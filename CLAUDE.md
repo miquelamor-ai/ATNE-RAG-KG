@@ -2,8 +2,7 @@
 
 ## Projecte
 Assistent IA per adaptar textos educatius a les diverses necessitats de l'alumnat
-(nouvinguts, NESE, DUA, altes capacitats). Fase 1 del programa PASSAREL·LA de
-Jesuites Educacio (FJE).
+(nouvinguts, NESE, DUA, altes capacitats). Jesuites Educacio (FJE).
 
 ## Usuari
 Miquel Amor — expert en pedagogia, NO programador. Comunica't SEMPRE en catala.

@@ -1,0 +1,10 @@
+.git
+.env
+profiles/
+__pycache__
+*.pyc
+.gitignore
+CLAUDE.md
+briefing_*.md
+*.md
+!requirements.txt

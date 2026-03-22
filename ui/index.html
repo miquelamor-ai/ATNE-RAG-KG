@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATNE — Adaptador de Textos</title>
+    <link rel="stylesheet" href="/ui/styles.css">
+</head>
+<body>
+
+<div class="app-layout">
+
+    <!-- ── SIDEBAR: Context Docent ──────────────────────────────── -->
+    <aside class="sidebar">
+        <div class="logo">ATNE</div>
+        <div class="subtitle">Adaptador de Textos a Necessitats Educatives</div>
+
+        <div class="health-bar" id="health-bar">
+            <span><span class="health-dot loading" id="dot-supabase"></span>Supabase</span>
+            <span><span class="health-dot loading" id="dot-gemini"></span>Gemini</span>
+        </div>
+
+        <h2>Context Docent</h2>
+
+        <div class="form-group">
+            <label for="ctx-etapa">Etapa</label>
+            <select id="ctx-etapa">
+                <option value="infantil">Infantil</option>
+                <option value="primaria">Primària</option>
+                <option value="ESO" selected>ESO</option>
+                <option value="batxillerat">Batxillerat</option>
+                <option value="FP">FP</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="ctx-curs">Curs</label>
+            <select id="ctx-curs">
+                <option value="1r">1r</option>
+                <option value="2n">2n</option>
+                <option value="3r" selected>3r</option>
+                <option value="4t">4t</option>
+                <option value="5e">5è</option>
+                <option value="6e">6è</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="ctx-ambit">Àmbit</label>
+            <select id="ctx-ambit">
+                <option value="cientific">Científic</option>
+                <option value="humanistic">Humanístic</option>
+                <option value="linguistic">Lingüístic</option>
+                <option value="artistic">Artístic</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="ctx-materia">Matèria concreta</label>
+            <input type="text" id="ctx-materia" placeholder="Ex: Biologia, Història...">
+            <div class="field-hint" id="hint-materia">La terminologia tècnica pròpia de la matèria es mantindrà sempre (amb definicions adaptades al nivell).</div>
+        </div>
+
+        <div class="form-group">
+            <label>Tipus d'aula</label>
+            <div class="radio-group">
+                <label><input type="radio" name="ctx-aula" value="ordinaria" checked> Ordinària</label>
+                <label><input type="radio" name="ctx-aula" value="acollida"> Acollida</label>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ── MAIN ─────────────────────────────────────────────────── -->
+    <main class="main">
+
+        <nav class="steps-nav">
+            <button class="step-tab active" data-step="1">1. Perfil</button>
+            <button class="step-tab" data-step="2">2. Text</button>
+            <button class="step-tab" data-step="3">3. Proposta</button>
+            <button class="step-tab" data-step="4">4. Resultat</button>
+        </nav>
+
+        <!-- ── PAS 1: Perfil Alumne ────────────────────────────── -->
+        <section class="step-panel active" id="step-1">
+            <div class="profile-header">
+                <select id="profile-selector">
+                    <option value="_new">— Nou perfil —</option>
+                </select>
+                <button class="btn" id="btn-load-profile">Carregar</button>
+                <button class="btn btn-primary" id="btn-save-profile">Desar</button>
+            </div>
+
+            <div class="form-group">
+                <label for="profile-nom">Nom del perfil</label>
+                <input type="text" id="profile-nom" placeholder="Ex: Amina - 3r ESO">
+            </div>
+
+            <h2 style="margin: 16px 0 12px;">Característiques</h2>
+            <div class="char-grid" id="char-grid">
+                <!-- Generat per app.js -->
+            </div>
+
+            <label style="display:block; margin-top:16px; font-size:13px; font-weight:600; color:var(--g700);">
+                Observacions del docent
+            </label>
+            <textarea class="obs-area" id="profile-obs" placeholder="Qualsevol informació rellevant sobre l'alumne que no encaixi en cap camp..."></textarea>
+
+            <button class="btn btn-primary btn-big" id="btn-next-2">Següent: Text original</button>
+        </section>
+
+        <!-- ── PAS 2: Text Original ────────────────────────────── -->
+        <section class="step-panel" id="step-2">
+            <h2 style="margin-bottom:12px;">Text original a adaptar</h2>
+            <textarea class="text-area" id="input-text" placeholder="Enganxa aquí el text que vols adaptar..."></textarea>
+            <div class="word-count" id="word-count">0 paraules</div>
+
+            <button class="btn btn-primary btn-big" id="btn-next-3">Següent: Proposta d'adaptació</button>
+        </section>
+
+        <!-- ── PAS 3: Proposta d'adaptació ─────────────────────── -->
+        <section class="step-panel" id="step-3">
+            <div class="proposal-card">
+                <h3>Paràmetres d'adaptació <span class="info-badge" id="proposal-basis"></span></h3>
+                <div class="param-row">
+                    <label>Nivell DUA</label>
+                    <select id="param-dua">
+                        <option value="Acces">Accés (LF extrema)</option>
+                        <option value="Core" selected>Core (estàndard)</option>
+                        <option value="Enriquiment">Enriquiment (repte)</option>
+                    </select>
+                </div>
+                <div class="param-row">
+                    <label>Intensitat Lectura Fàcil</label>
+                    <select id="param-lf">
+                        <option value="1">1 — Mínima</option>
+                        <option value="2" selected>2 — Baixa</option>
+                        <option value="3">3 — Moderada</option>
+                        <option value="4">4 — Alta</option>
+                        <option value="5">5 — Màxima</option>
+                    </select>
+                </div>
+                <div class="param-row">
+                    <label>Nivell sortida (MECR)</label>
+                    <select id="param-mecr">
+                        <option value="pre-A1">pre-A1</option>
+                        <option value="A1">A1</option>
+                        <option value="A2">A2</option>
+                        <option value="B1">B1</option>
+                        <option value="B2" selected>B2</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="proposal-card">
+                <h3>Complements</h3>
+                <div class="complement-grid" id="complement-grid">
+                    <!-- Generat per app.js -->
+                </div>
+            </div>
+
+            <button class="btn btn-ok btn-big" id="btn-adapt">ADAPTAR</button>
+
+            <div class="progress-area" id="progress-area">
+                <div id="progress-steps"></div>
+            </div>
+        </section>
+
+        <!-- ── PAS 4: Resultat ─────────────────────────────────── -->
+        <section class="step-panel" id="step-4">
+            <div class="result-columns">
+                <div class="result-col">
+                    <h3>Text original</h3>
+                    <div class="content" id="result-original"></div>
+                </div>
+                <div class="result-col editable-col">
+                    <h3>Text adaptat <span class="edit-badge">Editable — fes clic per reescriure</span></h3>
+                    <div class="content" id="result-adapted" contenteditable="true" spellcheck="true"></div>
+                </div>
+            </div>
+
+            <div id="result-complements"></div>
+
+            <div class="export-row">
+                <button class="btn" onclick="exportDoc('txt')">Descarregar TXT</button>
+                <button class="btn btn-primary" onclick="exportDoc('docx')">Descarregar DOCX</button>
+                <button class="btn" onclick="exportDoc('pdf')">Descarregar PDF</button>
+                <button class="btn" onclick="goToStep(1)">Nova adaptació</button>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<script src="/ui/app.js"></script>
+</body>
+</html>
