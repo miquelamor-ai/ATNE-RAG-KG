@@ -403,10 +403,15 @@ REGLES GENERALS:
 - Els termes tècnics van en negreta amb explicació entre parèntesis la primera vegada
 - Puntuació: prefereix punts i dos punts; evita punt i coma i punts suspensius
 
-REGLA CRÍTICA — TERMINOLOGIA CIENTÍFICA I TÈCNICA:
-- MAI substitueixis un terme científic per un de col·loquial o vulgar.
+REGLA CRÍTICA — TERMINOLOGIA CIENTÍFICA I TÈCNICA (PRIORITAT MÀXIMA):
+- MAI substitueixis un terme científic per un de col·loquial o vulgar. Aquesta regla és INVIOLABLE.
+- PARAULES PROHIBIDES en context tècnic: "cosa", "coses", "allò", "això", "el que fa que", "serveix per", "un tipus de". Utilitza SEMPRE el terme tècnic correcte.
+  ✗ INCORRECTE: "Les plantes necessiten coses per fer fotosíntesi"
   ✗ INCORRECTE: "la clorofil·la és una cosa verda de les plantes"
+  ✗ INCORRECTE: "les cèl·lules tenen coses que produeixen energia"
+  ✓ CORRECTE: "Les plantes necessiten **llum solar**, **aigua** i **diòxid de carboni** per fer la **fotosíntesi**"
   ✓ CORRECTE: "la **clorofil·la** (substància de color verd de les plantes) permet captar la llum"
+  ✓ CORRECTE: "les cèl·lules tenen **mitocondris** (parts que produeixen energia)"
 - Els termes tècnics propis de la matèria s'han de MANTENIR SEMPRE amb el nom correcte.
 - Per nivells baixos (pre-A1, A1, A2): escriu el terme correcte en negreta + definició curta i senzilla al costat.
 - Per nivells alts (B1, B2): el terme apareix en negreta amb definició la primera vegada.
@@ -414,7 +419,8 @@ REGLA CRÍTICA — TERMINOLOGIA CIENTÍFICA I TÈCNICA:
   · "fotosíntesi" → **fotosíntesi** (el procés que fan les plantes per fabricar el seu aliment amb llum)
   · "mitocondri" → **mitocondri** (part de la cèl·lula que produeix energia)
   · "equació" → **equació** (igualtat matemàtica amb una incògnita)
-- MAI diguis "cosa", "allò", "el que fa que" quan existeix el terme tècnic adequat.
+- Quan simplifiquis, CONCRETA amb el terme específic, mai generalitzis amb paraules buides.
+- AUTOCHECK: Abans de donar la resposta, revisa que NO hi aparegui cap de les paraules prohibides.
 
 GUIA DE NIVELLS MECR (Marc Europeu Comú de Referència) — OBLIGATÒRIA:
 El nivell MECR de sortida determina la complexitat lingüística MÀXIMA del text adaptat.
@@ -1092,14 +1098,16 @@ async def export_doc(payload: dict = Body(...)):
             if line.startswith("## "):
                 pdf.set_font(font_name, "B", 13)
                 pdf.ln(4)
-                pdf.multi_cell(w, 8, pdf_clean(line[3:]), align="L")
+                pdf.multi_cell(w, 8, pdf_clean(line[3:]), align="L",
+                               new_x="LMARGIN", new_y="NEXT")
                 pdf.set_font(font_name, "", 11)
                 pdf.ln(2)
             # Heading ###
             elif line.startswith("### "):
                 pdf.set_font(font_name, "B", 11)
                 pdf.ln(2)
-                pdf.multi_cell(w, 7, pdf_clean(line[4:]), align="L")
+                pdf.multi_cell(w, 7, pdf_clean(line[4:]), align="L",
+                               new_x="LMARGIN", new_y="NEXT")
                 pdf.set_font(font_name, "", 11)
             # Taules markdown
             elif stripped.startswith("|"):
@@ -1107,7 +1115,8 @@ async def export_doc(payload: dict = Body(...)):
                 # Saltar línies separadores (|---|---|)
                 if clean and not all(c in "-: " for c in clean):
                     pdf.set_font(font_name, "", 9)
-                    pdf.multi_cell(w, 5, pdf_clean(clean), align="L")
+                    pdf.multi_cell(w, 5, pdf_clean(clean), align="L",
+                                   new_x="LMARGIN", new_y="NEXT")
                     pdf.set_font(font_name, "", 11)
             # Bloc de codi
             elif stripped.startswith("```"):
@@ -1115,15 +1124,18 @@ async def export_doc(payload: dict = Body(...)):
             # Bullets: "- text" o "* text" (però NO "**negreta**")
             elif re.match(r'^[\s]*[-*]\s+(?!\*)', line) and not stripped.startswith("**"):
                 clean = re.sub(r'^[\s]*[-*]\s+', '', line).strip()
-                pdf.multi_cell(w, 6, f"  - {pdf_clean(clean)}", align="L")
+                pdf.multi_cell(w, 6, f"  - {pdf_clean(clean)}", align="L",
+                               new_x="LMARGIN", new_y="NEXT")
             # Llistes numerades: "1. text"
             elif re.match(r'^[\s]*\d+\.\s+', line):
                 clean = re.sub(r'^[\s]*\d+\.\s+', '', line).strip()
                 num = re.match(r'[\s]*(\d+)\.', line).group(1)
-                pdf.multi_cell(w, 6, f"  {num}. {pdf_clean(clean)}", align="L")
+                pdf.multi_cell(w, 6, f"  {num}. {pdf_clean(clean)}", align="L",
+                               new_x="LMARGIN", new_y="NEXT")
             # Línia normal
             else:
-                pdf.multi_cell(w, 6, pdf_clean(stripped), align="L")
+                pdf.multi_cell(w, 6, pdf_clean(stripped), align="L",
+                               new_x="LMARGIN", new_y="NEXT")
 
         pdf.set_font(font_name, "B", 16)
         pdf.cell(w, 10, pdf_safe(f"Adaptació ATNE — {profile_name}"), new_x="LMARGIN", new_y="NEXT")
@@ -1141,7 +1153,8 @@ async def export_doc(payload: dict = Body(...)):
         pdf.ln(3)
         for orig_line in original.split("\n"):
             if orig_line.strip():
-                pdf.multi_cell(w, 6, pdf_safe(orig_line), align="L")
+                pdf.multi_cell(w, 6, pdf_safe(orig_line), align="L",
+                               new_x="LMARGIN", new_y="NEXT")
             else:
                 pdf.ln(3)
         # Footer

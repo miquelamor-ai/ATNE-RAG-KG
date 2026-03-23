@@ -279,34 +279,67 @@ function loadContextFromStorage() {
 }
 
 
-// ── Perfils: desar / carregar / llistar ────────────────────────────────────
+// ── Perfils: desar / carregar / llistar (localStorage + servidor) ─────────
+
+function getLocalProfiles() {
+    try {
+        return JSON.parse(localStorage.getItem("atne_profiles")) || {};
+    } catch { return {}; }
+}
+
+function saveLocalProfiles(profiles) {
+    localStorage.setItem("atne_profiles", JSON.stringify(profiles));
+}
 
 async function loadProfileList() {
+    const sel = document.getElementById("profile-selector");
+    sel.innerHTML = '<option value="_new">— Nou perfil —</option>';
+
+    // Carregar des de localStorage (font principal)
+    const local = getLocalProfiles();
+    for (const [key, p] of Object.entries(local)) {
+        sel.innerHTML += `<option value="${key}">${p.nom}</option>`;
+    }
+
+    // Intentar sincronitzar des del servidor (per si hi ha perfils antics)
     try {
         const resp = await fetch("/api/profiles");
-        const profiles = await resp.json();
-        const sel = document.getElementById("profile-selector");
-        // Mantenir primera opció
-        sel.innerHTML = '<option value="_new">— Nou perfil —</option>';
-        for (const p of profiles) {
-            sel.innerHTML += `<option value="${p.fitxer}">${p.nom}</option>`;
+        const serverProfiles = await resp.json();
+        for (const p of serverProfiles) {
+            if (!local[p.fitxer]) {
+                // Carregar perfil complet del servidor i guardar a localStorage
+                const detailResp = await fetch(`/api/profiles/${p.fitxer}`);
+                const detail = await detailResp.json();
+                local[p.fitxer] = detail;
+                sel.innerHTML += `<option value="${p.fitxer}">${p.nom}</option>`;
+            }
         }
-    } catch { /* ignore */ }
+        saveLocalProfiles(local);
+    } catch { /* servidor no disponible, localStorage és suficient */ }
 }
 
 async function saveProfile() {
     const profile = collectProfile();
+    const key = profile.nom.toLowerCase().replace(/[^a-z0-9àáèéíïòóúüç]+/g, "_").replace(/_+/g, "_").slice(0, 30);
+
+    // Desar a localStorage (font principal)
+    const local = getLocalProfiles();
+    local[key] = profile;
+    saveLocalProfiles(local);
+
+    // Intentar desar també al servidor (backup)
     try {
         await fetch("/api/profiles", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(profile),
         });
-        await loadProfileList();
-        alert(`Perfil "${profile.nom}" desat correctament.`);
-    } catch (e) {
-        alert("Error desant el perfil: " + e.message);
-    }
+    } catch { /* no passa res, ja tenim localStorage */ }
+
+    await loadProfileList();
+    // Seleccionar el perfil acabat de desar
+    document.getElementById("profile-selector").value = key;
+    alert(`Perfil "${profile.nom}" desat correctament.`);
 }
 
 async function loadProfile() {
@@ -315,10 +348,23 @@ async function loadProfile() {
         resetProfileForm();
         return;
     }
+
+    // Carregar des de localStorage
+    const local = getLocalProfiles();
+    const profile = local[sel.value];
+    if (profile) {
+        applyProfileToForm(profile);
+        return;
+    }
+
+    // Fallback: servidor
     try {
         const resp = await fetch(`/api/profiles/${sel.value}`);
-        const profile = await resp.json();
-        applyProfileToForm(profile);
+        const serverProfile = await resp.json();
+        applyProfileToForm(serverProfile);
+        // Guardar a localStorage per futures vegades
+        local[sel.value] = serverProfile;
+        saveLocalProfiles(local);
     } catch (e) {
         alert("Error carregant el perfil: " + e.message);
     }
