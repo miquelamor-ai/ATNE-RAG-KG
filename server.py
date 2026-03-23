@@ -908,6 +908,57 @@ async def delete_profile(nom: str):
     return {"ok": True}
 
 
+# ── Historial i feedback ──────────────────────────────────────────────────
+
+@app.post("/api/history")
+async def save_history(payload: dict = Body(...)):
+    """Desa una adaptació a l'historial de Supabase."""
+    row = {
+        "profile_name": payload.get("profile_name", ""),
+        "profile_json": payload.get("profile", {}),
+        "context_json": payload.get("context", {}),
+        "params_json": payload.get("params", {}),
+        "original_text": payload.get("original", ""),
+        "adapted_text": payload.get("adapted", ""),
+    }
+    try:
+        resp = requests.post(
+            f"{SUPABASE_URL}/rest/v1/history",
+            headers={**SUPABASE_HEADERS, "Prefer": "return=representation"},
+            json=row,
+            timeout=10,
+        )
+        if resp.status_code in (200, 201):
+            data = resp.json()
+            return {"ok": True, "id": data[0]["id"] if data else None}
+        return {"ok": False, "error": resp.text}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+@app.patch("/api/history/{history_id}")
+async def update_history_feedback(history_id: int, payload: dict = Body(...)):
+    """Actualitza el rating i comentari d'una entrada de l'historial."""
+    update = {}
+    if "rating" in payload:
+        update["rating"] = payload["rating"]
+    if "comment" in payload:
+        update["comment"] = payload["comment"]
+    update["rated_at"] = "now()"
+    try:
+        resp = requests.patch(
+            f"{SUPABASE_URL}/rest/v1/history?id=eq.{history_id}",
+            headers={**SUPABASE_HEADERS, "Prefer": "return=representation"},
+            json=update,
+            timeout=10,
+        )
+        if resp.status_code in (200, 204):
+            return {"ok": True}
+        return {"ok": False, "error": resp.text}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
 # ── Proposta d'adaptació ───────────────────────────────────────────────────
 
 @app.post("/api/propose")

@@ -101,6 +101,8 @@ const state = {
     step: 1,
     adaptedText: "",
     originalText: "",
+    historyId: null,       // ID de l'entrada a Supabase history
+    feedbackRating: null,  // 1=dolenta, 2=regular, 3=bona
 };
 
 
@@ -606,8 +608,79 @@ function showResult() {
         `;
     }
 
+    // Resetar feedback
+    state.feedbackRating = null;
+    state.historyId = null;
+    document.querySelectorAll(".feedback-btn").forEach(b => b.classList.remove("selected"));
+    document.getElementById("feedback-comment-area").style.display = "none";
+    document.getElementById("feedback-thanks").style.display = "none";
+    document.getElementById("feedback-comment").value = "";
+
+    // Desar a historial (sense rating encara)
+    saveToHistory();
+
     // Anar al pas 4
     goToStep(4);
+}
+
+// ── Historial i feedback ─────────────────────────────────────────────────
+
+async function saveToHistory() {
+    const profile = collectProfile();
+    const context = collectContext();
+    const params = collectParams();
+    try {
+        const resp = await fetch("/api/history", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                profile_name: profile.nom,
+                profile: profile,
+                context: context,
+                params: params,
+                original: state.originalText,
+                adapted: state.adaptedText,
+            }),
+        });
+        const data = await resp.json();
+        if (data.ok && data.id) {
+            state.historyId = data.id;
+        }
+    } catch { /* no bloquejant */ }
+}
+
+function rateFeedback(rating) {
+    state.feedbackRating = rating;
+    // Marcar botó seleccionat
+    document.querySelectorAll(".feedback-btn").forEach(b => {
+        b.classList.toggle("selected", parseInt(b.dataset.rating) === rating);
+    });
+    // Mostrar camp de comentari (especialment si dolenta/regular)
+    document.getElementById("feedback-comment-area").style.display = "flex";
+    // Enviar rating immediatament
+    sendFeedback(rating);
+}
+
+async function sendFeedback(rating, comment) {
+    if (!state.historyId) return;
+    const body = { rating };
+    if (comment) body.comment = comment;
+    try {
+        await fetch(`/api/history/${state.historyId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        });
+    } catch { /* no bloquejant */ }
+}
+
+async function submitFeedback() {
+    const comment = document.getElementById("feedback-comment").value.trim();
+    if (comment) {
+        await sendFeedback(state.feedbackRating, comment);
+    }
+    document.getElementById("feedback-comment-area").style.display = "none";
+    document.getElementById("feedback-thanks").style.display = "block";
 }
 
 function parseAdaptedSections(text) {
