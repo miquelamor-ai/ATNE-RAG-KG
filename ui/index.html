@@ -101,9 +101,19 @@
             </div>
 
             <label style="display:block; margin-top:16px; font-size:13px; font-weight:600; color:var(--g700);">
+                Canal d'accés preferent
+            </label>
+            <select id="profile-canal" style="width:100%; padding:8px; border:1px solid var(--g200); border-radius:6px;">
+                <option value="mixte">Mixte (text + visual)</option>
+                <option value="visual">Principalment visual</option>
+                <option value="oral">Principalment oral</option>
+                <option value="text">Principalment textual</option>
+            </select>
+
+            <label style="display:block; margin-top:16px; font-size:13px; font-weight:600; color:var(--g700);">
                 Observacions del docent
             </label>
-            <textarea class="obs-area" id="profile-obs" placeholder="Qualsevol informació rellevant sobre l'alumne que no encaixi en cap camp..."></textarea>
+            <textarea class="obs-area" id="profile-obs" placeholder="Informació rellevant: memòria de treball baixa, es cansa ràpid amb lectura, bon nivell oral però escriptura limitada, sensibilitat a temes de guerra..."></textarea>
 
             <button class="btn btn-primary btn-big" id="btn-next-2">Següent: Text original</button>
         </section>

@@ -466,6 +466,22 @@ B2 (Avançat):
 - Estructures complexes permeses
 - Termes tècnics sense simplificar (però amb definició la primera vegada)
 - Adaptació mínima: principalment clarificar i estructurar
+
+REGLES DE CREUAMENT DE VARIABLES (aplicar quan el perfil combini condicions):
+- Nouvingut + dislèxia: reduir densitat visual (menys text per línia), oferir reforç no-textual, no dependre exclusivament de lectura autònoma. Cal suport visual + simplificació lingüística simultàniament.
+- Nouvingut + escolarització parcial: NO pressuposar familiaritat amb gèneres escolars (definició, resum, esquema, examen). Explicitar què s'espera en cada format.
+- TEA + text narratiu o figurat: explicitar totes les inferències, evitar ambigüitat, fer literal el que és implícit, mantenir estructura fixa i predictible.
+- DI + contingut abstracte: concretar amb exemples quotidians, limitar a 1 concepte nou per bloc, reforçar amb repetició i suport visual.
+- TDAH + text llarg: segmentar en blocs curts amb objectiu explícit per bloc, numerar passos, retroalimentació visual del progrés.
+- DLD/TDL + vocabulari curricular: reduir densitat lèxica, repetir termes clau, modelar ús en context, evitar subordinades.
+- Vulnerabilitat emocional o trauma: evitar temes sensibles (violència, guerra, separació familiar, mort) si el perfil ho indica. Prioritzar estructura i predictibilitat.
+- Nouvingut + L2 molt baixa (pre-A1/A1): la simplificació lingüística és PRIORITÀRIA sobre tot. El rigor terminològic s'adapta: terme en negreta + definició en 3-4 paraules.
+
+REGLA DE CÀRREGA COGNITIVA:
+- Màxim 2 conceptes nous per paràgraf a nivell pre-A1/A1/A2
+- Màxim 3 conceptes nous per paràgraf a nivell B1
+- Cada concepte nou va seguit d'un reforç (exemple concret, connexió amb coneixement previ, o suport visual)
+- Evitar redundància decorativa: cada element afegit ha de tenir funció pedagògica clara
 """
 
 
@@ -498,11 +514,20 @@ CONTEXT EDUCATIU:
             if key == "nouvingut" and val.get("L1"):
                 l1 = val["L1"]
     obs = profile.get("observacions", "")
+    canal = profile.get("canal_preferent", "mixte")
+    canal_desc = {
+        "mixte": "Mixte (text + visual)",
+        "visual": "Principalment visual — prioritzar esquemes, pictogrames, icones",
+        "oral": "Principalment oral — text molt curt, pensat per ser llegit en veu alta",
+        "text": "Principalment textual — text clar i ben estructurat",
+    }
     parts.append(f"""
 PERFIL DE L'ALUMNE DESTINATARI:
 - Característiques: {', '.join(actives) if actives else 'Genèric (sense característiques especials)'}
 - Llengua materna (L1): {l1 if l1 else '(no especificada)'}
+- Canal d'accés preferent: {canal_desc.get(canal, canal)}
 - Observacions del docent: {obs if obs else '(cap)'}
+IMPORTANT: Les observacions del docent són informació clínica o d'observació directa. Tenen prioritat sobre inferències genèriques del perfil.
 """)
 
     # Paràmetres d'adaptació

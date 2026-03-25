@@ -75,8 +75,22 @@ const CHARACTERISTICS = {
               options: ["true", "false"], labels: ["Sí", "No"] },
         ]
     },
-    vulnerabilitat: { label: "Vulnerabilitat socioeducativa", subtipus: "contextual", subvars: [] },
-    trastorn_emocional: { label: "Trastorn emocional / conducta", subtipus: "contextual", subvars: [] },
+    vulnerabilitat: {
+        label: "Vulnerabilitat socioeducativa",
+        subtipus: "contextual",
+        subvars: [
+            { id: "sensibilitat_tematica", label: "Sensibilitat temàtica (trauma)", type: "select",
+              options: ["false", "true"], labels: ["No", "Sí — evitar temes sensibles"] },
+        ]
+    },
+    trastorn_emocional: {
+        label: "Trastorn emocional / conducta",
+        subtipus: "contextual",
+        subvars: [
+            { id: "sensibilitat_tematica", label: "Sensibilitat temàtica (trauma)", type: "select",
+              options: ["false", "true"], labels: ["No", "Sí — evitar temes sensibles"] },
+        ]
+    },
 };
 
 const COMPLEMENTS = {
@@ -241,6 +255,7 @@ function collectProfile() {
     return {
         nom: document.getElementById("profile-nom").value || "Sense nom",
         caracteristiques,
+        canal_preferent: document.getElementById("profile-canal").value,
         observacions: document.getElementById("profile-obs").value,
     };
 }
@@ -384,6 +399,7 @@ function resetProfileForm() {
 function applyProfileToForm(profile) {
     document.getElementById("profile-nom").value = profile.nom || "";
     document.getElementById("profile-obs").value = profile.observacions || "";
+    document.getElementById("profile-canal").value = profile.canal_preferent || "mixte";
     const chars = profile.caracteristiques || {};
     for (const [key, val] of Object.entries(chars)) {
         const cb = document.querySelector(`input[type="checkbox"][data-char="${key}"]`);
