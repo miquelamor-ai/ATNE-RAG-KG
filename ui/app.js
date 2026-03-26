@@ -93,6 +93,93 @@ const CHARACTERISTICS = {
     },
 };
 
+// ── Opcions dinàmiques per etapa ──────────────────────────────────────────
+
+const CURSOS_PER_ETAPA = {
+    infantil: [
+        { value: "P3", label: "P3" },
+        { value: "P4", label: "P4" },
+        { value: "P5", label: "P5" },
+    ],
+    primaria: [
+        { value: "1r", label: "1r" },
+        { value: "2n", label: "2n" },
+        { value: "3r", label: "3r" },
+        { value: "4t", label: "4t" },
+        { value: "5e", label: "5è" },
+        { value: "6e", label: "6è" },
+    ],
+    ESO: [
+        { value: "1r", label: "1r" },
+        { value: "2n", label: "2n" },
+        { value: "3r", label: "3r" },
+        { value: "4t", label: "4t" },
+    ],
+    batxillerat: [
+        { value: "1r", label: "1r" },
+        { value: "2n", label: "2n" },
+    ],
+    FP: [
+        { value: "1r_CGM", label: "1r CGM" },
+        { value: "2n_CGM", label: "2n CGM" },
+        { value: "1r_CGS", label: "1r CGS" },
+        { value: "2n_CGS", label: "2n CGS" },
+    ],
+};
+
+const AMBITS_PER_ETAPA = {
+    infantil: [
+        { value: "descoberta_entorn", label: "Descoberta de l'entorn" },
+        { value: "comunicacio_llenguatges", label: "Comunicació i llenguatges" },
+        { value: "creixement_personal", label: "Creixement personal" },
+    ],
+    primaria: [
+        { value: "cientific", label: "Científic" },
+        { value: "humanistic", label: "Humanístic" },
+        { value: "linguistic", label: "Lingüístic" },
+        { value: "artistic", label: "Artístic" },
+    ],
+    ESO: [
+        { value: "cientific", label: "Científic" },
+        { value: "humanistic", label: "Humanístic" },
+        { value: "linguistic", label: "Lingüístic" },
+        { value: "artistic", label: "Artístic" },
+    ],
+    batxillerat: [
+        { value: "cientific", label: "Científic" },
+        { value: "humanistic", label: "Humanístic" },
+        { value: "linguistic", label: "Lingüístic" },
+        { value: "artistic", label: "Artístic" },
+    ],
+    FP: [
+        { value: "admin_gestio", label: "Administració i gestió" },
+        { value: "comerc_marketing", label: "Comerç i màrqueting" },
+        { value: "electricitat_electronica", label: "Electricitat i electrònica" },
+        { value: "fabricacio_mecanica", label: "Fabricació mecànica" },
+        { value: "hoteleria_turisme", label: "Hoteleria i turisme" },
+        { value: "imatge_personal", label: "Imatge personal" },
+        { value: "imatge_so", label: "Imatge i so" },
+        { value: "industria_alimentaria", label: "Indústria alimentària" },
+        { value: "informatica_comunicacions", label: "Informàtica i comunicacions" },
+        { value: "installacio_manteniment", label: "Instal·lació i manteniment" },
+        { value: "sanitat", label: "Sanitat" },
+        { value: "serveis_socioculturals", label: "Serveis socioculturals i a la comunitat" },
+        { value: "transport_vehicles", label: "Transport i manteniment de vehicles" },
+        { value: "activitats_fisiques", label: "Activitats físiques i esportives" },
+        { value: "arts_grafiques", label: "Arts gràfiques" },
+        { value: "quimica", label: "Química" },
+        { value: "edificacio_obra_civil", label: "Edificació i obra civil" },
+        { value: "energia_aigua", label: "Energia i aigua" },
+        { value: "fusta_moble", label: "Fusta, moble i suro" },
+        { value: "maritimopesquera", label: "Marítimopesquera" },
+        { value: "textil_confeccio", label: "Tèxtil, confecció i pell" },
+        { value: "agraria", label: "Agrària" },
+        { value: "seguretat_medi_ambient", label: "Seguretat i medi ambient" },
+        { value: "vidre_ceramica", label: "Vidre i ceràmica" },
+        { value: "arts_artesanies", label: "Arts i artesanies" },
+    ],
+};
+
 const COMPLEMENTS = {
     glossari: "Glossari de termes clau",
     negretes: "Paraules clau en negreta",
@@ -126,11 +213,47 @@ document.addEventListener("DOMContentLoaded", () => {
     renderCharGrid();
     renderComplementGrid();
     loadContextFromStorage();
+    updateEtapaSelects(); // Sincronitzar cursos/àmbits amb l'etapa carregada
     loadProfileList();
     checkHealth();
     bindEvents();
 });
 
+
+// ── Actualitzar selects dinàmics per etapa ─────────────────────────────────
+
+function updateEtapaSelects() {
+    const etapa = document.getElementById("ctx-etapa").value;
+
+    // Actualitzar cursos
+    const cursSelect = document.getElementById("ctx-curs");
+    const cursActual = cursSelect.value;
+    const cursos = CURSOS_PER_ETAPA[etapa] || [];
+    cursSelect.innerHTML = cursos.map(c =>
+        `<option value="${c.value}">${c.label}</option>`
+    ).join("");
+    // Intentar mantenir el curs seleccionat si existeix a la nova etapa
+    if (cursos.some(c => c.value === cursActual)) {
+        cursSelect.value = cursActual;
+    }
+
+    // Actualitzar àmbits
+    const ambitSelect = document.getElementById("ctx-ambit");
+    const ambitActual = ambitSelect.value;
+    const ambits = AMBITS_PER_ETAPA[etapa] || [];
+    ambitSelect.innerHTML = ambits.map(a =>
+        `<option value="${a.value}">${a.label}</option>`
+    ).join("");
+    if (ambits.some(a => a.value === ambitActual)) {
+        ambitSelect.value = ambitActual;
+    }
+
+    // Canviar etiqueta: "Àmbit" per la majoria, "Família professional" per FP
+    const ambitLabel = document.querySelector('label[for="ctx-ambit"]');
+    if (ambitLabel) {
+        ambitLabel.textContent = etapa === "FP" ? "Família professional" : "Àmbit";
+    }
+}
 
 // ── Health check ───────────────────────────────────────────────────────────
 
@@ -284,7 +407,10 @@ function loadContextFromStorage() {
     try {
         const ctx = JSON.parse(localStorage.getItem("atne_context"));
         if (!ctx) return;
-        if (ctx.etapa) document.getElementById("ctx-etapa").value = ctx.etapa;
+        if (ctx.etapa) {
+            document.getElementById("ctx-etapa").value = ctx.etapa;
+            updateEtapaSelects(); // Regenerar opcions abans de posar curs/àmbit
+        }
         if (ctx.curs) document.getElementById("ctx-curs").value = ctx.curs;
         if (ctx.ambit) document.getElementById("ctx-ambit").value = ctx.ambit;
         if (ctx.materia) document.getElementById("ctx-materia").value = ctx.materia;
@@ -900,8 +1026,14 @@ function bindEvents() {
     // Word count
     document.getElementById("input-text").addEventListener("input", updateWordCount);
 
+    // Actualitzar selects dinàmics quan canvia l'etapa
+    document.getElementById("ctx-etapa").addEventListener("change", () => {
+        updateEtapaSelects();
+        saveContextToStorage();
+    });
+
     // Persistir context en canviar
-    ["ctx-etapa", "ctx-curs", "ctx-ambit", "ctx-materia"].forEach(id => {
+    ["ctx-curs", "ctx-ambit", "ctx-materia"].forEach(id => {
         document.getElementById(id).addEventListener("change", saveContextToStorage);
     });
     document.querySelectorAll('input[name="ctx-aula"]').forEach(r => {
