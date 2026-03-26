@@ -38,8 +38,6 @@ const CHARACTERISTICS = {
         subvars: [
             { id: "tipus_capacitat", label: "Tipus", type: "select",
               options: ["global", "talent_especific"] },
-            { id: "doble_excepcionalitat", label: "Doble excepcionalitat", type: "select",
-              options: ["false", "true"], labels: ["No", "Sí"] },
         ]
     },
     di: {
