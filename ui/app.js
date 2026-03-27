@@ -1322,7 +1322,7 @@ function loadHistoryFull(index) {
 
     list.style.display = "none";
     document.getElementById("history-toggle").textContent = "▾ Textos anteriors";
-    showStep(1);
+    goToStep(1);
 
     setTimeout(() => {
         const notice = document.createElement("div");
