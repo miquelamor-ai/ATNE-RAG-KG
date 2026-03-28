@@ -252,6 +252,58 @@ La **coordinació amb la família i la comunitat** és un eix transversal d'actu
 
 ---
 
+## 6. INSTRUCCIONS D'ADAPTACIÓ TEXTUAL PER A L'LLM
+
+### Barrera nuclear
+**Lèxica i cultural**: L'alumnat nouvingut té com a barrera principal la comprensió lèxica (vocabulari en L2) i els referents culturals locals que desconeix. La distància lingüística entre L1 i català amplifica la dificultat.
+
+### Instruccions per al prompt LLM
+
+```
+PERFIL: Nouvingut
+- Referents culturals: substitueix locals per universals o explica breument
+- Glossari bilingüe amb traducció a L1 (al final)
+- Suport visual: la comprensió visual no depèn de L2
+- Redundància modal: text + imatge + esquema
+- NO pressuposar coneixement cultural local
+```
+
+### Mapa barrera → instruccions (prioritzat)
+
+| Prioritat | Instruccions activades | Justificació (barrera) |
+|---|---|---|
+| **1a (lèxica)** | A-01 (vocab freqüent), A-02 (termes en negreta), A-04 (referents explícits), A-05 (eliminar idiomàtiques), A-06 (eliminar polisèmia), A-20 (control densitat lèxica), A-21 (descomposició compostos) | Barrera nuclear: comprensió lèxica |
+| **2a (cultural)** | E-08 (referents culturalment diversos), E-09 (evitar suposits culturals), E-10 (sensibilitat temes), G-01 (glossari bilingüe), G-05 (substitució referents) | Barrera cultural |
+| **3a (sintàctica)** | A-07 (una idea per frase), A-09 (subjecte explícit), A-12 (limitació longitud frase), A-13 (eliminació subordinades), A-24 (present indicatiu), A-25 (formes verbals simples) | Barrera sintàctica |
+| **4a (estructura)** | B-01 (paràgrafs curts), B-02 (blocs amb títol), B-07 (resum anticipatiu), C-05 (glossari previ Sweller), C-08 (anticipació vocabulari) | Suport discursiu |
+
+### Exemple ABANS → DESPRÉS (A1, ciències naturals)
+
+**Original:**
+> La fotosíntesi és el procés bioquímic pel qual els organismes fotosintetis converteixen l'energia lluminosa en energia química, emmagatzemada en forma de compostos orgànics com la glucosa.
+
+**Adaptat (nouvingut, A1, DUA Accés):**
+
+## Paraules clau
+- **Fotosíntesi**: les plantes fan menjar amb llum ☀️
+- **Glucosa**: un tipus de sucre que fa la planta 🍬
+
+## Text adaptat
+Les plantes fan el seu menjar.
+Les plantes usen la llum del sol. ☀️
+Aquest procés es diu **fotosíntesi**.
+La planta fabrica **glucosa** (un sucre).
+La glucosa és l'aliment de la planta.
+
+## Glossari català-àrab
+| Català | العربية |
+|--------|---------|
+| planta | نبات |
+| llum del sol | ضوء الشمس |
+| menjar | طعام |
+
+---
+
 ## 5. FONTS DEL CORPUS
 
 | # | Títol | URL |

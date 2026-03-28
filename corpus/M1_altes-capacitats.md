@@ -187,6 +187,43 @@ L'actuació amb l'alumnat amb altes capacitats s'ha d'emmarcar sempre en el cont
     *   **Quan aplica:** Quan l'alumne mostra alta sensibilitat, reaccions intenses o dificultats en les relacions socials.
     *   **Fonament:** L'alta sensibilitat i intensitat emocional són trets freqüents. Desenvolupar l'autoregulació emocional és crucial per al seu benestar personal i la seva adaptació social.
     *   **Exemple complet de raonament:** "L'agent observa que una alumna amb AC reacciona amb molta ràbia davant el que considera una injustícia a l'aula, o que es tanca en si mateixa quan se sent incompresa pels seus companys. L'agent ha de raonar que, més enllà de la seva capacitat intel·lectual, l'alumna necessita suport per gestionar les seves emocions intenses. L'agent podria guiar l'alumna a identificar les emocions que sent (ràbia, tristesa, frustració), a comprendre per què les sent (sentit de la justícia, incomprensió) i a explorar estratègies per expressar-les de manera constructiva. Per exemple, en lloc d'esclatar, podria aprendre a respirar profundament, a escriure sobre el que sent, o a buscar un adult de confiança per parlar-ne. A més, l'agent podria suggerir-li maneres de comunicar les seves perspectives als companys de forma més empàtica, ajudant-la a construir relacions socials més satisfactòries i a sentir-se més acceptada."
+## 6. INSTRUCCIONS D'ADAPTACIÓ TEXTUAL PER A L'LLM
+
+### Barrera nuclear
+**Cap barrera lingüística**: L'alumnat amb altes capacitats NO necessita simplificació — al contrari, necessita profunditat, complexitat i repte cognitiu. La barrera real és l'avorriment i la desmotivació davant material massa senzill.
+
+### Instruccions per al prompt LLM
+
+```
+PERFIL: Altes Capacitats
+- NO simplifiquis: mantén complexitat lingüística i conceptual
+- Afegeix profunditat: excepcions, fronteres del coneixement, debats oberts
+- Connexions interdisciplinars
+- Preguntes de pensament crític (per què? i si...? quines alternatives?)
+```
+
+### Mapa barrera → instruccions (prioritzat)
+
+| Prioritat | Instruccions activades | Justificació |
+|---|---|---|
+| **1a (profunditat)** | H-12 (profundització conceptual), H-13 (connexions interdisciplinars), H-14 (mantenir complexitat) | Necessitat d'enriquiment |
+| **2a (pensament crític)** | F-09 (preguntes pensament crític), F-10 (connexions interdisciplinars) | Estimulació cognitiva |
+
+### Exemple ABANS → DESPRÉS (B2, ciències naturals)
+
+**Original:**
+> La fotosíntesi és el procés bioquímic pel qual els organismes fotosintetis converteixen l'energia lluminosa en energia química.
+
+**Adaptat (Altes Capacitats, B2, DUA Enriquiment):**
+
+## Text adaptat
+La **fotosíntesi** és el procés bioquímic mitjançant el qual els organismes fotosintetitzadors transformen l'energia lluminosa en energia química, emmagatzemada en forma de compostos orgànics com la glucosa (C₆H₁₂O₆).
+
+### Per anar més enllà
+- La fotosíntesi és responsable del 99% de l'oxigen atmosfèric. Què passaria si tots els organismes fotosintetitzadors desapareguessin?
+- Hi ha organismes que fan **quimiosíntesi** en lloc de fotosíntesi — usen energia química de minerals, no llum. On viuen?
+- Compara l'eficiència energètica de la fotosíntesi (~6%) amb la d'un panell solar (~20%). Per què la naturalesa és menys eficient?
+
 ---
 
 ## 5. FONTS DEL CORPUS

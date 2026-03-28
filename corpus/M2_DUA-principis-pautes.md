@@ -169,6 +169,40 @@ El DUA és un marc de referència potent per a la inclusió, però no és una pa
     *   **Exemple complet de raonament:** "Un alumne no sap com començar un projecte de recerca. L'agent raona que el DUA proporciona suports i promou l'autoregulació. L'agent suggereix: 'Revisa si el professor ha proporcionat alguna guia, un model, o una llista de passos (bastides) per començar (DOC 6). Si treballes en grup, parla amb els teus companys per veure com ho estan enfocant i com us podeu ajudar mútuament (DOC 9). Pensa també en els objectius que t'ha donat el professor (DOC 6): què has d'aconseguir? Quins són els primers passos? Reflexionar sobre aquestes preguntes t'ajudarà a organitzar-te i a avançar en la tasca (DOC 2).'"
 ---
 
+## 6. INSTRUCCIONS DUA PER NIVELL — BLOCS PER A L'LLM
+
+Cada adaptació usa UN ÚNIC nivell DUA. El codi selecciona el bloc corresponent.
+
+### DUA Accés — Lectura Fàcil extrema
+```
+NIVELL DUA: Accés — Lectura Fàcil extrema dins del límit MECR
+- Suport visual màxim a cada idea
+- Vocabulari molt bàsic, definicions integrades a CADA aparició
+- Estructura molt explícita i predictible
+- Redundància modal: text + imatge + esquema
+- Eliminació total de farcit: cada frase té funció pedagògica clara
+```
+
+### DUA Core — Llenguatge Clar
+```
+NIVELL DUA: Core — Llenguatge Clar (ISO 24495) dins del límit MECR
+- Adaptació estàndard mantenint rigor curricular
+- Frases curtes, vocabulari freqüent
+- Definicions per termes tècnics (la primera vegada)
+- Estructura clara amb connectors
+```
+
+### DUA Enriquiment — Màxima complexitat
+```
+NIVELL DUA: Enriquiment — Màxima complexitat dins del MECR
+- NO simplifiquis: mantén complexitat lingüística i conceptual
+- Afegeix profunditat: excepcions, fronteres del coneixement, debats oberts
+- Connexions interdisciplinars
+- Preguntes de pensament crític (analitzar, avaluar, crear)
+```
+
+---
+
 ## 5. FONTS DEL CORPUS
 
 | # | Títol | URL |

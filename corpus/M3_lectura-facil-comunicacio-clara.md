@@ -502,3 +502,156 @@ L'equip decideix adoptar Comunicació Clara com a estàndard de tots els documen
 - AENOR. (2018). *UNE 153101 EX. Lectura Fácil. Pautas y recomendaciones para la elaboración de documentos.* Asociación Española de Normalización.
 
 - Ajuntament de Barcelona. Gerència Municipal. (2022). *Siguem clars. Guia de comunicació clara per a administracions.* Ajuntament de Barcelona. http://hdl.handle.net/11703/128460
+
+---
+
+## 6. INSTRUCCIONS PER NIVELL MECR — BLOCS PER A L'LLM
+
+Cada adaptació usa UN ÚNIC nivell MECR de sortida. El codi selecciona el bloc corresponent.
+
+### pre-A1 (Alfabetització)
+```
+NIVELL MECR DE SORTIDA: pre-A1 (Alfabetització)
+- Frases de 3-5 paraules màxim
+- Només vocabulari quotidià bàsic (menjar, casa, escola, gran, petit, anar, fer)
+- Verbs en present, només formes regulars
+- NO fórmules, NO nombres grans, NO parèntesis explicatius llargs
+- Cada idea amb suport visual (emoji/pictograma)
+- Estructura: paraula + imatge, paraula + imatge
+- To: molt conversacional i directe ("Mira! Les plantes...")
+- GLOSSARI PREVI: comença amb "## Paraules clau" (3-5 termes amb imatge)
+```
+
+### A1 (Accés)
+```
+NIVELL MECR DE SORTIDA: A1 (Accés)
+- Frases de 5-8 paraules màxim
+- Vocabulari quotidià i escolar molt bàsic
+- Present d'indicatiu, frases SVO simples
+- NO subordinades, NO pronoms febles, NO veu passiva
+- Màxim 3-4 termes tècnics, amb definició molt curta i senzilla
+- To: conversacional i directe ("Ara aprendràs...")
+- GLOSSARI PREVI: comença amb "## Paraules clau" (3-5 termes)
+```
+
+### A2 (Plataforma)
+```
+NIVELL MECR DE SORTIDA: A2 (Plataforma)
+- Frases de 8-12 paraules màxim
+- Vocabulari freqüent + alguns termes escolars amb definició
+- Es permeten coordinades simples (i, però, perquè)
+- NO subordinades complexes
+- Màxim 5-6 termes tècnics per text, amb definició breu
+- To: conversacional-proper ("En aquesta secció veurem...")
+- GLOSSARI PREVI: comença amb "## Paraules clau" (5-8 termes)
+```
+
+### B1 (Llindar)
+```
+NIVELL MECR DE SORTIDA: B1 (Llindar)
+- Frases de 12-18 paraules
+- Vocabulari acadèmic bàsic amb explicacions puntuals
+- Es permeten subordinades simples
+- Termes tècnics amb explicació la primera vegada
+- Fórmules permeses amb explicació
+- Connectors: primer, després, per tant, a més
+- To: proper i acadèmic bàsic
+```
+
+### B2 (Avançat)
+```
+NIVELL MECR DE SORTIDA: B2 (Avançat)
+- Frases de fins a 25 paraules
+- Vocabulari acadèmic estàndard
+- Estructures complexes permeses
+- Termes tècnics sense simplificar (amb definició la primera vegada)
+- Adaptació mínima: principalment clarificar i estructurar
+- To: acadèmic complet
+```
+
+## 7. CÀRREGA COGNITIVA PER NIVELL MECR
+
+### Nivells baixos (pre-A1, A1, A2)
+```
+CÀRREGA COGNITIVA (nivells baixos):
+- Màxim 2 conceptes nous per paràgraf
+- Cada concepte nou va seguit d'un reforç immediat (exemple concret o suport visual)
+- Evitar redundància decorativa: cada element ha de tenir funció pedagògica clara
+```
+
+### Nivell mitjà (B1)
+```
+CÀRREGA COGNITIVA (nivell mitjà):
+- Màxim 3 conceptes nous per paràgraf
+- Cada concepte nou va seguit d'un reforç (exemple, connexió amb coneixement previ)
+- Evitar redundància decorativa
+```
+
+### Nivells alts (B2)
+```
+CÀRREGA COGNITIVA (nivells alts):
+- Densitat conceptual estàndard
+- Definicions la primera vegada per termes tècnics
+```
+
+## 8. RESOLUCIÓ DE CONFLICTES DUA-MECR-LF
+
+```
+JERARQUIA DE RESOLUCIÓ DE CONFLICTES:
+1. MECR (PRIORITAT MÀXIMA): el nivell lingüístic de sortida és el límit dur.
+   Si el MECR diu "max 8 paraules per frase" (A1), cap altra regla ho pot superar.
+2. DUA (SEGON): el nivell DUA determina la INTENSITAT de l'adaptació dins dels límits MECR.
+3. LF (TERCER): les regles de Lectura Fàcil s'apliquen com a intensificador del nivell DUA Accés.
+
+Si una definició parentètica fa superar el màxim MECR:
+→ Per A1/pre-A1: treure el parèntesi, posar la definició com a frase independent.
+→ Per A2/B1: permetre excepció de +3 paraules si conté definició.
+→ Per B2: no hi ha conflicte (límits amplis).
+```
+
+## 9. EXEMPLES ABANS → DESPRÉS PER NIVELL MECR
+
+### Exemple pre-A1
+**Original:** "La fotosíntesi és el procés bioquímic pel qual els organismes fotosintetis converteixen l'energia lluminosa en energia química."
+**Adaptat:**
+#### Paraules clau
+- **Fotosíntesi** 🌱: les plantes fan menjar amb llum ☀️
+#### Text adaptat
+Les plantes fan menjar. 🌱
+Les plantes usen la llum. ☀️
+Això es diu **fotosíntesi**.
+
+### Exemple A1
+**Original:** (mateix text)
+**Adaptat:**
+#### Paraules clau
+- **Fotosíntesi**: les plantes fan menjar amb llum.
+- **Energia**: força per fer coses.
+#### Text adaptat
+Les plantes fan el seu menjar.
+Les plantes utilitzen la llum del sol.
+Aquest procés es diu **fotosíntesi** (quan les plantes fan menjar amb la llum).
+
+### Exemple A2
+**Original:** (mateix text)
+**Adaptat:**
+#### Paraules clau
+- **Fotosíntesi**: procés que fan les plantes per fabricar el seu aliment.
+- **Energia química**: energia guardada dins els aliments.
+#### Text adaptat
+Les plantes necessiten llum del sol per fer el seu aliment.
+Aquest procés es diu **fotosíntesi** (procés de les plantes per fabricar aliment amb llum).
+La llum del sol es transforma en **energia química** (energia guardada dins la planta).
+
+### Exemple B1
+**Original:** (mateix text)
+**Adaptat:**
+#### Text adaptat
+La **fotosíntesi** (procés bioquímic de les plantes per produir aliment) és fonamental per a la vida.
+En aquest procés, les plantes absorbeixen llum solar i la converteixen en energia química que emmagatzemen.
+
+### Exemple B2
+**Original:** (mateix text)
+**Adaptat:**
+#### Text adaptat
+La **fotosíntesi** és el procés bioquímic mitjançant el qual els organismes fotosintetitzadors transformen l'energia lluminosa en energia química, emmagatzemada en forma de compostos orgànics.

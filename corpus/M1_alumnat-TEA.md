@@ -235,6 +235,48 @@ L'agent ha d'activar aquest document quan l'alumne:
 
 ---
 
+## 6. INSTRUCCIONS D'ADAPTACIÓ TEXTUAL PER A L'LLM
+
+### Barrera nuclear
+**Inferència**: L'alumnat amb TEA té com a barrera principal la comprensió inferencial — tot allò que és implícit, figurat, irònic o amb doble sentit. La Teoria de la Ment compromesa dificulta interpretar intencions i emocions no explícites.
+
+### Instruccions per al prompt LLM
+
+```
+PERFIL: TEA
+- Estructura predictible: sempre mateixa seqüència (títol→definició→exemple→activitat)
+- Zero implicitura: tota metàfora, ironia, sentit figurat → literal explícit
+- Vocabulari unívoc: evitar polisèmia, definir de forma unívoca
+- Anticipació: avisar canvis de tema o format ("Ara canviem de tema.")
+```
+
+### Mapa barrera → instruccions (prioritzat)
+
+| Prioritat | Instruccions activades | Justificació (barrera) |
+|---|---|---|
+| **1a (inferència)** | H-01 (estructura predictible), H-02 (zero implicitura), A-05 (eliminar idiomàtiques), A-06 (eliminar polisèmia) | Barrera nuclear: inferència |
+| **2a (estructura)** | H-03 (anticipació canvis), B-02 (blocs amb títol), B-06 (ordre cronològic), B-09 (numeració) | Predictibilitat necessària |
+| **3a (lèxica)** | A-03 (coherència terminològica), A-04 (referents explícits) | Polisèmia i ambigüitat |
+| **4a (discursiva)** | B-03 (frase tòpic), B-10 (transicions) | Coherència central feble |
+
+### Exemple ABANS → DESPRÉS (B1, ciències socials)
+
+**Original:**
+> El parlament és el cor de la democràcia. Quan els representants trenquen llances a favor d'una llei, el debat s'encén i les idees xoquen fins que surt fum blanc.
+
+**Adaptat (TEA, B1, DUA Core):**
+
+## Text adaptat
+### Què fa el parlament?
+El parlament és una institució molt important per a la democràcia.
+Els representants defensen lleis. Parlen a favor o en contra.
+El debat pot ser intens. Hi ha opinions diferents.
+Al final, es vota i s'aprova o es rebutja la llei.
+
+> ⚠️ **Nota**: "trencar llances" vol dir "defensar amb força". "Surt fum blanc" vol dir "s'arriba a un acord". Són expressions figurades.
+
+---
+
 ## 5. FONTS DEL CORPUS
 
 | # | Títol | URL |
