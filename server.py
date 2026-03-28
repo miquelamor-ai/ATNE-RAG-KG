@@ -18,6 +18,14 @@ from pathlib import Path
 import requests
 import uvicorn
 from dotenv import load_dotenv
+
+# Blocs de prompt v2 (arquitectura 4 capes)
+from prompt_blocks import (
+    IDENTITY_BLOCK, UNIVERSAL_RULES_BLOCK,
+    MECR_BLOCKS, DUA_BLOCKS, GENRE_BLOCKS,
+    PROFILE_BLOCKS, CROSSING_BLOCKS, FEWSHOT_EXAMPLES,
+    COGNITIVE_LOAD_BLOCK, CONFLICT_RESOLUTION_BLOCK,
+)
 from fastapi import FastAPI, Body, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse, FileResponse
@@ -385,190 +393,140 @@ def propose_adaptation(characteristics: dict, context: dict) -> dict:
     }
 
 
-# ── System prompt per Gemini ───────────────────────────────────────────────
-
-BASE_SYSTEM_PROMPT = """Ets l'assistent ATNE (Adaptador de Textos a Necessitats Educatives) de Jesuïtes Educació.
-
-El teu rol és transformar textos educatius perquè siguin accessibles a alumnat divers, seguint els principis del Disseny Universal per a l'Aprenentatge (DUA) i la Lectura Fàcil.
-
-REGLA ABSOLUTA — FORMAT:
-- Comença la resposta DIRECTAMENT amb "## Text adaptat". NO escriguis cap comentari, introducció, ni meta-text abans.
-- NO escriguis frases com "Here is...", "Final draft...", "Let me...", "I'll proceed...", "Okay...".
-- La resposta ha de contenir NOMÉS les seccions ## demanades, res més.
-
-REGLES GENERALS:
-- Escriu en català (o la llengua vehicular indicada)
-- Mantingues el rigor curricular del contingut original
-- No invents contingut: adapta, no crees de zero
-- Segueix les instruccions específiques del nivell DUA indicat
-- Cada frase ha de contenir una sola idea
-- Utilitza veu activa i subjecte explícit
-- Els termes tècnics van en negreta amb explicació entre parèntesis la primera vegada
-- Puntuació: prefereix punts i dos punts; evita punt i coma i punts suspensius
-
-REGLA CRÍTICA — TERMINOLOGIA CIENTÍFICA I TÈCNICA (PRIORITAT MÀXIMA):
-- MAI substitueixis un terme científic per un de col·loquial o vulgar. Aquesta regla és INVIOLABLE.
-- PARAULES PROHIBIDES en context tècnic: "cosa", "coses", "allò", "això", "el que fa que", "serveix per", "un tipus de". Utilitza SEMPRE el terme tècnic correcte.
-  ✗ INCORRECTE: "Les plantes necessiten coses per fer fotosíntesi"
-  ✗ INCORRECTE: "la clorofil·la és una cosa verda de les plantes"
-  ✗ INCORRECTE: "les cèl·lules tenen coses que produeixen energia"
-  ✓ CORRECTE: "Les plantes necessiten **llum solar**, **aigua** i **diòxid de carboni** per fer la **fotosíntesi**"
-  ✓ CORRECTE: "la **clorofil·la** (substància de color verd de les plantes) permet captar la llum"
-  ✓ CORRECTE: "les cèl·lules tenen **mitocondris** (parts que produeixen energia)"
-- Els termes tècnics propis de la matèria s'han de MANTENIR SEMPRE amb el nom correcte.
-- Per nivells baixos (pre-A1, A1, A2): escriu el terme correcte en negreta + definició curta i senzilla al costat.
-- Per nivells alts (B1, B2): el terme apareix en negreta amb definició la primera vegada.
-- Exemples per àmbit científic:
-  · "fotosíntesi" → **fotosíntesi** (el procés que fan les plantes per fabricar el seu aliment amb llum)
-  · "mitocondri" → **mitocondri** (part de la cèl·lula que produeix energia)
-  · "equació" → **equació** (igualtat matemàtica amb una incògnita)
-- Quan simplifiquis, CONCRETA amb el terme específic, mai generalitzis amb paraules buides.
-- AUTOCHECK: Abans de donar la resposta, revisa que NO hi aparegui cap de les paraules prohibides.
-
-GUIA DE NIVELLS MECR (Marc Europeu Comú de Referència) — OBLIGATÒRIA:
-El nivell MECR de sortida determina la complexitat lingüística MÀXIMA del text adaptat.
-Has de respectar estrictament els límits de cada nivell.
-
-pre-A1 (Alfabetització):
-- Frases de 3-5 paraules màxim
-- Només vocabulari quotidià bàsic (menjar, casa, escola, gran, petit, anar, fer)
-- Verbs en present, només formes regulars
-- NO fórmules, NO nombres grans, NO parèntesis explicatius llargs
-- Cada idea necessita suport visual (pictograma o icona)
-- Estructura: paraula + imatge, paraula + imatge
-
-A1 (Accés):
-- Frases de 5-8 paraules màxim
-- Vocabulari quotidià i escolar molt bàsic
-- Present d'indicatiu, frases simples (subjecte + verb + complement)
-- NO subordinades, NO pronoms febles, NO veu passiva
-- Termes tècnics: màxim 3-4 per text, sempre amb definició molt curta i senzilla
-- NO fórmules químiques ni símbols científics (substituir per paraules)
-- Exemple A1: "Les plantes fan el seu menjar. Utilitzen la llum del Sol."
-
-A2 (Plataforma):
-- Frases de 8-12 paraules màxim
-- Vocabulari freqüent + alguns termes escolars amb definició
-- Es permeten coordinades simples (i, però, perquè)
-- NO subordinades complexes
-- Termes tècnics: màxim 5-6 per text, amb definició breu
-- Fórmules: només si són essencials, amb explicació en paraules
-- Exemple A2: "Les plantes necessiten llum del Sol per fer el seu aliment. Aquest procés es diu fotosíntesi."
-
-B1 (Llindar):
-- Frases de 12-18 paraules
-- Vocabulari acadèmic bàsic amb explicacions puntuals
-- Es permeten subordinades simples
-- Termes tècnics amb explicació la primera vegada
-- Fórmules permeses amb explicació
-- Estructura textual amb connectors (primer, després, per tant, a més)
-
-B2 (Avançat):
-- Frases de fins a 25 paraules
-- Vocabulari acadèmic estàndard
-- Estructures complexes permeses
-- Termes tècnics sense simplificar (però amb definició la primera vegada)
-- Adaptació mínima: principalment clarificar i estructurar
-
-REGLES DE CREUAMENT DE VARIABLES (aplicar quan el perfil combini condicions):
-- Nouvingut + dislèxia: reduir densitat visual (menys text per línia), oferir reforç no-textual, no dependre exclusivament de lectura autònoma. Cal suport visual + simplificació lingüística simultàniament.
-- Nouvingut + escolarització parcial: NO pressuposar familiaritat amb gèneres escolars (definició, resum, esquema, examen). Explicitar què s'espera en cada format.
-- TEA + text narratiu o figurat: explicitar totes les inferències, evitar ambigüitat, fer literal el que és implícit, mantenir estructura fixa i predictible.
-- DI + contingut abstracte: concretar amb exemples quotidians, limitar a 1 concepte nou per bloc, reforçar amb repetició i suport visual.
-- TDAH + text llarg: segmentar en blocs curts amb objectiu explícit per bloc, numerar passos, retroalimentació visual del progrés.
-- DLD/TDL + vocabulari curricular: reduir densitat lèxica, repetir termes clau, modelar ús en context, evitar subordinades.
-- Vulnerabilitat emocional o trauma: evitar temes sensibles (violència, guerra, separació familiar, mort) si el perfil ho indica. Prioritzar estructura i predictibilitat.
-- Nouvingut + L2 molt baixa (pre-A1/A1): la simplificació lingüística és PRIORITÀRIA sobre tot. El rigor terminològic s'adapta: terme en negreta + definició en 3-4 paraules.
-
-REGLA DE CÀRREGA COGNITIVA:
-- Màxim 2 conceptes nous per paràgraf a nivell pre-A1/A1/A2
-- Màxim 3 conceptes nous per paràgraf a nivell B1
-- Cada concepte nou va seguit d'un reforç (exemple concret, connexió amb coneixement previ, o suport visual)
-- Evitar redundància decorativa: cada element afegit ha de tenir funció pedagògica clara
-"""
+# ── System prompt v2 — Arquitectura 4 capes (hardcoded) ────────────────────
 
 
-def build_system_prompt(profile: dict, context: dict, params: dict, rag_context: str) -> str:
-    """Munta el system prompt complet per a Gemini."""
-    parts = [BASE_SYSTEM_PROMPT]
-
-    # Context docent
-    parts.append(f"""
-CONTEXT EDUCATIU:
-- Etapa: {context.get('etapa', 'ESO')}
-- Curs: {context.get('curs', '')}
-- Àmbit: {context.get('ambit', '')}
-- Matèria: {context.get('materia', '')}
-- Tipus d'aula: {context.get('tipus_aula', 'ordinaria')}
-""")
-
-    # Perfil alumne
-    actives = []
+def _get_active_profiles(profile: dict) -> list[str]:
+    """Retorna la llista de claus de perfil actives."""
     chars = profile.get("caracteristiques", {})
-    l1 = ""  # Llengua materna per al glossari bilingüe
-    for key, val in chars.items():
-        if val.get("actiu"):
-            desc = key.replace("_", " ").title()
-            subvars = {k: v for k, v in val.items() if k != "actiu"}
-            if subvars:
-                desc += f" ({', '.join(f'{k}={v}' for k, v in subvars.items())})"
-            actives.append(desc)
-            # Capturar L1 del nouvingut
-            if key == "nouvingut" and val.get("L1"):
-                l1 = val["L1"]
-    obs = profile.get("observacions", "")
+    return [key for key, val in chars.items() if val.get("actiu")]
+
+
+def _get_cognitive_load_level(mecr: str) -> str:
+    """Determina el nivell de càrrega cognitiva segons MECR."""
+    if mecr in ("pre-A1", "A1", "A2"):
+        return "low"
+    elif mecr == "B1":
+        return "mid"
+    return "high"
+
+
+def _detect_crossing_signals(active_profiles: list[str], profile: dict,
+                             mecr: str, genre: str = "") -> list[str]:
+    """Detecta creuaments entre perfils actius i retorna blocs aplicables."""
+    blocks = []
+    chars = profile.get("caracteristiques", {})
+
+    for combo, block_text in CROSSING_BLOCKS.items():
+        # Creuaments entre 2 perfils
+        if all(p in active_profiles for p in combo):
+            blocks.append(block_text)
+            continue
+        # Creuaments perfil + condició contextual
+        if combo == ("nouvingut", "l2_molt_baixa"):
+            if "nouvingut" in active_profiles and mecr in ("pre-A1", "A1"):
+                blocks.append(block_text)
+        elif combo == ("nouvingut", "escolaritzacio_parcial"):
+            if "nouvingut" in active_profiles:
+                esc = chars.get("nouvingut", {}).get("escolaritzacio", "")
+                if esc and "parcial" in str(esc).lower():
+                    blocks.append(block_text)
+        elif combo == ("tea", "narracio"):
+            if "tea" in active_profiles and genre == "narracio":
+                blocks.append(block_text)
+        elif combo == ("tdah", "text_llarg"):
+            if "tdah" in active_profiles:
+                blocks.append(block_text)  # Sempre rellevant si TDAH actiu
+        elif combo == ("tdl", "vocabulari_dens"):
+            if "tdl" in active_profiles:
+                blocks.append(block_text)
+        elif combo == ("discapacitat_intellectual", "abstracte"):
+            if "discapacitat_intellectual" in active_profiles:
+                blocks.append(block_text)
+        elif combo == ("trastorn_emocional", "trauma"):
+            if "trastorn_emocional" in active_profiles:
+                trauma = chars.get("trastorn_emocional", {}).get("trauma", False)
+                if trauma:
+                    blocks.append(block_text)
+
+    return blocks
+
+
+def build_persona_audience(profile: dict, context: dict, mecr: str) -> str:
+    """Genera narrativa concreta de l'alumne (persona-audience pattern)."""
+    chars = profile.get("caracteristiques", {})
+    etapa = context.get("etapa", "ESO")
     canal = profile.get("canal_preferent", "mixte")
+    obs = profile.get("observacions", "")
+
+    parts = [f"Escrius per a un alumne de {etapa}"]
+
+    # Afegir detalls dels perfils actius
+    for key, val in chars.items():
+        if not val.get("actiu"):
+            continue
+        if key == "nouvingut":
+            l1 = val.get("L1", "desconeguda")
+            origen = val.get("origen", "")
+            mesos = val.get("mesos_catalunya", "")
+            esc = val.get("escolaritzacio", "")
+            parts.append(f"nouvingut (L1: {l1}")
+            if origen:
+                parts[-1] += f", origen: {origen}"
+            if mesos:
+                parts[-1] += f", {mesos} mesos a Catalunya"
+            if esc:
+                parts[-1] += f", escolarització: {esc}"
+            parts[-1] += ")"
+        elif key == "tea":
+            parts.append("amb TEA (Trastorn de l'Espectre Autista)")
+        elif key == "tdah":
+            parts.append("amb TDAH")
+        elif key == "dislexia":
+            parts.append("amb dislèxia")
+        elif key == "tdl":
+            parts.append("amb TDL (Trastorn del Desenvolupament del Llenguatge)")
+        elif key == "discapacitat_intellectual":
+            grau = val.get("grau", "")
+            parts.append(f"amb discapacitat intel·lectual{f' ({grau})' if grau else ''}")
+        elif key == "altes_capacitats":
+            parts.append("amb altes capacitats")
+        elif key == "2e":
+            parts.append("amb doble excepcionalitat (2e)")
+        elif key == "discapacitat_visual":
+            parts.append("amb discapacitat visual")
+        elif key == "discapacitat_auditiva":
+            parts.append("amb discapacitat auditiva")
+        elif key == "vulnerabilitat_socioeducativa":
+            parts.append("en situació de vulnerabilitat socioeducativa")
+        elif key == "trastorn_emocional":
+            parts.append("amb trastorn emocional/conductual")
+
+    narrativa = ", ".join(parts) + f".\nNivell MECR de sortida: {mecr}."
+
+    # Canal d'accés preferent
     canal_desc = {
         "mixte": "Mixte (text + visual)",
         "visual": "Principalment visual — prioritzar esquemes, pictogrames, icones",
         "oral": "Principalment oral — text molt curt, pensat per ser llegit en veu alta",
         "text": "Principalment textual — text clar i ben estructurat",
     }
-    parts.append(f"""
-PERFIL DE L'ALUMNE DESTINATARI:
-- Característiques: {', '.join(actives) if actives else 'Genèric (sense característiques especials)'}
-- Llengua materna (L1): {l1 if l1 else '(no especificada)'}
-- Canal d'accés preferent: {canal_desc.get(canal, canal)}
-- Observacions del docent: {obs if obs else '(cap)'}
-IMPORTANT: Les observacions del docent són informació clínica o d'observació directa. Tenen prioritat sobre inferències genèriques del perfil.
-""")
+    narrativa += f"\nCanal d'accés preferent: {canal_desc.get(canal, canal)}."
 
-    # Paràmetres d'adaptació
-    dua_desc = {
-        "Acces": "Accés — Lectura Fàcil extrema, suport visual màxim, vocabulari molt bàsic, definicions integrades.",
-        "Core": "Core — Adaptació estàndard mantenint rigor curricular, frases curtes, vocabulari freqüent.",
-        "Enriquiment": "Enriquiment — Manté complexitat, afegeix repte cognitiu, connexions interdisciplinars.",
-    }
-    parts.append(f"""
-PARÀMETRES D'ADAPTACIÓ:
-- Nivell DUA: {params.get('dua', 'Core')} — {dua_desc.get(params.get('dua', 'Core'), '')}
-- Intensitat Lectura Fàcil: {params.get('lf', 2)}/5
-- Nivell lingüístic de sortida (MECR): {params.get('mecr_sortida', 'B2')}
-""")
+    # Observacions del docent
+    if obs:
+        narrativa += f"\nObservacions del docent (PRIORITAT ALTA): {obs}"
 
-    # Complements activats
-    comp = params.get("complements", {})
-    comp_actius = [k.replace("_", " ").title() for k, v in comp.items() if v]
-    parts.append(f"""
-COMPLEMENTS A GENERAR (a més del text adaptat):
-{chr(10).join('- ' + c for c in comp_actius) if comp_actius else '- Cap complement addicional'}
-""")
+    return f"PERSONA-AUDIENCE:\n{narrativa}"
 
-    # Context RAG
-    if rag_context:
-        parts.append(f"""
-CONEIXEMENT PEDAGÒGIC DE REFERÈNCIA (recuperat del corpus FJE):
-{rag_context}
-""")
 
-    # Instruccions de sortida — detallades per complement
-    # Detectar quins complements estan actius per donar instruccions específiques
+def build_output_format(params: dict, l1: str) -> str:
+    """Genera les instruccions de format de sortida segons complements actius."""
     comp = params.get("complements", {})
     l1_display = l1 if l1 else "la llengua materna de l'alumne"
 
-    output_sections = []
-    output_sections.append("""
-FORMAT DE SORTIDA:
+    sections = []
+    sections.append("""FORMAT DE SORTIDA:
 Respon EXACTAMENT amb les seccions següents, separades per encapçalaments ## .
 Genera NOMÉS les seccions indicades com ACTIVADES.
 
@@ -577,162 +535,240 @@ El text complet adaptat segons tots els paràmetres indicats.
 - Estructura clara amb salts de línia entre idees
 - Termes tècnics en **negreta** amb definició entre parèntesis la primera vegada
 - Una idea per frase
-- Si el nivell és A1 o inferior: frases molt curtes, vocabulari quotidià, sense subordinades
-""")
+- Si el nivell és A1 o inferior: frases molt curtes, vocabulari quotidià, sense subordinades""")
 
     if comp.get("glossari"):
-        output_sections.append(f"""
-## Glossari
+        sections.append(f"""## Glossari
 ACTIVAT — Genera una TAULA MARKDOWN amb 3 columnes:
 | Terme | Traducció ({l1_display}) | Explicació simple |
 Inclou tots els termes tècnics o difícils del text adaptat (mínim 8-12 termes).
 La columna de traducció ha de contenir la traducció REAL al/a la {l1_display} (en el seu alfabet original si escau: àrab, xinès, urdú, etc.).
-L'explicació ha de ser en català molt senzill (nivell A1).
-""")
+L'explicació ha de ser en català molt senzill (nivell A1).""")
 
     if comp.get("negretes"):
-        output_sections.append("""
-## Negretes
-ACTIVAT — Ja integrat al text adaptat (termes clau en **negreta**). No cal secció separada.
-""")
+        sections.append("## Negretes\nACTIVAT — Ja integrat al text adaptat (termes clau en **negreta**). No cal secció separada.")
 
     if comp.get("definicions_integrades"):
-        output_sections.append("""
-## Definicions integrades
-ACTIVAT — Ja integrat al text adaptat (definicions entre parèntesis). No cal secció separada.
-""")
+        sections.append("## Definicions integrades\nACTIVAT — Ja integrat al text adaptat (definicions entre parèntesis). No cal secció separada.")
 
     if comp.get("traduccio_l1"):
-        output_sections.append(f"""
-## Traducció L1
-ACTIVAT — Ja integrat al glossari (columna de traducció a {l1_display}). No cal secció separada.
-""")
+        sections.append(f"## Traducció L1\nACTIVAT — Ja integrat al glossari (columna de traducció a {l1_display}). No cal secció separada.")
 
     if comp.get("pictogrames"):
-        output_sections.append("""
-## Pictogrames
+        sections.append("""## Pictogrames
 ACTIVAT — Afegeix icones/emojis de suport al costat dels conceptes clau del text adaptat.
 Exemples: ☀️ per llum, 💧 per aigua, 🌱 per planta, 🔬 per ciència, etc.
-Integra'ls directament al text adaptat, no en secció separada.
-""")
+Integra'ls directament al text adaptat, no en secció separada.""")
 
     if comp.get("esquema_visual"):
-        output_sections.append("""
-## Esquema visual
+        sections.append("""## Esquema visual
 ACTIVAT — Genera un esquema/diagrama en format text que mostri el procés o les relacions del contingut.
 Format: usa fletxes (→, ↓), símbols (+, =) i emojis per fer-lo visual i intuïtiu.
-Exemple de format:
-```
-ELEMENT A ☀️
-  ↓
-+ ELEMENT B 💧
-  ↓
-RESULTAT → PRODUCTE 1 + PRODUCTE 2
-```
-Ha de ser senzill, visual i comprensible per a l'alumne.
-""")
+Ha de ser senzill, visual i comprensible per a l'alumne.""")
 
     if comp.get("mapa_conceptual"):
-        output_sections.append("""
-## Mapa conceptual
+        sections.append("""## Mapa conceptual
 ACTIVAT — Genera un mapa conceptual en format text amb estructura d'arbre.
-Format:
-```
-CONCEPTE CENTRAL
-│
-├── Branca 1:
-│   ├─ Element a
-│   └─ Element b
-│
-├── Branca 2:
-│   └─ Element c
-│
-└── Branca 3:
-    ├─ Element d
-    └─ Element e
-```
-Mostra les relacions jeràrquiques entre els conceptes principals del text.
-""")
+Mostra les relacions jeràrquiques entre els conceptes principals del text.""")
 
     if comp.get("preguntes_comprensio"):
-        output_sections.append("""
-## Preguntes de comprensió
+        sections.append("""## Preguntes de comprensió
 ACTIVAT — Genera preguntes GRADUADES en 3 nivells de dificultat:
-
-### Nivell 1: Resposta curta (reconeixement)
-3 preguntes que es responen buscant informació directa al text.
-
-### Nivell 2: Verdader o fals
-3 afirmacions per marcar ✅ o ❌, barrejant correctes i incorrectes.
-
-### Nivell 3: Relaciona o completa
-2-3 activitats de relacionar conceptes (amb fletxes) o completar frases.
-
-Adapta la dificultat de les preguntes al nivell MECR de sortida.
-""")
+### Nivell 1: Resposta curta (reconeixement) — 3 preguntes directes del text.
+### Nivell 2: Verdader o fals — 3 afirmacions ✅ o ❌.
+### Nivell 3: Relaciona o completa — 2-3 activitats.
+Adapta la dificultat al nivell MECR de sortida.""")
 
     if comp.get("activitats_aprofundiment"):
-        output_sections.append("""
-## Activitats d'aprofundiment
+        sections.append("""## Activitats d'aprofundiment
 ACTIVAT — Genera 2-3 activitats de repte cognitiu:
-- Connexions interdisciplinars
-- Pensament crític (per què? i si...?)
-- Recerca guiada
-- Debat o reflexió
-""")
+connexions interdisciplinars, pensament crític, recerca guiada, debat.""")
 
     if comp.get("bastides"):
-        output_sections.append(f"""
-## Bastides (scaffolding)
-ACTIVAT — Genera suports didàctics estructurats en 4 blocs:
-
-### Frases model
-3-5 frases incompletes que l'alumne ha de completar amb informació del text.
-Exemple: "Les plantes necessiten ______ per fer la fotosíntesi."
-
-### Banc de paraules
-Llista de 8-12 paraules clau que l'alumne pot usar per completar les frases i activitats.
-Format: paraula1 – paraula2 – paraula3 – ...
-
-### Suport visual
-Indica quins suports visuals usar (icones, colors, esquemes, imatges recomanades).
-
-### Suport L1
-Si l'alumne és nouvingut, inclou pistes en {l1_display} per als conceptes més abstractes.
-""")
+        sections.append(f"""## Bastides (scaffolding)
+ACTIVAT — Genera suports didàctics en 4 blocs:
+### Frases model — 3-5 frases incompletes per completar amb info del text.
+### Banc de paraules — 8-12 paraules clau.
+### Suport visual — Indicacions d'icones, colors, esquemes recomanats.
+### Suport L1 — Pistes en {l1_display} per conceptes abstractes.""")
 
     if comp.get("mapa_mental"):
-        output_sections.append("""
-## Mapa mental
-ACTIVAT — Genera un mapa mental radial (diferent del mapa conceptual).
-El concepte central al mig, amb branques que s'expandeixen amb associacions lliures,
-preguntes generadores i connexions amb altres matèries.
-""")
+        sections.append("""## Mapa mental
+ACTIVAT — Genera un mapa mental radial amb el concepte central al mig,
+branques amb associacions, preguntes i connexions interdisciplinars.""")
 
     # Sempre: argumentació pedagògica + auditoria
-    output_sections.append("""
-## Argumentació pedagògica
-SEMPRE GENERAR — Explica les decisions pedagògiques preses, organitzades per àrees:
-1. **Adaptació lingüística**: què s'ha simplificat i per què (nivell MECR, tipus de frases, vocabulari)
-2. **Atenció a la diversitat**: com s'han tingut en compte les necessitats específiques (dislèxia, TEA, nouvingut, etc.)
-3. **Suport multimodal**: quins canals s'han activat (visual, lingüístic, cognitiu) i per què
-4. **Gradació cognitiva**: com s'ha organitzat la progressió (de reconeixement a producció)
-5. **Rigor curricular**: quins continguts s'han mantingut íntegres i per què
-Breu, 3-5 punts amb explicació de 1-2 frases cadascun.
+    sections.append("""## Argumentació pedagògica
+SEMPRE GENERAR — Explica les decisions pedagògiques preses (3-5 punts breus):
+1. Adaptació lingüística 2. Atenció a la diversitat 3. Suport multimodal
+4. Gradació cognitiva 5. Rigor curricular
 
 ## Notes d'auditoria
-SEMPRE GENERAR — Taula comparativa breu dels canvis principals:
+SEMPRE GENERAR — Taula comparativa breu:
 | Aspecte | Original | Adaptat | Motiu |
 Màxim 5-6 files amb els canvis més significatius.
-""")
 
-    output_sections.append("""
-Omès les seccions marcades com NO ACTIVADES. No generis seccions buides.
-""")
+Omès les seccions NO ACTIVADES. No generis seccions buides.""")
 
-    parts.append("\n".join(output_sections))
+    return "\n\n".join(sections)
 
-    return "\n".join(parts)
+
+def build_system_prompt(profile: dict, context: dict, params: dict, rag_context: str) -> str:
+    """Munta el system prompt v2 complet per a Gemini (arquitectura 4 capes)."""
+    parts = []
+
+    # ── CAPA 1: Identitat (fixa) ──────────────────────────────────────────
+    parts.append(IDENTITY_BLOCK)
+
+    # ── CAPA 2: Instruccions universals (fixa) ────────────────────────────
+    parts.append(UNIVERSAL_RULES_BLOCK)
+
+    # ── CAPA 3: Instruccions condicionals (variable) ──────────────────────
+
+    # 3a. MECR — NOMÉS el nivell de sortida
+    mecr = params.get("mecr_sortida", "B2")
+    parts.append(MECR_BLOCKS.get(mecr, MECR_BLOCKS["B2"]))
+
+    # 3b. DUA
+    dua = params.get("dua", "Core")
+    parts.append(DUA_BLOCKS.get(dua, DUA_BLOCKS["Core"]))
+
+    # 3c. Gènere discursiu (si indicat pel context)
+    genre = context.get("genere_discursiu", "")
+    if genre and genre in GENRE_BLOCKS:
+        parts.append(GENRE_BLOCKS[genre])
+
+    # 3d. Blocs per perfil — NOMÉS els actius
+    active_profiles = _get_active_profiles(profile)
+    for p in active_profiles:
+        if p in PROFILE_BLOCKS:
+            parts.append(PROFILE_BLOCKS[p])
+
+    # 3e. Blocs de creuament — NOMÉS si apliquen
+    crossing_blocks = _detect_crossing_signals(active_profiles, profile, mecr, genre)
+    for block in crossing_blocks:
+        parts.append(block)
+
+    # 3f. Càrrega cognitiva
+    cog_level = _get_cognitive_load_level(mecr)
+    parts.append(COGNITIVE_LOAD_BLOCK[cog_level])
+
+    # 3g. Resolució de conflictes (només si DUA Accés o nivell baix)
+    if dua == "Acces" or mecr in ("pre-A1", "A1", "A2"):
+        parts.append(CONFLICT_RESOLUTION_BLOCK)
+
+    # 3h. Few-shot example — 1 per al nivell MECR
+    if mecr in FEWSHOT_EXAMPLES:
+        parts.append(FEWSHOT_EXAMPLES[mecr])
+
+    # ── CAPA 4: Context (variable) ────────────────────────────────────────
+
+    # 4a. Context educatiu
+    parts.append(f"""CONTEXT EDUCATIU:
+- Etapa: {context.get('etapa', 'ESO')}
+- Curs: {context.get('curs', '')}
+- Àmbit: {context.get('ambit', '')}
+- Matèria: {context.get('materia', '')}
+- Tipus d'aula: {context.get('tipus_aula', 'ordinaria')}""")
+
+    # 4b. Persona-audience
+    parts.append(build_persona_audience(profile, context, mecr))
+
+    # 4c. Context RAG
+    if rag_context:
+        parts.append(f"CONEIXEMENT PEDAGÒGIC DE REFERÈNCIA (corpus FJE):\n{rag_context}")
+
+    # 4d. Format de sortida
+    chars = profile.get("caracteristiques", {})
+    l1 = ""
+    if chars.get("nouvingut", {}).get("actiu") and chars.get("nouvingut", {}).get("L1"):
+        l1 = chars["nouvingut"]["L1"]
+    parts.append(build_output_format(params, l1))
+
+    return "\n\n".join(parts)
+
+
+# ── Post-processament v2 ───────────────────────────────────────────────────
+
+# Límits de paraules per frase segons MECR
+MECR_SENTENCE_LIMITS = {
+    "pre-A1": 5, "A1": 8, "A2": 12, "B1": 18, "B2": 25,
+}
+
+# Paraules prohibides en context tècnic
+FORBIDDEN_WORDS = [
+    "cosa", "coses", "allò", "això", "el que fa que", "serveix per", "un tipus de",
+]
+
+
+def post_process_adaptation(text: str, mecr: str) -> dict:
+    """Verifica la sortida de l'LLM i retorna mètriques + avisos.
+
+    No modifica el text — reporta problemes perquè el docent/sistema els vegi.
+    """
+    warnings = []
+    max_words = MECR_SENTENCE_LIMITS.get(mecr, 25)
+
+    # Extreure només el text adaptat (entre ## Text adaptat i el següent ##)
+    adapted_match = re.search(
+        r'## Text adaptat\s*\n(.*?)(?=\n## |\Z)',
+        text, re.DOTALL
+    )
+    adapted_text = adapted_match.group(1) if adapted_match else text
+
+    # 1. Verificar longitud de frases
+    sentences = re.split(r'[.!?]\s+', adapted_text)
+    long_sentences = []
+    for s in sentences:
+        s = s.strip()
+        if not s or s.startswith("#") or s.startswith("|") or s.startswith("-"):
+            continue
+        word_count = len(s.split())
+        if word_count > max_words + 3:  # marge de 3 paraules (definicions)
+            long_sentences.append((s[:60] + "...", word_count))
+
+    if long_sentences:
+        warnings.append({
+            "type": "sentence_length",
+            "msg": f"{len(long_sentences)} frase(s) superen el límit MECR {mecr} ({max_words} paraules)",
+            "details": long_sentences[:3],
+        })
+
+    # 2. Detectar paraules prohibides
+    text_lower = adapted_text.lower()
+    found_forbidden = [w for w in FORBIDDEN_WORDS if w in text_lower]
+    if found_forbidden:
+        warnings.append({
+            "type": "forbidden_words",
+            "msg": f"Paraules prohibides detectades: {', '.join(found_forbidden)}",
+        })
+
+    # 3. Verificar presència d'encapçalaments
+    has_headings = bool(re.search(r'^##\s', text, re.MULTILINE))
+    if not has_headings:
+        warnings.append({
+            "type": "missing_headings",
+            "msg": "No s'han detectat encapçalaments ## al text",
+        })
+
+    # 4. Verificar presència de termes en negreta
+    bold_count = len(re.findall(r'\*\*[^*]+\*\*', adapted_text))
+    if bold_count == 0 and mecr in ("pre-A1", "A1", "A2"):
+        warnings.append({
+            "type": "missing_bold",
+            "msg": "No s'han detectat termes en negreta al text adaptat",
+        })
+
+    # Mètriques bàsiques
+    all_words = adapted_text.split()
+    metrics = {
+        "total_words": len(all_words),
+        "total_sentences": len([s for s in sentences if s.strip()]),
+        "bold_terms": bold_count,
+        "mecr_limit": max_words,
+    }
+
+    return {"warnings": warnings, "metrics": metrics}
 
 
 # ── Adaptació (funció bloquejant per executar en thread pool) ──────────────
@@ -870,10 +906,18 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
             pass
         # Netejar "thinking" filtrat de Gemini (text abans del primer ## )
         adapted = clean_gemini_output(adapted)
+
+        # Post-processament v2: verificar qualitat
+        mecr = params.get("mecr_sortida", "B2")
+        pp = post_process_adaptation(adapted, mecr)
+        for w in pp.get("warnings", []):
+            cb({"type": "step", "step": "warning", "msg": f"⚠ {w['msg']}"})
+
     except Exception as e:
         adapted = f"Error en la generació: {e}"
+        pp = {"warnings": [], "metrics": {}}
 
-    cb({"type": "result", "adapted": adapted})
+    cb({"type": "result", "adapted": adapted, "post_process": pp})
     cb({"type": "done"})
     return adapted
 
