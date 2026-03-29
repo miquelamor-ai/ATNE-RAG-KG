@@ -1,0 +1,9 @@
+=== ATNE Batch Test — Resum ===
+Branca: prompt-v2-rag
+Data: 2026-03-29 00:31
+Casos: 160 (160 OK, 0 errors)
+Temps total: 2402s (mitjana 15.0s/cas)
+Paraules mitjana: 769
+Warnings totals: 259
+
+Resultats: C:\Users\miquel.amor\Documents\GitHub\ATNE\tests\results\20260328_235135\metrics.csv

@@ -1,0 +1,373 @@
+{
+  "_meta": {
+    "description": "Matriu de tests sintètics ATNE — 16 textos x 10 perfils = 160 adaptacions",
+    "created": "2026-03-28",
+    "fonts": "Enciclopèdia Catalana, XTEC, SaviaMENT, Racó de contes, 3Cat, Diari Ara"
+  },
+
+  "textos": [
+    {
+      "id": "PRI_EXPL",
+      "etapa": "primaria",
+      "genere": "explicacio",
+      "tema": "La fotosíntesi",
+      "font": "SaviaMENT + IE Sala i Badrinas",
+      "paraules": 210,
+      "text": "Les plantes no s'alimenten d'altres éssers vius, sinó que es fabriquen el seu propi aliment a través d'un procés anomenat fotosíntesi. Per dur a terme aquest procés, les plantes necessiten quatre elements: llum solar, aigua, diòxid de carboni i sals minerals.\n\nEl procés funciona de la manera següent. Primer, les arrels de la planta absorbeixen aigua i sals minerals de la terra. Aquesta barreja, que s'anomena saba bruta, es transporta des de les arrels fins a les fulles a través de la tija. Un cop a les fulles, la planta absorbeix el diòxid de carboni de l'aire.\n\nA les fulles es troba un pigment de color verd anomenat clorofil·la. La clorofil·la atrapa l'energia lluminosa del sol i la transforma en energia química. Gràcies a aquesta energia, l'aigua de la saba bruta i el diòxid de carboni es converteixen en aliment per a la planta, que s'anomena saba elaborada. Durant aquest procés, la planta produeix oxigen i l'expulsa a l'aire a través de les fulles.\n\nFinalment, la saba elaborada es distribueix per tota la planta per alimentar-la. L'oxigen que les plantes alliberen durant la fotosíntesi és fonamental per a la vida de tots els éssers vius del planeta, ja que és l'oxigen que nosaltres necessitem per respirar."
+    },
+    {
+      "id": "PRI_NARR",
+      "etapa": "primaria",
+      "genere": "narracio",
+      "tema": "La llegenda de Sant Jordi",
+      "font": "Racó de contes + Contes en Català",
+      "paraules": 250,
+      "text": "Heus aquí que una vegada, en una terra molt llunyana, hi havia un regne anomenat Montblanc, on els prats eren sempre verds i el cel sempre blau. Però no tot era felicitat en aquest bell regne, ja que un terrible drac habitava a prop, espantant tots els seus habitants.\n\nEl drac era tan gran que la seva ombra cobria tot el poble quan volava per sobre. Tenia unes ales immenses i una pell coberta d'escates més dures que la pedra. De la seva boca sortien flames tan calentes que podien cremar tot el que trobava al seu pas.\n\nEls habitants de Montblanc estaven molt espantats i no sabien què fer. El rei, desesperat, va decidir que l'única manera de calmar la fúria del drac era oferir-li un habitant del poble cada dia. Així, cada matí, es feia un sorteig per veure qui seria el sacrificat.\n\nUn dia, el sorteig va escollir la princesa, la filla estimada del rei. Tot el poble va plorar la seva sort. Fou llavors quan va aparèixer un cavaller anomenat Jordi. Portava una armadura brillant i muntava un cavall blanc com la neu. Després d'una lluita intensa, va aconseguir clavar la llança en el cor del drac.\n\nDe la sang del drac va brotar un roser de roses vermelles. En Jordi va collir la rosa més bella i la va oferir a la princesa. Des d'aquell dia, cada 23 d'abril, es regalen roses i llibres per recordar el coratge i l'amor de Sant Jordi."
+    },
+    {
+      "id": "PRI_INST",
+      "etapa": "primaria",
+      "genere": "instruccio",
+      "tema": "Experiment: volcà de bicarbonat",
+      "font": "Repte Experimenta + XTEC",
+      "paraules": 220,
+      "text": "Objectiu: Simular una erupció volcànica mitjançant una reacció química entre un àcid i una base.\n\nMaterials necessaris: 1 got de vidre o ampolla petita de plàstic, 2 cullerades de bicarbonat sòdic, 150 ml de vinagre de vi, 1 cullerada de detergent de rentaplats, 4 gotes de colorant alimentari vermell, 1 safata de forn, argila o plastilina per construir el volcà.\n\nProcediment:\n\nPas 1. Construeix el volcà. Col·loca el got de vidre al centre de la safata i modela la plastilina o l'argila al voltant per donar-li forma de muntanya. Deixa l'obertura del got lliure a la part superior: serà el cràter del volcà.\n\nPas 2. Prepara la barreja. Dins del got, posa la cullerada de detergent de rentaplats i afegeix-hi les 4 gotes de colorant alimentari vermell. Remena bé.\n\nPas 3. Afegeix el vinagre. Aboca els 150 ml de vinagre dins del got i remena un altre cop.\n\nPas 4. Provoca l'erupció. Afegeix les 2 cullerades de bicarbonat sòdic dins del got i observa què passa.\n\nQuè ha passat? El vinagre és un àcid i el bicarbonat sòdic és una base. Quan els barreges, es produeix una reacció química que genera diòxid de carboni. El diòxid de carboni és un gas, i és el responsable de formar les bombolles que simulen l'erupció del volcà."
+    },
+    {
+      "id": "PRI_ARGU",
+      "etapa": "primaria",
+      "genere": "argumentacio",
+      "tema": "Per què és important reciclar?",
+      "font": "Ajuntament BCN + Maresme Circular",
+      "paraules": 240,
+      "text": "Davant l'emergència climàtica que vivim, és fonamental que tothom aprengui a cuidar el medi ambient. Una de les maneres més efectives de fer-ho és a través del reciclatge: recol·lectar, separar i processar materials que poden ser reutilitzats, en comptes de llençar-los a les escombraries.\n\nPer què és tan important reciclar? En primer lloc, perquè redueix la quantitat de residus que generem. Cada persona genera aproximadament 1,5 quilos de residus al dia, és a dir, més de 500 quilos a l'any. Si tot això acaba als abocadors, la contaminació del sòl, l'aigua i l'aire augmenta enormement.\n\nEn segon lloc, el reciclatge estalvia energia i recursos naturals. Per exemple, fabricar un quilo d'alumini a partir de materials reciclats necessita un 95% menys d'energia que produir-lo des de zero. A més, reciclar una tona de paper salva disset arbres.\n\nPerò el reciclatge no és l'únic que podem fer. Els experts parlen de les tres erres: reduir, reutilitzar i reciclar, en aquest ordre de prioritat. Primer, hem de reduir el consum de productes innecessaris. Després, hem de reutilitzar tot allò que puguem, allargant la vida útil dels objectes. I, finalment, hem de reciclar correctament separant els residus en els contenidors adequats.\n\nEn definitiva, reciclar no és només una opció: és una responsabilitat de tots. Si cadascun de nosaltres fa la seva part, contribuirem a un planeta més net i sostenible per a les generacions futures."
+    },
+
+    {
+      "id": "ESO1_EXPL",
+      "etapa": "ESO",
+      "genere": "explicacio",
+      "tema": "La cèl·lula eucariota",
+      "font": "Enciclopèdia Catalana (Temàtica Proa + GEC)",
+      "paraules": 280,
+      "text": "La cèl·lula és la unitat fonamental de la matèria vivent. Funciona com a unitat anatòmica i fisiològica: és el sistema organitzat més simple capaç de portar a terme les funcions vitals. Existeixen dos grans tipus de cèl·lules: les procariòtiques, sense membrana nuclear, pròpies dels bacteris, i les eucariòtiques, que contenen múltiples orgànuls i material genètic dins de cromosomes, pròpies dels animals i dels vegetals.\n\nLa cèl·lula eucariota consta de tres estructures principals. En primer lloc, la membrana cel·lular, formada per fosfolípids disposats en doble capa amb proteïnes incrustades, que funciona com a barrera selectiva i determina i manté les diferències entre el líquid de l'interior i l'exterior de la cèl·lula. En segon lloc, el citoplasma, que conté diversos orgànuls especialitzats: els mitocondris, encarregats de produir l'energia necessària per a totes les activitats cel·lulars; els ribosomes, que participen en la síntesi de les proteïnes; el reticle endoplasmàtic, una xarxa de membranes internes; l'aparell de Golgi, responsable de l'emmagatzematge i la distribució de substàncies; i els lisosomes, orgànuls delimitats per una membrana amb funció digestiva. En tercer lloc, el nucli, que conté el DNA, el material genètic que determina el fet que d'una cèl·lula concreta en neixin d'altres del mateix tipus.\n\nLa cèl·lula vegetal es diferencia de l'animal per la presència d'una paret cel·lular més o menys gruixuda, formada principalment de cel·lulosa, i pels cloroplasts, orgànuls capaços de dur a terme la fotosíntesi. A més, les cèl·lules vegetals presenten vacúols de gran mida que mantenen la turgència de la cèl·lula."
+    },
+    {
+      "id": "ESO1_NARR",
+      "etapa": "ESO",
+      "genere": "narracio",
+      "tema": "La Revolució Francesa",
+      "font": "Gran Enciclopèdia Catalana",
+      "paraules": 300,
+      "text": "La Revolució Francesa és el període de la història de França que va des de la formació dels Estats Generals, el 5 de maig de 1789, fins al cop d'estat del 18 de brumari de 1799. Aquest procés provocà la caiguda de l'Antic Règim i la presa del poder polític per part de la burgesia.\n\nLa societat de l'Antic Règim no s'adequava a la nova realitat econòmica i social, ja que excloïa del poder polític el sector més dinàmic de la societat: la burgesia, que esdevingué classe revolucionària. Les classes populars, víctimes de la crisi econòmica, forniren les forces de xoc revolucionàries. La filosofia de la Il·lustració, en proclamar la dignitat de l'home i els ideals de progrés i felicitat, assentà les bases ideològiques del canvi.\n\nL'etapa preliminar fou la revolta dels privilegiats (1787-89), que tingué lloc quan els ministres de la monarquia intentaren de resoldre la crisi econòmica suprimint els privilegis fiscals. L'Assemblea de Notables i els Parlaments es negaren a secundar les reformes i imposaren la convocatòria d'Estats Generals, que es reuniren a Versalles el 5 de maig de 1789. Els diputats de la burgesia, el Tercer Estat, exigiren de deliberar en comú amb els altres Estats, es constituïren en Assemblea Nacional i pronunciaren el jurament del Jeu de Paume.\n\nS'inicià així la primera etapa de la revolució. Davant el perill d'una contrarevolució, el poble de París es mobilitzà i el 14 de juliol de 1789 tingué lloc la presa de la Bastilla, símbol de l'absolutisme monàrquic. L'Assemblea abolí el règim feudal i aprovà la Declaració dels Drets de l'Home i del Ciutadà."
+    },
+    {
+      "id": "ESO1_INST",
+      "etapa": "ESO",
+      "genere": "instruccio",
+      "tema": "Observació cèl·lules ceba al microscopi",
+      "font": "IES F.X. Viñas (XTEC) + El Profe de Bio",
+      "paraules": 340,
+      "text": "Objectius: 1. Tenyir teixits vegetals amb blau de metilè. 2. Realitzar preparacions microscòpiques simples. 3. Descriure i dibuixar cèl·lules vegetals epitelials. 4. Familiaritzar-se amb l'ús del microscopi òptic.\n\nMaterial: Microscopi òptic, safata de dissecció, ganivet, tisores, agulla emmanegada, pinces, vidre de rellotge, portaobjectes i cobreobjectes, paper de filtre, placa de Petri, comptagotes, aigua destil·lada, solució de blau de metilè i ceba (Allium cepa).\n\nProcediment:\n1. Prepareu l'espai de treball amb paper de filtre. Netegeu el portaobjectes amb aigua i sabó si cal, i assequeu-lo bé.\n2. Talleu la ceba per la meitat i seleccioneu la tercera o quarta capa. Poseu 6-10 gotes d'aigua al vidre de rellotge.\n3. Aïlleu l'epidermis de la part còncava amb les pinces, sense malmetre-la. Retalleu 1 o 2 quadradets d'aproximadament 1 cm de costat i situeu-los al vidre de rellotge.\n4. Afegiu 1 gota de blau de metilè sobre cada quadradet i repartiu el tint amb l'agulla emmanegada. Espereu entre 3 i 4 minuts perquè es tenyeixin les estructures cel·lulars.\n5. Agafeu la mostra amb pinces i esteneu-la sobre el portaobjectes. Renteu amb cura deixant caure aigua destil·lada per eliminar l'excés de colorant.\n6. Poseu una gota d'aigua sobre la mostra. Col·loqueu el cobreobjectes inclinat i deixeu-lo caure a poc a poc per evitar bombolles d'aire.\n7. Situeu el portaobjectes a la platina del microscopi i fixeu-lo. Col·loqueu l'objectiu de 4x i enfoqueu.\n8. Passeu a l'objectiu de 10x i dibuixeu 2-3 cèl·lules amb detall, assenyalant paret cel·lular, membrana, nucli i citoplasma.\n9. En acabar, separeu el cobreobjectes amb cura, renteu els vidres i guardeu el microscopi.\n\nPrecaucions: El blau de metilè taca; useu-lo amb moderació. El cobreobjectes és delicat. No toqueu les lents del microscopi amb els dits."
+    },
+    {
+      "id": "ESO1_ARGU",
+      "etapa": "ESO",
+      "genere": "argumentacio",
+      "tema": "Energies renovables vs. no renovables",
+      "font": "Enciclopèdia Catalana (Temàtica Proa + GEC)",
+      "paraules": 310,
+      "text": "En l'actualitat, els combustibles fòssils —carbó, petroli i gas natural— constitueixen al voltant del 90% de l'energia que es consumeix al món. Tanmateix, es tracta de recursos condemnats, tard o d'hora, a exhaurir-se, ja que són finits i no es regeneren. Segons els càlculs, el planeta pot subministrar energia durant 40 anys més si només s'utilitza el petroli, i més de 200 si es continua utilitzant el carbó. A més de la seva limitació temporal, els combustibles fòssils generen una greu contaminació atmosfèrica que contribueix a l'escalfament global. Per tots aquests motius, resulta imprescindible avançar cap a un model energètic basat en les energies renovables.\n\nLes energies renovables són formes de producció d'energia que no depenen d'una primera matèria exhaurible i que es caracteritzen per l'absència de contaminació i de residus. S'hi inclouen l'energia hidroelèctrica, que representa el 20% de l'energia elèctrica mundial; l'energia eòlica, que aprofita la força del vent; l'energia solar, que capta la radiació electromagnètica del Sol; la biomassa; i l'energia geotèrmica.\n\nEls avantatges d'aquestes fonts són considerables: la seva disponibilitat és pràcticament il·limitada, el cost econòmic de la font és nul, són molt menys contaminants i permeten una gestió descentralitzada.\n\nNo obstant això, les energies renovables presenten encara alguns inconvenients: la seva baixa densitat i intermitència, la necessitat de grans superfícies de captació i uns costos actuals encara elevats. Ara bé, els compromisos internacionals com el Protocol de Kyoto han estimulat la investigació i la millora tecnològica. La transició cap a les energies renovables no és només desitjable: és una necessitat inajornable per garantir un futur sostenible."
+    },
+
+    {
+      "id": "ESO2_EXPL",
+      "etapa": "ESO",
+      "genere": "explicacio",
+      "tema": "Tectònica de plaques",
+      "font": "GEC + Història Natural PPCC (enciclopedia.cat)",
+      "paraules": 320,
+      "text": "La tectònica de plaques és la hipòtesi segons la qual la part superficial de la Terra, anomenada litosfera, és formada per plaques rígides d'un centenar de quilòmetres de gruix que \"suren\" damunt l'astenosfera, una capa més plàstica i deformable. Aquestes plaques poden tenir escorça oceànica, continental, o totes dues alhora.\n\nLa litosfera es divideix en un petit nombre de grans plaques i diverses microplaques, que es comporten de manera aproximadament rígida i es mouen lentament, a velocitats de l'ordre de centímetres per any. Aquests moviments es mantenen durant milions d'anys i són de tres tipus: separació, convergència i lliscament lateral. Els límits de plaques concentren els processos geològics més importants del planeta.\n\nLes primeres teories sorgiren de l'observació que la forma de la costa occidental d'Àfrica corresponia bastant perfectament amb la de l'est de l'Amèrica del Sud. Alfred Wegener enuncià el 1912 la teoria de la deriva dels continents. L'avenç del coneixement del fons oceànic donà lloc a la teoria de l'expansió dels fons oceànics formulada per Hess el 1960.\n\nEn les plaques hom pot diferenciar tres tipus de límits. Les zones d'acreció se situen al mig de les dorsals oceàniques, on s'origina escorça oceànica nova mitjançant un vulcanisme basàltic continu. Les zones de subducció comporten l'enfonsament d'una placa litosfèrica vers l'astenosfera, generant fosses oceàniques i activitat volcànica intensa. Finalment, les falles transformants són fractures on dues plaques llisquen lateralment l'una respecte a l'altra.\n\nAquesta teoria dóna una visió dinàmica de la història de la Terra i explica la formació de les muntanyes, la distribució del vulcanisme i la sismicitat, i la deriva dels continents."
+    },
+    {
+      "id": "ESO2_NARR",
+      "etapa": "ESO",
+      "genere": "narracio",
+      "tema": "La Guerra Civil espanyola a Catalunya",
+      "font": "Gran Enciclopèdia Catalana",
+      "paraules": 320,
+      "text": "La Guerra Civil espanyola fou un conflicte armat iniciat el 18 i 19 de juliol de 1936 i acabat l'1 d'abril de 1939. El conflicte es provocà per un cop d'estat planejat pel general Emilio Mola, que comptà amb el suport de sectors de les forces armades, partits de dreta i la Falange Española. Fou una resposta a la revolució d'octubre de 1934 i reflectia el fracàs de la convivència política durant la Segona República.\n\nLa insurrecció tingué èxit parcial. A les zones republicanes —Barcelona, Madrid, Bilbao, Menorca— es mantingué la lleialtat al govern central. Als territoris que caigueren sota control rebel, el poder fou assumit pels militars. A la zona republicana, els partits polítics del Front Popular i les organitzacions sindicals constituïren un poder paral·lel que desenvolupà reformes socials profundes com les col·lectivitzacions.\n\nLes forces rebels planificaren operacions convergents sobre Madrid, però els avanços foren lents. La batalla de Madrid del novembre de 1936 fou aferrissada. El bombardeig de Gernika, el 26 d'abril de 1937, per la Legió Còndor alemanya, tingué una gran repercussió internacional. La batalla de l'Ebre, del 25 de juliol al 16 de novembre de 1938, fou la més sagnant de tota la guerra, i deixà les reserves republicanes exhaustes.\n\nL'ofensiva sobre Catalunya, iniciada el 23 de desembre de 1938, progressà amb facilitat. Mig milió de persones, entre civils i militars, passaren a territori francès en un dels èxodes més grans d'Europa. Franco entrà a Madrid el 28 de març i l'1 d'abril de 1939 donà el darrer comunicat de guerra."
+    },
+    {
+      "id": "ESO2_INST",
+      "etapa": "ESO",
+      "genere": "instruccio",
+      "tema": "El mètode estadístic",
+      "font": "Gran Enciclopèdia Catalana",
+      "paraules": 300,
+      "text": "L'estadística és la ciència que aplica mètodes, tècniques i operacions d'anàlisi matemàtica per estudiar numèricament, amb el màxim de precisió, fenòmens col·lectius incompletament coneguts. Qualsevol estudi estadístic rigorós ha de seguir una seqüència ordenada de fases per garantir la validesa dels resultats.\n\nLa primera fase consisteix a delimitar clarament l'objecte de l'estudi: determinar quins aspectes es volen analitzar, quines variables es mesuraran i quines hipòtesis es volen contrastar.\n\nLa segona fase és l'elecció de la població a estudiar. Com que sovint és impracticable recollir dades de tota la població, es recorre al mostreig: la selecció d'un subconjunt representatiu, anomenat mostra. Es planteja aleshores el problema de la talla de la mostra i de la seva representativitat.\n\nLa tercera fase comprèn la recollida de dades, que s'obtenen per observació directa o per experimentació controlada.\n\nLa quarta fase és el tractament de les dades mitjançant les tècniques de l'estadística descriptiva: les dades s'ordenen, s'agrupen en classes i se'n compten els efectius. Es calculen mesures de tendència central —com la mitjana aritmètica i la mediana— i mesures de dispersió —com la variància i la desviació tipus.\n\nLa cinquena fase és la inferència estadística: a partir de les dades de la mostra, s'estimen els paràmetres de la població i es contrasten les hipòtesis inicials, amb un marge d'error quantificat. Finalment, els resultats s'interpreten i es comuniquen de manera clara, distingint entre correlació i causalitat."
+    },
+    {
+      "id": "ESO2_ARGU",
+      "etapa": "ESO",
+      "genere": "argumentacio",
+      "tema": "Drets humans: universalitat i debat",
+      "font": "Enciclopèdia Catalana (Atles Diversitat + GEC)",
+      "paraules": 340,
+      "text": "D'ençà de la Declaració Universal dels Drets Humans, proclamada per l'Assemblea General de l'ONU a París el 1948, existeix el problema de com garantir-ne el reconeixement i l'aplicació universals. El document, compost d'un preàmbul i de trenta articles, reconeix el dret a la vida, a la llibertat, a la seguretat, a la lliure associació i a la resistència contra l'opressió, com a drets fonamentals i irrenunciables de tota persona humana.\n\nA favor d'aquesta universalitat, cal argumentar que la majoria de cultures han tingut al llarg de la història diversos conceptes que es concentren al voltant de la idea de dignitat de la persona. Des de la Carta de Comandament de 1222, declaració fundacional de l'Imperi de Mali, fins a les tradicions filosòfiques d'Orient i d'Occident, la noció que l'ésser humà mereix respecte pel sol fet de ser-ho transcendeix les fronteres culturals. A més, els drets humans s'han classificat en tres generacions: els drets civils i polítics, vinculats a la llibertat; els drets socials, econòmics i culturals, vinculats a la igualtat; i els drets col·lectius, vinculats a la solidaritat.\n\nTanmateix, el relativisme cultural planteja una objecció seriosa: segons aquesta posició, és impossible establir un codi universal vàlid per a totes les cultures del món. Aquesta perspectiva assenyala que la Declaració del 1948 partia d'un model occidental específic. L'Organització per a la Unitat Africana proposà la seva pròpia Carta el 27 de juny de 1981.\n\nEn conclusió, el debat entre universalisme i relativisme no invalida els drets humans sinó que els enriqueix. La dignitat humana no és una imposició cultural, sinó un horitzó ètic compartit que cada societat ha de traduir al seu context."
+    },
+
+    {
+      "id": "BAT_EXPL",
+      "etapa": "batxillerat",
+      "genere": "explicacio",
+      "tema": "Termodinàmica i entropia",
+      "font": "Enciclopèdia Catalana (DIVULCAT + GEC)",
+      "paraules": 410,
+      "text": "La termodinàmica és la branca de la física que estudia el comportament macroscòpic de la matèria a partir dels mètodes de la mecànica estadística. A diferència de la mecànica clàssica, que analitza sistemes de punts discrets, la termodinàmica examina un gran nombre de partícules per determinar els valors mitjans de les seves propietats característiques. Les magnituds que descriu es classifiquen en intensives —com la pressió o la temperatura, que no depenen de la quantitat de massa— i extensives —com el volum o l'energia total, que corresponen al sistema complet.\n\nLa disciplina es fonamenta en quatre principis deduïts de l'experiència. El principi zero estableix que si dos sistemes estan en equilibri tèrmic amb un tercer, estan en equilibri entre ells: és la base conceptual del termòmetre. El primer principi afirma la conservació de l'energia: en qualsevol transformació, l'energia total d'un sistema aïllat es manté constant. El segon principi, formulat inicialment per Carnot el 1824 i desenvolupat per Clausius, estableix que les transformacions termodinàmiques més probables en un sistema aïllat són aquelles en les quals l'entropia augmenta o roman constant. El tercer principi postula que és impossible assolir el zero absolut de temperatura mitjançant un nombre finit de processos.\n\nL'entropia, simbolitzada per S, és una magnitud termodinàmica funció d'estat del sistema, introduïda per Clausius. En processos reversibles, l'entropia es manté constant gràcies a la intervenció de fonts tèrmiques auxiliars. En processos irreversibles reals, sempre hi ha augment d'entropia. Des de la mecànica estadística, Boltzmann va demostrar que la relació entre entropia i probabilitat és S = k ln W, on k és la constant de Boltzmann. L'entropia pot entendre's, doncs, com una mesura del grau de desordre molecular del sistema.\n\nEl nostre univers va iniciar-se en un estat amb una entropia extremadament baixa. Mentre l'univers s'expandia i es refredava, el desordre augmentava i permetia noves estructures. Com qualsevol sistema físic, l'univers evoluciona de manera que el desordre augmenta. Però com és possible que s'hagin pogut crear estructures complexes si la tendència global ens porta cap al desordre? La resposta rau en el fet que, en un sistema obert, l'entropia pot reduir-se localment a costa d'augmentar en altres zones."
+    },
+    {
+      "id": "BAT_NARR",
+      "etapa": "batxillerat",
+      "genere": "narracio",
+      "tema": "Invasió subtil — Pere Calders (1978)",
+      "font": "Catorze.cat / LletrA UOC",
+      "paraules": 420,
+      "text": "A l'Hostal Punta Marina, de Tossa, vaig conèixer un japonès desconcertant, que no s'assemblava en cap aspecte a la idea que jo tenia formada d'aquesta mena d'orientals. Es va asseure a la meva taula, després de demanar-me permís sense gaire cerimònia, i el primer que em va sorprendre és que no tenia els ulls oblics ni la pell groguenca. Tenia les galtes rosades i els cabells d'un castany tirant a ros. Parlava català a la perfecció, sense cap accent que pogués delatar un origen foraster.\n\nEm va dir que es deia Jaumet i que venia sants d'Olot: feia la zona sud de la Península i de tant en tant s'arribava a les Balears. Em va explicar que havia nascut a Banyoles, que era fill únic i que la seva mare feia unes mandonguilles que eren la meravella del món. Confesso que jo mateix hi posava la nota exòtica: quan m'adreçava a ell, vocalitzava massa, feia gestos explicatius amb les mans i construïa frases senzilles, com si parlés amb algú que no domina l'idioma. Ell em mirava amb uns ulls de color de mel, molt oberts, com si no acabés d'entendre per què em comportava d'aquella manera.\n\nLa meva dona, que era al menjador de l'hostal i ho observava tot, em va dir després que el meu japonès no tenia res de japonès. Jo vaig replicar-li que n'hi havia que s'hi assemblaven menys del que sembla, i que el perill de la infiltració era justament aquest: que no se'ls notava. Ella em va preguntar si l'home m'havia dit en algun moment que fos japonès, i vaig haver de reconèixer que no, que havia estat una impressió meva des del primer moment.\n\n—I d'on treus que és japonès? —va insistir ella.\n\nNo ho sabia, no ho podia explicar. Però tenia la certesa que aquell home amagava alguna cosa. Potser era la manera com girava el cap per mirar la sala, o com agafava els coberts. Res d'extraordinari, si hi penso fredament, però jo havia decidit que era japonès i tota la resta del sopar vaig interpretar-ho en clau oriental. Quan va demanar arròs, vaig pensar: ja hi som. Quan va fer servir l'escuradents, em vaig dir que era un costum asiàtic.\n\nL'endemà al matí el vaig trobar al bar, prenent un tallat. Portava un diari català i es lamentava del temps. Ho feia tot d'una manera tan normal que resultava sospitosa."
+    },
+    {
+      "id": "BAT_INST",
+      "etapa": "batxillerat",
+      "genere": "instruccio",
+      "tema": "Metodologia del treball de recerca",
+      "font": "Enciclopèdia Catalana (Aprendre a aprendre) + XTEC",
+      "paraules": 430,
+      "text": "El treball de recerca és un exercici acadèmic obligatori per a tot l'alumnat de batxillerat de Catalunya, que equival a una part significativa del currículum i suposa unes 70 hores de dedicació. Consisteix en un conjunt d'activitats estructurades i orientades a la investigació sobre un tema escollit i acotat, en part, per l'alumne mateix.\n\nFase 1: Plantejament i hipòtesi. Abans de començar, cal determinar la naturalesa del treball: si és obligatori i comú a tota la classe o si té un guió obert; si es centra en una única disciplina o té caràcter interdisciplinari; i quins mitjans de recerca s'utilitzaran. A continuació, cal establir la hipòtesi del treball, és a dir, formular un supòsit que constitueix una resposta provisional al problema plantejat. L'alumne s'ha de preguntar: sobre què vull escriure? Quina informació hauré de buscar? Quants apartats tindrà el treball?\n\nFase 2: Recerca i recollida de dades. La informació es pot obtenir per mitjans diversos. Si es tracta d'una recerca bibliogràfica, les fonts inclouen biblioteques, revistes especialitzades, diaris, llibres de text i recursos digitals. Si el treball requereix dades primàries, cal recórrer a fonts de testimoni directe: enquestes, entrevistes, visites a institucions. La informació recollida pot ser quantitativa o qualitativa. És essencial registrar sistemàticament les fonts consultades.\n\nFase 3: Organització i redacció. Un cop recollida la informació, cal elaborar un índex dels apartats i classificar el material. És fonamental redactar amb paraules pròpies: un treball mai no ha de ser una còpia de materials trobats. Si es reprodueix una citació, cal posar-la entre cometes i indicar-ne la procedència.\n\nFase 4: Estructura formal. El treball ha de contenir: un índex amb la relació dels apartats i les pàgines corresponents; una introducció on s'expliqui la intencionalitat de la recerca; el cos central, dividit en apartats estructurats; les conclusions; una opinió personal; i la bibliografia completa, ordenada alfabèticament.\n\nFase 5: Presentació i defensa. El document final s'ha d'escriure a ordinador, amb un interlineat estàndard d'1,5. Cal incorporar fotografies amb peus explicatius i usar criteris tipogràfics consistents."
+    },
+    {
+      "id": "BAT_ARGU",
+      "etapa": "batxillerat",
+      "genere": "argumentacio",
+      "tema": "Ètica de la intel·ligència artificial",
+      "font": "3Cat Info, Diari Ara, OEIAC, Gencat",
+      "paraules": 440,
+      "text": "La intel·ligència artificial ha deixat de ser un concepte de ciència-ficció per convertir-se en una tecnologia transversal que impregna tots els àmbits de la vida quotidiana. Com afirma Karina Gibert, catedràtica i directora de l'IDEAI-UPC: \"La IA és transversal. No hi ha cap camp on no es pugui utilitzar.\" Ara bé, aquesta omnipresència planteja interrogants ètics que la societat no pot eludir. La tesi d'aquest text és que el desenvolupament de la intel·ligència artificial requereix un marc ètic i regulador sòlid que garanteixi que els seus beneficis superin els riscos.\n\nEn primer lloc, cal assenyalar el problema dels biaixos algorítmics. La IA es basa en les dades que han generat i generen els humans i, per tant, reprodueix els biaixos de gènere, edat o etnicitat que contenen aquestes dades. Marta Aymerich documenta com GPT-4 tendeix a reproduir estereotips de gènere en recomanacions mèdiques: davant un cas de dificultat respiratòria per embòlia pulmonar, l'algorisme prioritza el trastorn de pànic en dones. Aquests biaixos no són merament tècnics; tenen conseqüències directes sobre la vida de les persones.\n\nEn segon lloc, la qüestió de la responsabilitat i la transparència. L'Observatori d'Ètica en Intel·ligència Artificial de Catalunya (OEIAC) ha desenvolupat el model PIO que avalua l'ús ètic de sistemes d'IA a través de set dimensions: transparència, justícia, seguretat, responsabilitat, privacitat, autonomia i sostenibilitat. Quan un algorisme pren decisions que afecten serveis essencials, el biaix d'automatització pot portar a validar decisions incorrectes sense la intervenció humana adequada.\n\nEn tercer lloc, l'impacte ambiental i social. Es preveu que per al 2030 els centres de dades consumeixin més del 8% de l'electricitat total dels Estats Units. A més, la cadena de valor de la IA genera explotació laboral en la mineria de metalls rars i treballadors poc remunerats per a l'etiquetatge de dades.\n\nDavant d'aquests riscos, la regulació europea ha respost amb l'AI Act, que classifica els sistemes d'IA per nivells de risc: inacceptable, alt, limitat i mínim. La innovació i la regulació no són dos pols oposats, sinó un marc compatible. Com resumeix Gibert: \"Està a les nostres mans decidir com col·loquem la IA a la societat.\""
+    }
+  ],
+
+  "perfils": [
+    {
+      "id": "P1",
+      "nom": "Nouvingut àrab pre-A1 DUA Accés",
+      "profile": {
+        "caracteristiques": {
+          "nouvingut": {"actiu": true, "detalls": {"origen": "Marroc", "L1": "àrab", "mesos_immersio": 3, "alfabet_llati": false}}
+        }
+      },
+      "context": {
+        "etapa": "ESO",
+        "curs": "1r ESO",
+        "materia": "cientific"
+      },
+      "params": {
+        "mecr_sortida": "pre-A1",
+        "dua": "Acces",
+        "tipus_adaptacio": "lectura_facil",
+        "genere_discursiu": "explicacio",
+        "ajuts": ["definicions", "pictogrames", "esquema"]
+      }
+    },
+    {
+      "id": "P2",
+      "nom": "Nouvingut xinès A1 DUA Accés",
+      "profile": {
+        "caracteristiques": {
+          "nouvingut": {"actiu": true, "detalls": {"origen": "Xina", "L1": "xinès mandarí", "mesos_immersio": 8, "alfabet_llati": false}}
+        }
+      },
+      "context": {
+        "etapa": "ESO",
+        "curs": "2n ESO",
+        "materia": "humanistic"
+      },
+      "params": {
+        "mecr_sortida": "A1",
+        "dua": "Acces",
+        "tipus_adaptacio": "lectura_facil",
+        "genere_discursiu": "narracio",
+        "ajuts": ["definicions", "pictogrames"]
+      }
+    },
+    {
+      "id": "P3",
+      "nom": "TDAH combinat A2 DUA Core",
+      "profile": {
+        "caracteristiques": {
+          "tdah": {"actiu": true, "detalls": {"subtipus": "combinat"}}
+        }
+      },
+      "context": {
+        "etapa": "ESO",
+        "curs": "2n ESO",
+        "materia": "cientific"
+      },
+      "params": {
+        "mecr_sortida": "A2",
+        "dua": "Core",
+        "tipus_adaptacio": "lectura_facil",
+        "genere_discursiu": "explicacio",
+        "ajuts": ["esquema", "exemples"]
+      }
+    },
+    {
+      "id": "P4",
+      "nom": "TEA nivell 2 B1 DUA Core",
+      "profile": {
+        "caracteristiques": {
+          "tea": {"actiu": true, "detalls": {"nivell_suport": 2}}
+        }
+      },
+      "context": {
+        "etapa": "ESO",
+        "curs": "3r ESO",
+        "materia": "humanistic"
+      },
+      "params": {
+        "mecr_sortida": "B1",
+        "dua": "Core",
+        "tipus_adaptacio": "lectura_facil",
+        "genere_discursiu": "narracio",
+        "ajuts": ["definicions", "esquema"]
+      }
+    },
+    {
+      "id": "P5",
+      "nom": "Dislèxia A2 DUA Accés",
+      "profile": {
+        "caracteristiques": {
+          "dislexia": {"actiu": true}
+        }
+      },
+      "context": {
+        "etapa": "primaria",
+        "curs": "6è Primària",
+        "materia": "cientific"
+      },
+      "params": {
+        "mecr_sortida": "A2",
+        "dua": "Acces",
+        "tipus_adaptacio": "lectura_facil",
+        "genere_discursiu": "instruccio",
+        "ajuts": ["definicions", "exemples", "pictogrames"]
+      }
+    },
+    {
+      "id": "P6",
+      "nom": "DI lleugera pre-A1 DUA Accés",
+      "profile": {
+        "caracteristiques": {
+          "discapacitat_intellectual": {"actiu": true, "detalls": {"grau": "lleugera"}}
+        }
+      },
+      "context": {
+        "etapa": "ESO",
+        "curs": "1r ESO",
+        "materia": "cientific"
+      },
+      "params": {
+        "mecr_sortida": "pre-A1",
+        "dua": "Acces",
+        "tipus_adaptacio": "lectura_facil",
+        "genere_discursiu": "explicacio",
+        "ajuts": ["definicions", "pictogrames", "esquema", "exemples"]
+      }
+    },
+    {
+      "id": "P7",
+      "nom": "Altes capacitats B2 DUA Enriquiment",
+      "profile": {
+        "caracteristiques": {
+          "altes_capacitats": {"actiu": true}
+        }
+      },
+      "context": {
+        "etapa": "batxillerat",
+        "curs": "1r Batxillerat",
+        "materia": "cientific"
+      },
+      "params": {
+        "mecr_sortida": "B2",
+        "dua": "Enriquiment",
+        "tipus_adaptacio": "multinivell",
+        "genere_discursiu": "argumentacio",
+        "ajuts": []
+      }
+    },
+    {
+      "id": "P8",
+      "nom": "Nouvingut+Dislèxia A1 DUA Accés (creuament)",
+      "profile": {
+        "caracteristiques": {
+          "nouvingut": {"actiu": true, "detalls": {"origen": "Senegal", "L1": "wòlof", "mesos_immersio": 5, "alfabet_llati": true}},
+          "dislexia": {"actiu": true}
+        }
+      },
+      "context": {
+        "etapa": "primaria",
+        "curs": "5è Primària",
+        "materia": "cientific"
+      },
+      "params": {
+        "mecr_sortida": "A1",
+        "dua": "Acces",
+        "tipus_adaptacio": "lectura_facil",
+        "genere_discursiu": "explicacio",
+        "ajuts": ["definicions", "pictogrames", "esquema"]
+      }
+    },
+    {
+      "id": "P9",
+      "nom": "TDAH+TEA B1 DUA Core (creuament)",
+      "profile": {
+        "caracteristiques": {
+          "tdah": {"actiu": true, "detalls": {"subtipus": "inatent"}},
+          "tea": {"actiu": true, "detalls": {"nivell_suport": 1}}
+        }
+      },
+      "context": {
+        "etapa": "ESO",
+        "curs": "4t ESO",
+        "materia": "humanistic"
+      },
+      "params": {
+        "mecr_sortida": "B1",
+        "dua": "Core",
+        "tipus_adaptacio": "lectura_facil",
+        "genere_discursiu": "argumentacio",
+        "ajuts": ["esquema", "definicions"]
+      }
+    },
+    {
+      "id": "P10",
+      "nom": "Vulnerabilitat+TDL A2 DUA Core (creuament)",
+      "profile": {
+        "caracteristiques": {
+          "vulnerabilitat_socioeducativa": {"actiu": true},
+          "tdl": {"actiu": true}
+        }
+      },
+      "context": {
+        "etapa": "primaria",
+        "curs": "6è Primària",
+        "materia": "linguistic"
+      },
+      "params": {
+        "mecr_sortida": "A2",
+        "dua": "Core",
+        "tipus_adaptacio": "lectura_facil",
+        "genere_discursiu": "narracio",
+        "ajuts": ["definicions", "exemples"]
+      }
+    }
+  ]
+}
