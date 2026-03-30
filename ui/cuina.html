@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATNE — Cuina</title>
+    <style>
+        :root {
+            --pri: #1a56db;
+            --pri-light: #dbeafe;
+            --ok: #059669;
+            --ok-light: #d1fae5;
+            --warn: #d97706;
+            --warn-light: #fef3c7;
+            --err: #dc2626;
+            --purple: #7c3aed;
+            --purple-light: #ede9fe;
+            --g50: #f9fafb;
+            --g100: #f3f4f6;
+            --g200: #e5e7eb;
+            --g300: #d1d5db;
+            --g500: #6b7280;
+            --g700: #374151;
+            --g900: #111827;
+            --r: 8px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--g50);
+            color: var(--g900);
+            line-height: 1.6;
+        }
+
+        /* ── Header ─────────────────────────────────── */
+
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--g200);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--pri);
+        }
+
+        .header .logo span {
+            font-weight: 400;
+            color: var(--g500);
+            margin-left: 4px;
+        }
+
+        .header nav {
+            display: flex;
+            gap: 4px;
+            margin-left: 16px;
+        }
+
+        .header nav a {
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            color: var(--g700);
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.15s;
+        }
+
+        .header nav a:hover, .header nav a.active {
+            background: var(--pri-light);
+            color: var(--pri);
+        }
+
+        .header .back-link {
+            margin-left: auto;
+            color: var(--g500);
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .header .back-link:hover { color: var(--pri); }
+
+        /* ── Container ──────────────────────────────── */
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--g900);
+            margin-bottom: 8px;
+        }
+
+        .section-subtitle {
+            font-size: 14px;
+            color: var(--g500);
+            margin-bottom: 28px;
+        }
+
+        /* ── Flux invers ────────────────────────────── */
+
+        .reverse-flow {
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        .rf-layer {
+            background: white;
+            border: 1px solid var(--g200);
+            border-radius: var(--r);
+            padding: 16px 20px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: box-shadow 0.2s;
+        }
+
+        .rf-layer:hover {
+            box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+        }
+
+        .rf-layer.open {
+            border-left-width: 4px;
+        }
+
+        .rf-head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .rf-icon {
+            font-size: 22px;
+            flex-shrink: 0;
+            width: 36px;
+            text-align: center;
+        }
+
+        .rf-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--g900);
+        }
+
+        .rf-who {
+            margin-left: auto;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .rf-who.docent  { background: var(--pri-light); color: var(--pri); }
+        .rf-who.sistema { background: var(--ok-light); color: var(--ok); }
+        .rf-who.gemini  { background: var(--purple-light); color: var(--purple); }
+
+        .rf-detail {
+            display: none;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--g100);
+            font-size: 13px;
+            color: var(--g700);
+            line-height: 1.7;
+        }
+
+        .rf-layer.open .rf-detail {
+            display: block;
+        }
+
+        .rf-detail .rf-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .rf-detail .rf-tag {
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            background: var(--g100);
+            color: var(--g700);
+        }
+
+        /* Connector entre capes */
+        .rf-question {
+            text-align: center;
+            padding: 10px 0;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--g500);
+        }
+
+        .rf-question::before {
+            content: '\2191';
+            display: block;
+            font-size: 18px;
+            color: var(--g300);
+            margin-bottom: 2px;
+        }
+
+        /* ── Separador ──────────────────────────────── */
+
+        .section-sep {
+            border: none;
+            border-top: 2px solid var(--g200);
+            margin: 48px 0;
+        }
+
+        /* ── Catàleg stats ──────────────────────────── */
+
+        .stats-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid var(--g200);
+            border-radius: var(--r);
+            padding: 12px 16px;
+            text-align: center;
+            min-width: 100px;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-card .num {
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .stat-card .label {
+            font-size: 11px;
+            color: var(--g500);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .stat-card.total .num { color: var(--g900); }
+        .stat-card.sempre .num { color: var(--pri); }
+        .stat-card.nivell .num { color: var(--warn); }
+        .stat-card.perfil .num { color: var(--ok); }
+        .stat-card.complement .num { color: var(--purple); }
+
+        /* ── Filtres ────────────────────────────────── */
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .filters input[type="text"] {
+            padding: 8px 12px;
+            border: 1px solid var(--g200);
+            border-radius: 6px;
+            font-size: 13px;
+            width: 240px;
+        }
+
+        .filters select {
+            padding: 8px 12px;
+            border: 1px solid var(--g200);
+            border-radius: 6px;
+            font-size: 13px;
+            background: white;
+        }
+
+        .filters .clear-btn {
+            padding: 8px 12px;
+            border: 1px solid var(--g200);
+            border-radius: 6px;
+            font-size: 13px;
+            background: white;
+            cursor: pointer;
+            color: var(--g500);
+        }
+
+        .filters .clear-btn:hover { background: var(--g100); }
+
+        .filter-count {
+            font-size: 13px;
+            color: var(--g500);
+            margin-left: auto;
+        }
+
+        /* ── Vista per perfil ───────────────────────── */
+
+        .view-toggle {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 20px;
+        }
+
+        .view-toggle button {
+            padding: 6px 14px;
+            border: 1px solid var(--g200);
+            border-radius: 6px;
+            font-size: 13px;
+            background: white;
+            cursor: pointer;
+            color: var(--g700);
+        }
+
+        .view-toggle button.active {
+            background: var(--pri);
+            color: white;
+            border-color: var(--pri);
+        }
+
+        /* ── Cards d'instruccions ───────────────────── */
+
+        .instr-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .instr-card {
+            background: white;
+            border: 1px solid var(--g200);
+            border-radius: var(--r);
+            padding: 12px 16px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            transition: box-shadow 0.15s;
+        }
+
+        .instr-card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .instr-card.highlighted {
+            border-color: var(--pri);
+            background: #f0f5ff;
+        }
+
+        .instr-id {
+            flex-shrink: 0;
+            width: 48px;
+            text-align: center;
+            padding: 4px 0;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .instr-id.cat-A { background: #3b82f6; }
+        .instr-id.cat-B { background: #10b981; }
+        .instr-id.cat-C { background: #f59e0b; }
+        .instr-id.cat-D { background: #8b5cf6; }
+        .instr-id.cat-E { background: #ef4444; }
+        .instr-id.cat-F { background: #ec4899; }
+        .instr-id.cat-G { background: #14b8a6; }
+        .instr-id.cat-H { background: #f97316; }
+
+        .instr-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .instr-text {
+            font-size: 13px;
+            color: var(--g900);
+            margin-bottom: 6px;
+        }
+
+        .instr-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .meta-badge {
+            display: inline-block;
+            padding: 1px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .meta-badge.act-SEMPRE  { background: var(--pri-light); color: var(--pri); }
+        .meta-badge.act-NIVELL  { background: var(--warn-light); color: var(--warn); }
+        .meta-badge.act-PERFIL  { background: var(--ok-light); color: var(--ok); }
+        .meta-badge.act-COMPLEMENT { background: var(--purple-light); color: var(--purple); }
+
+        .meta-badge.profile-tag {
+            background: var(--g100);
+            color: var(--g700);
+            font-weight: 500;
+        }
+
+        .meta-badge.suppress-tag {
+            background: #fef2f2;
+            color: var(--err);
+            font-weight: 500;
+        }
+
+        .meta-badge.mecr-tag {
+            background: var(--warn-light);
+            color: #92400e;
+            font-weight: 500;
+        }
+
+        .meta-badge.subvar-tag {
+            background: #fdf4ff;
+            color: #7e22ce;
+            font-weight: 500;
+        }
+
+        /* ── Profile view ───────────────────────────── */
+
+        .profile-section {
+            margin-bottom: 24px;
+        }
+
+        .profile-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            padding: 8px 12px;
+            background: var(--ok-light);
+            border-radius: 6px 6px 0 0;
+            color: var(--ok);
+        }
+
+        .profile-theme {
+            padding: 8px 12px;
+            background: var(--g50);
+            border-left: 3px solid var(--ok);
+            margin-bottom: 2px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--g700);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        /* ── Llegenda ───────────────────────────────── */
+
+        .legend {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding: 12px 16px;
+            background: white;
+            border: 1px solid var(--g200);
+            border-radius: var(--r);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--g700);
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        /* ── Responsive ─────────────────────────────── */
+
+        @media (max-width: 768px) {
+            .container { padding: 16px; }
+            .header { padding: 12px 16px; flex-wrap: wrap; }
+            .filters input[type="text"] { width: 100%; }
+            .stats-bar { gap: 8px; }
+            .stat-card { min-width: 80px; padding: 8px 12px; }
+            .stat-card .num { font-size: 22px; }
+        }
+
+        /* ── Fitxa per perfil ──────────────────────── */
+
+        .fitxa-section {
+            background: white;
+            border: 1px solid var(--g200);
+            border-radius: var(--r);
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .fitxa-section h3 {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--g500);
+            margin-bottom: 12px;
+        }
+
+        .barrier-grid {
+            display: grid;
+            grid-template-columns: 1fr 60px 1fr;
+            gap: 6px 12px;
+            align-items: center;
+        }
+
+        .barrier-name {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .barrier-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: var(--g100);
+            overflow: hidden;
+        }
+
+        .barrier-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .barrier-note {
+            font-size: 11px;
+            color: var(--g500);
+        }
+
+        .barrier-nuclear {
+            font-weight: 700;
+            color: var(--err);
+        }
+
+        .var-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .var-table th {
+            text-align: left;
+            padding: 6px 10px;
+            background: var(--g50);
+            border-bottom: 1px solid var(--g200);
+            font-weight: 600;
+            color: var(--g700);
+        }
+
+        .var-table td {
+            padding: 6px 10px;
+            border-bottom: 1px solid var(--g100);
+            vertical-align: top;
+        }
+
+        .var-dest {
+            display: inline-block;
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .var-dest.ordres { background: var(--pri-light); color: var(--pri); }
+        .var-dest.context { background: var(--ok-light); color: var(--ok); }
+        .var-dest.proposta { background: var(--warn-light); color: var(--warn); }
+        .var-dest.no-usa { background: var(--g100); color: var(--g500); }
+
+        .llm-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .llm-cap {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
+        .llm-cap.fiable { background: #d1fae5; color: #065f46; }
+        .llm-cap.limitat { background: #fef3c7; color: #92400e; }
+        .llm-cap.impossible { background: #fef2f2; color: #991b1b; }
+
+        /* ── Grups de categoria ─────────────────────── */
+
+        .cat-group {
+            margin-bottom: 24px;
+        }
+
+        .cat-group-header {
+            padding: 12px 16px;
+            background: white;
+            border: 1px solid var(--g200);
+            border-radius: var(--r) var(--r) 0 0;
+            border-left-width: 4px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .cat-group-header:hover {
+            background: var(--g50);
+        }
+
+        .cat-group-top {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cat-letter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .cat-group-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--g900);
+        }
+
+        .cat-count {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--g500);
+        }
+
+        .cat-toggle {
+            margin-left: auto;
+            font-size: 12px;
+            color: var(--g500);
+            transition: transform 0.2s;
+        }
+
+        .cat-toggle.open {
+            transform: rotate(180deg);
+        }
+
+        .cat-group-desc {
+            font-size: 13px;
+            color: var(--g500);
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        .cat-group-body {
+            border: 1px solid var(--g200);
+            border-top: none;
+            border-radius: 0 0 var(--r) var(--r);
+            overflow: hidden;
+        }
+
+        .cat-group-body .instr-list {
+            gap: 0;
+        }
+
+        .cat-group-body .instr-card {
+            border-radius: 0;
+            border-left: none;
+            border-right: none;
+            border-bottom: 1px solid var(--g100);
+            border-top: none;
+        }
+
+        .cat-group-body .instr-card:last-child {
+            border-bottom: none;
+        }
+
+        /* ── Loading ────────────────────────────────── */
+
+        .loading-msg {
+            text-align: center;
+            padding: 48px;
+            color: var(--g500);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">ATNE <span>Cuina</span></div>
+    <nav>
+        <a href="#flux" class="active" onclick="scrollToSection('flux')">Flux</a>
+        <a href="#perfils" onclick="scrollToSection('perfils')">Perfils</a>
+        <a href="#cataleg" onclick="scrollToSection('cataleg')">Cataleg</a>
+    </nav>
+    <a href="/" class="back-link">&#8592; Torna a l'app</a>
+</div>
+
+<div class="container">
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- SECCIÓ 1: FLUX DE TREBALL                                             -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+    <div id="flux">
+        <h1 class="section-title">Com es genera un text adaptat?</h1>
+        <p class="section-subtitle">
+            Comencem pel resultat i anem enrere. Clica cada capa per veure'n els detalls.
+        </p>
+
+        <div class="reverse-flow" id="reverse-flow">
+            <!-- Generat per JS -->
+        </div>
+    </div>
+
+    <hr class="section-sep">
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- SECCIÓ 2: FITXA PER PERFIL                                            -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+    <div id="perfils">
+        <h1 class="section-title">Fitxa per perfil</h1>
+        <p class="section-subtitle">
+            Selecciona un perfil per veure: barreres d'acces, instruccions que s'activen, variables que les condicionen i sensibilitat del model.
+        </p>
+
+        <select id="fitxa-profile-select" onchange="renderFitxa()" style="padding:10px 14px;border:1px solid var(--g200);border-radius:6px;font-size:14px;width:100%;max-width:400px;margin-bottom:20px;">
+            <!-- Generat per JS -->
+        </select>
+
+        <div id="fitxa-container"></div>
+    </div>
+
+    <hr class="section-sep">
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- SECCIÓ 3: CATÀLEG D'INSTRUCCIONS                                      -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+    <div id="cataleg">
+        <h1 class="section-title">Cataleg d'instruccions d'adaptacio</h1>
+        <p class="section-subtitle">
+            Totes les instruccions que ATNE pot enviar al model de llenguatge per adaptar un text.
+            Cada instruccio s'activa o no segons el perfil de l'alumne, el nivell MECR i els complements.
+        </p>
+
+        <!-- Stats -->
+        <div class="stats-bar" id="stats-bar">
+            <div class="stat-card total"><div class="num" id="stat-total">-</div><div class="label">Total</div></div>
+            <div class="stat-card sempre"><div class="num" id="stat-sempre">-</div><div class="label">Sempre</div></div>
+            <div class="stat-card nivell"><div class="num" id="stat-nivell">-</div><div class="label">Nivell</div></div>
+            <div class="stat-card perfil"><div class="num" id="stat-perfil">-</div><div class="label">Perfil</div></div>
+            <div class="stat-card complement"><div class="num" id="stat-complement">-</div><div class="label">Complement</div></div>
+        </div>
+
+        <!-- Llegenda categories -->
+        <div class="legend" id="legend-cats">
+            <!-- Generat per JS -->
+        </div>
+
+        <!-- Toggle vista -->
+        <div class="view-toggle">
+            <button class="active" onclick="setView('all')">Totes les instruccions</button>
+            <button onclick="setView('profile')">Vista per perfil</button>
+        </div>
+
+        <!-- Filtres (vista "all") -->
+        <div class="filters" id="filters-all">
+            <input type="text" id="filter-search" placeholder="Cerca per text o ID..." oninput="applyFilters()">
+            <select id="filter-activation" onchange="applyFilters()">
+                <option value="">Totes les capes</option>
+                <option value="SEMPRE">SEMPRE</option>
+                <option value="NIVELL">NIVELL</option>
+                <option value="PERFIL">PERFIL</option>
+                <option value="COMPLEMENT">COMPLEMENT</option>
+            </select>
+            <select id="filter-category" onchange="applyFilters()">
+                <option value="">Totes les categories</option>
+            </select>
+            <select id="filter-profile" onchange="applyFilters()">
+                <option value="">Tots els perfils</option>
+            </select>
+            <button class="clear-btn" onclick="clearFilters()">Neteja filtres</button>
+            <span class="filter-count" id="filter-count"></span>
+        </div>
+
+        <!-- Filtre per perfil (vista "profile") -->
+        <div class="filters" id="filters-profile" style="display:none;">
+            <select id="profile-select" onchange="renderProfileView()">
+                <!-- Generat per JS -->
+            </select>
+        </div>
+
+        <!-- Llista d'instruccions -->
+        <div id="instr-container">
+            <div class="loading-msg">Carregant cataleg...</div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ── Estat ──────────────────────────────────────────────────────────────────
+
+let catalogData = null;
+let currentView = 'all';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FLUX INVERS — del resultat cap enrere
+// ═══════════════════════════════════════════════════════════════════════════
+
+const LAYERS = [
+    {
+        id: 'resultat',
+        icon: '\ud83d\udcc4',
+        title: 'Text adaptat + complements',
+        who: 'docent', whoLabel: 'El docent ho rep',
+        detail: "El docent veu l'original i l'adaptat en columnes. El text adaptat es editable. A sota apareixen els complements activats (glossari, esquema, preguntes...).<div class='rf-tags'><span class='rf-tag'>Text editable</span><span class='rf-tag'>Comparativa original vs adaptat</span><span class='rf-tag'>Feedback</span><span class='rf-tag'>Exportar TXT / DOCX / PDF</span></div>",
+        question: "Com s'ha generat?",
+    },
+    {
+        id: 'genera',
+        icon: '\ud83e\udd16',
+        title: 'Gemini genera el text',
+        who: 'gemini', whoLabel: 'Gemini 2.5 Flash',
+        detail: "Gemini rep un <strong>prompt</strong> (les instruccions completes) i el <strong>text original</strong>, i genera el text adaptat en streaming. Despres el sistema verifica que el resultat compleix les restriccions (llargada de frases, vocabulari).<div class='rf-tags'><span class='rf-tag'>Streaming en temps real</span><span class='rf-tag'>Verificacio automatica</span></div>",
+        question: "Que conte el prompt que rep?",
+    },
+    {
+        id: 'prompt',
+        icon: '\ud83d\udce6',
+        title: 'El prompt: tot el que rep Gemini',
+        who: 'sistema', whoLabel: 'Sistema el monta automaticament',
+        detail: "\
+<div style='font-size:12px;color:var(--g500);margin-bottom:16px;'>El prompt es un text llarg (1.000\u20133.000 paraules) que Gemini rep com a instruccions. Es divideix en dues meitats ben diferenciades:<br><strong>ORDRES</strong> (seccions 1 i 2) = que ha de FER Gemini<br><strong>CONTEXT</strong> (seccions 3 i 4) = que ha de SABER Gemini</div>\
+\
+<div style='border-left:4px solid var(--g300);padding:10px 14px;margin-bottom:16px;background:var(--g50);border-radius:0 6px 6px 0;'>\
+<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;'>\
+<strong style='font-size:14px;'>1. Identitat</strong>\
+<span style='font-size:10px;padding:2px 8px;border-radius:3px;background:var(--g200);color:var(--g700);'>Fixa \u2014 sempre igual</span>\
+</div>\
+Li diu a Gemini qui es i que NO pot fer.<br>\
+<div style='background:white;border:1px solid var(--g200);border-radius:4px;padding:8px 10px;margin-top:6px;font-family:monospace;font-size:11px;color:var(--g700);line-height:1.5;'>\
+Ets ATNE de Jesuites Educacio, especialista en adaptacio de textos educatius per DUA, Lectura Facil i MECR.<br>\
+Restriccions: NO inventis contingut nou. NO facis meta-comentaris. Preserva TOTS els termes tecnics. Adapta, no crees.\
+</div>\
+<div style='margin-top:6px;font-size:11px;color:var(--g500);'>Origen: text fix definit al corpus</div>\
+</div>\
+\
+<div style='border-left:4px solid var(--pri);padding:10px 14px;margin-bottom:16px;background:#f0f5ff;border-radius:0 6px 6px 0;'>\
+<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;'>\
+<strong style='font-size:14px;'>2. Instruccions d'adaptacio</strong>\
+<span style='font-size:10px;padding:2px 8px;border-radius:3px;background:var(--pri-light);color:var(--pri);'>Variable \u2014 canvia per cada cas</span>\
+</div>\
+Les regles concretes que ha de seguir per transformar el text. Exemple d'un cas <em>nouvingut arabofon A1 + TEA nivell 2</em>:<br>\
+<div style='background:white;border:1px solid var(--g200);border-radius:4px;padding:8px 10px;margin-top:6px;font-family:monospace;font-size:11px;color:var(--g700);line-height:1.6;'>\
+REGLES UNIVERSALS:<br>\
+A-01: Usa vocabulari frequent. Substitueix termes poc habituals.<br>\
+A-07: Una idea per frase. Divideix frases llargues.<br>\
+A-08: Veu activa obligatoria. Transforma passives.<br>\
+A-14: Connectors explicits: per tant, a mes, en canvi.<br>\
+...<br><br>\
+INSTRUCCIONS PER NIVELL MECR (A1):<br>\
+A-12: Maxim 5-8 paraules per frase.<br>\
+A-13: ZERO subordinades. Nomes coordinades simples.<br>\
+A-24: Present d'indicatiu preferent. Evita subjuntiu.<br>\
+...<br><br>\
+INSTRUCCIONS PER PERFIL:<br>\
+H-01: TEA: estructura predictible \u2014 titol \u2192 definicio \u2192 exemple \u2192 activitat.<br>\
+H-02: TEA: zero implicatura \u2014 tota metafora o ironia \u2192 literal explicit.<br>\
+H-03: TEA: anticipacio de canvis \u2014 \"Ara canviem de tema.\"<br>\
+G-01: Glossari bilingue complet amb traduccio a arab.<br>\
+...\
+</div>\
+<div style='margin-top:8px;font-size:11px;color:var(--g500);'>Tambe pot incloure: bloc DUA del corpus, instruccions per genere discursiu, creuaments entre perfils (p.ex. nouvingut+TEA), resolucio de conflictes, i un exemple de sortida esperada per al MECR.</div>\
+<div style='margin-top:4px;font-size:11px;color:var(--g500);'>Origen: <a href='#cataleg' onclick='scrollToSection(\"cataleg\")' style='color:var(--pri);'>cataleg de 89 instruccions</a>, filtrades per perfil + MECR + complements.<br>Tambe inclou blocs del corpus FJE: guia DUA per nivell, instruccions per genere discursiu, creuaments entre perfils i un exemple de sortida esperada.</div>\
+</div>\
+\
+<div style='text-align:center;padding:10px 0;font-size:12px;font-weight:700;color:var(--g500);letter-spacing:1px;border-top:2px dashed var(--g200);border-bottom:2px dashed var(--g200);margin:8px 0 16px;'>\u2191 ORDRES (que ha de fer) &nbsp;&nbsp;\u2502&nbsp;&nbsp; CONTEXT (que ha de saber) \u2193</div>\
+\
+<div style='border-left:4px solid var(--ok);padding:10px 14px;margin-bottom:16px;background:#ecfdf5;border-radius:0 6px 6px 0;'>\
+<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;'>\
+<strong style='font-size:14px;'>3. Context</strong>\
+<span style='font-size:10px;padding:2px 8px;border-radius:3px;background:var(--ok-light);color:var(--ok);'>Variable</span>\
+</div>\
+Aqui NO hi ha ordres. Gemini usa aquesta informacio per prendre decisions en els casos que les regles no cobreixen. 3 parts:<br><br>\
+<strong>3a. Context educatiu</strong> (del que ha triat el docent)<br>\
+<div style='background:white;border:1px solid var(--g200);border-radius:4px;padding:8px 10px;margin:6px 0;font-family:monospace;font-size:11px;color:var(--g700);line-height:1.5;'>\
+CONTEXT EDUCATIU:<br>\
+- Etapa: ESO<br>\
+- Curs: 3r<br>\
+- Ambit: Cientific<br>\
+- Materia: Biologia\
+</div>\
+<strong>3b. Descripcio de l'alumne</strong> (el perfil, pero en narrativa \u2014 no com a ordres, sino perque Gemini entengui <em>per a qui</em> escriu)<br>\
+<div style='background:white;border:1px solid var(--g200);border-radius:4px;padding:8px 10px;margin:6px 0;font-family:monospace;font-size:11px;color:var(--g700);line-height:1.5;'>\
+PERSONA-AUDIENCE:<br>\
+Escrius per a un alumne de ESO (3r) nouvingut, L1 arab, escolaritzacio previa parcial, amb TEA nivell 2. Nivell MECR: A1. Observacio docent: es cansa rapid amb lectura llarga.\
+</div>\
+<strong>3c. Coneixement pedagogic FJE</strong> (fragments cercats automaticament al corpus \u2014 no son ordres, son referencies teoriques perque Gemini fonamenti les decisions)<br>\
+<div style='background:white;border:1px solid var(--g200);border-radius:4px;padding:8px 10px;margin:6px 0;font-family:monospace;font-size:11px;color:var(--g700);line-height:1.5;'>\
+CONEIXEMENT PEDAGOGIC (corpus FJE):<br>\
+[M3_lectura-facil-comunicacio-clara.md] La comunicacio clara es un dret...<br>\
+[M2_DUA-principis-pautes.md] El Disseny Universal implica...<br>\
+[M1_alumnat-nouvingut.md] L'acollida linguistica requereix...<br>\
+... (8-12 fragments rellevants)\
+</div>\
+<div style='margin-top:4px;font-size:11px;color:var(--g500);'>Origen: el docent (context + perfil) + cerca automatica al corpus (vectorial + Knowledge Graph)</div>\
+</div>\
+\
+<div style='border-left:4px solid var(--purple);padding:10px 14px;background:#f5f3ff;border-radius:0 6px 6px 0;'>\
+<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;'>\
+<strong style='font-size:14px;'>4. Format de sortida</strong>\
+<span style='font-size:10px;padding:2px 8px;border-radius:3px;background:var(--purple-light);color:var(--purple);'>Variable</span>\
+</div>\
+Indica a Gemini quines seccions ha de generar i exactament com. Exemple amb glossari + esquema activats:<br>\
+<div style='background:white;border:1px solid var(--g200);border-radius:4px;padding:8px 10px;margin:6px 0;font-family:monospace;font-size:11px;color:var(--g700);line-height:1.6;'>\
+FORMAT DE SORTIDA:<br>\
+Respon EXACTAMENT amb les seccions seguents:<br><br>\
+## Text adaptat<br>\
+El text complet adaptat. Estructura clara, termes en **negreta**, una idea per frase.<br><br>\
+## Glossari<br>\
+ACTIVAT \u2014 Taula amb 3 columnes:<br>\
+| Terme | Traduccio (arab) | Explicacio simple |<br>\
+Minim 8-12 termes. Traduccio REAL en alfabet original.<br><br>\
+## Esquema visual<br>\
+ACTIVAT \u2014 Diagrama en text amb fletxes i emojis.<br><br>\
+## Argumentacio pedagogica<br>\
+SEMPRE \u2014 Explica les decisions: adaptacio linguistica, atencio diversitat, suport multimodal...<br><br>\
+## Notes d'auditoria<br>\
+SEMPRE \u2014 Taula: | Aspecte | Original | Adaptat | Motiu |\
+</div>\
+<div style='margin-top:6px;font-size:11px;color:var(--g500);'>Origen: els complements activats a la proposta. Cada complement te instruccions detallades de format.</div>\
+</div>",
+        question: "D'on surten les instruccions de la seccio 2?",
+    },
+    {
+        id: 'seleccio',
+        icon: '\ud83d\udd0d',
+        title: 'Seleccio d\'instruccions (10\u201325 de 89)',
+        who: 'sistema', whoLabel: 'Sistema',
+        detail: "El cataleg conte 89 instruccions possibles (veu activa, frases curtes, glossari bilingue, estructura per TEA...). Per cada adaptacio, el sistema tria nomes les que apliquen. Hi ha 4 criteris d'activacio:<br><br>\
+\u2022 <span style='background:var(--pri-light);color:var(--pri);padding:2px 8px;border-radius:3px;font-weight:600;'>S'apliquen sempre</span> \u2014 bones practiques universals. ~32 regles (pero algunes es desactiven per altes capacitats)<br><br>\
+\u2022 <span style='background:var(--warn-light);color:var(--warn);padding:2px 8px;border-radius:3px;font-weight:600;'>Segons el nivell linguistic</span> \u2014 depenen del MECR de sortida. P.ex. \"maxim 8 paraules\" nomes per A1, \"present indicatiu\" nomes per pre-A1/A1/A2<br><br>\
+\u2022 <span style='background:var(--ok-light);color:var(--ok);padding:2px 8px;border-radius:3px;font-weight:600;'>Segons les necessitats de l'alumne</span> \u2014 depenen del perfil actiu. P.ex. \"estructura predictible\" nomes per TEA, \"micro-blocs\" nomes per TDAH<br><br>\
+\u2022 <span style='background:var(--purple-light);color:var(--purple);padding:2px 8px;border-radius:3px;font-weight:600;'>Extras opcionals</span> \u2014 nomes si el docent els ha activat (pictogrames, esquema visual, mapa conceptual)<br><br>\
+<a href='#cataleg' onclick='scrollToSection(\"cataleg\")' style='color:var(--pri);font-weight:600;'>Veure les 89 instruccions al cataleg complet \u2193</a>",
+        question: "Quins parametres determinen la seleccio?",
+    },
+    {
+        id: 'proposta',
+        icon: '\u2699\ufe0f',
+        title: 'Proposta d\'adaptacio',
+        who: 'sistema', whoLabel: 'Automatic (el docent pot modificar)',
+        detail: "A partir del perfil, el sistema calcula automaticament:<br><br>\
+\u2022 <strong>Nivell DUA</strong> \u2014 Acces (maxima adaptacio) / Core (estandard) / Enriquiment (repte cognitiu)<br>\
+\u2022 <strong>Lectura Facil</strong> \u2014 intensitat 1 (minima) a 5 (maxima)<br>\
+\u2022 <strong>MECR de sortida</strong> \u2014 nivell linguistic del text adaptat (pre-A1 a B2)<br>\
+\u2022 <strong>Complements</strong> \u2014 quins extras activar (glossari, esquema, pictogrames...)<br><br>\
+El docent veu aquesta proposta i pot modificar qualsevol parametre abans de llançar l'adaptacio.",
+        question: "A partir de que es calcula?",
+    },
+    {
+        id: 'input',
+        icon: '\u270d\ufe0f',
+        title: 'El que posa el docent',
+        who: 'docent', whoLabel: 'Docent',
+        detail: "<strong>Context educatiu</strong> \u2014 Etapa, curs, ambit, materia, tipus d'aula<br><br>\
+<strong>Perfil de l'alumne</strong> \u2014 Característiques actives (nouvingut, TEA, TDAH, dislexia...) amb sub-variables. Es poden combinar. La doble excepcionalitat (2e) es detecta automaticament.<br><br>\
+<strong>Text original</strong> \u2014 El text a adaptar + genere discursiu (explicatiu, narratiu, instructiu, argumentatiu)\
+<div class='rf-tags'><span class='rf-tag'>13 caracteristiques combinables</span><span class='rf-tag'>Sub-variables per cada una</span><span class='rf-tag'>Genere discursiu (auto o manual)</span></div>",
+    },
+];
+
+function renderReverseFlow() {
+    const container = document.getElementById('reverse-flow');
+    let html = '';
+
+    LAYERS.forEach((layer, i) => {
+        html += `<div class="rf-layer" id="rf-${layer.id}" onclick="toggleLayer('${layer.id}')">
+            <div class="rf-head">
+                <span class="rf-icon">${layer.icon}</span>
+                <span class="rf-title">${layer.title}</span>
+                <span class="rf-who ${layer.who}">${layer.whoLabel}</span>
+            </div>
+            <div class="rf-detail">${layer.detail}</div>
+        </div>`;
+
+        if (layer.question) {
+            html += `<div class="rf-question">${layer.question}</div>`;
+        }
+    });
+
+    container.innerHTML = html;
+}
+
+function toggleLayer(id) {
+    document.getElementById('rf-' + id).classList.toggle('open');
+}
+
+renderReverseFlow();
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FITXA PER PERFIL
+// ═══════════════════════════════════════════════════════════════════════════
+
+const BARRIER_DIMS = [
+    'Percepcio', 'Decodificacio', 'Comprensio lexica', 'Comprensio sintactica',
+    'Comprensio discursiva', 'Inferencia', 'Atencio sostinguda',
+    'Memoria de treball', 'Motivacio/emocional', 'Cultural/referencial'
+];
+
+const PROFILE_DATA = {
+    nouvingut: {
+        label: 'Nouvingut', nuclear: 'Comprensio lexica',
+        barriers: [0,0,4,2,3,1,1,1,2,4],
+        vars: [
+            ['L1 (llengua materna)', 'Ordres: activa glossari bilingue (G-01), pistes etimologiques si L1 romanica (E-11)', 'ordres'],
+            ['Alfabet llati (si/no)', 'Ordres: si NO llati, activa transliteracio fonetica (G-03)', 'ordres'],
+            ['MECR catala', 'Proposta: determina MECR de sortida. Ordres: activa totes les instruccions NIVELL', 'ordres'],
+            ['Escolaritzacio previa', 'Context: apareix a la narrativa persona-audience', 'context'],
+            ['CALP', 'Context: apareix a la narrativa', 'context'],
+            ['Familia linguistica', 'No s\'usa al prompt (futur)', 'no-usa'],
+        ],
+        instruccions_fixes: 'A-21, E-04, E-08, E-09, G-01, G-05',
+        instruccions_cond: 'E-11 (si L1 romanica), G-02 (si MECR baix), G-03 (si alfabet no llati)',
+        llm_notes: 'Glossari bilingue: fiabilitat ALTA per catala-castella/angles/frances. MITJANA per catala-arab. BAIXA per catala-xinès/amazic/bengali.',
+    },
+    tea: {
+        label: 'TEA', nuclear: 'Inferencia',
+        barriers: [0,0,1,1,2,4,1,1,2,1],
+        vars: [
+            ['Nivell suport DSM-5 (1-3)', 'Proposta: nivell 3 → DUA Acces + LF=5. Context: "TEA nivell X"', 'proposta'],
+            ['Comunicacio oral', 'Context: apareix a la narrativa', 'context'],
+        ],
+        instruccions_fixes: 'H-01 (estructura predictible), H-02 (zero implicatura), H-03 (anticipacio canvis)',
+        instruccions_cond: 'Cap condicionada per sub-variable',
+        llm_notes: 'Eliminacio de sentit figurat: fiabilitat ALTA. Estructura fixa titol→definicio→exemple: ALTA. Risc: Gemini Flash a vegades afegeix meta-text que trenca l\'estructura.',
+    },
+    tdah: {
+        label: 'TDAH', nuclear: 'Atencio sostinguda',
+        barriers: [0,0,0,0,1,0,4,2,2,0],
+        vars: [
+            ['Presentacio DSM-5', 'Context: "TDAH inatent/hiperactiu/combinat"', 'context'],
+            ['Grau de suport', 'No s\'usa al prompt', 'no-usa'],
+            ['Baixa memoria treball', 'No s\'usa al prompt (futur)', 'no-usa'],
+            ['Fatiga cognitiva', 'No s\'usa al prompt (futur)', 'no-usa'],
+        ],
+        instruccions_fixes: 'H-04 (micro-blocs), H-05 (progres visual), H-06 (variacio), B-13 (indicadors progres), F-06 (preguntes intercalades)',
+        instruccions_cond: 'Cap',
+        llm_notes: 'Micro-blocs amb objectiu: ALTA. Variacio de format dins el text: ALTA. Indicadors de progres [Seccio X de Y]: ALTA.',
+    },
+    dislexia: {
+        label: 'Dislexia', nuclear: 'Decodificacio',
+        barriers: [0,4,1,0,0,0,1,2,1,0],
+        vars: [
+            ['Tipus (fonologica/superficial/mixta)', 'No s\'usa al prompt', 'no-usa'],
+            ['Grau severitat', 'No s\'usa al prompt', 'no-usa'],
+            ['Tipografia adaptada', 'Frontend (CSS), no al prompt', 'no-usa'],
+            ['Columnes estretes', 'Frontend (CSS), no al prompt', 'no-usa'],
+        ],
+        instruccions_fixes: 'H-07 (evitar compostes), H-08 (alta frequencia), A-21 (descompon compostes), D-06 (lectura veu alta)',
+        instruccions_cond: 'Cap',
+        llm_notes: 'Evitar paraules compostes: ALTA. Repeticio lexica coherent: ALTA. Nota: tipografia adaptada i columnes estretes son CSS, no LLM.',
+    },
+    altes_capacitats: {
+        label: 'Altes capacitats', nuclear: '(cap barrera - risc d\'infrarepte)',
+        barriers: [0,0,0,0,0,0,0,0,2,0],
+        vars: [
+            ['Tipus capacitat (global/talent)', 'No s\'usa al prompt', 'no-usa'],
+        ],
+        instruccions_fixes: 'H-12 (profunditzacio), H-13 (connexions interdisciplinars), H-14 (mantenir complexitat), H-14b (PROHIBIT simplificar), F-09 (pensament critic), F-10 (connexions)',
+        instruccions_cond: 'SUPRESSIO: desactiva A-01 (vocab frequent), A-03 (no sinonims), A-05 (no figurat), A-07 (1 idea/frase), A-08 (veu activa), A-11 (puntuacio simple), A-16 (desnominalitzacio)',
+        llm_notes: 'Profunditzacio conceptual: ALTA. Connexions interdisciplinars: ALTA. Risc: el model pot simplificar per defecte si les instruccions de supressio no son prou fortes.',
+    },
+    di: {
+        label: 'Discapacitat intel\u00b7lectual', nuclear: 'Comprensio discursiva',
+        barriers: [0,1,2,2,4,4,2,3,2,1],
+        vars: [
+            ['Grau (lleu/moderat/sever)', 'Proposta: sever→DUA Acces + MECR A1. Moderat→MECR A2. Lleu→MECR B1. LF: sever=5, moderat=4, lleu=3', 'proposta'],
+        ],
+        instruccions_fixes: 'H-09 (1 concepte/bloc), H-10 (concrecio radical), H-11 (repeticio sistematica), D-06 (lectura veu alta)',
+        instruccions_cond: 'Cap condicionada per sub-variable directament (el grau opera via MECR/DUA)',
+        llm_notes: 'Concrecio amb exemples quotidians: ALTA. 1 concepte per bloc: BAIXA (el model no compta conceptes be). Repeticio en formats diversos: ALTA.',
+    },
+    tdl: {
+        label: 'TDL', nuclear: 'Comprensio lexica',
+        barriers: [0,1,4,4,2,1,1,2,1,0],
+        vars: [
+            ['Modalitat (comprensiu/expressiu/mixt)', 'No s\'usa al prompt', 'no-usa'],
+            ['Morfosintaxi afectada', 'No s\'usa al prompt', 'no-usa'],
+            ['Semantica afectada', 'No s\'usa al prompt', 'no-usa'],
+            ['Pragmatica afectada', 'No s\'usa al prompt', 'no-usa'],
+            ['Discurs/narrativa afectat', 'No s\'usa al prompt', 'no-usa'],
+            ['Comprensio lectora afectada', 'No s\'usa al prompt', 'no-usa'],
+            ['Grau severitat', 'No s\'usa al prompt', 'no-usa'],
+            ['Bilingue', 'No s\'usa al prompt', 'no-usa'],
+        ],
+        instruccions_fixes: 'H-16 (densitat lexica minima), H-17 (modelatge en context)',
+        instruccions_cond: 'Cap',
+        llm_notes: 'Reduccio de densitat lexica: ALTA. Modelatge en 2-3 contextos: ALTA. Nota: les 8 sub-variables del TDL no s\'usen al prompt — oportunitat de millora.',
+    },
+    disc_visual: {
+        label: 'Discapacitat visual', nuclear: 'Percepcio',
+        barriers: [4,0,0,0,0,0,0,0,0,0],
+        vars: [
+            ['Grau (baixa visio/greu/ceguesa)', 'Proposta: ceguesa→LF=5', 'proposta'],
+        ],
+        instruccions_fixes: 'H-19 (estructura semantica H1-H3, no colors)',
+        instruccions_cond: 'Cap',
+        llm_notes: 'Estructura amb encapcalaments: ALTA. No dependre de colors: el model ho fa be. Nota: descripcions d\'imatge son responsabilitat del frontend, no del LLM.',
+    },
+    disc_auditiva: {
+        label: 'Discapacitat auditiva', nuclear: 'Percepcio',
+        barriers: [3,0,1,1,1,0,0,0,0,0],
+        vars: [
+            ['Comunicacio (oral/LSC/bimodal)', 'No s\'usa al prompt', 'no-usa'],
+            ['Implant coclear', 'No s\'usa al prompt', 'no-usa'],
+        ],
+        instruccions_fixes: 'H-20 (simplificacio com L2 en sordesa prelocutiva)',
+        instruccions_cond: 'Cap',
+        llm_notes: 'Simplificacio lexica+sintactica: ALTA. Nota: suport visual per audio es frontend.',
+    },
+    tdc: {
+        label: 'TDC / Dispraxia', nuclear: 'Percepcio',
+        barriers: [2,1,0,0,0,0,1,1,1,0],
+        vars: [
+            ['Grau severitat', 'No s\'usa al prompt', 'no-usa'],
+            ['Motricitat fina', 'No s\'usa al prompt (frontend)', 'no-usa'],
+            ['Motricitat grossa', 'No s\'usa al prompt', 'no-usa'],
+            ['Acces teclat', 'No s\'usa al prompt (frontend)', 'no-usa'],
+        ],
+        instruccions_fixes: 'Instruccions del mapa: B-02, B-09, H-19, B-04, B-14 (compartides amb altres perfils)',
+        instruccions_cond: 'Cap',
+        llm_notes: 'Estructura clara amb llistes: ALTA. Nota: la majoria d\'adaptacions TDC son de frontend (tamany botons, acces teclat).',
+    },
+    disc_motora: {
+        label: 'Discapacitat motora', nuclear: 'Percepcio',
+        barriers: [2,0,0,0,0,0,0,0,0,0],
+        vars: [
+            ['Acces teclat/pantalla', 'No s\'usa al prompt (frontend)', 'no-usa'],
+        ],
+        instruccions_fixes: 'Instruccions del mapa: B-02, H-19 (compartides)',
+        instruccions_cond: 'Cap',
+        llm_notes: 'Quasi totes les adaptacions son de frontend (accessibilitat UI). El LLM nomes genera estructura clara.',
+    },
+    vulnerabilitat: {
+        label: 'Vulnerabilitat socioeducativa', nuclear: 'Motivacio/emocional',
+        barriers: [0,0,1,0,1,0,2,1,3,1],
+        vars: [
+            ['Sensibilitat tematica', 'No s\'usa al prompt (hauria d\'activar E-10)', 'no-usa'],
+        ],
+        instruccions_fixes: 'E-10 (sensibilitat temes traumatics), E-08 (referents culturals diversos)',
+        instruccions_cond: 'Cap',
+        llm_notes: 'Evitar temes sensibles: ALTA. Referents culturalment diversos: ALTA. Nota: la sub-variable "sensibilitat tematica" no es consulta al filtre — gap.',
+    },
+    trastorn_emocional: {
+        label: 'Trastorn emocional / conducta', nuclear: 'Motivacio/emocional',
+        barriers: [0,0,0,0,0,0,3,1,4,0],
+        vars: [
+            ['Sensibilitat tematica', 'No s\'usa al prompt (hauria d\'activar E-10)', 'no-usa'],
+        ],
+        instruccions_fixes: 'E-10 (sensibilitat temes), H-04 (micro-blocs), B-07 (resum anticipatiu)',
+        instruccions_cond: 'Cap',
+        llm_notes: 'Contingut segur i progressiu: ALTA. Micro-blocs: ALTA. Nota: mateixa situacio que vulnerabilitat — sub-variable no consultada.',
+    },
+};
+
+const BARRIER_COLORS = ['#d1d5db', '#a3e635', '#facc15', '#f97316', '#ef4444'];
+const BARRIER_LABELS = ['Cap (0)', 'Lleu (1)', 'Moderada (2)', 'Severa (3)', 'Critica (4)'];
+
+function populateFitxaSelect() {
+    const sel = document.getElementById('fitxa-profile-select');
+    sel.innerHTML = '<option value="">— Tria un perfil —</option>';
+    Object.entries(PROFILE_DATA).forEach(([key, p]) => {
+        sel.innerHTML += `<option value="${key}">${p.label}</option>`;
+    });
+}
+
+function renderFitxa() {
+    const key = document.getElementById('fitxa-profile-select').value;
+    const container = document.getElementById('fitxa-container');
+    if (!key || !PROFILE_DATA[key]) { container.innerHTML = ''; return; }
+
+    const p = PROFILE_DATA[key];
+
+    // 1. Barreres
+    let barriersHtml = '<div class="barrier-grid">';
+    BARRIER_DIMS.forEach((dim, i) => {
+        const val = p.barriers[i];
+        const pct = (val / 4) * 100;
+        const isNuclear = dim === p.nuclear || (p.nuclear.startsWith('(') && val >= 3);
+        barriersHtml += `
+            <div class="barrier-name ${isNuclear ? 'barrier-nuclear' : ''}">${isNuclear ? '\u25cf ' : ''}${dim}</div>
+            <div class="barrier-bar"><div class="barrier-bar-fill" style="width:${pct}%;background:${BARRIER_COLORS[val]};"></div></div>
+            <div class="barrier-note">${BARRIER_LABELS[val]}${isNuclear ? ' \u2014 barrera nuclear' : ''}</div>
+        `;
+    });
+    barriersHtml += '</div>';
+
+    // 2. Variables
+    let varsHtml = '<table class="var-table"><tr><th>Variable</th><th>On va al prompt</th><th>Destí</th></tr>';
+    p.vars.forEach(([name, dest, type]) => {
+        varsHtml += `<tr>
+            <td>${name}</td>
+            <td>${dest}</td>
+            <td><span class="var-dest ${type}">${type === 'ordres' ? 'ORDRES' : type === 'context' ? 'CONTEXT' : type === 'proposta' ? 'PROPOSTA' : 'No s\'usa'}</span></td>
+        </tr>`;
+    });
+    varsHtml += '</table>';
+
+    // 3. Instruccions
+    let instrHtml = `
+        <div style="margin-bottom:10px;">
+            <strong style="color:var(--ok);">Instruccions fixes</strong> (sempre que el perfil esta actiu):<br>
+            <span style="font-size:13px;">${p.instruccions_fixes}</span>
+        </div>
+        <div>
+            <strong style="color:var(--warn);">Instruccions condicionals</strong> (depenen de sub-variables):<br>
+            <span style="font-size:13px;">${p.instruccions_cond}</span>
+        </div>
+    `;
+
+    // 4. LLM
+    let llmHtml = `<div style="font-size:13px;line-height:1.6;">${p.llm_notes}</div>`;
+
+    container.innerHTML = `
+        <div class="fitxa-section"><h3>Barreres d'acces (escala 0-4)</h3>${barriersHtml}</div>
+        <div class="fitxa-section"><h3>Sub-variables: on va cada una al prompt?</h3>${varsHtml}</div>
+        <div class="fitxa-section"><h3>Instruccions d'adaptacio activades</h3>${instrHtml}</div>
+        <div class="fitxa-section"><h3>Sensibilitat del model (LLM)</h3>${llmHtml}</div>
+    `;
+}
+
+populateFitxaSelect();
+
+// ═══════════════════════════════════════════════════════════════════════════
+
+const CATEGORY_COLORS = {
+    A: '#3b82f6', B: '#10b981', C: '#f59e0b', D: '#8b5cf6',
+    E: '#ef4444', F: '#ec4899', G: '#14b8a6', H: '#f97316',
+};
+
+const CATEGORY_DESCRIPTIONS = {
+    A: "Vocabulari, sintaxi, puntuacio i estructura de les frases. Controlen la complexitat linguistica del text: frequencia lexica, subordinades, veu activa/passiva, longitud de frase segons MECR, desnominalitzacio (Halliday) i scaffolding decreixent (Vygotsky).",
+    B: "Com s'organitza visualment el text: paragrafs curts, titols descriptius, frase topic, llistes, ordre cronologic, transicions entre seccions, indicadors de progres i taules comparatives. L'arquitectura que fa el text navegable.",
+    C: "Estrategies per reduir la carrega cognitiva (Sweller, Mayer): limitar conceptes nous per paragraf, chunking en blocs de 3-5, glossari previ, analogies quotidianes, reforc immediat. Ajuden la memoria de treball.",
+    D: "Elements visuals i multimodals que genera el model dins del text: emojis de suport, esquemes de proces, mapes conceptuals jerarquics i preparacio per lectura en veu alta.",
+    E: "Preservacio del rigor academic: termes tecnics intocables (mai substituir per col\u00b7loquials), exactitud cientifica, exemples concrets, referents culturalment diversos, sensibilitat a temes traumatics i pistes etimologiques translingues.",
+    F: "Preguntes de comprensio intercalades (per TDAH), preguntes de pensament critic i connexions interdisciplinars (per altes capacitats). Avaluacio integrada dins el text adaptat.",
+    G: "Adaptacions linguistiques personalitzades per a la L1 de l'alumne: glossaris bilingues amb alfabet original, transliteracio fonetica, traduccio parcial de consignes, substitucio de referents culturals i to ajustat al MECR.",
+    H: "Instruccions especifiques per a cada perfil: estructura predictible (TEA), micro-blocs (TDAH), alta frequencia lexica (dislexia), concrecio radical (DI), profunditzacio (altes capacitats), equilibri format/contingut (2e), reduccio densitat (TDL), etc.",
+};
+
+const PROFILE_LABELS = {
+    nouvingut: 'Nouvingut',
+    tea: 'TEA',
+    tdah: 'TDAH',
+    dislexia: 'Dislexia',
+    altes_capacitats: 'Altes capacitats',
+    di: 'Discapacitat intel\u00b7lectual',
+    discapacitat_intellectual: 'Discapacitat intel\u00b7lectual',
+    tdl: 'TDL',
+    tdc: 'TDC / Dispraxia',
+    disc_visual: 'Discapacitat visual',
+    discapacitat_visual: 'Discapacitat visual',
+    disc_auditiva: 'Discapacitat auditiva',
+    discapacitat_auditiva: 'Discapacitat auditiva',
+    disc_motora: 'Discapacitat motora',
+    vulnerabilitat: 'Vulnerabilitat',
+    trastorn_emocional: 'Trastorn emocional',
+    '2e': 'Doble excepcionalitat (2e)',
+};
+
+const THEME_LABELS = {
+    '1_lexica': 'Lexica',
+    '2_cultural': 'Cultural',
+    '3_sintactica': 'Sintactica',
+    '4_estructura': 'Estructura',
+    '1_inferencia': 'Inferencia i claredat',
+    '2_estructura': 'Estructura',
+    '3_lexica': 'Lexica',
+    '4_discursiva': 'Discursiva',
+    '1_atencio': 'Atencio',
+    '2_memoria': 'Memoria',
+    '3_motivacio': 'Motivacio',
+    '1_decodificacio': 'Decodificacio',
+    '2_compensacio': 'Compensacio',
+    '1_discursiva': 'Discursiva',
+    '2_inferencia': 'Inferencia',
+    '4_visual': 'Visual',
+    '1_percepcio': 'Percepcio',
+    '1_motivacio': 'Motivacio',
+    '2_repte': 'Repte',
+    '1_equilibri': 'Equilibri',
+    '1_emocional': 'Emocional',
+    '3_seguretat': 'Seguretat',
+    '2_atencio': 'Atencio',
+};
+
+// ── Carrega dades ──────────────────────────────────────────────────────────
+
+async function loadCatalog() {
+    try {
+        const res = await fetch('/api/catalog');
+        catalogData = await res.json();
+        renderStats();
+        renderLegend();
+        populateFilters();
+        applyFilters();
+    } catch (e) {
+        document.getElementById('instr-container').innerHTML =
+            '<div class="loading-msg">Error carregant el cataleg. Assegura\'t que el servidor esta actiu.</div>';
+    }
+}
+
+// ── Stats ──────────────────────────────────────────────────────────────────
+
+function renderStats() {
+    const items = catalogData.items;
+    document.getElementById('stat-total').textContent = items.length;
+    document.getElementById('stat-sempre').textContent = items.filter(i => i.activation === 'SEMPRE').length;
+    document.getElementById('stat-nivell').textContent = items.filter(i => i.activation === 'NIVELL').length;
+    document.getElementById('stat-perfil').textContent = items.filter(i => i.activation === 'PERFIL').length;
+    document.getElementById('stat-complement').textContent = items.filter(i => i.activation === 'COMPLEMENT').length;
+}
+
+// ── Llegenda categories ────────────────────────────────────────────────────
+
+function renderLegend() {
+    const labels = catalogData.category_labels;
+    const counts = {};
+    catalogData.items.forEach(i => { counts[i.category] = (counts[i.category] || 0) + 1; });
+
+    const html = Object.entries(labels).map(([cat, label]) =>
+        `<div class="legend-item">
+            <div class="legend-dot" style="background: ${CATEGORY_COLORS[cat]};"></div>
+            <strong>${cat}.</strong> ${label} (${counts[cat] || 0})
+        </div>`
+    ).join('');
+    document.getElementById('legend-cats').innerHTML = html;
+}
+
+// ── Filtres ────────────────────────────────────────────────────────────────
+
+function populateFilters() {
+    // Categories
+    const catSelect = document.getElementById('filter-category');
+    Object.entries(catalogData.category_labels).forEach(([cat, label]) => {
+        const opt = document.createElement('option');
+        opt.value = cat;
+        opt.textContent = `${cat}. ${label}`;
+        catSelect.appendChild(opt);
+    });
+
+    // Perfils (unic)
+    const profiles = new Set();
+    catalogData.items.forEach(i => {
+        (i.profiles || []).forEach(p => profiles.add(p));
+    });
+    const profSelect = document.getElementById('filter-profile');
+    [...profiles].sort().forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = PROFILE_LABELS[p] || p;
+        profSelect.appendChild(opt);
+    });
+
+    // Profile select (vista per perfil)
+    const profViewSelect = document.getElementById('profile-select');
+    Object.keys(catalogData.profile_map).forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = PROFILE_LABELS[p] || p;
+        profViewSelect.appendChild(opt);
+    });
+}
+
+function clearFilters() {
+    document.getElementById('filter-search').value = '';
+    document.getElementById('filter-activation').value = '';
+    document.getElementById('filter-category').value = '';
+    document.getElementById('filter-profile').value = '';
+    applyFilters();
+}
+
+function applyFilters() {
+    if (!catalogData) return;
+
+    const search = document.getElementById('filter-search').value.toLowerCase();
+    const activation = document.getElementById('filter-activation').value;
+    const category = document.getElementById('filter-category').value;
+    const profile = document.getElementById('filter-profile').value;
+
+    const filtered = catalogData.items.filter(item => {
+        if (search && !item.text.toLowerCase().includes(search) && !item.id.toLowerCase().includes(search)) return false;
+        if (activation && item.activation !== activation) return false;
+        if (category && item.category !== category) return false;
+        if (profile && !(item.profiles || []).includes(profile)) return false;
+        return true;
+    });
+
+    document.getElementById('filter-count').textContent =
+        `${filtered.length} de ${catalogData.items.length} instruccions`;
+
+    renderInstrList(filtered);
+}
+
+// ── Render instruccions ────────────────────────────────────────────────────
+
+function renderInstrCard(item, highlight) {
+    let metaHtml = `<span class="meta-badge act-${item.activation}">${item.activation}</span>`;
+
+    if (item.profiles && item.profiles.length) {
+        item.profiles.forEach(p => {
+            metaHtml += ` <span class="meta-badge profile-tag">${PROFILE_LABELS[p] || p}</span>`;
+        });
+    }
+    if (item.suppress_if && item.suppress_if.length) {
+        metaHtml += ` <span class="meta-badge suppress-tag">Suprimida si: ${item.suppress_if.map(p => PROFILE_LABELS[p] || p).join(', ')}</span>`;
+    }
+    if (item.mecr_levels) {
+        metaHtml += ` <span class="meta-badge mecr-tag">MECR: ${item.mecr_levels.join(', ')}</span>`;
+    }
+    if (item.mecr_detail) {
+        const levels = Object.keys(item.mecr_detail).join(', ');
+        metaHtml += ` <span class="meta-badge mecr-tag">MECR: ${levels}</span>`;
+    }
+    if (item.subvar_conditions) {
+        const conds = Object.entries(item.subvar_conditions).map(([k, v]) => `${k}=${v}`).join(', ');
+        metaHtml += ` <span class="meta-badge subvar-tag">Condicio: ${conds}</span>`;
+    }
+    if (item.complement) {
+        metaHtml += ` <span class="meta-badge subvar-tag">Complement: ${item.complement}</span>`;
+    }
+
+    // Si hi ha mecr_detail, mostrar els detalls desplegables
+    let detailHtml = '';
+    if (item.mecr_detail) {
+        detailHtml = '<div style="margin-top:6px; padding-left: 8px; border-left: 2px solid var(--warn-light);">';
+        Object.entries(item.mecr_detail).forEach(([level, text]) => {
+            detailHtml += `<div style="font-size:12px; color:var(--g700); margin-bottom:2px;"><strong>${level}:</strong> ${text}</div>`;
+        });
+        detailHtml += '</div>';
+    }
+
+    return `<div class="instr-card${highlight ? ' highlighted' : ''}">
+        <div class="instr-id cat-${item.category}">${item.id}</div>
+        <div class="instr-body">
+            <div class="instr-text">${escapeHtml(item.text)}</div>
+            ${detailHtml}
+            <div class="instr-meta">${metaHtml}</div>
+        </div>
+    </div>`;
+}
+
+function renderInstrList(items) {
+    const container = document.getElementById('instr-container');
+    if (!items.length) {
+        container.innerHTML = '<div class="loading-msg">Cap instruccio coincideix amb els filtres.</div>';
+        return;
+    }
+
+    // Agrupa per categoria
+    const groups = {};
+    items.forEach(item => {
+        if (!groups[item.category]) groups[item.category] = [];
+        groups[item.category].push(item);
+    });
+
+    const categoryOrder = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+    let html = '';
+
+    categoryOrder.forEach(cat => {
+        if (!groups[cat]) return;
+        const label = catalogData.category_labels[cat] || cat;
+        const desc = CATEGORY_DESCRIPTIONS[cat] || '';
+        const count = groups[cat].length;
+        const groupId = 'cat-group-' + cat;
+
+        html += `<div class="cat-group">
+            <div class="cat-group-header" style="border-left-color: ${CATEGORY_COLORS[cat]};" onclick="toggleCatGroup('${groupId}')">
+                <div class="cat-group-top">
+                    <span class="cat-letter" style="background: ${CATEGORY_COLORS[cat]};">${cat}</span>
+                    <span class="cat-group-name">${label}</span>
+                    <span class="cat-count">${count} instruccions</span>
+                    <span class="cat-toggle open" id="toggle-${groupId}">&#9660;</span>
+                </div>
+                <div class="cat-group-desc">${desc}</div>
+            </div>
+            <div class="cat-group-body" id="${groupId}">
+                <div class="instr-list">
+                    ${groups[cat].map(i => renderInstrCard(i, false)).join('')}
+                </div>
+            </div>
+        </div>`;
+    });
+
+    container.innerHTML = html;
+}
+
+function toggleCatGroup(groupId) {
+    const body = document.getElementById(groupId);
+    const toggle = document.getElementById('toggle-' + groupId);
+    if (body.style.display === 'none') {
+        body.style.display = '';
+        toggle.classList.add('open');
+    } else {
+        body.style.display = 'none';
+        toggle.classList.remove('open');
+    }
+}
+
+// ── Vista per perfil ───────────────────────────────────────────────────────
+
+function renderProfileView() {
+    if (!catalogData) return;
+
+    const profile = document.getElementById('profile-select').value;
+    const map = catalogData.profile_map[profile];
+    if (!map) return;
+
+    const container = document.getElementById('instr-container');
+    const itemsById = {};
+    catalogData.items.forEach(i => { itemsById[i.id] = i; });
+
+    let html = `<div class="profile-section">
+        <div class="profile-section-title">${PROFILE_LABELS[profile] || profile} &mdash; instruccions prioritzades</div>`;
+
+    // Per cada tema
+    Object.entries(map).forEach(([theme, ids]) => {
+        const themeLabel = THEME_LABELS[theme] || theme.replace(/^\d+_/, '');
+        html += `<div class="profile-theme">${themeLabel}</div>`;
+        html += '<div class="instr-list" style="margin-bottom:4px;">';
+        ids.forEach(id => {
+            const item = itemsById[id];
+            if (item) {
+                html += renderInstrCard(item, true);
+            } else {
+                html += `<div class="instr-card"><div class="instr-id" style="background:var(--g300);">${id}</div><div class="instr-body"><div class="instr-text" style="color:var(--g500);">(instruccio no trobada al cataleg LLM)</div></div></div>`;
+            }
+        });
+        html += '</div>';
+    });
+
+    // Instruccions SEMPRE (suprimides per AC)
+    if (profile === 'altes_capacitats') {
+        const suppressed = catalogData.items.filter(i =>
+            i.suppress_if && i.suppress_if.includes('altes_capacitats')
+        );
+        if (suppressed.length) {
+            html += `<div class="profile-theme" style="border-color: var(--err); color: var(--err);">Instruccions universals SUPRIMIDES per aquest perfil</div>`;
+            html += '<div class="instr-list" style="margin-bottom:4px; opacity: 0.6;">';
+            suppressed.forEach(item => { html += renderInstrCard(item, false); });
+            html += '</div>';
+        }
+    }
+
+    html += '</div>';
+
+    // Instruccions SEMPRE que SÍ s'apliquen
+    const sempreItems = catalogData.items.filter(i =>
+        i.activation === 'SEMPRE' &&
+        !(i.suppress_if && i.suppress_if.includes(profile))
+    );
+    if (sempreItems.length) {
+        html += `<div class="profile-section">
+            <div class="profile-section-title" style="background:var(--pri-light); color:var(--pri);">
+                Regles universals (SEMPRE) &mdash; s'apliquen a tots els perfils
+            </div>
+            <div class="instr-list">`;
+        sempreItems.forEach(item => { html += renderInstrCard(item, false); });
+        html += '</div></div>';
+    }
+
+    container.innerHTML = html;
+}
+
+// ── Toggle vista ───────────────────────────────────────────────────────────
+
+function setView(view) {
+    currentView = view;
+    document.querySelectorAll('.view-toggle button').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+
+    if (view === 'all') {
+        document.getElementById('filters-all').style.display = 'flex';
+        document.getElementById('filters-profile').style.display = 'none';
+        applyFilters();
+    } else {
+        document.getElementById('filters-all').style.display = 'none';
+        document.getElementById('filters-profile').style.display = 'flex';
+        renderProfileView();
+    }
+}
+
+// ── Navegacio ──────────────────────────────────────────────────────────────
+
+function scrollToSection(id) {
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+    document.querySelectorAll('.header nav a').forEach(a => a.classList.remove('active'));
+    document.querySelector(`.header nav a[href="#${id}"]`).classList.add('active');
+}
+
+// Marca nav activa al fer scroll
+window.addEventListener('scroll', () => {
+    const cataleg = document.getElementById('cataleg');
+    if (!cataleg) return;
+    const top = cataleg.getBoundingClientRect().top;
+    const links = document.querySelectorAll('.header nav a');
+    if (top < 200) {
+        links[0].classList.remove('active');
+        links[1].classList.add('active');
+    } else {
+        links[0].classList.add('active');
+        links[1].classList.remove('active');
+    }
+});
+
+// ── Utils ──────────────────────────────────────────────────────────────────
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+
+loadCatalog();
+</script>
+</body>
+</html>

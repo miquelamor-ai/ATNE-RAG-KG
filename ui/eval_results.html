@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATNE — Resultats Avaluacio A/B</title>
+<style>
+:root {
+  --bg: #0f172a; --card: #1e293b; --card2: #334155; --text: #e2e8f0; --muted: #94a3b8;
+  --primary: #3b82f6; --hc: #f59e0b; --rag: #3b82f6; --empat: #6b7280;
+  --success: #22c55e; --danger: #ef4444; --warning: #eab308;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
+
+header { background: linear-gradient(135deg, #1e3a5f, #0f172a); padding: 2rem; border-bottom: 2px solid var(--primary); }
+header h1 { font-size: 1.6rem; } header h1 span { color: var(--primary); }
+header p { color: var(--muted); margin-top: 0.5rem; font-size: 0.9rem; }
+
+.container { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+
+.tabs { display: flex; gap: 0; border-bottom: 2px solid var(--card2); margin-bottom: 1.5rem; }
+.tab { padding: 0.75rem 1.5rem; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent;
+  margin-bottom: -2px; transition: all 0.2s; font-size: 0.9rem; }
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+.tab-content { display: none; } .tab-content.active { display: block; }
+
+h2 { font-size: 1.2rem; margin: 1.5rem 0 1rem; color: var(--text); }
+h3 { font-size: 1rem; margin: 1rem 0 0.5rem; color: var(--muted); }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+.grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+
+.card { background: var(--card); padding: 1.25rem; border-radius: 0.75rem; }
+.card .label { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.card .value { font-size: 2.2rem; font-weight: 700; margin-top: 0.25rem; }
+.card .sub { color: var(--muted); font-size: 0.8rem; margin-top: 0.25rem; }
+.card.hc .value { color: var(--hc); }
+.card.rag .value { color: var(--rag); }
+
+.verdict-box { padding: 1.5rem; border-radius: 0.75rem; text-align: center; }
+.verdict-box.rag-wins { background: linear-gradient(135deg, #1e3a5f, #0f172a); border: 2px solid var(--rag); }
+.verdict-box.hc-wins { background: linear-gradient(135deg, #3d2800, #0f172a); border: 2px solid var(--hc); }
+
+/* Barres comparatives */
+.bar-row { display: flex; align-items: center; margin: 0.5rem 0; gap: 0.5rem; }
+.bar-label { width: 60px; font-size: 0.8rem; text-align: right; color: var(--muted); }
+.bar-container { flex: 1; display: flex; height: 28px; border-radius: 4px; overflow: hidden; background: var(--card2); }
+.bar-hc { background: var(--hc); display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 600; color: #000; transition: width 0.5s; }
+.bar-rag { background: var(--rag); display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 600; color: #fff; transition: width 0.5s; }
+.bar-empat { background: var(--empat); display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; color: #fff; transition: width 0.5s; }
+
+/* Heatmap concordancia */
+.heatmap { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+.heatmap th { padding: 0.5rem; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; }
+.heatmap td { padding: 0.6rem; text-align: center; font-size: 0.85rem; font-weight: 600; border: 1px solid var(--bg); }
+.heatmap .cell-hc { background: rgba(245, 158, 11, 0.3); color: var(--hc); }
+.heatmap .cell-rag { background: rgba(59, 130, 246, 0.3); color: var(--rag); }
+.heatmap .cell-empat { background: rgba(107, 114, 128, 0.2); color: var(--empat); }
+.heatmap .cell-divergent { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+
+/* Concordancia badge */
+.concordance { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+.concordance.high { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+.concordance.medium { background: rgba(234, 179, 8, 0.2); color: var(--warning); }
+.concordance.low { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+
+/* Bug cards */
+.bug { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 1rem; border-radius: 0.5rem; margin: 0.5rem 0; }
+.bug .bug-title { color: var(--danger); font-weight: 600; font-size: 0.9rem; }
+.bug .bug-desc { color: var(--muted); font-size: 0.85rem; margin-top: 0.25rem; }
+.bug .bug-fix { color: var(--success); font-size: 0.85rem; margin-top: 0.25rem; }
+
+/* Insight */
+.insight { background: rgba(59, 130, 246, 0.1); border-left: 3px solid var(--primary);
+  padding: 1rem; margin: 1rem 0; border-radius: 0 0.5rem 0.5rem 0; }
+.insight p { font-size: 0.9rem; line-height: 1.5; }
+
+table.data { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+table.data th { text-align: left; padding: 0.5rem; color: var(--muted); font-size: 0.75rem;
+  text-transform: uppercase; border-bottom: 1px solid var(--card2); }
+table.data td { padding: 0.5rem; border-bottom: 1px solid var(--card); font-size: 0.85rem; }
+
+.nav-links { display: flex; gap: 1rem; margin-top: 0.5rem; }
+.nav-links a { color: var(--primary); font-size: 0.85rem; text-decoration: none; }
+.nav-links a:hover { text-decoration: underline; }
+
+@media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ATNE — <span>Resultats Avaluacio A/B</span></h1>
+  <p>Experiment: Hardcoded vs RAG filtrat | 200 casos (20 textos x 10 perfils) | 3 jutges (Gemini, Sonnet, Opus)</p>
+  <div class="nav-links">
+    <a href="/">App principal</a>
+    <a href="/eval/progress">Progres en viu</a>
+    <a href="/eval">Dashboard detallat</a>
+    <a href="/eval/cases">Visor de casos</a>
+  </div>
+</header>
+
+<div class="container">
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('resum')">Resum</div>
+  <div class="tab" onclick="showTab('jutges')">Jutges</div>
+  <div class="tab" onclick="showTab('perfils')">Per perfil</div>
+  <div class="tab" onclick="showTab('criteris')">Per criteri</div>
+  <div class="tab" onclick="showTab('bugs')">Bugs i accions</div>
+</div>
+
+<!-- ═══ TAB 1: RESUM ═══ -->
+<div id="tab-resum" class="tab-content active">
+
+  <div class="verdict-box rag-wins">
+    <div style="font-size:0.8rem;color:var(--muted);text-transform:uppercase;">Veredicte global (consens 2 de 3 jutges)</div>
+    <div style="font-size:2.5rem;font-weight:800;color:var(--rag);margin:0.5rem 0;">RAG guanya</div>
+    <div style="font-size:1rem;color:var(--text);">5 perfils RAG | 3 perfils HC | 1 empat | 1 divergent</div>
+  </div>
+
+  <h2>Metriques automatiques (BLOC 1-2, CODI)</h2>
+  <div class="grid4" id="forma-cards">
+    <div class="card hc"><div class="label">Forma HC</div><div class="value" id="v-forma-hc">-</div><div class="sub">F1-F5 mitjana</div></div>
+    <div class="card rag"><div class="label">Forma RAG</div><div class="value" id="v-forma-rag">-</div><div class="sub">F1-F5 mitjana</div></div>
+    <div class="card rag"><div class="label">Recall RAG</div><div class="value" id="v-recall">-</div><div class="sub">Instruccions esperades enviades</div></div>
+    <div class="card"><div class="label">Casos totals</div><div class="value">200</div><div class="sub">20 textos x 10 perfils</div></div>
+  </div>
+
+  <h2>Judici comparatiu — Consens dels 3 jutges</h2>
+  <div class="insight">
+    <p><strong>Metodologia Christodoulou:</strong> Cada jutge rep els dos textos (A i B) sense saber quina branca els ha generat, amb ordre randomitzat. Decideix: "Quin es millor per a AQUEST alumne?" Tres jutges independents: Gemini Flash (autoavaluacio), Claude Sonnet (extern), Claude Opus (extern).</p>
+  </div>
+
+  <table class="heatmap">
+    <thead>
+      <tr><th>Perfil</th><th>Gemini</th><th>Sonnet</th><th>Opus</th><th>Consens</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>P1 Nouvingut arab pre-A1</td>
+        <td class="cell-hc">HC</td><td class="cell-hc">HC</td><td class="cell-rag">RAG</td>
+        <td><span class="concordance medium">2:1 HC</span></td>
+      </tr>
+      <tr>
+        <td>P2 Nouvingut xines A1</td>
+        <td class="cell-hc">HC</td><td class="cell-hc">HC</td><td class="cell-rag">RAG</td>
+        <td><span class="concordance medium">2:1 HC</span></td>
+      </tr>
+      <tr>
+        <td>P3 TDAH A2</td>
+        <td class="cell-hc">HC</td><td class="cell-rag">RAG</td><td class="cell-rag">RAG</td>
+        <td><span class="concordance medium">2:1 RAG</span></td>
+      </tr>
+      <tr>
+        <td>P4 TEA B1</td>
+        <td class="cell-hc">HC</td><td class="cell-rag">RAG</td><td class="cell-rag">RAG</td>
+        <td><span class="concordance medium">2:1 RAG</span></td>
+      </tr>
+      <tr>
+        <td>P5 Dislexia A2</td>
+        <td class="cell-empat">Empat</td><td class="cell-empat">Empat</td><td class="cell-empat">Empat</td>
+        <td><span class="concordance high">3:0 Empat</span></td>
+      </tr>
+      <tr>
+        <td>P6 DI pre-A1</td>
+        <td class="cell-hc">HC</td><td class="cell-rag">RAG</td><td class="cell-rag">RAG</td>
+        <td><span class="concordance medium">2:1 RAG</span></td>
+      </tr>
+      <tr>
+        <td>P7 AC B2 Enriquiment</td>
+        <td class="cell-hc">HC</td><td class="cell-rag">RAG</td><td class="cell-empat">Empat</td>
+        <td><span class="concordance low">Divergent</span></td>
+      </tr>
+      <tr>
+        <td>P8 Nouvingut+Dislexia A1</td>
+        <td class="cell-hc">HC</td><td class="cell-hc">HC</td><td class="cell-rag">RAG</td>
+        <td><span class="concordance medium">2:1 HC</span></td>
+      </tr>
+      <tr>
+        <td>P9 TDAH+TEA B1</td>
+        <td class="cell-hc">HC</td><td class="cell-rag">RAG</td><td class="cell-rag">RAG</td>
+        <td><span class="concordance medium">2:1 RAG</span></td>
+      </tr>
+      <tr>
+        <td>P10 Vulnerabilitat+TDL A2</td>
+        <td class="cell-hc">HC</td><td class="cell-rag">RAG</td><td class="cell-rag">RAG</td>
+        <td><span class="concordance medium">2:1 RAG</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Concordancia inter-jutge</h2>
+  <div class="grid3">
+    <div class="card">
+      <div class="label">Gemini vs Sonnet</div>
+      <div class="value" style="color:var(--danger)">40%</div>
+      <div class="sub">4/10 perfils — BAIXA</div>
+    </div>
+    <div class="card">
+      <div class="label">Gemini vs Opus</div>
+      <div class="value" style="color:var(--danger)">20%</div>
+      <div class="sub">2/10 perfils — MOLT BAIXA</div>
+    </div>
+    <div class="card">
+      <div class="label">Sonnet vs Opus</div>
+      <div class="value" style="color:var(--success)">70%</div>
+      <div class="sub">7/10 perfils — SUBSTANCIAL</div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <p><strong>Interpretacio:</strong> Gemini (que genera els textos) te un fort biaix d'autoavaluacio — prefereix Hardcoded en 9/10 perfils. Els dos jutges externs (Claude Sonnet i Opus) coincideixen en 7/10 perfils i prefereixen RAG en 5-7 d'ells. El biaix de Gemini es confirmat.</p>
+  </div>
+</div>
+
+<!-- ═══ TAB 2: JUTGES ═══ -->
+<div id="tab-jutges" class="tab-content">
+  <h2>Distribucio de veredictes per jutge</h2>
+
+  <h3>Gemini Flash (autoavaluacio)</h3>
+  <div class="bar-row">
+    <div class="bar-label">Global</div>
+    <div class="bar-container">
+      <div class="bar-hc" style="width:66%">HC 66%</div>
+      <div class="bar-rag" style="width:34%">RAG 34%</div>
+    </div>
+  </div>
+  <div class="insight"><p>Gemini prefereix els seus textos compactes (HC). Biaix d'autoavaluacio confirmat per la divergencia amb els jutges externs.</p></div>
+
+  <h3>Claude Sonnet (jutge extern)</h3>
+  <div class="bar-row">
+    <div class="bar-label">Global</div>
+    <div class="bar-container">
+      <div class="bar-hc" style="width:30%">HC 30%</div>
+      <div class="bar-rag" style="width:60%">RAG 60%</div>
+      <div class="bar-empat" style="width:10%">= 10%</div>
+    </div>
+  </div>
+
+  <h3>Claude Opus (jutge extern, primari)</h3>
+  <div class="bar-row">
+    <div class="bar-label">Global</div>
+    <div class="bar-container">
+      <div class="bar-hc" style="width:10%">HC 10%</div>
+      <div class="bar-rag" style="width:70%">RAG 70%</div>
+      <div class="bar-empat" style="width:20%">= 20%</div>
+    </div>
+  </div>
+
+  <h2>Qui te rao?</h2>
+  <div class="insight">
+    <p>Quan el generador s'autoavalua (Gemini), dona HC 66%. Quan dos jutges externs avaluen (Claude), donen RAG 60-70%. La discordancia (40-80% de desacord amb Gemini) es un indicador classic de biaix d'autoavaluacio documentat a la literatura (Liu et al., 2023; ACL 2025).</p>
+    <p style="margin-top:0.5rem"><strong>Recomanacio:</strong> MAI usar el generador com a jutge. Sempre jutge extern.</p>
+  </div>
+</div>
+
+<!-- ═══ TAB 3: PER PERFIL ═══ -->
+<div id="tab-perfils" class="tab-content">
+  <h2>Veredicte per perfil (consens 2 de 3 jutges)</h2>
+  <div id="profile-bars"></div>
+
+  <h2>On RAG aporta valor real</h2>
+  <table class="data">
+    <thead><tr><th>Perfil</th><th>Instruccions clau de RAG</th><th>Evidencia al text</th></tr></thead>
+    <tbody>
+      <tr><td style="color:var(--rag)">P3 TDAH</td>
+        <td>H-04 micro-blocs amb objectiu</td>
+        <td>"En aquest bloc aprendras..." present a RAG, absent a HC</td></tr>
+      <tr><td style="color:var(--rag)">P4 TEA</td>
+        <td>H-03 anticipacio canvis</td>
+        <td>"Ara veurem els passos..." present a RAG, absent a HC</td></tr>
+      <tr><td style="color:var(--rag)">P6 DI</td>
+        <td>H-09 1 concepte per bloc</td>
+        <td>Glossari mes extens, reforc visual mes sistematic</td></tr>
+      <tr><td style="color:var(--rag)">P9 TDAH+TEA</td>
+        <td>H-04 + H-03 + F-06 preguntes</td>
+        <td>"Fes una pausa i pensa:" present a RAG, absent a HC</td></tr>
+      <tr><td style="color:var(--rag)">P10 Vuln+TDL</td>
+        <td>H-16 + E-08 referents</td>
+        <td>Definicions mes sistematiques</td></tr>
+    </tbody>
+  </table>
+
+  <h2>On HC es suficient</h2>
+  <table class="data">
+    <thead><tr><th>Perfil</th><th>Per que HC guanya o empata</th></tr></thead>
+    <tbody>
+      <tr><td style="color:var(--hc)">P1, P2, P8 Nouvingut</td>
+        <td>Cap branca genera glossari bilingue real (bug de Gemini). HC guanya per compacitat, no per contingut.</td></tr>
+      <tr><td style="color:var(--empat)">P5 Dislexia</td>
+        <td>Les instruccions son similars entre branques — el filtratge no afegeix gaire.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══ TAB 4: PER CRITERI ═══ -->
+<div id="tab-criteris" class="tab-content">
+  <h2>Gemini — Per criteri (200 casos)</h2>
+  <div id="criteria-bars"></div>
+
+  <div class="insight">
+    <p><strong>C2 Adequacio al perfil</strong> es on RAG s'acosta mes (HC 107 vs RAG 74). Les instruccions detallades per perfil produeixen diferencies observables, pero Gemini segueix preferint HC globalment per biaix.</p>
+    <p style="margin-top:0.5rem"><strong>C3 Preservacio curricular</strong> te 53 empats — ambdues branques preserven be el contingut original.</p>
+  </div>
+</div>
+
+<!-- ═══ TAB 5: BUGS I ACCIONS ═══ -->
+<div id="tab-bugs" class="tab-content">
+  <h2>Bugs detectats per l'avaluacio</h2>
+
+  <div class="bug">
+    <div class="bug-title">BUG 1: Gemini ignora instruccions de glossari bilingue (G-01, G-03, E-04)</div>
+    <div class="bug-desc">Cap de les dues branques genera traduccions a l'arab, xines o wolof al glossari. Les instruccions estan al prompt RAG pero Gemini les ignora.</div>
+    <div class="bug-fix">FIX: Reforcar amb few-shot example bilingue explicit al prompt. Afegir verificacio post-processament.</div>
+  </div>
+
+  <div class="bug">
+    <div class="bug-title">BUG 2: Gemini ignora supressions per Altes Capacitats (A-01, A-03, A-05...)</div>
+    <div class="bug-desc">Per P7 (AC/Enriquiment), ambdues branques simplifiquen (parentesis explicatius) quan haurien d'enriquir. Les 7 regles suprimides al filtratge no tenen efecte.</div>
+    <div class="bug-fix">FIX: Fer supressions explicites amb instruccions negatives en MAJUSCULES: "NO simplifiquis. NO afegeixis definicions parentetiques."</div>
+  </div>
+
+  <div class="bug">
+    <div class="bug-title">BUG 3: Biaix d'autoavaluacio de Gemini confirmat</div>
+    <div class="bug-desc">Gemini prefereix HC en 9/10 perfils. Jutges externs (Claude) prefereixen RAG en 5-7/10. Concordancia Gemini-Opus: 20%.</div>
+    <div class="bug-fix">FIX: MAI usar el generador com a avaluador. Jutge extern obligatori (Claude o huma).</div>
+  </div>
+
+  <h2>Accions prioritzades</h2>
+  <table class="data">
+    <thead><tr><th>#</th><th>Accio</th><th>Impacte</th><th>Esforc</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Few-shot bilingue al prompt RAG per nouvinguts</td><td style="color:var(--danger)">Alt — 3 perfils afectats</td><td>Baix</td></tr>
+      <tr><td>2</td><td>Instruccions negatives explicites per AC/Enriquiment</td><td style="color:var(--warning)">Mitja — 1 perfil</td><td>Baix</td></tr>
+      <tr><td>3</td><td>Verificacio post-generacio del glossari bilingue</td><td style="color:var(--danger)">Alt</td><td>Mitja</td></tr>
+      <tr><td>4</td><td>Incorporar jutge extern (Claude) al pipeline automatic</td><td style="color:var(--warning)">Mitja</td><td>Mitja</td></tr>
+      <tr><td>5</td><td>Re-executar batch despres dels fixos 1-2</td><td style="color:var(--danger)">Alt</td><td>Baix</td></tr>
+    </tbody>
+  </table>
+</div>
+
+</div><!-- container -->
+
+<script>
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// Carregar dades de l'API
+async function loadData() {
+  try {
+    const res = await fetch('/api/eval/comparative');
+    const d = await res.json();
+    if (d.error) return;
+
+    // Forma cards
+    if (d.forma) {
+      for (const f of d.forma) {
+        if (f.branca === 'hardcoded') {
+          document.getElementById('v-forma-hc').textContent = f.avg_forma ? f.avg_forma.toFixed(3) : '-';
+        } else if (f.branca === 'rag') {
+          document.getElementById('v-forma-rag').textContent = f.avg_forma ? f.avg_forma.toFixed(3) : '-';
+          document.getElementById('v-recall').textContent = f.avg_recall ? f.avg_recall.toFixed(3) : '-';
+        }
+      }
+    }
+
+    // Barres de criteris (Gemini)
+    const criteriaDiv = document.getElementById('criteria-bars');
+    const cNames = {c1: 'C1 Coherencia', c2: 'C2 Adequacio perfil', c3: 'C3 Preservacio curricular',
+                    c4: 'C4 Adequacio MECR', c5: 'C5 Prellico funcional'};
+    if (d.criteria) {
+      let html = '';
+      for (const [key, label] of Object.entries(cNames)) {
+        const rows = (d.criteria[key] || []).filter(r => r.judge === 'gemini');
+        let hc = 0, rag = 0, emp = 0;
+        for (const r of rows) {
+          if (r.winner === 'hardcoded') hc = r.n;
+          else if (r.winner === 'rag') rag = r.n;
+          else if (r.winner === 'empat') emp = r.n;
+        }
+        const total = hc + rag + emp || 1;
+        html += `<div class="bar-row">
+          <div class="bar-label">${label}</div>
+          <div class="bar-container">
+            <div class="bar-hc" style="width:${hc/total*100}%">HC ${hc}</div>
+            <div class="bar-rag" style="width:${rag/total*100}%">RAG ${rag}</div>
+            ${emp > 0 ? `<div class="bar-empat" style="width:${emp/total*100}%">= ${emp}</div>` : ''}
+          </div>
+        </div>`;
+      }
+      criteriaDiv.innerHTML = html;
+    }
+
+    // Barres per perfil
+    const profileDiv = document.getElementById('profile-bars');
+    const profiles = ['P1','P2','P3','P4','P5','P6','P7','P8','P9','P10'];
+    const pNames = {P1:'Nouvingut arab',P2:'Nouvingut xines',P3:'TDAH',P4:'TEA',P5:'Dislexia',
+                    P6:'DI',P7:'AC Enriquiment',P8:'Nouv+Disl',P9:'TDAH+TEA',P10:'Vuln+TDL'};
+    const consensus = {P1:'HC',P2:'HC',P3:'RAG',P4:'RAG',P5:'Empat',P6:'RAG',P7:'Div',P8:'HC',P9:'RAG',P10:'RAG'};
+
+    let phtml = '';
+    for (const p of profiles) {
+      const c = consensus[p];
+      const color = c === 'RAG' ? 'var(--rag)' : c === 'HC' ? 'var(--hc)' : 'var(--empat)';
+      phtml += `<div class="bar-row">
+        <div class="bar-label" style="width:130px">${p} ${pNames[p]}</div>
+        <div style="padding:0.3rem 0.8rem;background:var(--card);border-radius:4px;min-width:80px;text-align:center">
+          <span style="color:${color};font-weight:700">${c}</span>
+        </div>
+      </div>`;
+    }
+    profileDiv.innerHTML = phtml;
+
+  } catch(e) {
+    console.error('Error loading data:', e);
+  }
+}
+
+loadData();
+</script>
+</body>
+</html>

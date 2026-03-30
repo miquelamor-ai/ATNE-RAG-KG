@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATNE — Visor de casos avaluats</title>
+<style>
+:root {
+  --bg: #0f172a; --card: #1e293b; --card2: #334155; --text: #e2e8f0; --muted: #94a3b8;
+  --primary: #3b82f6; --hc: #f59e0b; --rag: #3b82f6; --empat: #6b7280;
+  --success: #22c55e; --danger: #ef4444; --warning: #eab308;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
+
+header { background: linear-gradient(135deg, #1e3a5f, #0f172a); padding: 1.5rem 2rem; border-bottom: 2px solid var(--primary); }
+header h1 { font-size: 1.5rem; } header h1 span { color: var(--primary); }
+header p { color: var(--muted); margin-top: 0.4rem; font-size: 0.85rem; }
+.nav-links { display: flex; gap: 1rem; margin-top: 0.5rem; }
+.nav-links a { color: var(--primary); font-size: 0.85rem; text-decoration: none; }
+.nav-links a:hover { text-decoration: underline; }
+
+/* ── Layout principal ── */
+.app-layout { display: flex; height: calc(100vh - 110px); overflow: hidden; }
+
+/* ── Barra lateral (llista + filtres) ── */
+.sidebar { width: 320px; min-width: 280px; background: var(--card); border-right: 1px solid var(--card2);
+  display: flex; flex-direction: column; overflow: hidden; }
+.sidebar-header { padding: 1rem; border-bottom: 1px solid var(--card2); }
+.sidebar-header h2 { font-size: 1rem; margin-bottom: 0.75rem; }
+
+.filters { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.filters select { background: var(--card2); color: var(--text); border: 1px solid var(--card2);
+  border-radius: 6px; padding: 0.35rem 0.5rem; font-size: 0.8rem; cursor: pointer; }
+.filters select:focus { outline: none; border-color: var(--primary); }
+
+.case-list { flex: 1; overflow-y: auto; padding: 0.5rem; }
+.case-item { padding: 0.65rem 0.75rem; border-radius: 6px; cursor: pointer; margin-bottom: 2px;
+  transition: background 0.15s; font-size: 0.82rem; }
+.case-item:hover { background: var(--card2); }
+.case-item.active { background: var(--primary); color: #fff; }
+.case-item .case-id { font-weight: 600; }
+.case-item .case-meta { color: var(--muted); font-size: 0.75rem; margin-top: 2px; }
+.case-item.active .case-meta { color: rgba(255,255,255,0.7); }
+
+.case-badges { display: flex; gap: 0.3rem; margin-top: 3px; flex-wrap: wrap; }
+.badge { font-size: 0.65rem; padding: 1px 6px; border-radius: 9999px; font-weight: 600; }
+.badge.hc-wins { background: rgba(245,158,11,0.25); color: var(--hc); }
+.badge.rag-wins { background: rgba(59,130,246,0.25); color: var(--rag); }
+.badge.empat { background: rgba(107,114,128,0.25); color: var(--empat); }
+
+/* ── Paginacio ── */
+.pagination { padding: 0.75rem; border-top: 1px solid var(--card2); display: flex;
+  justify-content: space-between; align-items: center; font-size: 0.8rem; }
+.pagination button { background: var(--card2); color: var(--text); border: none; border-radius: 6px;
+  padding: 0.4rem 0.8rem; cursor: pointer; font-size: 0.8rem; }
+.pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+.pagination button:hover:not(:disabled) { background: var(--primary); }
+.page-info { color: var(--muted); }
+
+/* ── Panell principal (detall del cas) ── */
+.main-panel { flex: 1; overflow-y: auto; padding: 1.5rem; }
+
+.empty-state { display: flex; align-items: center; justify-content: center; height: 100%;
+  color: var(--muted); font-size: 1.1rem; }
+
+/* ── Metadades del cas ── */
+.case-header { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.case-header h2 { font-size: 1.2rem; }
+.meta-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.meta-tag { font-size: 0.75rem; padding: 2px 8px; border-radius: 9999px;
+  background: var(--card2); color: var(--muted); }
+
+/* ── Metriques ── */
+.metrics-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem; margin-bottom: 1.25rem; }
+.metric { background: var(--card); padding: 0.75rem; border-radius: 8px; text-align: center; }
+.metric .label { font-size: 0.7rem; text-transform: uppercase; color: var(--muted); letter-spacing: 0.04em; }
+.metric .val { font-size: 1.5rem; font-weight: 700; margin-top: 0.15rem; }
+.metric .val.hc { color: var(--hc); }
+.metric .val.rag { color: var(--rag); }
+
+/* ── Split view textos ── */
+.split-view { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem; }
+.text-col { background: var(--card); border-radius: 8px; overflow: hidden; }
+.text-col-header { padding: 0.6rem 1rem; font-weight: 700; font-size: 0.85rem;
+  border-bottom: 2px solid; }
+.text-col-header.hc { color: var(--hc); border-color: var(--hc); background: rgba(245,158,11,0.08); }
+.text-col-header.rag { color: var(--rag); border-color: var(--rag); background: rgba(59,130,246,0.08); }
+.text-body { padding: 1rem; font-size: 0.88rem; line-height: 1.65; max-height: 600px; overflow-y: auto; }
+.text-body h1, .text-body h2, .text-body h3 { color: var(--text); margin: 0.8rem 0 0.4rem; }
+.text-body h1 { font-size: 1.15rem; }
+.text-body h2 { font-size: 1.05rem; }
+.text-body h3 { font-size: 0.95rem; }
+.text-body p { margin-bottom: 0.6rem; }
+.text-body ul, .text-body ol { margin: 0.4rem 0 0.6rem 1.2rem; }
+.text-body li { margin-bottom: 0.3rem; }
+.text-body strong { color: #fff; }
+.text-body em { color: var(--muted); }
+.text-body blockquote { border-left: 3px solid var(--primary); padding-left: 0.8rem;
+  margin: 0.5rem 0; color: var(--muted); }
+
+/* ── Original ── */
+.original-section { background: var(--card); border-radius: 8px; margin-bottom: 1.25rem; overflow: hidden; }
+.original-header { padding: 0.6rem 1rem; font-weight: 700; font-size: 0.85rem;
+  color: var(--muted); border-bottom: 1px solid var(--card2); background: rgba(148,163,184,0.08); }
+.original-body { padding: 1rem; font-size: 0.85rem; line-height: 1.6; color: var(--muted);
+  max-height: 300px; overflow-y: auto; white-space: pre-wrap; }
+
+/* ── Judicis ── */
+.judgements-section { margin-bottom: 1.5rem; }
+.judgements-section h3 { font-size: 0.95rem; margin-bottom: 0.75rem; color: var(--muted); }
+.judgement-card { background: var(--card); border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem;
+  border-left: 3px solid var(--card2); }
+.judgement-card.winner-rag { border-left-color: var(--rag); }
+.judgement-card.winner-hc { border-left-color: var(--hc); }
+.judgement-card.winner-empat { border-left-color: var(--empat); }
+.judge-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+.judge-name { font-weight: 700; font-size: 0.85rem; }
+.judge-verdict { font-size: 0.75rem; padding: 2px 8px; border-radius: 9999px; font-weight: 600; }
+.judge-verdict.hc { background: rgba(245,158,11,0.2); color: var(--hc); }
+.judge-verdict.rag { background: rgba(59,130,246,0.2); color: var(--rag); }
+.judge-verdict.empat { background: rgba(107,114,128,0.2); color: var(--empat); }
+.justification { font-size: 0.83rem; line-height: 1.5; color: var(--muted); }
+
+/* ── Loading ── */
+.loading { text-align: center; padding: 3rem; color: var(--muted); }
+.loading .spinner { display: inline-block; width: 24px; height: 24px;
+  border: 3px solid var(--card2); border-top-color: var(--primary);
+  border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 0.5rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .app-layout { flex-direction: column; height: auto; }
+  .sidebar { width: 100%; max-height: 300px; }
+  .split-view { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ATNE — <span>Visor de casos avaluats</span></h1>
+  <p>Comparacio de textos adaptats: Hardcoded vs RAG | Textos originals, adaptacions i judicis</p>
+  <div class="nav-links">
+    <a href="/">App principal</a>
+    <a href="/eval/progress">Progres en viu</a>
+    <a href="/eval">Dashboard</a>
+    <a href="/eval/results">Resultats A/B</a>
+    <a href="/eval/cases" style="font-weight:700">Visor de casos</a>
+  </div>
+</header>
+
+<div class="app-layout">
+  <!-- ═══ SIDEBAR ═══ -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h2>Casos <span id="total-count" style="color:var(--muted);font-weight:400"></span></h2>
+      <div class="filters">
+        <select id="filter-perfil" onchange="applyFilters()">
+          <option value="">Tots els perfils</option>
+          <option value="P1">P1 Nouvingut arab</option>
+          <option value="P2">P2 Nouvingut xines</option>
+          <option value="P3">P3 TDAH</option>
+          <option value="P4">P4 TEA</option>
+          <option value="P5">P5 Dislexia</option>
+          <option value="P6">P6 DI</option>
+          <option value="P7">P7 AC Enriquiment</option>
+          <option value="P8">P8 Nouv+Dislexia</option>
+          <option value="P9">P9 TDAH+TEA</option>
+          <option value="P10">P10 Vuln+TDL</option>
+        </select>
+        <select id="filter-etapa" onchange="applyFilters()">
+          <option value="">Totes les etapes</option>
+          <option value="primaria">Primaria</option>
+          <option value="ESO">ESO</option>
+          <option value="batxillerat">Batxillerat</option>
+        </select>
+        <select id="filter-genere" onchange="applyFilters()">
+          <option value="">Tots els generes</option>
+          <option value="explicacio">Explicacio</option>
+          <option value="narracio">Narracio</option>
+          <option value="argumentacio">Argumentacio</option>
+          <option value="instruccio">Instruccio</option>
+        </select>
+      </div>
+    </div>
+    <div class="case-list" id="case-list">
+      <div class="loading"><div class="spinner"></div><br>Carregant casos...</div>
+    </div>
+    <div class="pagination">
+      <button id="btn-prev" onclick="prevPage()" disabled>&larr; Anterior</button>
+      <span class="page-info" id="page-info">-</span>
+      <button id="btn-next" onclick="nextPage()" disabled>Seguent &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ═══ MAIN PANEL ═══ -->
+  <div class="main-panel" id="main-panel">
+    <div class="empty-state">Selecciona un cas de la llista per veure els textos adaptats</div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const RUN_ID = "20260329_130946";
+const PAGE_SIZE = 20;
+
+let state = {
+  cases: [],
+  total: 0,
+  offset: 0,
+  selected: null,
+  originals: {},  // text_id -> {text, ...}
+  perfils: {},    // perfil_id -> {nom, ...}
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// API
+// ═══════════════════════════════════════════════════════════════════════════════
+
+async function loadOriginals() {
+  try {
+    const res = await fetch("/api/eval/originals");
+    const data = await res.json();
+    if (data.textos) {
+      for (const t of data.textos) {
+        state.originals[t.id] = t;
+      }
+    }
+    if (data.perfils) {
+      for (const p of data.perfils) {
+        state.perfils[p.id] = p;
+      }
+    }
+  } catch (e) {
+    console.error("Error loading originals:", e);
+  }
+}
+
+async function loadCases() {
+  const perfil = document.getElementById("filter-perfil").value;
+  const etapa = document.getElementById("filter-etapa").value;
+  const genere = document.getElementById("filter-genere").value;
+
+  let url = `/api/eval/cases/${RUN_ID}?limit=${PAGE_SIZE}&offset=${state.offset}`;
+  if (perfil) url += `&perfil=${perfil}`;
+  if (etapa) url += `&etapa=${etapa}`;
+  if (genere) url += `&genere=${genere}`;
+
+  const listEl = document.getElementById("case-list");
+  listEl.innerHTML = '<div class="loading"><div class="spinner"></div><br>Carregant...</div>';
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.error) {
+      listEl.innerHTML = `<div class="loading" style="color:var(--danger)">${data.error}</div>`;
+      return;
+    }
+    state.cases = data.cases;
+    state.total = data.total;
+    renderList();
+    updatePagination();
+  } catch (e) {
+    listEl.innerHTML = `<div class="loading" style="color:var(--danger)">Error: ${e.message}</div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// RENDER LIST
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function consensWinner(judgements) {
+  if (!judgements || judgements.length === 0) return null;
+  let hc = 0, rag = 0, emp = 0;
+  for (const j of judgements) {
+    if (j.winner === "hardcoded") hc++;
+    else if (j.winner === "rag") rag++;
+    else emp++;
+  }
+  if (hc > rag && hc > emp) return "hc";
+  if (rag > hc && rag > emp) return "rag";
+  if (emp > hc && emp > rag) return "empat";
+  if (hc === rag) return "empat";
+  return rag > hc ? "rag" : "hc";
+}
+
+function renderList() {
+  const listEl = document.getElementById("case-list");
+  document.getElementById("total-count").textContent = `(${state.total})`;
+
+  if (state.cases.length === 0) {
+    listEl.innerHTML = '<div class="loading">Cap cas trobat amb aquests filtres</div>';
+    return;
+  }
+
+  let html = "";
+  for (const c of state.cases) {
+    const isActive = state.selected === c.cas_id ? " active" : "";
+    const winner = consensWinner(c.judgements);
+    let badgeHtml = "";
+    if (winner === "rag") badgeHtml = '<span class="badge rag-wins">RAG</span>';
+    else if (winner === "hc") badgeHtml = '<span class="badge hc-wins">HC</span>';
+    else if (winner === "empat") badgeHtml = '<span class="badge empat">Empat</span>';
+
+    html += `
+      <div class="case-item${isActive}" onclick="selectCase('${c.cas_id}')">
+        <div class="case-id">${c.cas_id}</div>
+        <div class="case-meta">${c.etapa} / ${c.genere} / ${c.mecr} / ${c.dua}</div>
+        <div class="case-badges">${badgeHtml}
+          ${c.judgements.length > 0 ? `<span class="badge" style="background:var(--card2);color:var(--muted)">${c.judgements.length} jutges</span>` : ""}
+        </div>
+      </div>`;
+  }
+  listEl.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PAGINATION
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function updatePagination() {
+  const page = Math.floor(state.offset / PAGE_SIZE) + 1;
+  const totalPages = Math.ceil(state.total / PAGE_SIZE);
+  document.getElementById("page-info").textContent = `${page} / ${totalPages}`;
+  document.getElementById("btn-prev").disabled = state.offset === 0;
+  document.getElementById("btn-next").disabled = state.offset + PAGE_SIZE >= state.total;
+}
+
+function nextPage() {
+  state.offset += PAGE_SIZE;
+  state.selected = null;
+  loadCases();
+}
+
+function prevPage() {
+  state.offset = Math.max(0, state.offset - PAGE_SIZE);
+  state.selected = null;
+  loadCases();
+}
+
+function applyFilters() {
+  state.offset = 0;
+  state.selected = null;
+  document.getElementById("main-panel").innerHTML =
+    '<div class="empty-state">Selecciona un cas de la llista per veure els textos adaptats</div>';
+  loadCases();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// RENDER DETAIL
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function selectCase(casId) {
+  state.selected = casId;
+  // Update active state in list
+  document.querySelectorAll(".case-item").forEach(el => {
+    el.classList.toggle("active", el.querySelector(".case-id").textContent === casId);
+  });
+
+  const c = state.cases.find(x => x.cas_id === casId);
+  if (!c) return;
+
+  const panel = document.getElementById("main-panel");
+  const original = state.originals[c.text_id];
+  const perfil = state.perfils[c.perfil_id];
+
+  // Build metrics
+  const formaHc = c.forma_hc != null ? c.forma_hc.toFixed(3) : "-";
+  const formaRag = c.forma_rag != null ? c.forma_rag.toFixed(3) : "-";
+  const recall = c.recall_rag != null ? (c.recall_rag * 100).toFixed(0) + "%" : "-";
+  const winner = consensWinner(c.judgements);
+  let winnerLabel = "-";
+  let winnerClass = "";
+  if (winner === "rag") { winnerLabel = "RAG"; winnerClass = "rag"; }
+  else if (winner === "hc") { winnerLabel = "Hardcoded"; winnerClass = "hc"; }
+  else if (winner === "empat") { winnerLabel = "Empat"; winnerClass = ""; }
+
+  // Judgements HTML
+  let judgementsHtml = "";
+  if (c.judgements.length > 0) {
+    judgementsHtml = '<div class="judgements-section"><h3>Judicis comparatius</h3>';
+    for (const j of c.judgements) {
+      const jWin = j.winner === "rag" ? "winner-rag" : j.winner === "hardcoded" ? "winner-hc" : "winner-empat";
+      const verdictClass = j.winner === "rag" ? "rag" : j.winner === "hardcoded" ? "hc" : "empat";
+      const verdictLabel = j.winner === "rag" ? "RAG" : j.winner === "hardcoded" ? "HC" : "Empat";
+      const judgeName = j.judge.charAt(0).toUpperCase() + j.judge.slice(1);
+      judgementsHtml += `
+        <div class="judgement-card ${jWin}">
+          <div class="judge-header">
+            <span class="judge-name">${judgeName}</span>
+            <span class="judge-verdict ${verdictClass}">${verdictLabel}</span>
+          </div>
+          <div class="justification">${escapeHtml(j.justification || "Sense justificacio")}</div>
+        </div>`;
+    }
+    judgementsHtml += "</div>";
+  }
+
+  // Perfil info
+  let perfilHtml = "";
+  if (perfil) {
+    perfilHtml = `<div class="meta-tag" title="${escapeHtml(perfil.nom || "")}">${c.perfil_id}: ${escapeHtml(perfil.nom || "")}</div>`;
+  }
+
+  panel.innerHTML = `
+    <div class="case-header">
+      <h2>${c.cas_id}</h2>
+      <div class="meta-tags">
+        <div class="meta-tag">${c.etapa}</div>
+        <div class="meta-tag">${c.genere}</div>
+        <div class="meta-tag">MECR ${c.mecr}</div>
+        <div class="meta-tag">DUA ${c.dua}</div>
+        ${perfilHtml}
+      </div>
+    </div>
+
+    <div class="metrics-row">
+      <div class="metric">
+        <div class="label">Forma HC</div>
+        <div class="val hc">${formaHc}</div>
+      </div>
+      <div class="metric">
+        <div class="label">Forma RAG</div>
+        <div class="val rag">${formaRag}</div>
+      </div>
+      <div class="metric">
+        <div class="label">Recall RAG</div>
+        <div class="val rag">${recall}</div>
+      </div>
+      <div class="metric">
+        <div class="label">Instruccions RAG</div>
+        <div class="val rag">${c.instr_rag || "-"}</div>
+      </div>
+      <div class="metric">
+        <div class="label">Prompt HC</div>
+        <div class="val" style="font-size:1.1rem">${c.prompt_hc_len ? (c.prompt_hc_len / 1000).toFixed(1) + "k" : "-"}</div>
+      </div>
+      <div class="metric">
+        <div class="label">Prompt RAG</div>
+        <div class="val" style="font-size:1.1rem">${c.prompt_rag_len ? (c.prompt_rag_len / 1000).toFixed(1) + "k" : "-"}</div>
+      </div>
+      <div class="metric">
+        <div class="label">Consens</div>
+        <div class="val ${winnerClass}" style="font-size:1.3rem">${winnerLabel}</div>
+      </div>
+    </div>
+
+    <div class="split-view">
+      <div class="text-col">
+        <div class="text-col-header hc">Hardcoded (${c.text_hc ? c.text_hc.length : 0} car.)</div>
+        <div class="text-body">${renderMarkdown(c.text_hc || "(sense text)")}</div>
+      </div>
+      <div class="text-col">
+        <div class="text-col-header rag">RAG filtrat (${c.text_rag ? c.text_rag.length : 0} car.)</div>
+        <div class="text-body">${renderMarkdown(c.text_rag || "(sense text)")}</div>
+      </div>
+    </div>
+
+    <div class="original-section">
+      <div class="original-header">Text original${original ? ` — ${original.tema || ""} (${original.paraules || "?"} paraules)` : ""}</div>
+      <div class="original-body">${original ? escapeHtml(original.text) : "(text original no disponible)"}</div>
+    </div>
+
+    ${judgementsHtml}
+  `;
+
+  // Sync scroll between the two text columns
+  const bodies = panel.querySelectorAll(".text-body");
+  if (bodies.length === 2) {
+    let syncing = false;
+    bodies[0].addEventListener("scroll", () => {
+      if (syncing) return;
+      syncing = true;
+      bodies[1].scrollTop = bodies[0].scrollTop;
+      syncing = false;
+    });
+    bodies[1].addEventListener("scroll", () => {
+      if (syncing) return;
+      syncing = true;
+      bodies[0].scrollTop = bodies[1].scrollTop;
+      syncing = false;
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function escapeHtml(str) {
+  if (!str) return "";
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+function renderMarkdown(md) {
+  if (!md) return "";
+  // Simple markdown renderer — no external libs
+  let html = escapeHtml(md);
+
+  // Headers
+  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+
+  // Bold and italic
+  html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+  // Blockquotes
+  html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+
+  // Unordered lists
+  html = html.replace(/^[-*] (.+)$/gm, '<li>$1</li>');
+  html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
+
+  // Numbered lists
+  html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+
+  // Horizontal rules
+  html = html.replace(/^---+$/gm, '<hr>');
+
+  // Paragraphs (double newlines)
+  html = html.replace(/\n\n+/g, '</p><p>');
+  html = html.replace(/\n/g, '<br>');
+  html = '<p>' + html + '</p>';
+
+  // Clean up empty paragraphs and nesting issues
+  html = html.replace(/<p>\s*<\/p>/g, '');
+  html = html.replace(/<p>(<h[123]>)/g, '$1');
+  html = html.replace(/(<\/h[123]>)<\/p>/g, '$1');
+  html = html.replace(/<p>(<ul>)/g, '$1');
+  html = html.replace(/(<\/ul>)<\/p>/g, '$1');
+  html = html.replace(/<p>(<blockquote>)/g, '$1');
+  html = html.replace(/(<\/blockquote>)<\/p>/g, '$1');
+  html = html.replace(/<p>(<hr>)<\/p>/g, '$1');
+
+  return html;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════════════
+
+async function init() {
+  await loadOriginals();
+  await loadCases();
+}
+
+init();
+</script>
+</body>
+</html>

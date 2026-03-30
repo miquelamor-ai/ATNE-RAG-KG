@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATNE — Progrés Avaluació</title>
+<style>
+:root {
+  --bg: #0f172a; --card: #1e293b; --text: #e2e8f0; --muted: #94a3b8;
+  --primary: #3b82f6; --success: #22c55e; --danger: #ef4444; --warning: #eab308;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 2rem; }
+h1 { font-size: 1.5rem; margin-bottom: 1.5rem; }
+h1 span { color: var(--primary); }
+
+.status-badge {
+  display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px;
+  font-size: 0.8rem; font-weight: 600; margin-left: 0.5rem;
+}
+.status-running { background: var(--warning); color: #000; animation: pulse 2s infinite; }
+.status-completed { background: var(--success); color: #000; }
+.status-idle { background: var(--muted); color: #000; }
+
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.card { background: var(--card); padding: 1.25rem; border-radius: 0.75rem; }
+.card .label { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.card .value { font-size: 2rem; font-weight: 700; margin-top: 0.25rem; }
+.card .sub { color: var(--muted); font-size: 0.85rem; margin-top: 0.25rem; }
+
+.progress-bar { width: 100%; height: 1.5rem; background: var(--card); border-radius: 0.75rem; overflow: hidden; margin: 1rem 0; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--success));
+  transition: width 0.5s ease; display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 600; color: #fff; min-width: 3rem; }
+
+.comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+.comparison .card .value.hc { color: var(--warning); }
+.comparison .card .value.rag { color: var(--primary); }
+
+table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+th { text-align: left; padding: 0.5rem; color: var(--muted); font-size: 0.75rem;
+  text-transform: uppercase; border-bottom: 1px solid #334155; }
+td { padding: 0.5rem; border-bottom: 1px solid #1e293b; font-size: 0.85rem; }
+
+.refresh-info { color: var(--muted); font-size: 0.75rem; margin-top: 1rem; }
+#error { color: var(--danger); margin: 1rem 0; display: none; }
+
+/* Tooltips */
+.tip { position: relative; cursor: help; border-bottom: 1px dotted var(--muted); }
+.tip::after {
+  content: attr(data-tip);
+  position: absolute; bottom: 130%; left: 0;
+  background: #1a1a2e; color: var(--text); padding: 0.6rem 0.8rem; border-radius: 0.5rem;
+  font-size: 0.78rem; line-height: 1.4; width: max-content; max-width: 320px;
+  white-space: normal; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  border: 1px solid var(--primary); z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+.tip:hover::after { opacity: 1; }
+
+.help-icon { display: inline-block; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--card2, #334155); color: var(--muted); font-size: 0.65rem; text-align: center;
+  line-height: 16px; margin-left: 4px; cursor: help; vertical-align: middle; }
+
+.section-help { color: var(--muted); font-size: 0.78rem; margin: -0.5rem 0 0.75rem; line-height: 1.4;
+  padding: 0.5rem 0.75rem; background: rgba(59,130,246,0.08); border-left: 2px solid var(--primary);
+  border-radius: 0 0.4rem 0.4rem 0; }
+
+.grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0; }
+</style>
+</head>
+<body>
+
+<h1>ATNE — <span>Progrés Avaluació</span> <span id="badge" class="status-badge status-idle">Carregant...</span></h1>
+<div id="runInfo" style="color: var(--muted); font-size: 0.85rem; margin-bottom: 1rem;"></div>
+
+<div class="progress-bar">
+  <div id="progressFill" class="progress-fill" style="width: 0%">0%</div>
+</div>
+
+<h2 style="font-size: 1.1rem; margin: 1.5rem 0 0.5rem;">Batch anterior (1 generador, 2 vies)</h2>
+<div class="section-help">Resultats del primer experiment A/B amb Gemini Flash com a unic generador. Compara dues vies de construir el prompt: Hardcoded (instruccions fixes) vs RAG filtrat (instruccions seleccionades per perfil).</div>
+
+<div class="grid">
+  <div class="card">
+    <div class="label"><span class="tip" data-tip="Cada cas = 1 text original adaptat per 1 perfil d'alumnat. 200 casos = 20 textos x 10 perfils.">Casos completats</span></div>
+    <div class="value" id="casesDone">-</div>
+    <div class="sub" id="casesTotal"></div>
+  </div>
+  <div class="card">
+    <div class="label"><span class="tip" data-tip="Nombre d'avaluacions fetes per un jutge LLM (BLOC 3). Cada avaluacio puntua el text adaptat en 5 criteris: Coherencia, Adequacio al perfil, Preservacio curricular, Adequacio MECR i Prellico.">Avaluacions LLM</span></div>
+    <div class="value" id="evalsDone">-</div>
+    <div class="sub">BLOC 3 (C1-C5)</div>
+  </div>
+  <div class="card">
+    <div class="label"><span class="tip" data-tip="Percentatge d'instruccions pedagogiques que el sistema ha enviat correctament al prompt. 0.977 = 97.7% de les instruccions esperades per al perfil s'han incloses. Calculat automaticament (BLOC 1, Python).">Recall RAG</span></div>
+    <div class="value" id="avgRecall">-</div>
+    <div class="sub">BLOC 1 (instruccions enviades)</div>
+  </div>
+</div>
+
+<h2 style="font-size: 1.1rem; margin: 1.5rem 0 0.5rem;">Comparativa parcial</h2>
+<div class="section-help">Compara les dues vies de prompt. <strong>Forma</strong> mesura aspectes formals (longitud de frase, titols, negretes, llistes, prellico) — calculat automaticament per Python. <strong>Paraules</strong> indica la longitud mitjana del text generat.</div>
+
+<div class="comparison">
+  <div class="card">
+    <div class="label"><span class="tip" data-tip="Branca Hardcoded: les instruccions d'adaptacio son constants Python fixes (prompt_blocks.py). Cada perfil te un bloc de 5-6 linies que sempre s'envia igual, independentment de les sub-variables de l'alumne.">Hardcoded</span></div>
+    <div class="value hc" id="hcForma">-</div>
+    <div class="sub"><span class="tip" data-tip="Mitjana de 5 metriques (F1-F5): F1=longitud frase dins rang MECR, F2=titols presents, F3=negretes en termes tecnics, F4=llistes, F5=prellico/glossari previ. Rang 0-1, mes alt = millor adherencia formal.">Forma (F1-F5)</span></div>
+    <div class="value hc" id="hcLen" style="font-size: 1.2rem; margin-top: 0.5rem;">-</div>
+    <div class="sub">Paraules mitjana</div>
+  </div>
+  <div class="card">
+    <div class="label"><span class="tip" data-tip="Branca RAG filtrat: les instruccions son seleccionades individualment d'un cataleg de 72 segons el perfil, sub-variables (L1, alfabet, escolaritzacio), nivell MECR i DUA. Envia NOMES les instruccions pertinents a cada cas.">RAG filtrat</span></div>
+    <div class="value rag" id="ragForma">-</div>
+    <div class="sub"><span class="tip" data-tip="Mateixa metrica que Hardcoded. Compara si el filtratge granular produeix textos amb millor adherencia formal.">Forma (F1-F5)</span></div>
+    <div class="value rag" id="ragLen" style="font-size: 1.2rem; margin-top: 0.5rem;">-</div>
+    <div class="sub">Paraules mitjana</div>
+  </div>
+</div>
+
+<h2 style="font-size: 1.1rem; margin: 1.5rem 0 0.5rem;">Últims casos processats</h2>
+<table>
+  <thead><tr><th>Cas</th><th>Branca</th><th>Forma</th><th>Longitud</th></tr></thead>
+  <tbody id="recentTable"><tr><td colspan="4" style="color:var(--muted)">Esperant dades...</td></tr></tbody>
+</table>
+
+<h2 style="font-size: 1.1rem; margin: 1.5rem 0 0.5rem;">Multi-LLM (4 generadors x 2 vies)</h2>
+<div class="section-help">Experiment complet amb 4 models generadors (Gemini Flash, Claude Sonnet, Llama 4 Scout, GPT-4o-mini) x 2 vies de prompt (Hardcoded i RAG) x 20 textos x 10 perfils = <strong>1.600 adaptacions</strong>. Cada adaptacio es avaluada per multiples jutges LLM en dues dimensions: individual (rubrica C1-C5) i comparativa (HC vs RAG, quin es millor).</div>
+
+<div class="grid4" id="multi-llm-cards"></div>
+
+<h3 style="font-size: 0.9rem; margin: 1rem 0 0.5rem; color: var(--muted);"><span class="tip" data-tip="Cada fila mostra un generador (Gemini, Sonnet, Llama, GPT) amb una via de prompt (hardcoded o rag). La barra indica quantes adaptacions s'han completat. El numero al final es la longitud mitjana en paraules.">Generacions per model</span></h3>
+<div id="multi-gen-bars"></div>
+
+<h3 style="font-size: 0.9rem; margin: 1rem 0 0.5rem; color: var(--muted);"><span class="tip" data-tip="Cada jutge avalua TOTES les adaptacions (inclou auto-avaluacio per mesurar biaix). 'indi' = avaluacio individual (rubrica C1-C5, puntuacio 1-5). 'comp' = avaluacio comparativa (HC vs RAG, quin text es millor per a l'alumne).">Avaluacions per jutge</span></h3>
+<div id="multi-eval-bars"></div>
+
+<h2 style="font-size: 1.1rem; margin: 1.5rem 0 0.5rem;">Ultims casos multi-LLM</h2>
+<table>
+  <thead>
+    <tr>
+      <th><span class="tip" data-tip="Identificador del cas: TEXT_ID__PERFIL_ID. Ex: PRI_EXPL__P1 = text 'Fotosintesi' amb perfil 'Nouvingut arab pre-A1'.">Cas</span></th>
+      <th><span class="tip" data-tip="Quin LLM ha generat l'adaptacio: gemini (Google), sonnet (Claude), llama (Meta open source), gpt (OpenAI).">Generador</span></th>
+      <th><span class="tip" data-tip="Via de prompt: 'hardcoded' = instruccions fixes compactes | 'rag' = instruccions filtrades del cataleg de 72 segons perfil i sub-variables.">Via</span></th>
+      <th><span class="tip" data-tip="Nombre de paraules del text adaptat generat.">Paraules</span></th>
+    </tr>
+  </thead>
+  <tbody id="multiRecentTable"><tr><td colspan="4" style="color:var(--muted)">Esperant dades...</td></tr></tbody>
+</table>
+
+<div id="error"></div>
+<div class="refresh-info">Actualització automàtica cada 10 segons · <a href="/eval/results" style="color:var(--primary)">Resultats</a> · <a href="/eval/cases" style="color:var(--primary)">Visor casos</a> · <a href="/eval" style="color:var(--primary)">Dashboard</a></div>
+
+<script>
+async function refresh() {
+  try {
+    const res = await fetch('/api/eval/progress');
+    const d = await res.json();
+
+    if (d.status === 'error') {
+      document.getElementById('error').textContent = d.message;
+      document.getElementById('error').style.display = 'block';
+      return;
+    }
+
+    const badge = document.getElementById('badge');
+    badge.textContent = d.status === 'running' ? 'En curs...' : d.status === 'completed' ? 'Completat' : 'Inactiu';
+    badge.className = 'status-badge status-' + d.status;
+
+    document.getElementById('runInfo').textContent =
+      `Run: ${d.run_id || '-'} · ${d.notes || ''} · ${d.timestamp || ''}`;
+
+    const p = d.progress || {};
+    document.getElementById('casesDone').textContent = p.cases_done || 0;
+    document.getElementById('casesTotal').textContent = `de ${p.total_expected || '?'}`;
+    document.getElementById('evalsDone').textContent = p.evals_done || 0;
+
+    const pct = p.percentage || 0;
+    const fill = document.getElementById('progressFill');
+    fill.style.width = pct + '%';
+    fill.textContent = pct + '%';
+
+    const ps = d.partial_stats || {};
+    const hc = ps.hardcoded || {};
+    const rag = ps.rag || {};
+
+    document.getElementById('hcForma').textContent = hc.avg_forma != null ? hc.avg_forma.toFixed(3) : '-';
+    document.getElementById('ragForma').textContent = rag.avg_forma != null ? rag.avg_forma.toFixed(3) : '-';
+    document.getElementById('hcLen').textContent = hc.avg_len != null ? Math.round(hc.avg_len / 5) + 'w' : '-';
+    document.getElementById('ragLen').textContent = rag.avg_len != null ? Math.round(rag.avg_len / 5) + 'w' : '-';
+    document.getElementById('avgRecall').textContent = rag.avg_recall != null ? rag.avg_recall.toFixed(3) : '-';
+
+    const recent = d.recent_cases || [];
+    const tbody = document.getElementById('recentTable');
+    if (recent.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted)">Esperant dades...</td></tr>';
+    } else {
+      tbody.innerHTML = recent.map(r =>
+        `<tr>
+          <td>${r.cas_id}</td>
+          <td><span style="color:${r.branca === 'rag' ? 'var(--primary)' : 'var(--warning)'}">${r.branca}</span></td>
+          <td>${r.forma != null ? r.forma.toFixed(3) : '-'}</td>
+          <td>${r.len || '-'} chars</td>
+        </tr>`
+      ).join('');
+    }
+    // ── Multi-LLM ──
+    const ml = d.multi_llm || {};
+    const cardsDiv = document.getElementById('multi-llm-cards');
+    if (ml.total_generations || ml.total_evaluations) {
+      cardsDiv.innerHTML = `
+        <div class="card"><div class="label">Generacions</div><div class="value">${ml.total_generations || 0}</div><div class="sub">de 1.600 esperades</div></div>
+        <div class="card"><div class="label">Avaluacions</div><div class="value">${ml.total_evaluations || 0}</div><div class="sub">de 9.600 esperades</div></div>
+      `;
+    }
+
+    // Barres generació per model
+    const genBars = document.getElementById('multi-gen-bars');
+    const gens = ml.generations || [];
+    if (gens.length > 0) {
+      const colors = {gemini:'#eab308',sonnet:'#8b5cf6',llama:'#22c55e',gpt:'#3b82f6'};
+      genBars.innerHTML = gens.map(g =>
+        `<div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
+          <span style="width:100px;font-size:0.8rem;text-align:right;color:var(--muted)">${g.generator}/${g.prompt_mode}</span>
+          <div style="flex:1;height:20px;background:var(--card2);border-radius:4px;overflow:hidden">
+            <div style="width:${g.n/2}%;height:100%;background:${colors[g.generator]||'#888'};display:flex;align-items:center;padding:0 8px;font-size:0.7rem;color:#fff;min-width:40px">${g.n}</div>
+          </div>
+          <span style="font-size:0.75rem;color:var(--muted)">${g.avg_words ? Math.round(g.avg_words)+'w' : ''}</span>
+        </div>`
+      ).join('');
+    }
+
+    // Barres avaluació per jutge
+    const evalBars = document.getElementById('multi-eval-bars');
+    const evals = ml.evaluations || [];
+    if (evals.length > 0) {
+      const colors = {gemini:'#eab308',sonnet:'#8b5cf6',llama:'#22c55e',gpt:'#3b82f6'};
+      evalBars.innerHTML = evals.map(e =>
+        `<div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
+          <span style="width:100px;font-size:0.8rem;text-align:right;color:var(--muted)">${e.judge}/${e.eval_type.slice(0,4)}</span>
+          <div style="flex:1;height:20px;background:var(--card2);border-radius:4px;overflow:hidden">
+            <div style="width:${e.n/16}%;height:100%;background:${colors[e.judge]||'#888'};display:flex;align-items:center;padding:0 8px;font-size:0.7rem;color:#fff;min-width:40px">${e.n}</div>
+          </div>
+        </div>`
+      ).join('');
+    }
+
+    // Últims multi-LLM
+    const mrt = document.getElementById('multiRecentTable');
+    const mrecent = ml.recent || [];
+    if (mrecent.length > 0) {
+      mrt.innerHTML = mrecent.map(r => {
+        const colors = {gemini:'#eab308',sonnet:'#8b5cf6',llama:'#22c55e',gpt:'#3b82f6'};
+        return `<tr>
+          <td>${r.cas_id}</td>
+          <td style="color:${colors[r.generator]||'#fff'}">${r.generator}</td>
+          <td>${r.prompt_mode}</td>
+          <td>${r.words || '-'}w</td>
+        </tr>`;
+      }).join('');
+    }
+
+  } catch (e) {
+    document.getElementById('error').textContent = 'Error de connexió: ' + e.message;
+    document.getElementById('error').style.display = 'block';
+  }
+}
+
+refresh();
+setInterval(refresh, 10000);
+</script>
+</body>
+</html>

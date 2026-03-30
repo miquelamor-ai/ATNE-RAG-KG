@@ -1,0 +1,1872 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATNE — Avaluació A/B Testing</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   CSS — Variables i Reset
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --primary: #2c5282;
+  --primary-light: #ebf4ff;
+  --primary-dark: #1a365d;
+  --success: #2f855a;
+  --success-light: #c6f6d5;
+  --success-bg: #f0fff4;
+  --danger: #c53030;
+  --danger-light: #fed7d7;
+  --danger-bg: #fff5f5;
+  --warning: #d69e2e;
+  --warning-light: #fefcbf;
+  --neutral: #718096;
+  --neutral-light: #e2e8f0;
+  --neutral-bg: #f7fafc;
+  --bg: #f7fafc;
+  --surface: #ffffff;
+  --text: #1a202c;
+  --text-secondary: #4a5568;
+  --text-muted: #a0aec0;
+  --border: #e2e8f0;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,.1), 0 4px 6px rgba(0,0,0,.05);
+  --transition: 0.2s ease;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Header
+   ═══════════════════════════════════════════════════════════════ */
+.header {
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+  color: #fff;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  box-shadow: var(--shadow-md);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+}
+
+.header-title span {
+  font-weight: 400;
+  opacity: 0.85;
+  font-size: 14px;
+  margin-left: 8px;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-controls label {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.header-controls select {
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(255,255,255,.3);
+  background: rgba(255,255,255,.15);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  min-width: 200px;
+}
+
+.header-controls select option {
+  background: var(--primary-dark);
+  color: #fff;
+}
+
+.header-stats {
+  display: flex;
+  gap: 16px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+
+.stat-badge {
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: var(--radius);
+  padding: 4px 12px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.stat-badge strong {
+  font-weight: 700;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Tabs
+   ═══════════════════════════════════════════════════════════════ */
+.tabs-bar {
+  display: flex;
+  gap: 0;
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  padding: 0 24px;
+}
+
+.tab-btn {
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all var(--transition);
+}
+
+.tab-btn:hover {
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.tab-btn.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  font-weight: 600;
+}
+
+.tab-panel {
+  display: none;
+  padding: 24px;
+  animation: fadeIn 0.25s ease;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Cards genèriques
+   ═══════════════════════════════════════════════════════════════ */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Tab 1: Resum — Score Cards
+   ═══════════════════════════════════════════════════════════════ */
+.score-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.score-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  text-align: center;
+  border-top: 4px solid var(--border);
+}
+
+.score-card.hc { border-top-color: var(--danger); }
+.score-card.rag { border-top-color: var(--success); }
+.score-card.tie { border-top-color: var(--warning); }
+.score-card.info { border-top-color: var(--primary); }
+
+.score-card .label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.score-card .value {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.score-card.hc .value { color: var(--danger); }
+.score-card.rag .value { color: var(--success); }
+.score-card.tie .value { color: var(--warning); }
+.score-card.info .value { color: var(--primary); }
+
+.score-card .sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Bar Charts (CSS-only)
+   ═══════════════════════════════════════════════════════════════ */
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 900px) {
+  .charts-row { grid-template-columns: 1fr; }
+}
+
+.bar-chart {
+  width: 100%;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.bar-label {
+  width: 50px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: right;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.bar-pair {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.bar-track {
+  height: 14px;
+  background: var(--neutral-light);
+  border-radius: 7px;
+  overflow: hidden;
+  position: relative;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 7px;
+  transition: width 0.5s ease;
+  min-width: 2px;
+}
+
+.bar-fill.hc { background: var(--danger); opacity: 0.7; }
+.bar-fill.rag { background: var(--success); opacity: 0.8; }
+
+.bar-value {
+  position: absolute;
+  right: 6px;
+  top: 0;
+  font-size: 10px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 14px;
+}
+
+.bar-legend {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 12px;
+  font-size: 12px;
+}
+
+.bar-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bar-legend-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.bar-legend-swatch.hc { background: var(--danger); opacity: 0.7; }
+.bar-legend-swatch.rag { background: var(--success); opacity: 0.8; }
+
+/* ═══════════════════════════════════════════════════════════════
+   Donut (CSS-only)
+   ═══════════════════════════════════════════════════════════════ */
+.donut-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.donut-container {
+  position: relative;
+  width: 160px;
+  height: 160px;
+}
+
+.donut-svg {
+  width: 160px;
+  height: 160px;
+  transform: rotate(-90deg);
+}
+
+.donut-svg circle {
+  fill: none;
+  stroke-width: 24;
+  cx: 80;
+  cy: 80;
+  r: 60;
+}
+
+.donut-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.donut-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.donut-legend-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.donut-legend-swatch.rag { background: var(--success); }
+.donut-legend-swatch.hc { background: var(--danger); }
+.donut-legend-swatch.tie { background: var(--warning); }
+
+/* ═══════════════════════════════════════════════════════════════
+   Tab 2: Taula Detall
+   ═══════════════════════════════════════════════════════════════ */
+.filters-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filters-bar input,
+.filters-bar select {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.filters-bar input { min-width: 120px; }
+.filters-bar select { min-width: 100px; }
+
+.filters-bar label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.data-table-wrapper {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.data-table th {
+  background: var(--neutral-bg);
+  border-bottom: 2px solid var(--border);
+  padding: 10px 8px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  position: relative;
+}
+
+.data-table th:hover {
+  background: var(--primary-light);
+}
+
+.data-table th .sort-arrow {
+  margin-left: 4px;
+  font-size: 10px;
+  opacity: 0.4;
+}
+
+.data-table th.sorted-asc .sort-arrow,
+.data-table th.sorted-desc .sort-arrow {
+  opacity: 1;
+  color: var(--primary);
+}
+
+.data-table td {
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.data-table tbody tr {
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.data-table tbody tr:nth-child(even) {
+  background: var(--neutral-bg);
+}
+
+.data-table tbody tr:hover {
+  background: var(--primary-light);
+}
+
+.data-table tbody tr.rag-wins { background: var(--success-bg); }
+.data-table tbody tr.rag-wins:nth-child(even) { background: #e6ffed; }
+.data-table tbody tr.hc-wins { background: var(--danger-bg); }
+.data-table tbody tr.hc-wins:nth-child(even) { background: #fff0f0; }
+.data-table tbody tr.tie-result { background: var(--neutral-bg); }
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge.rag { background: var(--success-light); color: var(--success); }
+.badge.hc { background: var(--danger-light); color: var(--danger); }
+.badge.empat { background: var(--warning-light); color: #92400e; }
+
+/* Expanded detail row */
+.expanded-row td {
+  padding: 0;
+  border-bottom: 2px solid var(--primary);
+}
+
+.expanded-detail {
+  padding: 16px 12px;
+  background: var(--primary-light);
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; max-height: 0; }
+  to   { opacity: 1; max-height: 2000px; }
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .detail-grid { grid-template-columns: 1fr; }
+}
+
+.detail-branch {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 12px;
+  box-shadow: var(--shadow);
+}
+
+.detail-branch h4 {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--border);
+}
+
+.detail-branch.hc-branch h4 { color: var(--danger); border-bottom-color: var(--danger-light); }
+.detail-branch.rag-branch h4 { color: var(--success); border-bottom-color: var(--success-light); }
+
+.criteria-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 4px 0;
+  font-size: 12px;
+  border-bottom: 1px solid var(--neutral-light);
+}
+
+.criteria-row:last-child { border-bottom: none; }
+
+.criteria-label { font-weight: 600; width: 30px; flex-shrink: 0; }
+.criteria-score {
+  font-weight: 700;
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+  border-radius: 4px;
+  padding: 1px 0;
+}
+
+.criteria-score.high { background: var(--success-light); color: var(--success); }
+.criteria-score.mid  { background: var(--warning-light); color: #92400e; }
+.criteria-score.low  { background: var(--danger-light); color: var(--danger); }
+
+.criteria-just { flex: 1; margin: 0 8px; color: var(--text-secondary); }
+
+.audit-section {
+  margin-top: 12px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 12px;
+  box-shadow: var(--shadow);
+}
+
+.audit-section h4 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+
+.audit-item {
+  font-size: 12px;
+  margin-bottom: 4px;
+  color: var(--text-secondary);
+}
+
+.audit-item strong { color: var(--text); }
+
+/* ═══════════════════════════════════════════════════════════════
+   Tab 3: Prompts i Outputs
+   ═══════════════════════════════════════════════════════════════ */
+.case-selector {
+  margin-bottom: 20px;
+}
+
+.case-selector select {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  min-width: 300px;
+  background: var(--surface);
+}
+
+.split-view {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 900px) {
+  .split-view { grid-template-columns: 1fr; }
+}
+
+.split-panel {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.split-panel.hc-panel { border-top: 3px solid var(--danger); }
+.split-panel.rag-panel { border-top: 3px solid var(--success); }
+
+.split-panel-header {
+  padding: 12px 16px;
+  font-weight: 700;
+  font-size: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.hc-panel .split-panel-header { color: var(--danger); background: var(--danger-bg); }
+.rag-panel .split-panel-header { color: var(--success); background: var(--success-bg); }
+
+.split-panel-section {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.split-panel-section:last-child { border-bottom: none; }
+
+.split-panel-section h5 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.prompt-block {
+  max-height: 300px;
+  overflow-y: auto;
+  background: #1a202c;
+  color: #e2e8f0;
+  padding: 12px;
+  border-radius: var(--radius);
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.output-block {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 12px;
+  background: var(--neutral-bg);
+  border-radius: var(--radius);
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.assessment-panel {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  border-top: 3px solid var(--primary);
+}
+
+.assessment-panel h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 12px;
+}
+
+.assessment-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .assessment-grid { grid-template-columns: 1fr; }
+}
+
+.assessment-item {
+  background: var(--neutral-bg);
+  border-radius: var(--radius);
+  padding: 10px;
+}
+
+.assessment-item .a-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.assessment-item .a-value {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.assessment-item .a-value.rag { color: var(--success); }
+.assessment-item .a-value.hc { color: var(--danger); }
+.assessment-item .a-value.empat { color: var(--warning); }
+
+.assessment-item .a-reason {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Tab 4: Correlacions — Heatmap
+   ═══════════════════════════════════════════════════════════════ */
+.heatmap-wrapper {
+  overflow-x: auto;
+  margin-bottom: 24px;
+}
+
+.heatmap {
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 500px;
+}
+
+.heatmap th {
+  padding: 8px 12px;
+  font-weight: 600;
+  text-align: center;
+  background: var(--neutral-bg);
+  border: 1px solid var(--border);
+}
+
+.heatmap td {
+  padding: 10px 12px;
+  text-align: center;
+  font-weight: 700;
+  border: 1px solid var(--border);
+  min-width: 70px;
+  transition: transform 0.1s;
+}
+
+.heatmap td:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-md);
+  z-index: 1;
+  position: relative;
+}
+
+.heatmap .row-header {
+  text-align: left;
+  font-weight: 600;
+  background: var(--neutral-bg);
+  color: var(--text-secondary);
+}
+
+.summary-tables {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.summary-mini-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.summary-mini-table th {
+  background: var(--neutral-bg);
+  padding: 8px 10px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid var(--border);
+}
+
+.summary-mini-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.summary-mini-table tr:nth-child(even) td {
+  background: var(--neutral-bg);
+}
+
+.diff-positive { color: var(--success); font-weight: 700; }
+.diff-negative { color: var(--danger); font-weight: 700; }
+.diff-zero { color: var(--text-muted); }
+
+/* ═══════════════════════════════════════════════════════════════
+   Empty state
+   ═══════════════════════════════════════════════════════════════ */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+
+.empty-state .empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.4;
+}
+
+.empty-state p {
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.empty-state .empty-sub {
+  font-size: 13px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Loading
+   ═══════════════════════════════════════════════════════════════ */
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Scrollbar personalitzat
+   ═══════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--neutral-light); border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     HEADER
+     ═══════════════════════════════════════════════════════════════ -->
+<header class="header">
+  <div class="header-title">
+    ATNE <span>Avaluacio A/B Testing</span>
+  </div>
+  <div class="header-controls">
+    <label for="run-selector">Execucio:</label>
+    <select id="run-selector">
+      <option value="">Carregant...</option>
+    </select>
+  </div>
+  <div class="header-stats" id="header-stats"></div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TABS
+     ═══════════════════════════════════════════════════════════════ -->
+<nav class="tabs-bar">
+  <button class="tab-btn active" data-tab="resum">Resum</button>
+  <button class="tab-btn" data-tab="detall">Detall per cas</button>
+  <button class="tab-btn" data-tab="prompts">Prompts i Outputs</button>
+  <button class="tab-btn" data-tab="correlacions">Correlacions</button>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TAB PANELS
+     ═══════════════════════════════════════════════════════════════ -->
+
+<!-- Tab 1: Resum -->
+<section class="tab-panel active" id="panel-resum">
+  <div id="loading-resum" class="loading-spinner">
+    <div class="spinner"></div>
+    Carregant dades...
+  </div>
+  <div id="content-resum" style="display:none">
+    <div class="score-cards" id="score-cards"></div>
+    <div class="charts-row">
+      <div class="card">
+        <div class="card-title">Forma per perfil</div>
+        <div class="bar-chart" id="chart-forma"></div>
+        <div class="bar-legend">
+          <span class="bar-legend-item"><span class="bar-legend-swatch hc"></span> Hardcoded</span>
+          <span class="bar-legend-item"><span class="bar-legend-swatch rag"></span> RAG</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Fons per perfil</div>
+        <div class="bar-chart" id="chart-fons"></div>
+        <div class="bar-legend">
+          <span class="bar-legend-item"><span class="bar-legend-swatch hc"></span> Hardcoded</span>
+          <span class="bar-legend-item"><span class="bar-legend-swatch rag"></span> RAG</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Distribucio de veredictes</div>
+      <div class="donut-section" id="donut-section"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Tab 2: Detall -->
+<section class="tab-panel" id="panel-detall">
+  <div class="card">
+    <div class="filters-bar" id="filters-bar">
+      <div class="filter-group">
+        <label>Text ID</label>
+        <input type="text" id="filter-text" placeholder="Cerca text...">
+      </div>
+      <div class="filter-group">
+        <label>Perfil</label>
+        <select id="filter-perfil"><option value="">Tots</option></select>
+      </div>
+      <div class="filter-group">
+        <label>Etapa</label>
+        <select id="filter-etapa"><option value="">Totes</option></select>
+      </div>
+      <div class="filter-group">
+        <label>Veredicte</label>
+        <select id="filter-veredicte">
+          <option value="">Tots</option>
+          <option value="rag">RAG guanya</option>
+          <option value="hardcoded">HC guanya</option>
+          <option value="empat">Empat</option>
+        </select>
+      </div>
+    </div>
+    <div class="data-table-wrapper">
+      <table class="data-table" id="detail-table">
+        <thead>
+          <tr id="detail-thead"></tr>
+        </thead>
+        <tbody id="detail-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Tab 3: Prompts -->
+<section class="tab-panel" id="panel-prompts">
+  <div class="case-selector">
+    <label for="case-select" style="font-weight:600;margin-right:8px;">Cas:</label>
+    <select id="case-select"><option value="">Selecciona un cas...</option></select>
+  </div>
+  <div id="prompts-content"></div>
+</section>
+
+<!-- Tab 4: Correlacions -->
+<section class="tab-panel" id="panel-correlacions">
+  <div class="card">
+    <div class="card-title">Diferencia Fons (RAG - HC) per Perfil x Genere</div>
+    <div class="heatmap-wrapper" id="heatmap-wrapper"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Resums per dimensio</div>
+    <div class="summary-tables" id="summary-tables"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+'use strict';
+
+/* ── Global state ──────────────────────────────────────────── */
+let currentRunId = null;
+let runData = null;       // full run data from /api/eval/run/{id}
+let sortColumn = null;
+let sortDir = 'asc';
+let expandedRow = null;
+
+const PROFILES = ['P1','P2','P3','P4','P5','P6','P7','P8','P9','P10'];
+const GENRES = ['explicacio','narracio','instruccio','argumentacio','cultural'];
+const GENRE_SHORT = { explicacio:'EXPL', narracio:'NARR', instruccio:'INST', argumentacio:'ARGU', cultural:'CULT' };
+const COLUMNS = [
+  { key:'cas_id',     label:'Cas',      sortable:true },
+  { key:'text_id',    label:'Text',     sortable:true },
+  { key:'perfil_id',  label:'Perfil',   sortable:true },
+  { key:'etapa',      label:'Etapa',    sortable:true },
+  { key:'genere',     label:'Genere',   sortable:true },
+  { key:'mecr',       label:'MECR',     sortable:true },
+  { key:'forma_hc',   label:'Forma HC', sortable:true, numeric:true },
+  { key:'forma_rag',  label:'Forma RAG',sortable:true, numeric:true },
+  { key:'fons_hc',    label:'Fons HC',  sortable:true, numeric:true },
+  { key:'fons_rag',   label:'Fons RAG', sortable:true, numeric:true },
+  { key:'veredicte',  label:'Veredicte',sortable:true },
+];
+
+/* ── API helpers ───────────────────────────────────────────── */
+
+async function fetchJSON(url) {
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    return await resp.json();
+  } catch(e) {
+    console.error('Fetch error:', url, e);
+    return null;
+  }
+}
+
+/* ── Init ──────────────────────────────────────────────────── */
+
+async function init() {
+  setupTabs();
+
+  const runs = await fetchJSON('/api/eval/runs');
+  const sel = document.getElementById('run-selector');
+
+  if (!runs || !runs.length) {
+    sel.innerHTML = '<option value="">Cap execucio disponible</option>';
+    showEmpty();
+    return;
+  }
+
+  sel.innerHTML = runs.map(function(r) {
+    const label = r.label || r.run_id || r;
+    const val = r.run_id || r;
+    return '<option value="' + val + '">' + label + '</option>';
+  }).join('');
+
+  sel.addEventListener('change', function() { loadRun(this.value); });
+
+  // Check URL hash
+  const hash = window.location.hash.replace('#', '');
+  if (hash) {
+    const parts = hash.split('/');
+    if (parts[0] === 'run' && parts[1]) {
+      sel.value = parts[1];
+    }
+    if (parts[2]) {
+      activateTab(parts[2]);
+    }
+  }
+
+  loadRun(sel.value);
+}
+
+async function loadRun(runId) {
+  if (!runId) { showEmpty(); return; }
+  currentRunId = runId;
+  window.location.hash = 'run/' + runId;
+
+  document.getElementById('loading-resum').style.display = 'flex';
+  document.getElementById('content-resum').style.display = 'none';
+
+  runData = await fetchJSON('/api/eval/run/' + runId);
+
+  if (!runData || !runData.cases || !runData.cases.length) {
+    showEmpty();
+    return;
+  }
+
+  document.getElementById('loading-resum').style.display = 'none';
+  document.getElementById('content-resum').style.display = 'block';
+
+  renderHeaderStats();
+  renderResum();
+  renderDetailTable();
+  renderPrompts();
+  renderCorrelacions();
+  populateFilters();
+}
+
+function showEmpty() {
+  document.getElementById('loading-resum').style.display = 'none';
+  document.getElementById('content-resum').style.display = 'none';
+  var panels = document.querySelectorAll('.tab-panel');
+  panels.forEach(function(p) {
+    if (!p.querySelector('.empty-state')) {
+      var empty = document.createElement('div');
+      empty.className = 'empty-state existing-empty';
+      empty.innerHTML = '<div class="empty-icon">--</div>' +
+        '<p>Cap dada disponible</p>' +
+        '<p class="empty-sub">Selecciona una execucio o executa primer el batch test amb l\'agent avaluador.</p>';
+      p.appendChild(empty);
+    }
+  });
+}
+
+function removeEmpties() {
+  document.querySelectorAll('.existing-empty').forEach(function(e) { e.remove(); });
+}
+
+/* ── Tabs ──────────────────────────────────────────────────── */
+
+function setupTabs() {
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      activateTab(this.getAttribute('data-tab'));
+    });
+  });
+}
+
+function activateTab(tabId) {
+  document.querySelectorAll('.tab-btn').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-tab') === tabId);
+  });
+  document.querySelectorAll('.tab-panel').forEach(function(p) {
+    p.classList.toggle('active', p.id === 'panel-' + tabId);
+  });
+  if (currentRunId) {
+    history.replaceState(null, '', '#run/' + currentRunId + '/' + tabId);
+  }
+}
+
+/* ── Data extraction helpers ───────────────────────────────── */
+
+function getCases() {
+  return runData && runData.cases ? runData.cases : [];
+}
+
+function safeNum(v) {
+  var n = parseFloat(v);
+  return isNaN(n) ? 0 : n;
+}
+
+function avg(arr) {
+  if (!arr.length) return 0;
+  return arr.reduce(function(a,b){ return a+b; }, 0) / arr.length;
+}
+
+function fmt(n) { return n.toFixed(2); }
+
+function getVeredicte(c) {
+  if (c.comparacio && c.comparacio.veredicte) return c.comparacio.veredicte;
+  if (c.veredicte) return c.veredicte;
+  return 'empat';
+}
+
+function getFormaHC(c) {
+  if (c.forma_hc !== undefined) return safeNum(c.forma_hc);
+  if (c.metrics && c.metrics.hardcoded && c.metrics.hardcoded.forma) {
+    return safeNum(c.metrics.hardcoded.forma.puntuacio_forma);
+  }
+  if (c.avaluacio && c.avaluacio.hardcoded) return safeNum(c.avaluacio.hardcoded.puntuacio_fons);
+  return 0;
+}
+
+function getFormaRAG(c) {
+  if (c.forma_rag !== undefined) return safeNum(c.forma_rag);
+  if (c.metrics && c.metrics.rag && c.metrics.rag.forma) {
+    return safeNum(c.metrics.rag.forma.puntuacio_forma);
+  }
+  if (c.avaluacio && c.avaluacio.rag) return safeNum(c.avaluacio.rag.puntuacio_fons);
+  return 0;
+}
+
+function getFonsHC(c) {
+  if (c.fons_hc !== undefined) return safeNum(c.fons_hc);
+  if (c.avaluacio && c.avaluacio.hardcoded) return safeNum(c.avaluacio.hardcoded.puntuacio_fons);
+  return 0;
+}
+
+function getFonsRAG(c) {
+  if (c.fons_rag !== undefined) return safeNum(c.fons_rag);
+  if (c.avaluacio && c.avaluacio.rag) return safeNum(c.avaluacio.rag.puntuacio_fons);
+  return 0;
+}
+
+function getCriteriaScores(c, branch) {
+  if (!c.avaluacio || !c.avaluacio[branch]) return [];
+  var av = c.avaluacio[branch];
+  var keys = ['C1','C2','C3','C4','C5','C6'];
+  var out = [];
+  keys.forEach(function(k) {
+    if (av[k]) {
+      out.push({ key: k, score: safeNum(av[k].p), justification: av[k].j || '' });
+    }
+  });
+  return out;
+}
+
+/* ── Header Stats ──────────────────────────────────────────── */
+
+function renderHeaderStats() {
+  removeEmpties();
+  var cases = getCases();
+  var total = cases.length;
+  var avgFormaHC = avg(cases.map(getFormaHC));
+  var avgFormaRAG = avg(cases.map(getFormaRAG));
+  var avgFonsHC = avg(cases.map(getFonsHC));
+  var avgFonsRAG = avg(cases.map(getFonsRAG));
+  var ragWins = cases.filter(function(c){ return getVeredicte(c)==='rag'; }).length;
+  var hcWins = cases.filter(function(c){ return getVeredicte(c)==='hardcoded'; }).length;
+  var empats = total - ragWins - hcWins;
+
+  var html = '' +
+    '<span class="stat-badge"><strong>' + total + '</strong> casos</span>' +
+    '<span class="stat-badge">Forma HC <strong>' + fmt(avgFormaHC) + '</strong> vs RAG <strong>' + fmt(avgFormaRAG) + '</strong></span>' +
+    '<span class="stat-badge">Fons HC <strong>' + fmt(avgFonsHC) + '</strong> vs RAG <strong>' + fmt(avgFonsRAG) + '</strong></span>' +
+    '<span class="stat-badge">RAG <strong>' + ragWins + '</strong> | HC <strong>' + hcWins + '</strong> | Empat <strong>' + empats + '</strong></span>';
+
+  document.getElementById('header-stats').innerHTML = html;
+}
+
+/* ── Tab 1: Resum ──────────────────────────────────────────── */
+
+function renderResum() {
+  var cases = getCases();
+  var avgFonsHC = avg(cases.map(getFonsHC));
+  var avgFonsRAG = avg(cases.map(getFonsRAG));
+  var avgFormaHC = avg(cases.map(getFormaHC));
+  var avgFormaRAG = avg(cases.map(getFormaRAG));
+  var ragWins = cases.filter(function(c){ return getVeredicte(c)==='rag'; }).length;
+  var hcWins = cases.filter(function(c){ return getVeredicte(c)==='hardcoded'; }).length;
+  var empats = cases.length - ragWins - hcWins;
+
+  // Score cards
+  document.getElementById('score-cards').innerHTML = '' +
+    '<div class="score-card hc"><div class="label">Fons Hardcoded</div><div class="value">' + fmt(avgFonsHC) + '</div><div class="sub">Mitjana C1-C5</div></div>' +
+    '<div class="score-card rag"><div class="label">Fons RAG</div><div class="value">' + fmt(avgFonsRAG) + '</div><div class="sub">Mitjana C1-C5</div></div>' +
+    '<div class="score-card hc"><div class="label">Forma Hardcoded</div><div class="value">' + fmt(avgFormaHC) + '</div><div class="sub">F1-F5</div></div>' +
+    '<div class="score-card rag"><div class="label">Forma RAG</div><div class="value">' + fmt(avgFormaRAG) + '</div><div class="sub">F1-F5</div></div>' +
+    '<div class="score-card info"><div class="label">Total casos</div><div class="value">' + cases.length + '</div><div class="sub">' + ragWins + ' RAG / ' + hcWins + ' HC / ' + empats + ' empat</div></div>';
+
+  // Bar charts per profile
+  renderBarChart('chart-forma', 'forma');
+  renderBarChart('chart-fons', 'fons');
+
+  // Donut
+  renderDonut(ragWins, hcWins, empats);
+}
+
+function renderBarChart(containerId, metric) {
+  var cases = getCases();
+  var container = document.getElementById(containerId);
+  var maxVal = metric === 'fons' ? 5 : 1;
+
+  var html = '';
+  PROFILES.forEach(function(pid) {
+    var profileCases = cases.filter(function(c){ return (c.perfil_id || c.cas_id || '').indexOf(pid) !== -1 || c.perfil_id === pid; });
+    if (!profileCases.length) return;
+
+    var hcVal, ragVal;
+    if (metric === 'forma') {
+      hcVal = avg(profileCases.map(getFormaHC));
+      ragVal = avg(profileCases.map(getFormaRAG));
+    } else {
+      hcVal = avg(profileCases.map(getFonsHC));
+      ragVal = avg(profileCases.map(getFonsRAG));
+    }
+
+    var hcPct = Math.min((hcVal / maxVal) * 100, 100);
+    var ragPct = Math.min((ragVal / maxVal) * 100, 100);
+
+    html += '<div class="bar-row">' +
+      '<div class="bar-label">' + pid + '</div>' +
+      '<div class="bar-pair">' +
+        '<div class="bar-track"><div class="bar-fill hc" style="width:' + hcPct + '%"><span class="bar-value">' + fmt(hcVal) + '</span></div></div>' +
+        '<div class="bar-track"><div class="bar-fill rag" style="width:' + ragPct + '%"><span class="bar-value">' + fmt(ragVal) + '</span></div></div>' +
+      '</div>' +
+    '</div>';
+  });
+
+  container.innerHTML = html || '<div class="empty-state"><p>Cap dada per perfil</p></div>';
+}
+
+function renderDonut(ragWins, hcWins, empats) {
+  var total = ragWins + hcWins + empats;
+  if (total === 0) {
+    document.getElementById('donut-section').innerHTML = '<div class="empty-state"><p>Cap dada</p></div>';
+    return;
+  }
+
+  var circumference = 2 * Math.PI * 60; // r=60
+  var ragPct = ragWins / total;
+  var hcPct = hcWins / total;
+  var tiePct = empats / total;
+
+  var ragLen = ragPct * circumference;
+  var hcLen = hcPct * circumference;
+  var tieLen = tiePct * circumference;
+
+  var ragOffset = 0;
+  var hcOffset = ragLen;
+  var tieOffset = ragLen + hcLen;
+
+  var svg = '<svg class="donut-svg" viewBox="0 0 160 160">' +
+    '<circle stroke="#e2e8f0" stroke-dasharray="' + circumference + '" stroke-dashoffset="0"/>' +
+    '<circle stroke="' + getComputedStyle(document.documentElement).getPropertyValue('--success').trim() + '" ' +
+      'stroke-dasharray="' + ragLen + ' ' + (circumference - ragLen) + '" ' +
+      'stroke-dashoffset="-' + ragOffset + '"/>' +
+    '<circle stroke="' + getComputedStyle(document.documentElement).getPropertyValue('--danger').trim() + '" ' +
+      'stroke-dasharray="' + hcLen + ' ' + (circumference - hcLen) + '" ' +
+      'stroke-dashoffset="-' + hcOffset + '"/>' +
+    '<circle stroke="' + getComputedStyle(document.documentElement).getPropertyValue('--warning').trim() + '" ' +
+      'stroke-dasharray="' + tieLen + ' ' + (circumference - tieLen) + '" ' +
+      'stroke-dashoffset="-' + tieOffset + '"/>' +
+  '</svg>';
+
+  document.getElementById('donut-section').innerHTML = '' +
+    '<div class="donut-container">' +
+      svg +
+      '<div class="donut-center">' + total + '<br>casos</div>' +
+    '</div>' +
+    '<div class="donut-legend">' +
+      '<div class="donut-legend-item"><span class="donut-legend-swatch rag"></span> RAG guanya: <strong>' + ragWins + '</strong> (' + Math.round(ragPct*100) + '%)</div>' +
+      '<div class="donut-legend-item"><span class="donut-legend-swatch hc"></span> HC guanya: <strong>' + hcWins + '</strong> (' + Math.round(hcPct*100) + '%)</div>' +
+      '<div class="donut-legend-item"><span class="donut-legend-swatch tie"></span> Empat: <strong>' + empats + '</strong> (' + Math.round(tiePct*100) + '%)</div>' +
+    '</div>';
+}
+
+/* ── Tab 2: Detall ─────────────────────────────────────────── */
+
+function renderDetailTable() {
+  // Header
+  var thead = document.getElementById('detail-thead');
+  thead.innerHTML = COLUMNS.map(function(col) {
+    var cls = '';
+    if (sortColumn === col.key) cls = sortDir === 'asc' ? 'sorted-asc' : 'sorted-desc';
+    var arrow = sortColumn === col.key ? (sortDir === 'asc' ? '&#9650;' : '&#9660;') : '&#9650;';
+    return '<th class="' + cls + '" data-key="' + col.key + '">' +
+      col.label + (col.sortable ? '<span class="sort-arrow">' + arrow + '</span>' : '') +
+    '</th>';
+  }).join('');
+
+  // Setup sort handlers
+  thead.querySelectorAll('th').forEach(function(th) {
+    th.addEventListener('click', function() {
+      var key = this.getAttribute('data-key');
+      if (sortColumn === key) {
+        sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortColumn = key;
+        sortDir = 'asc';
+      }
+      renderDetailTable();
+    });
+  });
+
+  // Body
+  var cases = getFilteredCases();
+  cases = sortCases(cases);
+
+  var tbody = document.getElementById('detail-tbody');
+  tbody.innerHTML = '';
+
+  if (!cases.length) {
+    tbody.innerHTML = '<tr><td colspan="' + COLUMNS.length + '" style="text-align:center;padding:40px;color:var(--text-muted);">Cap cas coincideix amb els filtres</td></tr>';
+    return;
+  }
+
+  cases.forEach(function(c) {
+    var v = getVeredicte(c);
+    var rowClass = v === 'rag' ? 'rag-wins' : (v === 'hardcoded' ? 'hc-wins' : 'tie-result');
+    var badgeClass = v === 'rag' ? 'rag' : (v === 'hardcoded' ? 'hc' : 'empat');
+    var badgeText = v === 'rag' ? 'RAG' : (v === 'hardcoded' ? 'HC' : 'Empat');
+    var casId = c.cas_id || '';
+
+    var tr = document.createElement('tr');
+    tr.className = rowClass;
+    tr.setAttribute('data-cas', casId);
+    tr.innerHTML = '' +
+      '<td>' + casId + '</td>' +
+      '<td>' + (c.text_id || '') + '</td>' +
+      '<td>' + (c.perfil_id || '') + '</td>' +
+      '<td>' + (c.etapa || '') + '</td>' +
+      '<td>' + (c.genere || '') + '</td>' +
+      '<td>' + (c.mecr || '') + '</td>' +
+      '<td>' + fmt(getFormaHC(c)) + '</td>' +
+      '<td>' + fmt(getFormaRAG(c)) + '</td>' +
+      '<td>' + fmt(getFonsHC(c)) + '</td>' +
+      '<td>' + fmt(getFonsRAG(c)) + '</td>' +
+      '<td><span class="badge ' + badgeClass + '">' + badgeText + '</span></td>';
+
+    tr.addEventListener('click', function() { toggleExpandRow(casId, this); });
+    tbody.appendChild(tr);
+  });
+}
+
+function toggleExpandRow(casId, clickedTr) {
+  // Remove any existing expanded row
+  var existing = document.querySelector('.expanded-row');
+  if (existing) {
+    var prevId = existing.getAttribute('data-expand');
+    existing.remove();
+    if (prevId === casId) { expandedRow = null; return; }
+  }
+
+  expandedRow = casId;
+  var c = getCases().find(function(x) { return x.cas_id === casId; });
+  if (!c) return;
+
+  var tr = document.createElement('tr');
+  tr.className = 'expanded-row';
+  tr.setAttribute('data-expand', casId);
+
+  var html = '<td colspan="' + COLUMNS.length + '"><div class="expanded-detail">';
+
+  // Criteria scores
+  html += '<div class="detail-grid">';
+
+  // HC branch
+  html += '<div class="detail-branch hc-branch"><h4>Hardcoded — Criteris</h4>';
+  var hcScores = getCriteriaScores(c, 'hardcoded');
+  if (hcScores.length) {
+    hcScores.forEach(function(s) {
+      var cls = s.score >= 4 ? 'high' : (s.score >= 3 ? 'mid' : 'low');
+      html += '<div class="criteria-row">' +
+        '<span class="criteria-label">' + s.key + '</span>' +
+        '<span class="criteria-score ' + cls + '">' + s.score + '</span>' +
+        '<span class="criteria-just">' + escapeHtml(s.justification) + '</span>' +
+      '</div>';
+    });
+  } else {
+    html += '<div style="color:var(--text-muted);font-size:12px">Sense dades de criteris</div>';
+  }
+  html += '</div>';
+
+  // RAG branch
+  html += '<div class="detail-branch rag-branch"><h4>RAG — Criteris</h4>';
+  var ragScores = getCriteriaScores(c, 'rag');
+  if (ragScores.length) {
+    ragScores.forEach(function(s) {
+      var cls = s.score >= 4 ? 'high' : (s.score >= 3 ? 'mid' : 'low');
+      html += '<div class="criteria-row">' +
+        '<span class="criteria-label">' + s.key + '</span>' +
+        '<span class="criteria-score ' + cls + '">' + s.score + '</span>' +
+        '<span class="criteria-just">' + escapeHtml(s.justification) + '</span>' +
+      '</div>';
+    });
+  } else {
+    html += '<div style="color:var(--text-muted);font-size:12px">Sense dades de criteris</div>';
+  }
+  html += '</div>';
+
+  html += '</div>'; // detail-grid
+
+  // Prompt audit
+  if (c.auditoria_prompt) {
+    html += '<div class="audit-section"><h4>Auditoria dels prompts</h4>';
+    ['hardcoded', 'rag'].forEach(function(branch) {
+      var a = c.auditoria_prompt[branch];
+      if (!a) return;
+      var brLabel = branch === 'hardcoded' ? 'HC' : 'RAG';
+      html += '<div class="audit-item"><strong>' + brLabel + ':</strong> ' +
+        (a.coherent_amb_perfil ? 'Coherent' : 'NO coherent') +
+        (a.motiu ? ' — ' + escapeHtml(a.motiu) : '') + '</div>';
+      if (a.instruccions_absents && a.instruccions_absents.length) {
+        html += '<div class="audit-item" style="margin-left:16px">Absents: ' + a.instruccions_absents.join(', ') + '</div>';
+      }
+      if (a.instruccions_irrellevants && a.instruccions_irrellevants.length) {
+        html += '<div class="audit-item" style="margin-left:16px">Irrellevants: ' + a.instruccions_irrellevants.join(', ') + '</div>';
+      }
+    });
+    html += '</div>';
+  }
+
+  // Comparison reasons
+  if (c.comparacio) {
+    html += '<div class="audit-section"><h4>Comparacio</h4>';
+    if (c.comparacio.motiu_forma) {
+      html += '<div class="audit-item"><strong>Forma:</strong> ' + escapeHtml(c.comparacio.motiu_forma) + '</div>';
+    }
+    if (c.comparacio.motiu_fons) {
+      html += '<div class="audit-item"><strong>Fons:</strong> ' + escapeHtml(c.comparacio.motiu_fons) + '</div>';
+    }
+    if (c.comparacio.motiu_veredicte) {
+      html += '<div class="audit-item"><strong>Veredicte:</strong> ' + escapeHtml(c.comparacio.motiu_veredicte) + '</div>';
+    }
+    html += '</div>';
+  }
+
+  html += '</div></td>';
+  tr.innerHTML = html;
+
+  clickedTr.after(tr);
+}
+
+function getFilteredCases() {
+  var cases = getCases();
+  var filterText = (document.getElementById('filter-text').value || '').toLowerCase();
+  var filterPerfil = document.getElementById('filter-perfil').value;
+  var filterEtapa = document.getElementById('filter-etapa').value;
+  var filterVeredicte = document.getElementById('filter-veredicte').value;
+
+  return cases.filter(function(c) {
+    if (filterText && (c.text_id || '').toLowerCase().indexOf(filterText) === -1 &&
+        (c.cas_id || '').toLowerCase().indexOf(filterText) === -1) return false;
+    if (filterPerfil && c.perfil_id !== filterPerfil) return false;
+    if (filterEtapa && c.etapa !== filterEtapa) return false;
+    if (filterVeredicte && getVeredicte(c) !== filterVeredicte) return false;
+    return true;
+  });
+}
+
+function sortCases(cases) {
+  if (!sortColumn) return cases;
+  var col = COLUMNS.find(function(c){ return c.key === sortColumn; });
+  if (!col) return cases;
+
+  var sorted = cases.slice();
+  sorted.sort(function(a, b) {
+    var va, vb;
+    if (col.key === 'forma_hc') { va = getFormaHC(a); vb = getFormaHC(b); }
+    else if (col.key === 'forma_rag') { va = getFormaRAG(a); vb = getFormaRAG(b); }
+    else if (col.key === 'fons_hc') { va = getFonsHC(a); vb = getFonsHC(b); }
+    else if (col.key === 'fons_rag') { va = getFonsRAG(a); vb = getFonsRAG(b); }
+    else { va = (a[col.key] || '').toString(); vb = (b[col.key] || '').toString(); }
+
+    if (typeof va === 'number' && typeof vb === 'number') {
+      return sortDir === 'asc' ? va - vb : vb - va;
+    }
+    return sortDir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+  });
+  return sorted;
+}
+
+function populateFilters() {
+  var cases = getCases();
+
+  // Perfils
+  var perfils = [];
+  cases.forEach(function(c) {
+    if (c.perfil_id && perfils.indexOf(c.perfil_id) === -1) perfils.push(c.perfil_id);
+  });
+  perfils.sort();
+  var selPerfil = document.getElementById('filter-perfil');
+  selPerfil.innerHTML = '<option value="">Tots</option>' +
+    perfils.map(function(p) { return '<option value="' + p + '">' + p + '</option>'; }).join('');
+
+  // Etapes
+  var etapes = [];
+  cases.forEach(function(c) {
+    if (c.etapa && etapes.indexOf(c.etapa) === -1) etapes.push(c.etapa);
+  });
+  etapes.sort();
+  var selEtapa = document.getElementById('filter-etapa');
+  selEtapa.innerHTML = '<option value="">Totes</option>' +
+    etapes.map(function(e) { return '<option value="' + e + '">' + e + '</option>'; }).join('');
+
+  // Case selector for Tab 3
+  var selCase = document.getElementById('case-select');
+  selCase.innerHTML = '<option value="">Selecciona un cas...</option>' +
+    cases.map(function(c) { return '<option value="' + (c.cas_id||'') + '">' + (c.cas_id||'') + '</option>'; }).join('');
+
+  // Attach filter events
+  ['filter-text','filter-perfil','filter-etapa','filter-veredicte'].forEach(function(id) {
+    document.getElementById(id).addEventListener('input', function() { renderDetailTable(); });
+    document.getElementById(id).addEventListener('change', function() { renderDetailTable(); });
+  });
+
+  // Case select event for Tab 3
+  selCase.addEventListener('change', function() { renderCasePrompts(this.value); });
+}
+
+/* ── Tab 3: Prompts i Outputs ──────────────────────────────── */
+
+function renderPrompts() {
+  // Initial empty
+  document.getElementById('prompts-content').innerHTML =
+    '<div class="empty-state"><p>Selecciona un cas per veure els prompts i outputs.</p></div>';
+}
+
+function renderCasePrompts(casId) {
+  var container = document.getElementById('prompts-content');
+  if (!casId) {
+    container.innerHTML = '<div class="empty-state"><p>Selecciona un cas per veure els prompts i outputs.</p></div>';
+    return;
+  }
+
+  var c = getCases().find(function(x) { return x.cas_id === casId; });
+  if (!c) {
+    container.innerHTML = '<div class="empty-state"><p>Cas no trobat.</p></div>';
+    return;
+  }
+
+  var promptHC = c.prompt_hardcoded || c.prompts && c.prompts.hardcoded || '(No disponible)';
+  var promptRAG = c.prompt_rag || c.prompts && c.prompts.rag || '(No disponible)';
+  var outputHC = c.text_hardcoded || c.outputs && c.outputs.hardcoded || '(No disponible)';
+  var outputRAG = c.text_rag || c.outputs && c.outputs.rag || '(No disponible)';
+
+  var html = '<div class="split-view">';
+
+  // HC Panel
+  html += '<div class="split-panel hc-panel">' +
+    '<div class="split-panel-header">Hardcoded</div>' +
+    '<div class="split-panel-section"><h5>System Prompt</h5><div class="prompt-block">' + escapeHtml(promptHC) + '</div></div>' +
+    '<div class="split-panel-section"><h5>Text Adaptat</h5><div class="output-block">' + escapeHtml(outputHC) + '</div></div>' +
+  '</div>';
+
+  // RAG Panel
+  html += '<div class="split-panel rag-panel">' +
+    '<div class="split-panel-header">RAG</div>' +
+    '<div class="split-panel-section"><h5>System Prompt</h5><div class="prompt-block">' + escapeHtml(promptRAG) + '</div></div>' +
+    '<div class="split-panel-section"><h5>Text Adaptat</h5><div class="output-block">' + escapeHtml(outputRAG) + '</div></div>' +
+  '</div>';
+
+  html += '</div>';
+
+  // Assessment panel
+  if (c.comparacio || c.avaluacio) {
+    html += '<div class="assessment-panel">';
+    html += '<h4>Avaluacio de l\'agent</h4>';
+    html += '<div class="assessment-grid">';
+
+    if (c.comparacio) {
+      var vClass = c.comparacio.veredicte === 'rag' ? 'rag' : (c.comparacio.veredicte === 'hardcoded' ? 'hc' : 'empat');
+      html += '<div class="assessment-item">' +
+        '<div class="a-label">Millor en forma</div>' +
+        '<div class="a-value ' + (c.comparacio.millor_forma === 'rag' ? 'rag' : 'hc') + '">' +
+          (c.comparacio.millor_forma || '-').toUpperCase() + '</div>' +
+        '<div class="a-reason">' + escapeHtml(c.comparacio.motiu_forma || '') + '</div>' +
+      '</div>';
+
+      html += '<div class="assessment-item">' +
+        '<div class="a-label">Millor en fons</div>' +
+        '<div class="a-value ' + (c.comparacio.millor_fons === 'rag' ? 'rag' : 'hc') + '">' +
+          (c.comparacio.millor_fons || '-').toUpperCase() + '</div>' +
+        '<div class="a-reason">' + escapeHtml(c.comparacio.motiu_fons || '') + '</div>' +
+      '</div>';
+
+      html += '<div class="assessment-item">' +
+        '<div class="a-label">Veredicte global</div>' +
+        '<div class="a-value ' + vClass + '">' + (c.comparacio.veredicte || '-').toUpperCase() + '</div>' +
+        '<div class="a-reason">' + escapeHtml(c.comparacio.motiu_veredicte || '') + '</div>' +
+      '</div>';
+    }
+
+    html += '</div></div>';
+  }
+
+  container.innerHTML = html;
+}
+
+/* ── Tab 4: Correlacions ───────────────────────────────────── */
+
+function renderCorrelacions() {
+  renderHeatmap();
+  renderSummaryTables();
+}
+
+function renderHeatmap() {
+  var cases = getCases();
+  var wrapper = document.getElementById('heatmap-wrapper');
+
+  // Build data matrix: profile x genre -> diff (RAG fons - HC fons)
+  var genresPresent = [];
+  GENRES.forEach(function(g) {
+    if (cases.some(function(c){ return c.genere === g; })) genresPresent.push(g);
+  });
+
+  if (!genresPresent.length) {
+    wrapper.innerHTML = '<div class="empty-state"><p>Cap dada de correlacions</p></div>';
+    return;
+  }
+
+  var html = '<table class="heatmap"><thead><tr><th></th>';
+  genresPresent.forEach(function(g) {
+    html += '<th>' + (GENRE_SHORT[g] || g) + '</th>';
+  });
+  html += '<th>Mitjana</th></tr></thead><tbody>';
+
+  PROFILES.forEach(function(pid) {
+    var profileCases = cases.filter(function(c){ return c.perfil_id === pid; });
+    if (!profileCases.length) return;
+
+    html += '<tr><td class="row-header">' + pid + '</td>';
+    var diffs = [];
+
+    genresPresent.forEach(function(g) {
+      var cell = profileCases.filter(function(c){ return c.genere === g; });
+      if (cell.length) {
+        var d = avg(cell.map(function(c){ return getFonsRAG(c) - getFonsHC(c); }));
+        diffs.push(d);
+        html += '<td style="background:' + diffColor(d) + ';color:' + diffTextColor(d) + '">' + (d >= 0 ? '+' : '') + fmt(d) + '</td>';
+      } else {
+        html += '<td style="background:#edf2f7;color:#a0aec0">--</td>';
+      }
+    });
+
+    var rowAvg = diffs.length ? avg(diffs) : 0;
+    html += '<td style="background:' + diffColor(rowAvg) + ';color:' + diffTextColor(rowAvg) + ';font-weight:800">' +
+      (rowAvg >= 0 ? '+' : '') + fmt(rowAvg) + '</td>';
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  wrapper.innerHTML = html;
+}
+
+function diffColor(d) {
+  // Interpolate from red (-2) through white (0) to green (+2)
+  var t = Math.max(-2, Math.min(2, d)) / 2; // normalize to -1..+1
+  if (t >= 0) {
+    var g = Math.round(200 + 55 * (1-t));
+    return 'rgba(47, 133, 90, ' + (t * 0.4) + ')';
+  } else {
+    return 'rgba(197, 48, 48, ' + (Math.abs(t) * 0.4) + ')';
+  }
+}
+
+function diffTextColor(d) {
+  var t = Math.abs(d);
+  return t > 1 ? '#1a202c' : '#4a5568';
+}
+
+function renderSummaryTables() {
+  var cases = getCases();
+  var container = document.getElementById('summary-tables');
+  var html = '';
+
+  // By MECR
+  html += '<div class="card"><div class="card-title">Per nivell MECR</div>';
+  html += buildDiffTable(cases, 'mecr');
+  html += '</div>';
+
+  // By DUA
+  html += '<div class="card"><div class="card-title">Per nivell DUA</div>';
+  html += buildDiffTable(cases, 'dua');
+  html += '</div>';
+
+  // By Etapa
+  html += '<div class="card"><div class="card-title">Per etapa</div>';
+  html += buildDiffTable(cases, 'etapa');
+  html += '</div>';
+
+  // Best profiles for RAG
+  html += '<div class="card"><div class="card-title">Perfils que mes beneficia RAG</div>';
+  html += buildProfileRanking(cases);
+  html += '</div>';
+
+  container.innerHTML = html;
+}
+
+function buildDiffTable(cases, field) {
+  var groups = {};
+  cases.forEach(function(c) {
+    var key = c[field] || '(no definit)';
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(c);
+  });
+
+  var rows = Object.keys(groups).sort().map(function(key) {
+    var g = groups[key];
+    var diffFons = avg(g.map(function(c){ return getFonsRAG(c) - getFonsHC(c); }));
+    var diffForma = avg(g.map(function(c){ return getFormaRAG(c) - getFormaHC(c); }));
+    return { key: key, n: g.length, diffFons: diffFons, diffForma: diffForma };
+  });
+
+  var html = '<table class="summary-mini-table"><thead><tr>' +
+    '<th>' + field.charAt(0).toUpperCase() + field.slice(1) + '</th>' +
+    '<th>N</th><th>Diff Fons</th><th>Diff Forma</th></tr></thead><tbody>';
+
+  rows.forEach(function(r) {
+    html += '<tr><td>' + r.key + '</td><td>' + r.n + '</td>' +
+      '<td class="' + diffClass(r.diffFons) + '">' + fmtDiff(r.diffFons) + '</td>' +
+      '<td class="' + diffClass(r.diffForma) + '">' + fmtDiff(r.diffForma) + '</td></tr>';
+  });
+
+  html += '</tbody></table>';
+  return html;
+}
+
+function buildProfileRanking(cases) {
+  var groups = {};
+  cases.forEach(function(c) {
+    var key = c.perfil_id || '?';
+    if (!groups[key]) groups[key] = { cases: [], nom: '' };
+    groups[key].cases.push(c);
+    if (c.perfil_nom) groups[key].nom = c.perfil_nom;
+  });
+
+  var rows = Object.keys(groups).map(function(key) {
+    var g = groups[key];
+    var diff = avg(g.cases.map(function(c){ return getFonsRAG(c) - getFonsHC(c); }));
+    return { key: key, nom: g.nom, diff: diff, n: g.cases.length };
+  });
+
+  rows.sort(function(a,b) { return b.diff - a.diff; });
+
+  var html = '<table class="summary-mini-table"><thead><tr>' +
+    '<th>Perfil</th><th>Nom</th><th>N</th><th>Diff Fons (RAG-HC)</th></tr></thead><tbody>';
+
+  rows.forEach(function(r) {
+    html += '<tr><td>' + r.key + '</td>' +
+      '<td style="font-size:11px">' + escapeHtml(r.nom) + '</td>' +
+      '<td>' + r.n + '</td>' +
+      '<td class="' + diffClass(r.diff) + '">' + fmtDiff(r.diff) + '</td></tr>';
+  });
+
+  html += '</tbody></table>';
+  return html;
+}
+
+/* ── Utility ───────────────────────────────────────────────── */
+
+function escapeHtml(str) {
+  if (!str) return '';
+  var div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function fmtDiff(n) {
+  return (n >= 0 ? '+' : '') + fmt(n);
+}
+
+function diffClass(n) {
+  if (n > 0.01) return 'diff-positive';
+  if (n < -0.01) return 'diff-negative';
+  return 'diff-zero';
+}
+
+/* ── Boot ──────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', init);
+
+})();
+</script>
+
+</body>
+</html>
