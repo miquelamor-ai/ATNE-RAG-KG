@@ -1431,7 +1431,10 @@ async def cuina_page():
     """Serveix la pàgina de cuina (flux + catàleg d'instruccions)."""
     html_path = UI_DIR / "cuina.html"
     if html_path.exists():
-        return HTMLResponse(html_path.read_text(encoding="utf-8"))
+        return HTMLResponse(
+            html_path.read_text(encoding="utf-8"),
+            headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
+        )
     return HTMLResponse("<h1>Cuina no disponible</h1>", status_code=404)
 
 
