@@ -1,5 +1,6 @@
 .git
 .env
+.claude/
 profiles/
 __pycache__
 *.pyc
@@ -8,3 +9,7 @@ CLAUDE.md
 briefing_*.md
 *.md
 !requirements.txt
+tests/
+docs/
+SESSION_LOG.md
+260323_*.md
