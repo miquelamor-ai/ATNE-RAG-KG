@@ -85,6 +85,7 @@ async def serve_static(path: str):
     if not file.exists() or not file.is_file():
         raise HTTPException(404, "Fitxer no trobat")
     content_types = {
+        ".html": "text/html",
         ".css": "text/css",
         ".js": "application/javascript",
         ".png": "image/png",
