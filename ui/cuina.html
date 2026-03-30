@@ -738,7 +738,7 @@
         </p>
 
         <div style="overflow-x:auto;padding-bottom:12px;">
-        <svg id="flux-diagram" viewBox="0 0 1100 820" style="width:100%;min-width:900px;max-width:1100px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;" xmlns="http://www.w3.org/2000/svg">
+        <svg id="flux-diagram" viewBox="0 0 1040 870" style="width:100%;min-width:860px;max-width:1040px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;" xmlns="http://www.w3.org/2000/svg">
             <defs>
                 <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#9ca3af"/></marker>
                 <marker id="arr-blue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#1a56db"/></marker>
@@ -752,31 +752,37 @@
                 .svg-box:hover { filter: drop-shadow(0 2px 6px rgba(0,0,0,0.15)); }
             </style>
 
-            <!-- ═══ COLUMNA ESQUERRA: INPUTS DOCENT ═══ -->
-            <text x="140" y="24" font-size="11" font-weight="700" fill="#6b7280" text-anchor="middle" letter-spacing="1">EL DOCENT CONFIGURA</text>
+            <!-- Column headers -->
+            <text x="150" y="18" font-size="10" font-weight="700" fill="#6b7280" text-anchor="middle" letter-spacing="1">DOCENT CONFIGURA</text>
+            <text x="430" y="18" font-size="10" font-weight="700" fill="#6b7280" text-anchor="middle" letter-spacing="1">SISTEMA PROCESSA</text>
+            <text x="700" y="18" font-size="10" font-weight="700" fill="#6b7280" text-anchor="middle" letter-spacing="1">PROMPT (system)</text>
 
-            <!-- Caixa Context Docent -->
+            <!-- ═══ BAND A (y=30-130): Context + Identitat ═══ -->
+            <line x1="0" y1="140" x2="1040" y2="140" stroke="#f3f4f6" stroke-width="1"/>
+            <text x="8" y="88" font-size="9" fill="#e5e7eb" font-weight="700" transform="rotate(-90,8,88)" text-anchor="middle">CONTEXT</text>
+
             <g class="svg-box" onclick="showHelp('context')">
                 <title>CONTEXT DOCENT — Clica per veure detalls.
-L'etapa, curs, ambit i materia van directament a la seccio 3 (CONTEXT) del prompt.
-El genere discursiu activa instruccions especifiques del corpus.
-L'etapa tambe s'usa per calcular el MECR per defecte a la proposta.</title>
-                <rect x="20" y="40" width="240" height="155" rx="8" fill="white" stroke="#1a56db" stroke-width="2"/>
-                <rect x="20" y="40" width="240" height="28" rx="8" fill="#dbeafe"/>
-                <rect x="20" y="60" width="240" height="8" fill="#dbeafe"/>
-                <text x="140" y="59" font-size="12" font-weight="700" fill="#1a56db" text-anchor="middle">CONTEXT DOCENT</text>
-                <text x="36" y="88" font-size="11" fill="#374151">Etapa (Infantil...FP)</text>
-                <text x="36" y="106" font-size="11" fill="#374151">Curs</text>
-                <text x="36" y="124" font-size="11" fill="#374151">Ambit (cient./human./ling.)</text>
-                <text x="36" y="142" font-size="11" fill="#374151">Materia concreta</text>
-                <text x="36" y="160" font-size="11" fill="#374151">Tipus aula (ordinaria/acollida)</text>
-                <text x="36" y="180" font-size="11" fill="#374151">Genere discursiu</text>
+L'etapa, curs, ambit i materia van a la seccio 3 (CONTEXT) del prompt.
+El genere discursiu activa instruccions del corpus.
+L'etapa calcula el MECR per defecte.</title>
+                <rect x="30" y="32" width="240" height="100" rx="8" fill="white" stroke="#1a56db" stroke-width="2"/>
+                <rect x="30" y="32" width="240" height="24" rx="8" fill="#dbeafe"/>
+                <rect x="30" y="50" width="240" height="6" fill="#dbeafe"/>
+                <text x="150" y="50" font-size="11" font-weight="700" fill="#1a56db" text-anchor="middle">CONTEXT DOCENT</text>
+                <text x="44" y="72" font-size="10" fill="#374151">Etapa, Curs, Ambit, Materia</text>
+                <text x="44" y="88" font-size="10" fill="#374151">Tipus aula, Genere discursiu</text>
+                <text x="44" y="104" font-size="9" fill="#9ca3af">Etapa tambe → proposta (MECR defecte)</text>
+                <text x="44" y="120" font-size="9" fill="#9ca3af">Genere → instruccions especifiques</text>
             </g>
 
-            <!-- Caixa Perfil -->
+            <!-- ═══ BAND B (y=150-370): INSTRUCCIONS ═══ -->
+            <line x1="0" y1="140" x2="1040" y2="140" stroke="#f3f4f6" stroke-width="1"/>
+            <text x="8" y="260" font-size="9" fill="#e5e7eb" font-weight="700" transform="rotate(-90,8,260)" text-anchor="middle">INSTRUCCIONS</text>
+
+            <!-- Perfil Alumne -->
             <g class="svg-box" onclick="showHelp('perfil')">
-                <title>PERFIL ALUMNE — Clica per veure detalls.
-13 caracteristiques combinables (nouvingut, TEA, TDAH, dislexia...).
+                <title>PERFIL ALUMNE — 13 caracteristiques combinables. Clica per veure detalls.
 Cada una te sub-variables. Activar un perfil fa 3 coses:
 1) Activa instruccions PERFIL al prompt (ordres)
 2) Genera la narrativa persona-audience (context)
