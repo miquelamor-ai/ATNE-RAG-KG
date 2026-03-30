@@ -742,10 +742,9 @@
             .flux-phase-header{display:flex;align-items:baseline;gap:12px;margin-bottom:16px}
             .flux-phase-num{font-size:32px;font-weight:900;color:#e5e7eb;line-height:1}
             .flux-phase-title{font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}
-            .flux-cards{display:flex;gap:12px;flex-wrap:wrap}
-            .flux-card{border:2px solid #d1d5db;border-radius:8px;background:white;cursor:pointer;transition:all .2s;overflow:hidden;flex:1;min-width:200px}
+            .flux-cards{display:flex;gap:8px;flex-direction:column}
+            .flux-card{border:2px solid #d1d5db;border-radius:8px;background:white;cursor:pointer;transition:all .2s;overflow:hidden;width:100%}
             .flux-card:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}
-            .flux-card.open{flex-basis:100%}
             .flux-card-head{padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
             .flux-card-head h3{font-size:13px;margin:0}
             .flux-card-head .card-hint{font-size:9px;color:#9ca3af;max-width:55%;text-align:right}
@@ -784,7 +783,7 @@
                     <div style="padding:0 16px 10px;font-size:11px;color:#374151"><strong>Etapa</strong>, <strong>Curs</strong>, <strong>Ambit</strong>, <strong>Materia</strong>, Tipus aula, <strong>Genere discursiu</strong></div>
                     <div class="flux-card-body"><strong>On va al prompt?</strong> A la seccio CONTEXT — Gemini ho sap pero no son ordres.<br><br><strong>Excepcio:</strong> el <em>genere discursiu</em> (explicatiu, narratiu, instructiu, argumentatiu) activa instruccions especifiques del corpus.<br><br><strong>L'etapa</strong> determina el MECR per defecte (Infantil=A1, Primaria=B1, ESO/Batx=B2).</div>
                 </div>
-                <div class="flux-card" style="border-color:#059669;flex:2;min-width:280px" onclick="toggleCard(this)">
+                <div class="flux-card" style="border-color:#059669" onclick="toggleCard(this)">
                     <div style="padding:3px 16px 0;background:#d1fae5;border-radius:6px 6px 0 0"><span style="font-size:10px;font-weight:700;color:#059669">13 CARACTERISTIQUES COMBINABLES</span></div>
                     <div class="flux-card-head"><h3 style="color:#059669">PERFIL ALUMNE</h3><span class="card-chevron">▼</span></div>
                     <div style="padding:0 16px 10px;font-size:11px;color:#374151">
@@ -897,7 +896,7 @@
                 <span class="flux-eq-op">+</span>
                 <div class="flux-eq-box" style="background:#ede9fe;color:#7c3aed;border:1.5px solid #7c3aed">System prompt<br><span style="font-size:10px;font-weight:400">(4 capes)</span></div>
                 <span class="flux-eq-op">→</span>
-                <div class="flux-card" style="border-color:#7c3aed;background:#7c3aed;flex:0 0 auto;min-width:180px;cursor:pointer" onclick="toggleCard(this)">
+                <div class="flux-card" style="border-color:#7c3aed;background:#7c3aed;cursor:pointer" onclick="toggleCard(this)">
                     <div class="flux-card-head"><h3 style="color:white">GEMINI 2.5 Flash</h3><span class="card-chevron" style="color:rgba(255,255,255,.5)">▼</span></div>
                     <div class="flux-card-body" style="background:white;border-radius:0 0 6px 6px">Temperatura: 0.4 · Max output: 16.384 tokens · Gratuit (capa free Google)<br><br>Despres de generar, Python verifica: llargada frases per MECR, vocabulari prohibit, metriques. L'LLM no compta be les paraules (3-4/10 fiabilitat) — la verificacio real es fa amb codi.</div>
                 </div>
