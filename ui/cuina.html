@@ -775,17 +775,34 @@
             </div>
             <div class="flux-cards">
                 <div class="flux-card" style="border-color:#1a56db" onclick="toggleCard(this)">
-                    <div class="flux-card-head"><h3 style="color:#1a56db">TEXT ORIGINAL</h3><span class="card-hint">Enganxa o puja</span><span class="card-chevron">▼</span></div>
-                    <div class="flux-card-body" data-key="text"></div>
+                    <div class="flux-card-head"><h3 style="color:#1a56db">TEXT ORIGINAL</h3><span class="card-chevron">▼</span></div>
+                    <div style="padding:0 16px 10px;font-size:11px;color:#6b7280">Enganxa o puja el text a adaptar. S'envia com a <em>user message</em> a Gemini i tambe com a query RAG.</div>
+                    <div class="flux-card-body">El text que el docent vol adaptar. S'envia com a <strong>missatge d'usuari</strong> a Gemini (separat del prompt/system).<br><br>Tambe s'usa per construir la query de cerca al corpus RAG: les primeres 200 paraules + les caracteristiques actives formen la consulta de cerca vectorial.</div>
                 </div>
                 <div class="flux-card" style="border-color:#1a56db" onclick="toggleCard(this)">
-                    <div class="flux-card-head"><h3 style="color:#1a56db">CONTEXT DOCENT</h3><span class="card-hint">Etapa, Curs, Materia, Genere</span><span class="card-chevron">▼</span></div>
-                    <div class="flux-card-body" data-key="context"></div>
+                    <div class="flux-card-head"><h3 style="color:#1a56db">CONTEXT DOCENT</h3><span class="card-chevron">▼</span></div>
+                    <div style="padding:0 16px 10px;font-size:11px;color:#374151"><strong>Etapa</strong>, <strong>Curs</strong>, <strong>Ambit</strong>, <strong>Materia</strong>, Tipus aula, <strong>Genere discursiu</strong></div>
+                    <div class="flux-card-body"><strong>On va al prompt?</strong> A la seccio CONTEXT — Gemini ho sap pero no son ordres.<br><br><strong>Excepcio:</strong> el <em>genere discursiu</em> (explicatiu, narratiu, instructiu, argumentatiu) activa instruccions especifiques del corpus.<br><br><strong>L'etapa</strong> determina el MECR per defecte (Infantil=A1, Primaria=B1, ESO/Batx=B2).</div>
                 </div>
                 <div class="flux-card" style="border-color:#059669;flex:2;min-width:280px" onclick="toggleCard(this)">
                     <div style="padding:3px 16px 0;background:#d1fae5;border-radius:6px 6px 0 0"><span style="font-size:10px;font-weight:700;color:#059669">13 CARACTERISTIQUES COMBINABLES</span></div>
-                    <div class="flux-card-head"><h3 style="color:#059669">PERFIL ALUMNE</h3><span class="card-hint">36 sub-variables, 20 connectades (56%)</span><span class="card-chevron">▼</span></div>
-                    <div class="flux-card-body" data-key="perfil"></div>
+                    <div class="flux-card-head"><h3 style="color:#059669">PERFIL ALUMNE</h3><span class="card-chevron">▼</span></div>
+                    <div style="padding:0 16px 10px;font-size:11px;color:#374151">
+                        <span style="display:inline-block;margin:2px 4px 2px 0;padding:1px 6px;background:#f0fdf4;border:1px solid #d1d5db;border-radius:3px;font-size:10px">Nouvingut <strong>6v</strong></span>
+                        <span style="display:inline-block;margin:2px 4px 2px 0;padding:1px 6px;background:#f0fdf4;border:1px solid #d1d5db;border-radius:3px;font-size:10px">TEA <strong>2v</strong></span>
+                        <span style="display:inline-block;margin:2px 4px 2px 0;padding:1px 6px;background:#f0fdf4;border:1px solid #d1d5db;border-radius:3px;font-size:10px">TDAH <strong>4v</strong></span>
+                        <span style="display:inline-block;margin:2px 4px 2px 0;padding:1px 6px;background:#f0fdf4;border:1px solid #d1d5db;border-radius:3px;font-size:10px">Dislexia <strong>4v</strong></span>
+                        <span style="display:inline-block;margin:2px 4px 2px 0;padding:1px 6px;background:#f0fdf4;border:1px solid #d1d5db;border-radius:3px;font-size:10px">TDL <strong>8v</strong></span>
+                        <span style="display:inline-block;margin:2px 4px 2px 0;padding:1px 6px;background:#f0fdf4;border:1px solid #d1d5db;border-radius:3px;font-size:10px">DI <strong>1v</strong></span>
+                        <span style="display:inline-block;margin:2px 4px 2px 0;padding:1px 6px;background:#f0fdf4;border:1px solid #d1d5db;border-radius:3px;font-size:10px">AC <strong>1v</strong></span>
+                        <span style="display:inline-block;margin:2px 4px 2px 0;padding:1px 6px;background:#f0fdf4;border:1px solid #d1d5db;border-radius:3px;font-size:10px">Disc.vis/aud/mot</span>
+                        <span style="display:inline-block;margin:2px 4px 2px 0;padding:1px 6px;background:#f0fdf4;border:1px solid #d1d5db;border-radius:3px;font-size:10px">Vuln</span>
+                        <span style="display:inline-block;margin:2px 4px 2px 0;padding:1px 6px;background:#f0fdf4;border:1px solid #d1d5db;border-radius:3px;font-size:10px">Emoc</span>
+                        <span style="display:inline-block;margin:2px 4px 2px 0;padding:1px 6px;background:#f0fdf4;border:1px solid #d1d5db;border-radius:3px;font-size:10px">TDC</span>
+                        <span style="display:inline-block;margin:2px 4px 2px 0;padding:1px 6px;background:#f0fdf4;border:1px solid #d1d5db;border-radius:3px;font-size:10px">2e</span>
+                        <br><span style="font-size:10px;color:#6b7280;margin-top:4px;display:inline-block">36 sub-variables · 20 connectades (56%) · + Observacions docent</span>
+                    </div>
+                    <div class="flux-card-body">Activar un perfil fa 3 coses:<br>1. <strong style="color:#1a56db">ORDRES</strong> — Activa instruccions fixes d'aquell perfil<br>2. <strong style="color:#6b7280">CONTEXT</strong> — Apareix a la narrativa persona-audience<br>3. <strong style="color:#d97706">PROPOSTA</strong> — Algunes sub-variables afecten DUA, LF o MECR<br><br>Exemples de sub-variables connectades:<br>• <code>tdah.baixa_memoria_treball</code> → intensifica chunking (3 elements max)<br>• <code>dislexia.tipus_fonologica</code> → activa H-22 (evitar prefixos encadenats)<br>• <code>disc_auditiva.comunicacio=LSC</code> → intensifica simplificacio com L2<br>• <code>vulnerabilitat.sensibilitat_tematica</code> → condiciona E-10 (temes traumatics)</div>
                 </div>
             </div>
         </div>
@@ -800,23 +817,27 @@
             </div>
             <div class="flux-cards">
                 <div class="flux-card" style="border-color:#d97706" onclick="toggleCard(this)">
-                    <div style="padding:3px 16px 0;background:#fef3c7;border-radius:6px 6px 0 0"><span style="font-size:10px;font-weight:700;color:#d97706">AUTOMATIC</span></div>
-                    <div class="flux-card-head"><h3 style="color:#d97706">PROPOSTA</h3><span class="card-hint">DUA + MECR + Complements</span><span class="card-chevron">▼</span></div>
-                    <div class="flux-card-body" data-key="proposta"></div>
+                    <div style="padding:3px 16px 0;background:#fef3c7;border-radius:6px 6px 0 0"><span style="font-size:10px;font-weight:700;color:#d97706">AUTOMATIC (el docent pot modificar)</span></div>
+                    <div class="flux-card-head"><h3 style="color:#d97706">PROPOSTA</h3><span class="card-chevron">▼</span></div>
+                    <div style="padding:0 16px 10px;font-size:11px;color:#374151"><strong>DUA</strong>: Acces / Core / Enriquiment · <strong style="color:#d97706">MECR sortida</strong>: pre-A1...B2 · <strong>Complements</strong></div>
+                    <div class="flux-card-body">El sistema calcula automaticament a partir del perfil:<br><br>• <strong>DUA</strong> — DI sever o TEA nivell 3 o nouvingut pre-A1 → Acces. Altes cap. → Enriquiment. Resta → Core.<br>• <strong style="color:#d97706">MECR sortida</strong> — <span style="color:var(--err)">PARAMETRE MES IMPORTANT</span>: controla TOTES les instruccions NIVELL (max paraules/frase, subordinades, temps verbals, to...)<br>• <strong>Complements</strong> — glossari, esquema, preguntes... segons perfil</div>
                 </div>
                 <div class="flux-card" style="border-color:#059669" onclick="toggleCard(this)">
-                    <div style="padding:3px 16px 0;background:#d1fae5;border-radius:6px 6px 0 0"><span style="font-size:10px;font-weight:700;color:#059669">88 INSTRUCCIONS → 6-8 BLOCS</span></div>
-                    <div class="flux-card-head"><h3 style="color:#059669">FILTRE + MACRODIRECTIVES</h3><span class="card-hint">Selecciona, intensifica, agrupa</span><span class="card-chevron">▼</span></div>
-                    <div class="flux-card-body" data-key="filtre"></div>
+                    <div style="padding:3px 16px 0;background:#d1fae5;border-radius:6px 6px 0 0"><span style="font-size:10px;font-weight:700;color:#059669">88 INSTRUCCIONS → 6-8 BLOCS TEMATICS</span></div>
+                    <div class="flux-card-head"><h3 style="color:#059669">FILTRE + MACRODIRECTIVES</h3><span class="card-chevron">▼</span></div>
+                    <div style="padding:0 16px 10px;font-size:11px;color:#374151">1. Selecciona per perfil + MECR · 2. Aplica sub-variables · 3. Suprimeix redundants · 4. Intensifica · <strong>5. Agrupa en macrodirectives</strong></div>
+                    <div class="flux-card-body"><strong>4 criteris d'activacio:</strong><br><br><span style="background:#dbeafe;color:#1a56db;padding:2px 8px;border-radius:3px;font-weight:600">SEMPRE (12)</span> — Bones practiques universals<br><span style="background:#fef3c7;color:#d97706;padding:2px 8px;border-radius:3px;font-weight:600">NIVELL (31)</span> — Depenen del MECR sortida<br><span style="background:#d1fae5;color:#059669;padding:2px 8px;border-radius:3px;font-weight:600">PERFIL (38)</span> — Per caracteristiques actives + sub-variables<br><span style="background:#ede9fe;color:#7c3aed;padding:2px 8px;border-radius:3px;font-weight:600">COMPLEMENT (3)</span> — Pictogrames, esquema, mapa<br><br><strong>Supressio intel·ligent:</strong> si dislexia activa, A-01/A-03 no s'envien (H-08 ja ho cobreix). Si TEA actiu, A-05 no s'envia (H-02 ho cobreix).<br><br><strong>Intensificacio:</strong> tdah.baixa_memoria_treball → chunking 3 elements (no 5). tdah.grau=sever → micro-blocs 2-3 frases (no 3-5).<br><br><a href="#cataleg" style="color:var(--pri);font-weight:600;">Veure les 88 instruccions al cataleg complet ↓</a></div>
                 </div>
                 <div class="flux-card" style="border-color:#6b7280" onclick="toggleCard(this)">
-                    <div class="flux-card-head"><h3 style="color:#6b7280">PERSONA-AUDIENCE</h3><span class="card-hint">Narrativa de l'alumne</span><span class="card-chevron">▼</span></div>
-                    <div class="flux-card-body" data-key="persona"></div>
+                    <div class="flux-card-head"><h3 style="color:#6b7280">PERSONA-AUDIENCE</h3><span class="card-chevron">▼</span></div>
+                    <div style="padding:0 16px 10px;font-size:11px;color:#374151;font-style:italic">"Alumne de 14 anys, nouvingut, L1 arab, CALP inicial, alfabet no llati..."</div>
+                    <div class="flux-card-body"><strong>Narrativa natural generada a partir de les sub-variables NARRATIVA.</strong><br><br>Exemple real:<br><div style="background:#f9fafb;padding:8px 12px;border-radius:4px;margin:8px 0;font-family:monospace;font-size:11px">Escrius per a un alumne de ESO (2n).<br>Alumne nouvingut que parla arab com a L1.<br>Alfabet no llati: necessita transliteracio fonetica.<br>Escolaritzacio previa parcial o interrompuda.<br>Llengua academica (CALP) inicial: no domina el registre escolar ni vocabulari abstracte.<br>Nivell MECR de sortida: A1.</div>No son ordres — son context perque l'LLM entengui <em>per a qui</em> escriu.</div>
                 </div>
                 <div class="flux-card" style="border-color:#7c3aed" onclick="toggleCard(this)">
                     <div style="padding:3px 16px 0;background:#ede9fe;border-radius:6px 6px 0 0"><span style="font-size:10px;font-weight:700;color:#7c3aed">RAG + KNOWLEDGE GRAPH</span></div>
-                    <div class="flux-card-head"><h3 style="color:#7c3aed">CORPUS FJE</h3><span class="card-hint">1.443 chunks + 952 nodes</span><span class="card-chevron">▼</span></div>
-                    <div class="flux-card-body" data-key="corpus"></div>
+                    <div class="flux-card-head"><h3 style="color:#7c3aed">CORPUS FJE</h3><span class="card-chevron">▼</span></div>
+                    <div style="padding:0 16px 10px;font-size:11px;color:#374151">1.443 chunks + 952 nodes + 2.294 arestes · Docs obligatoris per perfil</div>
+                    <div class="flux-card-body"><strong>Cerca vectorial</strong> — Embedding (Gemini) → cosinus similarity a pgvector (Supabase).<br><strong>Knowledge Graph</strong> — Conceptes de la query → expansio 1-2 salts pel graf.<br><strong>Score fusionat</strong>: 40% vector + 40% KG + 20% bonus si coincideixen.<br><br><strong>Docs obligatoris</strong> (sempre inclosos):<br>• Adaptacio → M3_lectura-facil + M2_DUA<br>• Nouvingut → M1_nouvingut + M1_acollida<br>• Avaluacio → M6_avaluacio-formativa<br><br>Resultat: 8-12 fragments que van al CONTEXT del prompt. No son ordres — son referencies teoriques.</div>
                 </div>
             </div>
         </div>
@@ -833,12 +854,12 @@
                 <div class="flux-prompt-stack">
                     <div class="flux-prompt-layer" style="border-color:#d1d5db" onclick="toggleCard(this)">
                         <div class="flux-card-head"><h3 style="color:#6b7280;font-size:11px">CAPA 1: IDENTITAT</h3><span class="card-hint">fixa — "Ets ATNE de Jesuites Educacio"</span><span class="card-chevron">▼</span></div>
-                        <div class="flux-card-body" data-key="identitat"></div>
+                        <div class="flux-card-body">Sempre igual:<br><div style="background:#f9fafb;padding:6px 10px;border-radius:4px;margin:6px 0;font-family:monospace;font-size:10px">"Ets ATNE de Jesuites Educacio. Restriccions: NO inventis contingut. NO meta-text. Preserva termes tecnics. Adapta, no crees."</div></div>
                     </div>
                     <div class="flux-prompt-layer" style="border-color:#1a56db;border-width:2px" onclick="toggleCard(this)">
                         <div style="padding:3px 14px 0;background:#dbeafe;border-radius:4px 4px 0 0;display:flex;justify-content:space-between"><span style="font-size:10px;font-weight:700;color:#1a56db">CAPA 2: MACRODIRECTIVES</span><span style="font-size:9px;color:#1a56db">variable — 6-8 blocs</span></div>
                         <div class="flux-card-head">
-                            <div style="display:flex;gap:8px;flex-wrap:wrap">
+                            <div style="display:flex;gap:6px;flex-wrap:wrap">
                                 <span style="background:#eff6ff;color:#1a56db;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">LEXIC</span>
                                 <span style="background:#eff6ff;color:#1a56db;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">SINTAXI</span>
                                 <span style="background:#eff6ff;color:#1a56db;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">ESTRUCTURA</span>
@@ -849,15 +870,15 @@
                             </div>
                             <span class="card-chevron">▼</span>
                         </div>
-                        <div class="flux-card-body" data-key="instruccions"></div>
+                        <div class="flux-card-body">Exemple real (TDAH moderat B1):<br><div style="background:#f9fafb;padding:8px 10px;border-radius:4px;margin:6px 0;font-family:monospace;font-size:10px;line-height:1.6"><strong>LEXIC:</strong> Usa vocabulari frequent. Termes tecnics en negreta. Un terme = un concepte. Referents pronominals explicits. Elimina idiomatiques...<br><br><strong>SINTAXI:</strong> Una idea per frase. Veu activa. Subjecte explicit. Max 12-18 paraules...<br><br><strong>ESTRUCTURA:</strong> Paragrafs curts. Titols descriptius. Indicadors progres [X de Y]...<br><br><strong>PERFIL:</strong> TDAH: micro-blocs 3-5 frases. Retroalimentacio visual. Variacio dins text.</div>L'LLM no veu IDs (A-01, H-04...) — nomes prosa tematica agrupada.</div>
                     </div>
                     <div class="flux-prompt-layer" style="border-color:#059669" onclick="toggleCard(this)">
                         <div class="flux-card-head"><h3 style="color:#059669;font-size:11px">CAPA 3: CONTEXT</h3><span class="card-hint">Educatiu + Persona + RAG + Complements</span><span class="card-chevron">▼</span></div>
-                        <div class="flux-card-body" data-key="context_prompt"></div>
+                        <div class="flux-card-body">Aqui <strong>NO hi ha ordres</strong> — son informacio de context:<br><br><strong>3a.</strong> Context educatiu: <span style="font-family:monospace;font-size:10px;background:#f9fafb;padding:2px 6px;border-radius:3px">Etapa: ESO | Curs: 3r | Materia: Biologia</span><br><strong>3b.</strong> Persona-audience: <span style="font-family:monospace;font-size:10px;background:#f9fafb;padding:2px 6px;border-radius:3px">Alumne nouvingut arabofon, CALP inicial, TEA nivell 2</span><br><strong>3c.</strong> Coneixement pedagogic (RAG): 8-12 fragments del corpus FJE<br><strong>3d.</strong> Complements activats: glossari, esquema, preguntes...</div>
                     </div>
                     <div class="flux-prompt-layer" style="border-color:#7c3aed" onclick="toggleCard(this)">
                         <div class="flux-card-head"><h3 style="color:#7c3aed;font-size:11px">CAPA 4: FORMAT SORTIDA</h3><span class="card-hint">## Text adaptat + seccions opcionals</span><span class="card-chevron">▼</span></div>
-                        <div class="flux-card-body" data-key="format"></div>
+                        <div class="flux-card-body"><strong>Sempre:</strong> ## Text adaptat + ## Argumentacio pedagogica<br><strong>Si actius:</strong> ## Glossari (taula bilingue) · ## Esquema visual · ## Mapa conceptual · ## Preguntes comprensio (3 nivells) · ## Bastides · ## Activitats aprofundiment<br><br>Cada complement te instruccions detallades de format.</div>
                     </div>
                 </div>
             </div>
@@ -878,7 +899,7 @@
                 <span class="flux-eq-op">→</span>
                 <div class="flux-card" style="border-color:#7c3aed;background:#7c3aed;flex:0 0 auto;min-width:180px;cursor:pointer" onclick="toggleCard(this)">
                     <div class="flux-card-head"><h3 style="color:white">GEMINI 2.5 Flash</h3><span class="card-chevron" style="color:rgba(255,255,255,.5)">▼</span></div>
-                    <div class="flux-card-body" style="background:white;border-radius:0 0 6px 6px" data-key="gemini"></div>
+                    <div class="flux-card-body" style="background:white;border-radius:0 0 6px 6px">Temperatura: 0.4 · Max output: 16.384 tokens · Gratuit (capa free Google)<br><br>Despres de generar, Python verifica: llargada frases per MECR, vocabulari prohibit, metriques. L'LLM no compta be les paraules (3-4/10 fiabilitat) — la verificacio real es fa amb codi.</div>
                 </div>
             </div>
         </div>
@@ -894,11 +915,13 @@
             <div class="flux-cards">
                 <div class="flux-card" style="border-color:#059669" onclick="toggleCard(this)">
                     <div class="flux-card-head"><h3 style="color:#059669">TEXT ADAPTAT + COMPLEMENTS</h3><span class="card-chevron">▼</span></div>
-                    <div class="flux-card-body" data-key="resultat"></div>
+                    <div style="padding:0 16px 10px;font-size:11px;color:#6b7280">Verificat amb Python: llargada frases, vocabulari prohibit, metriques</div>
+                    <div class="flux-card-body"><strong>Verificacio automatica (Python, no LLM):</strong><br>• Llargada maxima frases per MECR (A1=8 paraules, A2=12...)<br>• Deteccio vocabulari no desitjat ("cosa", "allo"...)<br>• Metriques: paraules, frases, termes en negreta, encapcalaments<br>• Avisos visibles si hi ha problemes</div>
                 </div>
                 <div class="flux-card" style="border-color:#1a56db" onclick="toggleCard(this)">
-                    <div class="flux-card-head"><h3 style="color:#1a56db">FRONTEND: original vs adaptat</h3><span class="card-hint">Revisio + Edicio + Exporta</span><span class="card-chevron">▼</span></div>
-                    <div class="flux-card-body" data-key="frontend"></div>
+                    <div class="flux-card-head"><h3 style="color:#1a56db">FRONTEND: original vs adaptat</h3><span class="card-chevron">▼</span></div>
+                    <div style="padding:0 16px 10px;font-size:11px;color:#6b7280">Columnes · Editable · Feedback · Export PDF/DOCX/TXT</div>
+                    <div class="flux-card-body">• <strong>Columnes</strong>: original (esquerra) vs adaptat (dreta)<br>• <strong>Editable</strong>: el text adaptat es pot editar directament<br>• <strong>Complements</strong>: glossari, esquema, preguntes... en seccions separades<br>• <strong>Feedback</strong>: Dolenta / Regular / Bona + comentari<br>• <strong>Export</strong>: TXT / DOCX / PDF</div>
                 </div>
             </div>
         </div>
@@ -1434,22 +1457,10 @@ function toggleCard(el) {
     siblings.forEach(s => s.classList.remove('open'));
     if (!wasOpen) {
         el.classList.add('open');
-        // Lazy-load contingut la primera vegada
-        const body = el.querySelector('.flux-card-body');
-        if (body && !body.dataset.loaded) {
-            const key = body.dataset.key;
-            const data = HELP_DATA[key];
-            if (data) {
-                body.innerHTML = '<h4 style="margin:10px 0 6px;font-size:14px;color:var(--g900);">' + data.title + '</h4>' + data.body;
-                body.dataset.loaded = '1';
-            }
-        }
-        // Scroll suau cap a la card oberta
         setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
     }
 }
 
-// Compat: showHelp encara funciona per si algun onclick antic queda
 function showHelp(key) { /* no-op, substituït per toggleCard */ }
 
 // ═══════════════════════════════════════════════════════════════════════════
