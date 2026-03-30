@@ -27,6 +27,27 @@ body {
     line-height: 1.5;
 }
 
+/* ── Top Navigation ───────────────────────────────── */
+.top-nav {
+    display: flex;
+    gap: 0;
+    background: var(--g900);
+    padding: 0 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+.top-nav a {
+    color: var(--g300);
+    text-decoration: none;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: background 0.15s, color 0.15s;
+}
+.top-nav a:hover { background: var(--g700); color: #fff; }
+.top-nav .nav-active { background: var(--pri); color: #fff; }
+
 /* ── Layout ─────────────────────────────────────── */
 
 .app-layout {
