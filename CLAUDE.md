@@ -96,4 +96,3 @@ El pipeline de mineria/indexacio esta a `C:\Users\miquel.amor\Documents\mineriaR
 - Python 3.12, FastAPI + uvicorn, google-genai, python-dotenv, requests
 - Encoding UTF-8 sempre
 - SSE per streaming de progres (no websockets)
-- .env exclosa del git

@@ -1,159 +1,297 @@
 """
-ATNE — Comparador de branques (RAG vs Hardcoded)
+compare_branches.py — Judici comparatiu multi-jutge (Christodoulou / Bradley-Terry).
 
-Llegeix els CSV de mètriques de cada branca i genera un report comparatiu.
+Cada jutge (Opus, Sonnet, Gemini) rep parells de textos adaptats (HC vs RAG)
+i decideix quin és millor — comparació directa, no rúbrica absoluta.
+
+Protocol anti-biaix:
+  - L'ordre de presentació (A/B) es randomitza per cada cas
+  - El jutge NO sap quina branca és quina (etiquetes "Text A" / "Text B")
+  - Per cada criteri C1-C5, decisió binària (A o B)
+  - Decisió global + justificació
 
 Ús:
-    python tests/compare_branches.py <rag_csv> <hardcoded_csv>
-    python tests/compare_branches.py tests/results/20260328_235135/metrics.csv ../ATNE-hardcoded/tests/results/<ts>/metrics.csv
+  python tests/compare_branches.py --judge gemini
+  python tests/compare_branches.py --judge opus    (requereix agent Claude)
+  python tests/compare_branches.py --judge sonnet  (requereix agent Claude)
+
+Referència: docs/decisions/avaluacio_agent_v2.md
 """
 
-import csv
-import io
+import argparse
+import json
+import os
+import random
+import sqlite3
 import sys
+import time
 from pathlib import Path
-from collections import defaultdict
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from dotenv import load_dotenv
+load_dotenv()
 
-def load_csv(path):
-    rows = []
-    with open(path, encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            # Normalitzar tipus
-            for k in ("paraules", "frases", "termes_negreta", "encapcalaments", "frases_llargues", "warnings"):
-                if k in row:
-                    row[k] = int(row[k]) if row[k] else 0
-            row["temps_s"] = float(row.get("temps_s", 0))
-            row["error"] = row.get("error", "False") == "True"
-            rows.append(row)
-    return rows
+_RUN_ID = "20260329_130946"  # Últim batch complet
+DB_PATH = Path(__file__).parent / "results" / "evaluations.db"
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# PROMPT COMPARATIU (sense revelar quina branca és quina)
+# ═══════════════════════════════════════════════════════════════════════════════
 
-def summarize(rows, label):
-    ok = [r for r in rows if not r["error"]]
-    n = len(ok)
-    if n == 0:
-        return {}
-    return {
-        "label": label,
-        "total": len(rows),
-        "ok": n,
-        "errors": len(rows) - n,
-        "avg_paraules": sum(r["paraules"] for r in ok) / n,
-        "avg_frases": sum(r["frases"] for r in ok) / n,
-        "avg_negreta": sum(r["termes_negreta"] for r in ok) / n,
-        "avg_temps": sum(r["temps_s"] for r in ok) / n,
-        "total_warnings": sum(r["warnings"] for r in ok),
-        "avg_warnings": sum(r["warnings"] for r in ok) / n,
-    }
+SYSTEM_PROMPT = """Ets un avaluador pedagògic expert. Reps dos textos adaptats (Text A i Text B) del MATEIX text original, per al MATEIX perfil d'alumnat. Has de decidir quin és millor.
 
+REGLES:
+1. NO saps quina branca ha generat cada text. Avalua només el resultat.
+2. Per cada criteri, tria A o B (o "empat" si realment no pots decidir).
+3. Justifica cada decisió en UNA frase.
+4. Retorna NOMÉS el JSON demanat.
+5. Escriu en català."""
 
-def compare_by_group(rag_rows, hc_rows, group_key):
-    """Compara mètriques agrupades per una clau (perfil, mecr, genere, etapa)."""
-    rag_groups = defaultdict(list)
-    hc_groups = defaultdict(list)
-    for r in rag_rows:
-        rag_groups[r[group_key]].append(r)
-    for r in hc_rows:
-        hc_groups[r[group_key]].append(r)
+USER_TEMPLATE = """## Cas: {cas_id}
 
-    all_keys = sorted(set(list(rag_groups.keys()) + list(hc_groups.keys())))
-    lines = []
-    for k in all_keys:
-        rg = [r for r in rag_groups.get(k, []) if not r["error"]]
-        hg = [r for r in hc_groups.get(k, []) if not r["error"]]
-        rw = sum(r["paraules"] for r in rg) / len(rg) if rg else 0
-        hw = sum(r["paraules"] for r in hg) / len(hg) if hg else 0
-        rt = sum(r["temps_s"] for r in rg) / len(rg) if rg else 0
-        ht = sum(r["temps_s"] for r in hg) / len(hg) if hg else 0
-        rn = sum(r["termes_negreta"] for r in rg) / len(rg) if rg else 0
-        hn = sum(r["termes_negreta"] for r in hg) / len(hg) if hg else 0
-        rwarn = sum(r["warnings"] for r in rg) / len(rg) if rg else 0
-        hwarn = sum(r["warnings"] for r in hg) / len(hg) if hg else 0
-        lines.append({
-            "key": k,
-            "rag_words": rw, "hc_words": hw,
-            "rag_time": rt, "hc_time": ht,
-            "rag_bold": rn, "hc_bold": hn,
-            "rag_warn": rwarn, "hc_warn": hwarn,
-        })
-    return lines
+### PERFIL DE L'ALUMNAT
+- Perfils actius: {perfils}
+- MECR sortida: {mecr}
+- DUA: {dua}
+- Etapa: {etapa}
+- Gènere discursiu: {genere}
+
+### TEXT ORIGINAL
+{text_original}
+
+---
+
+### TEXT A
+{text_a}
+
+---
+
+### TEXT B
+{text_b}
+
+---
+
+Compara Text A i Text B. Per cada criteri, decideix quin és millor.
+Retorna EXACTAMENT aquest JSON:
+
+{{
+  "global": {{"winner": "A" o "B" o "empat", "confidence": "alta" o "mitjana" o "baixa", "justification": "..."}},
+  "C1_coherencia": {{"winner": "A" o "B" o "empat", "justification": "..."}},
+  "C2_adequacio_perfil": {{"winner": "A" o "B" o "empat", "justification": "..."}},
+  "C3_preservacio_curricular": {{"winner": "A" o "B" o "empat", "justification": "..."}},
+  "C4_adequacio_mecr": {{"winner": "A" o "B" o "empat", "justification": "..."}},
+  "C5_prellico_funcional": {{"winner": "A" o "B" o "empat", "justification": "..."}}
+}}
+"""
 
 
-def print_table(title, lines, key_label=""):
-    print(f"\n### {title}")
-    print(f"| {key_label or 'Grup':<20} | RAG words | HC words | RAG time | HC time | RAG bold | HC bold | RAG warn | HC warn |")
-    print(f"|{'-'*22}|{'-'*11}|{'-'*10}|{'-'*10}|{'-'*9}|{'-'*10}|{'-'*9}|{'-'*10}|{'-'*9}|")
-    for l in lines:
-        print(f"| {l['key']:<20} | {l['rag_words']:>9.0f} | {l['hc_words']:>8.0f} | {l['rag_time']:>8.1f}s | {l['hc_time']:>7.1f}s | {l['rag_bold']:>8.1f} | {l['hc_bold']:>7.1f} | {l['rag_warn']:>8.1f} | {l['hc_warn']:>7.1f} |")
+def get_cases(conn, run_id: str) -> list[dict]:
+    """Llegeix tots els parells HC/RAG de la BD."""
+    rows = conn.execute("""
+        SELECT cas_id, branca, text_adaptat, perfils_actius, mecr, dua, etapa, genere
+        FROM eval_cases WHERE run_id = ? AND text_adaptat IS NOT NULL
+        ORDER BY cas_id, branca
+    """, (run_id,)).fetchall()
+
+    cases = {}
+    for r in rows:
+        cid = r["cas_id"]
+        if cid not in cases:
+            cases[cid] = {"cas_id": cid, "perfils": r["perfils_actius"],
+                          "mecr": r["mecr"], "dua": r["dua"],
+                          "etapa": r["etapa"], "genere": r["genere"]}
+        cases[cid][r["branca"]] = r["text_adaptat"]
+
+    # Només casos amb ambdues branques
+    return [c for c in cases.values() if "hardcoded" in c and "rag" in c]
+
+
+def get_original_text(cas_id: str) -> str:
+    """Recupera el text original del test_data.json."""
+    data_path = Path(__file__).parent / "test_data.json"
+    with open(data_path, encoding="utf-8") as f:
+        data = json.load(f)
+    text_id = cas_id.rsplit("__", 1)[0]
+    for t in data["textos"]:
+        if t["id"] == text_id:
+            return t["text"]
+    return "(text original no trobat)"
+
+
+def parse_json_response(raw: str) -> dict:
+    """Extreu JSON de la resposta de l'LLM."""
+    raw = raw.strip()
+    start = raw.find("{")
+    end = raw.rfind("}")
+    if start != -1 and end != -1:
+        try:
+            return json.loads(raw[start:end + 1])
+        except json.JSONDecodeError:
+            pass
+    return {"error": "parse_failed", "raw": raw[:500]}
+
+
+def evaluate_with_gemini(prompt: str) -> dict:
+    """Crida Gemini Flash com a jutge."""
+    from google import genai
+    from google.genai import types
+    client = genai.Client(
+        api_key=os.getenv("GEMINI_API_KEY"),
+        http_options=types.HttpOptions(timeout=180_000),
+    )
+    resp = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=[types.Content(role="user", parts=[types.Part(text=prompt)])],
+        config=types.GenerateContentConfig(
+            system_instruction=SYSTEM_PROMPT,
+            temperature=0.2,
+            max_output_tokens=4096,
+        ),
+    )
+    return parse_json_response(resp.text or "")
+
+
+def save_judgement(conn, run_id: str, case: dict, result: dict, judge: str, order: str):
+    """Guarda el judici a la BD."""
+    def resolve(winner):
+        if not winner or winner == "empat":
+            return "empat"
+        if order == "hc_first":
+            return "hardcoded" if winner == "A" else "rag"
+        else:
+            return "rag" if winner == "A" else "hardcoded"
+
+    g = result.get("global", {})
+    parts = case["cas_id"].rsplit("__", 1)
+    text_id = parts[0] if len(parts) == 2 else case["cas_id"]
+    perfil_id = parts[1] if len(parts) == 2 else ""
+
+    conn.execute("""
+        INSERT INTO comparative_judgements
+        (run_id, cas_id, text_id, perfil_id, judge, winner, confidence, justification,
+         c1_winner, c1_justification, c2_winner, c2_justification,
+         c3_winner, c3_justification, c4_winner, c4_justification,
+         c5_winner, c5_justification, order_presented)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+    """, (
+        run_id, case["cas_id"], text_id, perfil_id, judge,
+        resolve(g.get("winner", "")),
+        g.get("confidence", ""),
+        g.get("justification", ""),
+        resolve(result.get("C1_coherencia", {}).get("winner", "")),
+        result.get("C1_coherencia", {}).get("justification", ""),
+        resolve(result.get("C2_adequacio_perfil", {}).get("winner", "")),
+        result.get("C2_adequacio_perfil", {}).get("justification", ""),
+        resolve(result.get("C3_preservacio_curricular", {}).get("winner", "")),
+        result.get("C3_preservacio_curricular", {}).get("justification", ""),
+        resolve(result.get("C4_adequacio_mecr", {}).get("winner", "")),
+        result.get("C4_adequacio_mecr", {}).get("justification", ""),
+        resolve(result.get("C5_prellico_funcional", {}).get("winner", "")),
+        result.get("C5_prellico_funcional", {}).get("justification", ""),
+        order,
+    ))
+    conn.commit()
+
+
+def run_judge(judge_name: str, cases: list[dict], conn, run_id: str):
+    """Executa el jutge per tots els casos."""
+    total = len(cases)
+    wins = {"hardcoded": 0, "rag": 0, "empat": 0, "error": 0}
+
+    for i, case in enumerate(cases, 1):
+        # Randomitzar ordre (anti-biaix posicional)
+        if random.random() < 0.5:
+            text_a, text_b = case["hardcoded"], case["rag"]
+            order = "hc_first"
+        else:
+            text_a, text_b = case["rag"], case["hardcoded"]
+            order = "rag_first"
+
+        original = get_original_text(case["cas_id"])
+
+        prompt = USER_TEMPLATE.format(
+            cas_id=case["cas_id"],
+            perfils=case.get("perfils", ""),
+            mecr=case.get("mecr", ""),
+            dua=case.get("dua", ""),
+            etapa=case.get("etapa", ""),
+            genere=case.get("genere", ""),
+            text_original=original[:1500],
+            text_a=text_a[:2500],
+            text_b=text_b[:2500],
+        )
+
+        print(f"  [{i:3d}/{total}] {case['cas_id']} ...", end=" ", flush=True)
+
+        try:
+            if judge_name == "gemini":
+                result = evaluate_with_gemini(prompt)
+            else:
+                result = evaluate_with_gemini(prompt)  # Fallback
+
+            if "error" in result:
+                print("ERROR")
+                wins["error"] += 1
+            else:
+                g = result.get("global", {})
+                winner_label = g.get("winner", "?")
+                if winner_label == "empat":
+                    actual = "empat"
+                elif order == "hc_first":
+                    actual = "hardcoded" if winner_label == "A" else "rag"
+                else:
+                    actual = "rag" if winner_label == "A" else "hardcoded"
+                wins[actual] = wins.get(actual, 0) + 1
+                print(f"-> {actual} ({g.get('confidence', '?')})")
+
+                save_judgement(conn, run_id, case, result, judge_name, order)
+
+        except Exception as e:
+            print(f"EXCEPTION: {e}")
+            wins["error"] += 1
+
+        time.sleep(2)
+
+    return wins
 
 
 def main():
-    if len(sys.argv) < 3:
-        # Auto-detect últims resultats
-        rag_dir = Path("tests/results")
-        hc_dir = Path("../ATNE-hardcoded/tests/results")
-        if rag_dir.exists() and hc_dir.exists():
-            rag_csvs = sorted(rag_dir.glob("*/metrics.csv"))
-            hc_csvs = sorted(hc_dir.glob("*/metrics.csv"))
-            if rag_csvs and hc_csvs:
-                rag_path = rag_csvs[-1]
-                hc_path = hc_csvs[-1]
-                print(f"Auto-detect:\n  RAG: {rag_path}\n  HC:  {hc_path}\n")
-            else:
-                print("No s'han trobat resultats. Ús: python tests/compare_branches.py <rag.csv> <hc.csv>")
-                return
-        else:
-            print("Ús: python tests/compare_branches.py <rag.csv> <hc.csv>")
-            return
-    else:
-        rag_path = Path(sys.argv[1])
-        hc_path = Path(sys.argv[2])
+    parser = argparse.ArgumentParser(description="Judici comparatiu multi-jutge")
+    parser.add_argument("--judge", type=str, default="gemini",
+                        choices=["gemini", "opus", "sonnet"],
+                        help="Quin jutge usar")
+    parser.add_argument("--limit", type=int, default=0,
+                        help="Limitar a N casos (0 = tots)")
+    parser.add_argument("--run-id", type=str, default=_RUN_ID,
+                        help="Run ID a avaluar")
+    args = parser.parse_args()
 
-    rag_rows = load_csv(rag_path)
-    hc_rows = load_csv(hc_path)
+    run_id = args.run_id
 
-    rag_sum = summarize(rag_rows, "RAG")
-    hc_sum = summarize(hc_rows, "Hardcoded")
+    conn = sqlite3.connect(str(DB_PATH))
+    conn.row_factory = sqlite3.Row
 
-    print("=" * 70)
-    print("  ATNE — Comparativa branques prompt-v2")
-    print("=" * 70)
+    cases = get_cases(conn, run_id)
+    if args.limit > 0:
+        cases = cases[:args.limit]
 
-    print(f"\n### Resum global")
-    print(f"| Mètrica              | RAG          | Hardcoded    | Diff         |")
-    print(f"|{'-'*22}|{'-'*14}|{'-'*14}|{'-'*14}|")
-    for key, label, fmt in [
-        ("ok", "Casos OK", "d"),
-        ("errors", "Errors", "d"),
-        ("avg_paraules", "Paraules/cas", ".0f"),
-        ("avg_frases", "Frases/cas", ".0f"),
-        ("avg_negreta", "Negretes/cas", ".1f"),
-        ("avg_temps", "Temps/cas (s)", ".1f"),
-        ("total_warnings", "Warnings totals", "d"),
-        ("avg_warnings", "Warnings/cas", ".1f"),
-    ]:
-        rv = rag_sum.get(key, 0)
-        hv = hc_sum.get(key, 0)
-        diff = rv - hv
-        sign = "+" if diff > 0 else ""
-        print(f"| {label:<20} | {rv:>{12}{fmt}} | {hv:>{12}{fmt}} | {sign}{diff:>{11}{fmt}} |")
+    print("=" * 60)
+    print(f"  JUDICI COMPARATIU — Jutge: {args.judge}")
+    print(f"  Run: {run_id} | Casos: {len(cases)}")
+    print("=" * 60)
 
-    # Per perfil
-    print_table("Per perfil", compare_by_group(rag_rows, hc_rows, "perfil_id"), "Perfil")
+    wins = run_judge(args.judge, cases, conn, run_id)
 
-    # Per MECR
-    print_table("Per MECR", compare_by_group(rag_rows, hc_rows, "mecr"), "MECR")
+    print("\n" + "=" * 60)
+    print("  RESULTATS")
+    print("=" * 60)
+    total_valid = sum(v for k, v in wins.items() if k != "error")
+    for label, count in sorted(wins.items(), key=lambda x: -x[1]):
+        pct = count / total_valid * 100 if total_valid > 0 else 0
+        print(f"  {label:12s}: {count:3d} ({pct:5.1f}%)")
 
-    # Per gènere
-    print_table("Per gènere", compare_by_group(rag_rows, hc_rows, "genere"), "Gènere")
-
-    # Per etapa
-    print_table("Per etapa", compare_by_group(rag_rows, hc_rows, "etapa"), "Etapa")
-
-    print("\n" + "=" * 70)
+    conn.close()
 
 
 if __name__ == "__main__":

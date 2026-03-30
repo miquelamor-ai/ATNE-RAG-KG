@@ -847,6 +847,110 @@ Nota: NO simplificar. Enriquir.
 
 ---
 
+## 10. Actualitzacio 2026-03-30: Macrodirectives i connexio de sub-variables
+
+Aquesta seccio documenta els canvis arquitectonics fets el 2026-03-30, que transformen el cataleg de 95 instruccions atomiques (seccio 7) en un sistema de macrodirectives compactes i connecten les sub-variables del perfil alumne amb les instruccions corresponents.
+
+### 10.1 Macrodirectives implementades
+
+Les 9 macrodirectives substitueixen les llistes atomiques d'instruccions com a unitat d'enviament a l'LLM. Cada macrodirectiva agrupa instruccions relacionades en un bloc coherent i autocontingut:
+
+| Macrodirectiva | Abast | Instruccions que agrupa |
+|---|---|---|
+| **LEXIC** | Vocabulari, terminologia, referents | A-01 a A-06, A-19 a A-23 |
+| **SINTAXI** | Frases, veu, ordre, puntuacio | A-07 a A-13, A-17, A-24 a A-26 |
+| **ESTRUCTURA** | Paragrafs, titols, llistes, transicions | B-01 a B-14 |
+| **COGNITIU** | Carrega cognitiva, scaffolding, glossari previ | C-01 a C-09 |
+| **QUALITAT** | Coherencia Mayer, exactitud, autocheck | E-01, E-05, E-06, C-03 |
+| **MULTIMODAL** | Emojis, esquemes, taules, TTS | D-01 a D-09 |
+| **AVALUACIO** | Preguntes, activitats, pensament critic | F-01 a F-10 |
+| **PERSONALITZACIO** | Glossari bilingue, referents culturals, to | G-01 a G-06, E-08 a E-11 |
+| **PERFIL** | Bloc especific per perfil actiu (TEA, TDAH, dislexia, etc.) | H-01 a H-22 |
+
+L'avantatge principal es que l'LLM rep blocs narratius amb coherencia interna, en lloc de llistes numerades d'instruccions desconnectades. Aixo millora el seguiment d'instruccions, especialment amb Gemini Flash.
+
+### 10.2 Instruccions SEMPRE reduides de 24 a 12
+
+De les 24 instruccions que tenien activacio SEMPRE al cataleg original (seccio 7), 12 es mantenen com a SEMPRE i 12 passen a activacio NIVELL (condicionals per MECR).
+
+**12 instruccions que es mantenen SEMPRE:**
+
+| ID | Instruccio |
+|---|---|
+| A-01 | Substitucio per vocabulari frequent |
+| A-02 | Termes tecnics en negreta amb definicio |
+| A-03 | Repeticio lexica coherent, no sinonims |
+| A-04 | Referents pronominals explicits |
+| A-05 | Eliminar expressions idiomatiques |
+| A-07 | Una idea per frase |
+| A-14 | Connectors explicits |
+| A-18 | Dates i xifres en format complet |
+| A-19 | Sigles i abreviatures explicades |
+| B-01 | Paragrafs curts (3-5 frases) |
+| B-02 | Blocs tematics amb titol descriptiu |
+| B-03 | Frase topic al principi de cada paragraf |
+
+**12 instruccions que passen a NIVELL (condicionals):**
+
+| ID | Nova activacio | Motiu |
+|---|---|---|
+| A-06 | NIVELL (<=B1) | Eliminar polisemia nomes necessari per sota B2 |
+| A-08 | NIVELL (<=B1) | Veu activa obligatoria es restrictiu per B2 |
+| A-09 | NIVELL (<=B1) | Subjecte explicit a cada frase nomes cal per sota B2 |
+| A-10 | NIVELL (<=B1) | Ordre canonic SVO innecessari per B2 |
+| A-11 | NIVELL (<=B1) | Puntuacio simplificada innecessaria per B2 |
+| A-17 | NIVELL (<=B1) | Evitar negacions multiples nomes crític per sota B2 |
+| B-04 | NIVELL (<=B1) | Llistes en lloc d'enumeracions nomes per sota B2 |
+| B-05 | NIVELL (<=B1) | Estructura deductiva nomes obligatoria per sota B2 |
+| B-06 | NIVELL (<=B1) | Ordre cronologic per a processos nomes obligatori per sota B2 |
+| B-09 | NIVELL (<=B1) | Numeracio de passos nomes obligatoria per sota B2 |
+| B-11 | NIVELL (<=A2) | Salt de linia entre idees nomes obligatori per nivells baixos |
+| B-14 | NIVELL (<=B1) | Taules per informacio comparativa nomes obligatories per sota B2 |
+
+Aquesta reduccio fa que un cas B2 generic rebi 12 instruccions fixes (dins rang optim 7-12) en lloc de 24.
+
+### 10.3 Cinc duplicats resolts
+
+El cataleg original contenia redundancies que s'han eliminat:
+
+| Duplicat | Resolucio |
+|---|---|
+| E-04 (glossari bilingue L1-L2) = G-01 (glossari bilingue complet) | E-04 eliminat, G-01 es la canonica |
+| H-13 (AC: connexions interdisciplinars) = F-10 (connexions interdisciplinars) | H-13 eliminat, F-10 es la canonica |
+| E-08 (referents culturalment diversos) + G-05 (substitucio referents culturals) | Fusionats: una sola instruccio que cobreix ambdos aspectes |
+| H-14 (AC: manteniment complexitat) + H-14b (si existia duplicat intern) | Fusionats en una sola entrada |
+| A-01/A-03 vs H-08 i A-05 vs H-02 | Resolts amb suppress_if_profile: les instruccions generiques (A-01, A-03, A-05) es suprimeixen quan el perfil especific (dislexia per H-08, TEA per H-02) ja les cobreix amb mes detall |
+
+### 10.4 Tres noves instruccions
+
+| ID | Instruccio | Activacio | Justificacio |
+|---|---|---|---|
+| A-27 | Retall per fatiga: si el text supera X paraules (llindar per MECR), dividir en parts amb indicador [Part N de M] | NIVELL (<=A2) | Textos llargs causen abandonament en nivells baixos. Complementa H-04 (TDAH micro-blocs) pero per motiu diferent (fatiga lectora vs atencio) |
+| H-21 | Descripcio visual per ceguesa: generar descripcions textuals detallades de qualsevol element visual del text original (grafics, taules, mapes) | PERFIL (disc_visual) | Omplia un buit important: H-18 (alt-text) era per FE/CODI, pero l'LLM pot generar descripcions narratives dels visuals del text original |
+| H-22 | Dislexia fonologica: evitar clusters consonantics (bl, pr, tr a inici de paraula), preferir paraules amb estructura CV-CV, evitar paraules amb doble consonant | PERFIL (dislexia) | Regla especifica per dislexia fonologica basada en Dehaene, mes granular que H-07 (compostos llargs) |
+
+### 10.5 Vint-i-una sub-variables connectades
+
+S'ha creat un mapa sistematic que connecta les 21 sub-variables del perfil alumne (configurables per UI) amb les instruccions del cataleg que activen o desactiven. El mapa complet es a `docs/decisions/mapa_variables_instruccions.md`.
+
+Aquesta connexio permet que el codi `build_system_prompt()` seleccioni instruccions automaticament a partir de la configuracio del docent, sense logica ad hoc.
+
+### 10.6 Simulacio d'eficiencia
+
+Per validar l'impacte dels canvis, s'ha simulat un cas real:
+
+**Cas**: nouvingut amb nivell A1, text explicatiu de ciencies naturals.
+
+| Metrica | Abans (cataleg atomic) | Despres (macrodirectives) |
+|---|---|---|
+| Instruccions enviades | ~49 instruccions atomiques | 7 macrodirectives |
+| Tokens estimats al prompt | ~2.500 tokens d'instruccions | ~800 tokens d'instruccions |
+| Dins rang optim LLM (7-12) | No (4x per sobre) | Si |
+
+Les 7 macrodirectives del cas nouvingut A1 son: LEXIC, SINTAXI, ESTRUCTURA, COGNITIU, QUALITAT, PERSONALITZACIO i PERFIL(nouvingut). MULTIMODAL i AVALUACIO nomes s'afegeixen si el docent activa complements.
+
+---
+
 ## Annex A: Implementacio de referencia per a `build_system_prompt()` v2
 
 Pseudocodi que il-lustra com quedaria la funcio reestructurada:

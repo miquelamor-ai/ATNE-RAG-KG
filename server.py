@@ -16,6 +16,7 @@ import time
 from pathlib import Path
 
 import corpus_reader
+import instruction_filter
 import requests
 import uvicorn
 from dotenv import load_dotenv
@@ -403,106 +404,225 @@ def _get_active_profiles(profile: dict) -> list[str]:
     return [key for key, val in chars.items() if val.get("actiu")]
 
 
+def _str_to_bool(val) -> bool:
+    """Converteix string a bool de forma tolerant."""
+    if isinstance(val, bool):
+        return val
+    if isinstance(val, str):
+        return val.lower() in ("true", "1", "sí", "si")
+    return bool(val)
+
+
 def build_persona_audience(profile: dict, context: dict, mecr: str) -> str:
-    """Genera narrativa concreta de l'alumne (persona-audience pattern)."""
+    """
+    Genera narrativa concreta de l'alumne (persona-audience pattern).
+
+    Aprofita TOTES les sub-variables de tipus NARRATIVA per donar a l'LLM
+    una imatge rica de per a qui escriu, no només etiquetes abstractes.
+    """
     chars = profile.get("caracteristiques", {})
-    parts = []
+    lines = []
 
     etapa = context.get("etapa", "ESO")
     curs = context.get("curs", "")
-    parts.append(f"Escrius per a un alumne de {etapa}")
+    header = f"Escrius per a un alumne de {etapa}"
     if curs:
-        parts.append(f"({curs})")
+        header += f" ({curs})"
+    lines.append(header + ".")
 
     for key, val in chars.items():
         if not val.get("actiu"):
             continue
+
         if key == "nouvingut":
-            l1 = val.get("L1", "desconeguda")
-            mesos = val.get("mesos_a_catalunya", "")
-            parts.append(f"nouvingut, L1 {l1}")
-            if mesos:
-                parts.append(f"{mesos} mesos a Catalunya")
-            if val.get("escolaritzacio_previa") == "no":
-                parts.append("sense escolarització prèvia regular")
+            l1 = val.get("L1", "")
+            frag = "Alumne nouvingut"
+            if l1:
+                frag += f" que parla {l1} com a L1"
+            lines.append(frag + ".")
+
+            alfabet = val.get("alfabet_llati", True)
+            if isinstance(alfabet, str):
+                alfabet = alfabet.lower() not in ("no", "false", "0")
+            if not alfabet:
+                lines.append("Alfabet no llatí: necessita transliteració fonètica.")
+
+            esc = val.get("escolaritzacio_previa", "si")
+            if esc == "no":
+                lines.append("No ha estat escolaritzat regularment al seu país d'origen. No familiaritzat amb gèneres escolars.")
+            elif esc == "parcial":
+                lines.append("Escolarització prèvia parcial o interrompuda.")
+
+            calp = val.get("calp", "")
+            if calp == "inicial":
+                lines.append("Llengua acadèmica (CALP) inicial: no domina el registre escolar ni vocabulari abstracte de les matèries. Termes com 'justifica', 'argumenta', 'analitza' poden ser incomprensibles.")
+            elif calp == "emergent":
+                lines.append("Llengua acadèmica (CALP) emergent: entén consignes bàsiques però li costa el vocabulari abstracte.")
+
         elif key == "tea":
-            nivell = val.get("nivell_suport", 1)
-            parts.append(f"amb TEA nivell {nivell}")
+            nivell = val.get("nivell_suport", "1")
+            com = val.get("comunicacio_oral", "fluida")
+            frag = f"TEA, nivell de suport {nivell} (DSM-5)"
+            if com == "no_verbal":
+                frag += ". Comunicació oral no verbal: depèn totalment del canal visual i escrit"
+            elif com == "limitada":
+                frag += ". Comunicació oral limitada: necessita més suport visual"
+            lines.append(frag + ".")
+
         elif key == "tdah":
             pres = val.get("presentacio", "combinat")
-            parts.append(f"amb TDAH ({pres})")
-        elif key == "dislexia":
-            parts.append("amb dislèxia")
-        elif key == "altes_capacitats":
-            parts.append("amb altes capacitats")
-        elif key == "di":
-            parts.append("amb discapacitat intel·lectual")
-        else:
-            parts.append(f"amb {key.replace('_', ' ')}")
+            grau = val.get("grau", "")
+            frag = f"TDAH, presentació {pres}"
+            if grau:
+                frag += f" (grau {grau})"
+            lines.append(frag + ".")
 
-    parts.append(f"Nivell MECR: {mecr}.")
+            if _str_to_bool(val.get("baixa_memoria_treball", False)):
+                lines.append("Memòria de treball baixa: limitar elements simultanis, repetir informació clau.")
+            if _str_to_bool(val.get("fatiga_cognitiva", False)):
+                lines.append("Fatiga cognitiva: es cansa ràpid amb textos llargs, necessita text reduït i pauses visuals.")
+
+        elif key == "dislexia":
+            tipus = val.get("tipus_dislexia", "")
+            grau = val.get("grau", "")
+            frag = "Dislèxia"
+            if tipus:
+                frag += f" {tipus}"
+            if grau:
+                frag += f" (grau {grau})"
+            lines.append(frag + ".")
+
+        elif key == "altes_capacitats":
+            tipus = val.get("tipus_capacitat", "global")
+            if tipus == "talent_especific":
+                lines.append("Altes capacitats: talent específic. NO simplificar. Enriquir amb profunditat i connexions interdisciplinars.")
+            else:
+                lines.append("Altes capacitats globals. NO simplificar. Enriquir amb profunditat i connexions interdisciplinars.")
+
+        elif key in ("di", "discapacitat_intellectual"):
+            grau = val.get("grau", "lleu")
+            lines.append(f"Discapacitat intel·lectual (grau {grau}). Necessita concreció radical i repetició sistemàtica.")
+
+        elif key == "tdl":
+            modalitat = val.get("modalitat", "")
+            grau = val.get("grau", "")
+            frag = "TDL (Trastorn del Llenguatge)"
+            if modalitat:
+                frag += f", afectació {modalitat}"
+            if grau:
+                frag += f" (grau {grau})"
+            lines.append(frag + ".")
+
+            afectacions = []
+            if _str_to_bool(val.get("morfosintaxi", False)):
+                afectacions.append("morfosintaxi")
+            if _str_to_bool(val.get("semantica", False)):
+                afectacions.append("semàntica/lèxic")
+            if _str_to_bool(val.get("pragmatica", False)):
+                afectacions.append("pragmàtica")
+            if _str_to_bool(val.get("discurs_narrativa", False)):
+                afectacions.append("discurs/narrativa")
+            if afectacions:
+                lines.append(f"Àrees afectades: {', '.join(afectacions)}.")
+
+            if _str_to_bool(val.get("bilingue", False)):
+                lines.append("Context bilingüe/plurilingüe.")
+
+        elif key in ("disc_visual", "discapacitat_visual"):
+            grau = val.get("grau", "baixa_visio_moderada")
+            etiquetes = {
+                "baixa_visio_moderada": "baixa visió moderada",
+                "baixa_visio_greu": "baixa visió greu",
+                "ceguesa": "ceguesa",
+            }
+            lines.append(f"Discapacitat visual: {etiquetes.get(grau, grau)}.")
+
+        elif key in ("disc_auditiva", "discapacitat_auditiva"):
+            com = val.get("comunicacio", "oral")
+            impl = _str_to_bool(val.get("implant_coclear", False))
+            frag = "Discapacitat auditiva"
+            if com == "LSC":
+                frag += ", comunicació en Llengua de Signes Catalana. Tractar el català escrit com a L2"
+            elif com == "bimodal":
+                frag += ", comunicació bimodal (oral + signes)"
+            if impl:
+                frag += ". Porta implant coclear (accés auditiu parcial)"
+            lines.append(frag + ".")
+
+        elif key == "trastorn_emocional":
+            if _str_to_bool(val.get("sensibilitat_tematica", False)):
+                lines.append("Trastorn emocional/conductual. Sensibilitat temàtica: evitar temes de violència, separació, mort.")
+            else:
+                lines.append("Trastorn emocional/conductual.")
+
+        elif key == "vulnerabilitat":
+            if _str_to_bool(val.get("sensibilitat_tematica", False)):
+                lines.append("Vulnerabilitat socioeducativa. Sensibilitat temàtica: evitar temes potencialment traumàtics.")
+            else:
+                lines.append("Vulnerabilitat socioeducativa.")
+
+        elif key == "tdc":
+            grau = val.get("grau", "")
+            frag = "TDC/Dispraxia"
+            if grau:
+                frag += f" (grau {grau})"
+            lines.append(frag + ".")
+
+        elif key == "2e":
+            lines.append("Doble excepcionalitat (2e): combina altes capacitats amb una necessitat d'accessibilitat. Mantenir repte intel·lectual ALT amb suports de format.")
+
+        else:
+            lines.append(f"Amb {key.replace('_', ' ')}.")
+
+    lines.append(f"Nivell MECR de sortida: {mecr}.")
+
     obs = profile.get("observacions", "")
     if obs:
-        parts.append(f"Observació docent: {obs}")
+        lines.append(f"Observació del docent: {obs}")
 
-    return " ".join(parts)
+    return "\n".join(lines)
 
 
 def build_system_prompt(profile: dict, context: dict, params: dict, rag_context: str) -> str:
-    """Munta el system prompt v2 en 4 capes — instruccions llegides del corpus MD."""
+    """Munta el system prompt v2 en 4 capes — instruccions filtrades del catàleg de 89."""
     parts = []
+    mecr = params.get("mecr_sortida", "B2")
+    dua = params.get("dua", "Core")
 
     # ═══ CAPA 1: IDENTITAT (fixa) ═══
     parts.append(corpus_reader.get_identity())
 
-    # ═══ CAPA 2: INSTRUCCIONS UNIVERSALS (fixa) ═══
-    parts.append(corpus_reader.get_universal_rules())
+    # ═══ CAPES 2-3: INSTRUCCIONS FILTRADES (catàleg de 89 instruccions LLM) ═══
+    # Filtra segons perfils actius, sub-variables, MECR, DUA i complements
+    filtered = instruction_filter.get_instructions(profile, params)
+    instructions_text = instruction_filter.format_instructions_for_prompt(filtered)
+    parts.append(instructions_text)
 
-    # ═══ CAPA 3: INSTRUCCIONS CONDICIONALS (variable — del corpus) ═══
-    mecr = params.get("mecr_sortida", "B2")
-    dua = params.get("dua", "Core")
-
-    # 3a. MECR (només 1 nivell)
-    mecr_block = corpus_reader.get_mecr_block(mecr)
-    if mecr_block:
-        parts.append(mecr_block)
-
-    # 3b. DUA
+    # DUA (bloc del corpus — complementa les instruccions filtrades)
     dua_block = corpus_reader.get_dua_block(dua)
     if dua_block:
         parts.append(dua_block)
 
-    # 3c. Gènere discursiu (si indicat)
+    # Gènere discursiu (si indicat)
     genre = params.get("genere_discursiu", "")
     if genre:
         genre_block = corpus_reader.get_genre_block(genre)
         if genre_block:
             parts.append(genre_block)
 
-    # 3d. Perfils actius (només els que s'apliquen)
+    # Creuaments (si 2+ perfils actius)
     active_profiles = _get_active_profiles(profile)
-    for pkey in active_profiles:
-        pblock = corpus_reader.get_profile_block(pkey)
-        if pblock:
-            parts.append(pblock)
-
-    # 3e. Creuaments (si 2+ perfils actius)
     crossing_blocks = corpus_reader.get_crossing_blocks(active_profiles)
     for cb_text in crossing_blocks:
         parts.append(cb_text)
 
-    # 3f. Càrrega cognitiva
-    cog_block = corpus_reader.get_cognitive_load_block(mecr)
-    if cog_block:
-        parts.append(cog_block)
-
-    # 3g. Resolució conflictes (si nivell baix o DUA Accés)
+    # Resolució conflictes (si nivell baix o DUA Accés)
     if mecr in ("pre-A1", "A1", "A2") or dua == "Acces":
         conflict = corpus_reader.get_conflict_resolution()
         if conflict:
             parts.append(conflict)
 
-    # 3h. Few-shot example
+    # Few-shot example
     fewshot = corpus_reader.get_fewshot_example(mecr)
     if fewshot:
         parts.append(f"EXEMPLE DE SORTIDA ESPERADA ({mecr}):\n{fewshot}")
@@ -1301,6 +1421,416 @@ async def export_doc(payload: dict = Body(...)):
         return FileResponse(tmp, filename=f"{base_name}.pdf", media_type="application/pdf")
 
     return JSONResponse({"error": f"Format '{fmt}' no suportat"}, status_code=400)
+
+
+# ── Cuina (dashboard intern) ───────────────────────────────────────────────
+
+@app.get("/cuina", response_class=HTMLResponse)
+async def cuina_page():
+    """Serveix la pàgina de cuina (flux + catàleg d'instruccions)."""
+    html_path = UI_DIR / "cuina.html"
+    if html_path.exists():
+        return HTMLResponse(html_path.read_text(encoding="utf-8"))
+    return HTMLResponse("<h1>Cuina no disponible</h1>", status_code=404)
+
+
+@app.get("/api/catalog")
+async def api_catalog():
+    """Retorna el catàleg complet d'instruccions amb metadades."""
+    from instruction_catalog import CATALOG, PROFILE_INSTRUCTION_MAP
+
+    category_labels = {
+        "A": "Adaptació Lingüística",
+        "B": "Estructura i Organització",
+        "C": "Suport Cognitiu",
+        "D": "Multimodalitat",
+        "E": "Contingut Curricular",
+        "F": "Avaluació i Comprensió",
+        "G": "Personalització Lingüística",
+        "H": "Adaptacions per Perfil",
+    }
+
+    items = []
+    for iid, instr in CATALOG.items():
+        item = {
+            "id": iid,
+            "text": instr["text"],
+            "activation": instr["activation"],
+            "category": iid.split("-")[0],
+        }
+        if "profiles" in instr:
+            item["profiles"] = instr["profiles"]
+        if "mecr_levels" in instr:
+            item["mecr_levels"] = instr["mecr_levels"]
+        if "mecr_detail" in instr:
+            item["mecr_detail"] = instr["mecr_detail"]
+        if "suppress_if" in instr:
+            item["suppress_if"] = instr["suppress_if"]
+        if "subvar_conditions" in instr:
+            item["subvar_conditions"] = instr["subvar_conditions"]
+        if "complement" in instr:
+            item["complement"] = instr["complement"]
+        items.append(item)
+
+    return {
+        "items": items,
+        "total": len(items),
+        "category_labels": category_labels,
+        "profile_map": PROFILE_INSTRUCTION_MAP,
+    }
+
+
+# ── API Avaluació (dashboard) ──────────────────────────────────────────────
+
+@app.get("/eval", response_class=HTMLResponse)
+async def eval_dashboard():
+    """Serveix el dashboard d'avaluació (resultats complets)."""
+    html_path = UI_DIR / "eval_dashboard.html"
+    if html_path.exists():
+        return HTMLResponse(html_path.read_text(encoding="utf-8"))
+    return HTMLResponse("<h1>Dashboard no disponible</h1>", status_code=404)
+
+
+@app.get("/eval/progress", response_class=HTMLResponse)
+async def eval_progress_page():
+    """Serveix la pàgina de monitoratge en temps real."""
+    html_path = UI_DIR / "eval_progress.html"
+    if html_path.exists():
+        return HTMLResponse(html_path.read_text(encoding="utf-8"))
+    return HTMLResponse("<h1>Pàgina de progrés no disponible</h1>", status_code=404)
+
+
+@app.get("/eval/results", response_class=HTMLResponse)
+async def eval_results_page():
+    """Serveix la pàgina de resultats amb infografies."""
+    html_path = UI_DIR / "eval_results.html"
+    if html_path.exists():
+        return HTMLResponse(html_path.read_text(encoding="utf-8"))
+    return HTMLResponse("<h1>Resultats no disponibles</h1>", status_code=404)
+
+
+@app.get("/eval/cases", response_class=HTMLResponse)
+async def eval_cases_page():
+    """Serveix la pàgina de visualització de casos (textos adaptats)."""
+    html_path = UI_DIR / "eval_cases.html"
+    if html_path.exists():
+        return HTMLResponse(html_path.read_text(encoding="utf-8"))
+    return HTMLResponse("<h1>Cases no disponibles</h1>", status_code=404)
+
+
+@app.get("/api/eval/cases/{run_id}")
+async def eval_cases_detail(run_id: str, limit: int = 20, offset: int = 0,
+                            perfil: str = "", etapa: str = "", genere: str = ""):
+    """Retorna els casos amb textos adaptats complets per visualitzar."""
+    try:
+        import eval_db
+        conn = eval_db.init_db()
+
+        # Build optional filters
+        filters = ""
+        params = [run_id]
+        if perfil:
+            filters += " AND c1.perfil_id = ?"
+            params.append(perfil)
+        if etapa:
+            filters += " AND c1.etapa = ?"
+            params.append(etapa)
+        if genere:
+            filters += " AND c1.genere = ?"
+            params.append(genere)
+
+        rows = conn.execute(f"""
+            SELECT c1.cas_id, c1.text_id, c1.perfil_id, c1.etapa, c1.genere, c1.mecr, c1.dua,
+                   c1.perfils_actius,
+                   c1.text_adaptat as text_hc, c1.puntuacio_forma as forma_hc,
+                   c1.system_prompt_length as prompt_hc_len,
+                   c2.text_adaptat as text_rag, c2.puntuacio_forma as forma_rag,
+                   c2.recall as recall_rag,
+                   c2.system_prompt_length as prompt_rag_len,
+                   c2.total_instruccions_enviades as instr_rag
+            FROM eval_cases c1
+            JOIN eval_cases c2 ON c1.cas_id = c2.cas_id AND c1.run_id = c2.run_id
+            WHERE c1.run_id = ? AND c1.branca = 'hardcoded' AND c2.branca = 'rag'
+            {filters}
+            ORDER BY c1.cas_id
+            LIMIT ? OFFSET ?
+        """, (*params, limit, offset)).fetchall()
+
+        total = conn.execute(f"""
+            SELECT COUNT(DISTINCT c1.cas_id) FROM eval_cases c1
+            JOIN eval_cases c2 ON c1.cas_id = c2.cas_id AND c1.run_id = c2.run_id
+            WHERE c1.run_id = ? AND c1.branca = 'hardcoded' AND c2.branca = 'rag'
+            {filters}
+        """, params).fetchone()[0]
+
+        # Get comparative judgements if available
+        judgements = {}
+        jrows = conn.execute(
+            "SELECT cas_id, judge, winner, justification FROM comparative_judgements WHERE run_id = ?",
+            (run_id,)
+        ).fetchall()
+        for j in jrows:
+            cid = j["cas_id"]
+            if cid not in judgements:
+                judgements[cid] = []
+            judgements[cid].append({"judge": j["judge"], "winner": j["winner"],
+                                    "justification": j["justification"]})
+
+        cases = []
+        for r in rows:
+            cases.append({
+                "cas_id": r["cas_id"],
+                "text_id": r["text_id"],
+                "perfil_id": r["perfil_id"],
+                "etapa": r["etapa"],
+                "genere": r["genere"],
+                "mecr": r["mecr"],
+                "dua": r["dua"],
+                "perfils": r["perfils_actius"],
+                "text_hc": r["text_hc"],
+                "text_rag": r["text_rag"],
+                "forma_hc": r["forma_hc"],
+                "forma_rag": r["forma_rag"],
+                "recall_rag": r["recall_rag"],
+                "prompt_hc_len": r["prompt_hc_len"],
+                "prompt_rag_len": r["prompt_rag_len"],
+                "instr_rag": r["instr_rag"],
+                "judgements": judgements.get(r["cas_id"], []),
+            })
+
+        conn.close()
+        return JSONResponse({"cases": cases, "total": total, "offset": offset, "limit": limit})
+    except Exception as e:
+        return JSONResponse({"error": str(e)})
+
+
+@app.get("/api/eval/originals")
+async def eval_originals():
+    """Retorna els textos originals del dataset."""
+    import json as json_mod
+    data_path = Path(__file__).parent / "tests" / "test_data.json"
+    with open(data_path, encoding="utf-8") as f:
+        data = json_mod.load(f)
+    return JSONResponse({"textos": data["textos"], "perfils": data["perfils"]})
+
+
+@app.get("/api/eval/comparative")
+async def eval_comparative():
+    """Retorna totes les dades del judici comparatiu per al dashboard."""
+    try:
+        import eval_db
+        conn = eval_db.init_db()
+
+        # Judicis per jutge i guanyador
+        judges = conn.execute("""
+            SELECT judge, winner, COUNT(*) as n
+            FROM comparative_judgements
+            GROUP BY judge, winner ORDER BY judge, winner
+        """).fetchall()
+
+        # Per perfil
+        by_profile = conn.execute("""
+            SELECT judge, perfil_id, winner, COUNT(*) as n
+            FROM comparative_judgements
+            GROUP BY judge, perfil_id, winner
+            ORDER BY perfil_id, judge
+        """).fetchall()
+
+        # Per criteri
+        criteria = {}
+        for c in ["c1_winner", "c2_winner", "c3_winner", "c4_winner", "c5_winner"]:
+            rows = conn.execute(f"""
+                SELECT judge, {c} as winner, COUNT(*) as n
+                FROM comparative_judgements WHERE {c} IS NOT NULL AND {c} != ''
+                GROUP BY judge, {c}
+            """).fetchall()
+            criteria[c.replace("_winner", "")] = [dict(r) for r in rows]
+
+        # Justificacions (últims 20)
+        justifications = conn.execute("""
+            SELECT cas_id, judge, winner, confidence, justification
+            FROM comparative_judgements
+            ORDER BY id DESC LIMIT 20
+        """).fetchall()
+
+        # Mètriques forma de la BD
+        forma = conn.execute("""
+            SELECT branca,
+                   AVG(puntuacio_forma) as avg_forma,
+                   AVG(recall) as avg_recall,
+                   AVG(text_adaptat_length) as avg_len,
+                   COUNT(*) as n
+            FROM eval_cases WHERE run_id = (SELECT run_id FROM eval_runs ORDER BY timestamp DESC LIMIT 1)
+            GROUP BY branca
+        """).fetchall()
+
+        conn.close()
+
+        return JSONResponse({
+            "judges": [dict(r) for r in judges],
+            "by_profile": [dict(r) for r in by_profile],
+            "criteria": criteria,
+            "justifications": [dict(r) for r in justifications],
+            "forma": [dict(r) for r in forma],
+        })
+    except Exception as e:
+        return JSONResponse({"error": str(e)})
+
+
+@app.get("/api/eval/runs")
+async def eval_runs():
+    """Llista totes les execucions d'avaluació."""
+    try:
+        import eval_db
+        conn = eval_db.init_db()
+        runs = eval_db.get_all_runs(conn)
+        conn.close()
+        return JSONResponse(runs)
+    except Exception as e:
+        return JSONResponse({"error": str(e), "runs": []})
+
+
+@app.get("/api/eval/run/{run_id}")
+async def eval_run_detail(run_id: str):
+    """Retorna totes les dades d'una execució (per al dashboard)."""
+    try:
+        import eval_db
+        conn = eval_db.init_db()
+        data = eval_db.export_run_json(conn, run_id)
+        conn.close()
+        return JSONResponse(data)
+    except Exception as e:
+        return JSONResponse({"error": str(e)})
+
+
+@app.get("/api/eval/progress")
+async def eval_progress():
+    """Monitoratge en temps real del batch en curs — llegeix directament la BD."""
+    try:
+        import eval_db
+        import sqlite3
+        conn = eval_db.init_db()
+
+        # Últim run
+        last_run = conn.execute(
+            "SELECT run_id, timestamp, total_cases, notes FROM eval_runs ORDER BY timestamp DESC LIMIT 1"
+        ).fetchone()
+        if not last_run:
+            return JSONResponse({"status": "idle", "message": "Cap execució registrada"})
+
+        run_id = last_run["run_id"]
+        total_expected = last_run["total_cases"] or 0
+
+        # Casos completats (cada cas genera 2 files: HC + RAG)
+        count = conn.execute(
+            "SELECT COUNT(*) as n FROM eval_cases WHERE run_id = ?", (run_id,)
+        ).fetchone()["n"]
+        cases_done = count // 2  # 2 branques per cas
+
+        # Comparacions completades (BLOC 3)
+        evals_done = conn.execute(
+            "SELECT COUNT(*) as n FROM eval_comparisons WHERE run_id = ?", (run_id,)
+        ).fetchone()["n"]
+
+        # Mètriques parcials
+        stats = conn.execute("""
+            SELECT branca,
+                   AVG(puntuacio_forma) as avg_forma,
+                   AVG(puntuacio_fons) as avg_fons,
+                   AVG(recall) as avg_recall,
+                   AVG(text_adaptat_length) as avg_len
+            FROM eval_cases WHERE run_id = ?
+            GROUP BY branca
+        """, (run_id,)).fetchall()
+
+        branca_stats = {}
+        for row in stats:
+            branca_stats[row["branca"]] = {
+                "avg_forma": round(row["avg_forma"], 3) if row["avg_forma"] else None,
+                "avg_fons": round(row["avg_fons"], 3) if row["avg_fons"] else None,
+                "avg_recall": round(row["avg_recall"], 3) if row["avg_recall"] else None,
+                "avg_len": int(row["avg_len"]) if row["avg_len"] else None,
+            }
+
+        # Últims 5 casos processats
+        recent = conn.execute("""
+            SELECT cas_id, branca, puntuacio_forma, text_adaptat_length
+            FROM eval_cases WHERE run_id = ?
+            ORDER BY id DESC LIMIT 10
+        """, (run_id,)).fetchall()
+        recent_list = [
+            {"cas_id": r["cas_id"], "branca": r["branca"],
+             "forma": r["puntuacio_forma"], "len": r["text_adaptat_length"]}
+            for r in recent
+        ]
+
+        # Veredictes (si n'hi ha)
+        veredictes = {}
+        if evals_done > 0:
+            vrows = conn.execute("""
+                SELECT veredicte, COUNT(*) as n
+                FROM eval_comparisons WHERE run_id = ?
+                GROUP BY veredicte
+            """, (run_id,)).fetchall()
+            veredictes = {r["veredicte"] or "sense_eval": r["n"] for r in vrows}
+
+        # ── Multi-LLM progress ──
+        multi_llm = {}
+        try:
+            mlg = conn.execute("""
+                SELECT generator, prompt_mode, COUNT(*) as n, AVG(puntuacio_forma) as avg_forma,
+                       AVG(text_adaptat_paraules) as avg_words
+                FROM multi_llm_generations WHERE error IS NULL
+                GROUP BY generator, prompt_mode ORDER BY generator
+            """).fetchall()
+            multi_llm["generations"] = [dict(r) for r in mlg]
+
+            mle = conn.execute("""
+                SELECT judge, eval_type, COUNT(*) as n
+                FROM multi_llm_evaluations
+                GROUP BY judge, eval_type ORDER BY judge
+            """).fetchall()
+            multi_llm["evaluations"] = [dict(r) for r in mle]
+
+            mlr = conn.execute("""
+                SELECT cas_id, generator, prompt_mode, text_adaptat_paraules as words
+                FROM multi_llm_generations WHERE error IS NULL
+                ORDER BY id DESC LIMIT 10
+            """).fetchall()
+            multi_llm["recent"] = [dict(r) for r in mlr]
+
+            multi_llm["total_generations"] = conn.execute(
+                "SELECT COUNT(*) FROM multi_llm_generations WHERE error IS NULL"
+            ).fetchone()[0]
+            multi_llm["total_evaluations"] = conn.execute(
+                "SELECT COUNT(*) FROM multi_llm_evaluations"
+            ).fetchone()[0]
+        except Exception:
+            pass
+
+        conn.close()
+
+        is_running = cases_done < total_expected
+        pct = round(cases_done / total_expected * 100, 1) if total_expected > 0 else 0
+
+        return JSONResponse({
+            "status": "running" if is_running else "completed",
+            "run_id": run_id,
+            "notes": last_run["notes"],
+            "timestamp": last_run["timestamp"],
+            "progress": {
+                "cases_done": cases_done,
+                "total_expected": total_expected,
+                "evals_done": evals_done,
+                "percentage": pct,
+            },
+            "partial_stats": branca_stats,
+            "veredictes": veredictes,
+            "recent_cases": recent_list,
+            "multi_llm": multi_llm,
+        })
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)})
 
 
 # ── Main ────────────────────────────────────────────────────────────────────

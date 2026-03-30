@@ -729,10 +729,15 @@ function collectParams() {
     document.querySelectorAll("input[data-comp]").forEach(cb => {
         complements[cb.dataset.comp] = cb.checked;
     });
+    // Gènere textual (pas 2) — si no seleccionat, buit (auto-detecció al backend)
+    const genereEl = document.getElementById("input-genere-textual");
+    const genere = genereEl ? genereEl.value : "";
+
     return {
         dua: document.getElementById("param-dua").value,
         lf: parseInt(document.getElementById("param-lf").value),
         mecr_sortida: document.getElementById("param-mecr").value,
+        genere_discursiu: genere,
         complements,
     };
 }

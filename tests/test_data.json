@@ -1,8 +1,10 @@
 {
   "_meta": {
-    "description": "Matriu de tests sintètics ATNE — 16 textos x 10 perfils = 160 adaptacions",
+    "description": "Matriu de tests sintètics ATNE — 20 textos x 10 perfils = 200 adaptacions",
     "created": "2026-03-28",
-    "fonts": "Enciclopèdia Catalana, XTEC, SaviaMENT, Racó de contes, 3Cat, Diari Ara"
+    "updated": "2026-03-29",
+    "nota_v2": "Afegits 4 textos culturals (CULT_*) amb referents locals catalans per exercitar E-08, E-09, G-05",
+    "fonts": "Enciclopèdia Catalana, XTEC, SaviaMENT, Racó de contes, 3Cat, Diari Ara, Betevé, CCMA"
   },
 
   "textos": [
@@ -152,6 +154,43 @@
       "font": "3Cat Info, Diari Ara, OEIAC, Gencat",
       "paraules": 440,
       "text": "La intel·ligència artificial ha deixat de ser un concepte de ciència-ficció per convertir-se en una tecnologia transversal que impregna tots els àmbits de la vida quotidiana. Com afirma Karina Gibert, catedràtica i directora de l'IDEAI-UPC: \"La IA és transversal. No hi ha cap camp on no es pugui utilitzar.\" Ara bé, aquesta omnipresència planteja interrogants ètics que la societat no pot eludir. La tesi d'aquest text és que el desenvolupament de la intel·ligència artificial requereix un marc ètic i regulador sòlid que garanteixi que els seus beneficis superin els riscos.\n\nEn primer lloc, cal assenyalar el problema dels biaixos algorítmics. La IA es basa en les dades que han generat i generen els humans i, per tant, reprodueix els biaixos de gènere, edat o etnicitat que contenen aquestes dades. Marta Aymerich documenta com GPT-4 tendeix a reproduir estereotips de gènere en recomanacions mèdiques: davant un cas de dificultat respiratòria per embòlia pulmonar, l'algorisme prioritza el trastorn de pànic en dones. Aquests biaixos no són merament tècnics; tenen conseqüències directes sobre la vida de les persones.\n\nEn segon lloc, la qüestió de la responsabilitat i la transparència. L'Observatori d'Ètica en Intel·ligència Artificial de Catalunya (OEIAC) ha desenvolupat el model PIO que avalua l'ús ètic de sistemes d'IA a través de set dimensions: transparència, justícia, seguretat, responsabilitat, privacitat, autonomia i sostenibilitat. Quan un algorisme pren decisions que afecten serveis essencials, el biaix d'automatització pot portar a validar decisions incorrectes sense la intervenció humana adequada.\n\nEn tercer lloc, l'impacte ambiental i social. Es preveu que per al 2030 els centres de dades consumeixin més del 8% de l'electricitat total dels Estats Units. A més, la cadena de valor de la IA genera explotació laboral en la mineria de metalls rars i treballadors poc remunerats per a l'etiquetatge de dades.\n\nDavant d'aquests riscos, la regulació europea ha respost amb l'AI Act, que classifica els sistemes d'IA per nivells de risc: inacceptable, alt, limitat i mínim. La innovació i la regulació no són dos pols oposats, sinó un marc compatible. Com resumeix Gibert: \"Està a les nostres mans decidir com col·loquem la IA a la societat.\""
+    },
+
+    {
+      "id": "CULT_EXPL",
+      "etapa": "ESO",
+      "genere": "explicacio",
+      "tema": "Les festes populars catalanes",
+      "font": "Betevé, CCMA, Patrimoni Gencat",
+      "paraules": 250,
+      "text": "Catalunya té un calendari festiu molt ric que reflecteix la identitat col·lectiva del país. Les festes majors, que se celebren en honor del sant patró de cada municipi, són l'eix vertebrador de la vida social de pobles i ciutats. Durant aquestes celebracions, els castellers aixequen torres humanes que poden superar els deu pisos d'alçada, una tradició declarada Patrimoni Immaterial de la Humanitat per la UNESCO el 2010.\n\nEls gegants i capgrossos desfilen pels carrers amb música de gralles i tabals. Cada vila té els seus propis gegants, figures que representen personatges històrics o llegendaris del municipi. La Patum de Berga, per exemple, és una festa d'origen medieval on es barregen elements sagrats i profans: les guites, els plens de foc, el tabal i l'àliga són figures que es remunten al segle XIV.\n\nLes colles castelleres, formades per centenars de persones, practiquen durant mesos per aconseguir les construccions més complexes: el quatre de nou amb folre i manilles, el tres de deu o el pilar de vuit. La colla de Vilafranca del Penedès i els Castellers de Valls mantenen una rivalitat històrica que es remunta a principis del segle XIX.\n\nPer la Diada de Sant Jordi, el 23 d'abril, les Rambles de Barcelona i els carrers de tots els pobles s'omplen de parades de llibres i roses. Aquesta festa, que commemora la llegenda del cavaller que va matar el drac, s'ha convertit en el dia dels enamorats i de la cultura catalana. Els escriptors signen llibres i les roses vermelles es regalen com a símbol d'amor."
+    },
+    {
+      "id": "CULT_NARR",
+      "etapa": "primaria",
+      "genere": "narracio",
+      "tema": "La castanyada i la llegenda de les ànimes",
+      "font": "Tradició popular, Enciclopèdia Catalana",
+      "paraules": 280,
+      "text": "Cada any, quan arriba la tardor i les fulles dels arbres es tornen grogues i vermelles, a Catalunya se celebra la Castanyada. És la nit del 31 d'octubre, la vigília de Tots Sants, i les famílies es reuneixen per menjar castanyes torrades, moniatos al forn i panellets, uns dolços petits fets amb massapà i pinyons.\n\nLa castanyera és el personatge més conegut d'aquesta festa. És una dona gran, vestida amb roba de pagesa, que seu al costat d'un fogó on torra les castanyes. Als mercats i a les escoles, es munten parades de castanyes i els nens i nenes es disfressen de castanyeres i castanyers.\n\nDiuen que antigament, la nit de Tots Sants era una nit màgica en què les ànimes dels difunts tornaven a visitar les seves famílies. Per això, les famílies deixaven castanyes i panellets a la taula, perquè les ànimes poguessin menjar. A les esglésies es tocaven les campanes tota la nit, i els campaners necessitaven menjar castanyes i beure moscatell per aguantar desperts.\n\nAl Pallars Sobirà, als pobles del Pirineu, encara es conserva la tradició d'encendre una espelma per cada difunt de la família i de posar un lloc a taula per a les ànimes. I a Vilafranca del Penedès, la Castanyada es barreja amb les representacions del Don Juan Tenorio al teatre del Casal.\n\nL'endemà, el dia de Tots Sants, les famílies visiten els cementiris per portar flors als seus difunts. És un dia de record i de trobada familiar."
+    },
+    {
+      "id": "CULT_INST",
+      "etapa": "primaria",
+      "genere": "instruccio",
+      "tema": "Com fer panellets per la Castanyada",
+      "font": "Cuina catalana tradicional, Escola de Cuina",
+      "paraules": 290,
+      "text": "Objectiu: Preparar panellets tradicionals catalans per celebrar la Castanyada.\n\nIngredients per a uns 30 panellets: 250 grams de patata, 250 grams de sucre, 250 grams d'ametlla molta, ratlladura de llimona, 1 ou sencer i 1 rovell d'ou addicional, pinyons per decorar (uns 100 grams).\n\nProcés de preparació:\n\nPas 1. Bulliu la patata amb pell en una olla amb aigua durant uns 30 minuts, fins que sigui tendra. Peleu-la i feu-ne un puré fi amb una forquilla o un pasapurés. Deixeu-la refredar completament.\n\nPas 2. En un bol gran, barregeu el puré de patata amb el sucre i l'ametlla molta. Afegiu la ratlladura de llimona i l'ou sencer. Pasteu bé amb les mans fins que tingueu una massa homogènia i consistent. Si queda massa enganxosa, afegiu una mica més d'ametlla molta.\n\nPas 3. Deixeu reposar la massa al frigorífic durant almenys 30 minuts, tapada amb film transparent. Això farà que sigui més fàcil de treballar.\n\nPas 4. Traieu la massa del frigorífic i feu boletes de la mida d'una nou (uns 20 grams cadascuna). Col·loqueu-les sobre una safata de forn amb paper vegetal.\n\nPas 5. Pinteu cada boleta amb el rovell d'ou batut. Enganxeu els pinyons per tota la superfície, pressionant suaument perquè quedin ben fixats.\n\nPas 6. Escalfeu el forn a 200 graus. Enforeu els panellets durant 10-12 minuts, vigilant que no es cremin. Han de quedar daurats per fora però tous per dins.\n\nConsell: A Catalunya, cada casa té la seva recepta de panellets. Podeu variar el sabor afegint cacau, coco ratllat, fruita confitada o cafè a la massa base. Als forns i pastisseries, es troben panellets de tota mena des de setmanes abans de la Castanyada."
+    },
+    {
+      "id": "CULT_ARGU",
+      "etapa": "ESO",
+      "genere": "argumentacio",
+      "tema": "Cal mantenir les tradicions catalanes a l'escola?",
+      "font": "Debat educatiu, Jesuïtes Educació, Escola Nova 21",
+      "paraules": 330,
+      "text": "Des de fa dècades, les escoles catalanes celebren les festes del calendari tradicional: la Castanyada, Santa Llúcia, el Tió de Nadal, els Reis d'Orient, el Carnaval, Sant Jordi i les festes de fi de curs amb sardanes i castells. Tanmateix, en una societat cada vegada més diversa, amb alumnat procedent de desenes de països i cultures, sorgeix un debat legítim: cal mantenir aquestes celebracions o s'haurien d'adaptar per incloure tothom?\n\nEls defensors de mantenir les tradicions argumenten que les festes populars són un vehicle d'integració. Quan un alumne nouvingut del Pakistan participa en la construcció d'un castell humà, experimenta els valors de confiança, cooperació i pertinença que fonamenten la cultura d'acollida. La sardana, on tothom és igual dins la rotllana, simbolitza la igualtat. I la diada de Sant Jordi, amb l'intercanvi de llibres i roses, promou la lectura i l'afecte.\n\nD'altra banda, els crítics assenyalen que imposar festes d'una cultura dominant a alumnat de cultures minoritzades pot generar exclusió. Un alumne musulmà pot sentir-se incòmode amb el Tió de Nadal, que té connotacions nadalenques. Una alumna xinesa pot no entendre per què ha de ballar sardanes si a casa seva se celebra l'Any Nou Xinès de manera molt diferent. La pedagoga Francina Martí defensa que 'les escoles han de ser espais on totes les cultures siguin visibles, no només la majoritària'.\n\nUna via intermèdia, adoptada per moltes escoles de la xarxa de Jesuïtes Educació, consisteix a mantenir les festes tradicionals però obrir-les: explicar el seu origen, comparar-les amb celebracions similars d'altres cultures (el Diwali indi, el Hanami japonès, el Nowruz persa) i convidar les famílies a compartir les seves pròpies tradicions. Així, la Castanyada es converteix en una festa de la tardor on cada família aporta el seu dolç típic, i Sant Jordi es transforma en una celebració de totes les literatures del món.\n\nEn definitiva, el repte no és triar entre tradició i diversitat, sinó trobar la manera de fer conviure ambdues. Les festes escolars poden ser un pont entre cultures si es gestionen amb sensibilitat i obertura."
     }
   ],
 
