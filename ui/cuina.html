@@ -734,252 +734,185 @@
     <div id="flux">
         <h1 class="section-title">Diagrama de flux complet</h1>
         <p class="section-subtitle">
-            De dalt a baix: 5 fases des de la configuracio del docent fins al text adaptat. Clica qualsevol caixa per veure'n els detalls.
+            De dalt a baix: 5 fases des de la configuracio del docent fins al text adaptat. Clica qualsevol caixa per desplegar-ne els detalls.
         </p>
 
-        <div style="overflow-x:auto;padding-bottom:12px;">
-        <svg id="flux-diagram" viewBox="0 0 800 1060" style="width:100%;min-width:700px;max-width:860px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <marker id="arr" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0,0 L10,3.5 L0,7" fill="#9ca3af"/></marker>
-                <marker id="arr-b" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0,0 L10,3.5 L0,7" fill="#1a56db"/></marker>
-                <marker id="arr-g" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0,0 L10,3.5 L0,7" fill="#059669"/></marker>
-            </defs>
-            <style>
-                .bx{cursor:pointer;transition:filter .15s}
-                .bx:hover{filter:drop-shadow(0 3px 8px rgba(0,0,0,.12))}
-                .phase-label{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}
-                .phase-num{font-size:24px;font-weight:900;fill:#e5e7eb}
-            </style>
+        <style>
+            .flux-phase{padding:20px 24px;margin-bottom:2px;position:relative}
+            .flux-phase-header{display:flex;align-items:baseline;gap:12px;margin-bottom:16px}
+            .flux-phase-num{font-size:32px;font-weight:900;color:#e5e7eb;line-height:1}
+            .flux-phase-title{font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}
+            .flux-cards{display:flex;gap:12px;flex-wrap:wrap}
+            .flux-card{border:2px solid #d1d5db;border-radius:8px;background:white;cursor:pointer;transition:all .2s;overflow:hidden;flex:1;min-width:200px}
+            .flux-card:hover{box-shadow:0 3px 10px rgba(0,0,0,.08)}
+            .flux-card.open{flex-basis:100%}
+            .flux-card-head{padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+            .flux-card-head h3{font-size:13px;margin:0}
+            .flux-card-head .card-hint{font-size:9px;color:#9ca3af;max-width:55%;text-align:right}
+            .flux-card-head .card-chevron{font-size:14px;color:#d1d5db;transition:transform .2s;margin-left:8px;flex-shrink:0}
+            .flux-card.open .card-chevron{transform:rotate(180deg);color:#6b7280}
+            .flux-card-body{display:none;padding:0 16px 16px;font-size:13px;line-height:1.7;color:#374151;border-top:1px solid #f3f4f6}
+            .flux-card.open .flux-card-body{display:block;animation:cardIn .2s ease}
+            .flux-arrow{text-align:center;padding:6px 0;font-size:20px;color:#d1d5db}
+            .flux-bar{height:4px;border-radius:2px;width:100%}
+            .flux-prompt-stack{display:flex;flex-direction:column;gap:4px;flex:1;min-width:100%}
+            .flux-prompt-layer{border:1.5px solid #d1d5db;border-radius:6px;background:white;cursor:pointer;transition:all .2s;overflow:hidden}
+            .flux-prompt-layer:hover{box-shadow:0 2px 6px rgba(0,0,0,.06)}
+            .flux-prompt-layer.open{border-color:#1a56db}
+            .flux-prompt-layer .flux-card-head{padding:8px 14px}
+            .flux-prompt-layer .flux-card-body{padding:0 14px 12px}
+            .flux-eq{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center}
+            .flux-eq-box{padding:10px 20px;border-radius:8px;font-weight:600;font-size:12px;text-align:center}
+            .flux-eq-op{font-size:20px;color:#9ca3af}
+            @keyframes cardIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+        </style>
 
-            <!-- ══════════════════════════════════════════════════════════════ -->
-            <!-- FASE 1: ENTRADES DEL DOCENT                                  -->
-            <!-- ══════════════════════════════════════════════════════════════ -->
-            <rect x="0" y="0" width="800" height="195" rx="0" fill="#f8fafc"/>
-            <text x="18" y="24" class="phase-label" fill="#1a56db">FASE 1</text>
-            <text x="80" y="24" class="phase-label" fill="#6b7280">El docent configura</text>
-            <text x="770" y="28" class="phase-num" text-anchor="end">01</text>
-
-            <!-- Text original -->
-            <g class="bx" onclick="showHelp('text')">
-                <rect x="20" y="40" width="230" height="60" rx="8" fill="white" stroke="#1a56db" stroke-width="2"/>
-                <text x="135" y="66" font-size="13" font-weight="700" fill="#1a56db" text-anchor="middle">TEXT ORIGINAL</text>
-                <text x="135" y="84" font-size="9" fill="#9ca3af" text-anchor="middle">Enganxa o puja el text a adaptar</text>
-            </g>
-
-            <!-- Context docent -->
-            <g class="bx" onclick="showHelp('context')">
-                <rect x="280" y="40" width="230" height="60" rx="8" fill="white" stroke="#1a56db" stroke-width="2"/>
-                <text x="395" y="62" font-size="11" font-weight="700" fill="#1a56db" text-anchor="middle">CONTEXT DOCENT</text>
-                <text x="395" y="78" font-size="9" fill="#374151" text-anchor="middle">Etapa, Curs, Materia</text>
-                <text x="395" y="92" font-size="9" fill="#374151" text-anchor="middle">Genere discursiu, Aula</text>
-            </g>
-
-            <!-- Perfil alumne -->
-            <g class="bx" onclick="showHelp('perfil')">
-                <rect x="540" y="40" width="240" height="140" rx="8" fill="white" stroke="#059669" stroke-width="2"/>
-                <rect x="540" y="40" width="240" height="24" rx="8" fill="#d1fae5"/><rect x="540" y="58" width="240" height="6" fill="#d1fae5"/>
-                <text x="660" y="58" font-size="11" font-weight="700" fill="#059669" text-anchor="middle">PERFIL ALUMNE (13 caract.)</text>
-                <text x="555" y="82" font-size="10" fill="#374151">Nouvingut</text><text x="640" y="82" font-size="9" fill="#059669">6 vars</text>
-                <text x="555" y="98" font-size="10" fill="#374151">TEA / TDAH / Dislexia</text><text x="720" y="98" font-size="9" fill="#059669">10 vars</text>
-                <text x="555" y="114" font-size="10" fill="#374151">TDL / DI / AC / 2e</text><text x="720" y="114" font-size="9" fill="#059669">12 vars</text>
-                <text x="555" y="130" font-size="10" fill="#374151">Disc.vis/aud/mot, Vuln, Emoc, TDC</text>
-                <text x="555" y="148" font-size="9" fill="#6b7280">36 sub-variables, 20 connectades (56%)</text>
-                <text x="555" y="164" font-size="9" fill="#059669" font-weight="600">+ Observacions docent (text lliure)</text>
-            </g>
-
-            <!-- ══════════════════════════════════════════════════════════════ -->
-            <!-- FLETXA FASE 1 → 2                                            -->
-            <!-- ══════════════════════════════════════════════════════════════ -->
-            <line x1="400" y1="195" x2="400" y2="220" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"/>
-
-            <!-- ══════════════════════════════════════════════════════════════ -->
-            <!-- FASE 2: SISTEMA CALCULA                                      -->
-            <!-- ══════════════════════════════════════════════════════════════ -->
-            <rect x="0" y="220" width="800" height="200" rx="0" fill="#fff"/>
-            <text x="18" y="244" class="phase-label" fill="#d97706">FASE 2</text>
-            <text x="80" y="244" class="phase-label" fill="#6b7280">El sistema calcula</text>
-            <text x="770" y="248" class="phase-num" text-anchor="end">02</text>
-
-            <!-- Proposta auto -->
-            <g class="bx" onclick="showHelp('proposta')">
-                <rect x="20" y="260" width="230" height="80" rx="8" fill="white" stroke="#d97706" stroke-width="2"/>
-                <rect x="20" y="260" width="230" height="22" rx="8" fill="#fef3c7"/><rect x="20" y="276" width="230" height="6" fill="#fef3c7"/>
-                <text x="135" y="277" font-size="11" font-weight="700" fill="#d97706" text-anchor="middle">PROPOSTA (auto)</text>
-                <text x="35" y="300" font-size="10" fill="#374151">DUA: Acces / Core / Enriquiment</text>
-                <text x="35" y="316" font-size="10" font-weight="600" fill="#d97706">MECR sortida: pre-A1...B2</text>
-                <text x="35" y="332" font-size="10" fill="#374151">Complements a generar</text>
-            </g>
-
-            <!-- Filtre instruccions -->
-            <g class="bx" onclick="showHelp('filtre')">
-                <rect x="280" y="260" width="230" height="140" rx="8" fill="white" stroke="#059669" stroke-width="2"/>
-                <rect x="280" y="260" width="230" height="22" rx="8" fill="#d1fae5"/><rect x="280" y="276" width="230" height="6" fill="#d1fae5"/>
-                <text x="395" y="277" font-size="11" font-weight="700" fill="#059669" text-anchor="middle">FILTRE (88 instruccions)</text>
-                <text x="295" y="300" font-size="10" fill="#374151">1. Selecciona per perfil + MECR</text>
-                <text x="295" y="316" font-size="10" fill="#374151">2. Aplica sub-variables</text>
-                <text x="295" y="332" font-size="10" fill="#374151">3. Suprimeix redundants</text>
-                <text x="295" y="348" font-size="10" fill="#374151">4. Intensifica si cal</text>
-                <text x="295" y="370" font-size="10" font-weight="600" fill="#059669">5. Agrupa en macrodirectives</text>
-                <text x="295" y="390" font-size="9" fill="#6b7280">Resultat: 6-8 blocs temaics</text>
-            </g>
-
-            <!-- Persona-audience -->
-            <g class="bx" onclick="showHelp('persona')">
-                <rect x="540" y="260" width="240" height="60" rx="8" fill="white" stroke="#6b7280" stroke-width="1.5"/>
-                <text x="660" y="282" font-size="11" font-weight="700" fill="#6b7280" text-anchor="middle">PERSONA-AUDIENCE</text>
-                <text x="660" y="300" font-size="9" fill="#374151" text-anchor="middle">"Alumne de 14 anys, nouvingut, L1 arab,</text>
-                <text x="660" y="312" font-size="9" fill="#374151" text-anchor="middle">CALP inicial, alfabet no llati..."</text>
-            </g>
-
-            <!-- Corpus RAG -->
-            <g class="bx" onclick="showHelp('corpus')">
-                <rect x="540" y="340" width="240" height="55" rx="8" fill="white" stroke="#7c3aed" stroke-width="2"/>
-                <rect x="540" y="340" width="240" height="20" rx="8" fill="#ede9fe"/><rect x="540" y="354" width="240" height="6" fill="#ede9fe"/>
-                <text x="660" y="356" font-size="10" font-weight="700" fill="#7c3aed" text-anchor="middle">CORPUS FJE (RAG + KG)</text>
-                <text x="555" y="376" font-size="9" fill="#374151">1.443 chunks + 952 nodes + docs obligatoris</text>
-                <text x="555" y="389" font-size="8" fill="#9ca3af">Cerca vectorial + expansio Knowledge Graph</text>
-            </g>
-
-            <!-- Fletxes internes fase 2 -->
-            <path d="M 252,300 L 278,300" fill="none" stroke="#d97706" stroke-width="1.5" marker-end="url(#arr)"/>
-
-            <!-- ══════════════════════════════════════════════════════════════ -->
-            <!-- FLETXA FASE 2 → 3                                            -->
-            <!-- ══════════════════════════════════════════════════════════════ -->
-            <line x1="400" y1="420" x2="400" y2="445" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"/>
-
-            <!-- ══════════════════════════════════════════════════════════════ -->
-            <!-- FASE 3: PROMPT ASSEMBLAR                                     -->
-            <!-- ══════════════════════════════════════════════════════════════ -->
-            <rect x="0" y="445" width="800" height="210" rx="0" fill="#f8fafc"/>
-            <text x="18" y="469" class="phase-label" fill="#7c3aed">FASE 3</text>
-            <text x="80" y="469" class="phase-label" fill="#6b7280">Prompt assemblat (el que veu l'LLM)</text>
-            <text x="770" y="473" class="phase-num" text-anchor="end">03</text>
-
-            <!-- Les 4 capes del prompt -->
-            <g class="bx" onclick="showHelp('identitat')">
-                <rect x="40" y="485" width="720" height="30" rx="6" fill="white" stroke="#d1d5db"/>
-                <text x="55" y="505" font-size="10" font-weight="700" fill="#6b7280">CAPA 1: IDENTITAT</text>
-                <text x="250" y="505" font-size="9" fill="#9ca3af">"Ets ATNE de Jesuites Educacio. Restriccions absolutes."</text>
-                <text x="720" y="505" font-size="9" fill="#d1d5db" text-anchor="end">fixa</text>
-            </g>
-
-            <g class="bx" onclick="showHelp('instruccions')">
-                <rect x="40" y="522" width="720" height="56" rx="6" fill="white" stroke="#1a56db" stroke-width="2"/>
-                <rect x="40" y="522" width="720" height="20" rx="6" fill="#dbeafe"/><rect x="40" y="536" width="720" height="6" fill="#dbeafe"/>
-                <text x="55" y="538" font-size="10" font-weight="700" fill="#1a56db">CAPA 2: MACRODIRECTIVES (6-8 blocs)</text>
-                <text x="720" y="538" font-size="9" fill="#1a56db" text-anchor="end">variable</text>
-                <text x="65" y="558" font-size="9" fill="#374151" font-weight="600">LEXIC</text>
-                <text x="120" y="558" font-size="9" fill="#374151" font-weight="600">SINTAXI</text>
-                <text x="195" y="558" font-size="9" fill="#374151" font-weight="600">ESTRUCTURA</text>
-                <text x="295" y="558" font-size="9" fill="#374151" font-weight="600">COGNITIU</text>
-                <text x="375" y="558" font-size="9" fill="#374151" font-weight="600">QUALITAT</text>
-                <text x="460" y="558" font-size="9" fill="#374151" font-weight="600">PERSONALITZACIO</text>
-                <text x="590" y="558" font-size="9" fill="#374151" font-weight="600">PERFIL</text>
-                <text x="65" y="572" font-size="8" fill="#9ca3af">Cada bloc agrupa instruccions per tema. L'LLM no veu IDs — nomes prosa tematica.</text>
-            </g>
-
-            <g class="bx" onclick="showHelp('context_prompt')">
-                <rect x="40" y="585" width="720" height="30" rx="6" fill="white" stroke="#059669" stroke-width="1.5"/>
-                <text x="55" y="605" font-size="10" font-weight="700" fill="#059669">CAPA 3: CONTEXT</text>
-                <text x="250" y="605" font-size="9" fill="#374151">Educatiu + Persona-audience + RAG corpus + Complements</text>
-                <text x="720" y="605" font-size="9" fill="#059669" text-anchor="end">variable</text>
-            </g>
-
-            <g class="bx" onclick="showHelp('format')">
-                <rect x="40" y="622" width="720" height="26" rx="6" fill="white" stroke="#7c3aed" stroke-width="1.5"/>
-                <text x="55" y="640" font-size="10" font-weight="700" fill="#7c3aed">CAPA 4: FORMAT SORTIDA</text>
-                <text x="300" y="640" font-size="9" fill="#374151">## Text adaptat + seccions opcionals (glossari, esquema, preguntes...)</text>
-            </g>
-
-            <!-- ══════════════════════════════════════════════════════════════ -->
-            <!-- FLETXA FASE 3 → 4                                            -->
-            <!-- ══════════════════════════════════════════════════════════════ -->
-            <line x1="400" y1="655" x2="400" y2="680" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"/>
-
-            <!-- ══════════════════════════════════════════════════════════════ -->
-            <!-- FASE 4: LLM GENERA                                           -->
-            <!-- ══════════════════════════════════════════════════════════════ -->
-            <rect x="0" y="680" width="800" height="120" rx="0" fill="#fff"/>
-            <text x="18" y="704" class="phase-label" fill="#7c3aed">FASE 4</text>
-            <text x="80" y="704" class="phase-label" fill="#6b7280">L'LLM genera</text>
-            <text x="770" y="708" class="phase-num" text-anchor="end">04</text>
-
-            <!-- Text original (user msg) -->
-            <g class="bx" onclick="showHelp('text')">
-                <rect x="40" y="720" width="200" height="36" rx="8" fill="#dbeafe" stroke="#1a56db" stroke-width="1.5"/>
-                <text x="140" y="743" font-size="11" font-weight="600" fill="#1a56db" text-anchor="middle">Text original (user msg)</text>
-            </g>
-
-            <text x="260" y="742" font-size="16" fill="#9ca3af">+</text>
-
-            <!-- System prompt -->
-            <g>
-                <rect x="290" y="720" width="200" height="36" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
-                <text x="390" y="743" font-size="11" font-weight="600" fill="#7c3aed" text-anchor="middle">System prompt (4 capes)</text>
-            </g>
-
-            <text x="510" y="742" font-size="16" fill="#9ca3af">→</text>
-
-            <!-- Gemini -->
-            <g class="bx" onclick="showHelp('gemini')">
-                <rect x="540" y="716" width="220" height="44" rx="10" fill="#7c3aed"/>
-                <text x="650" y="743" font-size="14" font-weight="700" fill="white" text-anchor="middle">GEMINI 2.5 Flash</text>
-            </g>
-
-            <!-- Fletxa streaming -->
-            <text x="660" y="776" font-size="9" fill="#7c3aed" text-anchor="middle">streaming SSE ↓</text>
-
-            <!-- ══════════════════════════════════════════════════════════════ -->
-            <!-- FLETXA FASE 4 → 5                                            -->
-            <!-- ══════════════════════════════════════════════════════════════ -->
-            <line x1="400" y1="800" x2="400" y2="825" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"/>
-
-            <!-- ══════════════════════════════════════════════════════════════ -->
-            <!-- FASE 5: RESULTAT                                             -->
-            <!-- ══════════════════════════════════════════════════════════════ -->
-            <rect x="0" y="825" width="800" height="120" rx="0" fill="#f0fdf4"/>
-            <text x="18" y="849" class="phase-label" fill="#059669">FASE 5</text>
-            <text x="80" y="849" class="phase-label" fill="#6b7280">Resultat al docent</text>
-            <text x="770" y="853" class="phase-num" text-anchor="end">05</text>
-
-            <g class="bx" onclick="showHelp('resultat')">
-                <rect x="40" y="865" width="340" height="42" rx="8" fill="white" stroke="#059669" stroke-width="2"/>
-                <text x="210" y="891" font-size="12" font-weight="700" fill="#059669" text-anchor="middle">TEXT ADAPTAT + COMPLEMENTS</text>
-            </g>
-
-            <g class="bx" onclick="showHelp('frontend')">
-                <rect x="420" y="865" width="340" height="42" rx="8" fill="white" stroke="#1a56db" stroke-width="2"/>
-                <text x="590" y="885" font-size="11" font-weight="700" fill="#1a56db" text-anchor="middle">FRONTEND: original vs adaptat</text>
-                <text x="590" y="900" font-size="9" fill="#6b7280" text-anchor="middle">Revisio + Edicio + Exporta (PDF/DOCX/TXT)</text>
-            </g>
-
-            <!-- ══════════════════════════════════════════════════════════════ -->
-            <!-- LLEGENDA                                                     -->
-            <!-- ══════════════════════════════════════════════════════════════ -->
-            <rect x="40" y="940" width="720" height="105" rx="8" fill="white" stroke="#e5e7eb"/>
-            <text x="60" y="962" font-size="10" font-weight="700" fill="#6b7280">COM FUNCIONEN LES MACRODIRECTIVES</text>
-            <text x="60" y="982" font-size="9" fill="#374151">1. El cataleg te 88 instruccions individuals (A-01, A-02, H-04...) amb regles d'activacio.</text>
-            <text x="60" y="998" font-size="9" fill="#374151">2. El filtre selecciona nomes les rellevants pel cas (perfil + MECR + sub-variables).</text>
-            <text x="60" y="1014" font-size="9" fill="#374151">3. Les agrupa en 6-8 blocs temaics (LEXIC, SINTAXI, ESTRUCTURA...) sense IDs.</text>
-            <text x="60" y="1030" font-size="9" fill="#059669" font-weight="600">4. L'LLM rep 6-8 blocs coherents en lloc de 45+ regles soltes → millor seguiment.</text>
-
-        </svg>
-        </div>
-
-        <!-- Panel de detall (apareix en clicar una caixa del diagrama) -->
-        <div id="help-panel" style="display:none;margin-top:12px;padding:16px 20px;background:white;border:2px solid var(--pri);border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1);position:relative;animation:cardIn 0.2s ease;">
-            <button onclick="document.getElementById('help-panel').style.display='none'" style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:18px;color:var(--g300);cursor:pointer;">&times;</button>
-            <div id="help-content" style="font-size:13px;line-height:1.7;color:var(--g700);"></div>
-        </div>
-
-        <!-- Flux invers (col·lapsable) -->
-        <details style="margin-top:20px;">
-            <summary style="cursor:pointer;font-size:14px;font-weight:600;color:var(--pri);padding:8px 0;">Veure detalls de cada capa del prompt (flux invers)</summary>
-            <div class="reverse-flow" id="reverse-flow" style="margin-top:12px;">
-                <!-- Generat per JS -->
+        <!-- FASE 1 -->
+        <div class="flux-phase" style="background:#f8fafc">
+            <div class="flux-phase-header">
+                <span class="flux-phase-num">01</span>
+                <span class="flux-phase-title" style="color:#1a56db">El docent configura</span>
             </div>
-        </details>
+            <div class="flux-cards">
+                <div class="flux-card" style="border-color:#1a56db" onclick="toggleCard(this)">
+                    <div class="flux-card-head"><h3 style="color:#1a56db">TEXT ORIGINAL</h3><span class="card-hint">Enganxa o puja</span><span class="card-chevron">▼</span></div>
+                    <div class="flux-card-body" data-key="text"></div>
+                </div>
+                <div class="flux-card" style="border-color:#1a56db" onclick="toggleCard(this)">
+                    <div class="flux-card-head"><h3 style="color:#1a56db">CONTEXT DOCENT</h3><span class="card-hint">Etapa, Curs, Materia, Genere</span><span class="card-chevron">▼</span></div>
+                    <div class="flux-card-body" data-key="context"></div>
+                </div>
+                <div class="flux-card" style="border-color:#059669;flex:2;min-width:280px" onclick="toggleCard(this)">
+                    <div style="padding:3px 16px 0;background:#d1fae5;border-radius:6px 6px 0 0"><span style="font-size:10px;font-weight:700;color:#059669">13 CARACTERISTIQUES COMBINABLES</span></div>
+                    <div class="flux-card-head"><h3 style="color:#059669">PERFIL ALUMNE</h3><span class="card-hint">36 sub-variables, 20 connectades (56%)</span><span class="card-chevron">▼</span></div>
+                    <div class="flux-card-body" data-key="perfil"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flux-arrow">▼</div>
+
+        <!-- FASE 2 -->
+        <div class="flux-phase" style="background:#fff">
+            <div class="flux-phase-header">
+                <span class="flux-phase-num">02</span>
+                <span class="flux-phase-title" style="color:#d97706">El sistema calcula</span>
+            </div>
+            <div class="flux-cards">
+                <div class="flux-card" style="border-color:#d97706" onclick="toggleCard(this)">
+                    <div style="padding:3px 16px 0;background:#fef3c7;border-radius:6px 6px 0 0"><span style="font-size:10px;font-weight:700;color:#d97706">AUTOMATIC</span></div>
+                    <div class="flux-card-head"><h3 style="color:#d97706">PROPOSTA</h3><span class="card-hint">DUA + MECR + Complements</span><span class="card-chevron">▼</span></div>
+                    <div class="flux-card-body" data-key="proposta"></div>
+                </div>
+                <div class="flux-card" style="border-color:#059669" onclick="toggleCard(this)">
+                    <div style="padding:3px 16px 0;background:#d1fae5;border-radius:6px 6px 0 0"><span style="font-size:10px;font-weight:700;color:#059669">88 INSTRUCCIONS → 6-8 BLOCS</span></div>
+                    <div class="flux-card-head"><h3 style="color:#059669">FILTRE + MACRODIRECTIVES</h3><span class="card-hint">Selecciona, intensifica, agrupa</span><span class="card-chevron">▼</span></div>
+                    <div class="flux-card-body" data-key="filtre"></div>
+                </div>
+                <div class="flux-card" style="border-color:#6b7280" onclick="toggleCard(this)">
+                    <div class="flux-card-head"><h3 style="color:#6b7280">PERSONA-AUDIENCE</h3><span class="card-hint">Narrativa de l'alumne</span><span class="card-chevron">▼</span></div>
+                    <div class="flux-card-body" data-key="persona"></div>
+                </div>
+                <div class="flux-card" style="border-color:#7c3aed" onclick="toggleCard(this)">
+                    <div style="padding:3px 16px 0;background:#ede9fe;border-radius:6px 6px 0 0"><span style="font-size:10px;font-weight:700;color:#7c3aed">RAG + KNOWLEDGE GRAPH</span></div>
+                    <div class="flux-card-head"><h3 style="color:#7c3aed">CORPUS FJE</h3><span class="card-hint">1.443 chunks + 952 nodes</span><span class="card-chevron">▼</span></div>
+                    <div class="flux-card-body" data-key="corpus"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flux-arrow">▼</div>
+
+        <!-- FASE 3 -->
+        <div class="flux-phase" style="background:#f8fafc">
+            <div class="flux-phase-header">
+                <span class="flux-phase-num">03</span>
+                <span class="flux-phase-title" style="color:#7c3aed">Prompt assemblat (el que veu l'LLM)</span>
+            </div>
+            <div class="flux-cards">
+                <div class="flux-prompt-stack">
+                    <div class="flux-prompt-layer" style="border-color:#d1d5db" onclick="toggleCard(this)">
+                        <div class="flux-card-head"><h3 style="color:#6b7280;font-size:11px">CAPA 1: IDENTITAT</h3><span class="card-hint">fixa — "Ets ATNE de Jesuites Educacio"</span><span class="card-chevron">▼</span></div>
+                        <div class="flux-card-body" data-key="identitat"></div>
+                    </div>
+                    <div class="flux-prompt-layer" style="border-color:#1a56db;border-width:2px" onclick="toggleCard(this)">
+                        <div style="padding:3px 14px 0;background:#dbeafe;border-radius:4px 4px 0 0;display:flex;justify-content:space-between"><span style="font-size:10px;font-weight:700;color:#1a56db">CAPA 2: MACRODIRECTIVES</span><span style="font-size:9px;color:#1a56db">variable — 6-8 blocs</span></div>
+                        <div class="flux-card-head">
+                            <div style="display:flex;gap:8px;flex-wrap:wrap">
+                                <span style="background:#eff6ff;color:#1a56db;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">LEXIC</span>
+                                <span style="background:#eff6ff;color:#1a56db;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">SINTAXI</span>
+                                <span style="background:#eff6ff;color:#1a56db;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">ESTRUCTURA</span>
+                                <span style="background:#eff6ff;color:#1a56db;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">COGNITIU</span>
+                                <span style="background:#eff6ff;color:#1a56db;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">QUALITAT</span>
+                                <span style="background:#eff6ff;color:#1a56db;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">PERSONALITZACIO</span>
+                                <span style="background:#ecfdf5;color:#059669;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">PERFIL</span>
+                            </div>
+                            <span class="card-chevron">▼</span>
+                        </div>
+                        <div class="flux-card-body" data-key="instruccions"></div>
+                    </div>
+                    <div class="flux-prompt-layer" style="border-color:#059669" onclick="toggleCard(this)">
+                        <div class="flux-card-head"><h3 style="color:#059669;font-size:11px">CAPA 3: CONTEXT</h3><span class="card-hint">Educatiu + Persona + RAG + Complements</span><span class="card-chevron">▼</span></div>
+                        <div class="flux-card-body" data-key="context_prompt"></div>
+                    </div>
+                    <div class="flux-prompt-layer" style="border-color:#7c3aed" onclick="toggleCard(this)">
+                        <div class="flux-card-head"><h3 style="color:#7c3aed;font-size:11px">CAPA 4: FORMAT SORTIDA</h3><span class="card-hint">## Text adaptat + seccions opcionals</span><span class="card-chevron">▼</span></div>
+                        <div class="flux-card-body" data-key="format"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flux-arrow">▼</div>
+
+        <!-- FASE 4 -->
+        <div class="flux-phase" style="background:#fff">
+            <div class="flux-phase-header">
+                <span class="flux-phase-num">04</span>
+                <span class="flux-phase-title" style="color:#7c3aed">L'LLM genera</span>
+            </div>
+            <div class="flux-eq">
+                <div class="flux-eq-box" style="background:#dbeafe;color:#1a56db;border:1.5px solid #1a56db">Text original<br><span style="font-size:10px;font-weight:400">(user message)</span></div>
+                <span class="flux-eq-op">+</span>
+                <div class="flux-eq-box" style="background:#ede9fe;color:#7c3aed;border:1.5px solid #7c3aed">System prompt<br><span style="font-size:10px;font-weight:400">(4 capes)</span></div>
+                <span class="flux-eq-op">→</span>
+                <div class="flux-card" style="border-color:#7c3aed;background:#7c3aed;flex:0 0 auto;min-width:180px;cursor:pointer" onclick="toggleCard(this)">
+                    <div class="flux-card-head"><h3 style="color:white">GEMINI 2.5 Flash</h3><span class="card-chevron" style="color:rgba(255,255,255,.5)">▼</span></div>
+                    <div class="flux-card-body" style="background:white;border-radius:0 0 6px 6px" data-key="gemini"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flux-arrow">▼ streaming SSE</div>
+
+        <!-- FASE 5 -->
+        <div class="flux-phase" style="background:#f0fdf4">
+            <div class="flux-phase-header">
+                <span class="flux-phase-num">05</span>
+                <span class="flux-phase-title" style="color:#059669">Resultat al docent</span>
+            </div>
+            <div class="flux-cards">
+                <div class="flux-card" style="border-color:#059669" onclick="toggleCard(this)">
+                    <div class="flux-card-head"><h3 style="color:#059669">TEXT ADAPTAT + COMPLEMENTS</h3><span class="card-chevron">▼</span></div>
+                    <div class="flux-card-body" data-key="resultat"></div>
+                </div>
+                <div class="flux-card" style="border-color:#1a56db" onclick="toggleCard(this)">
+                    <div class="flux-card-head"><h3 style="color:#1a56db">FRONTEND: original vs adaptat</h3><span class="card-hint">Revisio + Edicio + Exporta</span><span class="card-chevron">▼</span></div>
+                    <div class="flux-card-body" data-key="frontend"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Macrodirectives info -->
+        <div style="margin-top:16px;padding:16px 20px;background:white;border:1px solid #e5e7eb;border-radius:8px">
+            <strong style="color:#6b7280;font-size:11px;letter-spacing:1px;text-transform:uppercase">Com funcionen les macrodirectives</strong>
+            <ol style="margin:8px 0 0 18px;font-size:13px;color:#374151;line-height:1.8">
+                <li>El cataleg te 88 instruccions individuals (A-01, A-02, H-04...) amb regles d'activacio.</li>
+                <li>El filtre selecciona nomes les rellevants pel cas (perfil + MECR + sub-variables).</li>
+                <li>Les agrupa en 6-8 blocs tematics (LEXIC, SINTAXI, ESTRUCTURA...) sense IDs.</li>
+                <li style="color:#059669;font-weight:600">L'LLM rep 6-8 blocs coherents en lloc de 45+ regles soltes → millor seguiment.</li>
+            </ol>
+        </div>
     </div>
 
     <hr class="section-sep">
@@ -1494,15 +1427,30 @@ Despres de generar, el sistema verifica automaticament (en Python, no confia en 
     },
 };
 
-function showHelp(key) {
-    const data = HELP_DATA[key];
-    if (!data) return;
-    const panel = document.getElementById('help-panel');
-    const content = document.getElementById('help-content');
-    content.innerHTML = '<h3 style="margin-bottom:10px;font-size:16px;color:var(--g900);">' + data.title + '</h3>' + data.body;
-    panel.style.display = 'block';
-    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+function toggleCard(el) {
+    const wasOpen = el.classList.contains('open');
+    // Tancar totes les cards del mateix nivell (germans)
+    const siblings = el.parentElement.querySelectorAll('.flux-card.open, .flux-prompt-layer.open');
+    siblings.forEach(s => s.classList.remove('open'));
+    if (!wasOpen) {
+        el.classList.add('open');
+        // Lazy-load contingut la primera vegada
+        const body = el.querySelector('.flux-card-body');
+        if (body && !body.dataset.loaded) {
+            const key = body.dataset.key;
+            const data = HELP_DATA[key];
+            if (data) {
+                body.innerHTML = '<h4 style="margin:10px 0 6px;font-size:14px;color:var(--g900);">' + data.title + '</h4>' + data.body;
+                body.dataset.loaded = '1';
+            }
+        }
+        // Scroll suau cap a la card oberta
+        setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+    }
 }
+
+// Compat: showHelp encara funciona per si algun onclick antic queda
+function showHelp(key) { /* no-op, substituït per toggleCard */ }
 
 // ═══════════════════════════════════════════════════════════════════════════
 // FITXA PER PERFIL
