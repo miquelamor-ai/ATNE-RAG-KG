@@ -734,256 +734,235 @@
     <div id="flux">
         <h1 class="section-title">Diagrama de flux complet</h1>
         <p class="section-subtitle">
-            D'esquerra a dreta: el que posa el docent, com es processa, i que rep Gemini. Clica qualsevol caixa per veure'n els detalls.
+            De dalt a baix: 5 fases des de la configuracio del docent fins al text adaptat. Clica qualsevol caixa per veure'n els detalls.
         </p>
 
         <div style="overflow-x:auto;padding-bottom:12px;">
-        <svg id="flux-diagram" viewBox="0 0 840 830" style="width:100%;min-width:750px;max-width:900px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;" xmlns="http://www.w3.org/2000/svg">
+        <svg id="flux-diagram" viewBox="0 0 800 1060" style="width:100%;min-width:700px;max-width:860px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;" xmlns="http://www.w3.org/2000/svg">
             <defs>
-                <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#9ca3af"/></marker>
-                <marker id="arr-b" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#1a56db"/></marker>
-                <marker id="arr-g" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#059669"/></marker>
-                <marker id="arr-p" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#7c3aed"/></marker>
-                <marker id="arr-o" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#d97706"/></marker>
+                <marker id="arr" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0,0 L10,3.5 L0,7" fill="#9ca3af"/></marker>
+                <marker id="arr-b" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0,0 L10,3.5 L0,7" fill="#1a56db"/></marker>
+                <marker id="arr-g" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0,0 L10,3.5 L0,7" fill="#059669"/></marker>
             </defs>
+            <style>
+                .bx{cursor:pointer;transition:filter .15s}
+                .bx:hover{filter:drop-shadow(0 3px 8px rgba(0,0,0,.12))}
+                .phase-label{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}
+                .phase-num{font-size:24px;font-weight:900;fill:#e5e7eb}
+            </style>
 
-            <style>.bx{cursor:pointer;transition:filter .15s}.bx:hover{filter:drop-shadow(0 2px 6px rgba(0,0,0,.15))}</style>
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <!-- FASE 1: ENTRADES DEL DOCENT                                  -->
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <rect x="0" y="0" width="800" height="195" rx="0" fill="#f8fafc"/>
+            <text x="18" y="24" class="phase-label" fill="#1a56db">FASE 1</text>
+            <text x="80" y="24" class="phase-label" fill="#6b7280">El docent configura</text>
+            <text x="770" y="28" class="phase-num" text-anchor="end">01</text>
 
-            <!-- HEADERS -->
-            <text x="135" y="16" font-size="10" font-weight="700" fill="#6b7280" text-anchor="middle" letter-spacing="1">DOCENT</text>
-            <text x="400" y="16" font-size="10" font-weight="700" fill="#6b7280" text-anchor="middle" letter-spacing="1">SISTEMA</text>
-            <text x="680" y="16" font-size="10" font-weight="700" fill="#6b7280" text-anchor="middle" letter-spacing="1">PROMPT</text>
+            <!-- Text original -->
+            <g class="bx" onclick="showHelp('text')">
+                <rect x="20" y="40" width="230" height="60" rx="8" fill="white" stroke="#1a56db" stroke-width="2"/>
+                <text x="135" y="66" font-size="13" font-weight="700" fill="#1a56db" text-anchor="middle">TEXT ORIGINAL</text>
+                <text x="135" y="84" font-size="9" fill="#9ca3af" text-anchor="middle">Enganxa o puja el text a adaptar</text>
+            </g>
 
-            <!-- Band separators -->
-            <line x1="0" y1="128" x2="840" y2="128" stroke="#f3f4f6" stroke-width="1"/>
-            <line x1="0" y1="370" x2="840" y2="370" stroke="#f3f4f6" stroke-width="1"/>
-            <line x1="0" y1="540" x2="840" y2="540" stroke="#f3f4f6" stroke-width="1"/>
-
-            <!-- Band labels -->
-            <text x="6" y="76" font-size="8" fill="#d1d5db" font-weight="700" transform="rotate(-90,6,76)" text-anchor="middle">CONTEXT</text>
-            <text x="6" y="250" font-size="8" fill="#d1d5db" font-weight="700" transform="rotate(-90,6,250)" text-anchor="middle">INSTRUCCIONS</text>
-            <text x="6" y="456" font-size="8" fill="#d1d5db" font-weight="700" transform="rotate(-90,6,456)" text-anchor="middle">NARRATIVA</text>
-            <text x="6" y="630" font-size="8" fill="#d1d5db" font-weight="700" transform="rotate(-90,6,630)" text-anchor="middle">EXECUCIO</text>
-
-            <!-- BAND A: CONTEXT -->
+            <!-- Context docent -->
             <g class="bx" onclick="showHelp('context')">
-                <title>CONTEXT DOCENT: Etapa, Curs, Ambit, Materia, Aula, Genere.</title>
-                <rect x="20" y="28" width="250" height="95" rx="8" fill="white" stroke="#1a56db" stroke-width="2"/>
-                <rect x="20" y="28" width="250" height="22" rx="8" fill="#dbeafe"/><rect x="20" y="44" width="250" height="6" fill="#dbeafe"/>
-                <text x="145" y="44" font-size="11" font-weight="700" fill="#1a56db" text-anchor="middle">CONTEXT DOCENT</text>
-                <text x="34" y="66" font-size="10" fill="#374151">Etapa, Curs, Ambit, Materia</text>
-                <text x="34" y="82" font-size="10" fill="#374151">Tipus aula, Genere discursiu</text>
-                <text x="34" y="100" font-size="9" fill="#9ca3af">Genere activa instruccions del corpus</text>
-                <text x="34" y="114" font-size="9" fill="#9ca3af">Etapa determina MECR defecte</text>
+                <rect x="280" y="40" width="230" height="60" rx="8" fill="white" stroke="#1a56db" stroke-width="2"/>
+                <text x="395" y="62" font-size="11" font-weight="700" fill="#1a56db" text-anchor="middle">CONTEXT DOCENT</text>
+                <text x="395" y="78" font-size="9" fill="#374151" text-anchor="middle">Etapa, Curs, Materia</text>
+                <text x="395" y="92" font-size="9" fill="#374151" text-anchor="middle">Genere discursiu, Aula</text>
             </g>
 
-            <g class="bx" onclick="showHelp('identitat')">
-                <title>SECCIO 1: IDENTITAT (fixa).</title>
-                <rect x="560" y="28" width="250" height="42" rx="6" fill="white" stroke="#d1d5db"/>
-                <text x="575" y="48" font-size="10" font-weight="700" fill="#6b7280">1. IDENTITAT</text>
-                <text x="575" y="62" font-size="9" fill="#9ca3af">Fixa: "Ets ATNE de Jesuites Educacio"</text>
-            </g>
-
-            <g class="bx" onclick="showHelp('context_prompt')">
-                <title>SECCIO 3: CONTEXT (no ordres). Educatiu + Persona + RAG.</title>
-                <rect x="560" y="76" width="250" height="48" rx="6" fill="white" stroke="#059669" stroke-width="1.5"/>
-                <rect x="560" y="76" width="250" height="18" rx="6" fill="#d1fae5"/><rect x="560" y="88" width="250" height="6" fill="#d1fae5"/>
-                <text x="575" y="90" font-size="10" font-weight="700" fill="#059669">3. CONTEXT (no ordres)</text>
-                <text x="575" y="108" font-size="9" fill="#374151">Educatiu + Persona + RAG + Complements</text>
-                <text x="575" y="120" font-size="8" fill="#9ca3af">Gemini ho sap pero no son instruccions</text>
-            </g>
-
-            <polyline points="272,95 558,95" fill="none" stroke="#1a56db" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arr-b)"/>
-
-            <!-- BAND B: INSTRUCCIONS -->
+            <!-- Perfil alumne -->
             <g class="bx" onclick="showHelp('perfil')">
-                <title>PERFIL ALUMNE: 13 caracteristiques combinables.</title>
-                <rect x="20" y="138" width="250" height="222" rx="8" fill="white" stroke="#059669" stroke-width="2"/>
-                <rect x="20" y="138" width="250" height="22" rx="8" fill="#d1fae5"/><rect x="20" y="154" width="250" height="6" fill="#d1fae5"/>
-                <text x="145" y="155" font-size="11" font-weight="700" fill="#059669" text-anchor="middle">PERFIL ALUMNE</text>
+                <rect x="540" y="40" width="240" height="140" rx="8" fill="white" stroke="#059669" stroke-width="2"/>
+                <rect x="540" y="40" width="240" height="24" rx="8" fill="#d1fae5"/><rect x="540" y="58" width="240" height="6" fill="#d1fae5"/>
+                <text x="660" y="58" font-size="11" font-weight="700" fill="#059669" text-anchor="middle">PERFIL ALUMNE (13 caract.)</text>
+                <text x="555" y="82" font-size="10" fill="#374151">Nouvingut</text><text x="640" y="82" font-size="9" fill="#059669">6 vars</text>
+                <text x="555" y="98" font-size="10" fill="#374151">TEA / TDAH / Dislexia</text><text x="720" y="98" font-size="9" fill="#059669">10 vars</text>
+                <text x="555" y="114" font-size="10" fill="#374151">TDL / DI / AC / 2e</text><text x="720" y="114" font-size="9" fill="#059669">12 vars</text>
+                <text x="555" y="130" font-size="10" fill="#374151">Disc.vis/aud/mot, Vuln, Emoc, TDC</text>
+                <text x="555" y="148" font-size="9" fill="#6b7280">36 sub-variables, 20 connectades (56%)</text>
+                <text x="555" y="164" font-size="9" fill="#059669" font-weight="600">+ Observacions docent (text lliure)</text>
             </g>
 
-            <g class="bx" onclick="showHelp('nouvingut')">
-                <title>NOUVINGUT: L1 i Alfabet activen instruccions (O). MECR determina nivell (N).</title>
-                <rect x="32" y="168" width="226" height="70" rx="4" fill="#f0fdf4" stroke="#d1d5db"/>
-                <text x="44" y="184" font-size="10" font-weight="700" fill="#059669">Nouvingut</text>
-                <text x="44" y="200" font-size="9" fill="#374151">L1 </text><text x="56" y="200" font-size="9" fill="#1a56db" font-weight="700">O</text>
-                <text x="80" y="200" font-size="9" fill="#374151">Alfabet </text><text x="120" y="200" font-size="9" fill="#1a56db" font-weight="700">O</text>
-                <text x="145" y="200" font-size="9" fill="#374151">MECR </text><text x="178" y="200" font-size="9" fill="#d97706" font-weight="700">N</text>
-                <text x="44" y="216" font-size="9" fill="#9ca3af">Escolarit. C  CALP -  Fam.ling. -</text>
-                <text x="44" y="230" font-size="8" fill="#9ca3af" font-style="italic">O=ordres N=nivell P=proposta C=context -=gap</text>
-            </g>
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <!-- FLETXA FASE 1 → 2                                            -->
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <line x1="400" y1="195" x2="400" y2="220" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"/>
 
-            <g class="bx" onclick="showHelp('tea')">
-                <title>TEA: DSM-5 afecta proposta (DUA,LF). Instruccions fixes.</title>
-                <rect x="32" y="244" width="108" height="34" rx="4" fill="#f0fdf4" stroke="#d1d5db"/>
-                <text x="44" y="260" font-size="10" font-weight="700" fill="#059669">TEA</text>
-                <text x="44" y="272" font-size="9" fill="#374151">DSM-5 </text><text x="82" y="272" font-size="9" fill="#d97706" font-weight="700">P</text>
-            </g>
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <!-- FASE 2: SISTEMA CALCULA                                      -->
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <rect x="0" y="220" width="800" height="200" rx="0" fill="#fff"/>
+            <text x="18" y="244" class="phase-label" fill="#d97706">FASE 2</text>
+            <text x="80" y="244" class="phase-label" fill="#6b7280">El sistema calcula</text>
+            <text x="770" y="248" class="phase-num" text-anchor="end">02</text>
 
-            <g class="bx" onclick="showHelp('di')">
-                <title>DI: Grau afecta DUA+MECR+LF.</title>
-                <rect x="148" y="244" width="108" height="34" rx="4" fill="#f0fdf4" stroke="#d1d5db"/>
-                <text x="160" y="260" font-size="10" font-weight="700" fill="#059669">DI</text>
-                <text x="160" y="272" font-size="9" fill="#374151">grau </text><text x="188" y="272" font-size="9" fill="#d97706" font-weight="700">P</text>
-            </g>
-
-            <g class="bx" onclick="showHelp('tdah')">
-                <title>TDAH: 4 sub-vars, 0 connectades.</title>
-                <rect x="32" y="284" width="108" height="28" rx="4" fill="#f0fdf4" stroke="#d1d5db"/>
-                <text x="44" y="302" font-size="10" font-weight="700" fill="#059669">TDAH</text>
-                <text x="86" y="302" font-size="8" fill="#dc2626">0 conn</text>
-            </g>
-
-            <g class="bx" onclick="showHelp('dislexia')">
-                <title>Dislexia: 4 sub-vars, 0 al prompt.</title>
-                <rect x="148" y="284" width="108" height="28" rx="4" fill="#f0fdf4" stroke="#d1d5db"/>
-                <text x="160" y="302" font-size="10" font-weight="700" fill="#059669">Dislexia</text>
-                <text x="213" y="302" font-size="8" fill="#dc2626">0 conn</text>
-            </g>
-
-            <g class="bx" onclick="showHelp('altres')">
-                <title>+7 perfils: AC, TDL(8 vars 0 conn!), disc.vis/aud/mot, vuln, emoc, TDC</title>
-                <rect x="32" y="318" width="226" height="34" rx="4" fill="#f9fafb" stroke="#d1d5db"/>
-                <text x="44" y="335" font-size="9" fill="#6b7280">+7 (AC, TDL, disc.vis/aud/mot, vuln, emoc, TDC)</text>
-                <text x="44" y="348" font-size="8" fill="#dc2626">TDL: 8 sub-vars, 0 connectades</text>
-            </g>
-
+            <!-- Proposta auto -->
             <g class="bx" onclick="showHelp('proposta')">
-                <title>PROPOSTA: DUA, LF, MECR sortida, Complements. Auto, docent pot modificar.</title>
-                <rect x="310" y="138" width="200" height="95" rx="8" fill="white" stroke="#d97706" stroke-width="2"/>
-                <rect x="310" y="138" width="200" height="22" rx="8" fill="#fef3c7"/><rect x="310" y="154" width="200" height="6" fill="#fef3c7"/>
-                <text x="410" y="155" font-size="11" font-weight="700" fill="#d97706" text-anchor="middle">PROPOSTA (auto)</text>
-                <text x="324" y="176" font-size="10" fill="#374151">DUA: Acces / Core / Enriq.</text>
-                <text x="324" y="192" font-size="10" fill="#374151">LF: intensitat 1-5</text>
-                <text x="324" y="208" font-size="10" font-weight="600" fill="#d97706">MECR sortida: pre-A1...B2</text>
-                <text x="324" y="224" font-size="10" fill="#374151">Complements activats</text>
+                <rect x="20" y="260" width="230" height="80" rx="8" fill="white" stroke="#d97706" stroke-width="2"/>
+                <rect x="20" y="260" width="230" height="22" rx="8" fill="#fef3c7"/><rect x="20" y="276" width="230" height="6" fill="#fef3c7"/>
+                <text x="135" y="277" font-size="11" font-weight="700" fill="#d97706" text-anchor="middle">PROPOSTA (auto)</text>
+                <text x="35" y="300" font-size="10" fill="#374151">DUA: Acces / Core / Enriquiment</text>
+                <text x="35" y="316" font-size="10" font-weight="600" fill="#d97706">MECR sortida: pre-A1...B2</text>
+                <text x="35" y="332" font-size="10" fill="#374151">Complements a generar</text>
             </g>
 
+            <!-- Filtre instruccions -->
             <g class="bx" onclick="showHelp('filtre')">
-                <title>FILTRE: 89 instruccions, tria 10-25.</title>
-                <rect x="310" y="250" width="200" height="108" rx="8" fill="white" stroke="#059669" stroke-width="2"/>
-                <rect x="310" y="250" width="200" height="22" rx="8" fill="#d1fae5"/><rect x="310" y="266" width="200" height="6" fill="#d1fae5"/>
-                <text x="410" y="267" font-size="11" font-weight="700" fill="#059669" text-anchor="middle">FILTRE (89 instr.)</text>
-                <text x="324" y="290" font-size="10" fill="#1a56db" font-weight="600">SEMPRE (32)</text>
-                <text x="424" y="290" font-size="10" fill="#d97706" font-weight="600">NIVELL (19)</text>
-                <text x="324" y="308" font-size="10" fill="#059669" font-weight="600">PERFIL (35)</text>
-                <text x="424" y="308" font-size="10" fill="#7c3aed" font-weight="600">COMP (3)</text>
-                <text x="324" y="330" font-size="9" fill="#6b7280">Resultat: 10-25 seleccionades</text>
-                <text x="324" y="348" font-size="8" fill="#9ca3af">Nomes 3 sub-vars activen condicions</text>
+                <rect x="280" y="260" width="230" height="140" rx="8" fill="white" stroke="#059669" stroke-width="2"/>
+                <rect x="280" y="260" width="230" height="22" rx="8" fill="#d1fae5"/><rect x="280" y="276" width="230" height="6" fill="#d1fae5"/>
+                <text x="395" y="277" font-size="11" font-weight="700" fill="#059669" text-anchor="middle">FILTRE (88 instruccions)</text>
+                <text x="295" y="300" font-size="10" fill="#374151">1. Selecciona per perfil + MECR</text>
+                <text x="295" y="316" font-size="10" fill="#374151">2. Aplica sub-variables</text>
+                <text x="295" y="332" font-size="10" fill="#374151">3. Suprimeix redundants</text>
+                <text x="295" y="348" font-size="10" fill="#374151">4. Intensifica si cal</text>
+                <text x="295" y="370" font-size="10" font-weight="600" fill="#059669">5. Agrupa en macrodirectives</text>
+                <text x="295" y="390" font-size="9" fill="#6b7280">Resultat: 6-8 blocs temaics</text>
+            </g>
+
+            <!-- Persona-audience -->
+            <g class="bx" onclick="showHelp('persona')">
+                <rect x="540" y="260" width="240" height="60" rx="8" fill="white" stroke="#6b7280" stroke-width="1.5"/>
+                <text x="660" y="282" font-size="11" font-weight="700" fill="#6b7280" text-anchor="middle">PERSONA-AUDIENCE</text>
+                <text x="660" y="300" font-size="9" fill="#374151" text-anchor="middle">"Alumne de 14 anys, nouvingut, L1 arab,</text>
+                <text x="660" y="312" font-size="9" fill="#374151" text-anchor="middle">CALP inicial, alfabet no llati..."</text>
+            </g>
+
+            <!-- Corpus RAG -->
+            <g class="bx" onclick="showHelp('corpus')">
+                <rect x="540" y="340" width="240" height="55" rx="8" fill="white" stroke="#7c3aed" stroke-width="2"/>
+                <rect x="540" y="340" width="240" height="20" rx="8" fill="#ede9fe"/><rect x="540" y="354" width="240" height="6" fill="#ede9fe"/>
+                <text x="660" y="356" font-size="10" font-weight="700" fill="#7c3aed" text-anchor="middle">CORPUS FJE (RAG + KG)</text>
+                <text x="555" y="376" font-size="9" fill="#374151">1.443 chunks + 952 nodes + docs obligatoris</text>
+                <text x="555" y="389" font-size="8" fill="#9ca3af">Cerca vectorial + expansio Knowledge Graph</text>
+            </g>
+
+            <!-- Fletxes internes fase 2 -->
+            <path d="M 252,300 L 278,300" fill="none" stroke="#d97706" stroke-width="1.5" marker-end="url(#arr)"/>
+
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <!-- FLETXA FASE 2 → 3                                            -->
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <line x1="400" y1="420" x2="400" y2="445" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"/>
+
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <!-- FASE 3: PROMPT ASSEMBLAR                                     -->
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <rect x="0" y="445" width="800" height="210" rx="0" fill="#f8fafc"/>
+            <text x="18" y="469" class="phase-label" fill="#7c3aed">FASE 3</text>
+            <text x="80" y="469" class="phase-label" fill="#6b7280">Prompt assemblat (el que veu l'LLM)</text>
+            <text x="770" y="473" class="phase-num" text-anchor="end">03</text>
+
+            <!-- Les 4 capes del prompt -->
+            <g class="bx" onclick="showHelp('identitat')">
+                <rect x="40" y="485" width="720" height="30" rx="6" fill="white" stroke="#d1d5db"/>
+                <text x="55" y="505" font-size="10" font-weight="700" fill="#6b7280">CAPA 1: IDENTITAT</text>
+                <text x="250" y="505" font-size="9" fill="#9ca3af">"Ets ATNE de Jesuites Educacio. Restriccions absolutes."</text>
+                <text x="720" y="505" font-size="9" fill="#d1d5db" text-anchor="end">fixa</text>
             </g>
 
             <g class="bx" onclick="showHelp('instruccions')">
-                <title>SECCIO 2: INSTRUCCIONS (ORDRES). SEMPRE + NIVELL + PERFIL + COMPLEMENT + extras.</title>
-                <rect x="560" y="138" width="250" height="222" rx="6" fill="white" stroke="#1a56db" stroke-width="2"/>
-                <rect x="560" y="138" width="250" height="22" rx="6" fill="#dbeafe"/><rect x="560" y="154" width="250" height="6" fill="#dbeafe"/>
-                <text x="575" y="155" font-size="10" font-weight="700" fill="#1a56db">2. INSTRUCCIONS (ORDRES)</text>
-                <rect x="572" y="168" width="226" height="20" rx="4" fill="#eff6ff" stroke="#bfdbfe"/>
-                <text x="582" y="182" font-size="9" font-weight="600" fill="#1a56db">SEMPRE - 32 universals</text>
-                <rect x="572" y="194" width="226" height="20" rx="4" fill="#fffbeb" stroke="#fde68a"/>
-                <text x="582" y="208" font-size="9" font-weight="600" fill="#d97706">NIVELL - per MECR sortida</text>
-                <rect x="572" y="220" width="226" height="20" rx="4" fill="#ecfdf5" stroke="#a7f3d0"/>
-                <text x="582" y="234" font-size="9" font-weight="600" fill="#059669">PERFIL - per caract. actives</text>
-                <rect x="572" y="246" width="226" height="20" rx="4" fill="#f5f3ff" stroke="#ddd6fe"/>
-                <text x="582" y="260" font-size="9" font-weight="600" fill="#7c3aed">COMPLEMENT - opcionals</text>
-                <text x="575" y="286" font-size="9" fill="#6b7280">+ bloc DUA del corpus</text>
-                <text x="575" y="300" font-size="9" fill="#6b7280">+ instruccions per genere discursiu</text>
-                <text x="575" y="314" font-size="9" fill="#6b7280">+ creuaments entre perfils</text>
-                <text x="575" y="328" font-size="9" fill="#6b7280">+ resolucio conflictes MECR/DUA/LF</text>
-                <text x="575" y="342" font-size="9" fill="#6b7280">+ exemple sortida (few-shot)</text>
-                <text x="575" y="356" font-size="8" fill="#9ca3af">Origen: cataleg 89 + corpus FJE</text>
+                <rect x="40" y="522" width="720" height="56" rx="6" fill="white" stroke="#1a56db" stroke-width="2"/>
+                <rect x="40" y="522" width="720" height="20" rx="6" fill="#dbeafe"/><rect x="40" y="536" width="720" height="6" fill="#dbeafe"/>
+                <text x="55" y="538" font-size="10" font-weight="700" fill="#1a56db">CAPA 2: MACRODIRECTIVES (6-8 blocs)</text>
+                <text x="720" y="538" font-size="9" fill="#1a56db" text-anchor="end">variable</text>
+                <text x="65" y="558" font-size="9" fill="#374151" font-weight="600">LEXIC</text>
+                <text x="120" y="558" font-size="9" fill="#374151" font-weight="600">SINTAXI</text>
+                <text x="195" y="558" font-size="9" fill="#374151" font-weight="600">ESTRUCTURA</text>
+                <text x="295" y="558" font-size="9" fill="#374151" font-weight="600">COGNITIU</text>
+                <text x="375" y="558" font-size="9" fill="#374151" font-weight="600">QUALITAT</text>
+                <text x="460" y="558" font-size="9" fill="#374151" font-weight="600">PERSONALITZACIO</text>
+                <text x="590" y="558" font-size="9" fill="#374151" font-weight="600">PERFIL</text>
+                <text x="65" y="572" font-size="8" fill="#9ca3af">Cada bloc agrupa instruccions per tema. L'LLM no veu IDs — nomes prosa tematica.</text>
             </g>
 
-            <!-- Band B arrows -->
-            <polyline points="258,200 290,200 290,234 558,234" fill="none" stroke="#1a56db" stroke-width="1.5" marker-end="url(#arr-b)"/>
-            <line x1="258" y1="210" x2="308" y2="208" stroke="#d97706" stroke-width="1.5" marker-end="url(#arr-o)"/>
-            <path d="M 142,260 L 290,260 L 290,180 L 308,180" fill="none" stroke="#d97706" stroke-width="1" marker-end="url(#arr-o)"/>
-            <path d="M 258,260 L 296,260 L 296,190 L 308,190" fill="none" stroke="#d97706" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr-o)"/>
-            <line x1="272" y1="305" x2="308" y2="305" stroke="#059669" stroke-width="2" marker-end="url(#arr-g)"/>
-            <line x1="380" y1="234" x2="380" y2="248" stroke="#d97706" stroke-width="2" marker-end="url(#arr-o)"/>
-            <line x1="460" y1="234" x2="460" y2="248" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arr-p)"/>
-            <line x1="512" y1="300" x2="558" y2="280" stroke="#059669" stroke-width="2" marker-end="url(#arr-g)"/>
-
-            <!-- BAND C: NARRATIVA -->
-            <g class="bx" onclick="showHelp('observacions')">
-                <title>OBSERVACIONS: Text lliure del docent. Va a persona-audience.</title>
-                <rect x="20" y="380" width="250" height="28" rx="6" fill="white" stroke="#6b7280" stroke-width="1" stroke-dasharray="4"/>
-                <text x="145" y="399" font-size="10" fill="#6b7280" text-anchor="middle">Observacions del docent (text lliure)</text>
-            </g>
-
-            <g class="bx" onclick="showHelp('persona')">
-                <title>PERSONA-AUDIENCE: Narrativa natural. NO ordres.</title>
-                <rect x="310" y="380" width="200" height="46" rx="8" fill="white" stroke="#6b7280" stroke-width="1" stroke-dasharray="4"/>
-                <text x="410" y="398" font-size="10" font-weight="600" fill="#6b7280" text-anchor="middle">PERSONA-AUDIENCE</text>
-                <text x="410" y="414" font-size="9" fill="#9ca3af" text-anchor="middle">Narrativa alumne (no ordres)</text>
-            </g>
-
-            <g class="bx" onclick="showHelp('corpus')">
-                <title>CORPUS FJE: RAG + KG. 8-12 fragments referencia.</title>
-                <rect x="310" y="440" width="200" height="60" rx="8" fill="white" stroke="#7c3aed" stroke-width="2"/>
-                <rect x="310" y="440" width="200" height="20" rx="8" fill="#ede9fe"/><rect x="310" y="454" width="200" height="6" fill="#ede9fe"/>
-                <text x="410" y="455" font-size="10" font-weight="700" fill="#7c3aed" text-anchor="middle">CORPUS FJE (RAG+KG)</text>
-                <text x="324" y="476" font-size="9" fill="#374151">1.443 chunks + 952 nodes</text>
-                <text x="324" y="492" font-size="9" fill="#374151">Docs obligatoris per perfil</text>
-            </g>
-
-            <!-- Band C arrows -->
-            <polyline points="145,362 145,400 308,400" fill="none" stroke="#6b7280" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
-            <line x1="272" y1="394" x2="308" y2="400" stroke="#6b7280" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
-            <polyline points="512,400 540,400 540,108 558,108" fill="none" stroke="#6b7280" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
-            <polyline points="512,470 546,470 546,115 558,115" fill="none" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arr-p)"/>
-
-            <!-- BAND D: EXECUCIO -->
-            <g class="bx" onclick="showHelp('text')">
-                <title>TEXT ORIGINAL: user message a Gemini. Tambe query RAG.</title>
-                <rect x="20" y="552" width="250" height="32" rx="8" fill="white" stroke="#1a56db" stroke-width="2"/>
-                <text x="145" y="573" font-size="12" font-weight="700" fill="#1a56db" text-anchor="middle">TEXT ORIGINAL</text>
+            <g class="bx" onclick="showHelp('context_prompt')">
+                <rect x="40" y="585" width="720" height="30" rx="6" fill="white" stroke="#059669" stroke-width="1.5"/>
+                <text x="55" y="605" font-size="10" font-weight="700" fill="#059669">CAPA 3: CONTEXT</text>
+                <text x="250" y="605" font-size="9" fill="#374151">Educatiu + Persona-audience + RAG corpus + Complements</text>
+                <text x="720" y="605" font-size="9" fill="#059669" text-anchor="end">variable</text>
             </g>
 
             <g class="bx" onclick="showHelp('format')">
-                <title>SECCIO 4: FORMAT SORTIDA.</title>
-                <rect x="560" y="548" width="250" height="78" rx="6" fill="white" stroke="#7c3aed" stroke-width="2"/>
-                <rect x="560" y="548" width="250" height="20" rx="6" fill="#ede9fe"/><rect x="560" y="562" width="250" height="6" fill="#ede9fe"/>
-                <text x="575" y="563" font-size="10" font-weight="700" fill="#7c3aed">4. FORMAT DE SORTIDA</text>
-                <text x="575" y="582" font-size="9" fill="#374151">## Text adaptat + ## Argumentacio (sempre)</text>
-                <text x="575" y="596" font-size="9" fill="#374151">## Glossari, Esquema, Preguntes... (si actius)</text>
-                <text x="575" y="618" font-size="8" fill="#9ca3af">Origen: complements de la proposta</text>
+                <rect x="40" y="622" width="720" height="26" rx="6" fill="white" stroke="#7c3aed" stroke-width="1.5"/>
+                <text x="55" y="640" font-size="10" font-weight="700" fill="#7c3aed">CAPA 4: FORMAT SORTIDA</text>
+                <text x="300" y="640" font-size="9" fill="#374151">## Text adaptat + seccions opcionals (glossari, esquema, preguntes...)</text>
             </g>
 
-            <g class="bx" onclick="showHelp('gemini')">
-                <title>GEMINI 2.5 Flash: prompt + text. Streaming. Gratuit.</title>
-                <rect x="560" y="645" width="250" height="38" rx="8" fill="#7c3aed"/>
-                <text x="685" y="669" font-size="13" font-weight="700" fill="white" text-anchor="middle">GEMINI 2.5 Flash</text>
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <!-- FLETXA FASE 3 → 4                                            -->
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <line x1="400" y1="655" x2="400" y2="680" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"/>
+
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <!-- FASE 4: LLM GENERA                                           -->
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <rect x="0" y="680" width="800" height="120" rx="0" fill="#fff"/>
+            <text x="18" y="704" class="phase-label" fill="#7c3aed">FASE 4</text>
+            <text x="80" y="704" class="phase-label" fill="#6b7280">L'LLM genera</text>
+            <text x="770" y="708" class="phase-num" text-anchor="end">04</text>
+
+            <!-- Text original (user msg) -->
+            <g class="bx" onclick="showHelp('text')">
+                <rect x="40" y="720" width="200" height="36" rx="8" fill="#dbeafe" stroke="#1a56db" stroke-width="1.5"/>
+                <text x="140" y="743" font-size="11" font-weight="600" fill="#1a56db" text-anchor="middle">Text original (user msg)</text>
             </g>
+
+            <text x="260" y="742" font-size="16" fill="#9ca3af">+</text>
+
+            <!-- System prompt -->
+            <g>
+                <rect x="290" y="720" width="200" height="36" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+                <text x="390" y="743" font-size="11" font-weight="600" fill="#7c3aed" text-anchor="middle">System prompt (4 capes)</text>
+            </g>
+
+            <text x="510" y="742" font-size="16" fill="#9ca3af">→</text>
+
+            <!-- Gemini -->
+            <g class="bx" onclick="showHelp('gemini')">
+                <rect x="540" y="716" width="220" height="44" rx="10" fill="#7c3aed"/>
+                <text x="650" y="743" font-size="14" font-weight="700" fill="white" text-anchor="middle">GEMINI 2.5 Flash</text>
+            </g>
+
+            <!-- Fletxa streaming -->
+            <text x="660" y="776" font-size="9" fill="#7c3aed" text-anchor="middle">streaming SSE ↓</text>
+
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <!-- FLETXA FASE 4 → 5                                            -->
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <line x1="400" y1="800" x2="400" y2="825" stroke="#9ca3af" stroke-width="2" marker-end="url(#arr)"/>
+
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <!-- FASE 5: RESULTAT                                             -->
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <rect x="0" y="825" width="800" height="120" rx="0" fill="#f0fdf4"/>
+            <text x="18" y="849" class="phase-label" fill="#059669">FASE 5</text>
+            <text x="80" y="849" class="phase-label" fill="#6b7280">Resultat al docent</text>
+            <text x="770" y="853" class="phase-num" text-anchor="end">05</text>
 
             <g class="bx" onclick="showHelp('resultat')">
-                <title>TEXT ADAPTAT: Verificacio Python post-generacio.</title>
-                <rect x="560" y="700" width="250" height="35" rx="8" fill="white" stroke="#059669" stroke-width="2"/>
-                <text x="685" y="722" font-size="11" font-weight="700" fill="#059669" text-anchor="middle">TEXT ADAPTAT + COMPLEMENTS</text>
+                <rect x="40" y="865" width="340" height="42" rx="8" fill="white" stroke="#059669" stroke-width="2"/>
+                <text x="210" y="891" font-size="12" font-weight="700" fill="#059669" text-anchor="middle">TEXT ADAPTAT + COMPLEMENTS</text>
             </g>
 
             <g class="bx" onclick="showHelp('frontend')">
-                <title>FRONTEND: Columnes, editable, feedback, export.</title>
-                <rect x="560" y="750" width="250" height="32" rx="8" fill="white" stroke="#1a56db" stroke-width="2"/>
-                <text x="685" y="771" font-size="11" font-weight="700" fill="#1a56db" text-anchor="middle">FRONTEND: revisa + exporta</text>
+                <rect x="420" y="865" width="340" height="42" rx="8" fill="white" stroke="#1a56db" stroke-width="2"/>
+                <text x="590" y="885" font-size="11" font-weight="700" fill="#1a56db" text-anchor="middle">FRONTEND: original vs adaptat</text>
+                <text x="590" y="900" font-size="9" fill="#6b7280" text-anchor="middle">Revisio + Edicio + Exporta (PDF/DOCX/TXT)</text>
             </g>
 
-            <!-- Band D arrows -->
-            <polyline points="512,224 535,224 535,580 558,580" fill="none" stroke="#7c3aed" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr-p)"/>
-            <polyline points="272,568 420,568 420,664 558,664" fill="none" stroke="#1a56db" stroke-width="2" marker-end="url(#arr-b)"/>
-            <text x="425" y="560" font-size="8" fill="#1a56db">(user msg)</text>
-            <line x1="685" y1="628" x2="685" y2="643" stroke="#374151" stroke-width="2" marker-end="url(#arr)"/>
-            <line x1="685" y1="683" x2="685" y2="698" stroke="#059669" stroke-width="2" marker-end="url(#arr-g)"/>
-            <line x1="685" y1="735" x2="685" y2="748" stroke="#1a56db" stroke-width="1.5" marker-end="url(#arr-b)"/>
-
-            <!-- LLEGENDA -->
-            <rect x="20" y="620" width="250" height="100" rx="8" fill="white" stroke="#e5e7eb"/>
-            <text x="34" y="638" font-size="10" font-weight="700" fill="#6b7280">LLEGENDA</text>
-            <line x1="34" y1="652" x2="60" y2="652" stroke="#1a56db" stroke-width="2"/><text x="68" y="656" font-size="9" fill="#374151">Va a ORDRES (instruccions)</text>
-            <line x1="34" y1="668" x2="60" y2="668" stroke="#d97706" stroke-width="2"/><text x="68" y="672" font-size="9" fill="#374151">Va a PROPOSTA (DUA/LF/MECR)</text>
-            <line x1="34" y1="684" x2="60" y2="684" stroke="#059669" stroke-width="2"/><text x="68" y="688" font-size="9" fill="#374151">Perfil actiu - filtre - prompt</text>
-            <line x1="34" y1="700" x2="60" y2="700" stroke="#7c3aed" stroke-width="1.5"/><text x="68" y="704" font-size="9" fill="#374151">Corpus / complements</text>
-            <line x1="34" y1="716" x2="60" y2="716" stroke="#6b7280" stroke-width="1" stroke-dasharray="4,3"/><text x="68" y="720" font-size="9" fill="#374151">Va a CONTEXT (narrativa)</text>
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <!-- LLEGENDA                                                     -->
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <rect x="40" y="940" width="720" height="105" rx="8" fill="white" stroke="#e5e7eb"/>
+            <text x="60" y="962" font-size="10" font-weight="700" fill="#6b7280">COM FUNCIONEN LES MACRODIRECTIVES</text>
+            <text x="60" y="982" font-size="9" fill="#374151">1. El cataleg te 88 instruccions individuals (A-01, A-02, H-04...) amb regles d'activacio.</text>
+            <text x="60" y="998" font-size="9" fill="#374151">2. El filtre selecciona nomes les rellevants pel cas (perfil + MECR + sub-variables).</text>
+            <text x="60" y="1014" font-size="9" fill="#374151">3. Les agrupa en 6-8 blocs temaics (LEXIC, SINTAXI, ESTRUCTURA...) sense IDs.</text>
+            <text x="60" y="1030" font-size="9" fill="#059669" font-weight="600">4. L'LLM rep 6-8 blocs coherents en lloc de 45+ regles soltes → millor seguiment.</text>
 
         </svg>
         </div>
