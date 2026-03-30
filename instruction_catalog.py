@@ -53,7 +53,7 @@ MACRODIRECTIVES = {
         "label": "SUPORT COGNITIU",
         "ordre": 4,
         "instruccions_possibles": [
-            "C-01", "C-02", "C-03", "C-04", "C-05", "C-06", "C-08",
+            "C-01", "C-02", "C-03", "C-04", "C-04b", "C-05", "C-06", "C-08",
             "A-27",
         ],
     },
@@ -69,7 +69,7 @@ MACRODIRECTIVES = {
         "label": "MULTIMODALITAT",
         "ordre": 6,
         "instruccions_possibles": [
-            "D-01", "D-02", "D-03", "D-06", "H-21",
+            "D-01", "D-02", "D-03", "D-06", "D-06b", "H-21",
         ],
     },
     "AVALUACIO": {
@@ -83,7 +83,7 @@ MACRODIRECTIVES = {
         "label": "PERSONALITZACIÓ LINGÜÍSTICA",
         "ordre": 8,
         "instruccions_possibles": [
-            "G-01", "G-02", "G-03", "G-05", "G-06",
+            "G-01", "G-02", "G-03", "G-05", "G-06", "G-07",
         ],
     },
     "PERFIL": {
@@ -91,13 +91,13 @@ MACRODIRECTIVES = {
         "ordre": 9,
         "instruccions_possibles": [
             "H-01", "H-02", "H-03",
-            "H-04", "H-05", "H-06",
+            "H-04", "H-04b", "H-05", "H-06",
             "H-07", "H-08", "H-22",
             "H-09", "H-10", "H-11",
             "H-12", "H-14",
             "H-15",
-            "H-16", "H-17",
-            "H-19", "H-20", "H-21",
+            "H-16", "H-17", "H-23", "H-24", "H-25", "H-26",
+            "H-19", "H-20", "H-20b", "H-21",
         ],
     },
 }
@@ -282,7 +282,7 @@ CATALOG = {
         "activation": "PERFIL",
         "macro": "COGNITIU",
         "profiles": ["tdah", "di"],
-        "subvar_conditions": {"fatiga_o_sever": True},
+        "subvar_conditions": {"fatiga_o_sever": True},  # tdah.fatiga_cognitiva O tdah.grau=sever O di.grau=sever
     },
 
     # ─── B. ESTRUCTURA I ORGANITZACIÓ ─────────────────────────────────────────
@@ -392,7 +392,13 @@ CATALOG = {
         "text": "Chunking: agrupa informació en blocs de 3-5 elements (límit memòria de treball).",
         "activation": "SEMPRE",
         "macro": "COGNITIU",
-        # baixa_memoria_treball intensifica: 3-5 → 3
+    },
+    "C-04b": {
+        "text": "Memòria de treball baixa: redueix blocs a 2-3 elements (no 3-5). Repeteix informació clau a cada bloc. Afegeix resums parcials cada 2-3 paràgrafs.",
+        "activation": "PERFIL",
+        "macro": "COGNITIU",
+        "profiles": ["tdah"],
+        "subvar_conditions": {"baixa_memoria_treball": True},
     },
     "C-05": {
         "text": "Glossari previ (pre-training, Sweller): comença amb '## Paraules clau' amb els termes essencials.",
@@ -437,7 +443,14 @@ CATALOG = {
         "text": "Prepara el text per a lectura en veu alta: frases amb ritme natural, pauses clares (punts).",
         "activation": "PERFIL",
         "macro": "MULTIMODAL",
-        "profiles": ["dislexia", "discapacitat_intellectual", "di", "discapacitat_visual", "disc_visual"],
+        "profiles": ["discapacitat_intellectual", "di", "discapacitat_visual", "disc_visual"],
+    },
+    "D-06b": {
+        "text": "Dislèxia moderada/severa: prepara el text per a lectura en veu alta com a canal principal d'accés. Frases curtes amb ritme natural, pauses clares, evita encavalcaments fonètics.",
+        "activation": "PERFIL",
+        "macro": "MULTIMODAL",
+        "profiles": ["dislexia"],
+        "subvar_conditions": {"dislexia_moderat_sever": True},
     },
 
     # ─── E. CONTINGUT CURRICULAR ──────────────────────────────────────────────
@@ -568,6 +581,14 @@ CATALOG = {
         },
     },
 
+    "G-07": {
+        "text": "Nouvingut sense CALP: estructura discursiva molt explícita. Marca clarament què és una definició, què és un exemple, què és una conclusió. Usa frase tòpic a cada paràgraf.",
+        "activation": "PERFIL",
+        "macro": "PERSONALITZACIO",
+        "profiles": ["nouvingut"],
+        "subvar_conditions": {"calp_inicial": True},
+    },
+
     # ─── H. ADAPTACIONS ESPECÍFIQUES PER PERFIL ──────────────────────────────
     # NOTA: H-13 eliminat (duplicat de F-10). H-14b fusionat amb H-14.
 
@@ -590,11 +611,17 @@ CATALOG = {
         "profiles": ["tea"],
     },
     "H-04": {
-        "text": "TDAH: micro-blocs de 3-5 frases amb objectiu explícit per bloc ('En aquest bloc aprendràs...').",
+        "text": "Micro-blocs de 3-5 frases amb objectiu explícit per bloc ('En aquest bloc aprendràs...').",
         "activation": "PERFIL",
         "macro": "PERFIL",
         "profiles": ["tdah", "trastorn_emocional"],
-        # grau=sever intensifica: 2-3 frases en lloc de 3-5
+    },
+    "H-04b": {
+        "text": "TDAH sever: micro-blocs de 2-3 frases (no 3-5). Objectiu molt curt i concret per bloc.",
+        "activation": "PERFIL",
+        "macro": "PERFIL",
+        "profiles": ["tdah"],
+        "subvar_conditions": {"tdah_sever": True},
     },
     "H-05": {
         "text": "TDAH: retroalimentació visual de progrés — barres, percentatges, indicadors visuals.",
@@ -669,6 +696,34 @@ CATALOG = {
         "macro": "PERFIL",
         "profiles": ["tdl"],
     },
+    "H-23": {
+        "text": "TDL receptiu: simplificació lingüística reforçada en TOT el text. L'alumne té dificultat per comprendre, no només per produir.",
+        "activation": "PERFIL",
+        "macro": "PERFIL",
+        "profiles": ["tdl"],
+        "subvar_conditions": {"tdl_receptiu": True},
+    },
+    "H-24": {
+        "text": "TDL amb semàntica afectada: redueix vocabulari al mínim funcional. Cada paraula de contingut ha de ser d'alta freqüència o estar definida.",
+        "activation": "PERFIL",
+        "macro": "PERFIL",
+        "profiles": ["tdl"],
+        "subvar_conditions": {"tdl_semantica": True},
+    },
+    "H-25": {
+        "text": "TDL amb morfosintaxi afectada: estructura SVO estricta. Evita passives, subordinades, relatius i ordre no canònic.",
+        "activation": "PERFIL",
+        "macro": "PERFIL",
+        "profiles": ["tdl"],
+        "subvar_conditions": {"tdl_morfosintaxi": True},
+    },
+    "H-26": {
+        "text": "TDL amb pragmàtica afectada: fes explícita tota intenció comunicativa. No pressuposar que l'alumne infereix el propòsit del text.",
+        "activation": "PERFIL",
+        "macro": "PERFIL",
+        "profiles": ["tdl"],
+        "subvar_conditions": {"tdl_pragmatica": True},
+    },
     "H-19": {
         "text": "Discapacitat visual: estructura semàntica amb encapçalaments (H1-H3) per lector de pantalla. NO dependre de colors o posicions.",
         "activation": "PERFIL",
@@ -680,7 +735,13 @@ CATALOG = {
         "activation": "PERFIL",
         "macro": "PERFIL",
         "profiles": ["discapacitat_auditiva", "disc_auditiva"],
-        # comunicacio=LSC intensifica; implant_coclear=true atenua
+    },
+    "H-20b": {
+        "text": "Disc. auditiva LSC: el català escrit és una L2. Simplificació sintàctica reforçada, suport visual per tot contingut, glossari amb suport visual.",
+        "activation": "PERFIL",
+        "macro": "PERFIL",
+        "profiles": ["disc_auditiva", "discapacitat_auditiva"],
+        "subvar_conditions": {"comunicacio_lsc": True},
     },
 
     # ─── NOVES INSTRUCCIONS ───────────────────────────────────────────────────

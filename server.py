@@ -320,8 +320,10 @@ def propose_adaptation(characteristics: dict, context: dict) -> dict:
 
     # ── Nivell DUA ──
     dua = "Core"
+    tdl_grau = characteristics.get("tdl", {}).get("grau", "lleu")
     if (di_grau == "sever" and "di" in actives) or \
        (tea_nivell == 3 and "tea" in actives) or \
+       (tdl_grau == "sever" and "tdl" in actives) or \
        (mecr == "pre-A1" and not nouvingut.get("alfabet_llati", True) and "nouvingut" in actives):
         dua = "Acces"
     elif "altes_capacitats" in actives and not ac_doble:
@@ -339,11 +341,14 @@ def propose_adaptation(characteristics: dict, context: dict) -> dict:
     if "nouvingut" in actives:
         lf_factors.append({"pre-A1": 4, "A1": 3, "A2": 2, "B1": 1, "B2": 1}.get(mecr, 3))
     if "dislexia" in actives:
-        lf_factors.append(3)
+        dislexia_grau = characteristics.get("dislexia", {}).get("grau", "lleu")
+        lf_factors.append({"sever": 4, "moderat": 3, "lleu": 3}.get(dislexia_grau, 3))
     if "tdl" in actives:
-        lf_factors.append(3)
+        tdl_grau = characteristics.get("tdl", {}).get("grau", "lleu")
+        lf_factors.append({"sever": 4, "moderat": 3, "lleu": 3}.get(tdl_grau, 3))
     if "tdah" in actives:
-        lf_factors.append(2)
+        tdah_grau = characteristics.get("tdah", {}).get("grau", "lleu")
+        lf_factors.append({"sever": 3, "moderat": 2, "lleu": 2}.get(tdah_grau, 2))
     if "altes_capacitats" in actives:
         lf_factors.append(1)
     if lf_factors:

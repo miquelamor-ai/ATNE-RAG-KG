@@ -29,7 +29,16 @@ def _check_subvar_conditions(instr: dict, profile_data: dict, mecr: str, chars: 
     - sensibilitat_tematica: bool
     - grau_ceguesa: disc_visual.grau == "ceguesa"
     - tipus_fonologica: dislexia.tipus_dislexia == "fonologica" o "mixta"
-    - fatiga_o_sever: tdah.fatiga_cognitiva==true O di.grau=="sever"
+    - fatiga_o_sever: tdah.fatiga_cognitiva==true O tdah.grau=="sever" O di.grau=="sever"
+    - tdah_sever: tdah.grau == "sever"
+    - baixa_memoria_treball: tdah.baixa_memoria_treball == true
+    - dislexia_moderat_sever: dislexia.grau in ("moderat", "sever")
+    - tdl_receptiu: tdl.modalitat in ("comprensiu", "mixt")
+    - tdl_semantica: tdl.semantica == true
+    - tdl_morfosintaxi: tdl.morfosintaxi == true
+    - tdl_pragmatica: tdl.pragmatica == true
+    - comunicacio_lsc: disc_auditiva.comunicacio == "LSC"
+    - calp_inicial: nouvingut.calp == "inicial"
     """
     conditions = instr.get("subvar_conditions", {})
     if not conditions:
@@ -76,7 +85,62 @@ def _check_subvar_conditions(instr: dict, profile_data: dict, mecr: str, chars: 
             if isinstance(fatiga, str):
                 fatiga = fatiga.lower() in ("true", "1")
             grau = profile_data.get("grau", "")
-            if expected and not fatiga and grau != "sever":
+            # Tambe mira tdah.grau=sever (cross-profile)
+            tdah_grau = chars.get("tdah", {}).get("grau", "")
+            if expected and not fatiga and grau != "sever" and tdah_grau != "sever":
+                return False
+
+        elif key == "tdah_sever":
+            grau = profile_data.get("grau", "")
+            if expected and grau != "sever":
+                return False
+
+        elif key == "baixa_memoria_treball":
+            actual = profile_data.get("baixa_memoria_treball", False)
+            if isinstance(actual, str):
+                actual = actual.lower() in ("true", "1")
+            if actual != expected:
+                return False
+
+        elif key == "dislexia_moderat_sever":
+            grau = profile_data.get("grau", "")
+            if expected and grau not in ("moderat", "sever"):
+                return False
+
+        elif key == "tdl_receptiu":
+            modalitat = profile_data.get("modalitat", "")
+            if expected and modalitat not in ("comprensiu", "mixt"):
+                return False
+
+        elif key == "tdl_semantica":
+            actual = profile_data.get("semantica", False)
+            if isinstance(actual, str):
+                actual = actual.lower() in ("true", "1")
+            if actual != expected:
+                return False
+
+        elif key == "tdl_morfosintaxi":
+            actual = profile_data.get("morfosintaxi", False)
+            if isinstance(actual, str):
+                actual = actual.lower() in ("true", "1")
+            if actual != expected:
+                return False
+
+        elif key == "tdl_pragmatica":
+            actual = profile_data.get("pragmatica", False)
+            if isinstance(actual, str):
+                actual = actual.lower() in ("true", "1")
+            if actual != expected:
+                return False
+
+        elif key == "comunicacio_lsc":
+            actual = profile_data.get("comunicacio", "")
+            if expected and actual != "LSC":
+                return False
+
+        elif key == "calp_inicial":
+            actual = profile_data.get("calp", "")
+            if expected and actual != "inicial":
                 return False
 
     return True
