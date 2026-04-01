@@ -1817,6 +1817,42 @@ async def eval_progress():
         except Exception:
             pass
 
+        # ── Multi-v2 progress (mateixa BD, taules multi_v2_*) ──
+        multi_v2 = {}
+        try:
+            ind = conn.execute(
+                "SELECT judge, COUNT(*) as n FROM multi_v2_evaluations "
+                "WHERE run_id='multi_v2' GROUP BY judge"
+            ).fetchall()
+            multi_v2["individual"] = {r["judge"]: r["n"] for r in ind}
+
+            tri = conn.execute(
+                "SELECT judge, COUNT(*) as n FROM multi_v2_trios "
+                "WHERE run_id='multi_v2' GROUP BY judge"
+            ).fetchall()
+            multi_v2["trios"] = {r["judge"]: r["n"] for r in tri}
+
+            cro = conn.execute(
+                "SELECT judge, pair, COUNT(*) as n FROM multi_v2_cross "
+                "WHERE run_id='multi_v2' GROUP BY judge, pair"
+            ).fetchall()
+            cross_data = {}
+            for r in cro:
+                cross_data.setdefault(r["judge"], {})[r["pair"]] = r["n"]
+            multi_v2["cross"] = cross_data
+
+            recent_v2 = conn.execute("""
+                SELECT e.cas_id, e.judge, g.generator, g.prompt_mode, e.puntuacio_global
+                FROM multi_v2_evaluations e
+                LEFT JOIN multi_llm_generations g ON e.generation_id = g.id
+                WHERE e.run_id = 'multi_v2'
+                ORDER BY e.id DESC LIMIT 8
+            """).fetchall()
+            multi_v2["recent"] = [dict(r) for r in recent_v2]
+            multi_v2["_n_recent_raw"] = len(recent_v2)
+        except Exception:
+            pass
+
         conn.close()
 
         is_running = cases_done < total_expected
@@ -1837,9 +1873,35 @@ async def eval_progress():
             "veredictes": veredictes,
             "recent_cases": recent_list,
             "multi_llm": multi_llm,
+            "multi_v2": multi_v2,
         })
     except Exception as e:
         return JSONResponse({"status": "error", "message": str(e)})
+
+
+@app.get("/api/eval/v2debug")
+async def eval_v2debug():
+    """Debug endpoint per testar multi_v2 recent query."""
+    import eval_db, sqlite3
+    conn = eval_db.init_db()
+    try:
+        n_evals = conn.execute("SELECT COUNT(*) FROM multi_v2_evaluations").fetchone()[0]
+        n_gens = conn.execute("SELECT COUNT(*) FROM multi_llm_generations").fetchone()[0]
+        rows = conn.execute("""
+            SELECT e.cas_id, e.judge, g.generator, g.prompt_mode, e.puntuacio_global
+            FROM multi_v2_evaluations e
+            LEFT JOIN multi_llm_generations g ON e.generation_id = g.id
+            WHERE e.run_id = 'multi_v2'
+            ORDER BY e.id DESC LIMIT 3
+        """).fetchall()
+        conn.close()
+        return JSONResponse({
+            "n_evals": n_evals, "n_gens": n_gens,
+            "recent": [dict(r) for r in rows]
+        })
+    except Exception as e:
+        conn.close()
+        return JSONResponse({"error": str(e)})
 
 
 # ── Main ────────────────────────────────────────────────────────────────────

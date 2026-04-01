@@ -158,6 +158,31 @@ td { padding: 0.5rem; border-bottom: 1px solid #1e293b; font-size: 0.85rem; }
   <tbody id="multiRecentTable"><tr><td colspan="4" style="color:var(--muted)">Esperant dades...</td></tr></tbody>
 </table>
 
+<!-- ═══════════════════ MULTI-V2 ═══════════════════ -->
+<h2 style="font-size:1.1rem;margin:2rem 0 0.25rem;">Multi-v2 — 3 generadors × 3 branques × 200 casos</h2>
+<div class="section-help">RAG-v2 (macrodirectives + sub-variables) vs HC i RAG-v1. Jutges: Gemini ($0) + GPT-4o-mini. 3 fases: individual (1.800 avals) · trios intra-model (600) · cross-model (600).</div>
+
+<div id="v2-individual-section" style="margin:1rem 0">
+  <h3 style="font-size:0.9rem;margin:0.75rem 0 0.4rem;color:var(--muted)">Fase 1 — Individual (1.800 avaluacions/jutge)</h3>
+  <div id="v2-individual-bars"></div>
+</div>
+
+<div id="v2-trios-section" style="margin:1rem 0">
+  <h3 style="font-size:0.9rem;margin:0.75rem 0 0.4rem;color:var(--muted)">Fase 2 — Trios intra-model (600 trios/jutge)</h3>
+  <div id="v2-trios-bars"></div>
+</div>
+
+<div id="v2-cross-section" style="margin:1rem 0">
+  <h3 style="font-size:0.9rem;margin:0.75rem 0 0.4rem;color:var(--muted)">Fase 3 — Cross-model (600 parells/jutge)</h3>
+  <div id="v2-cross-bars"></div>
+</div>
+
+<h3 style="font-size:0.9rem;margin:1rem 0 0.4rem;color:var(--muted)">Últimes avaluacions individuals multi-v2</h3>
+<table>
+  <thead><tr><th>Cas</th><th>Jutge</th><th>Generador</th><th>Branca</th><th>Score</th></tr></thead>
+  <tbody id="v2-recent-table"><tr><td colspan="5" style="color:var(--muted)">Esperant dades...</td></tr></tbody>
+</table>
+
 <div id="error"></div>
 <div class="refresh-info">Actualització automàtica cada 10 segons · <a href="/eval/results" style="color:var(--primary)">Resultats</a> · <a href="/eval/cases" style="color:var(--primary)">Visor casos</a> · <a href="/eval" style="color:var(--primary)">Dashboard</a></div>
 
@@ -266,6 +291,68 @@ async function refresh() {
           <td style="color:${colors[r.generator]||'#fff'}">${r.generator}</td>
           <td>${r.prompt_mode}</td>
           <td>${r.words || '-'}w</td>
+        </tr>`;
+      }).join('');
+    }
+
+    // ── Multi-v2 ──
+    const v2 = d.multi_v2 || {};
+    const judgeColors = {gemini:'#eab308', gpt4mini:'#3b82f6', sonnet:'#8b5cf6'};
+    const branchColors = {hc:'#f97316', rag_v1:'#22c55e', rag_v2:'#3b82f6'};
+
+    function v2Bar(label, n, total, color) {
+      const pct = total > 0 ? Math.min(100, Math.round(n / total * 100)) : 0;
+      const done = n >= total;
+      return `<div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
+        <span style="width:110px;font-size:0.8rem;text-align:right;color:var(--muted)">${label}</span>
+        <div style="flex:1;height:22px;background:#1e293b;border-radius:4px;overflow:hidden;position:relative">
+          <div style="width:${pct}%;height:100%;background:${color};opacity:0.85;transition:width 0.5s"></div>
+          <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:0.72rem;color:#fff;font-weight:600">${n}/${total} (${pct}%)</span>
+        </div>
+        ${done ? '<span style="color:#22c55e;font-size:0.8rem">✓</span>' : '<span style="color:#eab308;font-size:0.8rem;animation:pulse 2s infinite">●</span>'}
+      </div>`;
+    }
+
+    // Individual
+    const indData = v2.individual || {};
+    document.getElementById('v2-individual-bars').innerHTML =
+      ['gemini','gpt4mini','sonnet'].filter(j => indData[j] !== undefined || j !== 'sonnet')
+      .map(j => v2Bar(j, indData[j] || 0, 1800, judgeColors[j] || '#888')).join('') ||
+      '<span style="color:var(--muted);font-size:0.8rem">Sense dades</span>';
+
+    // Trios
+    const trioData = v2.trios || {};
+    document.getElementById('v2-trios-bars').innerHTML =
+      Object.keys({...{gemini:0,gpt4mini:0}, ...trioData})
+      .map(j => v2Bar(j, trioData[j] || 0, 600, judgeColors[j] || '#888')).join('') ||
+      '<span style="color:var(--muted);font-size:0.8rem">Sense dades</span>';
+
+    // Cross
+    const crossData = v2.cross || {};
+    const PAIRS = ['gemini_vs_sonnet','gemini_vs_gpt','sonnet_vs_gpt'];
+    let crossHtml = '';
+    for (const [judge, pairs] of Object.entries(crossData)) {
+      for (const pair of PAIRS) {
+        const n = (pairs[pair] || 0);
+        crossHtml += v2Bar(`${judge}/${pair.replace('_vs_','↔')}`, n, 200, judgeColors[judge] || '#888');
+      }
+    }
+    document.getElementById('v2-cross-bars').innerHTML = crossHtml ||
+      '<span style="color:var(--muted);font-size:0.8rem">Sense dades</span>';
+
+    // Recent
+    const v2recent = v2.recent || [];
+    const v2tbody = document.getElementById('v2-recent-table');
+    if (v2recent.length > 0) {
+      v2tbody.innerHTML = v2recent.map(r => {
+        const score = r.puntuacio_global != null ? r.puntuacio_global.toFixed(2) : '-';
+        const scoreColor = r.puntuacio_global >= 4 ? '#22c55e' : r.puntuacio_global >= 3 ? '#eab308' : '#ef4444';
+        return `<tr>
+          <td>${r.cas_id}</td>
+          <td style="color:${judgeColors[r.judge]||'#fff'}">${r.judge}</td>
+          <td style="color:${judgeColors[r.generator]||'#fff'}">${r.generator || '-'}</td>
+          <td style="color:${branchColors[r.prompt_mode]||'#fff'}">${r.prompt_mode || '-'}</td>
+          <td style="color:${scoreColor};font-weight:600">${score}</td>
         </tr>`;
       }).join('');
     }

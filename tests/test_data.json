@@ -2,8 +2,9 @@
   "_meta": {
     "description": "Matriu de tests sintètics ATNE — 20 textos x 10 perfils = 200 adaptacions",
     "created": "2026-03-28",
-    "updated": "2026-03-29",
+    "updated": "2026-03-31",
     "nota_v2": "Afegits 4 textos culturals (CULT_*) amb referents locals catalans per exercitar E-08, E-09, G-05",
+    "nota_v3": "Sub-variables aplanades (detalls eliminat) i completades per activar instruccions condicionals v2: calp, grau, baixa_memoria_treball, tipus_dislexia, modalitat TDL, etc. Clau vulnerabilitat_socioeducativa→vulnerabilitat.",
     "fonts": "Enciclopèdia Catalana, XTEC, SaviaMENT, Racó de contes, 3Cat, Diari Ara, Betevé, CCMA"
   },
 
@@ -200,7 +201,7 @@
       "nom": "Nouvingut àrab pre-A1 DUA Accés",
       "profile": {
         "caracteristiques": {
-          "nouvingut": {"actiu": true, "detalls": {"origen": "Marroc", "L1": "àrab", "mesos_immersio": 3, "alfabet_llati": false}}
+          "nouvingut": {"actiu": true, "origen": "Marroc", "L1": "àrab", "mesos_immersio": 3, "alfabet_llati": false, "calp": "inicial", "escolaritzacio_previa": "parcial"}
         }
       },
       "context": {
@@ -221,7 +222,7 @@
       "nom": "Nouvingut xinès A1 DUA Accés",
       "profile": {
         "caracteristiques": {
-          "nouvingut": {"actiu": true, "detalls": {"origen": "Xina", "L1": "xinès mandarí", "mesos_immersio": 8, "alfabet_llati": false}}
+          "nouvingut": {"actiu": true, "origen": "Xina", "L1": "xinès mandarí", "mesos_immersio": 8, "alfabet_llati": false, "calp": "inicial"}
         }
       },
       "context": {
@@ -242,7 +243,7 @@
       "nom": "TDAH combinat A2 DUA Core",
       "profile": {
         "caracteristiques": {
-          "tdah": {"actiu": true, "detalls": {"subtipus": "combinat"}}
+          "tdah": {"actiu": true, "presentacio": "combinat", "grau": "moderat", "baixa_memoria_treball": true, "fatiga_cognitiva": false}
         }
       },
       "context": {
@@ -263,7 +264,7 @@
       "nom": "TEA nivell 2 B1 DUA Core",
       "profile": {
         "caracteristiques": {
-          "tea": {"actiu": true, "detalls": {"nivell_suport": 2}}
+          "tea": {"actiu": true, "nivell_suport": 2, "comunicacio_oral": "fluida"}
         }
       },
       "context": {
@@ -284,7 +285,7 @@
       "nom": "Dislèxia A2 DUA Accés",
       "profile": {
         "caracteristiques": {
-          "dislexia": {"actiu": true}
+          "dislexia": {"actiu": true, "grau": "moderat", "tipus_dislexia": "visual"}
         }
       },
       "context": {
@@ -305,7 +306,7 @@
       "nom": "DI lleugera pre-A1 DUA Accés",
       "profile": {
         "caracteristiques": {
-          "discapacitat_intellectual": {"actiu": true, "detalls": {"grau": "lleugera"}}
+          "discapacitat_intellectual": {"actiu": true, "grau": "lleugera"}
         }
       },
       "context": {
@@ -347,8 +348,8 @@
       "nom": "Nouvingut+Dislèxia A1 DUA Accés (creuament)",
       "profile": {
         "caracteristiques": {
-          "nouvingut": {"actiu": true, "detalls": {"origen": "Senegal", "L1": "wòlof", "mesos_immersio": 5, "alfabet_llati": true}},
-          "dislexia": {"actiu": true}
+          "nouvingut": {"actiu": true, "origen": "Senegal", "L1": "wòlof", "mesos_immersio": 5, "alfabet_llati": true, "calp": "inicial"},
+          "dislexia": {"actiu": true, "grau": "lleu", "tipus_dislexia": "visual"}
         }
       },
       "context": {
@@ -369,8 +370,8 @@
       "nom": "TDAH+TEA B1 DUA Core (creuament)",
       "profile": {
         "caracteristiques": {
-          "tdah": {"actiu": true, "detalls": {"subtipus": "inatent"}},
-          "tea": {"actiu": true, "detalls": {"nivell_suport": 1}}
+          "tdah": {"actiu": true, "presentacio": "inatent", "grau": "lleu", "baixa_memoria_treball": true},
+          "tea": {"actiu": true, "nivell_suport": 1, "comunicacio_oral": "fluida"}
         }
       },
       "context": {
@@ -391,8 +392,8 @@
       "nom": "Vulnerabilitat+TDL A2 DUA Core (creuament)",
       "profile": {
         "caracteristiques": {
-          "vulnerabilitat_socioeducativa": {"actiu": true},
-          "tdl": {"actiu": true}
+          "vulnerabilitat": {"actiu": true},
+          "tdl": {"actiu": true, "grau": "sever", "modalitat": "comprensiu", "morfosintaxi": true, "semantica": true}
         }
       },
       "context": {
