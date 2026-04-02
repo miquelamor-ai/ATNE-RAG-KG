@@ -147,6 +147,7 @@ def evaluate_with_gemini(prompt: str) -> dict:
             system_instruction=SYSTEM_PROMPT,
             temperature=0.2,
             max_output_tokens=4096,
+            thinking_config=types.ThinkingConfig(thinking_budget=0),
         ),
     )
     return parse_json_response(resp.text or "")

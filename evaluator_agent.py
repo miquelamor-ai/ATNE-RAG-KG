@@ -217,6 +217,7 @@ def evaluate_case(user_prompt: str) -> dict:
             system_instruction=EVALUATOR_SYSTEM,
             temperature=0.2,  # Baix per consistencia
             max_output_tokens=8192,
+            thinking_config=types.ThinkingConfig(thinking_budget=0),
         ),
     )
 
