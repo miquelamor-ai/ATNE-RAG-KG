@@ -3,357 +3,1095 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ATNE — Resultats Avaluacio A/B</title>
+<title>ATNE — Resultats Avaluació multi-LLM</title>
 <style>
 :root {
   --bg: #0f172a; --card: #1e293b; --card2: #334155; --text: #e2e8f0; --muted: #94a3b8;
   --primary: #3b82f6; --hc: #f59e0b; --rag: #3b82f6; --empat: #6b7280;
   --success: #22c55e; --danger: #ef4444; --warning: #eab308;
+  --sonnet: #a78bfa; --gpt: #34d399; --gemini: #f87171; --llama: #fb923c; --qwen: #e879f9;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
 
+nav { display:flex; gap:0; background:#111827; padding:0 1rem; position:sticky; top:0; z-index:1000; flex-wrap:wrap; }
+nav a { color:#d1d5db; text-decoration:none; padding:.6rem 1rem; font-size:.85rem; font-weight:500; }
+nav a.active { background:#1a56db; color:#fff; }
+nav a:hover { background:#1f2937; }
+
 header { background: linear-gradient(135deg, #1e3a5f, #0f172a); padding: 2rem; border-bottom: 2px solid var(--primary); }
 header h1 { font-size: 1.6rem; } header h1 span { color: var(--primary); }
-header p { color: var(--muted); margin-top: 0.5rem; font-size: 0.9rem; }
+header p { color: var(--muted); margin-top: 0.4rem; font-size: 0.9rem; }
+.meta-pills { display:flex; gap:0.5rem; margin-top:0.75rem; flex-wrap:wrap; }
+.pill { background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); color:var(--primary); padding:0.2rem 0.6rem; border-radius:9999px; font-size:0.75rem; }
 
 .container { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
 
-.tabs { display: flex; gap: 0; border-bottom: 2px solid var(--card2); margin-bottom: 1.5rem; }
-.tab { padding: 0.75rem 1.5rem; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent;
-  margin-bottom: -2px; transition: all 0.2s; font-size: 0.9rem; }
+.tabs { display: flex; gap: 0; border-bottom: 2px solid var(--card2); margin-bottom: 1.5rem; flex-wrap:wrap; }
+.tab { padding: 0.75rem 1.25rem; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent;
+  margin-bottom: -2px; transition: all 0.2s; font-size: 0.85rem; }
 .tab:hover { color: var(--text); }
 .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
 .tab-content { display: none; } .tab-content.active { display: block; }
 
-h2 { font-size: 1.2rem; margin: 1.5rem 0 1rem; color: var(--text); }
-h3 { font-size: 1rem; margin: 1rem 0 0.5rem; color: var(--muted); }
+h2 { font-size: 1.15rem; margin: 1.5rem 0 0.75rem; color: var(--text); border-left:3px solid var(--primary); padding-left:0.6rem; }
+h3 { font-size: 0.95rem; margin: 1rem 0 0.5rem; color: var(--muted); }
 
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
-.grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+.grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+.grid5 { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; }
 
 .card { background: var(--card); padding: 1.25rem; border-radius: 0.75rem; }
 .card .label { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; }
-.card .value { font-size: 2.2rem; font-weight: 700; margin-top: 0.25rem; }
-.card .sub { color: var(--muted); font-size: 0.8rem; margin-top: 0.25rem; }
-.card.hc .value { color: var(--hc); }
-.card.rag .value { color: var(--rag); }
+.card .value { font-size: 2rem; font-weight: 700; margin-top: 0.25rem; }
+.card .sub { color: var(--muted); font-size: 0.78rem; margin-top: 0.25rem; }
 
-.verdict-box { padding: 1.5rem; border-radius: 0.75rem; text-align: center; }
+.verdict-box { padding: 1.5rem; border-radius: 0.75rem; text-align: center; margin-bottom: 1rem; }
 .verdict-box.rag-wins { background: linear-gradient(135deg, #1e3a5f, #0f172a); border: 2px solid var(--rag); }
-.verdict-box.hc-wins { background: linear-gradient(135deg, #3d2800, #0f172a); border: 2px solid var(--hc); }
 
-/* Barres comparatives */
-.bar-row { display: flex; align-items: center; margin: 0.5rem 0; gap: 0.5rem; }
-.bar-label { width: 60px; font-size: 0.8rem; text-align: right; color: var(--muted); }
-.bar-container { flex: 1; display: flex; height: 28px; border-radius: 4px; overflow: hidden; background: var(--card2); }
-.bar-hc { background: var(--hc); display: flex; align-items: center; justify-content: center;
-  font-size: 0.7rem; font-weight: 600; color: #000; transition: width 0.5s; }
-.bar-rag { background: var(--rag); display: flex; align-items: center; justify-content: center;
-  font-size: 0.7rem; font-weight: 600; color: #fff; transition: width 0.5s; }
-.bar-empat { background: var(--empat); display: flex; align-items: center; justify-content: center;
-  font-size: 0.7rem; color: #fff; transition: width 0.5s; }
+/* Barres */
+.bar-row { display: flex; align-items: center; margin: 0.4rem 0; gap: 0.5rem; }
+.bar-label { min-width: 160px; font-size: 0.8rem; color: var(--muted); text-align: right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.bar-label.wide { min-width: 240px; }
+.bar-container { flex: 1; display: flex; height: 26px; border-radius: 4px; overflow: hidden; background: var(--card2); min-width:0; }
+.bar-hc  { background: var(--hc);  display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:600; color:#000; transition:width .5s; white-space:nowrap; padding:0 4px; }
+.bar-rag { background: var(--rag); display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:600; color:#fff; transition:width .5s; white-space:nowrap; padding:0 4px; }
+.bar-empat { background: var(--empat); display:flex; align-items:center; justify-content:center; font-size:0.7rem; color:#fff; transition:width .5s; padding:0 3px; }
+.bar-sonnet { background:var(--sonnet); display:flex; align-items:center; justify-content:center; font-size:0.7rem; color:#000; padding:0 4px; }
+.bar-gpt    { background:var(--gpt);    display:flex; align-items:center; justify-content:center; font-size:0.7rem; color:#000; padding:0 4px; }
+.bar-gemini { background:var(--gemini); display:flex; align-items:center; justify-content:center; font-size:0.7rem; color:#000; padding:0 4px; }
+.bar-llama  { background:var(--llama);  display:flex; align-items:center; justify-content:center; font-size:0.7rem; color:#000; padding:0 4px; }
+.bar-qwen   { background:var(--qwen);   display:flex; align-items:center; justify-content:center; font-size:0.7rem; color:#000; padding:0 4px; }
 
-/* Heatmap concordancia */
-.heatmap { border-collapse: collapse; width: 100%; margin: 1rem 0; }
-.heatmap th { padding: 0.5rem; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; }
-.heatmap td { padding: 0.6rem; text-align: center; font-size: 0.85rem; font-weight: 600; border: 1px solid var(--bg); }
-.heatmap .cell-hc { background: rgba(245, 158, 11, 0.3); color: var(--hc); }
-.heatmap .cell-rag { background: rgba(59, 130, 246, 0.3); color: var(--rag); }
-.heatmap .cell-empat { background: rgba(107, 114, 128, 0.2); color: var(--empat); }
-.heatmap .cell-divergent { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+.score-bar { height:10px; border-radius:5px; background:var(--card2); overflow:hidden; margin-top:4px; }
+.score-fill { height:100%; background:var(--primary); border-radius:5px; }
 
-/* Concordancia badge */
-.concordance { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
-.concordance.high { background: rgba(34, 197, 94, 0.2); color: var(--success); }
-.concordance.medium { background: rgba(234, 179, 8, 0.2); color: var(--warning); }
-.concordance.low { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+/* Taules */
+table.data { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size:0.85rem; }
+table.data th { text-align: left; padding: 0.5rem 0.75rem; color: var(--muted); font-size: 0.72rem;
+  text-transform: uppercase; border-bottom: 1px solid var(--card2); background:var(--card); }
+table.data td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--card); }
+table.data tr:hover td { background:rgba(255,255,255,0.03); }
+.td-num { text-align:right; font-variant-numeric:tabular-nums; }
+.rank-1 { color:#fbbf24; font-weight:700; }
+.rank-2 { color:#94a3b8; font-weight:600; }
+.rank-3 { color:#b45309; }
 
-/* Bug cards */
-.bug { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);
-  padding: 1rem; border-radius: 0.5rem; margin: 0.5rem 0; }
-.bug .bug-title { color: var(--danger); font-weight: 600; font-size: 0.9rem; }
-.bug .bug-desc { color: var(--muted); font-size: 0.85rem; margin-top: 0.25rem; }
-.bug .bug-fix { color: var(--success); font-size: 0.85rem; margin-top: 0.25rem; }
+.badge { display:inline-block; padding:0.15rem 0.5rem; border-radius:9999px; font-size:0.72rem; font-weight:600; }
+.badge.rag   { background:rgba(59,130,246,0.2); color:var(--rag); }
+.badge.hc    { background:rgba(245,158,11,0.2); color:var(--hc); }
+.badge.empat { background:rgba(107,114,128,0.2); color:var(--empat); }
+.badge.ok    { background:rgba(34,197,94,0.2); color:var(--success); }
+.badge.warn  { background:rgba(234,179,8,0.2); color:var(--warning); }
+.badge.danger{ background:rgba(239,68,68,0.2); color:var(--danger); }
 
-/* Insight */
-.insight { background: rgba(59, 130, 246, 0.1); border-left: 3px solid var(--primary);
+.model-dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px; vertical-align:middle; }
+.dot-sonnet { background:var(--sonnet); }
+.dot-gpt    { background:var(--gpt); }
+.dot-gemini { background:var(--gemini); }
+.dot-llama  { background:var(--llama); }
+.dot-qwen   { background:var(--qwen); }
+
+.insight { background: rgba(59,130,246,0.08); border-left: 3px solid var(--primary);
   padding: 1rem; margin: 1rem 0; border-radius: 0 0.5rem 0.5rem 0; }
-.insight p { font-size: 0.9rem; line-height: 1.5; }
+.insight p { font-size: 0.88rem; line-height: 1.55; }
+.insight p + p { margin-top:0.5rem; }
 
-table.data { width: 100%; border-collapse: collapse; margin: 1rem 0; }
-table.data th { text-align: left; padding: 0.5rem; color: var(--muted); font-size: 0.75rem;
-  text-transform: uppercase; border-bottom: 1px solid var(--card2); }
-table.data td { padding: 0.5rem; border-bottom: 1px solid var(--card); font-size: 0.85rem; }
+.alert { padding:1rem; border-radius:0.5rem; margin:0.75rem 0; font-size:0.88rem; }
+.alert.danger { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); }
+.alert.warning { background:rgba(234,179,8,0.1); border:1px solid rgba(234,179,8,0.3); }
+.alert .alert-title { font-weight:700; margin-bottom:0.25rem; }
+.alert.danger .alert-title { color:var(--danger); }
+.alert.warning .alert-title { color:var(--warning); }
 
-.nav-links { display: flex; gap: 1rem; margin-top: 0.5rem; }
-.nav-links a { color: var(--primary); font-size: 0.85rem; text-decoration: none; }
-.nav-links a:hover { text-decoration: underline; }
+.heatmap-wrap { overflow-x:auto; }
+table.heatmap { border-collapse:collapse; width:100%; min-width:500px; }
+table.heatmap th { padding:0.5rem 0.75rem; font-size:0.72rem; color:var(--muted); text-transform:uppercase; text-align:center; }
+table.heatmap th:first-child { text-align:left; }
+table.heatmap td { padding:0.5rem 0.75rem; font-size:0.82rem; font-weight:600; border:1px solid var(--bg); text-align:center; }
+table.heatmap td:first-child { text-align:left; font-weight:400; color:var(--text); }
+.cell-hi  { background:rgba(34,197,94,0.25); color:var(--success); }
+.cell-mid { background:rgba(234,179,8,0.2); color:var(--warning); }
+.cell-lo  { background:rgba(239,68,68,0.2); color:var(--danger); }
+.cell-rag { background:rgba(59,130,246,0.25); color:var(--rag); }
+.cell-hc  { background:rgba(245,158,11,0.2); color:var(--hc); }
+.cell-emp { background:rgba(107,114,128,0.15); color:var(--empat); }
 
-@media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+.legend { display:flex; gap:1rem; flex-wrap:wrap; margin:0.75rem 0; font-size:0.78rem; color:var(--muted); }
+.legend span { display:flex; align-items:center; gap:4px; }
+
+@media(max-width:900px) { .grid2,.grid3,.grid4 { grid-template-columns:1fr; } .bar-label.wide { min-width:140px; } }
 </style>
 </head>
 <body>
-<nav style="display:flex;gap:0;background:#111827;padding:0 1rem;position:sticky;top:0;z-index:1000">
-<a href="/ui/index.html" style="color:#d1d5db;text-decoration:none;padding:.6rem 1rem;font-size:.85rem;font-weight:500">Adaptador</a>
-<a href="/ui/cuina.html" style="color:#d1d5db;text-decoration:none;padding:.6rem 1rem;font-size:.85rem;font-weight:500">Cuina</a>
-<a href="/ui/eval_dashboard.html" style="color:#d1d5db;text-decoration:none;padding:.6rem 1rem;font-size:.85rem;font-weight:500">Avaluacio</a>
-<a href="/ui/eval_cases.html" style="color:#d1d5db;text-decoration:none;padding:.6rem 1rem;font-size:.85rem;font-weight:500">Casos</a>
-<a href="/ui/eval_results.html" style="background:#1a56db;color:#fff;text-decoration:none;padding:.6rem 1rem;font-size:.85rem;font-weight:500">Resultats</a>
-<a href="/ui/eval_progress.html" style="color:#d1d5db;text-decoration:none;padding:.6rem 1rem;font-size:.85rem;font-weight:500">Progres</a>
+
+<nav>
+  <a href="/ui/index.html">Adaptador</a>
+  <a href="/ui/cuina.html">Cuina</a>
+  <a href="/ui/eval_dashboard.html">Avaluació</a>
+  <a href="/ui/eval_cases.html">Casos</a>
+  <a href="/ui/eval_results.html" class="active">Resultats</a>
+  <a href="/ui/eval_progress.html">Progrés</a>
 </nav>
 
 <header>
-  <h1>ATNE — <span>Resultats Avaluacio A/B</span></h1>
-  <p>Experiment: Hardcoded vs RAG filtrat | 200 casos (20 textos x 10 perfils) | 3 jutges (Gemini, Sonnet, Opus)</p>
-  <div class="nav-links">
-    <a href="/">App principal</a>
-    <a href="/eval/progress">Progres en viu</a>
-    <a href="/eval">Dashboard detallat</a>
-    <a href="/eval/cases">Visor de casos</a>
+  <h1>ATNE — <span>Resultats Avaluació multi-LLM</span></h1>
+  <p>Experiment <strong>multi_v1</strong> — 5 models generadors × 2 modes (RAG/HC) × 400 casos × 4 jutges externs</p>
+  <div class="meta-pills">
+    <span class="pill">2.000 generacions</span>
+    <span class="pill">9.746 avaluacions</span>
+    <span class="pill">5 models: Gemini · GPT · Llama · Qwen · Sonnet</span>
+    <span class="pill">4 jutges: Gemini · GPT · Llama · Qwen</span>
+    <span class="pill">10 perfils d'alumnat</span>
+    <span class="pill">3 etapes · 5 MECR · 4 gèneres · 3 DUA</span>
+    <span class="pill">Executat 2026-03-29</span>
   </div>
 </header>
 
 <div class="container">
 
 <div class="tabs">
-  <div class="tab active" onclick="showTab('resum')">Resum</div>
-  <div class="tab" onclick="showTab('jutges')">Jutges</div>
+  <div class="tab active" onclick="showTab('resum')">Resum global</div>
+  <div class="tab" onclick="showTab('models')">Per model</div>
+  <div class="tab" onclick="showTab('criteris')">Criteris C1–C5</div>
   <div class="tab" onclick="showTab('perfils')">Per perfil</div>
-  <div class="tab" onclick="showTab('criteris')">Per criteri</div>
-  <div class="tab" onclick="showTab('bugs')">Bugs i accions</div>
+  <div class="tab" onclick="showTab('dimensions')">Per etapa / MECR / DUA</div>
+  <div class="tab" onclick="showTab('genere')">Per gènere</div>
+  <div class="tab" onclick="showTab('insight')">Insight pedagògic</div>
 </div>
 
-<!-- ═══ TAB 1: RESUM ═══ -->
+<!-- ═══════════════════════════ TAB 1: RESUM ═══════════════════════════ -->
 <div id="tab-resum" class="tab-content active">
 
   <div class="verdict-box rag-wins">
-    <div style="font-size:0.8rem;color:var(--muted);text-transform:uppercase;">Veredicte global (consens 2 de 3 jutges)</div>
-    <div style="font-size:2.5rem;font-weight:800;color:var(--rag);margin:0.5rem 0;">RAG guanya</div>
-    <div style="font-size:1rem;color:var(--text);">5 perfils RAG | 3 perfils HC | 1 empat | 1 divergent</div>
+    <div style="font-size:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Veredicte global — 3.232 comparacions, jutges externs</div>
+    <div style="font-size:2.5rem;font-weight:800;color:var(--rag);margin:0.5rem 0">RAG guanya</div>
+    <div style="font-size:1rem;color:var(--text)">1.758 victòries RAG (54.4%) · 1.389 HC (43.0%) · 85 empats (2.6%)</div>
   </div>
 
-  <h2>Metriques automatiques (BLOC 1-2, CODI)</h2>
-  <div class="grid4" id="forma-cards">
-    <div class="card hc"><div class="label">Forma HC</div><div class="value" id="v-forma-hc">-</div><div class="sub">F1-F5 mitjana</div></div>
-    <div class="card rag"><div class="label">Forma RAG</div><div class="value" id="v-forma-rag">-</div><div class="sub">F1-F5 mitjana</div></div>
-    <div class="card rag"><div class="label">Recall RAG</div><div class="value" id="v-recall">-</div><div class="sub">Instruccions esperades enviades</div></div>
-    <div class="card"><div class="label">Casos totals</div><div class="value">200</div><div class="sub">20 textos x 10 perfils</div></div>
+  <div class="grid4" style="margin-bottom:1.5rem">
+    <div class="card"><div class="label">Generacions totals</div><div class="value" style="color:var(--primary)">2.000</div><div class="sub">400 per model generador</div></div>
+    <div class="card"><div class="label">Avaluacions totals</div><div class="value" style="color:var(--success)">9.746</div><div class="sub">individual + comparativa</div></div>
+    <div class="card"><div class="label">RAG win rate</div><div class="value" style="color:var(--rag)">54.4%</div><div class="sub">vs 43.0% HC</div></div>
+    <div class="card"><div class="label">Nota global /5</div><div class="value" style="color:var(--warning)">4.17</div><div class="sub">tots models, jutges externs</div></div>
   </div>
 
-  <h2>Judici comparatiu — Consens dels 3 jutges</h2>
-  <div class="insight">
-    <p><strong>Metodologia Christodoulou:</strong> Cada jutge rep els dos textos (A i B) sense saber quina branca els ha generat, amb ordre randomitzat. Decideix: "Quin es millor per a AQUEST alumne?" Tres jutges independents: Gemini Flash (autoavaluacio), Claude Sonnet (extern), Claude Opus (extern).</p>
-  </div>
+  <h2>Ranking global de models (nota /5, jutges externs)</h2>
+  <div class="insight"><p>Cada model ha generat 400 textos en mode RAG i 400 en mode HC. Els jutges que avaluen mai avaluen les seves pròpies generacions (zero autoavaluació).</p></div>
 
-  <table class="heatmap">
+  <table class="data">
     <thead>
-      <tr><th>Perfil</th><th>Gemini</th><th>Sonnet</th><th>Opus</th><th>Consens</th></tr>
+      <tr>
+        <th>#</th><th>Model</th><th>Mode</th>
+        <th class="td-num">Nota /5</th>
+        <th class="td-num">C1 Coherència</th>
+        <th class="td-num">C2 Perfil</th>
+        <th class="td-num">C3 Curricular</th>
+        <th class="td-num">C4 MECR</th>
+        <th class="td-num">C5 Pre-llic.</th>
+        <th class="td-num">Paraules</th>
+      </tr>
     </thead>
     <tbody>
       <tr>
-        <td>P1 Nouvingut arab pre-A1</td>
-        <td class="cell-hc">HC</td><td class="cell-hc">HC</td><td class="cell-rag">RAG</td>
-        <td><span class="concordance medium">2:1 HC</span></td>
+        <td class="rank-1">1</td>
+        <td><span class="model-dot dot-gpt"></span>GPT</td>
+        <td><span class="badge rag">RAG</span></td>
+        <td class="td-num rank-1">4.30</td>
+        <td class="td-num">4.15</td><td class="td-num">4.46</td>
+        <td class="td-num" style="color:var(--success)">4.11</td>
+        <td class="td-num">4.45</td><td class="td-num">4.31</td>
+        <td class="td-num">—</td>
       </tr>
       <tr>
-        <td>P2 Nouvingut xines A1</td>
-        <td class="cell-hc">HC</td><td class="cell-hc">HC</td><td class="cell-rag">RAG</td>
-        <td><span class="concordance medium">2:1 HC</span></td>
+        <td class="rank-1">1</td>
+        <td><span class="model-dot dot-sonnet"></span>Sonnet</td>
+        <td><span class="badge rag">RAG</span></td>
+        <td class="td-num rank-1">4.30</td>
+        <td class="td-num">4.16</td><td class="td-num">4.73</td>
+        <td class="td-num" style="color:var(--warning)">3.68</td>
+        <td class="td-num">4.66</td><td class="td-num">4.24</td>
+        <td class="td-num">~400</td>
       </tr>
       <tr>
-        <td>P3 TDAH A2</td>
-        <td class="cell-hc">HC</td><td class="cell-rag">RAG</td><td class="cell-rag">RAG</td>
-        <td><span class="concordance medium">2:1 RAG</span></td>
+        <td class="rank-2">3</td>
+        <td><span class="model-dot dot-gemini"></span>Gemini</td>
+        <td><span class="badge hc">HC</span></td>
+        <td class="td-num rank-2">4.29</td>
+        <td class="td-num">4.03</td><td class="td-num">4.72</td>
+        <td class="td-num" style="color:var(--warning)">3.95</td>
+        <td class="td-num">4.62</td><td class="td-num">4.14</td>
+        <td class="td-num">~327</td>
       </tr>
       <tr>
-        <td>P4 TEA B1</td>
-        <td class="cell-hc">HC</td><td class="cell-rag">RAG</td><td class="cell-rag">RAG</td>
-        <td><span class="concordance medium">2:1 RAG</span></td>
+        <td class="rank-2">4</td>
+        <td><span class="model-dot dot-gpt"></span>GPT</td>
+        <td><span class="badge hc">HC</span></td>
+        <td class="td-num rank-2">4.26</td>
+        <td class="td-num">4.16</td><td class="td-num">4.51</td>
+        <td class="td-num" style="color:var(--warning)">3.95</td>
+        <td class="td-num">4.54</td><td class="td-num">4.13</td>
+        <td class="td-num">—</td>
       </tr>
       <tr>
-        <td>P5 Dislexia A2</td>
-        <td class="cell-empat">Empat</td><td class="cell-empat">Empat</td><td class="cell-empat">Empat</td>
-        <td><span class="concordance high">3:0 Empat</span></td>
+        <td>5</td>
+        <td><span class="model-dot dot-sonnet"></span>Sonnet</td>
+        <td><span class="badge hc">HC</span></td>
+        <td class="td-num">4.20</td>
+        <td class="td-num">4.04</td><td class="td-num">4.68</td>
+        <td class="td-num" style="color:var(--danger)">3.48</td>
+        <td class="td-num">4.63</td><td class="td-num">4.14</td>
+        <td class="td-num">~327</td>
       </tr>
       <tr>
-        <td>P6 DI pre-A1</td>
-        <td class="cell-hc">HC</td><td class="cell-rag">RAG</td><td class="cell-rag">RAG</td>
-        <td><span class="concordance medium">2:1 RAG</span></td>
+        <td>6</td>
+        <td><span class="model-dot dot-llama"></span>Llama</td>
+        <td><span class="badge rag">RAG</span></td>
+        <td class="td-num">4.08</td>
+        <td class="td-num">4.09</td><td class="td-num">4.42</td>
+        <td class="td-num" style="color:var(--warning)">3.57</td>
+        <td class="td-num">4.38</td><td class="td-num">3.93</td>
+        <td class="td-num">—</td>
       </tr>
       <tr>
-        <td>P7 AC B2 Enriquiment</td>
-        <td class="cell-hc">HC</td><td class="cell-rag">RAG</td><td class="cell-empat">Empat</td>
-        <td><span class="concordance low">Divergent</span></td>
+        <td>7</td>
+        <td><span class="model-dot dot-gemini"></span>Gemini</td>
+        <td><span class="badge rag">RAG</span></td>
+        <td class="td-num">4.01</td>
+        <td class="td-num">3.76</td><td class="td-num">4.37</td>
+        <td class="td-num" style="color:var(--warning)">3.70</td>
+        <td class="td-num">4.25</td><td class="td-num">3.95</td>
+        <td class="td-num">~398</td>
       </tr>
       <tr>
-        <td>P8 Nouvingut+Dislexia A1</td>
-        <td class="cell-hc">HC</td><td class="cell-hc">HC</td><td class="cell-rag">RAG</td>
-        <td><span class="concordance medium">2:1 HC</span></td>
+        <td>8</td>
+        <td><span class="model-dot dot-qwen"></span>Qwen</td>
+        <td><span class="badge rag">RAG</span></td>
+        <td class="td-num">3.98</td>
+        <td class="td-num">3.55</td><td class="td-num">4.49</td>
+        <td class="td-num">3.63</td>
+        <td class="td-num">4.37</td><td class="td-num">3.84</td>
+        <td class="td-num">—</td>
       </tr>
       <tr>
-        <td>P9 TDAH+TEA B1</td>
-        <td class="cell-hc">HC</td><td class="cell-rag">RAG</td><td class="cell-rag">RAG</td>
-        <td><span class="concordance medium">2:1 RAG</span></td>
+        <td>9</td>
+        <td><span class="model-dot dot-llama"></span>Llama</td>
+        <td><span class="badge hc">HC</span></td>
+        <td class="td-num">3.96</td>
+        <td class="td-num">3.85</td><td class="td-num">4.40</td>
+        <td class="td-num" style="color:var(--danger)">3.27</td>
+        <td class="td-num">4.44</td><td class="td-num">3.82</td>
+        <td class="td-num">—</td>
       </tr>
       <tr>
-        <td>P10 Vulnerabilitat+TDL A2</td>
-        <td class="cell-hc">HC</td><td class="cell-rag">RAG</td><td class="cell-rag">RAG</td>
-        <td><span class="concordance medium">2:1 RAG</span></td>
+        <td>10</td>
+        <td><span class="model-dot dot-qwen"></span>Qwen</td>
+        <td><span class="badge hc">HC</span></td>
+        <td class="td-num">3.91</td>
+        <td class="td-num">3.46</td><td class="td-num">4.33</td>
+        <td class="td-num">3.58</td>
+        <td class="td-num">4.35</td><td class="td-num">3.82</td>
+        <td class="td-num">—</td>
       </tr>
     </tbody>
   </table>
 
-  <h2>Concordancia inter-jutge</h2>
-  <div class="grid3">
-    <div class="card">
-      <div class="label">Gemini vs Sonnet</div>
-      <div class="value" style="color:var(--danger)">40%</div>
-      <div class="sub">4/10 perfils — BAIXA</div>
-    </div>
-    <div class="card">
-      <div class="label">Gemini vs Opus</div>
-      <div class="value" style="color:var(--danger)">20%</div>
-      <div class="sub">2/10 perfils — MOLT BAIXA</div>
-    </div>
-    <div class="card">
-      <div class="label">Sonnet vs Opus</div>
-      <div class="value" style="color:var(--success)">70%</div>
-      <div class="sub">7/10 perfils — SUBSTANCIAL</div>
-    </div>
-  </div>
+  <h2>RAG vs Hardcoded per model generador</h2>
+  <p style="color:var(--muted);font-size:0.82rem;margin-bottom:0.75rem">Percentatge de victòries en comparació directa (jutges externs)</p>
 
-  <div class="insight">
-    <p><strong>Interpretacio:</strong> Gemini (que genera els textos) te un fort biaix d'autoavaluacio — prefereix Hardcoded en 9/10 perfils. Els dos jutges externs (Claude Sonnet i Opus) coincideixen en 7/10 perfils i prefereixen RAG en 5-7 d'ells. El biaix de Gemini es confirmat.</p>
-  </div>
-</div>
-
-<!-- ═══ TAB 2: JUTGES ═══ -->
-<div id="tab-jutges" class="tab-content">
-  <h2>Distribucio de veredictes per jutge</h2>
-
-  <h3>Gemini Flash (autoavaluacio)</h3>
   <div class="bar-row">
-    <div class="bar-label">Global</div>
+    <div class="bar-label">Sonnet</div>
     <div class="bar-container">
-      <div class="bar-hc" style="width:66%">HC 66%</div>
-      <div class="bar-rag" style="width:34%">RAG 34%</div>
+      <div class="bar-rag" style="width:67%">RAG 67%</div>
+      <div class="bar-hc" style="width:27%">HC 27%</div>
+      <div class="bar-empat" style="width:6%">= 6%</div>
     </div>
   </div>
-  <div class="insight"><p>Gemini prefereix els seus textos compactes (HC). Biaix d'autoavaluacio confirmat per la divergencia amb els jutges externs.</p></div>
-
-  <h3>Claude Sonnet (jutge extern)</h3>
   <div class="bar-row">
-    <div class="bar-label">Global</div>
+    <div class="bar-label">GPT</div>
     <div class="bar-container">
-      <div class="bar-hc" style="width:30%">HC 30%</div>
-      <div class="bar-rag" style="width:60%">RAG 60%</div>
-      <div class="bar-empat" style="width:10%">= 10%</div>
+      <div class="bar-rag" style="width:55%">RAG 55%</div>
+      <div class="bar-hc" style="width:40%">HC 40%</div>
+      <div class="bar-empat" style="width:5%">= 5%</div>
     </div>
   </div>
-
-  <h3>Claude Opus (jutge extern, primari)</h3>
   <div class="bar-row">
-    <div class="bar-label">Global</div>
+    <div class="bar-label">Llama</div>
     <div class="bar-container">
-      <div class="bar-hc" style="width:10%">HC 10%</div>
-      <div class="bar-rag" style="width:70%">RAG 70%</div>
-      <div class="bar-empat" style="width:20%">= 20%</div>
+      <div class="bar-rag" style="width:49%">RAG 49%</div>
+      <div class="bar-hc" style="width:44%">HC 44%</div>
+      <div class="bar-empat" style="width:7%">= 7%</div>
+    </div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">Qwen</div>
+    <div class="bar-container">
+      <div class="bar-rag" style="width:50%">RAG 50%</div>
+      <div class="bar-hc" style="width:47%">HC 47%</div>
+      <div class="bar-empat" style="width:3%">= 3%</div>
+    </div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">Gemini</div>
+    <div class="bar-container">
+      <div class="bar-hc" style="width:60%">HC 60%</div>
+      <div class="bar-rag" style="width:38%">RAG 38%</div>
+      <div class="bar-empat" style="width:2%"></div>
     </div>
   </div>
 
-  <h2>Qui te rao?</h2>
-  <div class="insight">
-    <p>Quan el generador s'autoavalua (Gemini), dona HC 66%. Quan dos jutges externs avaluen (Claude), donen RAG 60-70%. La discordancia (40-80% de desacord amb Gemini) es un indicador classic de biaix d'autoavaluacio documentat a la literatura (Liu et al., 2023; ACL 2025).</p>
-    <p style="margin-top:0.5rem"><strong>Recomanacio:</strong> MAI usar el generador com a jutge. Sempre jutge extern.</p>
+  <div class="insight" style="margin-top:1rem">
+    <p><strong>Sorpresa principal:</strong> Gemini-HC (4.29) supera Gemini-RAG (4.01). Per als altres 4 models, el mode RAG sempre millora la nota. Gemini genera textos més compactes en mode HC que els jutges valoren positivament; el RAG el fa més llarg (+20%) però no necessàriament millor.</p>
+    <p><strong>Longitud:</strong> RAG genera ~398 paraules de mitjana vs ~327 del HC. +20% de longitud que no sempre es tradueix en millor qualitat.</p>
   </div>
-</div>
 
-<!-- ═══ TAB 3: PER PERFIL ═══ -->
-<div id="tab-perfils" class="tab-content">
-  <h2>Veredicte per perfil (consens 2 de 3 jutges)</h2>
-  <div id="profile-bars"></div>
+</div><!-- /tab-resum -->
 
-  <h2>On RAG aporta valor real</h2>
-  <table class="data">
-    <thead><tr><th>Perfil</th><th>Instruccions clau de RAG</th><th>Evidencia al text</th></tr></thead>
+<!-- ═══════════════════════════ TAB 2: MODELS ═══════════════════════════ -->
+<div id="tab-models" class="tab-content">
+
+  <h2>Comportament de cada model generador</h2>
+
+  <div class="legend">
+    <span><span class="model-dot dot-sonnet"></span>Sonnet</span>
+    <span><span class="model-dot dot-gpt"></span>GPT</span>
+    <span><span class="model-dot dot-gemini"></span>Gemini</span>
+    <span><span class="model-dot dot-llama"></span>Llama</span>
+    <span><span class="model-dot dot-qwen"></span>Qwen</span>
+  </div>
+
+  <h3>Nota per criteri — tots models, mode RAG vs HC</h3>
+  <div class="heatmap-wrap">
+  <table class="heatmap">
+    <thead>
+      <tr><th>Model + Mode</th><th>C1 Coh.</th><th>C2 Perfil</th><th>C3 Curr.</th><th>C4 MECR</th><th>C5 Pre-ll.</th><th>Total</th></tr>
+    </thead>
     <tbody>
-      <tr><td style="color:var(--rag)">P3 TDAH</td>
-        <td>H-04 micro-blocs amb objectiu</td>
-        <td>"En aquest bloc aprendras..." present a RAG, absent a HC</td></tr>
-      <tr><td style="color:var(--rag)">P4 TEA</td>
-        <td>H-03 anticipacio canvis</td>
-        <td>"Ara veurem els passos..." present a RAG, absent a HC</td></tr>
-      <tr><td style="color:var(--rag)">P6 DI</td>
-        <td>H-09 1 concepte per bloc</td>
-        <td>Glossari mes extens, reforc visual mes sistematic</td></tr>
-      <tr><td style="color:var(--rag)">P9 TDAH+TEA</td>
-        <td>H-04 + H-03 + F-06 preguntes</td>
-        <td>"Fes una pausa i pensa:" present a RAG, absent a HC</td></tr>
-      <tr><td style="color:var(--rag)">P10 Vuln+TDL</td>
-        <td>H-16 + E-08 referents</td>
-        <td>Definicions mes sistematiques</td></tr>
+      <tr><td><span class="model-dot dot-gpt"></span>GPT RAG</td>
+        <td class="cell-hi">4.15</td><td class="cell-hi">4.46</td><td class="cell-hi">4.11</td><td class="cell-hi">4.45</td><td class="cell-hi">4.31</td><td class="cell-hi">4.30</td></tr>
+      <tr><td><span class="model-dot dot-sonnet"></span>Sonnet RAG</td>
+        <td class="cell-hi">4.16</td><td class="cell-hi">4.73</td><td class="cell-mid">3.68</td><td class="cell-hi">4.66</td><td class="cell-hi">4.24</td><td class="cell-hi">4.30</td></tr>
+      <tr><td><span class="model-dot dot-gemini"></span>Gemini HC</td>
+        <td class="cell-hi">4.03</td><td class="cell-hi">4.72</td><td class="cell-mid">3.95</td><td class="cell-hi">4.62</td><td class="cell-hi">4.14</td><td class="cell-hi">4.29</td></tr>
+      <tr><td><span class="model-dot dot-gpt"></span>GPT HC</td>
+        <td class="cell-hi">4.16</td><td class="cell-hi">4.51</td><td class="cell-mid">3.95</td><td class="cell-hi">4.54</td><td class="cell-hi">4.13</td><td class="cell-hi">4.26</td></tr>
+      <tr><td><span class="model-dot dot-sonnet"></span>Sonnet HC</td>
+        <td class="cell-hi">4.04</td><td class="cell-hi">4.68</td><td class="cell-lo">3.48</td><td class="cell-hi">4.63</td><td class="cell-hi">4.14</td><td class="cell-mid">4.20</td></tr>
+      <tr><td><span class="model-dot dot-llama"></span>Llama RAG</td>
+        <td class="cell-hi">4.09</td><td class="cell-hi">4.42</td><td class="cell-mid">3.57</td><td class="cell-hi">4.38</td><td class="cell-mid">3.93</td><td class="cell-mid">4.08</td></tr>
+      <tr><td><span class="model-dot dot-gemini"></span>Gemini RAG</td>
+        <td class="cell-mid">3.76</td><td class="cell-hi">4.37</td><td class="cell-mid">3.70</td><td class="cell-mid">4.25</td><td class="cell-mid">3.95</td><td class="cell-mid">4.01</td></tr>
+      <tr><td><span class="model-dot dot-qwen"></span>Qwen RAG</td>
+        <td class="cell-mid">3.55</td><td class="cell-hi">4.49</td><td class="cell-mid">3.63</td><td class="cell-hi">4.37</td><td class="cell-mid">3.84</td><td class="cell-mid">3.98</td></tr>
+      <tr><td><span class="model-dot dot-llama"></span>Llama HC</td>
+        <td class="cell-mid">3.85</td><td class="cell-hi">4.40</td><td class="cell-lo">3.27</td><td class="cell-hi">4.44</td><td class="cell-mid">3.82</td><td class="cell-mid">3.96</td></tr>
+      <tr><td><span class="model-dot dot-qwen"></span>Qwen HC</td>
+        <td class="cell-lo">3.46</td><td class="cell-hi">4.33</td><td class="cell-mid">3.58</td><td class="cell-hi">4.35</td><td class="cell-mid">3.82</td><td class="cell-mid">3.91</td></tr>
     </tbody>
   </table>
+  </div>
+  <div class="legend" style="margin-top:0.5rem">
+    <span class="badge ok">≥4.0 — Bo</span>
+    <span class="badge warn">3.5–3.99 — Acceptable</span>
+    <span class="badge danger">&lt;3.5 — Feble</span>
+  </div>
 
-  <h2>On HC es suficient</h2>
-  <table class="data">
-    <thead><tr><th>Perfil</th><th>Per que HC guanya o empata</th></tr></thead>
+  <h2>Nota per jutge — matriu creuada (individual, sense autoaval.)</h2>
+  <div class="heatmap-wrap">
+  <table class="heatmap">
+    <thead>
+      <tr><th>Generat per ↓ / Avaluat per →</th><th>Gemini</th><th>GPT</th><th>Llama</th><th>Qwen</th><th>Mitjana</th></tr>
+    </thead>
     <tbody>
-      <tr><td style="color:var(--hc)">P1, P2, P8 Nouvingut</td>
-        <td>Cap branca genera glossari bilingue real (bug de Gemini). HC guanya per compacitat, no per contingut.</td></tr>
-      <tr><td style="color:var(--empat)">P5 Dislexia</td>
-        <td>Les instruccions son similars entre branques — el filtratge no afegeix gaire.</td></tr>
+      <tr>
+        <td><span class="model-dot dot-gemini"></span>Gemini</td>
+        <td style="color:var(--muted)">—</td>
+        <td class="cell-mid">4.00</td><td class="cell-hi">4.37</td><td class="cell-mid">4.08</td>
+        <td class="cell-mid"><strong>4.20</strong></td>
+      </tr>
+      <tr>
+        <td><span class="model-dot dot-gpt"></span>GPT</td>
+        <td class="cell-hi">4.34</td>
+        <td style="color:var(--muted)">—</td>
+        <td class="cell-hi">4.45</td><td class="cell-mid">4.06</td>
+        <td class="cell-hi"><strong>4.28</strong></td>
+      </tr>
+      <tr>
+        <td><span class="model-dot dot-llama"></span>Llama</td>
+        <td class="cell-hi">4.06</td><td class="cell-mid">3.99</td>
+        <td style="color:var(--muted)">—</td>
+        <td class="cell-mid">4.00</td>
+        <td class="cell-mid"><strong>4.02</strong></td>
+      </tr>
+      <tr>
+        <td><span class="model-dot dot-qwen"></span>Qwen</td>
+        <td class="cell-mid">3.59</td><td class="cell-mid">3.94</td><td class="cell-hi">4.38</td>
+        <td style="color:var(--muted)">—</td>
+        <td class="cell-mid"><strong>3.97</strong></td>
+      </tr>
+      <tr>
+        <td><span class="model-dot dot-sonnet"></span>Sonnet</td>
+        <td class="cell-hi">4.38</td><td class="cell-hi">4.07</td><td class="cell-hi">4.49</td><td class="cell-mid">4.06</td>
+        <td class="cell-hi"><strong>4.25</strong></td>
+      </tr>
     </tbody>
   </table>
-</div>
+  </div>
+  <div class="insight">
+    <p><strong>Llama jutge:</strong> és el més generós — posa les notes més altes a tots els models. <strong>GPT jutge:</strong> el més exigent, especialment amb C3 curricular. <strong>Qwen jutge:</strong> les notes més baixes a tothom, inclòs als que el superen.</p>
+    <p><strong>Sonnet</strong> és el model que rep les notes més altes de tots els jutges externs (4.25 de mitjana).</p>
+  </div>
 
-<!-- ═══ TAB 4: PER CRITERI ═══ -->
+</div><!-- /tab-models -->
+
+<!-- ═══════════════════════════ TAB 3: CRITERIS ═══════════════════════════ -->
 <div id="tab-criteris" class="tab-content">
-  <h2>Gemini — Per criteri (200 casos)</h2>
-  <div id="criteria-bars"></div>
 
-  <div class="insight">
-    <p><strong>C2 Adequacio al perfil</strong> es on RAG s'acosta mes (HC 107 vs RAG 74). Les instruccions detallades per perfil produeixen diferencies observables, pero Gemini segueix preferint HC globalment per biaix.</p>
-    <p style="margin-top:0.5rem"><strong>C3 Preservacio curricular</strong> te 53 empats — ambdues branques preserven be el contingut original.</p>
-  </div>
-</div>
+  <h2>Anàlisi per criteri — tots els models i modes</h2>
 
-<!-- ═══ TAB 5: BUGS I ACCIONS ═══ -->
-<div id="tab-bugs" class="tab-content">
-  <h2>Bugs detectats per l'avaluacio</h2>
-
-  <div class="bug">
-    <div class="bug-title">BUG 1: Gemini ignora instruccions de glossari bilingue (G-01, G-03, E-04)</div>
-    <div class="bug-desc">Cap de les dues branques genera traduccions a l'arab, xines o wolof al glossari. Les instruccions estan al prompt RAG pero Gemini les ignora.</div>
-    <div class="bug-fix">FIX: Reforcar amb few-shot example bilingue explicit al prompt. Afegir verificacio post-processament.</div>
-  </div>
-
-  <div class="bug">
-    <div class="bug-title">BUG 2: Gemini ignora supressions per Altes Capacitats (A-01, A-03, A-05...)</div>
-    <div class="bug-desc">Per P7 (AC/Enriquiment), ambdues branques simplifiquen (parentesis explicatius) quan haurien d'enriquir. Les 7 regles suprimides al filtratge no tenen efecte.</div>
-    <div class="bug-fix">FIX: Fer supressions explicites amb instruccions negatives en MAJUSCULES: "NO simplifiquis. NO afegeixis definicions parentetiques."</div>
+  <div class="grid3" style="margin-bottom:1.5rem">
+    <div class="card" style="border-top:3px solid var(--success)">
+      <div class="label">C2 — Adequació al perfil</div>
+      <div class="value" style="color:var(--success)">4.54</div>
+      <div class="sub">El punt fort. Tots els models adapten bé al perfil.</div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--success)">
+      <div class="label">C4 — Adequació MECR</div>
+      <div class="value" style="color:var(--success)">4.48</div>
+      <div class="sub">Calibratge lingüístic consistent.</div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--danger)">
+      <div class="label">C3 — Preservació curricular</div>
+      <div class="value" style="color:var(--danger)">3.64</div>
+      <div class="sub">El punt feble sistemàtic. Tots els models fallen aquí.</div>
+    </div>
   </div>
 
-  <div class="bug">
-    <div class="bug-title">BUG 3: Biaix d'autoavaluacio de Gemini confirmat</div>
-    <div class="bug-desc">Gemini prefereix HC en 9/10 perfils. Jutges externs (Claude) prefereixen RAG en 5-7/10. Concordancia Gemini-Opus: 20%.</div>
-    <div class="bug-fix">FIX: MAI usar el generador com a avaluador. Jutge extern obligatori (Claude o huma).</div>
+  <h3>Comparació C1–C5 (global, tots els models, jutges externs)</h3>
+
+  <div class="bar-row">
+    <div class="bar-label">C2 Adequació perfil</div>
+    <div class="bar-container">
+      <div class="bar-rag" style="width:90.8%">4.54 / 5</div>
+    </div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">C4 Adequació MECR</div>
+    <div class="bar-container">
+      <div class="bar-rag" style="width:89.6%">4.48 / 5</div>
+    </div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">C5 Pre-lectoescriptura</div>
+    <div class="bar-container">
+      <div class="bar-rag" style="width:82.2%">4.11 / 5</div>
+    </div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">C1 Coherència</div>
+    <div class="bar-container">
+      <div class="bar-rag" style="width:80%">4.00 / 5</div>
+    </div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label" style="color:var(--danger)">C3 Preserv. curricular</div>
+    <div class="bar-container">
+      <div class="bar-hc" style="width:72.8%;background:var(--danger)">3.64 / 5</div>
+    </div>
   </div>
 
-  <h2>Accions prioritzades</h2>
+  <h2>C3 — On falla la preservació curricular?</h2>
+
+  <div class="grid2">
+    <div>
+      <h3>Per etapa</h3>
+      <div class="bar-row">
+        <div class="bar-label">Primària</div>
+        <div class="bar-container"><div class="bar-rag" style="width:81.2%">4.06</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">ESO</div>
+        <div class="bar-container"><div class="bar-rag" style="width:72.8%">3.64</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label" style="color:var(--danger)">Batxillerat</div>
+        <div class="bar-container"><div class="bar-hc" style="width:67.2%;background:var(--danger)">3.36</div></div>
+      </div>
+    </div>
+    <div>
+      <h3>Per nivell DUA</h3>
+      <div class="bar-row">
+        <div class="bar-label">Enriquiment</div>
+        <div class="bar-container"><div class="bar-rag" style="width:88.2%">4.41</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Core</div>
+        <div class="bar-container"><div class="bar-rag" style="width:77%">3.85</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label" style="color:var(--danger)">Accés</div>
+        <div class="bar-container"><div class="bar-hc" style="width:69.4%;background:var(--danger)">3.47</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert danger" style="margin-top:1rem">
+    <div class="alert-title">Paradoxa central del sistema</div>
+    El nivell Accés rep la nota global més alta (4.23) però el C3 més baix (3.47). Els models simplifiquen bé per a Accés, però en el procés perden contingut curricular. Enriquiment és l'únic nivell on C3 (4.41) supera la nota global (4.11).
+  </div>
+
+  <h2>C3 per model — qui preserva millor el contingut?</h2>
+  <div class="bar-row">
+    <div class="bar-label"><span class="model-dot dot-gpt"></span>GPT RAG</div>
+    <div class="bar-container"><div class="bar-rag" style="width:82.2%">4.11</div></div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label"><span class="model-dot dot-gemini"></span>Gemini HC</div>
+    <div class="bar-container"><div class="bar-rag" style="width:79%">3.95</div></div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label"><span class="model-dot dot-gpt"></span>GPT HC</div>
+    <div class="bar-container"><div class="bar-rag" style="width:79%">3.95</div></div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label"><span class="model-dot dot-gemini"></span>Gemini RAG</div>
+    <div class="bar-container"><div class="bar-mid" style="width:74%;background:var(--warning)">3.70</div></div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label"><span class="model-dot dot-sonnet"></span>Sonnet RAG</div>
+    <div class="bar-container"><div class="bar-mid" style="width:73.6%;background:var(--warning)">3.68</div></div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label"><span class="model-dot dot-qwen"></span>Qwen RAG</div>
+    <div class="bar-container"><div class="bar-mid" style="width:72.6%;background:var(--warning)">3.63</div></div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label"><span class="model-dot dot-llama"></span>Llama RAG</div>
+    <div class="bar-container"><div class="bar-mid" style="width:71.4%;background:var(--warning)">3.57</div></div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label"><span class="model-dot dot-qwen"></span>Qwen HC</div>
+    <div class="bar-container"><div class="bar-mid" style="width:71.6%;background:var(--warning)">3.58</div></div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label"><span class="model-dot dot-sonnet"></span>Sonnet HC</div>
+    <div class="bar-container"><div class="bar-lo" style="width:69.6%;background:var(--danger)">3.48</div></div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label"><span class="model-dot dot-llama"></span>Llama HC</div>
+    <div class="bar-container"><div class="bar-lo" style="width:65.4%;background:var(--danger)">3.27</div></div>
+  </div>
+  <p style="color:var(--muted);font-size:0.8rem;margin-top:0.5rem">GPT-RAG és l'únic que supera 4.0 en C3. Llama-HC és el pitjor (3.27).</p>
+
+</div><!-- /tab-criteris -->
+
+<!-- ═══════════════════════════ TAB 4: PERFILS ═══════════════════════════ -->
+<div id="tab-perfils" class="tab-content">
+
+  <h2>Resultats per perfil d'alumnat</h2>
+  <p style="color:var(--muted);font-size:0.82rem;margin-bottom:1rem">200 generacions per perfil (5 models × 2 modes × 20 textos). Avaluació individual jutges externs.</p>
+
   <table class="data">
-    <thead><tr><th>#</th><th>Accio</th><th>Impacte</th><th>Esforc</th></tr></thead>
+    <thead>
+      <tr>
+        <th>#</th><th>Perfil</th>
+        <th class="td-num">Nota /5</th>
+        <th class="td-num">C2 Perfil</th>
+        <th class="td-num">C3 Curr.</th>
+        <th class="td-num">C4 MECR</th>
+        <th>RAG vs HC</th>
+      </tr>
+    </thead>
     <tbody>
-      <tr><td>1</td><td>Few-shot bilingue al prompt RAG per nouvinguts</td><td style="color:var(--danger)">Alt — 3 perfils afectats</td><td>Baix</td></tr>
-      <tr><td>2</td><td>Instruccions negatives explicites per AC/Enriquiment</td><td style="color:var(--warning)">Mitja — 1 perfil</td><td>Baix</td></tr>
-      <tr><td>3</td><td>Verificacio post-generacio del glossari bilingue</td><td style="color:var(--danger)">Alt</td><td>Mitja</td></tr>
-      <tr><td>4</td><td>Incorporar jutge extern (Claude) al pipeline automatic</td><td style="color:var(--warning)">Mitja</td><td>Mitja</td></tr>
-      <tr><td>5</td><td>Re-executar batch despres dels fixos 1-2</td><td style="color:var(--danger)">Alt</td><td>Baix</td></tr>
+      <tr>
+        <td class="rank-1">1</td>
+        <td>Dislèxia A2 Accés</td>
+        <td class="td-num rank-1">4.32</td>
+        <td class="td-num">4.65</td>
+        <td class="td-num">3.72</td>
+        <td class="td-num">4.56</td>
+        <td><span class="badge rag">RAG 57%</span></td>
+      </tr>
+      <tr>
+        <td class="rank-2">2</td>
+        <td>TDAH combinat A2 Core</td>
+        <td class="td-num rank-2">4.28</td>
+        <td class="td-num">4.44</td>
+        <td class="td-num">3.84</td>
+        <td class="td-num">4.48</td>
+        <td><span class="badge rag">RAG 55%</span></td>
+      </tr>
+      <tr>
+        <td class="rank-3">3</td>
+        <td>DI lleugera pre-A1 Accés</td>
+        <td class="td-num rank-3">4.27</td>
+        <td class="td-num">4.79</td>
+        <td class="td-num">3.36</td>
+        <td class="td-num">4.84</td>
+        <td><span class="badge rag">RAG 63%</span></td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>Vulnerabilitat+TDL A2 Core</td>
+        <td class="td-num">4.23</td>
+        <td class="td-num">4.46</td>
+        <td class="td-num">3.66</td>
+        <td class="td-num">4.52</td>
+        <td><span class="badge rag" style="background:rgba(59,130,246,0.35)">RAG 66% ★</span></td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>Nouvingut+Dislèxia A1 Accés</td>
+        <td class="td-num">4.23</td>
+        <td class="td-num">4.62</td>
+        <td class="td-num">3.51</td>
+        <td class="td-num">4.61</td>
+        <td><span class="badge rag">RAG 58%</span></td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td>Nouvingut xinès A1 Accés</td>
+        <td class="td-num">4.19</td>
+        <td class="td-num">4.55</td>
+        <td class="td-num">3.50</td>
+        <td class="td-num">4.56</td>
+        <td><span class="badge rag">RAG 56%</span></td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td>Nouvingut àrab pre-A1 Accés</td>
+        <td class="td-num">4.14</td>
+        <td class="td-num">4.61</td>
+        <td class="td-num">3.24</td>
+        <td class="td-num">4.61</td>
+        <td><span class="badge empat">Empat (51/49)</span></td>
+      </tr>
+      <tr>
+        <td>8</td>
+        <td>Altes capacitats B2 Enriquiment</td>
+        <td class="td-num">4.11</td>
+        <td class="td-num">4.49</td>
+        <td class="td-num" style="color:var(--success)">4.41</td>
+        <td class="td-num">4.21</td>
+        <td><span class="badge rag">RAG 52%</span></td>
+      </tr>
+      <tr>
+        <td>9</td>
+        <td>TEA nivell 2 B1 Core</td>
+        <td class="td-num">4.01</td>
+        <td class="td-num">4.51</td>
+        <td class="td-num">3.96</td>
+        <td class="td-num">4.37</td>
+        <td><span class="badge rag">RAG 53%</span></td>
+      </tr>
+      <tr>
+        <td>10</td>
+        <td style="color:var(--danger)">TDAH+TEA B1 Core (creuament)</td>
+        <td class="td-num" style="color:var(--danger)">3.90</td>
+        <td class="td-num">4.34</td>
+        <td class="td-num">3.93</td>
+        <td class="td-num">4.25</td>
+        <td><span class="badge rag">RAG 55%</span></td>
+      </tr>
     </tbody>
   </table>
-</div>
+
+  <h2>RAG vs HC — comparació per perfil</h2>
+  <div class="bar-row">
+    <div class="bar-label wide">Vulnerabilitat+TDL A2</div>
+    <div class="bar-container">
+      <div class="bar-rag" style="width:64.3%">RAG 166</div>
+      <div class="bar-hc" style="width:33.2%">HC 86</div>
+      <div class="bar-empat" style="width:2.5%"></div>
+    </div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label wide">DI lleugera pre-A1</div>
+    <div class="bar-container">
+      <div class="bar-rag" style="width:61.9%">RAG 164</div>
+      <div class="bar-hc" style="width:36.2%">HC 96</div>
+      <div class="bar-empat" style="width:1.9%"></div>
+    </div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label wide">Nouvingut+Dislèxia A1</div>
+    <div class="bar-container">
+      <div class="bar-rag" style="width:56.7%">RAG 147</div>
+      <div class="bar-hc" style="width:41.3%">HC 107</div>
+      <div class="bar-empat" style="width:2%"></div>
+    </div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label wide">Nouvingut xinès A1</div>
+    <div class="bar-container">
+      <div class="bar-rag" style="width:55.2%">RAG 145</div>
+      <div class="bar-hc" style="width:43.3%">HC 114</div>
+      <div class="bar-empat" style="width:1.5%"></div>
+    </div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label wide">Altes capacitats B2</div>
+    <div class="bar-container">
+      <div class="bar-rag" style="width:52.2%">RAG 134</div>
+      <div class="bar-hc" style="width:43.3%">HC 111</div>
+      <div class="bar-empat" style="width:4.5%">= 10</div>
+    </div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label wide">TDAH+TEA B1</div>
+    <div class="bar-container">
+      <div class="bar-rag" style="width:51.3%">RAG 133</div>
+      <div class="bar-hc" style="width:42%">HC 109</div>
+      <div class="bar-empat" style="width:6.7%">= 17</div>
+    </div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label wide">TEA nivell 2 B1</div>
+    <div class="bar-container">
+      <div class="bar-rag" style="width:51.2%">RAG 133</div>
+      <div class="bar-hc" style="width:44.7%">HC 116</div>
+      <div class="bar-empat" style="width:4.1%">= 16</div>
+    </div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label wide">TDAH combinat A2</div>
+    <div class="bar-container">
+      <div class="bar-rag" style="width:53.6%">RAG 140</div>
+      <div class="bar-hc" style="width:44%">HC 115</div>
+      <div class="bar-empat" style="width:2.4%"></div>
+    </div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label wide">Dislèxia A2</div>
+    <div class="bar-container">
+      <div class="bar-rag" style="width:54.3%">RAG 144</div>
+      <div class="bar-hc" style="width:40.6%">HC 108</div>
+      <div class="bar-empat" style="width:5.1%">= 12</div>
+    </div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label wide" style="color:var(--empat)">Nouvingut àrab pre-A1</div>
+    <div class="bar-container">
+      <div class="bar-hc" style="width:49.2%">HC 128</div>
+      <div class="bar-rag" style="width:48.8%">RAG 127</div>
+      <div class="bar-empat" style="width:2%"></div>
+    </div>
+  </div>
+
+  <div class="insight" style="margin-top:1rem">
+    <p><strong>Perfils on RAG marca la diferència:</strong> Vulnerabilitat+TDL (66%) i DI lleugera (63%). El corpus FJE aporta instruccions específiques per a suport intensiu que el HC no cobreix.</p>
+    <p><strong>Cas especial Nouvingut àrab pre-A1:</strong> únic perfil amb empat tècnic. El HC ja té prou instruccions per a pre-A1 i el RAG no aporta res addicional. Gap: falta corpus específic d'àrab/wolof per generar glossaris bilingüies.</p>
+    <p><strong>TDAH+TEA creuament (3.90):</strong> el perfil de doble excepcionalitat és el més difícil. La combinació de necessitats contradictòries (focus TDAH + predictibilitat TEA) confon els models.</p>
+  </div>
+
+</div><!-- /tab-perfils -->
+
+<!-- ═══════════════════════════ TAB 5: DIMENSIONS ═══════════════════════════ -->
+<div id="tab-dimensions" class="tab-content">
+
+  <div class="grid3">
+    <div>
+      <h2>Per etapa educativa</h2>
+      <table class="data">
+        <thead><tr><th>Etapa</th><th class="td-num">Nota</th><th class="td-num">C3</th><th class="td-num">RAG%</th></tr></thead>
+        <tbody>
+          <tr><td>Primària</td><td class="td-num rank-1">4.26</td><td class="td-num" style="color:var(--success)">4.06</td><td class="td-num">57%</td></tr>
+          <tr><td>ESO</td><td class="td-num rank-2">4.17</td><td class="td-num" style="color:var(--warning)">3.64</td><td class="td-num">58%</td></tr>
+          <tr><td>Batxillerat</td><td class="td-num" style="color:var(--danger)">4.01</td><td class="td-num" style="color:var(--danger)">3.36</td><td class="td-num">52%</td></tr>
+        </tbody>
+      </table>
+      <div class="insight"><p>C3 cau de 4.06 a 3.36 de primària a batxillerat. A batxillerat, la profunditat curricular és tan gran que els models la sacrifiquen per simplificar.</p></div>
+    </div>
+
+    <div>
+      <h2>Per nivell MECR</h2>
+      <table class="data">
+        <thead><tr><th>MECR</th><th class="td-num">Nota</th><th class="td-num">C2</th><th class="td-num">C4</th></tr></thead>
+        <tbody>
+          <tr><td>A2</td><td class="td-num rank-1">4.27</td><td class="td-num">4.52</td><td class="td-num">4.52</td></tr>
+          <tr><td>A1</td><td class="td-num rank-2">4.21</td><td class="td-num">4.58</td><td class="td-num">4.59</td></tr>
+          <tr><td>pre-A1</td><td class="td-num rank-3">4.20</td><td class="td-num">4.70</td><td class="td-num">4.72</td></tr>
+          <tr><td>B2</td><td class="td-num">4.11</td><td class="td-num">4.49</td><td class="td-num">4.21</td></tr>
+          <tr><td style="color:var(--warning)">B1</td><td class="td-num" style="color:var(--warning)">3.96</td><td class="td-num">4.43</td><td class="td-num">4.31</td></tr>
+        </tbody>
+      </table>
+      <div class="insight"><p><strong>Paradoxa B1:</strong> és el nivell pitjor malgrat no ser el més exigent. B1 requereix un calibratge precís (ni massa simple ni massa complex) que els models no dominen bé.</p></div>
+    </div>
+
+    <div>
+      <h2>Per nivell DUA</h2>
+      <table class="data">
+        <thead><tr><th>DUA</th><th class="td-num">Nota</th><th class="td-num">C2</th><th class="td-num">C3</th></tr></thead>
+        <tbody>
+          <tr><td>Accés</td><td class="td-num rank-1">4.23</td><td class="td-num" style="color:var(--success)">4.64</td><td class="td-num" style="color:var(--danger)">3.47</td></tr>
+          <tr><td>Enriquiment</td><td class="td-num rank-2">4.11</td><td class="td-num">4.49</td><td class="td-num" style="color:var(--success)">4.41</td></tr>
+          <tr><td>Core</td><td class="td-num rank-2">4.11</td><td class="td-num">4.44</td><td class="td-num">3.85</td></tr>
+        </tbody>
+      </table>
+      <div class="insight"><p>Accés és el nivell globalment millor però amb el C3 pitjor (3.47). Enriquiment és l'únic on C3 (4.41) supera la nota total — perquè no cal simplificar, cal aprofundir.</p></div>
+    </div>
+  </div>
+
+  <h2>Visualització comparativa: nota global vs C3 per dimensió</h2>
+
+  <div class="grid2">
+    <div>
+      <h3>Per etapa — Nota global vs C3</h3>
+      <div class="bar-row">
+        <div class="bar-label">Primària global</div>
+        <div class="bar-container"><div class="bar-rag" style="width:85.2%">4.26</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Primària C3</div>
+        <div class="bar-container"><div class="bar-rag" style="width:81.2%;background:var(--success)">4.06</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">ESO global</div>
+        <div class="bar-container"><div class="bar-rag" style="width:83.4%">4.17</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">ESO C3</div>
+        <div class="bar-container"><div class="bar-rag" style="width:72.8%;background:var(--warning)">3.64</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Batxillerat global</div>
+        <div class="bar-container"><div class="bar-rag" style="width:80.2%">4.01</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Batxillerat C3</div>
+        <div class="bar-container"><div class="bar-rag" style="width:67.2%;background:var(--danger)">3.36</div></div>
+      </div>
+    </div>
+    <div>
+      <h3>Per MECR — Nota global vs C4 (adequació)</h3>
+      <div class="bar-row">
+        <div class="bar-label">A2 global</div>
+        <div class="bar-container"><div class="bar-rag" style="width:85.4%">4.27</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">A2 C4 MECR</div>
+        <div class="bar-container"><div class="bar-rag" style="width:90.4%;background:var(--success)">4.52</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">B1 global</div>
+        <div class="bar-container"><div class="bar-rag" style="width:79.2%">3.96</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">B1 C4 MECR</div>
+        <div class="bar-container"><div class="bar-rag" style="width:86.2%;background:var(--warning)">4.31</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">B2 global</div>
+        <div class="bar-container"><div class="bar-rag" style="width:82.2%">4.11</div></div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">B2 C4 MECR</div>
+        <div class="bar-container"><div class="bar-rag" style="width:84.2%">4.21</div></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /tab-dimensions -->
+
+<!-- ═══════════════════════════ TAB 6: GÈNERE ═══════════════════════════ -->
+<div id="tab-genere" class="tab-content">
+
+  <h2>Per gènere discursiu</h2>
+  <p style="color:var(--muted);font-size:0.82rem;margin-bottom:1rem">500 generacions per gènere (5 models × 2 modes × 50 textos per gènere). Jutges externs.</p>
+
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Gènere</th>
+        <th class="td-num">Nota /5</th>
+        <th class="td-num">C1 Coherència</th>
+        <th class="td-num">C3 Curricular</th>
+        <th>RAG vs HC</th>
+        <th class="td-num">N evals</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Instrucció</td>
+        <td class="td-num rank-1">4.21</td>
+        <td class="td-num">4.09</td>
+        <td class="td-num">3.79</td>
+        <td><span class="badge rag">RAG 55%</span></td>
+        <td class="td-num">1.269</td>
+      </tr>
+      <tr>
+        <td>Argumentació</td>
+        <td class="td-num rank-1">4.20</td>
+        <td class="td-num">4.03</td>
+        <td class="td-num">3.73</td>
+        <td><span class="badge rag">RAG 54%</span></td>
+        <td class="td-num">1.311</td>
+      </tr>
+      <tr>
+        <td>Explicació</td>
+        <td class="td-num rank-2">4.14</td>
+        <td class="td-num">3.92</td>
+        <td class="td-num">3.65</td>
+        <td><span class="badge rag">RAG 56%</span></td>
+        <td class="td-num">1.411</td>
+      </tr>
+      <tr>
+        <td>Narració</td>
+        <td class="td-num rank-3">4.13</td>
+        <td class="td-num">3.90</td>
+        <td class="td-num">3.69</td>
+        <td><span class="badge rag">RAG 59%</span></td>
+        <td class="td-num">1.303</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="insight">
+    <p>Les diferències entre gèneres són petites (0.08 punts entre el primer i el quart). El gènere no és un factor discriminant important.</p>
+    <p><strong>Narració:</strong> la nota global és la més baixa (4.13) però RAG hi guanya amb més marge (59%). Adaptar la veu narrativa és el repte màxim per al model, però el RAG ajuda significativament.</p>
+    <p><strong>Instrucció:</strong> la nota més alta. Els textos instructius (procediments, passos) es simplifiquen bé perquè ja tenen una estructura seqüencial natural.</p>
+  </div>
+
+  <h2>RAG vs HC per gènere</h2>
+  <div class="bar-row">
+    <div class="bar-label">Narració</div>
+    <div class="bar-container">
+      <div class="bar-rag" style="width:59%">RAG 382</div>
+      <div class="bar-hc" style="width:39%">HC 261</div>
+      <div class="bar-empat" style="width:2%"></div>
+    </div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">Explicació</div>
+    <div class="bar-container">
+      <div class="bar-rag" style="width:55.4%">RAG 368</div>
+      <div class="bar-hc" style="width:43.5%">HC 289</div>
+      <div class="bar-empat" style="width:1.1%"></div>
+    </div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">Argumentació</div>
+    <div class="bar-container">
+      <div class="bar-rag" style="width:53.6%">RAG 349</div>
+      <div class="bar-hc" style="width:41.3%">HC 269</div>
+      <div class="bar-empat" style="width:5.1%">= 24</div>
+    </div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label">Instrucció</div>
+    <div class="bar-container">
+      <div class="bar-rag" style="width:53.3%">RAG 334</div>
+      <div class="bar-hc" style="width:43.2%">HC 271</div>
+      <div class="bar-empat" style="width:3.5%">= 22</div>
+    </div>
+  </div>
+
+</div><!-- /tab-genere -->
+
+<!-- ═══════════════════════════ TAB 7: INSIGHT ═══════════════════════════ -->
+<div id="tab-insight" class="tab-content">
+
+  <h2>Insight pedagògic — síntesi i accions derivades</h2>
+
+  <h3>Les 5 conclusions principals</h3>
+
+  <div class="alert warning" style="margin-bottom:0.75rem">
+    <div class="alert-title">1. RAG guanya globalment (54.4%) però no de manera uniforme</div>
+    Sonnet i GPT s'aprofiten del RAG (+2-4 punts percentuals). Gemini NO: la seva versió HC supera la RAG. Possible causa: el RAG allarga el text de Gemini sense millorar-ne la qualitat percebuda.
+  </div>
+
+  <div class="alert danger" style="margin-bottom:0.75rem">
+    <div class="alert-title">2. C3 Preservació curricular és el gap sistèmic del projecte</div>
+    Nota global 3.64/5. Afecta tots els models i modes. El pitjor és el nivell Accés (3.47) — simplificar molt implica perdre contingut. Batxillerat (3.36) és el cas extrem. Cap model ha resolt aquest trade-off adaptació/preservació.
+  </div>
+
+  <div class="alert warning" style="margin-bottom:0.75rem">
+    <div class="alert-title">3. La doble excepcionalitat confon els models (TDAH+TEA = 3.90)</div>
+    El perfil de creuament és el pitjor avaluat (3.90). Les instruccions contradictòries (micro-blocs TDAH vs predictibilitat TEA) no estan ben integrades al prompt. Cal investigació addicional sobre com gestionar la tensió entre perfils.
+  </div>
+
+  <div class="alert warning" style="margin-bottom:0.75rem">
+    <div class="alert-title">4. B1 és el nivell MECR més difícil (3.96), no els extrems</div>
+    Pre-A1 (4.20) és fàcil perquè "simplificar molt" és una instrucció clara. B2 (4.11) és fàcil perquè "enriquir" també ho és. B1 requereix calibratge precís que els models no dominen.
+  </div>
+
+  <div class="alert warning">
+    <div class="alert-title">5. El jutge extern és indispensable</div>
+    La matriu de jutges mostra que Llama és massa generós, Qwen massa estricte. Cap jutge és neutral. Cal consensuar entre almenys 2 jutges externs per evitar biaix. El jutge intern (mateixa família que el generador) NO és vàlid.
+  </div>
+
+  <h2>Accions prioritàries derivades</h2>
+  <table class="data">
+    <thead>
+      <tr><th>#</th><th>Acció</th><th>Criteri afectat</th><th>Impacte esperat</th><th>Complexitat</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>1</strong></td>
+        <td>Prompt específic anti-pèrdua curricular per a Accés i Batxillerat</td>
+        <td style="color:var(--danger)">C3 (+0.3–0.5)</td>
+        <td><span class="badge danger">Alt</span></td>
+        <td>Baixa</td>
+      </tr>
+      <tr>
+        <td><strong>2</strong></td>
+        <td>Instruccions de síntesi per a doble excepcionalitat (TDAH+TEA)</td>
+        <td>C2 perfil (+0.2)</td>
+        <td><span class="badge warn">Mitja</span></td>
+        <td>Mitja</td>
+      </tr>
+      <tr>
+        <td><strong>3</strong></td>
+        <td>Calibratge específic per a B1: exemples few-shot de "terme mig"</td>
+        <td>C4 MECR (+0.2)</td>
+        <td><span class="badge warn">Mitja</span></td>
+        <td>Baixa</td>
+      </tr>
+      <tr>
+        <td><strong>4</strong></td>
+        <td>Corpus bilingüe àrab/xinès per a glossaris nouvinguts</td>
+        <td>C2 perfil (+0.3)</td>
+        <td><span class="badge danger">Alt</span></td>
+        <td>Alta (mineriaRAG)</td>
+      </tr>
+      <tr>
+        <td><strong>5</strong></td>
+        <td>Restringir longitud RAG per a Gemini (problema longitud vs qualitat)</td>
+        <td>Global (+0.1–0.2)</td>
+        <td><span class="badge warn">Mitja</span></td>
+        <td>Baixa</td>
+      </tr>
+      <tr>
+        <td><strong>6</strong></td>
+        <td>Repetir batch multi_v2 amb fixos 1+3 aplicats</td>
+        <td>Validació</td>
+        <td><span class="badge danger">Alt</span></td>
+        <td>Baixa</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Taula resum executiu</h2>
+  <div class="heatmap-wrap">
+  <table class="heatmap">
+    <thead>
+      <tr><th>Dimensió</th><th>Punt fort</th><th>Punt feble</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Model</td><td class="cell-hi">GPT-RAG / Sonnet-RAG (4.30)</td><td class="cell-lo">Gemini-RAG (paradoxa 4.01)</td></tr>
+      <tr><td>Criteri</td><td class="cell-hi">C2 Adequació perfil (4.54)</td><td class="cell-lo">C3 Preservació curricular (3.64)</td></tr>
+      <tr><td>Perfil</td><td class="cell-hi">Dislèxia A2 (4.32)</td><td class="cell-lo">TDAH+TEA creuament (3.90)</td></tr>
+      <tr><td>Etapa</td><td class="cell-hi">Primària (4.26)</td><td class="cell-lo">Batxillerat C3 (3.36)</td></tr>
+      <tr><td>MECR</td><td class="cell-hi">A2 (4.27)</td><td class="cell-lo">B1 (3.96) — calibratge difícil</td></tr>
+      <tr><td>DUA</td><td class="cell-hi">Accés nota global (4.23)</td><td class="cell-lo">Accés C3 (3.47) — paradoxa</td></tr>
+      <tr><td>Gènere</td><td class="cell-hi">Instrucció (4.21)</td><td class="cell-lo">Narració (4.13) — menys crític</td></tr>
+      <tr><td>RAG vs HC</td><td class="cell-rag">RAG guanya globalment (54.4%)</td><td class="cell-hc">Gemini HC millor que RAG</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+</div><!-- /tab-insight -->
 
 </div><!-- container -->
 
@@ -364,79 +1102,6 @@ function showTab(name) {
   event.target.classList.add('active');
   document.getElementById('tab-' + name).classList.add('active');
 }
-
-// Carregar dades de l'API
-async function loadData() {
-  try {
-    const res = await fetch('/api/eval/comparative');
-    const d = await res.json();
-    if (d.error) return;
-
-    // Forma cards
-    if (d.forma) {
-      for (const f of d.forma) {
-        if (f.branca === 'hardcoded') {
-          document.getElementById('v-forma-hc').textContent = f.avg_forma ? f.avg_forma.toFixed(3) : '-';
-        } else if (f.branca === 'rag') {
-          document.getElementById('v-forma-rag').textContent = f.avg_forma ? f.avg_forma.toFixed(3) : '-';
-          document.getElementById('v-recall').textContent = f.avg_recall ? f.avg_recall.toFixed(3) : '-';
-        }
-      }
-    }
-
-    // Barres de criteris (Gemini)
-    const criteriaDiv = document.getElementById('criteria-bars');
-    const cNames = {c1: 'C1 Coherencia', c2: 'C2 Adequacio perfil', c3: 'C3 Preservacio curricular',
-                    c4: 'C4 Adequacio MECR', c5: 'C5 Prellico funcional'};
-    if (d.criteria) {
-      let html = '';
-      for (const [key, label] of Object.entries(cNames)) {
-        const rows = (d.criteria[key] || []).filter(r => r.judge === 'gemini');
-        let hc = 0, rag = 0, emp = 0;
-        for (const r of rows) {
-          if (r.winner === 'hardcoded') hc = r.n;
-          else if (r.winner === 'rag') rag = r.n;
-          else if (r.winner === 'empat') emp = r.n;
-        }
-        const total = hc + rag + emp || 1;
-        html += `<div class="bar-row">
-          <div class="bar-label">${label}</div>
-          <div class="bar-container">
-            <div class="bar-hc" style="width:${hc/total*100}%">HC ${hc}</div>
-            <div class="bar-rag" style="width:${rag/total*100}%">RAG ${rag}</div>
-            ${emp > 0 ? `<div class="bar-empat" style="width:${emp/total*100}%">= ${emp}</div>` : ''}
-          </div>
-        </div>`;
-      }
-      criteriaDiv.innerHTML = html;
-    }
-
-    // Barres per perfil
-    const profileDiv = document.getElementById('profile-bars');
-    const profiles = ['P1','P2','P3','P4','P5','P6','P7','P8','P9','P10'];
-    const pNames = {P1:'Nouvingut arab',P2:'Nouvingut xines',P3:'TDAH',P4:'TEA',P5:'Dislexia',
-                    P6:'DI',P7:'AC Enriquiment',P8:'Nouv+Disl',P9:'TDAH+TEA',P10:'Vuln+TDL'};
-    const consensus = {P1:'HC',P2:'HC',P3:'RAG',P4:'RAG',P5:'Empat',P6:'RAG',P7:'Div',P8:'HC',P9:'RAG',P10:'RAG'};
-
-    let phtml = '';
-    for (const p of profiles) {
-      const c = consensus[p];
-      const color = c === 'RAG' ? 'var(--rag)' : c === 'HC' ? 'var(--hc)' : 'var(--empat)';
-      phtml += `<div class="bar-row">
-        <div class="bar-label" style="width:130px">${p} ${pNames[p]}</div>
-        <div style="padding:0.3rem 0.8rem;background:var(--card);border-radius:4px;min-width:80px;text-align:center">
-          <span style="color:${color};font-weight:700">${c}</span>
-        </div>
-      </div>`;
-    }
-    profileDiv.innerHTML = phtml;
-
-  } catch(e) {
-    console.error('Error loading data:', e);
-  }
-}
-
-loadData();
 </script>
 </body>
 </html>
