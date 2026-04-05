@@ -29,6 +29,12 @@ from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse, Fil
 load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+GEMMA4_API_KEY = os.getenv("GEMMA4_API_KEY", "")
+MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "")
+# ATNE_MODEL: gemini | gemma4 | mistral (default: el que tingui clau disponible)
+ATNE_MODEL = os.getenv("ATNE_MODEL", "").lower()
+if not ATNE_MODEL:
+    ATNE_MODEL = "mistral" if MISTRAL_API_KEY else "gemma4"
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
 
@@ -43,14 +49,18 @@ PROFILES_DIR.mkdir(exist_ok=True)
 
 UI_DIR = Path(__file__).parent / "ui"
 
-# Client Gemini (SDK google-genai)
+# Client Gemini (SDK google-genai) — serveix per Gemini i Gemma 4
 from google import genai
 from google.genai import types
 
+# Triem clau segons ATNE_MODEL
+_genai_key = GEMMA4_API_KEY if ATNE_MODEL == "gemma4" else GEMINI_API_KEY
 gemini_client = genai.Client(
-    api_key=GEMINI_API_KEY,
-    http_options=types.HttpOptions(timeout=180_000),  # 180s per generacions llargues
-)
+    api_key=_genai_key or GEMMA4_API_KEY or GEMINI_API_KEY,
+    http_options=types.HttpOptions(timeout=300_000),  # 5min per generacions llargues
+) if (_genai_key or GEMMA4_API_KEY or GEMINI_API_KEY) else None
+
+print(f"[ATNE] Model actiu: {ATNE_MODEL}")
 
 # ── FastAPI app ─────────────────────────────────────────────────────────────
 
@@ -944,9 +954,10 @@ def clean_gemini_output(text: str) -> str:
 
 
 def run_adaptation(text: str, profile: dict, context: dict, params: dict,
-                   progress_callback=None):
-    """Executa tot el pipeline d'adaptació: RAG search + Gemini."""
+                   progress_callback=None, model_override: str = None):
+    """Executa tot el pipeline d'adaptació: RAG search + LLM."""
     cb = progress_callback or (lambda ev: None)
+    active_model = (model_override or ATNE_MODEL).lower()
 
     # 1. Cerca RAG+KG
     cb({"type": "step", "step": "search", "msg": "Cercant context pedagògic rellevant..."})
@@ -994,32 +1005,42 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
     # 4. System prompt
     system_prompt = build_system_prompt(profile, context, params, rag_context)
 
-    # 5. Cridar Gemini
-    cb({"type": "step", "step": "adapting", "msg": "Generant adaptació amb Gemini..."})
+    # 5. Cridar LLM segons active_model
+    model_label = {"gemma4": "Gemma 4 31B", "mistral": "Mistral Small"}.get(active_model, active_model)
+    cb({"type": "step", "step": "adapting", "msg": f"Generant adaptació amb {model_label}..."})
+    adapted = ""
     try:
-        response = gemini_client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=f"TEXT ORIGINAL A ADAPTAR:\n\n{text}",
-            config=types.GenerateContentConfig(
-                system_instruction=system_prompt,
-                temperature=0.4,
-                max_output_tokens=16384,
-                thinking_config=types.ThinkingConfig(thinking_budget=0),
-            ),
-        )
-        adapted = response.text or ""
-        # Avisar si Gemini ha truncat per max_output_tokens
-        try:
-            fr = response.candidates[0].finish_reason
-            if fr and str(fr).upper() in ("MAX_TOKENS", "2"):
-                cb({"type": "step", "step": "warning",
-                    "msg": "⚠ La resposta s'ha truncat (massa complements). Considera reduir-ne."})
-        except Exception:
-            pass
-        # Netejar "thinking" filtrat de Gemini (text abans del primer ## )
+        if active_model == "mistral":
+            r = requests.post(
+                "https://api.mistral.ai/v1/chat/completions",
+                headers={"Authorization": f"Bearer {MISTRAL_API_KEY}", "Content-Type": "application/json"},
+                json={
+                    "model": "mistral-small-latest",
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": f"TEXT ORIGINAL A ADAPTAR:\n\n{text}"},
+                    ],
+                    "max_tokens": 8192,
+                    "temperature": 0.4,
+                },
+                timeout=180,
+            )
+            if r.status_code != 200:
+                raise RuntimeError(f"HTTP {r.status_code}: {r.text[:200]}")
+            adapted = r.json()["choices"][0]["message"]["content"] or ""
+        elif active_model == "gemma4":
+            response = gemini_client.models.generate_content(
+                model="gemma-4-31b-it",
+                contents=[types.Content(role="user", parts=[types.Part(text=f"{system_prompt}\n\n---\n\nTEXT ORIGINAL A ADAPTAR:\n\n{text}")])],
+                config=types.GenerateContentConfig(temperature=0.4, max_output_tokens=8192),
+            )
+            adapted = response.text or ""
+        else:
+            raise RuntimeError(f"Model desconegut: {active_model}. Opcions: mistral, gemma4")
+        # Netejar "thinking" filtrat (text abans del primer ##)
         adapted = clean_gemini_output(adapted)
     except Exception as e:
-        adapted = f"Error en la generació: {e}"
+        adapted = f"Error en la generació ({active_model}): {e}"
 
     # 6. Post-processament Python
     mecr = params.get("mecr_sortida", "B2")
@@ -1037,7 +1058,7 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
 @app.get("/api/health")
 async def health():
     """Verifica connectivitat amb Supabase i Gemini."""
-    checks = {"supabase": False, "gemini": False}
+    checks = {"supabase": False, "llm": False, "model": ATNE_MODEL}
     try:
         resp = requests.get(
             f"{SUPABASE_URL}/rest/v1/rag_fje",
@@ -1049,11 +1070,19 @@ async def health():
     except Exception:
         pass
     try:
-        gemini_client.models.get(model="gemini-2.5-flash")
-        checks["gemini"] = True
+        if ATNE_MODEL == "mistral":
+            r = requests.get("https://api.mistral.ai/v1/models",
+                headers={"Authorization": f"Bearer {MISTRAL_API_KEY}"}, timeout=5)
+            checks["llm"] = r.status_code == 200
+        elif ATNE_MODEL == "gemma4":
+            gemini_client.models.get(model="gemma-4-31b-it")
+            checks["llm"] = True
+        else:
+            gemini_client.models.get(model="gemini-2.5-flash")
+            checks["llm"] = True
     except Exception:
         pass
-    ok = all(checks.values())
+    ok = checks["supabase"] and checks["llm"]
     return JSONResponse({"ok": ok, **checks}, status_code=200 if ok else 503)
 
 
@@ -1186,6 +1215,7 @@ async def adapt_stream(payload: dict = Body(...)):
     profile = payload.get("profile", {})
     context = payload.get("context", {})
     params = payload.get("params", {})
+    model = payload.get("model", "")  # mistral | gemma4 | (buit = default ATNE_MODEL)
 
     if not text.strip():
         return JSONResponse({"error": "Cal proporcionar un text"}, status_code=400)
@@ -1199,7 +1229,7 @@ async def adapt_stream(payload: dict = Body(...)):
         with concurrent.futures.ThreadPoolExecutor() as pool:
             task = loop.run_in_executor(
                 pool,
-                lambda: run_adaptation(text, profile, context, params, cb),
+                lambda: run_adaptation(text, profile, context, params, cb, model_override=model or None),
             )
             while not task.done():
                 while events:

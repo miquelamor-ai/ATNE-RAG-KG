@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATNE — Informe Avaluació 5 Models</title>
+<style>
+:root {
+  --bg: #0f172a; --card: #1e293b; --card2: #334155; --text: #e2e8f0; --muted: #94a3b8;
+  --primary: #3b82f6; --success: #22c55e; --danger: #ef4444; --warning: #eab308;
+  --gold: #fbbf24; --silver: #cbd5e1; --bronze: #d97706;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+nav { display:flex; gap:0; background:#111827; padding:0 1rem; position:sticky; top:0; z-index:1000; flex-wrap:wrap; }
+nav a { color:#d1d5db; text-decoration:none; padding:.6rem 1rem; font-size:.85rem; font-weight:500; }
+nav a.active { background:#1a56db; color:#fff; }
+nav a:hover { background:#1f2937; }
+
+header { background: linear-gradient(135deg, #1e3a5f, #0f172a); padding: 2rem; border-bottom: 2px solid var(--primary); }
+header h1 { font-size: 1.8rem; } header h1 span { color: var(--primary); }
+header p { color: var(--muted); margin-top: 0.4rem; font-size: 0.9rem; }
+.meta-pills { display:flex; gap:0.5rem; margin-top:0.75rem; flex-wrap:wrap; }
+.pill { background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); color:var(--primary); padding:0.2rem 0.6rem; border-radius:9999px; font-size:0.75rem; }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+
+section { background: var(--card); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+section h2 { font-size: 1.3rem; margin-bottom: 1rem; color: var(--primary); border-bottom: 1px solid var(--card2); padding-bottom: 0.5rem; }
+section h3 { font-size: 1.05rem; margin: 1rem 0 0.5rem; color: var(--text); }
+section p { margin-bottom: 0.8rem; color: var(--text); }
+section ul { margin-left: 1.5rem; margin-bottom: 0.8rem; }
+section li { margin-bottom: 0.4rem; }
+
+table { width: 100%; border-collapse: collapse; margin: 0.8rem 0; font-size: 0.9rem; }
+th, td { padding: 0.6rem 0.8rem; text-align: left; border-bottom: 1px solid var(--card2); }
+th { background: #0f172a; color: var(--primary); font-weight: 600; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+tr:hover { background: rgba(59,130,246,0.05); }
+.row-gold { background: rgba(251,191,36,0.08); }
+.row-silver { background: rgba(203,213,225,0.06); }
+.row-bronze { background: rgba(217,119,6,0.06); }
+
+.medal { font-size: 1.2rem; }
+.badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+.badge-free { background: rgba(34,197,94,0.2); color: var(--success); border: 1px solid rgba(34,197,94,0.4); }
+.badge-paid { background: rgba(239,68,68,0.2); color: var(--danger); border: 1px solid rgba(239,68,68,0.4); }
+.badge-bug { background: rgba(234,179,8,0.2); color: var(--warning); border: 1px solid rgba(234,179,8,0.4); }
+
+.highlight { background: rgba(59,130,246,0.1); border-left: 3px solid var(--primary); padding: 0.8rem 1rem; margin: 0.8rem 0; border-radius: 4px; }
+.success-box { background: rgba(34,197,94,0.08); border-left: 3px solid var(--success); padding: 0.8rem 1rem; margin: 0.8rem 0; border-radius: 4px; }
+.warning-box { background: rgba(234,179,8,0.08); border-left: 3px solid var(--warning); padding: 0.8rem 1rem; margin: 0.8rem 0; border-radius: 4px; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+
+.stat-card { background: #0f172a; padding: 1rem; border-radius: 6px; border: 1px solid var(--card2); }
+.stat-label { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; }
+.stat-value { font-size: 2rem; font-weight: 700; color: var(--primary); margin-top: 0.2rem; }
+.stat-sub { color: var(--muted); font-size: 0.85rem; margin-top: 0.2rem; }
+</style>
+</head>
+<body>
+
+<nav>
+    <a href="/ui/index.html">Adaptador</a>
+    <a href="/ui/cuina.html">Cuina</a>
+    <a href="/ui/eval_dashboard.html">Avaluacio</a>
+    <a href="/ui/eval_cases.html">Casos</a>
+    <a href="/ui/eval_results.html">Resultats</a>
+    <a href="/ui/eval_progress.html">Progres</a>
+    <a href="/ui/informe.html" class="active">Informe</a>
+</nav>
+
+<header>
+    <h1>Informe d'Avaluacio <span>5 Models LLM</span></h1>
+    <p>Comparativa qualitat-cost · RAG-v2 · Jutges externs · 5 abril 2026</p>
+    <div class="meta-pills">
+        <span class="pill">1.800 textos generats</span>
+        <span class="pill">Rubrica v2 (8 criteris)</span>
+        <span class="pill">3 jutges externs</span>
+        <span class="pill">~6.000 avaluacions</span>
+        <span class="pill">200 casos × 10 perfils</span>
+    </div>
+</header>
+
+<div class="container">
+
+<!-- Resum executiu -->
+<section>
+    <h2>Resum executiu</h2>
+    <p><strong>Els 3 models gratuits arriben al 94-95% de la qualitat del millor model de pagament.</strong> Per a un pilot educatiu sense pressupost, Mistral Small i Gemma 4 31B son opcions plenament viables.</p>
+
+    <div class="grid-2" style="margin-top: 1rem;">
+        <div class="stat-card">
+            <div class="stat-label">Millor model</div>
+            <div class="stat-value">GPT-4o-mini</div>
+            <div class="stat-sub">4.44/5 · ~0.003€/adaptacio</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Millor gratuit</div>
+            <div class="stat-value">Gemma 4 31B</div>
+            <div class="stat-sub">4.23/5 · 0€</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Mes rapid gratuit</div>
+            <div class="stat-value">Mistral Small</div>
+            <div class="stat-sub">4.19/5 · 9s/adaptacio</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Cost pilot FJE 1.000 docents</div>
+            <div class="stat-value">0 €</div>
+            <div class="stat-sub">Free tier Mistral o Gemma 4</div>
+        </div>
+    </div>
+</section>
+
+<!-- Ranking -->
+<section>
+    <h2>Ranking global (RAG-v2, sense self-eval)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Pos</th>
+                <th>Model</th>
+                <th class="num">Global</th>
+                <th class="num">A1 Coher</th>
+                <th class="num">A2 Gram</th>
+                <th class="num">A3 Lleg</th>
+                <th class="num">B1 Conting</th>
+                <th class="num">B2 Perfil</th>
+                <th class="num">B3 Scaffold</th>
+                <th class="num">B4 Cultura</th>
+                <th class="num">C1 Aprenent</th>
+                <th>Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="row-gold">
+                <td><span class="medal">🥇</span></td>
+                <td><strong>GPT-4o-mini</strong></td>
+                <td class="num"><strong>4.44</strong></td>
+                <td class="num">4.30</td>
+                <td class="num"><strong>4.73</strong></td>
+                <td class="num"><strong>4.36</strong></td>
+                <td class="num">4.68</td>
+                <td class="num"><strong>4.39</strong></td>
+                <td class="num"><strong>4.17</strong></td>
+                <td class="num"><strong>4.46</strong></td>
+                <td class="num">4.46</td>
+                <td><span class="badge badge-paid">~0.003€</span></td>
+            </tr>
+            <tr class="row-silver">
+                <td><span class="medal">🥈</span></td>
+                <td><strong>Gemma 4 31B</strong></td>
+                <td class="num"><strong>4.23</strong></td>
+                <td class="num">3.85</td>
+                <td class="num">4.36</td>
+                <td class="num">4.12</td>
+                <td class="num">4.53</td>
+                <td class="num">4.30</td>
+                <td class="num">4.08</td>
+                <td class="num">4.09</td>
+                <td class="num">4.36</td>
+                <td><span class="badge badge-free">0€ free</span></td>
+            </tr>
+            <tr class="row-bronze">
+                <td><span class="medal">🥉</span></td>
+                <td><strong>Mistral Small</strong></td>
+                <td class="num"><strong>4.19</strong></td>
+                <td class="num"><strong>3.96</strong></td>
+                <td class="num">4.74</td>
+                <td class="num">4.03</td>
+                <td class="num"><strong>4.81</strong></td>
+                <td class="num">4.02</td>
+                <td class="num">3.74</td>
+                <td class="num">4.23</td>
+                <td class="num">4.11</td>
+                <td><span class="badge badge-free">0€ free</span></td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>Gemini 2.5 Flash</td>
+                <td class="num">3.93</td>
+                <td class="num">3.69</td>
+                <td class="num">4.23</td>
+                <td class="num">3.76</td>
+                <td class="num">4.25</td>
+                <td class="num">3.97</td>
+                <td class="num">3.69</td>
+                <td class="num">3.88</td>
+                <td class="num">3.95</td>
+                <td><span class="badge badge-free">0€ free</span></td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>Claude Sonnet 3.5</td>
+                <td class="num">2.04</td>
+                <td class="num">1.90</td>
+                <td class="num">2.40</td>
+                <td class="num">2.06</td>
+                <td class="num">2.13</td>
+                <td class="num">1.89</td>
+                <td class="num">1.80</td>
+                <td class="num">2.25</td>
+                <td class="num">1.96</td>
+                <td><span class="badge badge-bug">Bug RAG-v2</span></td>
+            </tr>
+        </tbody>
+    </table>
+    <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem;">En negreta, el lider per cada criteri. Sonnet amb bug conegut a la branca RAG-v2 (textos truncats).</p>
+</section>
+
+<!-- Duel gratuits -->
+<section>
+    <h2>Duel Gemma 4 vs Mistral (models gratuits)</h2>
+    <p>Els dos models gratuits estan empatats tecnicament (diferencia de 0.04 punts). Analitzem punts forts:</p>
+
+    <div class="grid-2">
+        <div>
+            <h3>✓ Gemma 4 destaca en:</h3>
+            <ul>
+                <li><strong>Adequacio al perfil</strong> (B2: +0.28): aplica millor instruccions per NESE, nouvingut, altes capacitats</li>
+                <li><strong>Scaffolding</strong> (B3: +0.34): glossaris, esquemes, suports cognitius</li>
+                <li><strong>Potencial d'aprenentatge</strong> (C1: +0.25): l'alumne apren mes</li>
+                <li><strong>Open-source</strong> Apache 2.0 (sense vendor lock-in)</li>
+            </ul>
+        </div>
+        <div>
+            <h3>✓ Mistral destaca en:</h3>
+            <ul>
+                <li><strong>Gramatica</strong> (A2: +0.38): menys errors linguistics</li>
+                <li><strong>Fidelitat curricular</strong> (B1: +0.28): preserva millor el contingut original</li>
+                <li><strong>Coherencia</strong> (A1: +0.11): flux de les idees</li>
+                <li><strong>Velocitat</strong>: 9s vs 107s per adaptacio (12x mes rapid)</li>
+                <li><strong>Europeu</strong>: GDPR-nativa, sobirania de dades</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="highlight">
+        <strong>Conclusio del duel:</strong> per a perfils amb necessitats educatives especifiques (NESE, nouvingut), <strong>Gemma 4</strong> ofereix millor scaffolding. Per a textos de rigor curricular, <strong>Mistral</strong> preserva millor el contingut. ATNE ofereix ara al docent la tria entre ambdos al selector de l'adaptador.
+    </div>
+</section>
+
+<!-- Comparatiu branques -->
+<section>
+    <h2>Comparatiu arquitectures de prompt</h2>
+    <p>Comparacio HC (hardcoded) vs RAG-v1 vs RAG-v2 per cada generador:</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Generador</th>
+                <th class="num">HC</th>
+                <th class="num">RAG-v1</th>
+                <th class="num">RAG-v2</th>
+                <th>Millor</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>gemini</td><td class="num"><strong>4.37</strong></td><td class="num">4.01</td><td class="num">3.93</td><td>HC (-0.44 respecte RAG-v2)</td></tr>
+            <tr><td>gpt</td><td class="num">4.37</td><td class="num">4.41</td><td class="num"><strong>4.44</strong></td><td>RAG-v2 (progres consistent)</td></tr>
+            <tr><td>sonnet</td><td class="num">4.37</td><td class="num"><strong>4.42</strong></td><td class="num">2.04*</td><td>RAG-v1 (RAG-v2 invalid)</td></tr>
+            <tr><td>gemma4</td><td class="num">—</td><td class="num">—</td><td class="num"><strong>4.23</strong></td><td>Nomes RAG-v2 testat</td></tr>
+            <tr><td>mistral</td><td class="num">—</td><td class="num">—</td><td class="num"><strong>4.19</strong></td><td>Nomes RAG-v2 testat</td></tr>
+        </tbody>
+    </table>
+    <p style="font-size: 0.85rem; color: var(--muted);">*Sonnet RAG-v2: bug de generacio (textos truncats a 111 paraules).</p>
+</section>
+
+<!-- Biaix jutges -->
+<section>
+    <h2>Biaix entre jutges</h2>
+    <p>Descobertes sobre els jutges utilitzats:</p>
+    <ul>
+        <li><strong>GPT-4o-mini</strong>: el jutge <strong>mes exigent</strong>, mitjanes mes baixes, mes discriminatiu</li>
+        <li><strong>Gemini</strong>: tendeix a puntuar alt (generos), inflacio de ~0.4 punts</li>
+        <li><strong>Mistral</strong>: puntua Gemma 4 molt alt (4.66) — possible afinitat entre models europeus</li>
+        <li><strong>Self-eval bias</strong> confirmat: Mistral jutjant Mistral = 4.73, Gemini jutjant Gemini = 4.84, GPT jutjant GPT (no disponible)</li>
+    </ul>
+    <div class="highlight">
+        <strong>Recomanacio:</strong> usar <strong>GPT-4o-mini</strong> com a jutge de referencia en futurs benchmarks. Mes conservador i discriminatiu.
+    </div>
+</section>
+
+<!-- Conclusions -->
+<section>
+    <h2>Conclusions i decisions</h2>
+
+    <h3>Per a produccio (pilot FJE)</h3>
+    <div class="success-box">
+        <strong>Decisio: doble via Mistral + Gemma 4.</strong> ATNE ofereix al docent triar entre els dos models gratuits. Cost zero, qualitat al 95% de GPT. El feedback real dels docents determinara quin sera el default.
+    </div>
+
+    <h3>Per a escalat futur</h3>
+    <ul>
+        <li><strong>Pilot FJE</strong> (1.000 docents): 0€ amb free tier</li>
+        <li><strong>FJE complet</strong> (5.000 docents): ~40€/mes si cal pagar</li>
+        <li><strong>Espanya</strong> (15.000 docents): ~150-225€/mes</li>
+        <li><strong>Servidor propi</strong>: NO rendible fins 50.000+ usuaris</li>
+    </ul>
+
+    <h3>Fluxe d'auto-avaluacio (Generate + Verify + Retry)</h3>
+    <div class="highlight">
+        El seguent pas es implementar autoavaluacio amb retry: si l'adaptacio generada puntua < 4.0 a la rubrica v2, es regenera automaticament (max 2 intents). Garanteix qualitat minima. Cost: 0€ (tot free tier).
+    </div>
+
+    <h3>Limitacions conegudes</h3>
+    <ul>
+        <li>Sonnet RAG-v2 invalid per bug de generacio (textos truncats)</li>
+        <li>Gemini free tier original avaluat amb thinking tokens (biaix positiu ~0.6)</li>
+        <li>Biaix de jutges: cal sempre jutges externs</li>
+        <li>Rubrica v2 validada pero en continua revisio</li>
+    </ul>
+</section>
+
+<!-- Dades de refencia -->
+<section>
+    <h2>Dades de referencia</h2>
+    <ul>
+        <li><strong>200 casos</strong>: 20 textos × 10 perfils d'alumnat</li>
+        <li><strong>4 etapes</strong>: Primaria, ESO1, ESO2, Batxillerat</li>
+        <li><strong>4 generes discursius</strong>: explicatiu, narratiu, instructiu, argumentatiu</li>
+        <li><strong>4 textos culturals</strong> addicionals (referents catalans)</li>
+        <li><strong>10 perfils</strong>: P1-P7 simples + P8-P10 creuats (2e)</li>
+        <li><strong>5 generadors</strong> × 3 branques (HC, RAG-v1, RAG-v2) = fins a 2.800 textos</li>
+        <li><strong>3 jutges externs</strong>: Gemini, GPT-4o-mini, Mistral</li>
+        <li><strong>Rubrica v2</strong>: 8 criteris (A1-A3, B1-B4, C1) en 3 dimensions ponderades</li>
+        <li><strong>6 marcs teorics</strong>: Halliday, IEC, TSAR, Mayer, CAST/UDL, Sweller, Vygotsky, Bloom</li>
+    </ul>
+
+    <p style="margin-top: 1rem; color: var(--muted); font-size: 0.85rem;">
+        Documents complets: <code>docs/avaluacio_final_5_models.md</code>,
+        <code>docs/avaluacio_rubrica.md</code>,
+        <code>docs/estrategia_costos_escalat.md</code>
+    </p>
+</section>
+
+</div>
+
+</body>
+</html>

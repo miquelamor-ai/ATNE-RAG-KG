@@ -6,3 +6,15 @@ output/
 node_modules/
 .next/
 profiles/
+server.log
+*.log
+tests/.tmp/
+tests/results/*.db
+tests/results/*.log
+tests/results/2026*/
+tests/results/sonnet_batches/
+tests/results/sonnet_eval_batches/
+tests/results/cases_for_judge.json
+tests/results/sonnet_test.txt
+.claude/
+260323_Millores*.md

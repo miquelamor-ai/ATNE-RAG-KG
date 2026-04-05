@@ -770,10 +770,12 @@ async function runAdaptation() {
     btn.textContent = "Adaptant...";
 
     try {
+        const modelSel = document.getElementById("model-selector");
+        const model = modelSel ? modelSel.value : "mistral";
         const resp = await fetch("/api/adapt", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text, profile, context, params }),
+            body: JSON.stringify({ text, profile, context, params, model }),
         });
 
         const reader = resp.body.getReader();

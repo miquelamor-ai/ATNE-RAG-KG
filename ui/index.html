@@ -15,6 +15,7 @@
     <a href="/ui/eval_cases.html">Casos</a>
     <a href="/ui/eval_results.html">Resultats</a>
     <a href="/ui/eval_progress.html">Progres</a>
+    <a href="/ui/informe.html">Informe</a>
 </nav>
 
 <div class="app-layout">
@@ -197,6 +198,13 @@
                 </div>
             </div>
 
+            <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;">
+                <label for="model-selector" style="font-size:0.9em;font-weight:600;">Model:</label>
+                <select id="model-selector" style="padding:6px 10px;border-radius:4px;border:1px solid #ccc;">
+                    <option value="mistral">Mistral Small (ràpid · europeu)</option>
+                    <option value="gemma4">Gemma 4 31B (Google · open-source)</option>
+                </select>
+            </div>
             <button class="btn btn-ok btn-big" id="btn-adapt">ADAPTAR</button>
 
             <div class="progress-area" id="progress-area">

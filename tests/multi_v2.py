@@ -58,8 +58,8 @@ load_dotenv()
 
 RUN_ID       = "multi_v2"
 V1_RUN_ID    = "multi_v1"
-GENERATORS   = ["gemini", "sonnet", "gpt"]
-JUDGES       = ["gemini", "gpt4mini"]
+GENERATORS   = ["gemini", "sonnet", "gpt", "gemma4", "mistral"]
+JUDGES       = ["gemini", "gpt4mini", "gemma4", "mistral"]
 DB_PATH      = Path(__file__).parent / "results" / "evaluations.db"
 DATA_PATH    = Path(__file__).parent / "test_data.json"
 ROOT         = Path(__file__).parent.parent
@@ -149,8 +149,101 @@ def call_gpt4mini(system_prompt: str, user_prompt: str) -> str:
     return resp.choices[0].message.content or ""
 
 
-GEN_CALLERS = {"gemini": call_gemini, "sonnet": call_sonnet, "gpt": call_gpt}
-JUDGE_CALLERS = {"gemini": call_gemini, "gpt4mini": call_gpt4mini, "sonnet": call_sonnet}
+def _call_gemma4_base(system_prompt: str, user_prompt: str, max_tokens: int, temp: float) -> str:
+    """Gemma 4 31B via API gratuïta (clau GEMMA4_API_KEY, free tier SENSE billing).
+    Retry automàtic per errors 500/504 (servidor inestable, model nou).
+    """
+    from google import genai
+    from google.genai import types
+    client = genai.Client(
+        api_key=os.getenv("GEMMA4_API_KEY"),
+        http_options=types.HttpOptions(timeout=480_000),  # 8 min timeout
+    )
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            resp = client.models.generate_content(
+                model="gemma-4-31b-it",
+                contents=[types.Content(role="user", parts=[types.Part(text=f"{system_prompt}\n\n---\n\n{user_prompt}")])],
+                config=types.GenerateContentConfig(
+                    temperature=temp,
+                    max_output_tokens=max_tokens,
+                ),
+            )
+            time.sleep(5)
+            return resp.text or ""
+        except Exception as e:
+            err_str = str(e)
+            if ("504" in err_str or "500" in err_str or "DEADLINE" in err_str or "INTERNAL" in err_str) and attempt < max_retries - 1:
+                wait = 30 * (attempt + 1)  # 30s, 60s
+                print(f"[retry {attempt+1}/{max_retries} en {wait}s] ", end="", flush=True)
+                time.sleep(wait)
+                continue
+            raise
+
+
+def call_gemma4(system_prompt: str, user_prompt: str) -> str:
+    return _call_gemma4_base(system_prompt, user_prompt, max_tokens=8192, temp=0.3)
+
+
+def call_gemma4_judge(system_prompt: str, user_prompt: str) -> str:
+    return _call_gemma4_base(system_prompt, user_prompt, max_tokens=4096, temp=0.2)
+
+
+def _call_mistral_base(system_prompt: str, user_prompt: str, max_tokens: int, temp: float) -> str:
+    """Mistral Small via API gratuita (Experiment plan, clau MISTRAL_API_KEY sense billing).
+    Limits free tier: 60 RPM, 375.000 TPM, 1B tokens/mes. Europeu (GDPR-nativa).
+    """
+    import requests
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            r = requests.post(
+                "https://api.mistral.ai/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {os.getenv('MISTRAL_API_KEY')}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": "mistral-small-latest",
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt},
+                    ],
+                    "max_tokens": max_tokens,
+                    "temperature": temp,
+                },
+                timeout=300,
+            )
+            if r.status_code == 429:  # Rate limit
+                wait = 60
+                print(f"[rate limit, esperant {wait}s] ", end="", flush=True)
+                time.sleep(wait)
+                continue
+            if r.status_code != 200:
+                raise RuntimeError(f"HTTP {r.status_code}: {r.text[:200]}")
+            data = r.json()
+            return data["choices"][0]["message"]["content"] or ""
+        except Exception as e:
+            err_str = str(e)
+            if attempt < max_retries - 1 and ("timeout" in err_str.lower() or "500" in err_str or "502" in err_str or "503" in err_str):
+                wait = 15 * (attempt + 1)
+                print(f"[retry {attempt+1}/{max_retries} en {wait}s] ", end="", flush=True)
+                time.sleep(wait)
+                continue
+            raise
+
+
+def call_mistral(system_prompt: str, user_prompt: str) -> str:
+    return _call_mistral_base(system_prompt, user_prompt, max_tokens=8192, temp=0.3)
+
+
+def call_mistral_judge(system_prompt: str, user_prompt: str) -> str:
+    return _call_mistral_base(system_prompt, user_prompt, max_tokens=4096, temp=0.2)
+
+
+GEN_CALLERS = {"gemini": call_gemini, "sonnet": call_sonnet, "gpt": call_gpt, "gemma4": call_gemma4, "mistral": call_mistral}
+JUDGE_CALLERS = {"gemini": call_gemini, "gpt4mini": call_gpt4mini, "sonnet": call_sonnet, "gemma4": call_gemma4_judge, "mistral": call_mistral_judge}
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # PROMPTS D'AVALUACIÓ — RÚBRICA V2 (8 criteris)
@@ -1042,9 +1135,9 @@ if __name__ == "__main__":
     parser.add_argument("--phase", required=True,
         choices=["init_db","copy_v1","generate","evaluate","trio","cross","report","all"])
     parser.add_argument("--generator", default="all",
-        choices=["gemini","sonnet","gpt","all"])
+        choices=["gemini","sonnet","gpt","gemma4","mistral","all"])
     parser.add_argument("--judge", default=None,
-        choices=["gemini","gpt4mini","sonnet"])
+        choices=["gemini","gpt4mini","sonnet","gemma4","mistral"])
     parser.add_argument("--limit", type=int, default=0,
         help="Limita el nombre d'avaluacions noves (0 = sense límit)")
     args = parser.parse_args()
