@@ -1,0 +1,103 @@
+{
+  "per_perfil": [
+    {
+      "perfil": "P1",
+      "nom": "Nouvingut arab pre-A1 DUA Acces",
+      "n": 138,
+      "mean": 4.057101449275361
+    },
+    {
+      "perfil": "P2",
+      "nom": "Nouvingut xines A1 DUA Acces",
+      "n": 135,
+      "mean": 4.078222222222222
+    },
+    {
+      "perfil": "P3",
+      "nom": "TDAH A2 DUA Core",
+      "n": 136,
+      "mean": 4.309485294117647
+    },
+    {
+      "perfil": "P4",
+      "nom": "TEA B1 DUA Core",
+      "n": 137,
+      "mean": 4.308832116788321
+    },
+    {
+      "perfil": "P5",
+      "nom": "Dislexia A2 DUA Acces",
+      "n": 130,
+      "mean": 4.332692307692308
+    },
+    {
+      "perfil": "P6",
+      "nom": "DI pre-A1 DUA Acces",
+      "n": 140,
+      "mean": 4.428214285714286
+    },
+    {
+      "perfil": "P7",
+      "nom": "Altes capacitats B2 DUA Enriquiment",
+      "n": 139,
+      "mean": 3.9878417266187056
+    },
+    {
+      "perfil": "P8",
+      "nom": "Nouvingut+Dislexia A1 (creuament)",
+      "n": 137,
+      "mean": 4.2071532846715325
+    },
+    {
+      "perfil": "P9",
+      "nom": "TDAH+TEA B1 (creuament)",
+      "n": 137,
+      "mean": 4.3238686131386865
+    },
+    {
+      "perfil": "P10",
+      "nom": "Vulnerabilitat+TDL A2 (creuament)",
+      "n": 135,
+      "mean": 4.315185185185185
+    }
+  ],
+  "per_etapa": [
+    {
+      "etapa": "ESO",
+      "n": 702,
+      "mean": 4.267720797720798
+    },
+    {
+      "etapa": "batxillerat",
+      "n": 313,
+      "mean": 4.067571884984026
+    },
+    {
+      "etapa": "primaria",
+      "n": 349,
+      "mean": 4.316790830945559
+    }
+  ],
+  "per_genere": [
+    {
+      "genere": "argumentacio",
+      "n": 371,
+      "mean": 4.2860646900269534
+    },
+    {
+      "genere": "explicacio",
+      "n": 330,
+      "mean": 4.227818181818182
+    },
+    {
+      "genere": "instruccio",
+      "n": 330,
+      "mean": 4.310787878787878
+    },
+    {
+      "genere": "narracio",
+      "n": 333,
+      "mean": 4.107447447447448
+    }
+  ]
+}

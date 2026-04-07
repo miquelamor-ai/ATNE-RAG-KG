@@ -953,9 +953,75 @@ def clean_gemini_output(text: str) -> str:
     return text.strip()
 
 
+def _call_llm(active_model: str, system_prompt: str, text: str) -> str:
+    """Wrapper unificat de crida al LLM (Mistral o Gemma 4)."""
+    if active_model == "mistral":
+        r = requests.post(
+            "https://api.mistral.ai/v1/chat/completions",
+            headers={"Authorization": f"Bearer {MISTRAL_API_KEY}", "Content-Type": "application/json"},
+            json={
+                "model": "mistral-small-latest",
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": f"TEXT ORIGINAL A ADAPTAR:\n\n{text}"},
+                ],
+                "max_tokens": 8192,
+                "temperature": 0.4,
+            },
+            timeout=180,
+        )
+        if r.status_code != 200:
+            raise RuntimeError(f"HTTP {r.status_code}: {r.text[:200]}")
+        return r.json()["choices"][0]["message"]["content"] or ""
+    elif active_model == "gemma4":
+        response = gemini_client.models.generate_content(
+            model="gemma-4-31b-it",
+            contents=[types.Content(role="user", parts=[types.Part(text=f"{system_prompt}\n\n---\n\nTEXT ORIGINAL A ADAPTAR:\n\n{text}")])],
+            config=types.GenerateContentConfig(temperature=0.4, max_output_tokens=8192),
+        )
+        return response.text or ""
+    else:
+        raise RuntimeError(f"Model desconegut: {active_model}. Opcions: mistral, gemma4")
+
+
+VERIFY_SYSTEM = """Ets un avaluador pedagògic ràpid. Avalua una adaptació de text educatiu amb 3 criteris breus (1-5 cadascun):
+- Q (Qualitat textual): coherència, correcció gramatical, llegibilitat
+- P (Perfil): s'ha aplicat bé al perfil de l'alumne declarat
+- C (Curricular): preserva el contingut original sense errors
+
+Retorna NOMÉS aquest JSON:
+{"Q":1-5,"P":1-5,"C":1-5,"j":"una frase justificació"}"""
+
+
+def _verify_adaptation(active_model: str, text_original: str, text_adapted: str, profile: dict, params: dict):
+    """Autoavaluació ràpida amb 3 criteris. Retorna (mitjana, info)."""
+    import re
+    perfil_nom = profile.get("nom", "genèric")
+    mecr = params.get("mecr_sortida", "B2")
+    dua = params.get("dua", "Core")
+    user_msg = (
+        f"PERFIL: {perfil_nom} | MECR sortida: {mecr} | DUA: {dua}\n\n"
+        f"TEXT ORIGINAL:\n{text_original[:2000]}\n\n"
+        f"TEXT ADAPTAT:\n{text_adapted[:3000]}\n\n"
+        f"Puntua Q, P, C (1-5). JSON nomes."
+    )
+    raw = _call_llm(active_model, VERIFY_SYSTEM, user_msg)
+    # Extreure JSON
+    m = re.search(r'\{[^}]*"Q"[^}]*\}', raw, re.DOTALL)
+    if not m:
+        raise RuntimeError(f"No s'ha trobat JSON a la resposta: {raw[:200]}")
+    import json as _json
+    data = _json.loads(m.group(0))
+    q = float(data.get("Q", 0))
+    p = float(data.get("P", 0))
+    c = float(data.get("C", 0))
+    avg = (q + p + c) / 3
+    return avg, {"Q": q, "P": p, "C": c, "j": data.get("j", "")}
+
+
 def run_adaptation(text: str, profile: dict, context: dict, params: dict,
                    progress_callback=None, model_override: str = None):
-    """Executa tot el pipeline d'adaptació: RAG search + LLM."""
+    """Executa tot el pipeline d'adaptació: RAG search + LLM + Verify + Retry."""
     cb = progress_callback or (lambda ev: None)
     active_model = (model_override or ATNE_MODEL).lower()
 
@@ -1005,42 +1071,51 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
     # 4. System prompt
     system_prompt = build_system_prompt(profile, context, params, rag_context)
 
-    # 5. Cridar LLM segons active_model
+    # 5. Cridar LLM segons active_model (amb Generate+Verify+Retry)
     model_label = {"gemma4": "Gemma 4 31B", "mistral": "Mistral Small"}.get(active_model, active_model)
-    cb({"type": "step", "step": "adapting", "msg": f"Generant adaptació amb {model_label}..."})
     adapted = ""
-    try:
-        if active_model == "mistral":
-            r = requests.post(
-                "https://api.mistral.ai/v1/chat/completions",
-                headers={"Authorization": f"Bearer {MISTRAL_API_KEY}", "Content-Type": "application/json"},
-                json={
-                    "model": "mistral-small-latest",
-                    "messages": [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": f"TEXT ORIGINAL A ADAPTAR:\n\n{text}"},
-                    ],
-                    "max_tokens": 8192,
-                    "temperature": 0.4,
-                },
-                timeout=180,
-            )
-            if r.status_code != 200:
-                raise RuntimeError(f"HTTP {r.status_code}: {r.text[:200]}")
-            adapted = r.json()["choices"][0]["message"]["content"] or ""
-        elif active_model == "gemma4":
-            response = gemini_client.models.generate_content(
-                model="gemma-4-31b-it",
-                contents=[types.Content(role="user", parts=[types.Part(text=f"{system_prompt}\n\n---\n\nTEXT ORIGINAL A ADAPTAR:\n\n{text}")])],
-                config=types.GenerateContentConfig(temperature=0.4, max_output_tokens=8192),
-            )
-            adapted = response.text or ""
-        else:
-            raise RuntimeError(f"Model desconegut: {active_model}. Opcions: mistral, gemma4")
-        # Netejar "thinking" filtrat (text abans del primer ##)
-        adapted = clean_gemini_output(adapted)
-    except Exception as e:
-        adapted = f"Error en la generació ({active_model}): {e}"
+    verify_enabled = params.get("verify_retry", True)  # per defecte ON
+    min_score = 4.0
+    max_attempts = 2 if verify_enabled else 1
+    best_adapted = ""
+    best_score = -1
+    verify_info = None
+
+    for attempt in range(1, max_attempts + 1):
+        label_attempt = f" (intent {attempt}/{max_attempts})" if verify_enabled else ""
+        cb({"type": "step", "step": "adapting", "msg": f"Generant adaptació amb {model_label}{label_attempt}..."})
+        try:
+            adapted = _call_llm(active_model, system_prompt, text)
+            adapted = clean_gemini_output(adapted)
+        except Exception as e:
+            adapted = f"Error en la generació ({active_model}): {e}"
+            break
+
+        if not verify_enabled:
+            best_adapted = adapted
+            break
+
+        # VERIFY: jutge ràpid amb rúbrica simplificada
+        cb({"type": "step", "step": "verifying", "msg": f"Autoavaluant qualitat (intent {attempt})..."})
+        try:
+            score, verify_info = _verify_adaptation(active_model, text, adapted, profile, params)
+            cb({"type": "step", "step": "verify_result", "msg": f"Puntuació autoavaluació: {score:.1f}/5.0"})
+        except Exception as e:
+            cb({"type": "step", "step": "warning", "msg": f"Avís: autoavaluació fallida ({e}). Conservem aquesta versió."})
+            best_adapted = adapted
+            break
+
+        if score > best_score:
+            best_score = score
+            best_adapted = adapted
+
+        if score >= min_score:
+            break  # OK
+
+        if attempt < max_attempts:
+            cb({"type": "step", "step": "retry", "msg": f"Qualitat < {min_score}. Regenerant..."})
+
+    adapted = best_adapted if best_adapted else adapted
 
     # 6. Post-processament Python
     mecr = params.get("mecr_sortida", "B2")
@@ -1048,7 +1123,10 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
     for w in pp.get("warnings", []):
         cb({"type": "step", "step": "warning", "msg": w})
 
-    cb({"type": "result", "adapted": adapted, "post_process": pp})
+    result_ev = {"type": "result", "adapted": adapted, "post_process": pp}
+    if verify_info is not None:
+        result_ev["verify"] = {"score": best_score, **verify_info}
+    cb(result_ev)
     cb({"type": "done"})
     return adapted
 

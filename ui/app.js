@@ -772,10 +772,13 @@ async function runAdaptation() {
     try {
         const modelSel = document.getElementById("model-selector");
         const model = modelSel ? modelSel.value : "mistral";
+        const verifyToggle = document.getElementById("verify-toggle");
+        const verify_retry = verifyToggle ? verifyToggle.checked : true;
+        const paramsWithVerify = { ...params, verify_retry };
         const resp = await fetch("/api/adapt", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text, profile, context, params, model }),
+            body: JSON.stringify({ text, profile, context, params: paramsWithVerify, model }),
         });
 
         const reader = resp.body.getReader();
