@@ -28,8 +28,14 @@ from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse, Fil
 
 load_dotenv()
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMMA4_API_KEY = os.getenv("GEMMA4_API_KEY", "")
+GEMINI_API_KEYS = [k for k in [os.getenv(f"GEMINI_API_KEY{s}", "")
+                                for s in ["", "_3", "_4", "_5", "_6", "_7"]] if k]
+GEMINI_API_KEY = GEMINI_API_KEYS[0] if GEMINI_API_KEYS else ""
+_gemini_key_idx = 0  # índex actual de rotació
+GEMMA4_API_KEYS = [k for k in [os.getenv(f"GEMMA4_API_KEY{s}", "")
+                                for s in ["", "_2", "_3", "_4", "_5", "_6", "_7"]] if k]
+GEMMA4_API_KEY = GEMMA4_API_KEYS[0] if GEMMA4_API_KEYS else ""
+_gemma4_key_idx = 0  # índex actual de rotació
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "")
 # ATNE_MODEL: gemini | gemma4 | mistral (default: el que tingui clau disponible)
 ATNE_MODEL = os.getenv("ATNE_MODEL", "").lower()
@@ -365,17 +371,54 @@ def propose_adaptation(characteristics: dict, context: dict) -> dict:
         lf = max(lf_factors)
 
     # ── MECR sortida ──
-    mecr_sortida = "B2"
+    # Cada perfil amb barrera lingüística real proposa un MECR candidat.
+    # S'agafa el MÉS BAIX (més restrictiu) de tots els candidats.
+    # Perfils sense barrera lingüística (TEA, TDAH, dislèxia, disc_visual,
+    # disc_motora, trastorn_emocional) NO proposen MECR — usen el default d'etapa.
+    # Font: docs/investigacio/mapa_barreres_perfil.md
+    MECR_ORDER = ["pre-A1", "A1", "A2", "B1", "B2", "C1"]
     etapa_defaults = {
         "infantil": "A1", "primaria": "B1", "ESO": "B2",
         "batxillerat": "B2", "FP": "B2",
     }
+    mecr_base = etapa_defaults.get(etapa, "B2")
+    mecr_candidats = []
+
+    # Nouvingut: MECR explícit triat pel docent
     if "nouvingut" in actives and mecr:
-        mecr_sortida = mecr
-    elif "di" in actives:
-        mecr_sortida = {"sever": "A1", "moderat": "A2", "lleu": "B1"}.get(di_grau, "B1")
+        mecr_candidats.append(mecr)
+
+    # DI: barrera cognitiva → lingüística
+    if "di" in actives:
+        mecr_candidats.append(
+            {"sever": "A1", "moderat": "A2", "lleu": "B1"}.get(di_grau, "B1"))
+
+    # TDL: barrera lèxica i sintàctica directa (Bishop 2017)
+    if "tdl" in actives:
+        mecr_candidats.append(
+            {"sever": "A1", "moderat": "A2", "lleu": "B1"}.get(tdl_grau, "B1"))
+
+    # Disc. auditiva prelocutiva (LSC): català escrit funciona com L2
+    if "disc_auditiva" in actives and disc_auditiva.get("comunicacio") == "LSC":
+        mecr_candidats.append("A1")
+
+    # Vulnerabilitat socioeducativa: retard lector per manca d'estimulació
+    # Redueix 1 nivell respecte l'etapa (no tant com DI o TDL)
+    if "vulnerabilitat" in actives:
+        idx = MECR_ORDER.index(mecr_base)
+        mecr_candidats.append(MECR_ORDER[max(0, idx - 1)])
+
+    # Altes capacitats (sense 2e): pujar 1 nivell per permetre més complexitat
+    if "altes_capacitats" in actives and not ac_doble:
+        idx = MECR_ORDER.index(mecr_base)
+        mecr_candidats.append(MECR_ORDER[min(len(MECR_ORDER) - 1, idx + 1)])
+
+    # Resolució: el més restrictiu guanya (excepte si altes_capacitats és l'únic)
+    if mecr_candidats:
+        mecr_sortida = min(mecr_candidats, key=lambda m: MECR_ORDER.index(m)
+                          if m in MECR_ORDER else 99)
     else:
-        mecr_sortida = etapa_defaults.get(etapa, "B2")
+        mecr_sortida = mecr_base
 
     # ── Complements automàtics ──
     complements = {
@@ -599,8 +642,8 @@ def build_persona_audience(profile: dict, context: dict, mecr: str) -> str:
     return "\n".join(lines)
 
 
-def build_system_prompt(profile: dict, context: dict, params: dict, rag_context: str) -> str:
-    """Munta el system prompt v2 en 4 capes — instruccions filtrades del catàleg de 89."""
+def build_system_prompt(profile: dict, context: dict, params: dict, rag_context: str = "") -> str:
+    """Munta el system prompt en 4 capes — instruccions graduades del catàleg de 98."""
     parts = []
     mecr = params.get("mecr_sortida", "B2")
     dua = params.get("dua", "Core")
@@ -632,25 +675,14 @@ def build_system_prompt(profile: dict, context: dict, params: dict, rag_context:
     for cb_text in crossing_blocks:
         parts.append(cb_text)
 
-    # Resolució conflictes (si nivell baix o DUA Accés)
-    if mecr in ("pre-A1", "A1", "A2") or dua == "Acces":
-        conflict = corpus_reader.get_conflict_resolution()
-        if conflict:
-            parts.append(conflict)
-
-    # Few-shot example
-    fewshot = corpus_reader.get_fewshot_example(mecr)
-    if fewshot:
-        parts.append(f"EXEMPLE DE SORTIDA ESPERADA ({mecr}):\n{fewshot}")
+    # Resolució conflictes: ELIMINAT (2026-04-09) — redundant amb A-26 graduada per MECR
+    # Few-shot example: ELIMINAT (2026-04-09) — un sol domini (fotosíntesi), risc sobreajust. Parking lot.
 
     # ═══ CAPA 4: CONTEXT (variable) ═══
 
-    # 4a. Context educatiu
-    parts.append(f"""CONTEXT EDUCATIU:
-- Etapa: {context.get('etapa', 'ESO')}
-- Curs: {context.get('curs', '')}
-- Àmbit: {context.get('ambit', '')}
-- Matèria: {context.get('materia', '')}""")
+    # 4a. Context educatiu: ELIMINAT del prompt (2026-04-09)
+    # L'etapa/curs s'usen al Python (propose_adaptation) per calcular MECR,
+    # però l'LLM no els necessita — ja rep les instruccions filtrades pel MECR correcte.
 
     # 4b. Persona-audience
     persona = build_persona_audience(profile, context, mecr)
@@ -691,13 +723,23 @@ El text complet adaptat segons tots els paràmetres indicats.
 """)
 
     if comp.get("glossari"):
-        output_sections.append(f"""
+        is_nouvingut = "nouvingut" in [k for k, v in chars.items() if v.get("actiu")]
+        if is_nouvingut and l1:
+            output_sections.append(f"""
 ## Glossari
 ACTIVAT — Genera una TAULA MARKDOWN amb 3 columnes:
 | Terme | Traducció ({l1_display}) | Explicació simple |
 Inclou tots els termes tècnics o difícils del text adaptat (mínim 8-12 termes).
 La columna de traducció ha de contenir la traducció REAL al/a la {l1_display} (en el seu alfabet original si escau: àrab, xinès, urdú, etc.).
 L'explicació ha de ser en català molt senzill (nivell A1).
+""")
+        else:
+            output_sections.append("""
+## Glossari
+ACTIVAT — Genera una TAULA MARKDOWN amb 2 columnes:
+| Terme | Explicació simple |
+Inclou tots els termes tècnics o difícils del text adaptat (mínim 8-12 termes).
+L'explicació ha de ser en català molt senzill.
 """)
 
     if comp.get("negretes"):
@@ -955,6 +997,7 @@ def clean_gemini_output(text: str) -> str:
 
 def _call_llm(active_model: str, system_prompt: str, text: str) -> str:
     """Wrapper unificat de crida al LLM (Mistral o Gemma 4)."""
+    global _gemma4_key_idx, _gemini_key_idx
     if active_model == "mistral":
         r = requests.post(
             "https://api.mistral.ai/v1/chat/completions",
@@ -974,23 +1017,49 @@ def _call_llm(active_model: str, system_prompt: str, text: str) -> str:
             raise RuntimeError(f"HTTP {r.status_code}: {r.text[:200]}")
         return r.json()["choices"][0]["message"]["content"] or ""
     elif active_model == "gemma4":
-        response = gemini_client.models.generate_content(
-            model="gemma-4-31b-it",
-            contents=[types.Content(role="user", parts=[types.Part(text=f"{system_prompt}\n\n---\n\nTEXT ORIGINAL A ADAPTAR:\n\n{text}")])],
-            config=types.GenerateContentConfig(temperature=0.4, max_output_tokens=8192),
-        )
-        return response.text or ""
+        errors = []
+        for attempt in range(len(GEMMA4_API_KEYS)):
+            idx = (_gemma4_key_idx + attempt) % len(GEMMA4_API_KEYS)
+            client = genai.Client(
+                api_key=GEMMA4_API_KEYS[idx],
+                http_options=types.HttpOptions(timeout=300_000),
+            )
+            try:
+                response = client.models.generate_content(
+                    model="gemma-4-31b-it",
+                    contents=[types.Content(role="user", parts=[types.Part(text=f"{system_prompt}\n\n---\n\nTEXT ORIGINAL A ADAPTAR:\n\n{text}")])],
+                    config=types.GenerateContentConfig(temperature=0.4, max_output_tokens=8192),
+                )
+                _gemma4_key_idx = (idx + 1) % len(GEMMA4_API_KEYS)  # rotar per la pròxima crida
+                return response.text or ""
+            except Exception as e:
+                errors.append(f"clau {idx+1}: {e}")
+                continue
+        raise RuntimeError(f"Totes les claus Gemma4 han fallat: {'; '.join(errors)}")
     elif active_model == "gemini":
-        response = gemini_client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=[types.Content(role="user", parts=[types.Part(text=text)])],
-            config=types.GenerateContentConfig(
-                system_instruction=system_prompt,
-                temperature=0.4, max_output_tokens=8192,
-                thinking_config=types.ThinkingConfig(thinking_budget=0),
-            ),
-        )
-        return response.text or ""
+        errors = []
+        for attempt in range(len(GEMINI_API_KEYS)):
+            idx = (_gemini_key_idx + attempt) % len(GEMINI_API_KEYS)
+            client = genai.Client(
+                api_key=GEMINI_API_KEYS[idx],
+                http_options=types.HttpOptions(timeout=300_000),
+            )
+            try:
+                response = client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=[types.Content(role="user", parts=[types.Part(text=text)])],
+                    config=types.GenerateContentConfig(
+                        system_instruction=system_prompt,
+                        temperature=0.4, max_output_tokens=8192,
+                        thinking_config=types.ThinkingConfig(thinking_budget=0),
+                    ),
+                )
+                _gemini_key_idx = (idx + 1) % len(GEMINI_API_KEYS)
+                return response.text or ""
+            except Exception as e:
+                errors.append(f"clau {idx+1}: {e}")
+                continue
+        raise RuntimeError(f"Totes les claus Gemini han fallat: {'; '.join(errors)}")
     elif active_model == "gpt":
         from openai import OpenAI
         client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -1044,55 +1113,20 @@ def _verify_adaptation(active_model: str, text_original: str, text_adapted: str,
 
 def run_adaptation(text: str, profile: dict, context: dict, params: dict,
                    progress_callback=None, model_override: str = None):
-    """Executa tot el pipeline d'adaptació: RAG search + LLM + Verify + Retry."""
+    """Executa tot el pipeline d'adaptació: instruccions graduades + LLM + Verify + Retry.
+
+    RAG-KG desactivat (2026-04-09): les 98 instruccions graduades del catàleg
+    cobreixen el 'què fer' de forma exhaustiva. El RAG recuperava documents
+    irrellevants (M0, perfils equivocats) i el resultat era indistingible.
+    La infraestructura RAG-KG (Supabase vectors + KG) es manté per a futur ús
+    (diagnòstic, generació de material, recerca).
+    """
     cb = progress_callback or (lambda ev: None)
     active_model = (model_override or ATNE_MODEL).lower()
 
-    # 1. Cerca RAG+KG
-    cb({"type": "step", "step": "search", "msg": "Cercant context pedagògic rellevant..."})
-
-    chars = profile.get("caracteristiques", {})
-    # Construir query de cerca: text + característiques
-    search_terms = []
-    for key, val in chars.items():
-        if val.get("actiu"):
-            search_terms.append(key.replace("_", " "))
-    search_query = " ".join(search_terms) + " " + text[:200]
-
-    try:
-        search_results = combined_search(search_query, top_k=8)
-        cb({"type": "step", "step": "search_done",
-            "msg": f"{len(search_results)} documents trobats via RAG+KG"})
-    except Exception as e:
-        cb({"type": "step", "step": "search_done",
-            "msg": f"Cerca RAG amb error ({e}), continuant sense context..."})
-        search_results = []
-
-    # 2. Recuperar documents obligatoris
-    cb({"type": "step", "step": "mandatory", "msg": "Afegint documents obligatoris..."})
-    mandatory_names = get_mandatory_docs(chars)
-    # Comprovar quins ja tenim dels search results
-    found_sources = {r["source"] for r in search_results if r.get("source")}
-    missing = [n for n in mandatory_names if n not in found_sources]
-    if missing:
-        mandatory_docs = fetch_docs_by_source(missing)
-        for doc in mandatory_docs:
-            search_results.append({
-                "source": doc["metadata"].get("source", "obligatori"),
-                "content": doc["content"],
-                "final_score": 1.0,
-            })
-
-    # 3. Muntar context RAG
-    rag_parts = []
-    for r in search_results:
-        if r.get("content"):
-            source = r.get("source", "")
-            rag_parts.append(f"[Font: {source}]\n{r['content'][:500]}")
-    rag_context = "\n\n---\n\n".join(rag_parts[:12])
-
-    # 4. System prompt
-    system_prompt = build_system_prompt(profile, context, params, rag_context)
+    # System prompt — sense RAG, les instruccions graduades són el motor
+    cb({"type": "step", "step": "search", "msg": "Preparant instruccions d'adaptació..."})
+    system_prompt = build_system_prompt(profile, context, params, rag_context="")
 
     # 5. Cridar LLM segons active_model (amb Generate+Verify+Retry)
     model_label = {"gemma4": "Gemma 4 31B", "mistral": "Mistral Small"}.get(active_model, active_model)

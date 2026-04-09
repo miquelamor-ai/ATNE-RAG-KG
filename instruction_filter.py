@@ -192,11 +192,11 @@ def _get_intensified_text(iid: str, instr: dict, chars: dict, mecr: str) -> str:
             return detail
         return text
 
-    # Intensificació de C-04 per baixa memòria de treball
+    # Intensificació de C-04 per baixa memòria de treball (absorb C-04b)
     if iid == "C-04":
         tdah_data = chars.get("tdah", {})
         if tdah_data.get("actiu") and _str_to_bool(tdah_data.get("baixa_memoria_treball", False)):
-            return "Chunking estricte: agrupa informació en blocs de MÀXIM 3 elements (memòria de treball limitada)."
+            return "Chunking estricte: blocs de MÀXIM 2-3 elements (memòria de treball limitada). Repeteix informació clau a cada bloc. Afegeix resums parcials cada 2-3 paràgrafs."
 
     # Intensificació de H-04 per grau sever
     if iid == "H-04":
@@ -213,6 +213,12 @@ def _get_intensified_text(iid: str, instr: dict, chars: dict, mecr: str) -> str:
             return "Discapacitat auditiva (LSC): simplificació intensiva com L2. Eliminar subordinades, una idea per frase, vocabulari molt freqüent."
         if impl:
             return "Discapacitat auditiva (implant coclear): simplificació moderada. Mantenir estructures senzilles però permetre més complexitat que en LSC."
+
+    # ── Handler genèric per mecr_detail (aplica a qualsevol instrucció graduada) ──
+    if "mecr_detail" in instr:
+        detail = instr["mecr_detail"].get(mecr, "")
+        if detail:
+            return detail
 
     return text
 
@@ -366,8 +372,9 @@ def format_instructions_for_prompt(filtered: dict) -> str:
         label = macro["label"]
         texts = [instr["text"] for instr in macro["instruccions"]]
 
-        # Agrupar en bloc compacte (prosa, no llista numerada)
-        block = f"**{label}**: {' '.join(texts)}"
+        # Cada instrucció en línia separada per millorar atenció de l'LLM
+        bullet_list = "\n".join(f"- {t}" for t in texts)
+        block = f"**{label}**:\n{bullet_list}"
         sections.append(block)
 
     # Info de supressions per altes capacitats

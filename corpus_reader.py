@@ -62,40 +62,25 @@ def load_corpus():
 
 OBJECTIU: Transformar textos educatius perquè siguin accessibles a l'alumnat descrit, seguint principis de DUA, Lectura Fàcil i MECR.
 
-RESTRICCIONS ABSOLUTES:
-- Comença DIRECTAMENT amb "## Text adaptat". ZERO meta-text, ZERO introduccions.
-- NO escriguis "Here is...", "Final draft...", "Let me...", "I'll proceed...", "Okay...".
-- Escriu en català (o la llengua vehicular indicada).
-- Mantingues el rigor curricular: MAI substitueixis un terme tècnic per un de col·loquial.
-  PARAULES PROHIBIDES en context tècnic: "cosa", "coses", "allò", "això", "el que fa que", "serveix per", "un tipus de".
-- ADAPTA, no CREES: cada element del text adaptat ha de tenir correspondència amb l'original (principi de coherència de Mayer)."""
+TO: Acadèmic neutre. Respecta el registre del text original quan sigui identificable.
 
-    _cache["universal_rules"] = """REGLES UNIVERSALS D'ADAPTACIÓ:
+FIDELITAT:
+- En adaptació: cada element ha de tenir correspondència amb l'original (Mayer). No inventis dades, exemples ni fets.
+- En complements (glossari, preguntes, esquemes): crea contingut nou derivat del text adaptat.
 
-LÈXIC:
-1. Usa vocabulari freqüent. Termes tècnics en **negreta** amb definició.
-2. Un terme = un concepte. No variïs per elegància (no sinònims).
-3. Referents pronominals explícits: si ambigu, repeteix el nom.
-4. Elimina expressions idiomàtiques i sentit figurat.
+RIGOR TERMINOLÒGIC: Conserva sempre els termes curriculars. Defineix-los, no els eliminis. MAI substitueixis per parafrasis buides ("la cosa verda", "el que fa que", "un tipus de").
 
-SINTAXI:
-5. Una idea per frase. Veu activa. Subjecte explícit.
-6. Puntuació simple: punts i dos punts. Evita punt i coma.
-7. Ordre canònic: Subjecte + Verb + Complement.
+FORMAT: Comença DIRECTAMENT amb "## Text adaptat". Zero meta-text ("Here is...", "Let me...", "Okay...").
 
-ESTRUCTURA:
-8. Paràgrafs curts (3-5 frases màx). Un tema per paràgraf.
-9. Títols descriptius en format pregunta quan sigui possible.
-10. Frase tòpic al principi de cada paràgraf.
+LLENGUA: Català (o la llengua vehicular indicada).
 
-COHESIÓ (Halliday):
-11. Connectors explícits entre frases (per tant, a més, en canvi).
-12. Desnominalitza: noms abstractes → verbs ("l'evaporació" → "quan s'evapora").
-13. Transicions entre seccions ("Ja hem vist X. Ara veurem Y").
+SEGURETAT:
+- No reprodueixis dades personals de l'alumne al text adaptat.
+- Evita exemples potencialment traumàtics amb perfils vulnerables.
+- No inventis estadístiques, dates ni fets no presents al text original."""
 
-QUALITAT:
-14. Scaffolding decreixent (Vygotsky): 1a aparició=terme+definició completa, 2a=terme+definició breu, 3a en endavant=terme sol.
-15. AUTOCHECK: revisa que no hi aparegui cap de les paraules prohibides."""
+    # universal_rules eliminades — totes ja són al catàleg d'instruccions amb gradació MECR
+    _cache["universal_rules"] = ""
 
     # ── Perfils (llegits dels M1) ──
     profile_files = {

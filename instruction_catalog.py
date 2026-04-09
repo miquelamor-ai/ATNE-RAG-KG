@@ -29,8 +29,8 @@ MACRODIRECTIVES = {
         "ordre": 1,
         "instruccions_possibles": [
             "A-01", "A-02", "A-03", "A-04", "A-05", "A-06",
-            "A-15", "A-16", "A-17", "A-18", "A-19",
-            "A-20", "A-21", "A-22", "A-23",
+            "A-14", "A-15", "A-16", "A-17", "A-18", "A-19",
+            "A-20", "A-21", "A-22", "A-23", "A-29", "A-30",
         ],
     },
     "SINTAXI": {
@@ -38,7 +38,7 @@ MACRODIRECTIVES = {
         "ordre": 2,
         "instruccions_possibles": [
             "A-07", "A-08", "A-09", "A-10", "A-11",
-            "A-12", "A-13", "A-24", "A-25", "A-26",
+            "A-12", "A-13", "A-24", "A-25", "A-26", "A-28",
         ],
     },
     "ESTRUCTURA": {
@@ -53,7 +53,7 @@ MACRODIRECTIVES = {
         "label": "SUPORT COGNITIU",
         "ordre": 4,
         "instruccions_possibles": [
-            "C-01", "C-02", "C-03", "C-04", "C-04b", "C-05", "C-06", "C-08",
+            "C-01", "C-02", "C-03", "C-04", "C-05", "C-06", "C-08",
             "A-27",
         ],
     },
@@ -83,7 +83,7 @@ MACRODIRECTIVES = {
         "label": "PERSONALITZACIÓ LINGÜÍSTICA",
         "ordre": 8,
         "instruccions_possibles": [
-            "G-01", "G-02", "G-03", "G-05", "G-06", "G-07",
+            "G-01", "G-02", "G-03", "G-06", "G-07",  # G-05 eliminat (fusionat amb E-08)
         ],
     },
     "PERFIL": {
@@ -91,13 +91,18 @@ MACRODIRECTIVES = {
         "ordre": 9,
         "instruccions_possibles": [
             "H-01", "H-02", "H-03",
-            "H-04", "H-04b", "H-05", "H-06",
+            "H-04", "H-05", "H-06",
             "H-07", "H-08", "H-22",
             "H-09", "H-10", "H-11",
-            "H-12", "H-14",
-            "H-15",
             "H-16", "H-17", "H-23", "H-24", "H-25", "H-26",
             "H-19", "H-20", "H-20b", "H-21",
+        ],
+    },
+    "ENRIQUIMENT": {
+        "label": "⚠️ ENRIQUIMENT — NO SIMPLIFIQUIS",
+        "ordre": 0,  # ordre 0 = primer bloc del prompt, que soni FORT
+        "instruccions_possibles": [
+            "H-12", "H-14", "H-15",
         ],
     },
 }
@@ -145,7 +150,12 @@ CATALOG = {
         "text": "Elimina polisèmia: cada paraula en un sol sentit. Si cal, substitueix.",
         "activation": "NIVELL",
         "macro": "LEXIC",
-        "mecr_levels": ["pre-A1", "A1", "A2", "B1"],
+        "mecr_detail": {
+            "pre-A1": "Elimina TOTA polisèmia: cada paraula en un sol sentit. Substitueix qualsevol mot ambigu.",
+            "A1": "Elimina polisèmia: cada paraula en un sol sentit. Substitueix mots ambigus.",
+            "A2": "Redueix polisèmia: una accepció per mot. Permet polisèmia si el context desambigua clarament.",
+            "B1": "Controla polisèmia: evita usos figurats o poc habituals d'un mot. Permet sentits habituals.",
+        },
     },
     "A-07": {
         "text": "Una idea per frase. Divideix frases llargues en unitats simples.",
@@ -157,25 +167,45 @@ CATALOG = {
         "text": "Veu activa obligatòria. Transforma passives en actives.",
         "activation": "NIVELL",
         "macro": "SINTAXI",
-        "mecr_levels": ["pre-A1", "A1", "A2", "B1"],
+        "mecr_detail": {
+            "pre-A1": "Veu activa SEMPRE. Zero passives, zero impersonals.",
+            "A1": "Veu activa obligatòria. Transforma totes les passives en actives.",
+            "A2": "Veu activa preferent. Permet passiva només si és molt habitual ('és considerat').",
+            "B1": "Prefereix veu activa. Permet passiva quan sigui natural i clara.",
+        },
     },
     "A-09": {
         "text": "Subjecte explícit a cada frase. No l'elideixis.",
         "activation": "NIVELL",
         "macro": "SINTAXI",
-        "mecr_levels": ["pre-A1", "A1", "A2", "B1"],
+        "mecr_detail": {
+            "pre-A1": "Subjecte explícit SEMPRE. Repeteix el nom complet a cada frase.",
+            "A1": "Subjecte explícit a cada frase. No elideixis mai.",
+            "A2": "Subjecte explícit. Permet elisió només si el subjecte és idèntic a la frase anterior.",
+            "B1": "Subjecte explícit quan hi hagi risc d'ambigüitat. Permet elisió en contextos clars.",
+        },
     },
     "A-10": {
         "text": "Ordre canònic: Subjecte + Verb + Complement. Evita inversions.",
         "activation": "NIVELL",
         "macro": "SINTAXI",
-        "mecr_levels": ["pre-A1", "A1", "A2", "B1"],
+        "mecr_detail": {
+            "pre-A1": "Ordre SVO estricte a TOTES les frases. Zero inversions, zero dislocacions.",
+            "A1": "Ordre SVO obligatori. Evita qualsevol inversió.",
+            "A2": "Ordre SVO preferent. Permet tematització frontal simple ('Ahir, el Joan...').",
+            "B1": "Ordre SVO per defecte. Permet inversions estilístiques si no generen ambigüitat.",
+        },
     },
     "A-11": {
         "text": "Puntuació simplificada: punts i dos punts. Evita punt i coma, parèntesis llargs, guions.",
         "activation": "NIVELL",
         "macro": "SINTAXI",
-        "mecr_levels": ["pre-A1", "A1", "A2", "B1"],
+        "mecr_detail": {
+            "pre-A1": "Puntuació mínima: NOMÉS punts finals. Ni dos punts, ni comes entre clàusules.",
+            "A1": "Puntuació simple: punts i comes. Evita dos punts, punt i coma, parèntesis.",
+            "A2": "Puntuació simplificada: punts, comes i dos punts. Evita punt i coma i parèntesis llargs.",
+            "B1": "Puntuació estàndard simplificada. Permet punt i coma ocasional. Evita parèntesis llargs.",
+        },
     },
     "A-12": {
         "text": "Limita la longitud de frase al màxim del nivell MECR de sortida.",
@@ -208,8 +238,14 @@ CATALOG = {
     },
     "A-15": {
         "text": "Scaffolding decreixent (Vygotsky): 1a aparició = terme + definició completa; 2a = terme + definició breu; 3a en endavant = terme sol.",
-        "activation": "SEMPRE",
+        "activation": "NIVELL",
         "macro": "LEXIC",
+        "mecr_detail": {
+            "pre-A1": "Scaffolding màxim: 1a aparició = terme + definició completa + exemple visual; 2a = terme + definició; 3a = terme sol amb recordatori ('recorda: X és...').",
+            "A1": "Scaffolding complet: 1a aparició = terme + definició completa; 2a = terme + definició breu; 3a en endavant = terme sol.",
+            "A2": "Scaffolding estàndard: 1a aparició = terme + definició; repeticions posteriors = terme sol.",
+            "B1": "Scaffolding lleuger: defineix un terme la 1a vegada; després usa'l sense definició.",
+        },
     },
     "A-16": {
         "text": "Desnominalitza: noms abstractes → verbs. Exemple: 'l'evaporació' → 'quan s'evapora'.",
@@ -221,7 +257,12 @@ CATALOG = {
         "text": "Evita negacions múltiples. Reformula en positiu.",
         "activation": "NIVELL",
         "macro": "LEXIC",
-        "mecr_levels": ["pre-A1", "A1", "A2", "B1"],
+        "mecr_detail": {
+            "pre-A1": "ZERO negacions. Reformula TOTES les frases en positiu.",
+            "A1": "Evita negacions. Reformula en positiu. Permet 'no' simple només si és imprescindible.",
+            "A2": "Evita negacions múltiples. Permet negació simple ('no és', 'no té').",
+            "B1": "Evita doble negació. Permet negació simple i natural.",
+        },
     },
     "A-18": {
         "text": "Dates en format complet (12 de març de 2026, no 12/03/26). Xifres amb context.",
@@ -237,7 +278,11 @@ CATALOG = {
         "text": "Controla la densitat lèxica: redueix la proporció de paraules de contingut per frase.",
         "activation": "NIVELL",
         "macro": "LEXIC",
-        "mecr_levels": ["pre-A1", "A1", "A2"],
+        "mecr_detail": {
+            "pre-A1": "Densitat lèxica mínima: màxim 2 paraules de contingut per frase. La resta funcionals.",
+            "A1": "Densitat lèxica baixa: màxim 3 paraules de contingut per frase.",
+            "A2": "Densitat lèxica controlada: màxim 4-5 paraules de contingut per frase.",
+        },
         "suppress_if_profile": ["tdl"],  # H-16 ja cobreix això
     },
     "A-21": {
@@ -262,19 +307,32 @@ CATALOG = {
         "text": "Present d'indicatiu preferent. Evita subjuntiu, condicional i temps composts.",
         "activation": "NIVELL",
         "macro": "SINTAXI",
-        "mecr_levels": ["pre-A1", "A1", "A2"],
+        "mecr_detail": {
+            "pre-A1": "NOMÉS present d'indicatiu. Zero subjuntiu, zero condicional, zero temps composts.",
+            "A1": "Present d'indicatiu i passat simple (perfet perifràstic). Evita subjuntiu i condicional.",
+            "A2": "Present, passat simple i futur perifràstic ('anirà'). Evita subjuntiu i condicional.",
+        },
     },
     "A-25": {
         "text": "Formes verbals simples. Evita perífrasis verbals i construccions complexes.",
         "activation": "NIVELL",
         "macro": "SINTAXI",
-        "mecr_levels": ["pre-A1", "A1", "A2"],
+        "mecr_detail": {
+            "pre-A1": "ZERO perífrasis. Només formes verbals simples (present, passat, imperatiu).",
+            "A1": "Formes simples. Permet 'anar a + infinitiu' i 'haver de + infinitiu'.",
+            "A2": "Formes simples preferents. Permet perífrasis d'obligació i futur. Evita gerundis.",
+        },
     },
     "A-26": {
         "text": "Evita incisos parentètics llargs. Si la definició allarga la frase, posa-la en frase independent.",
         "activation": "NIVELL",
         "macro": "SINTAXI",
-        "mecr_levels": ["pre-A1", "A1", "A2", "B1"],
+        "mecr_detail": {
+            "pre-A1": "ZERO incisos ni parèntesis. Cada informació en frase independent.",
+            "A1": "Evita incisos. Definicions en frase separada, mai entre parèntesis.",
+            "A2": "Permet incisos curts (3-4 mots). Definicions llargues en frase apart.",
+            "B1": "Permet incisos breus i parèntesis explicatius. Evita incisos de >8 mots.",
+        },
     },
     # ─── NOVA: retall per fatiga ──────────────────────────────────────────────
     "A-27": {
@@ -283,6 +341,33 @@ CATALOG = {
         "macro": "COGNITIU",
         "profiles": ["tdah", "di"],
         "subvar_conditions": {"fatiga_o_sever": True},  # tdah.fatiga_cognitiva O tdah.grau=sever O di.grau=sever
+    },
+    # ─── NOVES: sessions 2026-04-09 ──────────────────────────────────────────
+    "A-28": {
+        "text": "Evita oracions impersonals (cal, convé, s'ha de). Dirigeix-te directament al lector: 'Tu has de...' / 'Fes...'",
+        "activation": "NIVELL",
+        "macro": "SINTAXI",
+        "mecr_detail": {
+            "pre-A1": "ZERO impersonals. Sempre 'tu' directe: 'Mira', 'Fes', 'Escriu'.",
+            "A1": "Evita impersonals. Prefereix 'tu has de' a 'cal que' i 'fes' a 's'ha de fer'.",
+            "A2": "Redueix impersonals. Permet 'cal' si és molt habitual, però prefereix formes directes.",
+        },
+    },
+    "A-29": {
+        "text": "Evita adverbis acabats en -ment. Reformula amb verbs o frases curtes.",
+        "activation": "NIVELL",
+        "macro": "LEXIC",
+        "mecr_detail": {
+            "pre-A1": "ZERO adverbis en -ment. 'Ràpidament' → 'molt ràpid'. 'Posteriorment' → 'després'.",
+            "A1": "Evita adverbis en -ment. Substitueix per formes simples ('lentament' → 'a poc a poc').",
+            "A2": "Redueix adverbis en -ment. Permet els molt habituals ('normalment', 'finalment').",
+        },
+    },
+    "A-30": {
+        "text": "Evita anglicismes i paraules d'altres idiomes. Busca equivalents habituals en català.",
+        "activation": "PERFIL",
+        "macro": "LEXIC",
+        "profiles": ["nouvingut", "tdl"],
     },
 
     # ─── B. ESTRUCTURA I ORGANITZACIÓ ─────────────────────────────────────────
@@ -306,7 +391,12 @@ CATALOG = {
         "text": "Llistes en lloc d'enumeracions dins del text.",
         "activation": "NIVELL",
         "macro": "ESTRUCTURA",
-        "mecr_levels": ["pre-A1", "A1", "A2", "B1"],
+        "mecr_detail": {
+            "pre-A1": "SEMPRE llista amb vinyetes. Màxim 3 ítems per llista. Mai enumeració dins del text.",
+            "A1": "Llista amb vinyetes si 2+ elements. Màxim 4-5 ítems per llista.",
+            "A2": "Llista si 3+ elements. Permet enumeració breu dins del text (2 elements).",
+            "B1": "Llista si 4+ elements o si l'enumeració és complexa.",
+        },
     },
     "B-05": {
         "text": "Estructura deductiva: general → particular. Primer la idea, després els detalls.",
@@ -324,13 +414,22 @@ CATALOG = {
         "text": "Resum anticipatiu (advance organizer): comença cada secció amb una frase que anticipa el contingut.",
         "activation": "NIVELL",
         "macro": "ESTRUCTURA",
-        "mecr_levels": ["pre-A1", "A1", "A2"],
+        "mecr_detail": {
+            "pre-A1": "Advance organizer molt breu: 'Ara aprendràs 1 cosa: [concepte].'",
+            "A1": "Advance organizer breu: 'En aquest bloc veuràs: [concepte 1] i [concepte 2].'",
+            "A2": "Resum anticipatiu de 2-3 frases que presenti els conceptes clau de la secció.",
+        },
     },
     "B-08": {
         "text": "Resum final recapitulatiu: tanca cada secció llarga amb un resum de les idees principals.",
         "activation": "NIVELL",
         "macro": "ESTRUCTURA",
-        "mecr_levels": ["pre-A1", "A1", "A2", "B1"],
+        "mecr_detail": {
+            "pre-A1": "Resum final d'1 frase molt curta: 'Hem après que [idea].'",
+            "A1": "Resum final de 1-2 frases amb la idea principal.",
+            "A2": "Resum final de 2-3 frases amb les idees principals.",
+            "B1": "Resum recapitulatiu d'un paràgraf breu amb les idees clau i connexions.",
+        },
     },
     "B-09": {
         "text": "Numera els passos i seqüències. Cada pas en línia separada.",
@@ -381,7 +480,12 @@ CATALOG = {
         "text": "Reforç immediat de cada concepte nou: exemple concret, suport visual o connexió amb el quotidià.",
         "activation": "NIVELL",
         "macro": "COGNITIU",
-        "mecr_levels": ["pre-A1", "A1", "A2", "B1"],
+        "mecr_detail": {
+            "pre-A1": "Reforç CADA concepte: exemple visual + connexió amb objecte físic concret. Res en abstracte.",
+            "A1": "Reforç cada concepte nou: exemple concret quotidià + suport visual.",
+            "A2": "Reforç dels conceptes clau: exemple concret o connexió amb experiència propera.",
+            "B1": "Reforç dels conceptes més abstractes: exemple o analogia quan la definició sola no basti.",
+        },
     },
     "C-03": {
         "text": "Eliminació de redundància decorativa (principi de coherència, Mayer): cada element ha de tenir funció pedagògica clara.",
@@ -392,25 +496,29 @@ CATALOG = {
         "text": "Chunking: agrupa informació en blocs de 3-5 elements (límit memòria de treball).",
         "activation": "SEMPRE",
         "macro": "COGNITIU",
+        # Intensificat a _get_intensified_text: si TDAH+baixa_memoria → "2-3 elements, repeteix info clau, resums parcials"
     },
-    "C-04b": {
-        "text": "Memòria de treball baixa: redueix blocs a 2-3 elements (no 3-5). Repeteix informació clau a cada bloc. Afegeix resums parcials cada 2-3 paràgrafs.",
-        "activation": "PERFIL",
-        "macro": "COGNITIU",
-        "profiles": ["tdah"],
-        "subvar_conditions": {"baixa_memoria_treball": True},
-    },
+    # C-04b absorbit dins C-04 via _get_intensified_text (no cal instrucció separada)
     "C-05": {
         "text": "Glossari previ (pre-training, Sweller): comença amb '## Paraules clau' amb els termes essencials.",
         "activation": "NIVELL",
         "macro": "COGNITIU",
-        "mecr_levels": ["pre-A1", "A1", "A2"],
+        "mecr_detail": {
+            "pre-A1": "Glossari previ de 3-4 termes amb suport visual (emoji/icona) i definició de 3-4 mots.",
+            "A1": "Glossari previ de 5-6 termes amb definició senzilla (5-8 mots).",
+            "A2": "Glossari previ de 8-10 termes amb definició breu i un exemple.",
+        },
     },
     "C-06": {
         "text": "Analogies amb experiències quotidianes: cada concepte abstracte amb un exemple del dia a dia.",
         "activation": "NIVELL",
         "macro": "COGNITIU",
-        "mecr_levels": ["pre-A1", "A1", "A2", "B1"],
+        "mecr_detail": {
+            "pre-A1": "Analogia amb objecte físic/concret per a CADA concepte ('l'energia és com una pila').",
+            "A1": "Analogia amb experiència quotidiana per a cada concepte abstracte.",
+            "A2": "Analogia amb situació familiar per als conceptes més abstractes.",
+            "B1": "Analogia o comparació per als conceptes nous o complexos.",
+        },
     },
     "C-08": {
         "text": "Anticipació de vocabulari: els termes clau apareixen primer al glossari, després al text.",
@@ -487,7 +595,12 @@ CATALOG = {
         "text": "Un exemple concret per cada concepte abstracte.",
         "activation": "NIVELL",
         "macro": "QUALITAT",
-        "mecr_levels": ["pre-A1", "A1", "A2", "B1"],
+        "mecr_detail": {
+            "pre-A1": "Exemple visual/tàctil per a CADA concepte ('la cèl·lula és com una habitació petita').",
+            "A1": "Exemple quotidià concret per a cada concepte abstracte.",
+            "A2": "Exemple concret per a cada concepte abstracte. Pot ser del domini de la matèria.",
+            "B1": "Exemple concret o cas real per als conceptes més complexos o nous.",
+        },
     },
     # E-08 fusionat amb G-05 → queda E-08 com a instrucció única
     "E-08": {
@@ -599,7 +712,7 @@ CATALOG = {
         "profiles": ["tea"],
     },
     "H-02": {
-        "text": "TEA: zero implicitura — tota metàfora, ironia o sentit figurat → literal explícit.",
+        "text": "TEA: zero implicitura — tota metàfora, ironia o sentit figurat → literal explícit. No generis ironia, sarcasme ni inferències socials implícites als exemples o complements.",
         "activation": "PERFIL",
         "macro": "PERFIL",
         "profiles": ["tea"],
@@ -615,13 +728,7 @@ CATALOG = {
         "activation": "PERFIL",
         "macro": "PERFIL",
         "profiles": ["tdah", "trastorn_emocional"],
-    },
-    "H-04b": {
-        "text": "TDAH sever: micro-blocs de 2-3 frases (no 3-5). Objectiu molt curt i concret per bloc.",
-        "activation": "PERFIL",
-        "macro": "PERFIL",
-        "profiles": ["tdah"],
-        "subvar_conditions": {"tdah_sever": True},
+        # Intensificat a _get_intensified_text: si TDAH sever → "2-3 frases" (absorb H-04b)
     },
     "H-05": {
         "text": "TDAH: retroalimentació visual de progrés — barres, percentatges, indicadors visuals.",
@@ -668,20 +775,20 @@ CATALOG = {
     "H-12": {
         "text": "Altes capacitats: profundització conceptual — excepcions, fronteres del coneixement, debats oberts.",
         "activation": "PERFIL",
-        "macro": "PERFIL",
+        "macro": "ENRIQUIMENT",
         "profiles": ["altes_capacitats"],
     },
     # H-14: fusió de H-14 + H-14b
     "H-14": {
         "text": "Altes capacitats: PROHIBIT SIMPLIFICAR. Mantén la complexitat lingüística i conceptual original o augmenta-la. NO facis servir vocabulari freqüent, NO eliminis subordinades, NO escurcis frases, NO desnominalitzis, NO eliminis sentit figurat. Les regles universals de simplificació NO s'apliquen a aquest perfil.",
         "activation": "PERFIL",
-        "macro": "PERFIL",
+        "macro": "ENRIQUIMENT",
         "profiles": ["altes_capacitats"],
     },
     "H-15": {
         "text": "Doble excepcionalitat (2e): EQUILIBRI — mantén repte cognitiu ALT amb suports d'accessibilitat. Adapta FORMAT (visual, segmentat) però NO el CONTINGUT intel·lectual.",
         "activation": "PERFIL",
-        "macro": "PERFIL",
+        "macro": "ENRIQUIMENT",
         "profiles": ["2e"],
     },
     "H-16": {
