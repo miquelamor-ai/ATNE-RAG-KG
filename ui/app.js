@@ -899,6 +899,26 @@ function showResult() {
         `;
     }
 
+    // Stats de paraules separades
+    const origWords = state.originalText.trim().split(/\s+/).length;
+    const mainWords = (sections.main || "").trim().split(/\s+/).length;
+    const compWords = Object.values(sections.complements).reduce((sum, c) => sum + c.trim().split(/\s+/).length, 0);
+    const totalWords = mainWords + compWords;
+    const statsDiv = document.getElementById("result-word-stats");
+    if (statsDiv) {
+        statsDiv.innerHTML = `
+            <span><strong>Original:</strong> ${origWords} par</span>
+            <span style="color:#6b7280">|</span>
+            <span><strong>Text adaptat:</strong> ${mainWords} par</span>
+            <span style="color:#6b7280">|</span>
+            <span><strong>Complements:</strong> ${compWords} par</span>
+            <span style="color:#6b7280">|</span>
+            <span><strong>Total:</strong> ${totalWords} par</span>
+            <span style="color:#6b7280">|</span>
+            <span style="color:${mainWords <= origWords ? '#059669' : '#d97706'}">${mainWords <= origWords ? '↓' : '↑'} ${Math.abs(Math.round((mainWords/origWords-1)*100))}% vs original</span>
+        `;
+    }
+
     // Resetar feedback
     state.feedbackRating = null;
     state.historyId = null;
