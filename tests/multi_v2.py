@@ -135,7 +135,7 @@ def call_sonnet(system_prompt: str, user_prompt: str) -> str:
             [CLAUDE_CMD, "-p", "-",
              "--system-prompt-file", sp_file, "--model", "sonnet"],
             input=user_prompt.encode("utf-8"),
-            capture_output=True, env=env, timeout=180
+            capture_output=True, env=env, timeout=300
         )
         if result.returncode != 0:
             err = result.stderr.decode("utf-8", errors="replace")[:300]
@@ -189,7 +189,8 @@ def _call_gemma4_base(system_prompt: str, user_prompt: str, max_tokens: int, tem
     from google.genai import types
     keys = [k for k in [os.getenv("GEMMA4_API_KEY"), os.getenv("GEMMA4_API_KEY_2"),
                         os.getenv("GEMMA4_API_KEY_3"), os.getenv("GEMMA4_API_KEY_4"),
-                        os.getenv("GEMMA4_API_KEY_5"), os.getenv("GEMMA4_API_KEY_6")] if k]
+                        os.getenv("GEMMA4_API_KEY_5"), os.getenv("GEMMA4_API_KEY_6"),
+                        os.getenv("GEMMA4_API_KEY_7")] if k]
     max_retries = len(keys) + 2
     for attempt in range(max_retries):
         key = keys[_gemma4_key_idx % len(keys)]
@@ -343,7 +344,7 @@ def _call_qwen3_base(system_prompt: str, user_prompt: str, max_tokens: int, temp
 
 
 def call_qwen3(system_prompt: str, user_prompt: str) -> str:
-    return _call_qwen3_base(system_prompt, user_prompt, max_tokens=8192, temp=0.3)
+    return _call_qwen3_base(system_prompt, user_prompt, max_tokens=2500, temp=0.3)
 
 
 def call_qwen3_judge(system_prompt: str, user_prompt: str) -> str:
@@ -679,6 +680,91 @@ def build_rag_v3_prompt(perfil_entry: dict, text_entry: dict) -> tuple[str, dict
     ids = extract_instruction_ids(filtered)
     return "\n\n".join(parts), {
         "mode": "rag_v3",
+        "instruction_ids": ids,
+        "filter_stats": filtered.get("stats", {}),
+    }
+
+
+def build_det_prompt(perfil_entry: dict, text_entry: dict) -> tuple[str, dict]:
+    """Prompt determinista pur — com v3 però amb persona-audience i format sortida complet.
+    Simula el que faria server.py SENSE RAG. Afegeix tot el que v3 no tenia:
+    creuaments, resolució conflictes, persona-audience, format sortida detallat.
+    """
+    import corpus_reader
+    from instruction_filter import get_instructions, format_instructions_for_prompt
+    from evaluator_metrics import extract_instruction_ids
+
+    if not corpus_reader._cache:
+        corpus_reader.load_corpus()
+
+    profile = perfil_entry["profile"]
+    params = perfil_entry["params"]
+    mecr = params.get("mecr_sortida", "B2")
+    dua = params.get("dua", "Core")
+
+    # ═══ CAPA 1: IDENTITAT ═══
+    parts = [corpus_reader.get_identity()]
+
+    # ═══ CAPA 2: INSTRUCCIONS FILTRADES ═══
+    filtered = get_instructions(profile, params)
+    instructions_text = format_instructions_for_prompt(filtered)
+    parts.append(instructions_text)
+
+    # Bloc DUA del corpus
+    dua_block = corpus_reader.get_dua_block(dua)
+    if dua_block:
+        parts.append(dua_block)
+
+    # Gènere discursiu
+    genre = params.get("genere_discursiu", "")
+    if not genre:
+        genre = text_entry.get("genere", "")
+    if genre:
+        genre_block = corpus_reader.get_genre_block(genre)
+        if genre_block:
+            parts.append(genre_block)
+
+    # Creuaments (si 2+ perfils actius)
+    chars = profile.get("caracteristiques", {})
+    active_profiles = [k for k, v in chars.items() if v.get("actiu")]
+    crossing_blocks = corpus_reader.get_crossing_blocks(active_profiles)
+    for cb_text in crossing_blocks:
+        parts.append(cb_text)
+
+    # Resolució conflictes (MECR baix o DUA Accés)
+    if mecr in ("pre-A1", "A1", "A2") or dua == "Acces":
+        conflict = corpus_reader.get_conflict_resolution()
+        if conflict:
+            parts.append(conflict)
+
+    # Few-shot example
+    fewshot = corpus_reader.get_fewshot_example(mecr)
+    if fewshot:
+        parts.append(f"EXEMPLE DE SORTIDA ESPERADA ({mecr}):\n{fewshot}")
+
+    # ═══ CAPA 3: CONTEXT (sense RAG) ═══
+    parts.append(f"CONTEXT EDUCATIU:\n- Etapa: {text_entry.get('etapa', 'ESO')}\n- Gènere: {text_entry.get('genere', '')}")
+
+    # Persona-audience (narrativa de l'alumne)
+    from server import build_persona_audience
+    context = {"etapa": text_entry.get("etapa", "ESO"), "curs": ""}
+    persona = build_persona_audience(profile, context, mecr)
+    parts.append(f"PERSONA-AUDIENCE:\n{persona}")
+
+    # ═══ CAPA 4: FORMAT SORTIDA ═══
+    output = ["FORMAT DE SORTIDA:", "Respon EXACTAMENT amb les seccions següents:", "",
+              "## Text adaptat", "El text complet adaptat. Estructura clara, termes en **negreta**, una idea per frase.", "",
+              "## Argumentació pedagògica", "SEMPRE — Explica les decisions pedagògiques (3-5 punts).", "",
+              "## Notes d'auditoria", "SEMPRE — Taula: | Aspecte | Original | Adaptat | Motiu |"]
+    # Glossari si nouvingut
+    if "nouvingut" in active_profiles:
+        l1 = chars.get("nouvingut", {}).get("L1", "la llengua materna")
+        output.insert(4, f"\n## Glossari\nACTIVAT — Taula: | Terme | Traducció ({l1}) | Explicació simple |\nMínim 8-12 termes.\n")
+    parts.append("\n".join(output))
+
+    ids = extract_instruction_ids(filtered)
+    return "\n\n".join(parts), {
+        "mode": "det",
         "instruction_ids": ids,
         "filter_stats": filtered.get("stats", {}),
     }
@@ -1040,6 +1126,11 @@ def run_evaluate(conn, judge: str, limit: int = 0):
             pC = s("C1")
             pG = round(pA * 0.3 + pB * 0.5 + pC * 0.2, 2) if pA and pB and pC else 0
 
+            # GUARD: descartar avaluacions invàlides (parse fallit)
+            if pG < 1.0:
+                print(f"DESCARTADA (parse fallit: A={pA} B={pB} C={pC})")
+                continue
+
             print(f"A={pA:.1f} B={pB:.1f} C={pC} G={pG:.2f}")
 
             conn.execute("""
@@ -1298,7 +1389,7 @@ def run_cross(conn, judge: str):
 # FASE V3: GENERACIÓ RAG-v3
 # ═══════════════════════════════════════════════════════════════════════════════
 
-V3_GENERATORS = ["gpt", "gemma4", "mistral", "qwen3"]
+V3_GENERATORS = ["gpt", "gemma4", "mistral", "qwen3", "sonnet"]
 HC_NEW_GENERATORS = ["gemma4", "mistral", "qwen3"]
 
 def run_generation_hc(conn, generator: str, data: dict):
@@ -1326,6 +1417,7 @@ def run_generation_hc(conn, generator: str, data: dict):
             elif existing:
                 conn.execute("DELETE FROM multi_llm_generations WHERE run_id=? AND cas_id=? AND generator=? AND prompt_mode='hc'",
                              (RUN_ID, cas_id, generator))
+                conn.commit()
 
             print(f"  [{i:3d}/{total}] {cas_id} [{generator}] generant hc...", end=" ", flush=True)
             t0 = time.time()
@@ -1417,6 +1509,7 @@ def run_generation_v3(conn, generator: str, data: dict):
             elif existing:
                 conn.execute("DELETE FROM multi_llm_generations WHERE run_id=? AND cas_id=? AND generator=? AND prompt_mode='rag_v3'",
                              (RUN_ID, cas_id, generator))
+                conn.commit()
 
             print(f"  [{i:3d}/{total}] {cas_id} [{generator}] generant v3...", end=" ", flush=True)
             t0 = time.time()
@@ -1491,7 +1584,7 @@ def run_generation_v3(conn, generator: str, data: dict):
 
             if text_adaptat:
                 print(f"OK ({paraules} par, {temps}s)")
-            time.sleep(API_DELAY)
+            time.sleep(10 if generator == "sonnet" else API_DELAY)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1936,7 +2029,8 @@ if __name__ == "__main__":
     parser.add_argument("--phase", required=True,
         choices=["init_db","copy_v1",
                  "generate","evaluate","trio","cross","report","all",
-                 "generate_hc","generate_v3","evaluate_v3","trio_v3","cross_v3","report_v3","all_v3"])
+                 "generate_hc","generate_v3","evaluate_v3","trio_v3","cross_v3","report_v3","all_v3",
+                 "generate_det"])
     parser.add_argument("--generator", default="all",
         choices=["gemini","sonnet","gpt","gemma4","mistral","qwen3","all"])
     parser.add_argument("--judge", default=None,
@@ -2025,6 +2119,103 @@ if __name__ == "__main__":
 
     if args.phase in ("report_v3", "all_v3"):
         run_report_v3(conn)
+
+    # ── Fase DET: determinista pur (sense RAG) ──
+
+    DET_GENERATORS = ["gemini", "gpt", "mistral"]
+    DET_TEXTS = ["PRI_EXPL", "ESO1_NARR", "BAT_INST", "ESO2_ARGU"]
+    DET_PERFILS = ["P1", "P3", "P4", "P6", "P7"]  # nouvingut_arab, TEA, TDAH, DI, altes_cap
+
+    if args.phase == "generate_det":
+        gens = DET_GENERATORS if args.generator == "all" else [args.generator]
+        from evaluator_metrics import evaluate_forma, retrieval_recall
+
+        for gen in gens:
+            if gen not in GEN_CALLERS:
+                print(f"  [SKIP] {gen} no té caller")
+                continue
+            caller = GEN_CALLERS[gen]
+            print(f"\n=== GENERACIÓ DET [{gen}] ===")
+            det_cases = [(t, p) for t in data["textos"] for p in data["perfils"]
+                         if t["id"] in DET_TEXTS and p["id"] in DET_PERFILS]
+            total = len(det_cases)
+            for i, (t, p) in enumerate(det_cases, 1):
+                cas_id = f"{t['id']}__{p['id']}"
+                existing = conn.execute(
+                    "SELECT id, text_adaptat FROM multi_llm_generations WHERE run_id=? AND cas_id=? AND generator=? AND prompt_mode='det'",
+                    (RUN_ID, cas_id, gen)).fetchone()
+                if existing and existing[1]:
+                    print(f"  [{i:3d}/{total}] {cas_id} [{gen}] det ja existeix, skip")
+                    continue
+                elif existing:
+                    conn.execute("DELETE FROM multi_llm_generations WHERE run_id=? AND cas_id=? AND generator=? AND prompt_mode='det'",
+                                 (RUN_ID, cas_id, gen))
+                    conn.commit()
+
+                print(f"  [{i:3d}/{total}] {cas_id} [{gen}] generant det...", end=" ", flush=True)
+                t0 = time.time()
+                system_prompt, meta = build_det_prompt(p, t)
+                user_prompt = f"Adapta el text següent:\n\n{t['text']}"
+                text_adaptat = ""
+                error = None
+                try:
+                    text_adaptat = caller(system_prompt, user_prompt)
+                except Exception as e:
+                    error = str(e)[:200]
+                    print(f"ERR: {error}")
+                temps = round(time.time() - t0, 1)
+                comps = detect_complements(text_adaptat) if text_adaptat else {}
+                paraules = len(text_adaptat.split()) if text_adaptat else 0
+                try:
+                    forma = evaluate_forma(text_adaptat, p["params"].get("mecr_sortida", "B2"))
+                except Exception:
+                    forma = {}
+                recall_val = None
+                absents_val = None
+                try:
+                    active_profs = meta["filter_stats"].get("perfils_actius", [])
+                    ret = retrieval_recall(active_profs, meta.get("instruction_ids", []))
+                    recall_val = ret["recall"]
+                    absents_val = json.dumps(ret.get("absents", []), ensure_ascii=False)
+                except Exception:
+                    pass
+                conn.execute("""
+                    INSERT INTO multi_llm_generations (
+                        run_id, cas_id, text_id, perfil_id, generator, prompt_mode,
+                        text_original, text_original_tema, text_original_font,
+                        text_original_etapa, text_original_genere, text_original_paraules,
+                        perfil_nom, perfil_json, perfils_actius, mecr, dua,
+                        system_prompt, system_prompt_length, instruction_ids, filter_stats,
+                        text_adaptat, text_adaptat_length, text_adaptat_paraules,
+                        te_glossari, te_glossari_bilingue, te_negretes, te_prellico,
+                        te_esquema, te_preguntes, te_argumentacio_pedagogica, te_auditoria,
+                        f1_longitud_frase, f2_titols, f3_negretes, f4_llistes, f5_prellico,
+                        puntuacio_forma, recall, instruccions_absents, temps_generacio, error
+                    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                """, (
+                    RUN_ID, cas_id, t["id"], p["id"], gen, "det",
+                    t["text"], t.get("tema", ""), t.get("font", ""),
+                    t.get("etapa", ""), t.get("genere", ""), t.get("paraules", 0),
+                    p["nom"], json.dumps(p["profile"], ensure_ascii=False),
+                    json.dumps(meta["filter_stats"].get("perfils_actius", []), ensure_ascii=False),
+                    p["params"].get("mecr_sortida", "B2"), p["params"].get("dua", "Core"),
+                    system_prompt, len(system_prompt),
+                    json.dumps(meta.get("instruction_ids", []), ensure_ascii=False),
+                    json.dumps(meta.get("filter_stats", {}), ensure_ascii=False),
+                    text_adaptat, len(text_adaptat), paraules,
+                    comps.get("te_glossari", 0), comps.get("te_glossari_bilingue", 0),
+                    comps.get("te_negretes", 0), comps.get("te_prellico", 0),
+                    comps.get("te_esquema", 0), comps.get("te_preguntes", 0),
+                    comps.get("te_argumentacio_pedagogica", 0), comps.get("te_auditoria", 0),
+                    forma.get("f1_longitud_frase", 0), forma.get("f2_titols", 0),
+                    forma.get("f3_negretes", 0), forma.get("f4_llistes", 0),
+                    forma.get("f5_prellico", 0), forma.get("puntuacio_forma", 0),
+                    recall_val, absents_val, temps, error
+                ))
+                conn.commit()
+                if text_adaptat:
+                    print(f"OK ({paraules} par, {temps}s)")
+                time.sleep(10 if gen == "sonnet" else API_DELAY)
 
     print("\nFet.")
 

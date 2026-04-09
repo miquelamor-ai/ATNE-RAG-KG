@@ -54,52 +54,88 @@ def call_gemini_single(system_prompt, user_prompt, key_name):
     return resp.text or ""
 
 
+def call_gemma4_single(system_prompt, user_prompt, key_name):
+    """Una sola crida a Gemma 4 amb UNA clau especifica."""
+    from google import genai
+    from google.genai import types
+    key = os.getenv(key_name)
+    if not key:
+        raise RuntimeError(f"{key_name} no trobada")
+    client = genai.Client(api_key=key, http_options=types.HttpOptions(timeout=480_000))
+    resp = client.models.generate_content(
+        model="gemma-4-31b-it",
+        contents=[types.Content(role="user", parts=[types.Part(text=f"{system_prompt}\n\n---\n\n{user_prompt}")])],
+        config=types.GenerateContentConfig(
+            temperature=0.3,
+            max_output_tokens=8192,
+        ),
+    )
+    return resp.text or ""
+
+
 def call_qwen3_single(system_prompt, user_prompt):
-    """Una sola crida a Qwen 3 via Groq."""
+    """Una sola crida a Qwen 3 via Groq. Prova totes les claus amb retry."""
     import requests
-    # Rotar entre claus Groq fresques
-    global _groq_key_idx
-    groq_keys = [k for k in [os.getenv("GROQ_API_KEY_2"), os.getenv("GROQ_API_KEY_3"),
-                              os.getenv("GROQ_API_KEY_4"), os.getenv("GROQ_API_KEY_5"),
-                              os.getenv("GROQ_API_KEY_6"), os.getenv("GROQ_API_KEY")] if k]
+    groq_keys = [k for k in [os.getenv("GROQ_API_KEY"), os.getenv("GROQ_API_KEY_2"),
+                              os.getenv("GROQ_API_KEY_3"), os.getenv("GROQ_API_KEY_4"),
+                              os.getenv("GROQ_API_KEY_5"), os.getenv("GROQ_API_KEY_6")] if k]
     if not hasattr(call_qwen3_single, '_idx'):
         call_qwen3_single._idx = 0
-    groq_key = groq_keys[call_qwen3_single._idx % len(groq_keys)]
-    r = requests.post(
-        "https://api.groq.com/openai/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer {groq_key}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "model": "qwen/qwen3-32b",
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-            "max_tokens": 8192,
-            "temperature": 0.3,
-        },
-        timeout=300,
-    )
-    if r.status_code in (429, 413):
-        call_qwen3_single._idx += 1  # provar seguent clau
-        raise RuntimeError(f"RATE_LIMIT_{r.status_code}")
-    if r.status_code != 200:
-        raise RuntimeError(f"HTTP {r.status_code}: {r.text[:200]}")
-    text = r.json()["choices"][0]["message"]["content"] or ""
-    text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
-    call_qwen3_single._idx += 1  # rotar per repartir quota
-    return text
+
+    payload = {
+        "model": "qwen/qwen3-32b",
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+        "max_tokens": 2500,
+        "temperature": 0.3,
+    }
+
+    # Intentar totes les claus (2 rondes si cal, amb pausa entre rondes)
+    last_err = None
+    for ronda in range(2):
+        for i in range(len(groq_keys)):
+            idx = (call_qwen3_single._idx + i) % len(groq_keys)
+            groq_key = groq_keys[idx]
+            try:
+                r = requests.post(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"},
+                    json=payload, timeout=300,
+                )
+                if r.status_code == 200:
+                    call_qwen3_single._idx = (idx + 1) % len(groq_keys)
+                    text = r.json()["choices"][0]["message"]["content"] or ""
+                    text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
+                    return text
+                elif r.status_code in (429, 413):
+                    last_err = f"RATE_LIMIT_{r.status_code} key{idx}"
+                    time.sleep(2)
+                    continue
+                else:
+                    raise RuntimeError(f"HTTP {r.status_code}: {r.text[:200]}")
+            except requests.exceptions.RequestException as e:
+                last_err = str(e)[:200]
+                time.sleep(2)
+                continue
+        # Entre rondes, esperar 60s perque es reseti el TPM
+        if ronda == 0:
+            print(f"[totes les claus ocupades, esperant 60s]", end=" ", flush=True)
+            time.sleep(60)
+
+    raise RuntimeError(last_err or "Totes les claus esgotades")
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", required=True, choices=["gemini", "qwen3"])
+    parser.add_argument("--model", required=True, choices=["gemini", "qwen3", "gemma4"])
+    parser.add_argument("--mode", default="rag_v2", choices=["rag_v2", "hc", "rag_v3"], help="Prompt mode")
     parser.add_argument("--delay", type=int, default=30, help="Segons entre crides exitoses")
     parser.add_argument("--retry-delay", type=int, default=120, help="Segons despres d'un error")
     parser.add_argument("--key", default="GEMINI_API_KEY_3", help="Nom de la clau per Gemini (una sola)")
     parser.add_argument("--limit", type=int, default=0, help="Max generacions (0=totes)")
+    parser.add_argument("--reverse", action="store_true", help="Recorre els casos en ordre invers")
     args = parser.parse_args()
 
     conn = sqlite3.connect(str(DB_PATH))
@@ -109,15 +145,20 @@ def main():
     with open(DATA_PATH, encoding="utf-8") as f:
         data = json.load(f)
 
-    from multi_v2 import build_rag_v2_prompt, detect_complements
+    from multi_v2 import build_rag_v2_prompt, build_hardcoded_prompt, build_rag_v3_prompt, detect_complements
+    prompt_builders = {"rag_v2": build_rag_v2_prompt, "hc": build_hardcoded_prompt, "rag_v3": build_rag_v3_prompt}
+    build_prompt = prompt_builders[args.mode]
 
     textos = data["textos"]
     perfils = data["perfils"]
+    if args.reverse:
+        textos = list(reversed(textos))
+        perfils = list(reversed(perfils))
     total = len(textos) * len(perfils)
     generated = 0
     errors = 0
 
-    print(f"=== GEN SLOW [{args.model}] clau={args.key if args.model=='gemini' else 'GROQ'} delay={args.delay}s ===")
+    print(f"=== GEN SLOW [{args.model}] mode={args.mode} delay={args.delay}s ===")
 
     for i, t in enumerate(textos):
         for j, p in enumerate(perfils):
@@ -126,23 +167,23 @@ def main():
 
             # Skip si ja existeix
             existing = conn.execute(
-                "SELECT id FROM multi_llm_generations WHERE run_id=? AND cas_id=? AND generator=? AND prompt_mode='rag_v2' AND text_adaptat IS NOT NULL AND text_adaptat != ''",
-                (RUN_ID, cas_id, args.model)
+                "SELECT id FROM multi_llm_generations WHERE run_id=? AND cas_id=? AND generator=? AND prompt_mode=? AND text_adaptat IS NOT NULL AND text_adaptat != ''",
+                (RUN_ID, cas_id, args.model, args.mode)
             ).fetchone()
             if existing:
                 continue
 
             # Esborrar errors previs d'aquest cas
             conn.execute(
-                "DELETE FROM multi_llm_generations WHERE run_id=? AND cas_id=? AND generator=? AND prompt_mode='rag_v2' AND error IS NOT NULL",
-                (RUN_ID, cas_id, args.model)
+                "DELETE FROM multi_llm_generations WHERE run_id=? AND cas_id=? AND generator=? AND prompt_mode=? AND error IS NOT NULL",
+                (RUN_ID, cas_id, args.model, args.mode)
             )
             conn.commit()
 
             print(f"  [{idx:3d}/{total}] {cas_id} ...", end=" ", flush=True)
             t0 = time.time()
 
-            system_prompt, meta = build_rag_v2_prompt(p, t)
+            system_prompt, meta = build_prompt(p, t)
             user_prompt = f"Adapta el text seguent:\n\n{t['text']}"
 
             text_adaptat = ""
@@ -150,6 +191,8 @@ def main():
             try:
                 if args.model == "gemini":
                     text_adaptat = call_gemini_single(system_prompt, user_prompt, args.key)
+                elif args.model == "gemma4":
+                    text_adaptat = call_gemma4_single(system_prompt, user_prompt, args.key)
                 else:
                     text_adaptat = call_qwen3_single(system_prompt, user_prompt)
             except Exception as e:
@@ -161,6 +204,8 @@ def main():
                     try:
                         if args.model == "gemini":
                             text_adaptat = call_gemini_single(system_prompt, user_prompt, args.key)
+                        elif args.model == "gemma4":
+                            text_adaptat = call_gemma4_single(system_prompt, user_prompt, args.key)
                         else:
                             text_adaptat = call_qwen3_single(system_prompt, user_prompt)
                         error = None
@@ -210,7 +255,7 @@ def main():
                         puntuacio_forma, recall, instruccions_absents, temps_generacio, error
                     ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                 """, (
-                    RUN_ID, cas_id, t["id"], p["id"], args.model, "rag_v2",
+                    RUN_ID, cas_id, t["id"], p["id"], args.model, args.mode,
                     t["text"], t.get("tema", ""), t.get("font", ""),
                     t.get("etapa", ""), t.get("genere", ""), t.get("paraules", 0),
                     p["nom"], json.dumps(p["profile"], ensure_ascii=False),

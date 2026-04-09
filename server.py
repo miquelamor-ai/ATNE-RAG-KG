@@ -20,7 +20,7 @@ import instruction_filter
 import requests
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI, Body, HTTPException
+from fastapi import FastAPI, Body, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse, FileResponse
 
@@ -980,8 +980,31 @@ def _call_llm(active_model: str, system_prompt: str, text: str) -> str:
             config=types.GenerateContentConfig(temperature=0.4, max_output_tokens=8192),
         )
         return response.text or ""
+    elif active_model == "gemini":
+        response = gemini_client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=[types.Content(role="user", parts=[types.Part(text=text)])],
+            config=types.GenerateContentConfig(
+                system_instruction=system_prompt,
+                temperature=0.4, max_output_tokens=8192,
+                thinking_config=types.ThinkingConfig(thinking_budget=0),
+            ),
+        )
+        return response.text or ""
+    elif active_model == "gpt":
+        from openai import OpenAI
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        resp = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"TEXT ORIGINAL A ADAPTAR:\n\n{text}"},
+            ],
+            max_tokens=8192, temperature=0.4,
+        )
+        return resp.choices[0].message.content or ""
     else:
-        raise RuntimeError(f"Model desconegut: {active_model}. Opcions: mistral, gemma4")
+        raise RuntimeError(f"Model desconegut: {active_model}. Opcions: gemini, gpt, mistral, gemma4")
 
 
 VERIFY_SYSTEM = """Ets un avaluador pedagògic ràpid. Avalua una adaptació de text educatiu amb 3 criteris breus (1-5 cadascun):
@@ -1551,6 +1574,70 @@ async def cuina_page():
     return HTMLResponse("<h1>Cuina no disponible</h1>", status_code=404)
 
 
+@app.get("/validacio", response_class=HTMLResponse)
+async def validacio_page():
+    """Serveix la pàgina de validació humana."""
+    html_path = UI_DIR / "validacio.html"
+    if html_path.exists():
+        return HTMLResponse(html_path.read_text(encoding="utf-8"),
+                            headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
+    return HTMLResponse("<h1>Validació no disponible</h1>", status_code=404)
+
+
+@app.get("/validacio_data.json")
+async def validacio_data():
+    """Serveix les dades de validació estàtiques (det)."""
+    json_path = UI_DIR / "validacio_data.json"
+    if json_path.exists():
+        return JSONResponse(json.loads(json_path.read_text(encoding="utf-8")))
+    return JSONResponse([])
+
+
+@app.get("/api/validacio/{tanda}")
+async def api_validacio_tanda(tanda: str):
+    """Retorna textos adaptats + puntuacions per a una tanda (prompt_mode)."""
+    import sqlite3
+    db_path = Path(__file__).parent / "tests" / "results" / "evaluations.db"
+    if not db_path.exists():
+        return JSONResponse([])
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    # Agafar tots els casos d'aquesta tanda amb avaluació GPT
+    rows = conn.execute("""
+        SELECT g.cas_id, g.generator, g.perfil_nom, g.mecr, g.dua, g.text_adaptat_paraules,
+               g.text_original, g.text_adaptat, g.system_prompt, g.perfil_id,
+               e.a1_coherencia, e.a2_correccio, e.a3_llegibilitat,
+               e.b1_fidelitat, e.b2_adequacio_perfil, e.b3_scaffolding, e.b4_cultura,
+               e.c1_potencial, e.puntuacio_global
+        FROM multi_llm_generations g
+        LEFT JOIN multi_v2_evaluations e ON e.generation_id = g.id AND e.judge = 'gpt4mini'
+        WHERE g.run_id = 'multi_v2' AND g.prompt_mode = ?
+          AND g.text_adaptat IS NOT NULL AND g.text_adaptat != ''
+          AND g.generator IN ('gemini', 'gpt', 'mistral')
+        ORDER BY g.cas_id, g.generator
+        LIMIT 200
+    """, (tanda,)).fetchall()
+    data = []
+    for r in rows:
+        data.append({
+            "cas_id": r["cas_id"], "generator": r["generator"],
+            "perfil": r["perfil_nom"] or "", "perfil_id": r["perfil_id"] or "",
+            "mecr": r["mecr"] or "", "dua": r["dua"] or "",
+            "paraules": r["text_adaptat_paraules"] or 0,
+            "original": r["text_original"] or "", "adaptat": r["text_adaptat"] or "",
+            "system_prompt": r["system_prompt"] or "",
+            "gpt": {
+                "A1": r["a1_coherencia"] or 0, "A2": r["a2_correccio"] or 0,
+                "A3": r["a3_llegibilitat"] or 0, "B1": r["b1_fidelitat"] or 0,
+                "B2": r["b2_adequacio_perfil"] or 0, "B3": r["b3_scaffolding"] or 0,
+                "B4": r["b4_cultura"] or 0, "C1": r["c1_potencial"] or 0,
+                "global": r["puntuacio_global"] or 0,
+            }
+        })
+    conn.close()
+    return JSONResponse(data)
+
+
 @app.get("/api/catalog")
 async def api_catalog():
     """Retorna el catàleg complet d'instruccions amb metadades."""
@@ -1594,6 +1681,110 @@ async def api_catalog():
         "total": len(items),
         "category_labels": category_labels,
         "profile_map": PROFILE_INSTRUCTION_MAP,
+    }
+
+
+# ── API Corpus (visor de documents MD) ────────────────────────────────────
+
+CORPUS_DIR = Path(__file__).parent / "corpus"
+
+@app.get("/api/corpus")
+async def api_corpus_list():
+    """Retorna la llista de fitxers del corpus amb títol i mòdul."""
+    files = []
+    for f in sorted(CORPUS_DIR.glob("*.md")):
+        name = f.stem
+        modul = name.split("_")[0]  # M1, M2, M3
+        modul_noms = {
+            "M1": "Subjecte (perfils alumnat)",
+            "M2": "Mètode (metodologies)",
+            "M3": "Llengua",
+        }
+        files.append({
+            "filename": f.name,
+            "stem": name,
+            "modul": modul,
+            "modul_nom": modul_noms.get(modul, modul),
+            "titol": name.split("_", 1)[1].replace("-", " ").replace("·", "·").title() if "_" in name else name,
+            "size_kb": round(f.stat().st_size / 1024, 1),
+        })
+    return {"files": files, "total": len(files)}
+
+
+@app.get("/api/corpus/{filename}")
+async def api_corpus_file(filename: str):
+    """Retorna el contingut d'un fitxer del corpus."""
+    filepath = CORPUS_DIR / filename
+    if not filepath.exists() or not filepath.suffix == ".md":
+        return {"error": "Fitxer no trobat"}, 404
+    content = filepath.read_text(encoding="utf-8")
+    # Extreure seccions (## headings)
+    sections = []
+    current = {"title": "Introducció", "content": ""}
+    for line in content.split("\n"):
+        if line.startswith("## "):
+            if current["content"].strip():
+                sections.append(current)
+            current = {"title": line[3:].strip(), "content": ""}
+        else:
+            current["content"] += line + "\n"
+    if current["content"].strip():
+        sections.append(current)
+    return {
+        "filename": filename,
+        "content": content,
+        "sections": sections,
+        "length": len(content),
+        "words": len(content.split()),
+    }
+
+
+# ── API Prompt Preview ───────────────────────────────────────────────────
+
+@app.post("/api/prompt-preview")
+async def api_prompt_preview(request: Request):
+    """Genera el prompt complet per a un perfil donat (sense cridar l'LLM)."""
+    data = await request.json()
+    profile = data.get("profile", {})
+    context = data.get("context", {"etapa": "ESO", "curs": "3r"})
+    params = data.get("params", {"mecr_sortida": "B2", "dua": "Core"})
+
+    mecr = params.get("mecr_sortida", "B2")
+
+    # 1. Instruccions filtrades
+    filtered = instruction_filter.get_instructions(profile, params)
+    instructions_text = instruction_filter.format_instructions_for_prompt(filtered)
+    instruction_ids = [f["id"] for f in filtered]
+
+    # 2. Persona-audience
+    persona = build_persona_audience(profile, context, mecr)
+
+    # 3. Prompt complet (sense RAG — no fem cerca real)
+    prompt = build_system_prompt(profile, context, params, "[Aquí anirien 8-12 fragments del corpus FJE cercats per similitud vectorial]")
+
+    # 4. Capes separades per visualització
+    identity = corpus_reader.get_identity()
+    dua_block = corpus_reader.get_dua_block(params.get("dua", "Core")) or ""
+    genre_block = ""
+    genre = params.get("genere_discursiu", "")
+    if genre:
+        genre_block = corpus_reader.get_genre_block(genre) or ""
+    fewshot = corpus_reader.get_fewshot_example(mecr) or ""
+
+    return {
+        "prompt_complet": prompt,
+        "prompt_length": len(prompt),
+        "prompt_words": len(prompt.split()),
+        "capes": {
+            "identitat": identity,
+            "instruccions": instructions_text,
+            "dua": dua_block,
+            "genere": genre_block,
+            "persona_audience": persona,
+            "fewshot": fewshot,
+        },
+        "instruction_ids": instruction_ids,
+        "total_instructions": len(filtered),
     }
 
 

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATNE — Validacio humana</title>
+    <style>
+        :root { --pri: #1a56db; --pri-light: #dbeafe; --ok: #059669; --ok-light: #d1fae5;
+                --warn: #d97706; --warn-light: #fef3c7; --err: #dc2626; --err-light: #fee2e2;
+                --purple: #7c3aed; --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb;
+                --g300: #d1d5db; --g500: #6b7280; --g700: #374151; --g900: #111827; --r: 8px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+               background: var(--g50); color: var(--g900); line-height: 1.6; }
+
+        .header { background: white; border-bottom: 1px solid var(--g200); padding: 16px 32px;
+                  display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100; }
+        .header .logo { font-size: 20px; font-weight: 700; color: var(--pri); }
+        .header .logo span { font-weight: 400; color: var(--g500); }
+        .header nav { display: flex; gap: 4px; margin-left: 16px; }
+        .header nav a, .header nav button { padding: 8px 16px; border-radius: 6px; text-decoration: none;
+            color: var(--g700); font-size: 14px; font-weight: 500; background: none; border: none; cursor: pointer; }
+        .header nav a:hover, .header nav button:hover, .header nav a.active { background: var(--pri-light); color: var(--pri); }
+        .header .back-link { margin-left: auto; color: var(--g500); text-decoration: none; font-size: 13px; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+        h1 { font-size: 22px; margin-bottom: 8px; }
+        .subtitle { color: var(--g500); font-size: 14px; margin-bottom: 24px; }
+
+        /* Rubrica */
+        .rubrica { background: white; border: 1px solid var(--g200); border-radius: var(--r);
+                   padding: 20px; margin-bottom: 24px; display: none; }
+        .rubrica.visible { display: block; }
+        .rubrica h2 { font-size: 16px; margin-bottom: 12px; color: var(--pri); }
+        .rubrica table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .rubrica th, .rubrica td { padding: 8px 12px; border: 1px solid var(--g200); text-align: left; vertical-align: top; }
+        .rubrica th { background: var(--g50); font-weight: 600; }
+        .rubrica .crit-name { font-weight: 700; white-space: nowrap; }
+
+        /* Cas selector */
+        .cas-nav { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
+        .cas-btn { padding: 8px 14px; border: 2px solid var(--g200); border-radius: 6px;
+                   background: white; cursor: pointer; font-size: 12px; transition: all .15s; }
+        .cas-btn:hover { border-color: var(--pri); }
+        .cas-btn.active { border-color: var(--pri); background: var(--pri-light); color: var(--pri); font-weight: 600; }
+        .cas-btn.scored { border-color: var(--ok); }
+        .cas-btn .model-tag { display: block; font-size: 10px; color: var(--g500); margin-top: 2px; }
+
+        /* Text panels */
+        .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+        .panel { background: white; border: 1px solid var(--g200); border-radius: var(--r); overflow: hidden; }
+        .panel-head { padding: 12px 16px; border-bottom: 1px solid var(--g200); display: flex;
+                      justify-content: space-between; align-items: center; }
+        .panel-head h3 { font-size: 13px; font-weight: 700; }
+        .panel-head .badge { font-size: 11px; padding: 2px 8px; border-radius: 4px; }
+        .panel-body { padding: 16px; font-size: 14px; line-height: 1.8; max-height: 500px; overflow-y: auto; }
+        .panel-body.original { color: var(--g500); }
+
+        /* Perfil bar */
+        .perfil-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; padding: 12px 16px;
+                      background: white; border: 1px solid var(--g200); border-radius: var(--r); }
+        .perfil-tag { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+
+        /* Scoring */
+        .scoring { background: white; border: 2px solid var(--pri); border-radius: var(--r); padding: 20px; margin-bottom: 20px; }
+        .scoring h3 { font-size: 15px; color: var(--pri); margin-bottom: 16px; }
+        .score-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--g100); }
+        .score-row:last-child { border-bottom: none; }
+        .score-label { flex: 0 0 220px; font-size: 13px; }
+        .score-label strong { display: block; }
+        .score-label .hint { font-size: 11px; color: var(--g500); }
+        .score-btns { display: flex; gap: 6px; }
+        .score-btn { width: 44px; height: 44px; border: 2px solid var(--g200); border-radius: 8px;
+                     background: white; cursor: pointer; font-size: 16px; font-weight: 700; transition: all .15s; }
+        .score-btn:hover { border-color: var(--pri); background: var(--pri-light); }
+        .score-btn.selected { border-color: var(--pri); background: var(--pri); color: white; }
+        .score-btn.gpt { border-color: var(--warn); background: var(--warn-light); color: var(--warn); font-size: 12px; }
+
+        /* Compare */
+        .compare-section { background: white; border: 1px solid var(--g200); border-radius: var(--r);
+                           padding: 20px; margin-bottom: 20px; display: none; }
+        .compare-section.visible { display: block; }
+        .compare-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+        .compare-bar .label { font-size: 13px; font-weight: 600; flex: 0 0 200px; }
+        .compare-fill { height: 24px; border-radius: 4px; display: flex; align-items: center;
+                        padding: 0 8px; font-size: 11px; font-weight: 700; color: white; min-width: 30px; }
+
+        /* Summary */
+        .summary { background: var(--g50); border: 2px solid var(--g200); border-radius: var(--r);
+                   padding: 20px; margin-top: 24px; display: none; }
+        .summary.visible { display: block; }
+        .summary h2 { font-size: 16px; margin-bottom: 16px; }
+        .summary table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .summary th, .summary td { padding: 8px 12px; border: 1px solid var(--g200); text-align: center; }
+        .summary th { background: white; }
+        .diff-pos { color: var(--err); font-weight: 700; }
+        .diff-neg { color: var(--ok); font-weight: 700; }
+
+        @media (max-width: 768px) {
+            .panels { grid-template-columns: 1fr; }
+            .score-label { flex: 0 0 140px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">ATNE <span>Validacio humana</span></div>
+    <nav>
+        <button onclick="toggleRubrica()">Rubrica</button>
+        <button onclick="showSummary()">Resum</button>
+    </nav>
+    <span id="progress" style="font-size:12px;color:var(--g500)"></span>
+    <a href="/cuina" class="back-link">&larr; Cuina</a>
+</div>
+
+<div class="container">
+    <h1>Validacio humana de textos adaptats</h1>
+    <p class="subtitle">Llegeix cada text adaptat, puntua de 1 a 5, i compara amb el jutge GPT.</p>
+
+    <!-- Selector de tanda -->
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:20px;padding:12px 16px;background:white;border:1px solid var(--g200);border-radius:var(--r);">
+        <label style="font-size:13px;font-weight:600;color:var(--g700);">Tanda:</label>
+        <select id="tanda-select" onchange="changeTanda()" style="padding:8px 14px;border:1px solid var(--g200);border-radius:6px;font-size:14px;">
+            <option value="det" selected>DET (determinista pur, sense RAG)</option>
+            <option value="rag_v3">RAG-v3 (22 sub-vars)</option>
+            <option value="rag_v2">RAG-v2 (10 sub-vars)</option>
+            <option value="hc">HC (hardcoded antic)</option>
+        </select>
+        <span id="tanda-info" style="font-size:12px;color:var(--g500);"></span>
+    </div>
+
+    <!-- Rubrica desplegable -->
+    <div class="rubrica" id="rubrica">
+        <h2>Rubrica simplificada (5 criteris)</h2>
+        <table>
+            <tr><th>Criteri</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr>
+            <tr>
+                <td class="crit-name">A. Qualitat text</td>
+                <td>Incoherent, errors greus de catala</td>
+                <td>Poc fluid, diversos errors</td>
+                <td>Acceptable, algun error</td>
+                <td>Clar i ben escrit</td>
+                <td>Impecable, flueix natural</td>
+            </tr>
+            <tr>
+                <td class="crit-name">B1. Fidelitat contingut</td>
+                <td>Perd conceptes clau, inventa</td>
+                <td>Falten parts importants</td>
+                <td>Manté el nucli, perd detalls</td>
+                <td>Quasi complet</td>
+                <td>Tot preservat sense errors</td>
+            </tr>
+            <tr>
+                <td class="crit-name">B2. Adequacio al perfil</td>
+                <td>Ignora MECR i perfil completament</td>
+                <td>Alguna adaptacio pero insuficient</td>
+                <td>Parcial: fa algunes coses be</td>
+                <td>Bona adequacio, falta algun detall</td>
+                <td>Perfecte per a aquest alumne</td>
+            </tr>
+            <tr>
+                <td class="crit-name">B3. Suports (scaffolding)</td>
+                <td>Cap: ni glossari, ni esquema, ni ajuts</td>
+                <td>Algun suport minim</td>
+                <td>Glossari O esquema (no tots dos)</td>
+                <td>Glossari + esquema + definicions</td>
+                <td>Tot: glossari bilingue + esquema + definicions + preguntes</td>
+            </tr>
+            <tr>
+                <td class="crit-name">C1. Aprenentatge</td>
+                <td>L'alumne no entendria res</td>
+                <td>Entendria algo pero no aprendria</td>
+                <td>Aprendria parcialment</td>
+                <td>Aprendria be</td>
+                <td>Aprendria i podria explicar-ho</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Navegacio entre casos -->
+    <div class="cas-nav" id="cas-nav"></div>
+
+    <!-- Barra de perfil -->
+    <div class="perfil-bar" id="perfil-bar"></div>
+
+    <!-- Panels text -->
+    <div class="panels">
+        <div class="panel">
+            <div class="panel-head">
+                <h3>Text original</h3>
+                <span class="badge" style="background:var(--g100);color:var(--g700)" id="orig-words"></span>
+            </div>
+            <div class="panel-body original" id="panel-original"></div>
+        </div>
+        <div class="panel">
+            <div class="panel-head">
+                <h3 id="panel-gen-title">Text adaptat</h3>
+                <span class="badge" style="background:var(--pri-light);color:var(--pri)" id="adapt-words"></span>
+            </div>
+            <div class="panel-body" id="panel-adaptat"></div>
+        </div>
+    </div>
+
+    <!-- System prompt -->
+    <details style="margin-bottom:16px;">
+        <summary style="cursor:pointer;padding:12px 16px;background:white;border:1px solid var(--g200);border-radius:var(--r);font-weight:600;font-size:14px;color:var(--purple);">
+            Veure el prompt que ha rebut el model (system prompt complet)
+        </summary>
+        <div id="panel-prompt" style="background:white;border:1px solid var(--g200);border-radius:0 0 var(--r) var(--r);border-top:none;padding:16px;font-family:monospace;font-size:12px;line-height:1.7;max-height:500px;overflow-y:auto;white-space:pre-wrap;color:var(--g700);"></div>
+    </details>
+
+    <!-- Scoring -->
+    <div class="scoring" id="scoring">
+        <h3>La teva puntuacio</h3>
+        <div id="score-rows"></div>
+        <div style="margin-top:16px;display:flex;gap:12px;align-items:center;">
+            <button onclick="revealGPT()" id="btn-reveal"
+                style="padding:10px 20px;background:var(--warn);color:white;border:none;border-radius:6px;font-size:14px;cursor:pointer;font-weight:600;">
+                Mostra puntuacio GPT
+            </button>
+            <span id="reveal-msg" style="font-size:13px;color:var(--g500);"></span>
+        </div>
+    </div>
+
+    <!-- Compare -->
+    <div class="compare-section" id="compare-section">
+        <h3 style="font-size:15px;margin-bottom:16px;">Comparacio: Tu vs GPT</h3>
+        <div id="compare-bars"></div>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary" id="summary">
+        <h2>Resum de totes les puntuacions</h2>
+        <table id="summary-table"></table>
+    </div>
+</div>
+
+<script>
+let DATA = [];
+let currentIdx = 0;
+let humanScores = {};  // {idx: {A: x, B1: x, B2: x, B3: x, C1: x}}
+
+const CRITERIA = [
+    { id: 'A', label: 'Qualitat text', hint: 'Coherencia, correccio, llegibilitat', gptKeys: ['A1','A2','A3'], avg: true },
+    { id: 'B1', label: 'Fidelitat contingut', hint: 'Preserva conceptes clau sense inventar', gptKeys: ['B1'], avg: false },
+    { id: 'B2', label: 'Adequacio al perfil', hint: 'MECR, DUA, necessitats especifiques', gptKeys: ['B2'], avg: false },
+    { id: 'B3', label: 'Suports / scaffolding', hint: 'Glossari, esquema, definicions, preguntes', gptKeys: ['B3'], avg: false },
+    { id: 'C1', label: 'Potencial aprenentatge', hint: 'L\'alumne aprendria amb aquest text?', gptKeys: ['C1'], avg: false },
+];
+
+async function loadData(tanda) {
+    tanda = tanda || 'det';
+    const url = tanda === 'det' ? '/validacio_data.json' : `/api/validacio/${tanda}`;
+    const res = await fetch(url);
+    DATA = await res.json();
+    document.getElementById('tanda-info').textContent = `${DATA.length} textos`;
+    if (DATA.length === 0) {
+        document.getElementById('cas-nav').innerHTML = '<p style="color:var(--g500)">No hi ha textos per aquesta tanda.</p>';
+        return;
+    }
+    renderNav();
+    selectCase(0);
+    updateProgress();
+}
+
+function changeTanda() {
+    const tanda = document.getElementById('tanda-select').value;
+    humanScores = {};
+    currentIdx = 0;
+    loadData(tanda);
+}
+
+function renderNav() {
+    const nav = document.getElementById('cas-nav');
+    nav.innerHTML = DATA.map((c, i) => {
+        const short = c.cas_id.replace('__', ' ').replace('_', ' ');
+        return `<button class="cas-btn" id="btn-${i}" onclick="selectCase(${i})">
+            ${short}<span class="model-tag">${c.generator}</span></button>`;
+    }).join('');
+}
+
+function selectCase(idx) {
+    currentIdx = idx;
+    const c = DATA[idx];
+
+    // Nav active
+    document.querySelectorAll('.cas-btn').forEach((b, i) => {
+        b.classList.toggle('active', i === idx);
+        if (humanScores[i]) b.classList.add('scored');
+    });
+
+    // Perfil bar
+    const mecr_colors = {'pre-A1':'#dc2626','A1':'#d97706','A2':'#d97706','B1':'#059669','B2':'#1a56db'};
+    const dua_colors = {'Acces':'#dc2626','Core':'#1a56db','Enriquiment':'#7c3aed'};
+    document.getElementById('perfil-bar').innerHTML = `
+        <span class="perfil-tag" style="background:var(--ok-light);color:var(--ok)">${c.perfil}</span>
+        <span class="perfil-tag" style="background:${mecr_colors[c.mecr]||'#6b7280'}22;color:${mecr_colors[c.mecr]||'#6b7280'}">MECR: ${c.mecr}</span>
+        <span class="perfil-tag" style="background:${dua_colors[c.dua]||'#6b7280'}22;color:${dua_colors[c.dua]||'#6b7280'}">DUA: ${c.dua}</span>
+        <span class="perfil-tag" style="background:var(--g100);color:var(--g700)">${c.paraules} paraules</span>
+        <span class="perfil-tag" style="background:var(--purple);22;color:var(--purple)">${c.generator.toUpperCase()}</span>`;
+
+    // Panels
+    document.getElementById('panel-original').innerHTML = renderMarkdown(c.original);
+    document.getElementById('panel-adaptat').innerHTML = renderMarkdown(c.adaptat);
+    document.getElementById('orig-words').textContent = c.original.split(/\s+/).length + ' par';
+    document.getElementById('adapt-words').textContent = c.paraules + ' par';
+    document.getElementById('panel-gen-title').textContent = `Text adaptat — ${c.generator.toUpperCase()}`;
+
+    // Prompt
+    document.getElementById('panel-prompt').textContent = c.system_prompt || '(prompt no disponible)';
+
+    // Score rows
+    const saved = humanScores[idx] || {};
+    document.getElementById('score-rows').innerHTML = CRITERIA.map(cr => `
+        <div class="score-row">
+            <div class="score-label">
+                <strong>${cr.id}. ${cr.label}</strong>
+                <span class="hint">${cr.hint}</span>
+            </div>
+            <div class="score-btns" id="btns-${cr.id}">
+                ${[1,2,3,4,5].map(v => `<button class="score-btn ${saved[cr.id]===v?'selected':''}"
+                    onclick="setScore('${cr.id}',${v})">${v}</button>`).join('')}
+                <span class="score-btn gpt" id="gpt-${cr.id}" style="display:none"></span>
+            </div>
+        </div>
+    `).join('');
+
+    // Reset reveal
+    document.getElementById('btn-reveal').style.display = '';
+    document.getElementById('reveal-msg').textContent = '';
+    document.getElementById('compare-section').classList.remove('visible');
+    CRITERIA.forEach(cr => { document.getElementById('gpt-'+cr.id).style.display = 'none'; });
+}
+
+function setScore(criterionId, value) {
+    if (!humanScores[currentIdx]) humanScores[currentIdx] = {};
+    humanScores[currentIdx][criterionId] = value;
+
+    // Visual
+    const btns = document.querySelectorAll(`#btns-${criterionId} .score-btn:not(.gpt)`);
+    btns.forEach(b => b.classList.toggle('selected', parseInt(b.textContent) === value));
+
+    // Mark nav
+    document.getElementById('btn-' + currentIdx).classList.add('scored');
+    updateProgress();
+}
+
+function getGPTScore(criterion) {
+    const c = DATA[currentIdx];
+    const gpt = c.gpt;
+    if (criterion.avg) {
+        const vals = criterion.gptKeys.map(k => gpt[k]).filter(v => v > 0);
+        return vals.length ? Math.round(vals.reduce((a,b)=>a+b,0) / vals.length * 10) / 10 : 0;
+    }
+    return gpt[criterion.gptKeys[0]] || 0;
+}
+
+function revealGPT() {
+    const c = DATA[currentIdx];
+    CRITERIA.forEach(cr => {
+        const el = document.getElementById('gpt-' + cr.id);
+        const val = getGPTScore(cr);
+        el.textContent = 'GPT: ' + val;
+        el.style.display = '';
+    });
+    document.getElementById('btn-reveal').style.display = 'none';
+
+    // Show compare
+    const human = humanScores[currentIdx];
+    if (human && Object.keys(human).length >= 3) {
+        showCompare(human);
+    } else {
+        document.getElementById('reveal-msg').textContent = 'Puntua almenys 3 criteris per veure la comparacio.';
+    }
+}
+
+function showCompare(human) {
+    const section = document.getElementById('compare-section');
+    section.classList.add('visible');
+    let html = '';
+    CRITERIA.forEach(cr => {
+        const h = human[cr.id] || 0;
+        const g = getGPTScore(cr);
+        const diff = g - h;
+        const diffStr = diff > 0 ? `<span class="diff-pos">GPT +${diff.toFixed(1)}</span>` :
+                        diff < 0 ? `<span class="diff-neg">Tu +${Math.abs(diff).toFixed(1)}</span>` : '=';
+        const hPct = h / 5 * 100;
+        const gPct = g / 5 * 100;
+        html += `<div class="compare-bar">
+            <div class="label">${cr.id}. ${cr.label}</div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                <div style="display:flex;align-items:center;gap:8px">
+                    <span style="font-size:11px;width:30px;color:var(--pri)">Tu</span>
+                    <div class="compare-fill" style="width:${hPct}%;background:var(--pri)">${h}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                    <span style="font-size:11px;width:30px;color:var(--warn)">GPT</span>
+                    <div class="compare-fill" style="width:${gPct}%;background:var(--warn)">${g}</div>
+                </div>
+            </div>
+            <div style="width:80px;text-align:right;font-size:12px">${diffStr}</div>
+        </div>`;
+    });
+    document.getElementById('compare-bars').innerHTML = html;
+}
+
+function showSummary() {
+    const el = document.getElementById('summary');
+    el.classList.toggle('visible');
+    if (!el.classList.contains('visible')) return;
+
+    let html = '<tr><th>Cas</th><th>Model</th><th>Perfil</th>';
+    CRITERIA.forEach(cr => html += `<th>Tu: ${cr.id}</th><th>GPT: ${cr.id}</th><th>Dif</th>`);
+    html += '</tr>';
+
+    let totalH = {}, totalG = {}, totalN = {};
+    CRITERIA.forEach(cr => { totalH[cr.id] = 0; totalG[cr.id] = 0; totalN[cr.id] = 0; });
+
+    DATA.forEach((c, i) => {
+        const h = humanScores[i] || {};
+        html += `<tr><td>${c.cas_id.split('__')[0]}</td><td>${c.generator}</td><td style="font-size:11px">${c.mecr} ${c.dua}</td>`;
+        CRITERIA.forEach(cr => {
+            const hv = h[cr.id] || '';
+            const keys = cr.gptKeys;
+            let gv;
+            if (cr.avg) {
+                const vals = keys.map(k => c.gpt[k]).filter(v => v > 0);
+                gv = vals.length ? Math.round(vals.reduce((a,b)=>a+b,0) / vals.length * 10) / 10 : '';
+            } else {
+                gv = c.gpt[keys[0]] || '';
+            }
+            const diff = (hv && gv) ? (gv - hv).toFixed(1) : '';
+            const cls = diff > 0 ? 'diff-pos' : diff < 0 ? 'diff-neg' : '';
+            html += `<td>${hv || '-'}</td><td>${gv}</td><td class="${cls}">${diff ? (diff > 0 ? '+' : '') + diff : '-'}</td>`;
+            if (hv && gv) { totalH[cr.id] += hv; totalG[cr.id] += gv; totalN[cr.id]++; }
+        });
+        html += '</tr>';
+    });
+
+    // Mitjanes
+    html += '<tr style="font-weight:700;background:var(--pri-light)"><td colspan="3">MITJANA</td>';
+    CRITERIA.forEach(cr => {
+        const n = totalN[cr.id];
+        const hm = n ? (totalH[cr.id] / n).toFixed(2) : '-';
+        const gm = n ? (totalG[cr.id] / n).toFixed(2) : '-';
+        const dm = n ? ((totalG[cr.id] - totalH[cr.id]) / n).toFixed(2) : '-';
+        const cls = dm > 0 ? 'diff-pos' : dm < 0 ? 'diff-neg' : '';
+        html += `<td>${hm}</td><td>${gm}</td><td class="${cls}">${dm > 0 ? '+' : ''}${dm}</td>`;
+    });
+    html += '</tr>';
+
+    document.getElementById('summary-table').innerHTML = html;
+}
+
+function updateProgress() {
+    const scored = Object.keys(humanScores).length;
+    document.getElementById('progress').textContent = `${scored}/${DATA.length} puntuats`;
+}
+
+function toggleRubrica() {
+    document.getElementById('rubrica').classList.toggle('visible');
+}
+
+function renderMarkdown(text) {
+    return text
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/\*\*([^*]+)\*\*/g, '<strong style="color:var(--pri)">$1</strong>')
+        .replace(/^### (.+)$/gm, '<h4 style="font-size:14px;font-weight:700;margin:16px 0 6px;color:var(--g900);border-bottom:1px solid var(--g100);padding-bottom:4px">$1</h4>')
+        .replace(/^## (.+)$/gm, '<h3 style="font-size:15px;font-weight:700;margin:20px 0 8px;color:var(--pri)">$1</h3>')
+        .replace(/^\|(.+)\|$/gm, (m) => {
+            const cells = m.split('|').filter(c => c.trim());
+            return '<div style="display:flex;gap:8px;padding:4px 0;font-size:13px;border-bottom:1px solid var(--g100)">' +
+                cells.map(c => `<span style="flex:1">${c.trim()}</span>`).join('') + '</div>';
+        })
+        .replace(/^- (.+)$/gm, '<div style="padding-left:16px;margin:3px 0">&#8226; $1</div>')
+        .replace(/^(\d+)\. (.+)$/gm, '<div style="padding-left:16px;margin:3px 0"><strong>$1.</strong> $2</div>')
+        .replace(/\n\n/g, '<br><br>')
+        .replace(/\n/g, '<br>');
+}
+
+loadData();
+</script>
+</body>
+</html>

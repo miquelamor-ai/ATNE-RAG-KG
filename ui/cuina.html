@@ -722,6 +722,8 @@
         <a href="#flux" class="active" onclick="scrollToSection('flux')">Flux</a>
         <a href="#perfils" onclick="scrollToSection('perfils')">Perfils</a>
         <a href="#cataleg" onclick="scrollToSection('cataleg')">Cataleg</a>
+        <a href="#corpus" onclick="scrollToSection('corpus')">Corpus</a>
+        <a href="#preview" onclick="scrollToSection('preview')">Prompt Preview</a>
     </nav>
     <a href="/" class="back-link">&#8592; Torna a l'app</a>
 </div>
@@ -1020,6 +1022,109 @@
         <!-- Llista d'instruccions -->
         <div id="instr-container">
             <div class="loading-msg">Carregant cataleg...</div>
+        </div>
+    </div>
+
+    <hr class="section-sep">
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- SECCIÓ 4: VISOR DEL CORPUS                                            -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+    <div id="corpus">
+        <h1 class="section-title">Corpus pedagogic FJE</h1>
+        <p class="section-subtitle">
+            17 documents de referencia que alimenten el RAG i les instruccions. Clica per explorar el contingut complet de cada document.
+        </p>
+
+        <div id="corpus-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:24px;">
+            <div class="loading-msg">Carregant corpus...</div>
+        </div>
+
+        <!-- Visor del document seleccionat -->
+        <div id="corpus-viewer" style="display:none;background:white;border:1px solid var(--g200);border-radius:var(--r);overflow:hidden;">
+            <div id="corpus-viewer-header" style="padding:16px 20px;border-bottom:1px solid var(--g200);display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                    <h2 id="corpus-viewer-title" style="font-size:16px;margin:0;color:var(--g900)"></h2>
+                    <span id="corpus-viewer-meta" style="font-size:12px;color:var(--g500)"></span>
+                </div>
+                <button onclick="closeCorpusViewer()" style="background:none;border:1px solid var(--g200);border-radius:6px;padding:6px 14px;cursor:pointer;font-size:13px;color:var(--g500)">Tanca</button>
+            </div>
+            <!-- Navegacio per seccions -->
+            <div id="corpus-sections-nav" style="padding:8px 20px;border-bottom:1px solid var(--g100);display:flex;gap:6px;flex-wrap:wrap;background:var(--g50);"></div>
+            <!-- Contingut -->
+            <div id="corpus-viewer-content" style="padding:20px;font-size:14px;line-height:1.8;max-height:600px;overflow-y:auto;"></div>
+        </div>
+    </div>
+
+    <hr class="section-sep">
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- SECCIÓ 5: PROMPT PREVIEW                                              -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+    <div id="preview">
+        <h1 class="section-title">Previsualizador de prompt</h1>
+        <p class="section-subtitle">
+            Tria un perfil i veu el prompt REAL que rebria el model de llenguatge. Les 4 capes amb el contingut exacte.
+        </p>
+
+        <!-- Selector de perfil -->
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;align-items:end;">
+            <div style="flex:1;min-width:200px;">
+                <label style="font-size:12px;font-weight:600;color:var(--g500);display:block;margin-bottom:4px;">Perfil</label>
+                <select id="preview-profile" style="width:100%;padding:10px 14px;border:1px solid var(--g200);border-radius:6px;font-size:14px;">
+                    <option value="nouvingut">Nouvingut (arab, A1)</option>
+                    <option value="nouvingut_xines">Nouvingut (xines, pre-A1)</option>
+                    <option value="tea">TEA (nivell 2)</option>
+                    <option value="tdah">TDAH (combinat, moderat)</option>
+                    <option value="dislexia">Dislexia (fonologica)</option>
+                    <option value="di">Discapacitat intellectual (lleu)</option>
+                    <option value="altes_cap">Altes capacitats</option>
+                    <option value="nouvingut_tea" selected>Nouvingut arab + TEA (creuament)</option>
+                    <option value="tdah_dislexia">TDAH + Dislexia (creuament)</option>
+                </select>
+            </div>
+            <div style="min-width:140px;">
+                <label style="font-size:12px;font-weight:600;color:var(--g500);display:block;margin-bottom:4px;">Etapa</label>
+                <select id="preview-etapa" style="width:100%;padding:10px 14px;border:1px solid var(--g200);border-radius:6px;font-size:14px;">
+                    <option value="Primaria">Primaria</option>
+                    <option value="ESO" selected>ESO</option>
+                    <option value="Batxillerat">Batxillerat</option>
+                </select>
+            </div>
+            <div style="min-width:120px;">
+                <label style="font-size:12px;font-weight:600;color:var(--g500);display:block;margin-bottom:4px;">MECR</label>
+                <select id="preview-mecr" style="width:100%;padding:10px 14px;border:1px solid var(--g200);border-radius:6px;font-size:14px;">
+                    <option value="pre-A1">pre-A1</option>
+                    <option value="A1" selected>A1</option>
+                    <option value="A2">A2</option>
+                    <option value="B1">B1</option>
+                    <option value="B2">B2</option>
+                </select>
+            </div>
+            <div style="min-width:120px;">
+                <label style="font-size:12px;font-weight:600;color:var(--g500);display:block;margin-bottom:4px;">DUA</label>
+                <select id="preview-dua" style="width:100%;padding:10px 14px;border:1px solid var(--g200);border-radius:6px;font-size:14px;">
+                    <option value="Acces" selected>Acces</option>
+                    <option value="Core">Core</option>
+                    <option value="Enriquiment">Enriquiment</option>
+                </select>
+            </div>
+            <button onclick="generatePreview()" style="padding:10px 24px;background:var(--pri);color:white;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;">Genera prompt</button>
+        </div>
+
+        <!-- Resultat -->
+        <div id="preview-result" style="display:none;">
+            <!-- Stats -->
+            <div id="preview-stats" style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;"></div>
+            <!-- Capes -->
+            <div id="preview-layers" style="display:flex;flex-direction:column;gap:8px;"></div>
+            <!-- Prompt complet -->
+            <details style="margin-top:16px;">
+                <summary style="cursor:pointer;font-weight:600;color:var(--g700);padding:12px;background:var(--g50);border-radius:var(--r);border:1px solid var(--g200);">Veure prompt complet (text cru que rep l'LLM)</summary>
+                <pre id="preview-raw" style="background:var(--g50);padding:16px;border:1px solid var(--g200);border-radius:0 0 var(--r) var(--r);font-size:12px;line-height:1.6;white-space:pre-wrap;max-height:500px;overflow-y:auto;"></pre>
+            </details>
         </div>
     </div>
 
@@ -2091,6 +2196,271 @@ function escapeHtml(text) {
 // ── Init ───────────────────────────────────────────────────────────────────
 
 loadCatalog();
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SECCIÓ 4: VISOR DEL CORPUS
+// ═══════════════════════════════════════════════════════════════════════════
+
+const MODULE_COLORS = { M1: '#059669', M2: '#1a56db', M3: '#7c3aed' };
+const MODULE_BG = { M1: '#d1fae5', M2: '#dbeafe', M3: '#ede9fe' };
+
+async function loadCorpusList() {
+    try {
+        const res = await fetch('/api/corpus');
+        const data = await res.json();
+        const container = document.getElementById('corpus-list');
+
+        // Agrupar per modul
+        const groups = {};
+        data.files.forEach(f => {
+            if (!groups[f.modul]) groups[f.modul] = { nom: f.modul_nom, files: [] };
+            groups[f.modul].files.push(f);
+        });
+
+        let html = '';
+        for (const [modul, group] of Object.entries(groups)) {
+            const color = MODULE_COLORS[modul] || '#6b7280';
+            const bg = MODULE_BG[modul] || '#f3f4f6';
+            group.files.forEach(f => {
+                html += `<div onclick="openCorpusFile('${f.filename}')" style="background:white;border:1px solid var(--g200);border-radius:var(--r);padding:14px 18px;cursor:pointer;transition:all .15s;border-left:4px solid ${color};" onmouseover="this.style.boxShadow='0 3px 10px rgba(0,0,0,.08)'" onmouseout="this.style.boxShadow='none'">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                        <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;background:${bg};color:${color}">${modul}</span>
+                        <span style="font-size:11px;color:var(--g500)">${f.size_kb} KB</span>
+                    </div>
+                    <h3 style="font-size:14px;margin:4px 0 2px;color:var(--g900)">${f.titol}</h3>
+                    <span style="font-size:11px;color:var(--g500)">${f.filename}</span>
+                </div>`;
+            });
+        }
+        container.innerHTML = html;
+    } catch (e) {
+        document.getElementById('corpus-list').innerHTML = '<p style="color:var(--err)">Error carregant corpus. Assegura que el servidor esta en marxa.</p>';
+    }
+}
+
+async function openCorpusFile(filename) {
+    const viewer = document.getElementById('corpus-viewer');
+    const titleEl = document.getElementById('corpus-viewer-title');
+    const metaEl = document.getElementById('corpus-viewer-meta');
+    const navEl = document.getElementById('corpus-sections-nav');
+    const contentEl = document.getElementById('corpus-viewer-content');
+
+    viewer.style.display = 'block';
+    contentEl.innerHTML = '<div class="loading-msg">Carregant document...</div>';
+    titleEl.textContent = filename;
+
+    try {
+        const res = await fetch('/api/corpus/' + filename);
+        const data = await res.json();
+
+        titleEl.textContent = filename.replace('.md', '').split('_').slice(1).join(' ').replace(/-/g, ' ');
+        metaEl.textContent = `${data.words} paraules · ${data.sections.length} seccions · ${Math.round(data.length/1024)} KB`;
+
+        // Navegacio per seccions
+        let navHtml = '';
+        data.sections.forEach((s, i) => {
+            const short = s.title.length > 30 ? s.title.substring(0, 28) + '...' : s.title;
+            navHtml += `<button onclick="scrollToCorpusSection(${i})" style="background:white;border:1px solid var(--g200);border-radius:4px;padding:4px 10px;font-size:11px;cursor:pointer;white-space:nowrap;color:var(--g700)">${short}</button>`;
+        });
+        navEl.innerHTML = navHtml;
+
+        // Contingut amb markdown basic
+        let contentHtml = '';
+        data.sections.forEach((s, i) => {
+            contentHtml += `<div id="corpus-section-${i}" style="margin-bottom:24px;">`;
+            contentHtml += `<h3 style="font-size:15px;color:var(--pri);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--g100);">${s.title}</h3>`;
+            contentHtml += `<div style="color:var(--g700);font-size:13px;line-height:1.8;">${renderMd(s.content)}</div>`;
+            contentHtml += '</div>';
+        });
+        contentEl.innerHTML = contentHtml;
+
+        // Scroll al visor
+        viewer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (e) {
+        contentEl.innerHTML = '<p style="color:var(--err)">Error carregant el document.</p>';
+    }
+}
+
+function renderMd(text) {
+    return text
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+        .replace(/`([^`]+)`/g, '<code style="background:var(--g100);padding:1px 4px;border-radius:3px;font-size:12px">$1</code>')
+        .replace(/^### (.+)$/gm, '<h4 style="font-size:13px;font-weight:700;margin:12px 0 4px;color:var(--g900)">$1</h4>')
+        .replace(/^- (.+)$/gm, '<div style="padding-left:16px;margin:2px 0">• $1</div>')
+        .replace(/^\d+\. (.+)$/gm, '<div style="padding-left:16px;margin:2px 0">$1</div>')
+        .replace(/\n\n/g, '<br><br>')
+        .replace(/\n/g, '<br>');
+}
+
+function scrollToCorpusSection(i) {
+    const el = document.getElementById('corpus-section-' + i);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeCorpusViewer() {
+    document.getElementById('corpus-viewer').style.display = 'none';
+}
+
+loadCorpusList();
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SECCIÓ 5: PROMPT PREVIEW
+// ═══════════════════════════════════════════════════════════════════════════
+
+const PREVIEW_PROFILES = {
+    nouvingut: {
+        caracteristiques: { nouvingut: { actiu: true, L1: "arab", alfabet_llati: false, escolaritzacio_previa: "parcial", calp: "inicial" } }
+    },
+    nouvingut_xines: {
+        caracteristiques: { nouvingut: { actiu: true, L1: "xines mandari", alfabet_llati: false, escolaritzacio_previa: "si", calp: "inicial" } }
+    },
+    tea: {
+        caracteristiques: { tea: { actiu: true, nivell_suport: "2", comunicacio_oral: "fluida" } }
+    },
+    tdah: {
+        caracteristiques: { tdah: { actiu: true, presentacio: "combinat", grau: "moderat", baixa_memoria_treball: true, fatiga_cognitiva: true } }
+    },
+    dislexia: {
+        caracteristiques: { dislexia: { actiu: true, tipus_dislexia: "fonologica", grau: "moderat" } }
+    },
+    di: {
+        caracteristiques: { di: { actiu: true, grau: "lleu" } }
+    },
+    altes_cap: {
+        caracteristiques: { altes_capacitats: { actiu: true, tipus_capacitat: "global" } }
+    },
+    nouvingut_tea: {
+        caracteristiques: {
+            nouvingut: { actiu: true, L1: "arab", alfabet_llati: false, escolaritzacio_previa: "parcial", calp: "inicial" },
+            tea: { actiu: true, nivell_suport: "2", comunicacio_oral: "fluida" }
+        }
+    },
+    tdah_dislexia: {
+        caracteristiques: {
+            tdah: { actiu: true, presentacio: "combinat", grau: "moderat", baixa_memoria_treball: true },
+            dislexia: { actiu: true, tipus_dislexia: "fonologica", grau: "moderat" }
+        }
+    },
+};
+
+async function generatePreview() {
+    const profileKey = document.getElementById('preview-profile').value;
+    const etapa = document.getElementById('preview-etapa').value;
+    const mecr = document.getElementById('preview-mecr').value;
+    const dua = document.getElementById('preview-dua').value;
+
+    const resultDiv = document.getElementById('preview-result');
+    resultDiv.style.display = 'block';
+    document.getElementById('preview-stats').innerHTML = '<div class="loading-msg">Generant prompt...</div>';
+    document.getElementById('preview-layers').innerHTML = '';
+    document.getElementById('preview-raw').textContent = '';
+
+    try {
+        const res = await fetch('/api/prompt-preview', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                profile: PREVIEW_PROFILES[profileKey],
+                context: { etapa: etapa, curs: '3r' },
+                params: { mecr_sortida: mecr, dua: dua, complements: { glossari: true, esquema_visual: true, preguntes_comprensio: true } }
+            })
+        });
+        const data = await res.json();
+
+        // Stats
+        document.getElementById('preview-stats').innerHTML = `
+            <div style="background:var(--pri-light);padding:10px 16px;border-radius:6px;flex:1;min-width:120px;text-align:center">
+                <div style="font-size:24px;font-weight:700;color:var(--pri)">${data.total_instructions}</div>
+                <div style="font-size:11px;color:var(--pri)">instruccions actives</div>
+            </div>
+            <div style="background:var(--warn-light);padding:10px 16px;border-radius:6px;flex:1;min-width:120px;text-align:center">
+                <div style="font-size:24px;font-weight:700;color:var(--warn)">${data.prompt_words}</div>
+                <div style="font-size:11px;color:var(--warn)">paraules al prompt</div>
+            </div>
+            <div style="background:var(--ok-light);padding:10px 16px;border-radius:6px;flex:1;min-width:120px;text-align:center">
+                <div style="font-size:24px;font-weight:700;color:var(--ok)">${data.prompt_length}</div>
+                <div style="font-size:11px;color:var(--ok)">caracters totals</div>
+            </div>
+        `;
+
+        // Capes
+        const layerConfig = [
+            { key: 'identitat', title: 'CAPA 1: IDENTITAT', color: '#6b7280', bg: '#f9fafb', desc: 'Fixa — sempre igual' },
+            { key: 'instruccions', title: 'CAPA 2: INSTRUCCIONS', color: '#1a56db', bg: '#eff6ff', desc: `${data.total_instructions} instruccions filtrades, agrupades en macrodirectives` },
+            { key: 'dua', title: 'BLOC DUA', color: '#d97706', bg: '#fffbeb', desc: `Bloc ${dua} del corpus` },
+            { key: 'genere', title: 'BLOC GENERE', color: '#7c3aed', bg: '#f5f3ff', desc: 'Instruccions per genere discursiu (si indicat)' },
+            { key: 'persona_audience', title: 'PERSONA-AUDIENCE', color: '#059669', bg: '#ecfdf5', desc: 'Narrativa de l\'alumne (context, no ordres)' },
+            { key: 'fewshot', title: 'EXEMPLE FEW-SHOT', color: '#dc2626', bg: '#fef2f2', desc: `Exemple de sortida esperada per MECR ${mecr}` },
+        ];
+
+        let layersHtml = '';
+        layerConfig.forEach(l => {
+            const content = data.capes[l.key];
+            if (!content) return;
+            const preview = content.substring(0, 150).replace(/</g, '&lt;') + (content.length > 150 ? '...' : '');
+            const words = content.split(/\s+/).length;
+
+            layersHtml += `<div style="border:1.5px solid ${l.color};border-radius:var(--r);overflow:hidden;background:white;">
+                <div onclick="this.parentElement.classList.toggle('open');this.querySelector('.chevron').textContent=this.parentElement.classList.contains('open')?'▲':'▼'" style="padding:12px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:${l.bg}">
+                    <div>
+                        <span style="font-size:12px;font-weight:700;color:${l.color}">${l.title}</span>
+                        <span style="font-size:11px;color:var(--g500);margin-left:8px">${l.desc}</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <span style="font-size:10px;color:var(--g500)">${words} paraules</span>
+                        <span class="chevron" style="font-size:14px;color:var(--g500)">▼</span>
+                    </div>
+                </div>
+                <div style="padding:4px 16px 4px;font-size:11px;color:var(--g500);font-style:italic">${preview}</div>
+                <div style="display:none;padding:12px 16px;border-top:1px solid var(--g100);">
+                    <pre style="font-size:12px;line-height:1.6;white-space:pre-wrap;color:var(--g700);margin:0;max-height:400px;overflow-y:auto">${content.replace(/</g, '&lt;')}</pre>
+                </div>
+            </div>`;
+        });
+
+        // IDs de les instruccions actives
+        if (data.instruction_ids && data.instruction_ids.length > 0) {
+            layersHtml += `<div style="padding:12px 16px;background:var(--g50);border:1px solid var(--g200);border-radius:var(--r);">
+                <span style="font-size:11px;font-weight:600;color:var(--g500)">IDs instruccions actives:</span>
+                <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">
+                    ${data.instruction_ids.map(id => `<span style="background:var(--pri-light);color:var(--pri);padding:2px 8px;border-radius:3px;font-size:11px;font-weight:600">${id}</span>`).join('')}
+                </div>
+            </div>`;
+        }
+
+        document.getElementById('preview-layers').innerHTML = layersHtml;
+
+        // Afegir toggle per les capes expandibles
+        document.querySelectorAll('#preview-layers > div.open').forEach(el => el.classList.remove('open'));
+
+        // Prompt raw
+        document.getElementById('preview-raw').textContent = data.prompt_complet;
+
+    } catch (e) {
+        document.getElementById('preview-stats').innerHTML = `<p style="color:var(--err)">Error generant preview: ${e.message}. Assegura que el servidor esta en marxa.</p>`;
+    }
+}
+
+// Fix toggle per capes del preview
+document.addEventListener('click', function(e) {
+    const layer = e.target.closest('#preview-layers > div');
+    if (!layer) return;
+    const body = layer.querySelector('div:last-child');
+    if (body && body.style.display !== undefined) {
+        // Toggle es fa al onclick del header, aqui nomes assegurem coherencia
+    }
+});
+
+// Override toggle per capes expandibles del preview
+(function() {
+    const style = document.createElement('style');
+    style.textContent = '#preview-layers > div.open > div:last-child { display: block !important; }';
+    document.head.appendChild(style);
+})();
+
 </script>
 </body>
 </html>
