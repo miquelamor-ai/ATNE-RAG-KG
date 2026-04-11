@@ -275,12 +275,161 @@ let _historyLoaded = false; // cache flag historial
 document.addEventListener("DOMContentLoaded", () => {
     renderCharGrid();
     renderComplementGrid();
+    renderObservableBehaviors();
+    renderAjutsList();
     loadContextFromStorage();
     updateEtapaSelects(); // Sincronitzar cursos/àmbits amb l'etapa carregada
     loadProfileList();
     checkHealth();
     bindEvents();
+    updateMecrPreview();
 });
+
+
+// ── Via observable: estat i renderitzat ────────────────────────────────────
+
+// Via actualment activa: 'observable' (default) o 'diagnostic'
+let currentVia = "observable";
+
+// Set d'ajuts marcats manualment pel docent (per distingir dels automàtics)
+const manualAjuts = new Set();
+// Set d'ajuts marcats manualment com a exclosos (per si el docent desmarca un automàtic)
+const suppressedAjuts = new Set();
+
+function renderObservableBehaviors() {
+    const container = document.getElementById("observable-behaviors");
+    if (!container || !window.ObservableMapping) return;
+
+    const items = Object.entries(window.ObservableMapping.BEHAVIORS);
+    container.innerHTML = items.map(([bid, beh]) => `
+        <label class="behavior-item" style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;font-size:13px;line-height:1.4;">
+            <input type="checkbox" data-behavior="${bid}" style="margin-top:2px;">
+            <span>${beh.label}</span>
+        </label>
+    `).join("");
+
+    container.querySelectorAll('input[type="checkbox"][data-behavior]').forEach(cb => {
+        cb.addEventListener("change", () => {
+            syncAjutsFromBehaviors();
+            updateMecrPreview();
+        });
+    });
+}
+
+function renderAjutsList() {
+    const container = document.getElementById("ajuts-list");
+    if (!container || !window.ObservableMapping) return;
+
+    const ajuts = window.ObservableMapping.AJUTS;
+    const grups = window.ObservableMapping.AJUT_GRUPS;
+
+    // Agrupar per grup
+    const perGrup = {};
+    for (const [aid, ajut] of Object.entries(ajuts)) {
+        if (!perGrup[ajut.grup]) perGrup[ajut.grup] = [];
+        perGrup[ajut.grup].push({ id: aid, label: ajut.label });
+    }
+
+    let html = "";
+    for (const [grupKey, grupLabel] of Object.entries(grups)) {
+        const items = perGrup[grupKey] || [];
+        if (!items.length) continue;
+        html += `<div class="ajut-grup" style="margin-bottom:6px;">
+            <div style="font-size:11px;font-weight:600;color:#0369a1;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">${grupLabel}</div>
+            ${items.map(it => `
+                <label class="ajut-item" style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;font-size:13px;line-height:1.4;padding:2px 0;">
+                    <input type="checkbox" data-ajut="${it.id}" style="margin-top:2px;">
+                    <span>${it.label}</span>
+                </label>
+            `).join("")}
+        </div>`;
+    }
+    container.innerHTML = html;
+
+    // Marcar manualment quan el docent toca
+    container.querySelectorAll('input[type="checkbox"][data-ajut]').forEach(cb => {
+        cb.addEventListener("change", () => {
+            const aid = cb.dataset.ajut;
+            if (cb.checked) {
+                manualAjuts.add(aid);
+                suppressedAjuts.delete(aid);
+            } else {
+                manualAjuts.delete(aid);
+                // Si la conducta que l'havia activat encara està marcada,
+                // registrem que el docent el vol explícitament fora.
+                if (isAjutAutoActive(aid)) suppressedAjuts.add(aid);
+            }
+        });
+    });
+}
+
+function isAjutAutoActive(ajutId) {
+    // Retorna true si alguna conducta marcada l'activa automàticament
+    const active = getActiveBehaviorIds();
+    const { ajutsAutomatics } = window.ObservableMapping.behaviorsToProfile(active);
+    return ajutsAutomatics.has(ajutId);
+}
+
+function getActiveBehaviorIds() {
+    return Array.from(
+        document.querySelectorAll('#observable-behaviors input[type="checkbox"]:checked')
+    ).map(cb => cb.dataset.behavior);
+}
+
+function syncAjutsFromBehaviors() {
+    // Quan es marca/desmarca una conducta, ajustem els ajuts:
+    //  - automàtics: segueixen el que digui el mapping
+    //  - manuals: no els tocaems
+    //  - suprimits manualment: queden fora tot i que siguin auto
+    const active = getActiveBehaviorIds();
+    const { ajutsAutomatics } = window.ObservableMapping.behaviorsToProfile(active);
+
+    document.querySelectorAll('#ajuts-list input[type="checkbox"][data-ajut]').forEach(cb => {
+        const aid = cb.dataset.ajut;
+        const isAuto = ajutsAutomatics.has(aid);
+        const isManual = manualAjuts.has(aid);
+        const isSuppressed = suppressedAjuts.has(aid);
+
+        cb.checked = (isAuto && !isSuppressed) || isManual;
+    });
+}
+
+function getSelectedAjutIds() {
+    return Array.from(
+        document.querySelectorAll('#ajuts-list input[type="checkbox"][data-ajut]:checked')
+    ).map(cb => cb.dataset.ajut);
+}
+
+function getDesfase() {
+    const r = document.querySelector('input[name="desfase"]:checked');
+    return r ? parseInt(r.value, 10) : 0;
+}
+
+function updateMecrPreview() {
+    if (!window.ObservableMapping) return;
+    const preview = document.getElementById("mecr-preview-value");
+    if (!preview) return;
+    const etapa = document.getElementById("ctx-etapa").value;
+    const curs = document.getElementById("ctx-curs").value;
+    const desfase = getDesfase();
+    const mecr = window.ObservableMapping.computeMecr(etapa, curs, desfase);
+    const ref = window.ObservableMapping.getMecrReferencia(etapa, curs);
+    preview.textContent = desfase === 0
+        ? `${mecr} (nivell del curs)`
+        : `${mecr} (desplaçat des de ${ref})`;
+}
+
+function setVia(via) {
+    currentVia = via;
+    document.querySelectorAll("#via-selector .via-tab").forEach(tab => {
+        const active = tab.dataset.via === via;
+        tab.classList.toggle("via-active", active);
+        tab.style.borderBottomColor = active ? "#0369a1" : "transparent";
+        tab.style.color = active ? "#0369a1" : "#374151";
+    });
+    document.getElementById("via-observable-panel").style.display = via === "observable" ? "" : "none";
+    document.getElementById("via-diagnostic-panel").style.display = via === "diagnostic" ? "" : "none";
+}
 
 
 // ── Actualitzar selects dinàmics per etapa ─────────────────────────────────
@@ -457,9 +606,39 @@ function renderComplementGrid() {
 // ── Recollir perfil del formulari ──────────────────────────────────────────
 
 function collectProfile() {
+    // Via observable: construir caracteristiques a partir de les conductes
+    if (currentVia === "observable") {
+        const behaviorIds = getActiveBehaviorIds();
+        const { caracteristiques: fromBehaviors } =
+            window.ObservableMapping.behaviorsToProfile(behaviorIds);
+
+        // Inicialitzem totes les claus conegudes amb actiu=false (per compat amb server)
+        const caracteristiques = {};
+        for (const key of Object.keys(CHARACTERISTICS)) {
+            caracteristiques[key] = { actiu: false };
+        }
+        // Copiem les activades per les conductes
+        for (const [key, data] of Object.entries(fromBehaviors)) {
+            caracteristiques[key] = data;
+        }
+
+        return {
+            nom: document.getElementById("profile-nom").value || "Sense nom",
+            caracteristiques,
+            canal_preferent: document.getElementById("profile-canal").value,
+            observacions: document.getElementById("profile-obs").value,
+            _via: "observable",
+            _behaviors: behaviorIds,
+            _ajuts: getSelectedAjutIds(),
+            _desfase: getDesfase(),
+        };
+    }
+
+    // Via diagnòstic (original)
     const caracteristiques = {};
     for (const key of Object.keys(CHARACTERISTICS)) {
         const cb = document.querySelector(`input[type="checkbox"][data-char="${key}"]`);
+        if (!cb) { caracteristiques[key] = { actiu: false }; continue; }
         const entry = { actiu: cb.checked };
         if (cb.checked) {
             document.querySelectorAll(`[data-char="${key}"][data-var]`).forEach(el => {
@@ -476,6 +655,7 @@ function collectProfile() {
         caracteristiques,
         canal_preferent: document.getElementById("profile-canal").value,
         observacions: document.getElementById("profile-obs").value,
+        _via: "diagnostic",
     };
 }
 
@@ -733,10 +913,27 @@ function collectParams() {
     const genereEl = document.getElementById("input-genere-textual");
     const genere = genereEl ? genereEl.value : "";
 
+    let mecr = document.getElementById("param-mecr").value;
+
+    // Via observable: el MECR es calcula des del Bloc A (etapa+curs+desfase)
+    // i els ajuts marcats afegeixen complements del backend.
+    if (currentVia === "observable" && window.ObservableMapping) {
+        const etapa = document.getElementById("ctx-etapa").value;
+        const curs = document.getElementById("ctx-curs").value;
+        const desfase = getDesfase();
+        mecr = window.ObservableMapping.computeMecr(etapa, curs, desfase);
+
+        const ajutIds = getSelectedAjutIds();
+        const fromAjuts = window.ObservableMapping.ajutsToComplements(ajutIds);
+        for (const [k, v] of Object.entries(fromAjuts)) {
+            complements[k] = v;
+        }
+    }
+
     return {
         dua: document.getElementById("param-dua").value,
         lf: parseInt(document.getElementById("param-lf").value),
-        mecr_sortida: document.getElementById("param-mecr").value,
+        mecr_sortida: mecr,
         genere_discursiu: genere,
         complements,
     };
@@ -774,7 +971,18 @@ async function runAdaptation() {
         const model = modelSel ? modelSel.value : "mistral";
         const verifyToggle = document.getElementById("verify-toggle");
         const verify_retry = verifyToggle ? verifyToggle.checked : true;
-        const paramsWithVerify = { ...params, verify_retry };
+
+        // Mode d'adaptació: alumne (1 versió) o grup (3 versions)
+        const mode = getAdaptMode();
+        const levels = mode === "grup"
+            ? ["accessible", "estandard", "exigent"]
+            : ["single"];
+
+        state.adaptMode = mode;
+        state.versions = {}; // { accessible: "...", estandard: "...", exigent: "..." }
+        state.doneLevels = new Set();
+
+        const paramsWithVerify = { ...params, verify_retry, levels };
         const resp = await fetch("/api/adapt", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -810,21 +1018,38 @@ async function runAdaptation() {
 }
 
 function handleSSEEvent(ev, container) {
+    const level = ev.level || "";
+    const levelTag = level ? ` [${versionLabel(level)}]` : "";
+
     if (ev.type === "step") {
-        // Marcar anteriors com done
-        container.querySelectorAll(".progress-step.active").forEach(el => {
+        // Marcar anteriors com done (només els del mateix level o sense level)
+        container.querySelectorAll(`.progress-step.active[data-level="${level}"]`).forEach(el => {
             el.classList.remove("active");
             el.classList.add("done");
             el.querySelector(".spinner")?.remove();
         });
-        container.innerHTML += `
-            <div class="progress-step active">
-                <div class="spinner"></div>
-                ${ev.msg}
-            </div>
-        `;
+        const div = document.createElement("div");
+        div.className = "progress-step active";
+        div.dataset.level = level;
+        div.innerHTML = `<div class="spinner"></div>${ev.msg}${levelTag}`;
+        container.appendChild(div);
     } else if (ev.type === "result") {
-        state.adaptedText = ev.adapted;
+        // Acumulem per versió. Si no hi ha level, és una versió única.
+        if (state.adaptMode === "grup" && level) {
+            state.versions[level] = ev.adapted;
+        } else {
+            state.adaptedText = ev.adapted;
+        }
+    } else if (ev.type === "done_level") {
+        // Un nivell individual ha acabat. En mode grup, això pot dispar el
+        // renderitzat parcial (per mostrar una pestanya mentre les altres
+        // encara generen). Per simplicitat, esperem el 'done' global.
+        state.doneLevels.add(level);
+        container.querySelectorAll(`.progress-step.active[data-level="${level}"]`).forEach(el => {
+            el.classList.remove("active");
+            el.classList.add("done");
+            el.querySelector(".spinner")?.remove();
+        });
     } else if (ev.type === "done") {
         if (state._doneHandled) return; // evitar duplicats
         state._doneHandled = true;
@@ -836,6 +1061,68 @@ function handleSSEEvent(ev, container) {
         container.innerHTML += `<div class="progress-step done">Adaptació completada!</div>`;
         showResult();
     }
+}
+
+function versionLabel(level) {
+    return ({
+        accessible: "Més accessible",
+        estandard: "Estàndard",
+        exigent: "Més exigent",
+    })[level] || level;
+}
+
+function bindVersionTabs() {
+    document.querySelectorAll("#version-tabs .version-tab").forEach(tab => {
+        // Elimina listeners previs clonant
+        const nw = tab.cloneNode(true);
+        tab.parentNode.replaceChild(nw, tab);
+    });
+    document.querySelectorAll("#version-tabs .version-tab").forEach(tab => {
+        tab.addEventListener("click", () => switchVersion(tab.dataset.version));
+    });
+}
+
+function switchVersion(level) {
+    if (!state.versions || !state.versions[level]) return;
+    state.currentVersion = level;
+    state.adaptedText = state.versions[level];
+
+    // Reparsejar seccions del text d'aquesta versió
+    const sections = parseAdaptedSections(state.adaptedText);
+    document.getElementById("result-adapted").innerHTML = formatMarkdown(sections.main || state.adaptedText);
+
+    // Actualitzar complements (cada versió pot tenir-ne de propis)
+    const compDiv = document.getElementById("result-complements");
+    compDiv.innerHTML = "";
+    for (const [title, content] of Object.entries(sections.complements)) {
+        const icon = getCompIcon(title);
+        const isAudit = title.toLowerCase().includes("auditoria") || title.toLowerCase().includes("argumentació");
+        const openAttr = isAudit ? "" : "open";
+        compDiv.innerHTML += `
+            <details class="complement-card" ${openAttr}>
+                <summary class="complement-header">
+                    <span class="complement-icon">${icon}</span>
+                    <span class="complement-title">${title}</span>
+                </summary>
+                <div class="complement-body">${formatMarkdown(content)}</div>
+            </details>
+        `;
+    }
+
+    updateVersionTabsUI();
+}
+
+function updateVersionTabsUI() {
+    document.querySelectorAll("#version-tabs .version-tab").forEach(tab => {
+        const isActive = tab.dataset.version === state.currentVersion;
+        const hasContent = state.versions && state.versions[tab.dataset.version];
+        tab.classList.toggle("version-active", isActive);
+        tab.style.borderBottomColor = isActive ? "#0369a1" : "transparent";
+        tab.style.color = isActive ? "#0369a1" : (hasContent ? "#374151" : "#94a3b8");
+        tab.disabled = !hasContent;
+    });
+    const label = document.getElementById("version-label");
+    if (label) label.textContent = state.currentVersion ? `— ${versionLabel(state.currentVersion)}` : "";
 }
 
 
@@ -874,6 +1161,21 @@ function getCompIcon(title) {
 
 function showResult() {
     document.getElementById("result-original").textContent = state.originalText;
+
+    // Mode grup: inicialitzar pestanyes i seleccionar la primera versió disponible
+    const versionTabs = document.getElementById("version-tabs");
+    if (state.adaptMode === "grup" && state.versions && Object.keys(state.versions).length) {
+        versionTabs.style.display = "flex";
+        bindVersionTabs();
+        // Triar la versió estàndard com a defecte (si hi és)
+        const defaultVersion = state.versions.estandard ? "estandard"
+            : (state.versions.accessible ? "accessible" : "exigent");
+        state.currentVersion = defaultVersion;
+        state.adaptedText = state.versions[defaultVersion];
+        updateVersionTabsUI();
+    } else {
+        versionTabs.style.display = "none";
+    }
 
     // Parsejar seccions del text adaptat
     const sections = parseAdaptedSections(state.adaptedText);
@@ -1166,6 +1468,49 @@ async function exportDoc(format) {
 }
 
 
+// ── Upload de fitxer (PDF/DOCX/MD/TXT) ─────────────────────────────────────
+
+async function handleFileUpload(ev) {
+    const input = ev.target;
+    const file = input.files && input.files[0];
+    if (!file) return;
+
+    const status = document.getElementById("upload-status");
+    const textarea = document.getElementById("input-text");
+
+    status.textContent = `Llegint "${file.name}"…`;
+    status.style.color = "#0369a1";
+
+    try {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const resp = await fetch("/api/extract-text", {
+            method: "POST",
+            body: formData,
+        });
+        const data = await resp.json();
+
+        if (!resp.ok) {
+            status.textContent = `Error: ${data.error || resp.statusText}`;
+            status.style.color = "#b91c1c";
+            input.value = ""; // permet reintentar amb el mateix fitxer
+            return;
+        }
+
+        textarea.value = data.text;
+        updateWordCount();
+        status.textContent = `${file.name} — ${data.paraules} paraules extretes (${data.format_detectat.toUpperCase()})`;
+        status.style.color = "#15803d";
+    } catch (e) {
+        status.textContent = `Error de xarxa: ${e.message}`;
+        status.style.color = "#b91c1c";
+    } finally {
+        input.value = "";
+    }
+}
+
+
 // ── Comptador de paraules ──────────────────────────────────────────────────
 
 function updateWordCount() {
@@ -1198,6 +1543,10 @@ function bindEvents() {
     // Word count
     document.getElementById("input-text").addEventListener("input", updateWordCount);
 
+    // Upload de fitxer
+    const fileInput = document.getElementById("file-input");
+    if (fileInput) fileInput.addEventListener("change", handleFileUpload);
+
     // Carregar historial quan s'arriba al pas 2
     document.querySelectorAll('.step-tab').forEach(tab => {
         tab.addEventListener('click', () => {
@@ -1209,15 +1558,47 @@ function bindEvents() {
     document.getElementById("ctx-etapa").addEventListener("change", () => {
         updateEtapaSelects();
         saveContextToStorage();
+        updateMecrPreview();
     });
 
     // Persistir context en canviar
     ["ctx-curs", "ctx-ambit", "ctx-materia"].forEach(id => {
-        document.getElementById(id).addEventListener("change", saveContextToStorage);
+        document.getElementById(id).addEventListener("change", () => {
+            saveContextToStorage();
+            if (id === "ctx-curs") updateMecrPreview();
+        });
     });
     document.querySelectorAll('input[name="ctx-aula"]').forEach(r => {
         r.addEventListener("change", saveContextToStorage);
     });
+
+    // Via observable / diagnòstic
+    document.querySelectorAll("#via-selector .via-tab").forEach(tab => {
+        tab.addEventListener("click", () => setVia(tab.dataset.via));
+    });
+
+    // Desplaçament del Bloc A
+    document.querySelectorAll('input[name="desfase"]').forEach(r => {
+        r.addEventListener("change", updateMecrPreview);
+    });
+
+    // Mode alumne/grup: actualitza etiqueta del Bloc A
+    document.querySelectorAll('input[name="adapt-mode"]').forEach(r => {
+        r.addEventListener("change", updateBlocALabel);
+    });
+}
+
+function updateBlocALabel() {
+    const mode = document.querySelector('input[name="adapt-mode"]:checked')?.value || "alumne";
+    const label = document.getElementById("bloc-a-label");
+    if (!label) return;
+    label.textContent = mode === "grup"
+        ? "El GRUP globalment està:"
+        : "Aquest ALUMNE està:";
+}
+
+function getAdaptMode() {
+    return document.querySelector('input[name="adapt-mode"]:checked')?.value || "alumne";
 }
 
 // ── Historial de textos anteriors ──────────────────────────────────────────

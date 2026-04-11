@@ -107,9 +107,67 @@
                 <input type="text" id="profile-nom" placeholder="Ex: Amina - 3r ESO">
             </div>
 
-            <h2 style="margin: 16px 0 12px;">Característiques</h2>
-            <div class="char-grid" id="char-grid">
-                <!-- Generat per app.js -->
+            <!-- ── Selector de via d'entrada ─────────────────────── -->
+            <div class="via-selector" id="via-selector" style="display:flex;gap:8px;margin:18px 0 14px 0;border-bottom:2px solid #e5e7eb;">
+                <button type="button" class="via-tab via-active" data-via="observable" style="padding:10px 18px;background:none;border:none;border-bottom:3px solid transparent;font-size:14px;font-weight:600;cursor:pointer;color:#374151;">
+                    Via observable <span style="font-weight:400;color:#9ca3af;font-size:12px;">(recomanada)</span>
+                </button>
+                <button type="button" class="via-tab" data-via="diagnostic" style="padding:10px 18px;background:none;border:none;border-bottom:3px solid transparent;font-size:14px;font-weight:600;cursor:pointer;color:#374151;">
+                    Via diagnòstic <span style="font-weight:400;color:#9ca3af;font-size:12px;">(per a DOPs i tutors/es)</span>
+                </button>
+            </div>
+
+            <!-- ── VIA OBSERVABLE ─────────────────────────────────── -->
+            <div id="via-observable-panel">
+                <p style="font-size:13px;color:#64748b;margin:0 0 14px 0;">
+                    No cal un diagnòstic: marca el que observes en l'alumne (o grup) i l'app t'ajudarà a triar els ajuts adequats.
+                </p>
+
+                <!-- Bloc A: Desfase curricular -->
+                <div class="bloc-card" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px;margin-bottom:14px;">
+                    <h3 id="bloc-a-label" style="margin:0 0 10px 0;font-size:14px;font-weight:600;color:#1e293b;">
+                        Aquest ALUMNE està:
+                    </h3>
+                    <div class="desfase-scale" id="desfase-scale" style="display:flex;gap:6px;flex-wrap:wrap;">
+                        <label class="desfase-opt"><input type="radio" name="desfase" value="2"> Molt per sobre</label>
+                        <label class="desfase-opt"><input type="radio" name="desfase" value="1"> Per sobre</label>
+                        <label class="desfase-opt"><input type="radio" name="desfase" value="0" checked> Al nivell del curs</label>
+                        <label class="desfase-opt"><input type="radio" name="desfase" value="-1"> Per sota</label>
+                        <label class="desfase-opt"><input type="radio" name="desfase" value="-2"> Molt per sota</label>
+                    </div>
+                    <div id="desfase-mecr-preview" style="margin-top:10px;font-size:12px;color:#64748b;">
+                        Nivell lingüístic de sortida: <strong id="mecr-preview-value">—</strong>
+                    </div>
+                </div>
+
+                <!-- Bloc B: Doble columna observes → ajuts -->
+                <div class="bloc-b-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                    <div class="bloc-card" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px;">
+                        <h3 style="margin:0 0 10px 0;font-size:14px;font-weight:600;color:#1e293b;">
+                            Què observes?
+                        </h3>
+                        <div id="observable-behaviors" style="display:flex;flex-direction:column;gap:10px;">
+                            <!-- Generat per app.js a partir d'OBSERVABLE_BEHAVIORS -->
+                        </div>
+                    </div>
+                    <div class="bloc-card" style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:14px 16px;">
+                        <h3 style="margin:0 0 10px 0;font-size:14px;font-weight:600;color:#075985;">
+                            Ajuts que s'aplicaran
+                            <span style="font-weight:400;color:#0369a1;font-size:11px;display:block;margin-top:2px;">Pots afegir-ne o treure'n manualment</span>
+                        </h3>
+                        <div id="ajuts-list" style="display:flex;flex-direction:column;gap:10px;">
+                            <!-- Generat per app.js a partir d'AJUT_CATALOG -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── VIA DIAGNÒSTIC (existent) ─────────────────────── -->
+            <div id="via-diagnostic-panel" style="display:none;">
+                <h2 style="margin: 16px 0 12px;">Característiques</h2>
+                <div class="char-grid" id="char-grid">
+                    <!-- Generat per app.js -->
+                </div>
             </div>
 
             <label style="display:block; margin-top:16px; font-size:13px; font-weight:600; color:var(--g700);">
@@ -133,6 +191,16 @@
         <!-- ── PAS 2: Text Original ────────────────────────────── -->
         <section class="step-panel" id="step-2">
             <h2 style="margin-bottom:12px;">Text original a adaptar</h2>
+
+            <!-- Upload de fitxer -->
+            <div class="upload-row" id="upload-row" style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:10px 12px;background:#f9fafb;border:1px dashed #cbd5e1;border-radius:6px;">
+                <label for="file-input" class="btn" style="cursor:pointer;">
+                    Pujar fitxer (PDF, DOCX, MD, TXT)
+                </label>
+                <input type="file" id="file-input" accept=".pdf,.docx,.md,.txt" style="display:none;">
+                <span id="upload-status" style="font-size:13px;color:#64748b;">o enganxa el text a continuació</span>
+            </div>
+
             <textarea class="text-area" id="input-text" placeholder="Enganxa aquí el text que vols adaptar..."></textarea>
             <div class="word-count" id="word-count">0 paraules</div>
 
@@ -200,6 +268,27 @@
                 </div>
             </div>
 
+            <!-- Mode d'adaptació: alumne concret o grup multinivell -->
+            <div class="proposal-card">
+                <h3>Com vols l'adaptació?</h3>
+                <div class="mode-group" style="display:flex;flex-direction:column;gap:8px;">
+                    <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;font-size:14px;">
+                        <input type="radio" name="adapt-mode" value="alumne" checked style="margin-top:3px;">
+                        <span>
+                            <strong>Per a aquest alumne concret</strong>
+                            <span style="display:block;font-size:12px;color:#64748b;">1 versió del text adaptada al seu nivell</span>
+                        </span>
+                    </label>
+                    <label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;font-size:14px;">
+                        <input type="radio" name="adapt-mode" value="grup" style="margin-top:3px;">
+                        <span>
+                            <strong>Per a un grup amb diversitat de nivells</strong>
+                            <span style="display:block;font-size:12px;color:#64748b;">3 versions simultànies: més accessible / estàndard / més exigent</span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
             <div style="display:flex;gap:15px;align-items:center;margin-bottom:10px;flex-wrap:wrap;">
                 <label for="model-selector" style="font-size:0.9em;font-weight:600;">Model:</label>
                 <select id="model-selector" style="padding:6px 10px;border-radius:4px;border:1px solid #ccc;">
@@ -222,13 +311,26 @@
 
         <!-- ── PAS 4: Resultat ─────────────────────────────────── -->
         <section class="step-panel" id="step-4">
+            <!-- Pestanyes de versions (només visible en mode grup) -->
+            <div id="version-tabs" style="display:none;gap:4px;margin-bottom:10px;border-bottom:2px solid #e5e7eb;">
+                <button type="button" class="version-tab version-active" data-version="accessible" style="padding:8px 16px;background:none;border:none;border-bottom:3px solid transparent;font-size:13px;font-weight:600;cursor:pointer;color:#374151;">
+                    Més accessible
+                </button>
+                <button type="button" class="version-tab" data-version="estandard" style="padding:8px 16px;background:none;border:none;border-bottom:3px solid transparent;font-size:13px;font-weight:600;cursor:pointer;color:#374151;">
+                    Estàndard
+                </button>
+                <button type="button" class="version-tab" data-version="exigent" style="padding:8px 16px;background:none;border:none;border-bottom:3px solid transparent;font-size:13px;font-weight:600;cursor:pointer;color:#374151;">
+                    Més exigent
+                </button>
+            </div>
+
             <div class="result-columns">
                 <div class="result-col">
                     <h3>Text original</h3>
                     <div class="content" id="result-original"></div>
                 </div>
                 <div class="result-col editable-col">
-                    <h3>Text adaptat <span class="edit-badge">Editable — fes clic per reescriure</span></h3>
+                    <h3>Text adaptat <span class="edit-badge">Editable — fes clic per reescriure</span> <span id="version-label" style="font-size:12px;color:#0369a1;font-weight:500;"></span></h3>
                     <div class="content" id="result-adapted" contenteditable="true" spellcheck="true"></div>
                 </div>
             </div>
@@ -265,6 +367,7 @@
     </main>
 </div>
 
+<script src="/ui/observable_mapping.js"></script>
 <script src="/ui/app.js"></script>
 </body>
 </html>

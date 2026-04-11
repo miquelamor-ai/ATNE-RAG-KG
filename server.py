@@ -20,7 +20,7 @@ import instruction_filter
 import requests
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI, Body, HTTPException, Request
+from fastapi import FastAPI, Body, HTTPException, Request, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse, FileResponse
 
@@ -1342,7 +1342,108 @@ async def propose(payload: dict = Body(...)):
     return result
 
 
+# ── Extracció de text des de fitxer (PDF/DOCX/MD/TXT) ─────────────────────
+
+MAX_UPLOAD_BYTES = 5 * 1024 * 1024  # 5 MB
+
+@app.post("/api/extract-text")
+async def extract_text_from_file(file: UploadFile = File(...)):
+    """
+    Rep un fitxer PDF/DOCX/MD/TXT i retorna el text pla extret.
+    Límit: 5 MB. Format detectat per l'extensió.
+    """
+    filename = (file.filename or "").lower()
+    ext = filename.rsplit(".", 1)[-1] if "." in filename else ""
+
+    if ext not in ("pdf", "docx", "md", "txt"):
+        return JSONResponse(
+            {"error": f"Format no suportat: .{ext}. Accepta: PDF, DOCX, MD, TXT."},
+            status_code=400,
+        )
+
+    raw = await file.read()
+    if len(raw) > MAX_UPLOAD_BYTES:
+        return JSONResponse(
+            {"error": f"Fitxer massa gran ({len(raw)//1024} KB). Màxim: 5 MB."},
+            status_code=400,
+        )
+    if not raw:
+        return JSONResponse({"error": "Fitxer buit."}, status_code=400)
+
+    text = ""
+    try:
+        if ext == "txt" or ext == "md":
+            # Provar UTF-8 primer, fallback a latin-1
+            try:
+                text = raw.decode("utf-8")
+            except UnicodeDecodeError:
+                text = raw.decode("latin-1", errors="replace")
+            # Per MD, mantenim el text tal qual (l'LLM entén markdown)
+
+        elif ext == "pdf":
+            import io
+            from pypdf import PdfReader
+            reader = PdfReader(io.BytesIO(raw))
+            pages = []
+            for page in reader.pages:
+                try:
+                    pages.append(page.extract_text() or "")
+                except Exception:
+                    continue
+            text = "\n\n".join(p.strip() for p in pages if p.strip())
+
+        elif ext == "docx":
+            import io
+            from docx import Document  # python-docx
+            doc = Document(io.BytesIO(raw))
+            parts = [p.text for p in doc.paragraphs if p.text.strip()]
+            text = "\n\n".join(parts)
+
+    except Exception as e:
+        return JSONResponse(
+            {"error": f"No s'ha pogut extreure el text: {type(e).__name__}: {e}"},
+            status_code=500,
+        )
+
+    text = text.strip()
+    if not text:
+        return JSONResponse(
+            {"error": "No s'ha pogut extreure text llegible del fitxer. "
+                      "Si és un PDF escanejat, caldria OCR (no suportat ara)."},
+            status_code=422,
+        )
+
+    paraules = len(text.split())
+    return {
+        "text": text,
+        "paraules": paraules,
+        "format_detectat": ext,
+        "filename": file.filename,
+    }
+
+
 # ── Adaptació (SSE stream) ─────────────────────────────────────────────────
+
+# ── Multinivell: desplaçar MECR ±1 per a mode grup ─────────────────────────
+
+_MECR_SCALE = ["pre-A1", "A1", "A2", "B1", "B2"]
+
+def _shift_mecr(mecr: str, shift: int) -> str:
+    """Desplaça el MECR N graons amb límits pre-A1..B2."""
+    try:
+        idx = _MECR_SCALE.index(mecr)
+    except ValueError:
+        return mecr
+    new_idx = max(0, min(len(_MECR_SCALE) - 1, idx + shift))
+    return _MECR_SCALE[new_idx]
+
+# Mapa de nivells per a mode grup: label → desplaçament relatiu al MECR base
+LEVEL_SHIFTS = {
+    "accessible": -1,
+    "estandard": 0,
+    "exigent": +1,
+}
+
 
 @app.post("/api/adapt")
 async def adapt_stream(payload: dict = Body(...)):
@@ -1355,26 +1456,58 @@ async def adapt_stream(payload: dict = Body(...)):
     if not text.strip():
         return JSONResponse({"error": "Cal proporcionar un text"}, status_code=400)
 
+    # Nivells a generar. Per defecte: una sola versió.
+    # Si arriba 'levels' amb més d'un element, generem cada un en paral·lel
+    # amb MECR ajustat (accessible=-1, estandard=0, exigent=+1).
+    levels = params.get("levels") or ["single"]
+    base_mecr = params.get("mecr_sortida", "B1")
+
     async def gen():
         events: list[dict] = []
-        def cb(ev):
-            events.append(ev)
+        done_count = {"n": 0}
+
+        def make_cb(level_id: str):
+            def _cb(ev):
+                # Afegim la identificació del nivell a cada event, perquè el
+                # frontend pugui enrutar-lo a la pestanya corresponent.
+                ev_tagged = {**ev, "level": level_id}
+                if ev.get("type") == "done":
+                    done_count["n"] += 1
+                    # El 'done' global l'enviem quan tots els nivells han acabat.
+                    # Reemetem un 'done_level' individual perquè el frontend sàpiga
+                    # que aquest nivell concret ja està llest.
+                    ev_tagged["type"] = "done_level"
+                events.append(ev_tagged)
+            return _cb
 
         loop = asyncio.get_event_loop()
-        with concurrent.futures.ThreadPoolExecutor() as pool:
-            task = loop.run_in_executor(
-                pool,
-                lambda: run_adaptation(text, profile, context, params, cb, model_override=model or None),
-            )
-            while not task.done():
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max(3, len(levels))) as pool:
+            tasks = []
+            for lvl in levels:
+                shift = LEVEL_SHIFTS.get(lvl, 0)
+                params_lvl = {**params, "mecr_sortida": _shift_mecr(base_mecr, shift)}
+                # level 'single' ⇒ passem id buit (frontend tracta com a mode alumne)
+                level_id = lvl if lvl != "single" else ""
+                t = loop.run_in_executor(
+                    pool,
+                    lambda p=params_lvl, l=level_id: run_adaptation(
+                        text, profile, context, p, make_cb(l), model_override=model or None
+                    ),
+                )
+                tasks.append(t)
+
+            total = len(tasks)
+            all_done = lambda: all(t.done() for t in tasks)
+            while not all_done():
                 while events:
                     yield f"data: {json.dumps(events.pop(0), ensure_ascii=False)}\n\n"
-                # Keepalive: evita QUIC_NETWORK_IDLE_TIMEOUT mentre Gemini genera
                 yield ": keepalive\n\n"
                 await asyncio.sleep(0.5)
-            # Drenar events restants (run_adaptation ja envia 'done')
             while events:
                 yield f"data: {json.dumps(events.pop(0), ensure_ascii=False)}\n\n"
+
+            # 'done' global quan tots els nivells han acabat
+            yield f"data: {json.dumps({'type': 'done', 'total_levels': total}, ensure_ascii=False)}\n\n"
 
     return StreamingResponse(gen(), media_type="text/event-stream")
 
