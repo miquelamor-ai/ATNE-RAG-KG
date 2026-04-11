@@ -1608,6 +1608,44 @@ async def cuina_page():
     return HTMLResponse("<h1>Cuina no disponible</h1>", status_code=404)
 
 
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard_xat9_page():
+    """Serveix el dashboard del Xat 9 (experiment A/B multi-model)."""
+    html_path = UI_DIR / "dashboard_xat9.html"
+    if html_path.exists():
+        return HTMLResponse(
+            html_path.read_text(encoding="utf-8"),
+            headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
+        )
+    return HTMLResponse("<h1>Dashboard Xat 9 no disponible</h1>", status_code=404)
+
+
+@app.get("/informe_fje")
+async def informe_fje_md():
+    """Descàrrega de l'informe executiu FJE en Markdown."""
+    md_path = Path(__file__).parent / "tests" / "experiment_ab" / "informe_executiu_FJE.md"
+    if md_path.exists():
+        return FileResponse(
+            str(md_path),
+            filename="informe_executiu_FJE.md",
+            media_type="text/markdown; charset=utf-8",
+        )
+    return HTMLResponse("<h1>Informe FJE no disponible</h1>", status_code=404)
+
+
+@app.get("/informe_tecnic")
+async def informe_tecnic_md():
+    """Descàrrega de l'informe tècnic multi-model en Markdown."""
+    md_path = Path(__file__).parent / "tests" / "experiment_ab" / "informe_multi_model.md"
+    if md_path.exists():
+        return FileResponse(
+            str(md_path),
+            filename="informe_multi_model.md",
+            media_type="text/markdown; charset=utf-8",
+        )
+    return HTMLResponse("<h1>Informe tècnic no disponible</h1>", status_code=404)
+
+
 @app.get("/validacio", response_class=HTMLResponse)
 async def validacio_page():
     """Serveix la pàgina de validació humana."""

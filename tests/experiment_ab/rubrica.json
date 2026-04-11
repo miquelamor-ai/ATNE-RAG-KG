@@ -1,0 +1,75 @@
+{
+  "nom": "Rúbrica d'avaluació Xat 9 — Prompt mínim vs complet",
+  "versio": "1.0",
+  "escala": "1-5 (1=deficient, 2=insuficient, 3=acceptable, 4=bo, 5=excel·lent)",
+  "criteris": [
+    {
+      "id": "adequacio_linguistica",
+      "nom": "Adequació lingüística al MECR",
+      "pes": 0.25,
+      "descriptors": {
+        "1": "Ignora completament el nivell MECR. Frases llargues i complexes per a un A1, o frases infantils per a un B2. Vocabulari inadequat al nivell.",
+        "2": "Intenta ajustar-se al MECR però amb errors greus: subordinades complexes per a A1-A2, o lèxic massa tècnic sense definir.",
+        "3": "S'ajusta raonablement al MECR en vocabulari i longitud de frase, però amb desviacions puntuals (alguna frase massa llarga, algun terme no adaptat).",
+        "4": "Bon ajust al MECR: longitud de frase coherent amb el nivell, vocabulari freqüent, veu activa predominant, puntuació adequada.",
+        "5": "Ajust excel·lent: longitud de frase dins els rangs MECR (pre-A1=3-5, A1=5-8, A2=8-12, B1=12-18), vocabulari calibrat, zero subordinades on no toca, subjecte explícit."
+      }
+    },
+    {
+      "id": "fidelitat_curricular",
+      "nom": "Fidelitat al contingut curricular",
+      "pes": 0.20,
+      "descriptors": {
+        "1": "Perd informació essencial del text original. Termes tècnics eliminats sense substitut. Errors conceptuals introduïts per simplificació excessiva.",
+        "2": "Manté la idea general però perd detalls importants o introdueix alguna imprecisió en simplificar.",
+        "3": "Preserva el contingut principal. Algun terme tècnic eliminat sense necessitat o alguna simplificació que rossa l'error.",
+        "4": "Bon equilibri: contingut preservat, termes tècnics mantinguts en negreta amb definició, causalitat intacta.",
+        "5": "Excel·lent: tot el nucli terminològic intocable preservat, definicions graduades per MECR, cadena causal intacta, zero errors conceptuals."
+      }
+    },
+    {
+      "id": "adequacio_perfil",
+      "nom": "Adequació al perfil de l'alumne",
+      "pes": 0.25,
+      "descriptors": {
+        "1": "Adaptació completament genèrica, no es nota cap ajust al perfil específic (nouvingut, TDAH, AC, TDL, 2e, DI).",
+        "2": "Menciona el perfil però sense implementar suports concrets: no hi ha glossari bilingüe per nouvingut, no hi ha micro-blocs per TDAH, etc.",
+        "3": "Implementa alguns suports del perfil però no tots: per exemple, glossari per nouvingut però sense transliteració; blocs curts per TDAH però sense indicadors de progrés.",
+        "4": "Bon ajust al perfil: la majoria de suports específics implementats (glossari, estructura predictible, blocs, enriquiment...).",
+        "5": "Excel·lent: tots els suports del perfil implementats i ben integrats. Per nouvingut: glossari + transliteració + pistes L1. Per TDAH: micro-blocs + progrés + variació. Per AC: profundització + connexions + pensament crític. Per 2e: repte alt + suports format."
+      }
+    },
+    {
+      "id": "llegibilitat_estructura",
+      "nom": "Llegibilitat i estructura",
+      "pes": 0.15,
+      "descriptors": {
+        "1": "Text desorganitzat, sense paràgrafs clars, sense títols ni seccions. Difícil de seguir.",
+        "2": "Estructura bàsica present però deficient: paràgrafs massa llargs, transicions pobres, falta coherència global.",
+        "3": "Estructura acceptable: paràgrafs identificables, algun títol, però falta resum anticipatiu o recapitulatiu, transicions millorables.",
+        "4": "Bona estructura: paràgrafs curts (3-5 frases), títols descriptius, frase tòpic al principi, transicions entre seccions.",
+        "5": "Excel·lent: resum anticipatiu, blocs temàtics amb títol-pregunta, frase tòpic, connectors explícits, transicions ('Ja hem vist X. Ara veurem Y'), resum final."
+      }
+    },
+    {
+      "id": "complements",
+      "nom": "Complements i suports addicionals",
+      "pes": 0.15,
+      "descriptors": {
+        "1": "Cap complement ni suport addicional al text pla.",
+        "2": "Algun complement molt bàsic (una definició entre parèntesis) però insuficient per al perfil.",
+        "3": "Complements presents però poc integrats: glossari al final desconnectat del text, o exemples genèrics.",
+        "4": "Bons complements: glossari integrat, exemples concrets, analogies quotidianes, scaffolding decreixent.",
+        "5": "Excel·lent: glossari previ (pre-training), analogies culturalment diverses, esquema de procés, scaffolding Vygotsky (1a=def completa, 2a=breu, 3a=sol), preguntes intercalades si escau."
+      }
+    }
+  ],
+  "instruccions_jutge": "Ets un avaluador expert en adaptació de textos educatius per a la diversitat. Avalua el text adaptat comparant-lo amb l'original i el perfil de l'alumne. Puntua cada criteri de 1 a 5 segons els descriptors. Sigues rigorós i objectiu. No inflis les puntuacions. Justifica breument cada puntuació amb evidència del text.",
+  "format_resposta": {
+    "adequacio_linguistica": {"puntuacio": "1-5", "justificacio": "breu"},
+    "fidelitat_curricular": {"puntuacio": "1-5", "justificacio": "breu"},
+    "adequacio_perfil": {"puntuacio": "1-5", "justificacio": "breu"},
+    "llegibilitat_estructura": {"puntuacio": "1-5", "justificacio": "breu"},
+    "complements": {"puntuacio": "1-5", "justificacio": "breu"}
+  }
+}

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<title>Xat 9 · Dashboard experiment A/B multi-model</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #f5f7fa; margin: 0; padding: 0; color: #1a202c; }
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+  header { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 40px 24px; border-radius: 16px; margin-bottom: 32px; }
+  h1 { margin: 0 0 8px 0; font-size: 32px; }
+  header .subtitle { opacity: 0.9; font-size: 16px; }
+  .hero-banner { background: #fef3c7; border-left: 6px solid #f59e0b; padding: 24px; border-radius: 8px; margin: 24px 0; }
+  .hero-banner h2 { margin: 0 0 8px 0; color: #78350f; }
+  .hero-banner .winner { font-size: 28px; font-weight: bold; color: #92400e; margin: 12px 0; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 24px 0; }
+  .kpi { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+  .kpi-label { font-size: 12px; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em; }
+  .kpi-value { font-size: 24px; font-weight: bold; margin: 8px 0 4px; color: #1e293b; }
+  .kpi-sub { font-size: 13px; color: #64748b; }
+  section { background: white; padding: 28px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); margin-bottom: 24px; }
+  section h2 { margin: 0 0 8px 0; color: #1e293b; font-size: 22px; }
+  section .q { color: #64748b; font-style: italic; margin-bottom: 20px; font-size: 14px; }
+  .chart-container { position: relative; height: 400px; margin: 16px 0; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+  th { background: #f1f5f9; font-weight: 600; color: #475569; }
+  tbody tr:hover { background: #f8fafc; }
+  .heatmap { display: grid; gap: 4px; margin: 16px 0; }
+  .heatmap-cell { padding: 16px 8px; text-align: center; border-radius: 4px; color: white; font-weight: bold; font-size: 14px; }
+  .footer { text-align: center; color: #94a3b8; padding: 24px; font-size: 13px; }
+  .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+  .badge-green { background: #d1fae5; color: #065f46; }
+  .badge-red { background: #fee2e2; color: #991b1b; }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+</style>
+</head>
+<body>
+<nav style="background:#1e293b;padding:12px 24px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+  <a href="/ui/index.html" style="color:#d1d5db;text-decoration:none;padding:.4rem .8rem;font-size:.85rem;">← Adaptador</a>
+  <a href="/ui/cuina.html" style="color:#d1d5db;text-decoration:none;padding:.4rem .8rem;font-size:.85rem;">Cuina</a>
+  <a href="/ui/eval_dashboard.html" style="color:#d1d5db;text-decoration:none;padding:.4rem .8rem;font-size:.85rem;">Avaluació</a>
+  <a href="/ui/eval_results.html" style="color:#d1d5db;text-decoration:none;padding:.4rem .8rem;font-size:.85rem;">Resultats</a>
+  <a href="/ui/informe.html" style="color:#d1d5db;text-decoration:none;padding:.4rem .8rem;font-size:.85rem;">Informe</a>
+  <a href="/dashboard" style="background:#fbbf24;color:#1e293b;text-decoration:none;padding:.4rem .8rem;font-size:.85rem;font-weight:600;border-radius:4px;">Dashboard Xat 9</a>
+  <span style="margin-left:auto;display:flex;gap:8px;">
+    <a href="/informe_fje" download style="color:#fbbf24;text-decoration:none;padding:.4rem .8rem;font-size:.8rem;border:1px solid #fbbf24;border-radius:4px;">↓ Informe FJE</a>
+    <a href="/informe_tecnic" download style="color:#94a3b8;text-decoration:none;padding:.4rem .8rem;font-size:.8rem;border:1px solid #94a3b8;border-radius:4px;">↓ Informe tècnic</a>
+  </span>
+</nav>
+<div class="container">
+  <header>
+    <h1>Xat 9 · Experiment A/B multi-model</h1>
+    <div class="subtitle">Prompt mínim vs prompt complet · 4 generadors × 5 jutges · 604 parells avaluats</div>
+    <div class="subtitle">Data: 2026-04-11T13:06:05</div>
+  </header>
+
+  <div class="hero-banner">
+    <h2>🏆 Arquitectura DUAL recomanada per a FJE</h2>
+    <p style="margin:8px 0 16px;color:#78350f;font-size:15px;">La solució òptima combina dos models: un per adaptar el text, un altre per generar els complements.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:20px;">
+      <div style="background:white;padding:20px;border-radius:10px;border-top:4px solid #3b82f6;">
+        <div style="font-size:12px;text-transform:uppercase;color:#64748b;font-weight:600;">Motor d'adaptació</div>
+        <div style="font-size:24px;font-weight:bold;color:#1e40af;margin:8px 0;">Gemma 4 31B</div>
+        <div style="font-size:13px;color:#64748b;">Qualitat del text: <strong>4.73/5</strong></div>
+        <div style="font-size:12px;color:#94a3b8;margin-top:4px;">MECR · fidelitat · perfil · llegibilitat</div>
+      </div>
+      <div style="background:white;padding:20px;border-radius:10px;border-top:4px solid #10b981;">
+        <div style="font-size:12px;text-transform:uppercase;color:#64748b;font-weight:600;">Motor de complements</div>
+        <div style="font-size:24px;font-weight:bold;color:#065f46;margin:8px 0;">Gemma 4 31B</div>
+        <div style="font-size:13px;color:#64748b;">Complements: <strong>4.87/5</strong></div>
+        <div style="font-size:12px;color:#94a3b8;margin-top:4px;">glossari · esquemes · pictogrames</div>
+      </div>
+      <div style="background:white;padding:20px;border-radius:10px;border-top:4px solid #f59e0b;">
+        <div style="font-size:12px;text-transform:uppercase;color:#64748b;font-weight:600;">Millor eficiència Q/cost</div>
+        <div style="font-size:24px;font-weight:bold;color:#92400e;margin:8px 0;">Gemma 4 31B</div>
+        <div style="font-size:13px;color:#64748b;">Qualitat/preu: <strong>4753.7</strong></div>
+        <div style="font-size:12px;color:#94a3b8;margin-top:4px;">alternativa econòmica</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Millor amb prompt MÍNIM</div>
+      <div class="kpi-value">Gemma 4 31B</div>
+      <div class="kpi-sub">Puntuació A: 4.57/5</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Millor amb prompt COMPLET</div>
+      <div class="kpi-value">Gemma 4 31B</div>
+      <div class="kpi-sub">Puntuació B: 4.75/5</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Més adequació AL PERFIL</div>
+      <div class="kpi-value">Gemma 4 31B</div>
+      <div class="kpi-sub">nouvingut · TDAH · AC · TDL · 2e</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Qui guanya MÉS amb prompt complet</div>
+      <div class="kpi-value">GPT-4o-mini</div>
+      <div class="kpi-sub">Δ = +0.62</div>
+    </div>
+  </div>
+
+  <section>
+    <h2>📊 Secció 1 — Comparativa global: Prompt mínim (A) vs Prompt complet (B)</h2>
+    <p class="q">🔸 Preguntes: Quin és el millor model amb prompt mínim? I amb prompt complet? Val la pena el catàleg de 98 instruccions per a cada model?</p>
+    <div class="chart-container">
+      <canvas id="globalCompare"></canvas>
+    </div>
+  </section>
+
+  <section>
+    <h2>📈 Secció 2 — Efecte del prompt complet per criteri</h2>
+    <p class="q">🔸 Pregunta: En quin criteri ajuda més el prompt complet per a cada model? (Δ = B − A)</p>
+    <div class="chart-container">
+      <canvas id="deltaCriteris"></canvas>
+    </div>
+  </section>
+
+  <section>
+    <h2>🎯 Secció 3 — Qualitat per criteri (prompt complet)</h2>
+    <p class="q">🔸 Preguntes: Quin és el millor fent complements? Millor en adequació al perfil? Millor en MECR? En fidelitat? En llegibilitat?</p>
+    <div class="chart-container">
+      <canvas id="perCriteri"></canvas>
+    </div>
+  </section>
+
+  <section>
+    <h2>🧩 Secció 4 — Matriu Model × Perfil d'alumne</h2>
+    <p class="q">🔸 Pregunta: Quin model és millor per cada tipus d'alumne? (nouvingut, TDAH, AC, TDL, 2e, TDAH+DI)</p>
+    <div id="heatmap-container" style="overflow-x:auto;"></div>
+  </section>
+
+  <section>
+    <h2>🎓 Secció 5 — Qualitat per etapa educativa</h2>
+    <p class="q">🔸 Pregunta: Quin model és millor per primària, ESO i batxillerat?</p>
+    <div class="chart-container">
+      <canvas id="perEtapa"></canvas>
+    </div>
+  </section>
+
+  <section>
+    <h2>💰 Secció 6 — Simulació de cost a escala FJE</h2>
+    <p class="q">🔸 Pregunta: Quant costaria cada model amb 1000 docents × 20 adaptacions/mes = 20,000 adaptacions/mes?</p>
+    <table>
+      <thead>
+        <tr><th>Model</th><th>Qualitat (B)</th><th>$/1M tokens</th><th>Cost/mes FJE</th><th>Cost/any FJE</th><th>Ràtio Q/€</th></tr>
+      </thead>
+      <tbody>
+        <tr style=background:#d1fae5>
+          <td><strong>Gemma 4 31B</strong></td>
+          <td>4.75</td>
+          <td>$0.00</td>
+          <td>$0.0</td>
+          <td>$0.0</td>
+          <td><span class="badge badge-green">475.37</span></td>
+        </tr>
+        <tr >
+          <td><strong>GPT-4o-mini</strong></td>
+          <td>4.19</td>
+          <td>$0.38</td>
+          <td>$19.0</td>
+          <td>$228.0</td>
+          <td><span class="badge badge-blue">10.74</span></td>
+        </tr>
+        <tr >
+          <td><strong>Llama 3.3 70B</strong></td>
+          <td>4.26</td>
+          <td>$0.00</td>
+          <td>$0.0</td>
+          <td>$0.0</td>
+          <td><span class="badge badge-green">426.44</span></td>
+        </tr>
+        <tr >
+          <td><strong>Mistral Small</strong></td>
+          <td>4.64</td>
+          <td>$0.30</td>
+          <td>$15.0</td>
+          <td>$180.0</td>
+          <td><span class="badge badge-blue">14.96</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top:16px;color:#64748b;font-size:13px;">
+      💡 <strong>Solució híbrida recomanada</strong>: usar Gemma (gratis) o Llama (gratis via Groq free tier) per casos estàndard i GPT-4o-mini o Mistral per casos difícils on calgui més qualitat.
+    </p>
+  </section>
+
+  <section>
+    <h2>🔍 Secció 7 — Fiabilitat inter-jutge</h2>
+    <p class="q">🔸 Pregunta: Ens podem fiar dels jutges? Coincideixen entre ells?</p>
+    <table>
+      <thead>
+        <tr><th></th><th>claude_sonnet</th><th>gemini_flash</th><th>gpt4o</th><th>llama_judge</th><th>mistral_judge</th><th>qwen_judge</th></tr></thead><tbody><tr><td><strong>claude_sonnet</strong></td><td style='background:#d1fae5;text-align:center;'>1.0</td><td style='background:#fef3c7;text-align:center;'>0.68</td><td style='background:#fef3c7;text-align:center;'>0.63</td><td style='background:#fef3c7;text-align:center;'>0.63</td><td style='background:#fef3c7;text-align:center;'>0.61</td><td style='background:#fef3c7;text-align:center;'>0.55</td></tr><tr><td><strong>gemini_flash</strong></td><td style='background:#fef3c7;text-align:center;'>0.68</td><td style='background:#d1fae5;text-align:center;'>1.0</td><td style='background:#d1fae5;text-align:center;'>0.75</td><td style='background:#fee2e2;text-align:center;'>0.39</td><td style='background:#fef3c7;text-align:center;'>0.66</td><td style='background:#fef3c7;text-align:center;'>0.43</td></tr><tr><td><strong>gpt4o</strong></td><td style='background:#fef3c7;text-align:center;'>0.63</td><td style='background:#d1fae5;text-align:center;'>0.75</td><td style='background:#d1fae5;text-align:center;'>1.0</td><td style='background:#fee2e2;text-align:center;'>0.37</td><td style='background:#fef3c7;text-align:center;'>0.68</td><td style='background:#fef3c7;text-align:center;'>0.44</td></tr><tr><td><strong>llama_judge</strong></td><td style='background:#fef3c7;text-align:center;'>0.63</td><td style='background:#fee2e2;text-align:center;'>0.39</td><td style='background:#fee2e2;text-align:center;'>0.37</td><td style='background:#d1fae5;text-align:center;'>1.0</td><td style='background:#fef3c7;text-align:center;'>0.43</td><td style='background:#fee2e2;text-align:center;'>0.29</td></tr><tr><td><strong>mistral_judge</strong></td><td style='background:#fef3c7;text-align:center;'>0.61</td><td style='background:#fef3c7;text-align:center;'>0.66</td><td style='background:#fef3c7;text-align:center;'>0.68</td><td style='background:#fef3c7;text-align:center;'>0.43</td><td style='background:#d1fae5;text-align:center;'>1.0</td><td style='background:#fef3c7;text-align:center;'>0.41</td></tr><tr><td><strong>qwen_judge</strong></td><td style='background:#fef3c7;text-align:center;'>0.55</td><td style='background:#fef3c7;text-align:center;'>0.43</td><td style='background:#fef3c7;text-align:center;'>0.44</td><td style='background:#fee2e2;text-align:center;'>0.29</td><td style='background:#fef3c7;text-align:center;'>0.41</td><td style='background:#d1fae5;text-align:center;'>1.0</td></tr>      </tbody>
+    </table>
+    <p style="color:#64748b;font-size:13px;margin-top:12px;">
+      Verd (≥0.7) = concordança forta · Groc (0.4-0.7) = moderada · Vermell (<0.4) = baixa
+    </p>
+  </section>
+
+  <div class="footer">
+    Dashboard generat automàticament · Xat 9 ATNE · <a href="informe_multi_model.md">Informe Markdown</a>
+  </div>
+</div>
+
+<script>
+const CRITERIS = ["Adequaci\u00f3 MECR", "Fidelitat curricular", "Adequaci\u00f3 al perfil", "Llegibilitat", "Complements"];
+const MODELS = ["Gemma 4 31B", "GPT-4o-mini", "Llama 3.3 70B", "Mistral Small"];
+const COLORS = ["#4285f4", "#10a37f", "#0467df", "#fa520f"];
+
+// Secció 1: Comparativa global A vs B
+new Chart(document.getElementById('globalCompare'), {
+  type: 'bar',
+  data: {
+    labels: MODELS,
+    datasets: [
+      {
+        label: 'A (prompt mínim)',
+        data: [4.57, 3.57, 3.96, 4.41],
+        backgroundColor: '#fbbf24',
+        borderColor: '#f59e0b',
+        borderWidth: 2,
+      },
+      {
+        label: 'B (prompt complet)',
+        data: [4.75, 4.19, 4.26, 4.64],
+        backgroundColor: '#34d399',
+        borderColor: '#10b981',
+        borderWidth: 2,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: { y: { beginAtZero: true, max: 5, title: { display: true, text: 'Puntuació ponderada (0-5)' } } },
+    plugins: {
+      title: { display: true, text: 'Mitjana dels jutges · prompt mínim vs complet · per model', font: { size: 14 } },
+      legend: { position: 'top' }
+    }
+  }
+});
+
+// Secció 2: Delta per criteri
+new Chart(document.getElementById('deltaCriteris'), {
+  type: 'bar',
+  data: {
+    labels: CRITERIS,
+    datasets: [{"label": "Gemma 4 31B", "data": [0.12, 0.43, 0.04, 0.03, 0.33], "backgroundColor": "#4285f4"}, {"label": "GPT-4o-mini", "data": [0.05, 0.44, 0.84, 0.05, 2.02], "backgroundColor": "#10a37f"}, {"label": "Llama 3.3 70B", "data": [0.02, 0.52, 0.41, -0.53, 1.11], "backgroundColor": "#0467df"}, {"label": "Mistral Small", "data": [0.13, 0.5, 0.14, -0.04, 0.47], "backgroundColor": "#fa520f"}]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: { y: { title: { display: true, text: 'Δ (B − A)' } } },
+    plugins: {
+      title: { display: true, text: 'Efecte del prompt complet per criteri i model', font: { size: 14 } },
+      legend: { position: 'top' }
+    }
+  }
+});
+
+// Secció 3: Per criteri (B)
+new Chart(document.getElementById('perCriteri'), {
+  type: 'radar',
+  data: {
+    labels: CRITERIS,
+    datasets: [{"label": "Gemma 4 31B (B)", "data": [4.48, 4.74, 4.88, 4.9, 4.87], "backgroundColor": "#4285f4aa", "borderColor": "#4285f4", "borderWidth": 2}, {"label": "GPT-4o-mini (B)", "data": [4.02, 4.5, 4.08, 4.18, 4.25], "backgroundColor": "#10a37faa", "borderColor": "#10a37f", "borderWidth": 2}, {"label": "Llama 3.3 70B (B)", "data": [4.04, 4.35, 4.38, 4.14, 4.46], "backgroundColor": "#0467dfaa", "borderColor": "#0467df", "borderWidth": 2}, {"label": "Mistral Small (B)", "data": [4.27, 4.83, 4.71, 4.76, 4.74], "backgroundColor": "#fa520faa", "borderColor": "#fa520f", "borderWidth": 2}]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: { r: { beginAtZero: true, max: 5, ticks: { stepSize: 1 } } },
+    plugins: {
+      title: { display: true, text: 'Comparativa per criteri (prompt complet) · radar', font: { size: 14 } },
+      legend: { position: 'top' }
+    }
+  }
+});
+
+// Secció 4: Heatmap Model × Perfil (manual amb divs)
+const heatmapData = [{"x": "altes_capacitats", "y": "Gemma 4 31B", "v": 4.71}, {"x": "doble_excepcionalitat", "y": "Gemma 4 31B", "v": 4.63}, {"x": "nouvingut_arabic", "y": "Gemma 4 31B", "v": 4.7}, {"x": "tdah_di_lleu", "y": "Gemma 4 31B", "v": 4.71}, {"x": "tdah_lleu", "y": "Gemma 4 31B", "v": 4.26}, {"x": "tdl_pragmatica", "y": "Gemma 4 31B", "v": 4.65}, {"x": "altes_capacitats", "y": "GPT-4o-mini", "v": 4.09}, {"x": "doble_excepcionalitat", "y": "GPT-4o-mini", "v": 4.1}, {"x": "nouvingut_arabic", "y": "GPT-4o-mini", "v": 4.23}, {"x": "tdah_di_lleu", "y": "GPT-4o-mini", "v": 4.11}, {"x": "tdah_lleu", "y": "GPT-4o-mini", "v": 4.12}, {"x": "tdl_pragmatica", "y": "GPT-4o-mini", "v": 4.13}, {"x": "altes_capacitats", "y": "Llama 3.3 70B", "v": 3.94}, {"x": "doble_excepcionalitat", "y": "Llama 3.3 70B", "v": 4.21}, {"x": "nouvingut_arabic", "y": "Llama 3.3 70B", "v": 4.23}, {"x": "tdah_di_lleu", "y": "Llama 3.3 70B", "v": 4.14}, {"x": "tdah_lleu", "y": "Llama 3.3 70B", "v": 4.09}, {"x": "tdl_pragmatica", "y": "Llama 3.3 70B", "v": 3.97}, {"x": "altes_capacitats", "y": "Mistral Small", "v": 4.82}, {"x": "doble_excepcionalitat", "y": "Mistral Small", "v": 4.3}, {"x": "nouvingut_arabic", "y": "Mistral Small", "v": 4.42}, {"x": "tdah_di_lleu", "y": "Mistral Small", "v": 4.57}, {"x": "tdah_lleu", "y": "Mistral Small", "v": 4.44}, {"x": "tdl_pragmatica", "y": "Mistral Small", "v": 4.33}];
+const perfilsUnique = [...new Set(heatmapData.map(d => d.x))];
+const modelsUnique = [...new Set(heatmapData.map(d => d.y))];
+
+let heatmapHTML = '<div class="heatmap" style="grid-template-columns: 180px repeat(' + perfilsUnique.length + ', 1fr);">';
+heatmapHTML += '<div></div>';
+perfilsUnique.forEach(p => {
+  heatmapHTML += '<div style="font-weight:600;font-size:12px;text-align:center;padding:8px;color:#475569;">' + p + '</div>';
+});
+modelsUnique.forEach(m => {
+  heatmapHTML += '<div style="font-weight:600;padding:8px;color:#475569;font-size:13px;">' + m + '</div>';
+  perfilsUnique.forEach(p => {
+    const item = heatmapData.find(d => d.y === m && d.x === p);
+    const val = item ? item.v : 0;
+    // Color: vermell (baix) → groc → verd (alt)
+    let color;
+    if (val < 2.5) color = '#ef4444';
+    else if (val < 3.5) color = '#f59e0b';
+    else if (val < 4.0) color = '#10b981';
+    else color = '#059669';
+    heatmapHTML += '<div class="heatmap-cell" style="background:' + color + '">' + val + '</div>';
+  });
+});
+heatmapHTML += '</div>';
+document.getElementById('heatmap-container').innerHTML = heatmapHTML;
+
+// Secció 5: Per etapa
+new Chart(document.getElementById('perEtapa'), {
+  type: 'bar',
+  data: {
+    labels: ['Primària', 'ESO', 'Batxillerat'],
+    datasets: [{"label": "Gemma 4 31B", "data": [4.66, 4.11, 4.59], "backgroundColor": "#4285f4"}, {"label": "GPT-4o-mini", "data": [4.13, 4.32, 4.22], "backgroundColor": "#10a37f"}, {"label": "Llama 3.3 70B", "data": [4.07, 4.16, 0], "backgroundColor": "#0467df"}, {"label": "Mistral Small", "data": [4.46, 4.5, 4.33], "backgroundColor": "#fa520f"}]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: { y: { beginAtZero: true, max: 5, title: { display: true, text: 'Puntuació B (prompt complet)' } } },
+    plugins: {
+      title: { display: true, text: 'Qualitat per etapa educativa', font: { size: 14 } },
+      legend: { position: 'top' }
+    }
+  }
+});
+</script>
+</body>
+</html>
