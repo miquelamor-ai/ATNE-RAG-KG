@@ -196,6 +196,7 @@ const MECR_PER_ETAPA_CURS = {
     },
     batxillerat: { "1r": "B2", "2n": "B2" },
     FP: {
+        "1r_CFGB": "A2", "2n_CFGB": "A2",
         "1r_CGM": "B1", "2n_CGM": "B1",
         "1r_CGS": "B2", "2n_CGS": "B2",
     },

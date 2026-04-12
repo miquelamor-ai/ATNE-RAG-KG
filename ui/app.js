@@ -181,10 +181,12 @@ const CURSOS_PER_ETAPA = {
         { value: "2n", label: "2n" },
     ],
     FP: [
-        { value: "1r_CGM", label: "1r CGM" },
-        { value: "2n_CGM", label: "2n CGM" },
-        { value: "1r_CGS", label: "1r CGS" },
-        { value: "2n_CGS", label: "2n CGS" },
+        { value: "1r_CFGB", label: "1r Grau Bàsic (CFGB)" },
+        { value: "2n_CFGB", label: "2n Grau Bàsic (CFGB)" },
+        { value: "1r_CGM", label: "1r Grau Mitjà (CFGM)" },
+        { value: "2n_CGM", label: "2n Grau Mitjà (CFGM)" },
+        { value: "1r_CGS", label: "1r Grau Superior (CFGS)" },
+        { value: "2n_CGS", label: "2n Grau Superior (CFGS)" },
     ],
 };
 
