@@ -1,0 +1,56 @@
+[
+  {
+    "id": "literals",
+    "nom": "Literals (Bloom: Recordar)",
+    "perfils_aplicables": ["nouvingut_arabic", "tdah_di_lleu", "tdl_pragmatica", "tdah_lleu"],
+    "instruccio": "Genera 4-5 PREGUNTES LITERALS (nivell Bloom 'Recordar') sobre el text. Cada pregunta ha de tenir una resposta única i directa que es pot trobar explícitament al text. Format JSON estricte: {\"preguntes\": [{\"tipus\": \"literal\", \"pregunta\": \"...\", \"resposta_correcta\": \"...\", \"frase_text_referencia\": \"...\"}, ...]}. Important: la pregunta NO ha de copiar literalment una frase del text — ha de reformular. La 'frase_text_referencia' és la frase del text on hi ha la resposta."
+  },
+  {
+    "id": "comprensio",
+    "nom": "De comprensió (Bloom: Comprendre)",
+    "perfils_aplicables": ["nouvingut_arabic", "tdah_lleu", "tdl_pragmatica", "doble_excepcionalitat", "altes_capacitats"],
+    "instruccio": "Genera 4-5 PREGUNTES DE COMPRENSIÓ (nivell Bloom 'Comprendre') sobre el text. Han de demanar a l'alumne que demostri que entén la idea, no només que recorda fets. Format JSON: {\"preguntes\": [{\"tipus\": \"comprensio\", \"pregunta\": \"...\", \"resposta_esperada\": \"...\", \"justificacio_pedagogica\": \"per què aquesta pregunta mesura comprensió\"}, ...]}."
+  },
+  {
+    "id": "vocabulari_contextual",
+    "nom": "De vocabulari contextual",
+    "perfils_aplicables": ["nouvingut_arabic", "tdl_pragmatica"],
+    "instruccio": "Genera 5-6 PREGUNTES DE VOCABULARI CONTEXTUAL. Cada pregunta presenta una paraula difícil del text i demana el seu significat segons el context. Format JSON: {\"preguntes\": [{\"tipus\": \"vocabulari\", \"paraula\": \"...\", \"frase_context\": \"...\", \"pregunta\": \"Què vol dir 'X' segons el context?\", \"resposta_correcta\": \"...\", \"distractors\": [\"...\", \"...\", \"...\"]}, ...]}. Els distractors han de ser semànticament plausibles però incorrectes."
+  },
+  {
+    "id": "inferencials",
+    "nom": "Inferencials (Bloom: Comprendre, alt)",
+    "perfils_aplicables": ["altes_capacitats", "doble_excepcionalitat", "tdah_lleu"],
+    "instruccio": "Genera 4-5 PREGUNTES INFERENCIALS sobre el text. La resposta NO està explícita — l'alumne ha de deduir-la a partir de pistes textuals. Format JSON: {\"preguntes\": [{\"tipus\": \"inferencial\", \"pregunta\": \"...\", \"resposta_esperada\": \"...\", \"pistes_text\": [\"frase 1\", \"frase 2\"], \"explicacio_inferencia\": \"com es dedueix\"}, ...]}. Útil per a TEA i alumnes que necessiten treballar inferències pragmàtiques."
+  },
+  {
+    "id": "aplicacio",
+    "nom": "D'aplicació (Bloom: Aplicar)",
+    "perfils_aplicables": ["tdah_lleu", "doble_excepcionalitat", "altes_capacitats"],
+    "instruccio": "Genera 4-5 PREGUNTES D'APLICACIÓ que demanin a l'alumne usar el coneixement del text en una situació nova o quotidiana. Format JSON: {\"preguntes\": [{\"tipus\": \"aplicacio\", \"pregunta\": \"...\", \"context_situacio\": \"...\", \"resposta_model\": \"...\"}, ...]}. Les preguntes han de connectar el contingut amb experiències reals de l'alumne."
+  },
+  {
+    "id": "analisi",
+    "nom": "D'anàlisi (Bloom: Analitzar)",
+    "perfils_aplicables": ["altes_capacitats", "doble_excepcionalitat"],
+    "instruccio": "Genera 3-4 PREGUNTES D'ANÀLISI que demanin descompondre el text en parts, comparar idees o identificar relacions causa-efecte. Format JSON: {\"preguntes\": [{\"tipus\": \"analisi\", \"pregunta\": \"...\", \"resposta_model\": \"...\", \"competencia\": \"comparacio | causa-efecte | classificacio | descomposicio\"}, ...]}. Apte per a alumnes que necessiten reptes intel·lectuals."
+  },
+  {
+    "id": "avaluatives",
+    "nom": "Avaluatives (Bloom: Avaluar)",
+    "perfils_aplicables": ["altes_capacitats", "doble_excepcionalitat"],
+    "instruccio": "Genera 3 PREGUNTES AVALUATIVES que demanin a l'alumne emetre un judici argumentat sobre el text. Format JSON: {\"preguntes\": [{\"tipus\": \"avaluativa\", \"pregunta\": \"...\", \"criteris_resposta\": [\"...\", \"...\"], \"resposta_model\": \"...\"}, ...]}. Les preguntes han de ser obertes i requerir argumentació, no simple opinió."
+  },
+  {
+    "id": "creatives",
+    "nom": "Creatives (Bloom: Crear)",
+    "perfils_aplicables": ["altes_capacitats", "doble_excepcionalitat"],
+    "instruccio": "Genera 3 PREGUNTES CREATIVES que demanin a l'alumne produir alguna cosa nova a partir del text (un final alternatiu, una proposta, un esquema, etc.). Format JSON: {\"preguntes\": [{\"tipus\": \"creativa\", \"pregunta\": \"...\", \"format_resposta\": \"...\", \"criteris_qualitat\": [\"...\", \"...\"]}, ...]}. Aptes per a 2e i altes capacitats que necessiten enriquiment."
+  },
+  {
+    "id": "metacognitives",
+    "nom": "Metacognitives (autoregulació)",
+    "perfils_aplicables": ["tdah_lleu", "tdah_di_lleu"],
+    "instruccio": "Genera 3-4 PREGUNTES METACOGNITIVES que ajudin l'alumne a reflexionar sobre el seu propi procés d'aprenentatge. Format JSON: {\"preguntes\": [{\"tipus\": \"metacognitiva\", \"pregunta\": \"...\", \"objectiu\": \"monitoratge | regulacio | reflexio\", \"format_resposta\": \"obert\"}, ...]}. Exemples: 'Què has entès millor?', 'Quina part has hagut de rellegir?', 'Com explicaries això a un company?'"
+  }
+]

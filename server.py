@@ -1753,6 +1753,28 @@ async def dashboard_xat9_page():
     return HTMLResponse("<h1>Dashboard Xat 9 no disponible</h1>", status_code=404)
 
 
+@app.get("/dashboard_complements", response_class=HTMLResponse)
+async def dashboard_complements_page():
+    html_path = UI_DIR / "dashboard_complements.html"
+    if html_path.exists():
+        return HTMLResponse(
+            html_path.read_text(encoding="utf-8"),
+            headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
+        )
+    return HTMLResponse("<h1>Dashboard Complements no disponible</h1>", status_code=404)
+
+
+@app.get("/dashboard_questions", response_class=HTMLResponse)
+async def dashboard_questions_page():
+    html_path = UI_DIR / "dashboard_questions.html"
+    if html_path.exists():
+        return HTMLResponse(
+            html_path.read_text(encoding="utf-8"),
+            headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
+        )
+    return HTMLResponse("<h1>Dashboard Questions no disponible</h1>", status_code=404)
+
+
 @app.get("/informe_fje")
 async def informe_fje_md():
     """Descàrrega de l'informe executiu FJE en Markdown."""

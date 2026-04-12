@@ -1,0 +1,50 @@
+[
+  {
+    "id": "glossari_simple",
+    "nom": "Glossari simple (2 columnes)",
+    "perfils_aplicables": ["tdah_lleu", "tdah_di_lleu", "tdl_pragmatica"],
+    "instruccio": "Genera un GLOSSARI en taula markdown amb 2 columnes: | Terme | Explicació senzilla |. Inclou de 6 a 10 termes tècnics o difícils del text. Les explicacions han de ser en català molt senzill (nivell A1-A2), una idea per cel·la."
+  },
+  {
+    "id": "glossari_bilingue_arab",
+    "nom": "Glossari bilingüe àrab (3 columnes)",
+    "perfils_aplicables": ["nouvingut_arabic"],
+    "instruccio": "Genera un GLOSSARI BILINGÜE en taula markdown amb 3 columnes: | Terme català | Traducció àrab | Explicació simple |. Inclou de 8 a 12 termes essencials del text. La traducció al àrab ha de ser real i correcta (escriu en alfabet àrab nadiu). L'explicació ha de ser en català nivell A1, una idea per cel·la."
+  },
+  {
+    "id": "esquema_visual",
+    "nom": "Esquema visual de procés (markdown)",
+    "perfils_aplicables": ["tdah_lleu", "tdah_di_lleu", "tdl_pragmatica"],
+    "instruccio": "Genera un ESQUEMA VISUAL del procés o estructura principal del text, en format markdown. Usa fletxes (→), guions (-) i indentació per representar la jerarquia. Si és un procés, usa numeració seqüencial. Màxim 12 línies. Ha de ser visualment escanejable d'un cop d'ull."
+  },
+  {
+    "id": "mapa_conceptual",
+    "nom": "Mapa conceptual jeràrquic",
+    "perfils_aplicables": ["altes_capacitats", "doble_excepcionalitat"],
+    "instruccio": "Genera un MAPA CONCEPTUAL jeràrquic del text en format markdown. Identifica el concepte central i 4-6 conceptes secundaris connectats. Per a cada concepte secundari, afegeix 2-3 sub-conceptes. Usa indentació per mostrar nivells. Inclou les relacions explícites entre conceptes (ex: 'A causa B', 'A inclou B'). Mínim 15 línies, màxim 25."
+  },
+  {
+    "id": "pictogrames_descrits",
+    "nom": "Pictogrames descrits per a TTS",
+    "perfils_aplicables": ["tdah_di_lleu", "tdl_pragmatica"],
+    "instruccio": "Identifica els 5-8 conceptes clau del text que es beneficiarien d'un suport visual i, per a cadascun, escriu en format markdown: | Concepte | [Pictograma: descripció breu] | Per què ajuda |. La descripció del pictograma ha de ser concreta i visual (com un símbol ARASAAC). Exemple: '[Pictograma: una flor amb pètals oberts cap al sol]'."
+  },
+  {
+    "id": "transliteracio_fonetica",
+    "nom": "Transliteració fonètica per a alfabet no llatí",
+    "perfils_aplicables": ["nouvingut_arabic"],
+    "instruccio": "Identifica els 8-12 termes més difícils de pronunciar del text per a un parlant àrab. Genera una taula markdown amb 3 columnes: | Català escrit | Pronunciació fonètica IPA | So aproximat en àrab |. La transliteració ha de ser fonèticament correcta i útil per a un alumne que no llegeix l'alfabet llatí."
+  },
+  {
+    "id": "analogies_quotidianes",
+    "nom": "Analogies amb experiències quotidianes",
+    "perfils_aplicables": ["tdl_pragmatica", "tdah_di_lleu"],
+    "instruccio": "Genera 4-6 ANALOGIES que connectin els conceptes principals del text amb experiències quotidianes d'un alumne de l'edat corresponent. Format markdown: '**Concepte tècnic**: és com [analogia quotidiana]. Per exemple: [exemple concret].' Les analogies han de ser culturalment universals i visualment imaginables."
+  },
+  {
+    "id": "preguntes_intercalades",
+    "nom": "Preguntes de comprovació intercalades",
+    "perfils_aplicables": ["tdah_lleu", "tdah_di_lleu"],
+    "instruccio": "Genera 4-6 PREGUNTES DE COMPROVACIÓ per intercalar al text adaptat (cada 2-3 paràgrafs). Les preguntes han de ser tipus 'STOP & CHECK' que ajuden l'alumne a verificar que va seguint. Cada pregunta ha de tenir: pregunta breu (1 línia) + resposta esperada (1 línia). Format markdown amb numeració. Han de ser literals o de comprensió immediata, no avaluatives."
+  }
+]

@@ -1,0 +1,75 @@
+{
+  "nom": "Rúbrica d'avaluació de preguntes de comprensió lectora",
+  "versio": "1.0",
+  "escala": "1-5 (1=deficient, 2=insuficient, 3=acceptable, 4=bo, 5=excel·lent)",
+  "criteris": [
+    {
+      "id": "validesa_pedagogica",
+      "nom": "Validesa pedagògica (mesura el que diu mesurar)",
+      "pes": 0.30,
+      "descriptors": {
+        "1": "La pregunta no mesura el que pretén. Una 'pregunta literal' demana inferència; una 'pregunta d'anàlisi' es pot respondre amb un fet literal.",
+        "2": "Mesura parcialment el nivell taxonòmic declarat. Hi ha confusió entre nivells.",
+        "3": "Mesura raonablement el nivell declarat però amb desviacions menors.",
+        "4": "Mesura correctament el nivell taxonòmic. Una pregunta de comprensió demana comprensió real.",
+        "5": "Mesura amb precisió quirúrgica el nivell declarat. Distingiria perfectament un alumne que ha entès d'un que no."
+      }
+    },
+    {
+      "id": "adequacio_nivell",
+      "nom": "Adequació al nivell MECR i cognitiu del perfil",
+      "pes": 0.25,
+      "descriptors": {
+        "1": "Pregunta inabordable per al perfil (massa complexa per A1, massa infantil per C1) o lingüísticament inadequada.",
+        "2": "Adequació parcial. Algunes preguntes encaixen amb el perfil, altres no.",
+        "3": "Generalment adequada al perfil. Algunes preguntes podrien ajustar-se millor.",
+        "4": "Bona adequació. La complexitat lingüística i cognitiva encaixa amb el perfil.",
+        "5": "Calibratge perfecte. Cada pregunta està al límit superior del que el perfil pot fer (Vygotsky, ZPD), sense ser ni trivial ni inassolible."
+      }
+    },
+    {
+      "id": "discriminacio",
+      "nom": "Capacitat discriminativa",
+      "pes": 0.15,
+      "descriptors": {
+        "1": "Tothom respondria igual. La pregunta no distingeix qui ha entès de qui no (massa fàcil o massa òbvia).",
+        "2": "Discriminació feble. Només els alumnes amb dificultats greus fallarien.",
+        "3": "Discriminació mitjana. Diferencia algun grup.",
+        "4": "Bona discriminació. Distingeix alumnes que han entès dels que han llegit superficialment.",
+        "5": "Discriminació excel·lent. Mesura amb precisió graus de comprensió. La resposta requereix una construcció mental concreta del text."
+      }
+    },
+    {
+      "id": "originalitat_redaccio",
+      "nom": "Originalitat de redacció (no copy-paste)",
+      "pes": 0.15,
+      "descriptors": {
+        "1": "Copia literalment frases del text. Les preguntes es poden respondre per coincidència de paraules sense entendre.",
+        "2": "Copia parcialment. Reformula poc.",
+        "3": "Reformula la majoria de preguntes però algunes encara són molt literals.",
+        "4": "Reformula bé. Les preguntes utilitzen sinònims i estructures noves.",
+        "5": "Originalitat alta. Les preguntes obliguen l'alumne a recuperar la idea, no a buscar paraules clau al text."
+      }
+    },
+    {
+      "id": "format_estructural",
+      "nom": "Format i estructura del JSON",
+      "pes": 0.15,
+      "descriptors": {
+        "1": "JSON invàlid o estructura incoherent. Camps obligatoris absents.",
+        "2": "JSON vàlid però amb camps incomplets o inconsistents.",
+        "3": "JSON vàlid amb tots els camps obligatoris. Format millorable.",
+        "4": "JSON ben estructurat. Camps complets. Distractors plausibles si escau.",
+        "5": "JSON impecable. Format estructural perfecte, distractors molt plausibles, justificacions pedagògiques presents."
+      }
+    }
+  ],
+  "instruccions_jutge": "Ets un avaluador expert en avaluació pedagògica i taxonomia de Bloom. Avalua si les preguntes generades són pedagògicament vàlides, adequades al perfil, i si discriminen comprensió real. Sigues rigorós: distingir entre una pregunta que mesura comprensió i una que només mesura coincidència de paraules és essencial. No inflis puntuacions.",
+  "format_resposta": {
+    "validesa_pedagogica": {"puntuacio": "1-5", "justificacio": "breu"},
+    "adequacio_nivell": {"puntuacio": "1-5", "justificacio": "breu"},
+    "discriminacio": {"puntuacio": "1-5", "justificacio": "breu"},
+    "originalitat_redaccio": {"puntuacio": "1-5", "justificacio": "breu"},
+    "format_estructural": {"puntuacio": "1-5", "justificacio": "breu"}
+  }
+}

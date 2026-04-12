@@ -1,0 +1,75 @@
+{
+  "nom": "Rúbrica d'avaluació de complements pedagògics",
+  "versio": "1.0",
+  "escala": "1-5 (1=deficient, 2=insuficient, 3=acceptable, 4=bo, 5=excel·lent)",
+  "criteris": [
+    {
+      "id": "correccio_linguistica",
+      "nom": "Correcció lingüística i formal",
+      "pes": 0.20,
+      "descriptors": {
+        "1": "Errors greus de gramàtica, ortografia o estructura. Per glossaris bilingües: traducció absent, incorrecta o en alfabet equivocat.",
+        "2": "Diversos errors menors o un error greu. Format poc consistent.",
+        "3": "Pocs errors menors. Format coherent però millorable.",
+        "4": "Sense errors greus. Format consistent. Per glossaris bilingües: traducció correcta i en alfabet adequat.",
+        "5": "Impecable. Català natural, format perfectament estructurat. Glossaris bilingües amb traduccions idiomàtiques i correctes."
+      }
+    },
+    {
+      "id": "adequacio_perfil",
+      "nom": "Adequació al perfil de l'alumne",
+      "pes": 0.25,
+      "descriptors": {
+        "1": "El complement no respon a les necessitats específiques del perfil. Per exemple, glossari massa complex per a DI o massa simple per a AC.",
+        "2": "Adequació parcial. Algunes parts encaixen amb el perfil, altres no.",
+        "3": "Adequat al perfil en general però amb algun element fora de lloc.",
+        "4": "Bona adequació. Es nota que s'ha pensat per a aquest perfil concret (vocabulari, format, complexitat).",
+        "5": "Excel·lent personalització. Cada element del complement està específicament calibrat per al perfil. Per nouvingut: glossari amb termes essencials, no decoratius. Per TDAH: micro-blocs i progressió clara."
+      }
+    },
+    {
+      "id": "carrega_cognitiva",
+      "nom": "Càrrega cognitiva (Cognitive Load Theory)",
+      "pes": 0.20,
+      "descriptors": {
+        "1": "Saturat. Massa elements, massa text, massa densitat. Pot distreure o esgotar l'alumne, especialment TDAH/DI.",
+        "2": "Pesat. Conté informació redundant o massa volum per al perfil.",
+        "3": "Acceptable. Volum raonable però no optimitzat.",
+        "4": "Ben calibrat. Volum just per al perfil. Aplica chunking adequat (Miller 7±2 o Cowan 4±1 per perfils amb baixa MT).",
+        "5": "Òptim. Mínim necessari, màxim útil. Respecta els límits de memòria de treball del perfil. Cada element té un propòsit clar."
+      }
+    },
+    {
+      "id": "utilitat_practica",
+      "nom": "Utilitat pràctica per a l'alumne",
+      "pes": 0.25,
+      "descriptors": {
+        "1": "Decoratiu o irrellevant. L'alumne no el faria servir o no l'ajudaria a entendre el text.",
+        "2": "Marginal. Aporta poc valor real al procés d'aprenentatge.",
+        "3": "Útil per a la majoria d'alumnes del perfil. Aporta valor però no és imprescindible.",
+        "4": "Molt útil. L'alumne hi recorrerà sovint i li facilita la comprensió o accés al text.",
+        "5": "Essencial. Sense aquest complement, l'alumne tindria dificultats reals per accedir al text. És el que un docent FJE consideraria 'imprescindible'."
+      }
+    },
+    {
+      "id": "coherencia_text",
+      "nom": "Coherència amb el text original",
+      "pes": 0.10,
+      "descriptors": {
+        "1": "Conté errors conceptuals o termes que no apareixen al text. Inventa contingut.",
+        "2": "Mostra deriva respecte al text. Algun terme inventat o reformulació imprecisa.",
+        "3": "Generalment coherent. Algun terme reformulat sense pèrdua de sentit.",
+        "4": "Coherent amb el text. Tots els termes del glossari/esquema apareixen al text adaptat.",
+        "5": "Perfectament alineat. Cada element del complement es pot trobar literalment o conceptualment al text."
+      }
+    }
+  ],
+  "instruccions_jutge": "Ets un avaluador expert en disseny pedagògic per a la diversitat. Avalua el complement (glossari, esquema, mapa, etc.) tenint en compte el perfil concret de l'alumne i el text al qual acompanya. Sigues rigorós: la rúbrica busca distingir complements que un docent FJE consideraria útils dels que són decoratius o saturats. No inflis puntuacions.",
+  "format_resposta": {
+    "correccio_linguistica": {"puntuacio": "1-5", "justificacio": "breu"},
+    "adequacio_perfil": {"puntuacio": "1-5", "justificacio": "breu"},
+    "carrega_cognitiva": {"puntuacio": "1-5", "justificacio": "breu"},
+    "utilitat_practica": {"puntuacio": "1-5", "justificacio": "breu"},
+    "coherencia_text": {"puntuacio": "1-5", "justificacio": "breu"}
+  }
+}

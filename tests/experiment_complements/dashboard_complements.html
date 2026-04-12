@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Experiment Complements · Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    background: #1a1a2e;
+    color: #e2e8f0;
+    min-height: 100vh;
+  }
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+  /* Hero banner */
+  .hero {
+    background: linear-gradient(135deg, #16213e 0%, #0f3460 60%, #1a1a4e 100%);
+    border-radius: 16px;
+    padding: 48px 40px;
+    margin-bottom: 32px;
+    border: 1px solid #2d2d4a;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .hero h1 {
+    font-size: 28px;
+    color: #94a3b8;
+    font-weight: 400;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 13px;
+  }
+  .hero .winner-name {
+    font-size: 36px;
+    font-weight: 800;
+    color: #4285f4;
+    margin-bottom: 4px;
+  }
+  .hero .winner-subtitle {
+    font-size: 18px;
+    color: #a0aec0;
+    margin-bottom: 24px;
+  }
+  .hero table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  .hero table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #2d2d4a;
+    font-size: 15px;
+  }
+  .hero table tr:last-child td { border-bottom: none; }
+
+  /* Cards */
+  .card {
+    background: #16213e;
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 24px;
+    border: 1px solid #2d2d4a;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+  .card h2 {
+    font-size: 20px;
+    color: #e2e8f0;
+    margin-bottom: 6px;
+  }
+  .card .subtitle {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 20px;
+  }
+  .chart-container {
+    position: relative;
+    height: 400px;
+    margin: 16px 0;
+  }
+
+  /* Heatmap tables */
+  .heatmap-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+  }
+  .heatmap-table th {
+    padding: 10px 12px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+    text-align: center;
+    border-bottom: 2px solid #2d2d4a;
+  }
+  .heatmap-table th:first-child { text-align: left; }
+  .heatmap-table td {
+    padding: 12px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 15px;
+    border-bottom: 1px solid #1a1a2e;
+  }
+  .heatmap-table td:first-child {
+    text-align: left;
+    font-weight: 600;
+    color: #a0aec0;
+    font-size: 13px;
+  }
+  .heatmap-table tr:hover { background: #1a1a3e; }
+
+  /* Correlation table */
+  .corr-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+  }
+  .corr-table th {
+    padding: 10px 8px;
+    color: #94a3b8;
+    border-bottom: 2px solid #2d2d4a;
+    font-size: 12px;
+  }
+  .corr-table td {
+    font-size: 14px;
+    color: #e2e8f0;
+  }
+
+  /* Grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  /* KPI */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .kpi {
+    background: #16213e;
+    border: 1px solid #2d2d4a;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+  }
+  .kpi-label { font-size: 11px; text-transform: uppercase; color: #64748b; letter-spacing: 0.08em; }
+  .kpi-value { font-size: 28px; font-weight: 800; margin: 8px 0 4px; }
+  .kpi-sub { font-size: 12px; color: #64748b; }
+
+  .footer {
+    text-align: center;
+    color: #475569;
+    padding: 32px;
+    font-size: 12px;
+  }
+
+  .legend-row {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #94a3b8;
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ═══ Hero ═══ -->
+  <div class="hero">
+    <h1>Experiment Complements ATNE</h1>
+    <div class="winner-name">Gemma 4 31B: millor model per generar complements</div>
+    <div class="winner-subtitle">Puntuació ponderada 4.58/5 · 513 avaluacions · 5 jutges · 2026-04-12T02:00:17</div>
+    <table>
+      
+        <tr>
+          <td style="font-size:20px;text-align:center;">🥇</td>
+          <td><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#4285f4;margin-right:8px;"></span><strong>Gemma 4 31B</strong></td>
+          <td style="font-size:20px;font-weight:bold;color:#4285f4;">4.58</td>
+          <td style="color:#8b95a5;">160 casos</td>
+        </tr>
+        <tr>
+          <td style="font-size:20px;text-align:center;">🥈</td>
+          <td><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#10a37f;margin-right:8px;"></span><strong>GPT-4o-mini</strong></td>
+          <td style="font-size:20px;font-weight:bold;color:#10a37f;">4.46</td>
+          <td style="color:#8b95a5;">160 casos</td>
+        </tr>
+        <tr>
+          <td style="font-size:20px;text-align:center;">🥉</td>
+          <td><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#0467df;margin-right:8px;"></span><strong>Llama 3.3 70B</strong></td>
+          <td style="font-size:20px;font-weight:bold;color:#0467df;">4.37</td>
+          <td style="color:#8b95a5;">33 casos</td>
+        </tr>
+        <tr>
+          <td style="font-size:20px;text-align:center;">4t</td>
+          <td><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#fa520f;margin-right:8px;"></span><strong>Mistral Small</strong></td>
+          <td style="font-size:20px;font-weight:bold;color:#fa520f;">4.34</td>
+          <td style="color:#8b95a5;">160 casos</td>
+        </tr>
+    </table>
+  </div>
+
+  <!-- ═══ KPIs ═══ -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">Total avaluacions</div>
+      <div class="kpi-value" style="color:#4285f4;">513</div>
+      <div class="kpi-sub">4 models × 8 tipus × 6 perfils</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Millor score</div>
+      <div class="kpi-value" style="color:#4285f4;">4.58</div>
+      <div class="kpi-sub">Gemma 4 31B</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Jutges LLM</div>
+      <div class="kpi-value" style="color:#a78bfa;">5</div>
+      <div class="kpi-sub">Gemini Flash, GPT-4o, Llama, Mistral, Qwen</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Criteris avaluats</div>
+      <div class="kpi-value" style="color:#fbbf24;">5</div>
+      <div class="kpi-sub">Pesos: 20% / 25% / 20% / 25% / 10%</div>
+    </div>
+  </div>
+
+  <!-- ═══ Secció 1: Ranking global (bar chart) ═══ -->
+  <div class="card">
+    <h2>Ranking global per model</h2>
+    <div class="subtitle">Puntuació ponderada mitjana (5 criteris × 5 jutges) — Pesos: correc. 20% · perfil 25% · càrrega 20% · utilitat 25% · coherència 10%</div>
+    <div class="chart-container">
+      <canvas id="rankingChart"></canvas>
+    </div>
+  </div>
+
+  <!-- ═══ Secció 2: Radar per criteri ═══ -->
+  <div class="card">
+    <h2>Comparativa per criteri (radar)</h2>
+    <div class="subtitle">Mitjana de tots els jutges per a cadascun dels 5 criteris d'avaluació</div>
+    <div class="chart-container" style="height:500px;">
+      <canvas id="radarChart"></canvas>
+    </div>
+  </div>
+
+  <!-- ═══ Secció 3: Millor per criteri ═══ -->
+  <div class="card">
+    <h2>Millor model per criteri</h2>
+    <div class="subtitle">Quin model destaca en cada dimensió?</div>
+    
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #2d2d4a;">
+          <span style="color:#a0aec0;">Correcció lingüística</span>
+          <span><strong style="color:#fa520f;">Mistral Small</strong> <span style="color:#e2e8f0;">4.77</span></span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #2d2d4a;">
+          <span style="color:#a0aec0;">Adequació al perfil</span>
+          <span><strong style="color:#4285f4;">Gemma 4 31B</strong> <span style="color:#e2e8f0;">4.55</span></span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #2d2d4a;">
+          <span style="color:#a0aec0;">Càrrega cognitiva</span>
+          <span><strong style="color:#4285f4;">Gemma 4 31B</strong> <span style="color:#e2e8f0;">4.54</span></span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #2d2d4a;">
+          <span style="color:#a0aec0;">Utilitat pràctica</span>
+          <span><strong style="color:#4285f4;">Gemma 4 31B</strong> <span style="color:#e2e8f0;">4.52</span></span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #2d2d4a;">
+          <span style="color:#a0aec0;">Coherència amb el text</span>
+          <span><strong style="color:#fa520f;">Mistral Small</strong> <span style="color:#e2e8f0;">4.97</span></span>
+        </div>
+  </div>
+
+  <!-- ═══ Secció 4: Heatmap Model × Tipus complement ═══ -->
+  <div class="card">
+    <h2>Heatmap: Model × Tipus de complement</h2>
+    <div class="subtitle">Puntuació ponderada per a cada combinació model-complement (8 tipus)</div>
+    <div style="overflow-x:auto;">
+      
+    <table class="heatmap-table">
+      <thead><tr><th style="min-width:180px;"></th><th><span style="color:#4285f4;">Gemma 4 31B</span></th><th><span style="color:#10a37f;">GPT-4o-mini</span></th><th><span style="color:#0467df;">Llama 3.3 70B</span></th><th><span style="color:#fa520f;">Mistral Small</span></th></tr></thead>
+      <tbody><tr><td>Analogies quotidianes</td><td style="background:#065f46;border:2px solid #fbbf24;border-radius:4px;">4.73</td><td style="background:#065f46;border-radius:4px;">4.67</td><td style="background:#1a1a2e;border-radius:4px;">—</td><td style="background:#0d9488;border-radius:4px;">4.38</td></tr><tr><td>Esquema visual</td><td style="background:#047857;border:2px solid #fbbf24;border-radius:4px;">4.44</td><td style="background:#0d9488;border-radius:4px;">4.34</td><td style="background:#1a1a2e;border-radius:4px;">—</td><td style="background:#0d9488;border-radius:4px;">4.20</td></tr><tr><td>Glossari bilingüe àrab</td><td style="background:#065f46;border:2px solid #fbbf24;border-radius:4px;">4.64</td><td style="background:#065f46;border-radius:4px;">4.62</td><td style="background:#0e7490;border-radius:4px;">4.18</td><td style="background:#065f46;border-radius:4px;">4.61</td></tr><tr><td>Glossari simple</td><td style="background:#047857;border:2px solid #fbbf24;border-radius:4px;">4.45</td><td style="background:#0d9488;border-radius:4px;">4.34</td><td style="background:#0d9488;border-radius:4px;">4.38</td><td style="background:#0d9488;border-radius:4px;">4.34</td></tr><tr><td>Mapa conceptual</td><td style="background:#047857;border:2px solid #fbbf24;border-radius:4px;">4.53</td><td style="background:#047857;border-radius:4px;">4.41</td><td style="background:#1a1a2e;border-radius:4px;">—</td><td style="background:#0d9488;border-radius:4px;">4.33</td></tr><tr><td>Pictogrames descrits</td><td style="background:#065f46;border:2px solid #fbbf24;border-radius:4px;">4.76</td><td style="background:#047857;border-radius:4px;">4.48</td><td style="background:#1a1a2e;border-radius:4px;">—</td><td style="background:#0d9488;border-radius:4px;">4.35</td></tr><tr><td>Preguntes intercalades</td><td style="background:#065f46;border:2px solid #fbbf24;border-radius:4px;">4.61</td><td style="background:#047857;border-radius:4px;">4.54</td><td style="background:#047857;border-radius:4px;">4.43</td><td style="background:#0d9488;border-radius:4px;">4.25</td></tr><tr><td>Transliteració fonètica</td><td style="background:#065f46;border:2px solid #fbbf24;border-radius:4px;">4.68</td><td style="background:#065f46;border-radius:4px;">4.60</td><td style="background:#1a1a2e;border-radius:4px;">—</td><td style="background:#047857;border-radius:4px;">4.55</td></tr></tbody>
+    </table>
+    <div class="legend-row" style="margin-top:16px;">
+      <span class="legend-item"><span class="legend-dot" style="background:#9f1239;"></span> &lt; 3.8</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#b45309;"></span> 3.8-4.0</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#0e7490;"></span> 4.0-4.2</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#0d9488;"></span> 4.2-4.4</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#047857;"></span> 4.4-4.6</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#065f46;"></span> &ge; 4.6</span>
+      <span class="legend-item"><span style="width:10px;height:10px;border:2px solid #fbbf24;border-radius:2px;"></span> Millor de la fila</span>
+    </div>
+    </div>
+  </div>
+
+  <!-- ═══ Secció 5: Heatmap Model × Perfil ═══ -->
+  <div class="card">
+    <h2>Heatmap: Model × Perfil d'alumne</h2>
+    <div class="subtitle">Puntuació ponderada per a cada combinació model-perfil (6 perfils)</div>
+    <div style="overflow-x:auto;">
+      
+    <table class="heatmap-table">
+      <thead><tr><th style="min-width:180px;"></th><th><span style="color:#4285f4;">Gemma 4 31B</span></th><th><span style="color:#10a37f;">GPT-4o-mini</span></th><th><span style="color:#0467df;">Llama 3.3 70B</span></th><th><span style="color:#fa520f;">Mistral Small</span></th></tr></thead>
+      <tbody><tr><td>Altes capacitats</td><td style="background:#065f46;border:2px solid #fbbf24;border-radius:4px;">4.65</td><td style="background:#047857;border-radius:4px;">4.59</td><td style="background:#1a1a2e;border-radius:4px;">—</td><td style="background:#0d9488;border-radius:4px;">4.37</td></tr><tr><td>2e (AC + dislèxia)</td><td style="background:#047857;border:2px solid #fbbf24;border-radius:4px;">4.42</td><td style="background:#0d9488;border-radius:4px;">4.23</td><td style="background:#1a1a2e;border-radius:4px;">—</td><td style="background:#0d9488;border-radius:4px;">4.28</td></tr><tr><td>Nouvingut (àrab)</td><td style="background:#065f46;border:2px solid #fbbf24;border-radius:4px;">4.66</td><td style="background:#065f46;border-radius:4px;">4.61</td><td style="background:#0e7490;border-radius:4px;">4.18</td><td style="background:#047857;border-radius:4px;">4.58</td></tr><tr><td>TDAH + DI lleu</td><td style="background:#065f46;border:2px solid #fbbf24;border-radius:4px;">4.61</td><td style="background:#047857;border-radius:4px;">4.45</td><td style="background:#047857;border-radius:4px;">4.41</td><td style="background:#0d9488;border-radius:4px;">4.25</td></tr><tr><td>TDAH lleu</td><td style="background:#047857;border:2px solid #fbbf24;border-radius:4px;">4.53</td><td style="background:#047857;border-radius:4px;">4.48</td><td style="background:#047857;border-radius:4px;">4.41</td><td style="background:#0d9488;border-radius:4px;">4.33</td></tr><tr><td>TDL pragmàtica</td><td style="background:#047857;border:2px solid #fbbf24;border-radius:4px;">4.56</td><td style="background:#047857;border-radius:4px;">4.42</td><td style="background:#0d9488;border-radius:4px;">4.31</td><td style="background:#0d9488;border-radius:4px;">4.33</td></tr></tbody>
+    </table>
+    <div class="legend-row" style="margin-top:16px;">
+      <span class="legend-item"><span class="legend-dot" style="background:#9f1239;"></span> &lt; 3.8</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#b45309;"></span> 3.8-4.0</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#0e7490;"></span> 4.0-4.2</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#0d9488;"></span> 4.2-4.4</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#047857;"></span> 4.4-4.6</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#065f46;"></span> &ge; 4.6</span>
+      <span class="legend-item"><span style="width:10px;height:10px;border:2px solid #fbbf24;border-radius:2px;"></span> Millor de la fila</span>
+    </div>
+    </div>
+  </div>
+
+  <!-- ═══ Secció 6: Correlació inter-jutge ═══ -->
+  <div class="card">
+    <h2>Concordança inter-jutge (correlació Pearson)</h2>
+    <div class="subtitle">Matriu de correlació entre els 5 jutges LLM · Verd (r &ge; 0.7) = forta · Taronja (0.4-0.7) = moderada · Vermell (&lt; 0.4) = baixa</div>
+    <div style="overflow-x:auto;">
+      <table class="corr-table">
+        <thead>
+          <tr><th></th><th style="font-size:12px;padding:10px 6px;">Gemini Flash</th><th style="font-size:12px;padding:10px 6px;">GPT-4o</th><th style="font-size:12px;padding:10px 6px;">Llama</th><th style="font-size:12px;padding:10px 6px;">Mistral</th><th style="font-size:12px;padding:10px 6px;">Qwen</th></tr>
+        </thead>
+        <tbody>
+          <tr><td style="font-weight:600;padding:10px 8px;">Gemini Flash</td><td style="background:#2d2d4a;text-align:center;padding:10px 6px;font-weight:600;">—</td><td style="background:#7f1d1d;text-align:center;padding:10px 6px;font-weight:600;">0.19</td><td style="background:#7f1d1d;text-align:center;padding:10px 6px;font-weight:600;">0.23</td><td style="background:#7f1d1d;text-align:center;padding:10px 6px;font-weight:600;">0.03</td><td style="background:#7f1d1d;text-align:center;padding:10px 6px;font-weight:600;">0.26</td></tr><tr><td style="font-weight:600;padding:10px 8px;">GPT-4o</td><td style="background:#7f1d1d;text-align:center;padding:10px 6px;font-weight:600;">0.19</td><td style="background:#2d2d4a;text-align:center;padding:10px 6px;font-weight:600;">—</td><td style="background:#78350f;text-align:center;padding:10px 6px;font-weight:600;">0.58</td><td style="background:#7f1d1d;text-align:center;padding:10px 6px;font-weight:600;">0.11</td><td style="background:#7f1d1d;text-align:center;padding:10px 6px;font-weight:600;">0.17</td></tr><tr><td style="font-weight:600;padding:10px 8px;">Llama</td><td style="background:#7f1d1d;text-align:center;padding:10px 6px;font-weight:600;">0.23</td><td style="background:#78350f;text-align:center;padding:10px 6px;font-weight:600;">0.58</td><td style="background:#2d2d4a;text-align:center;padding:10px 6px;font-weight:600;">—</td><td style="background:#7f1d1d;text-align:center;padding:10px 6px;font-weight:600;">0.07</td><td style="background:#78350f;text-align:center;padding:10px 6px;font-weight:600;">0.42</td></tr><tr><td style="font-weight:600;padding:10px 8px;">Mistral</td><td style="background:#7f1d1d;text-align:center;padding:10px 6px;font-weight:600;">0.03</td><td style="background:#7f1d1d;text-align:center;padding:10px 6px;font-weight:600;">0.11</td><td style="background:#7f1d1d;text-align:center;padding:10px 6px;font-weight:600;">0.07</td><td style="background:#2d2d4a;text-align:center;padding:10px 6px;font-weight:600;">—</td><td style="background:#7f1d1d;text-align:center;padding:10px 6px;font-weight:600;">0.13</td></tr><tr><td style="font-weight:600;padding:10px 8px;">Qwen</td><td style="background:#7f1d1d;text-align:center;padding:10px 6px;font-weight:600;">0.26</td><td style="background:#7f1d1d;text-align:center;padding:10px 6px;font-weight:600;">0.17</td><td style="background:#78350f;text-align:center;padding:10px 6px;font-weight:600;">0.42</td><td style="background:#7f1d1d;text-align:center;padding:10px 6px;font-weight:600;">0.13</td><td style="background:#2d2d4a;text-align:center;padding:10px 6px;font-weight:600;">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer">
+    Dashboard generat automàticament · Experiment Complements ATNE · 2026-04-12 05:27
+  </div>
+
+</div>
+
+<script>
+// ═══ Configuració global Chart.js ═══
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.borderColor = '#2d2d4a';
+
+// ═══ Secció 1: Ranking global ═══
+new Chart(document.getElementById('rankingChart'), {
+  type: 'bar',
+  data: {
+    labels: ["Gemma 4 31B", "GPT-4o-mini", "Llama 3.3 70B", "Mistral Small"],
+    datasets: [{
+      label: 'Puntuació ponderada',
+      data: [4.58, 4.46, 4.37, 4.34],
+      backgroundColor: ["#4285f4", "#10a37f", "#0467df", "#fa520f"],
+      borderColor: ["#4285f4", "#10a37f", "#0467df", "#fa520f"],
+      borderWidth: 2,
+      borderRadius: 6,
+      barPercentage: 0.6,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'y',
+    scales: {
+      x: {
+        min: 3.5,
+        max: 5,
+        grid: { color: '#2d2d4a' },
+        ticks: { color: '#94a3b8', font: { size: 13 } },
+        title: { display: true, text: 'Puntuació (0-5)', color: '#64748b' }
+      },
+      y: {
+        grid: { display: false },
+        ticks: { color: '#e2e8f0', font: { size: 14, weight: 'bold' } }
+      }
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          afterLabel: function(ctx) {
+            const ns = [160, 160, 33, 160];
+            return 'n = ' + ns[ctx.dataIndex] + ' casos';
+          }
+        }
+      }
+    }
+  }
+});
+
+// ═══ Secció 2: Radar per criteri ═══
+new Chart(document.getElementById('radarChart'), {
+  type: 'radar',
+  data: {
+    labels: ["Correcci\u00f3 ling\u00fc\u00edstica", "Adequaci\u00f3 al perfil", "C\u00e0rrega cognitiva", "Utilitat pr\u00e0ctica", "Coher\u00e8ncia amb el text"],
+    datasets: [{"label": "Gemma 4 31B", "data": [4.55, 4.55, 4.54, 4.52, 4.93], "backgroundColor": "#4285f433", "borderColor": "#4285f4", "borderWidth": 2, "pointBackgroundColor": "#4285f4"}, {"label": "GPT-4o-mini", "data": [4.52, 4.39, 4.3, 4.44, 4.91], "backgroundColor": "#10a37f33", "borderColor": "#10a37f", "borderWidth": 2, "pointBackgroundColor": "#10a37f"}, {"label": "Llama 3.3 70B", "data": [4.15, 4.32, 4.39, 4.36, 4.9], "backgroundColor": "#0467df33", "borderColor": "#0467df", "borderWidth": 2, "pointBackgroundColor": "#0467df"}, {"label": "Mistral Small", "data": [4.77, 4.1, 4.07, 4.18, 4.97], "backgroundColor": "#fa520f33", "borderColor": "#fa520f", "borderWidth": 2, "pointBackgroundColor": "#fa520f"}]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      r: {
+        beginAtZero: false,
+        min: 3.5,
+        max: 5,
+        ticks: {
+          stepSize: 0.25,
+          color: '#64748b',
+          backdropColor: 'transparent',
+          font: { size: 11 }
+        },
+        grid: { color: '#2d2d4a' },
+        pointLabels: {
+          color: '#e2e8f0',
+          font: { size: 13 }
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          color: '#e2e8f0',
+          padding: 20,
+          usePointStyle: true,
+          pointStyleWidth: 12,
+          font: { size: 13 }
+        }
+      }
+    }
+  }
+});
+</script>
+
+</body>
+</html>

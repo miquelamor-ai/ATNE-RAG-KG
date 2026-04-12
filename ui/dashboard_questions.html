@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Questions — Experiment ATNE</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    line-height: 1.6;
+  }
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, #16213e 0%, #0f3460 50%, #1a1a2e 100%);
+    padding: 48px 32px;
+    border-radius: 16px;
+    margin-bottom: 32px;
+    border: 1px solid #233554;
+    text-align: center;
+  }
+  .hero h1 {
+    font-size: 2.2em;
+    color: #4285f4;
+    margin-bottom: 8px;
+  }
+  .hero .subtitle {
+    color: #94a3b8;
+    font-size: 1em;
+    margin-bottom: 24px;
+  }
+  .hero .winner-score {
+    font-size: 3em;
+    font-weight: 800;
+    color: #4285f4;
+    margin: 12px 0;
+  }
+  .hero .meta {
+    color: #64748b;
+    font-size: 0.85em;
+    margin-top: 8px;
+  }
+
+  /* Ranking table in hero */
+  .ranking-table {
+    margin: 24px auto 0;
+    max-width: 600px;
+  }
+  .ranking-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .ranking-table th {
+    padding: 10px 16px;
+    text-align: left;
+    color: #94a3b8;
+    font-size: 0.8em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #233554;
+  }
+  .ranking-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #1e293b;
+    font-size: 0.95em;
+  }
+
+  /* Cards */
+  .card {
+    background: #16213e;
+    border: 1px solid #233554;
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  .card h2 {
+    font-size: 1.3em;
+    color: #e2e8f0;
+    margin-bottom: 6px;
+  }
+  .card .desc {
+    color: #64748b;
+    font-size: 0.85em;
+    font-style: italic;
+    margin-bottom: 20px;
+  }
+
+  /* Chart */
+  .chart-container {
+    position: relative;
+    height: 400px;
+    margin: 16px 0;
+  }
+
+  /* KPI grid */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .kpi {
+    background: #16213e;
+    border: 1px solid #233554;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+  }
+  .kpi-label {
+    font-size: 0.7em;
+    text-transform: uppercase;
+    color: #64748b;
+    letter-spacing: 0.05em;
+  }
+  .kpi-value {
+    font-size: 1.3em;
+    font-weight: 700;
+    margin: 6px 0;
+  }
+  .kpi-sub {
+    font-size: 0.85em;
+    color: #94a3b8;
+  }
+
+  /* Tables inside cards */
+  .card table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .card th {
+    padding: 10px 12px;
+    text-align: left;
+    color: #94a3b8;
+    font-size: 0.8em;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid #233554;
+    background: #0f1a2e;
+  }
+  .card td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #1e293b;
+    font-size: 0.9em;
+  }
+  .card tbody tr:hover {
+    background: #1e293b;
+  }
+
+  /* Grid layouts */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 900px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.5em; }
+  }
+
+  /* Legend */
+  .legend {
+    color: #64748b;
+    font-size: 0.8em;
+    margin-top: 12px;
+    padding: 8px 12px;
+    background: #0f1a2e;
+    border-radius: 6px;
+    display: inline-block;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    color: #475569;
+    padding: 32px;
+    font-size: 0.8em;
+  }
+  .footer a { color: #4285f4; text-decoration: none; }
+
+  /* Responsive tables */
+  .table-wrap { overflow-x: auto; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ═══ 1. Hero Banner ═══ -->
+  <div class="hero">
+    <h1>Gemma 4 31B: millor model per generar preguntes</h1>
+    <div class="subtitle">Experiment de generacio de preguntes de comprensio lectora — 4 models x 5 jutges</div>
+    <div class="winner-score">4.40<span style="font-size:0.4em;color:#94a3b8"> / 5</span></div>
+    <div class="meta">767 avaluacions totals &middot; 2026-04-12T05:22:23</div>
+
+    <div class="ranking-table">
+      <table>
+        <thead><tr><th>Pos.</th><th>Model</th><th>Score ponderat</th><th>n casos</th></tr></thead>
+        <tbody>
+          <tr style="background:rgba(66,133,244,0.15)">
+          <td style="font-weight:700;font-size:1.1em;">1r</td>
+          <td><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#4285f4;margin-right:8px;vertical-align:middle;"></span>Gemma 4 31B</td>
+          <td style="font-weight:700;font-size:1.1em;color:#4285f4">4.40</td>
+          <td>250</td>
+        </tr>
+<tr style="background:transparent">
+          <td style="font-weight:700;font-size:1.1em;">2n</td>
+          <td><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#fa520f;margin-right:8px;vertical-align:middle;"></span>Mistral Small</td>
+          <td style="font-weight:700;font-size:1.1em;color:#fa520f">4.20</td>
+          <td>250</td>
+        </tr>
+<tr style="background:transparent">
+          <td style="font-weight:700;font-size:1.1em;">3r</td>
+          <td><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#10a37f;margin-right:8px;vertical-align:middle;"></span>GPT-4o-mini</td>
+          <td style="font-weight:700;font-size:1.1em;color:#10a37f">4.09</td>
+          <td>250</td>
+        </tr>
+<tr style="background:transparent">
+          <td style="font-weight:700;font-size:1.1em;">4t</td>
+          <td><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#0467df;margin-right:8px;vertical-align:middle;"></span>Llama 3.3 70B</td>
+          <td style="font-weight:700;font-size:1.1em;color:#0467df">3.91</td>
+          <td>17</td>
+        </tr>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ KPI: Millor per criteri ═══ -->
+  <div class="kpi-grid">
+    <div class="kpi">
+          <div class="kpi-label">Validesa pedagogica</div>
+          <div class="kpi-value" style="color:#0467df">Llama 3.3 70B</div>
+          <div class="kpi-sub">4.57 / 5</div>
+        </div>
+<div class="kpi">
+          <div class="kpi-label">Adequacio nivell</div>
+          <div class="kpi-value" style="color:#4285f4">Gemma 4 31B</div>
+          <div class="kpi-sub">4.24 / 5</div>
+        </div>
+<div class="kpi">
+          <div class="kpi-label">Discriminacio</div>
+          <div class="kpi-value" style="color:#4285f4">Gemma 4 31B</div>
+          <div class="kpi-sub">3.98 / 5</div>
+        </div>
+<div class="kpi">
+          <div class="kpi-label">Originalitat redaccio</div>
+          <div class="kpi-value" style="color:#4285f4">Gemma 4 31B</div>
+          <div class="kpi-sub">4.36 / 5</div>
+        </div>
+<div class="kpi">
+          <div class="kpi-label">Format estructural</div>
+          <div class="kpi-value" style="color:#4285f4">Gemma 4 31B</div>
+          <div class="kpi-sub">4.99 / 5</div>
+        </div>
+
+  </div>
+
+  <!-- ═══ 2. Bar chart: Ranking global ═══ -->
+  <div class="card">
+    <h2>Ranking global (score ponderat)</h2>
+    <div class="desc">Mitjana ponderada dels 5 criteris, agregant tots els jutges disponibles per cas.</div>
+    <div class="chart-container">
+      <canvas id="rankingBar"></canvas>
+    </div>
+  </div>
+
+  <!-- ═══ 3. Radar chart: Per criteri ═══ -->
+  <div class="card">
+    <h2>Comparativa per criteri</h2>
+    <div class="desc">5 criteris d'avaluacio: validesa pedagogica (30%), adequacio al nivell (25%), discriminacio (15%), originalitat (15%), format (15%).</div>
+    <div class="chart-container">
+      <canvas id="radarCriteri"></canvas>
+    </div>
+  </div>
+
+  <!-- ═══ 4. Heatmap: Model x Tipus pregunta ═══ -->
+  <div class="card">
+    <h2>Matriu Model x Tipus de pregunta</h2>
+    <div class="desc">Score ponderat per cada combinacio model-tipus. 9 tipus de Bloom (recordar ... crear) + metacognitives.</div>
+    <div class="table-wrap">
+      <table style="width:100%;border-collapse:collapse;">
+<thead><tr><th style="text-align:left;padding:12px;">Model</th><th style="text-align:center;padding:12px;font-size:0.8em;">Literals</th><th style="text-align:center;padding:12px;font-size:0.8em;">Comprensio</th><th style="text-align:center;padding:12px;font-size:0.8em;">Vocabulari ctx.</th><th style="text-align:center;padding:12px;font-size:0.8em;">Inferencials</th><th style="text-align:center;padding:12px;font-size:0.8em;">Aplicacio</th><th style="text-align:center;padding:12px;font-size:0.8em;">Analisi</th><th style="text-align:center;padding:12px;font-size:0.8em;">Avaluatives</th><th style="text-align:center;padding:12px;font-size:0.8em;">Creatives</th><th style="text-align:center;padding:12px;font-size:0.8em;">Metacognitives</th></tr></thead>
+<tbody><tr><td style="padding:10px;font-weight:600;"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#4285f4;margin-right:6px;"></span>Gemma 4 31B</td><td style="text-align:center;padding:10px;background:#f59e0b80;font-weight:600;border-radius:4px;">3.96</td><td style="text-align:center;padding:10px;background:#10b98180;font-weight:600;border-radius:4px;">4.38</td><td style="text-align:center;padding:10px;background:#f59e0b80;font-weight:600;border-radius:4px;">3.95</td><td style="text-align:center;padding:10px;background:#05966980;font-weight:600;border-radius:4px;">4.57</td><td style="text-align:center;padding:10px;background:#05966980;font-weight:600;border-radius:4px;">4.67</td><td style="text-align:center;padding:10px;background:#05966980;font-weight:600;border-radius:4px;">4.58</td><td style="text-align:center;padding:10px;background:#05966980;font-weight:600;border-radius:4px;">4.81</td><td style="text-align:center;padding:10px;background:#05966980;font-weight:600;border-radius:4px;">4.74</td><td style="text-align:center;padding:10px;background:#10b98180;font-weight:600;border-radius:4px;">4.15</td></tr>
+<tr><td style="padding:10px;font-weight:600;"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#fa520f;margin-right:6px;"></span>Mistral Small</td><td style="text-align:center;padding:10px;background:#f59e0b80;font-weight:600;border-radius:4px;">3.87</td><td style="text-align:center;padding:10px;background:#10b98180;font-weight:600;border-radius:4px;">4.04</td><td style="text-align:center;padding:10px;background:#10b98180;font-weight:600;border-radius:4px;">4.04</td><td style="text-align:center;padding:10px;background:#10b98180;font-weight:600;border-radius:4px;">4.24</td><td style="text-align:center;padding:10px;background:#10b98180;font-weight:600;border-radius:4px;">4.44</td><td style="text-align:center;padding:10px;background:#10b98180;font-weight:600;border-radius:4px;">4.24</td><td style="text-align:center;padding:10px;background:#05966980;font-weight:600;border-radius:4px;">4.67</td><td style="text-align:center;padding:10px;background:#05966980;font-weight:600;border-radius:4px;">4.74</td><td style="text-align:center;padding:10px;background:#10b98180;font-weight:600;border-radius:4px;">4.00</td></tr>
+<tr><td style="padding:10px;font-weight:600;"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#10a37f;margin-right:6px;"></span>GPT-4o-mini</td><td style="text-align:center;padding:10px;background:#f59e0b80;font-weight:600;border-radius:4px;">3.99</td><td style="text-align:center;padding:10px;background:#f59e0b80;font-weight:600;border-radius:4px;">3.92</td><td style="text-align:center;padding:10px;background:#f59e0b80;font-weight:600;border-radius:4px;">3.85</td><td style="text-align:center;padding:10px;background:#10b98180;font-weight:600;border-radius:4px;">4.18</td><td style="text-align:center;padding:10px;background:#10b98180;font-weight:600;border-radius:4px;">4.19</td><td style="text-align:center;padding:10px;background:#10b98180;font-weight:600;border-radius:4px;">4.17</td><td style="text-align:center;padding:10px;background:#10b98180;font-weight:600;border-radius:4px;">4.38</td><td style="text-align:center;padding:10px;background:#05966980;font-weight:600;border-radius:4px;">4.59</td><td style="text-align:center;padding:10px;background:#f59e0b80;font-weight:600;border-radius:4px;">3.80</td></tr>
+<tr><td style="padding:10px;font-weight:600;"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0467df;margin-right:6px;"></span>Llama 3.3 70B</td><td style="text-align:center;padding:10px;background:#f59e0b80;font-weight:600;border-radius:4px;">3.91</td><td style="text-align:center;padding:10px;color:#555;">—</td><td style="text-align:center;padding:10px;color:#555;">—</td><td style="text-align:center;padding:10px;color:#555;">—</td><td style="text-align:center;padding:10px;color:#555;">—</td><td style="text-align:center;padding:10px;color:#555;">—</td><td style="text-align:center;padding:10px;color:#555;">—</td><td style="text-align:center;padding:10px;color:#555;">—</td><td style="text-align:center;padding:10px;color:#555;">—</td></tr>
+</tbody></table>
+    </div>
+    <div class="legend">Vermell &lt;3.5 &middot; Groc 3.5-4.0 &middot; Verd clar 4.0-4.5 &middot; Verd fosc &gt;4.5</div>
+  </div>
+
+  <!-- ═══ 5. Heatmap: Model x Perfil ═══ -->
+  <div class="card">
+    <h2>Matriu Model x Perfil d'alumne</h2>
+    <div class="desc">Score ponderat per cada combinacio model-perfil. 6 perfils d'alumnat divers.</div>
+    <div class="table-wrap">
+      <table style="width:100%;border-collapse:collapse;">
+<thead><tr><th style="text-align:left;padding:12px;">Model</th><th style="text-align:center;padding:12px;font-size:0.8em;">Nouvingut (arab)</th><th style="text-align:center;padding:12px;font-size:0.8em;">TDAH lleu</th><th style="text-align:center;padding:12px;font-size:0.8em;">Altes capacitats</th><th style="text-align:center;padding:12px;font-size:0.8em;">TDL pragmatica</th><th style="text-align:center;padding:12px;font-size:0.8em;">2e (AC+dislexia)</th><th style="text-align:center;padding:12px;font-size:0.8em;">TDAH+DI lleu</th></tr></thead>
+<tbody><tr><td style="padding:10px;font-weight:600;"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#4285f4;margin-right:6px;"></span>Gemma 4 31B</td><td style="text-align:center;padding:10px;background:#f59e0b80;font-weight:600;border-radius:4px;">3.83</td><td style="text-align:center;padding:10px;background:#10b98180;font-weight:600;border-radius:4px;">4.35</td><td style="text-align:center;padding:10px;background:#05966980;font-weight:600;border-radius:4px;">4.95</td><td style="text-align:center;padding:10px;background:#10b98180;font-weight:600;border-radius:4px;">4.14</td><td style="text-align:center;padding:10px;background:#10b98180;font-weight:600;border-radius:4px;">4.46</td><td style="text-align:center;padding:10px;background:#f59e0b80;font-weight:600;border-radius:4px;">3.91</td></tr>
+<tr><td style="padding:10px;font-weight:600;"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#fa520f;margin-right:6px;"></span>Mistral Small</td><td style="text-align:center;padding:10px;background:#f59e0b80;font-weight:600;border-radius:4px;">3.73</td><td style="text-align:center;padding:10px;background:#10b98180;font-weight:600;border-radius:4px;">4.13</td><td style="text-align:center;padding:10px;background:#05966980;font-weight:600;border-radius:4px;">4.63</td><td style="text-align:center;padding:10px;background:#10b98180;font-weight:600;border-radius:4px;">4.07</td><td style="text-align:center;padding:10px;background:#10b98180;font-weight:600;border-radius:4px;">4.27</td><td style="text-align:center;padding:10px;background:#f59e0b80;font-weight:600;border-radius:4px;">3.80</td></tr>
+<tr><td style="padding:10px;font-weight:600;"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#10a37f;margin-right:6px;"></span>GPT-4o-mini</td><td style="text-align:center;padding:10px;background:#f59e0b80;font-weight:600;border-radius:4px;">3.61</td><td style="text-align:center;padding:10px;background:#10b98180;font-weight:600;border-radius:4px;">4.05</td><td style="text-align:center;padding:10px;background:#10b98180;font-weight:600;border-radius:4px;">4.48</td><td style="text-align:center;padding:10px;background:#10b98180;font-weight:600;border-radius:4px;">4.06</td><td style="text-align:center;padding:10px;background:#10b98180;font-weight:600;border-radius:4px;">4.13</td><td style="text-align:center;padding:10px;background:#f59e0b80;font-weight:600;border-radius:4px;">3.71</td></tr>
+<tr><td style="padding:10px;font-weight:600;"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0467df;margin-right:6px;"></span>Llama 3.3 70B</td><td style="text-align:center;padding:10px;background:#f59e0b80;font-weight:600;border-radius:4px;">3.83</td><td style="text-align:center;padding:10px;color:#555;">—</td><td style="text-align:center;padding:10px;color:#555;">—</td><td style="text-align:center;padding:10px;color:#555;">—</td><td style="text-align:center;padding:10px;color:#555;">—</td><td style="text-align:center;padding:10px;background:#10b98180;font-weight:600;border-radius:4px;">4.04</td></tr>
+</tbody></table>
+    </div>
+    <div class="legend">Vermell &lt;3.5 &middot; Groc 3.5-4.0 &middot; Verd clar 4.0-4.5 &middot; Verd fosc &gt;4.5</div>
+  </div>
+
+  <!-- ═══ 6. JSON validity ═══ -->
+  <div class="card">
+    <h2>Validesa del JSON generat</h2>
+    <div class="desc">Percentatge de respostes amb JSON valid (parsejable i amb l'estructura correcta).</div>
+    <div class="table-wrap">
+      <table style="width:100%;border-collapse:collapse;">
+<thead><tr><th>Model</th><th>JSON valids</th><th>Total</th><th>%</th></tr></thead>
+<tbody><tr><td style="font-weight:600;"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#4285f4;margin-right:6px;"></span>Gemma 4 31B</td><td>250</td><td>250</td><td style="font-weight:700;color:#4ade80">100.0%</td></tr>
+<tr><td style="font-weight:600;"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#fa520f;margin-right:6px;"></span>Mistral Small</td><td>250</td><td>250</td><td style="font-weight:700;color:#4ade80">100.0%</td></tr>
+<tr><td style="font-weight:600;"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#10a37f;margin-right:6px;"></span>GPT-4o-mini</td><td>250</td><td>250</td><td style="font-weight:700;color:#4ade80">100.0%</td></tr>
+<tr><td style="font-weight:600;"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0467df;margin-right:6px;"></span>Llama 3.3 70B</td><td>17</td><td>17</td><td style="font-weight:700;color:#4ade80">100.0%</td></tr>
+</tbody></table>
+    </div>
+  </div>
+
+  <!-- ═══ 7. Inter-judge correlation ═══ -->
+  <div class="card">
+    <h2>Concordanca inter-jutge</h2>
+    <div class="desc">Correlacio de Pearson entre parelles de jutges sobre totes les puntuacions compartides.</div>
+    <div class="table-wrap">
+      <table style="width:100%;border-collapse:collapse;">
+<thead><tr><th></th><th style="text-align:center;font-size:0.85em;">Gemini Flash</th><th style="text-align:center;font-size:0.85em;">GPT-4o</th><th style="text-align:center;font-size:0.85em;">Llama</th><th style="text-align:center;font-size:0.85em;">Mistral</th><th style="text-align:center;font-size:0.85em;">Qwen</th></tr></thead>
+<tbody><tr><td style="font-weight:600;font-size:0.85em;">Gemini Flash</td><td style="text-align:center;padding:10px;background:#4285f440;font-weight:600;">1.00</td><td style="text-align:center;padding:10px;background:transparent;font-weight:600;">—</td><td style="text-align:center;padding:10px;background:transparent;font-weight:600;">—</td><td style="text-align:center;padding:10px;background:transparent;font-weight:600;">—</td><td style="text-align:center;padding:10px;background:transparent;font-weight:600;">—</td></tr>
+<tr><td style="font-weight:600;font-size:0.85em;">GPT-4o</td><td style="text-align:center;padding:10px;background:transparent;font-weight:600;">—</td><td style="text-align:center;padding:10px;background:#4285f440;font-weight:600;">1.00</td><td style="text-align:center;padding:10px;background:#4ade8060;font-weight:600;">0.75</td><td style="text-align:center;padding:10px;background:#fbbf2460;font-weight:600;">0.68</td><td style="text-align:center;padding:10px;background:#fbbf2460;font-weight:600;">0.66</td></tr>
+<tr><td style="font-weight:600;font-size:0.85em;">Llama</td><td style="text-align:center;padding:10px;background:transparent;font-weight:600;">—</td><td style="text-align:center;padding:10px;background:#4ade8060;font-weight:600;">0.75</td><td style="text-align:center;padding:10px;background:#4285f440;font-weight:600;">1.00</td><td style="text-align:center;padding:10px;background:#4ade8060;font-weight:600;">0.80</td><td style="text-align:center;padding:10px;background:#fbbf2460;font-weight:600;">0.55</td></tr>
+<tr><td style="font-weight:600;font-size:0.85em;">Mistral</td><td style="text-align:center;padding:10px;background:transparent;font-weight:600;">—</td><td style="text-align:center;padding:10px;background:#fbbf2460;font-weight:600;">0.68</td><td style="text-align:center;padding:10px;background:#4ade8060;font-weight:600;">0.80</td><td style="text-align:center;padding:10px;background:#4285f440;font-weight:600;">1.00</td><td style="text-align:center;padding:10px;background:#fbbf2460;font-weight:600;">0.59</td></tr>
+<tr><td style="font-weight:600;font-size:0.85em;">Qwen</td><td style="text-align:center;padding:10px;background:transparent;font-weight:600;">—</td><td style="text-align:center;padding:10px;background:#fbbf2460;font-weight:600;">0.66</td><td style="text-align:center;padding:10px;background:#fbbf2460;font-weight:600;">0.55</td><td style="text-align:center;padding:10px;background:#fbbf2460;font-weight:600;">0.59</td><td style="text-align:center;padding:10px;background:#4285f440;font-weight:600;">1.00</td></tr>
+</tbody></table>
+    </div>
+    <div class="legend">Verd (&ge;0.7) = concordanca forta &middot; Groc (0.4-0.7) = moderada &middot; Vermell (&lt;0.4) = baixa &middot; Blau = diagonal</div>
+  </div>
+
+  <div class="footer">
+    Dashboard generat automaticament &middot; ATNE Experiment Questions &middot; 2026-04-12 05:27
+  </div>
+</div>
+
+<script>
+// ── Chart defaults (dark theme) ──
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.borderColor = '#233554';
+
+// ── 2. Ranking bar chart ──
+new Chart(document.getElementById('rankingBar'), {
+  type: 'bar',
+  data: {
+    labels: ["Gemma 4 31B", "Mistral Small", "GPT-4o-mini", "Llama 3.3 70B"],
+    datasets: [{
+      label: 'Score ponderat',
+      data: [4.4, 4.2, 4.09, 3.91],
+      backgroundColor: ["#4285f4", "#fa520f", "#10a37f", "#0467df"],
+      borderColor: ["#4285f4", "#fa520f", "#10a37f", "#0467df"],
+      borderWidth: 2,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: false,
+        min: 3.0,
+        max: 5.0,
+        title: { display: true, text: 'Score ponderat (0-5)', color: '#94a3b8' },
+        grid: { color: '#233554' },
+      },
+      x: {
+        grid: { display: false },
+      }
+    },
+    plugins: {
+      legend: { display: false },
+      title: {
+        display: true,
+        text: 'Ranking global per model (mitjana ponderada dels jutges)',
+        color: '#e2e8f0',
+        font: { size: 14 }
+      }
+    }
+  }
+});
+
+// ── 3. Radar per criteri ──
+new Chart(document.getElementById('radarCriteri'), {
+  type: 'radar',
+  data: {
+    labels: ["Validesa pedagogica", "Adequacio nivell", "Discriminacio", "Originalitat redaccio", "Format estructural"],
+    datasets: [{"label": "Gemma 4 31B", "data": [4.46, 4.24, 3.98, 4.36, 4.99], "backgroundColor": "#4285f433", "borderColor": "#4285f4", "borderWidth": 2, "pointBackgroundColor": "#4285f4"}, {"label": "Mistral Small", "data": [4.3, 3.94, 3.87, 3.99, 4.98], "backgroundColor": "#fa520f33", "borderColor": "#fa520f", "borderWidth": 2, "pointBackgroundColor": "#fa520f"}, {"label": "GPT-4o-mini", "data": [4.03, 4.01, 3.57, 4.0, 4.97], "backgroundColor": "#10a37f33", "borderColor": "#10a37f", "borderWidth": 2, "pointBackgroundColor": "#10a37f"}, {"label": "Llama 3.3 70B", "data": [4.57, 3.75, 3.08, 2.7, 4.94], "backgroundColor": "#0467df33", "borderColor": "#0467df", "borderWidth": 2, "pointBackgroundColor": "#0467df"}]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      r: {
+        beginAtZero: false,
+        min: 2.5,
+        max: 5.0,
+        ticks: { stepSize: 0.5, color: '#94a3b8', backdropColor: 'transparent' },
+        grid: { color: '#233554' },
+        pointLabels: { color: '#e2e8f0', font: { size: 12 } },
+        angleLines: { color: '#233554' },
+      }
+    },
+    plugins: {
+      title: {
+        display: true,
+        text: 'Comparativa per criteri — 4 models',
+        color: '#e2e8f0',
+        font: { size: 14 }
+      },
+      legend: { position: 'bottom', labels: { padding: 20 } }
+    }
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+[
+  {
+    "id": "nouvingut_arabic",
+    "nom": "Nouvingut genèric (àrab)",
+    "descripcio_curta": "Alumne nouvingut, L1 àrab, alfabet no llatí, MECR A1",
+    "perfil": "nouvingut",
+    "etapa": "ESO",
+    "curs": "1r ESO",
+    "mecr": "A1",
+    "sub_variables": {
+      "L1": "àrab",
+      "alfabet_llati": false,
+      "calp": "inicial",
+      "temps_acollida": "6 mesos"
+    },
+    "complexitat": "simple",
+    "prompt_minim": "Adapta aquest text per a un alumne nouvingut de 1r d'ESO, parlant natiu d'àrab, amb un nivell de català A1."
+  },
+  {
+    "id": "tdah_lleu",
+    "nom": "TDAH lleu",
+    "descripcio_curta": "Alumne amb TDAH lleu, primària cicle superior",
+    "perfil": "tdah",
+    "etapa": "primaria",
+    "curs": "5è primària",
+    "mecr": "B1",
+    "sub_variables": {
+      "grau": "lleu",
+      "baixa_memoria_treball": false
+    },
+    "complexitat": "simple",
+    "prompt_minim": "Adapta aquest text per a un alumne de 5è de primària amb TDAH lleu, nivell lingüístic B1."
+  },
+  {
+    "id": "altes_capacitats",
+    "nom": "Altes capacitats",
+    "descripcio_curta": "Alumne amb altes capacitats, batxillerat",
+    "perfil": "altes_capacitats",
+    "etapa": "batxillerat",
+    "curs": "1r batxillerat",
+    "mecr": "C1",
+    "sub_variables": {},
+    "complexitat": "simple",
+    "prompt_minim": "Adapta aquest text per a un alumne d'altes capacitats de 1r de batxillerat, nivell C1. Enriqueix el contingut amb profundització i pensament crític."
+  },
+  {
+    "id": "tdl_pragmatica",
+    "nom": "TDL amb afectació pragmàtica",
+    "descripcio_curta": "Alumne amb TDL receptiu-pragmàtic, ESO",
+    "perfil": "tdl",
+    "etapa": "ESO",
+    "curs": "2n ESO",
+    "mecr": "A2",
+    "sub_variables": {
+      "grau": "moderat",
+      "modalitat": "receptiu",
+      "pragmatica": true,
+      "morfosintaxi": true,
+      "semantica": false
+    },
+    "complexitat": "complex",
+    "prompt_minim": "Adapta aquest text per a un alumne de 2n d'ESO amb Trastorn del Desenvolupament del Llenguatge (TDL) de tipus receptiu i pragmàtic, nivell A2."
+  },
+  {
+    "id": "doble_excepcionalitat",
+    "nom": "2e: Altes capacitats + dislèxia",
+    "descripcio_curta": "Alumne 2e amb AC i dislèxia fonològica, ESO",
+    "perfil": "2e",
+    "etapa": "ESO",
+    "curs": "3r ESO",
+    "mecr": "B2",
+    "sub_variables": {
+      "perfil_ac": true,
+      "perfil_dislexia": true,
+      "tipus_dislexia": "fonologica",
+      "grau_dislexia": "moderat"
+    },
+    "complexitat": "complex",
+    "prompt_minim": "Adapta aquest text per a un alumne de 3r d'ESO amb doble excepcionalitat: altes capacitats intel·lectuals i dislèxia fonològica moderada, nivell B2."
+  },
+  {
+    "id": "tdah_di_lleu",
+    "nom": "TDAH moderat + DI lleu",
+    "descripcio_curta": "Alumne amb TDAH moderat i discapacitat intel·lectual lleu, primària",
+    "perfil": "tdah",
+    "etapa": "primaria",
+    "curs": "6è primària",
+    "mecr": "A2",
+    "sub_variables": {
+      "grau_tdah": "moderat",
+      "perfil_di": true,
+      "grau_di": "lleu",
+      "baixa_memoria_treball": true
+    },
+    "complexitat": "complex",
+    "prompt_minim": "Adapta aquest text per a un alumne de 6è de primària amb TDAH moderat i discapacitat intel·lectual lleu, nivell A2. Necessita suport visual, blocs molt curts i vocabulari molt senzill."
+  }
+]
