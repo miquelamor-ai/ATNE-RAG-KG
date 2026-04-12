@@ -880,18 +880,127 @@ body {
 .profile-header-minimal { display: flex; gap: 0.625rem; align-items: center; padding: 0.5rem 0; }
 .profile-header-minimal select { flex: 1; padding: 0.5rem 0.75rem; border: none; border-radius: var(--radius-lg); font-size: 0.875rem; background: var(--surface-container-low); }
 
-/* ── Char grid (via diagnòstic) ────────────────────────── */
-.char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; padding-top: 1rem; }
-.char-item { padding: 0.875rem 1rem; border-radius: var(--radius-2xl); cursor: pointer; transition: all 0.2s; background: var(--surface-container-low); }
-.char-item:hover { background: var(--surface-container-high); }
-.char-item.checked { background: var(--surface-container-high); box-shadow: inset 0 0 0 2px rgba(51, 55, 166, 0.2); }
-.char-item label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem; font-weight: 500; }
-.char-item input[type="checkbox"] { accent-color: var(--primary); }
-.char-subvars { display: none; margin-top: 0.625rem; padding: 0.75rem; background: var(--surface-container-lowest); border-radius: var(--radius-lg); }
-.char-item.checked .char-subvars { display: block; }
-.subvar-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.375rem; font-size: 0.8125rem; }
-.subvar-row label { min-width: 6.25rem; font-weight: 500; font-size: 0.75rem; color: var(--on-surface-variant); }
-.subvar-row select, .subvar-row input { flex: 1; padding: 0.375rem 0.625rem; border: none; border-radius: var(--radius-lg); font-size: 0.8125rem; background: var(--surface-container-low); }
+/* ── NESE Chips (via diagnòstic) ───────────────────────── */
+.char-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-top: 1rem;
+}
+
+.char-item {
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-xl);
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--surface-container-low);
+    border: 1px solid rgba(199, 197, 213, 0.2);
+    flex-shrink: 0;
+}
+
+.char-item:hover {
+    background: var(--surface-container-high);
+}
+
+.char-item.checked {
+    background: linear-gradient(135deg, var(--primary), var(--primary-container));
+    border-color: transparent;
+}
+
+.char-item label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--on-surface-variant);
+    white-space: nowrap;
+}
+
+.char-item.checked label {
+    color: var(--on-primary);
+}
+
+.char-item input[type="checkbox"] {
+    display: none;
+}
+
+.char-subvars {
+    display: none;
+    margin-top: 0.75rem;
+    padding: 1.25rem;
+    background: var(--surface-container-lowest);
+    border-radius: var(--radius-2xl);
+    border: 1px solid rgba(199, 197, 213, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    width: 100%;
+}
+
+/* Sub-vars apareixen FORA del chip, a sota del grid */
+.char-item.checked .char-subvars {
+    display: block;
+}
+
+.subvar-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.8125rem;
+}
+
+.subvar-row label {
+    min-width: 8rem;
+    font-weight: 500;
+    font-size: 0.75rem;
+    color: var(--on-surface-variant);
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.subvar-row select,
+.subvar-row input {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: 0.8125rem;
+    background: var(--surface-container-low);
+    color: var(--on-surface);
+}
+
+.nese-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.nese-subvars-container {
+    margin-top: 1rem;
+}
+
+.subvars-title {
+    font-family: var(--font-headline);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(199, 197, 213, 0.15);
+}
+
+.subvars-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 1.5rem;
+}
+
+@media (max-width: 600px) {
+    .subvars-grid { grid-template-columns: 1fr; }
+}
 
 /* ── Progress ──────────────────────────────────────────── */
 .progress-area { display: none; margin: 1.25rem 0; }

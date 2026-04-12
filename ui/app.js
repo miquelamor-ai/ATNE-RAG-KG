@@ -601,14 +601,44 @@ function renderCharGrid() {
     const grid = document.getElementById("char-grid");
     grid.innerHTML = "";
 
-    for (const [key, char] of Object.entries(CHARACTERISTICS)) {
-        const div = document.createElement("div");
-        div.className = "char-item";
-        div.dataset.key = key;
+    // Contenidor per als chips
+    const chipsRow = document.createElement("div");
+    chipsRow.className = "nese-chips";
 
-        let subvarsHTML = "";
+    // Contenidor per les sub-variables (apareixen a sota del grid de chips)
+    const subvarsContainer = document.createElement("div");
+    subvarsContainer.className = "nese-subvars-container";
+    subvarsContainer.id = "nese-subvars";
+
+    for (const [key, char] of Object.entries(CHARACTERISTICS)) {
+        // Chip
+        const chip = document.createElement("div");
+        chip.className = "char-item";
+        chip.dataset.key = key;
+
+        chip.innerHTML = `
+            <label>
+                <input type="checkbox" data-char="${key}">
+                ${char.label}
+            </label>
+        `;
+
+        // Sub-variables panel (fora del chip)
+        let subvarsPanel = null;
         if (char.subvars.length > 0) {
-            const rows = char.subvars.map(sv => {
+            subvarsPanel = document.createElement("div");
+            subvarsPanel.className = "char-subvars";
+            subvarsPanel.id = `subvars-${key}`;
+            subvarsPanel.style.display = "none";
+
+            const title = document.createElement("div");
+            title.className = "subvars-title";
+            title.textContent = char.label;
+            subvarsPanel.appendChild(title);
+
+            const rows = document.createElement("div");
+            rows.className = "subvars-grid";
+            rows.innerHTML = char.subvars.map(sv => {
                 if (sv.type === "select") {
                     const opts = sv.options.map((o, i) => {
                         const label = sv.labels ? sv.labels[i] : o;
@@ -626,30 +656,25 @@ function renderCharGrid() {
                     </div>`;
                 }
             }).join("");
-            subvarsHTML = `<div class="char-subvars">${rows}</div>`;
+            subvarsPanel.appendChild(rows);
+            subvarsContainer.appendChild(subvarsPanel);
         }
 
-        const badge = char.subtipus === "contextual"
-            ? ' <span style="font-size:11px;color:var(--warn);">(contextual)</span>'
-            : "";
-
-        div.innerHTML = `
-            <label>
-                <input type="checkbox" data-char="${key}">
-                ${char.label}${badge}
-            </label>
-            ${subvarsHTML}
-        `;
-
-        // Toggle checked class
-        const cb = div.querySelector('input[type="checkbox"]');
+        // Toggle
+        const cb = chip.querySelector('input[type="checkbox"]');
         cb.addEventListener("change", () => {
-            div.classList.toggle("checked", cb.checked);
+            chip.classList.toggle("checked", cb.checked);
+            if (subvarsPanel) {
+                subvarsPanel.style.display = cb.checked ? "block" : "none";
+            }
             check2eAlert();
         });
 
-        grid.appendChild(div);
+        chipsRow.appendChild(chip);
     }
+
+    grid.appendChild(chipsRow);
+    grid.appendChild(subvarsContainer);
 }
 
 
