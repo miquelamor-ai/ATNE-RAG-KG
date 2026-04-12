@@ -6,7 +6,8 @@
     <title>ATNE — Adaptador de Textos</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/ui/styles.css">
 </head>
 <body>
@@ -37,8 +38,19 @@
     <!-- ── PAS 1: Perfil ───────────────────────────────────── -->
     <section class="step-panel active" id="step-1">
 
-        <!-- Context docent (antic sidebar, ara integrat) -->
-        <div class="context-bar">
+        <div class="page-header">
+            <span class="step-indicator">Pas 1 de 4</span>
+            <h1 class="page-title">Configura el context d'aprenentatge</h1>
+            <p class="page-desc">Defineix l'entorn educatiu i el perfil de l'alumne per personalitzar l'adaptació curricular amb precisió.</p>
+        </div>
+
+        <!-- Context docent -->
+        <div class="card">
+            <div class="card-header">
+                <div class="icon-box"><span class="material-symbols-outlined">school</span></div>
+                <h3 class="card-title">Context Docent</h3>
+            </div>
+            <div class="context-bar" style="padding:0;border:none;box-shadow:none;border-radius:0;background:transparent;">
             <div class="context-field">
                 <label for="ctx-etapa">Etapa</label>
                 <select id="ctx-etapa">
@@ -74,11 +86,17 @@
                 <input type="text" id="ctx-materia" placeholder="Ex: Biologia, Història...">
             </div>
         </div>
+            </div>
+        </div>
         <input type="hidden" name="ctx-aula" value="ordinaria">
 
         <!-- Mode: alumne concret o grup -->
         <div class="mode-card">
-            <h3>Per a qui és l'adaptació?</h3>
+            <div class="card-header">
+                <div class="icon-box"><span class="material-symbols-outlined">group</span></div>
+                <h3 class="card-title">Per a qui és l'adaptació?</h3>
+            </div>
+            <div class="radio-grid">
             <label class="mode-option">
                 <input type="radio" name="adapt-mode" value="alumne" checked>
                 <span>
@@ -93,11 +111,15 @@
                     <span class="mode-desc">3 versions simultànies: accessible, estàndard i exigent</span>
                 </span>
             </label>
+            </div>
         </div>
 
         <!-- Bloc A: Desfase curricular -->
         <div class="bloc-a">
-            <h3 id="bloc-a-label">Aquest alumne llegeix i comprèn...</h3>
+            <div class="card-header">
+                <div class="icon-box"><span class="material-symbols-outlined">trending_up</span></div>
+                <h3 class="card-title" id="bloc-a-label">Aquest alumne llegeix i comprèn...</h3>
+            </div>
             <div class="desfase-scale" id="desfase-scale">
                 <label class="desfase-opt"><input type="radio" name="desfase" value="2"> Molt per sobre</label>
                 <label class="desfase-opt"><input type="radio" name="desfase" value="1"> Per sobre</label>
@@ -113,16 +135,21 @@
         <!-- Bloc B: Doble columna observes → ajuts -->
         <div class="bloc-b-grid">
             <div class="bloc-b-card">
-                <h3>Què observes?</h3>
+                <div class="card-header">
+                    <div class="icon-box"><span class="material-symbols-outlined">visibility</span></div>
+                    <h3 class="card-title">Què observes?</h3>
+                </div>
                 <div id="observable-behaviors">
                     <!-- Generat per app.js -->
                 </div>
             </div>
             <div class="bloc-b-card ajuts-card">
-                <h3>
-                    Ajuts que s'aplicaran
-                    <span class="card-hint">Pots afegir-ne o treure'n manualment</span>
-                </h3>
+                <div class="card-header">
+                    <div class="icon-box" style="background-color:var(--surface-container-lowest);"><span class="material-symbols-outlined">support</span></div>
+                    <h3 class="card-title">Ajuts que s'aplicaran
+                        <span class="card-hint">Pots afegir-ne o treure'n manualment</span>
+                    </h3>
+                </div>
                 <div id="ajuts-list">
                     <!-- Generat per app.js -->
                 </div>
