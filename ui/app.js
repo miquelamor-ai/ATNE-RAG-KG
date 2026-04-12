@@ -302,8 +302,8 @@ function renderObservableBehaviors() {
 
     const items = Object.entries(window.ObservableMapping.BEHAVIORS);
     container.innerHTML = items.map(([bid, beh]) => `
-        <label class="behavior-item" style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;font-size:13px;line-height:1.4;">
-            <input type="checkbox" data-behavior="${bid}" style="margin-top:2px;">
+        <label class="behavior-item">
+            <input type="checkbox" data-behavior="${bid}">
             <span>${beh.label}</span>
         </label>
     `).join("");
@@ -334,11 +334,11 @@ function renderAjutsList() {
     for (const [grupKey, grupLabel] of Object.entries(grups)) {
         const items = perGrup[grupKey] || [];
         if (!items.length) continue;
-        html += `<div class="ajut-grup" style="margin-bottom:6px;">
-            <div style="font-size:11px;font-weight:600;color:#0369a1;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">${grupLabel}</div>
+        html += `<div class="ajut-grup">
+            <div class="ajut-grup-label">${grupLabel}</div>
             ${items.map(it => `
-                <label class="ajut-item" style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;font-size:13px;line-height:1.4;padding:2px 0;">
-                    <input type="checkbox" data-ajut="${it.id}" style="margin-top:2px;">
+                <label class="ajut-item">
+                    <input type="checkbox" data-ajut="${it.id}">
                     <span>${it.label}</span>
                 </label>
             `).join("")}
@@ -421,14 +421,18 @@ function updateMecrPreview() {
 
 function setVia(via) {
     currentVia = via;
-    document.querySelectorAll("#via-selector .via-tab").forEach(tab => {
-        const active = tab.dataset.via === via;
-        tab.classList.toggle("via-active", active);
-        tab.style.borderBottomColor = active ? "#0369a1" : "transparent";
-        tab.style.color = active ? "#0369a1" : "#374151";
-    });
-    document.getElementById("via-observable-panel").style.display = via === "observable" ? "" : "none";
-    document.getElementById("via-diagnostic-panel").style.display = via === "diagnostic" ? "" : "none";
+    // La via diagnòstic ara és un <details>, s'obre/tanca sola.
+    // La via observable sempre visible — el diagnostic és un desplegable secundari.
+    // currentVia es determina per si hi ha conductes marcades o si el details diagnostic està obert.
+}
+
+function updateCurrentVia() {
+    const diagPanel = document.getElementById("via-diagnostic-panel");
+    const hasBehaviors = getActiveBehaviorIds().length > 0;
+    const diagOpen = diagPanel && diagPanel.open;
+    // Si té conductes marcades O el diagnòstic està tancat, usem observable.
+    // Si el diagnòstic està obert i no hi ha conductes, usem diagnostic.
+    currentVia = (diagOpen && !hasBehaviors) ? "diagnostic" : "observable";
 }
 
 
@@ -663,12 +667,14 @@ function collectProfile() {
 // ── Recollir context docent ────────────────────────────────────────────────
 
 function collectContext() {
+    const aulaRadio = document.querySelector('input[name="ctx-aula"]:checked');
+    const aulaHidden = document.querySelector('input[name="ctx-aula"][type="hidden"]');
     return {
         etapa: document.getElementById("ctx-etapa").value,
         curs: document.getElementById("ctx-curs").value,
         ambit: document.getElementById("ctx-ambit").value,
         materia: document.getElementById("ctx-materia").value,
-        tipus_aula: document.querySelector('input[name="ctx-aula"]:checked')?.value || "ordinaria",
+        tipus_aula: aulaRadio ? aulaRadio.value : (aulaHidden ? aulaHidden.value : "ordinaria"),
     };
 }
 
@@ -1568,14 +1574,11 @@ function bindEvents() {
             if (id === "ctx-curs") updateMecrPreview();
         });
     });
-    document.querySelectorAll('input[name="ctx-aula"]').forEach(r => {
-        r.addEventListener("change", saveContextToStorage);
-    });
+    // ctx-aula ara és un hidden input, no cal listener
 
-    // Via observable / diagnòstic
-    document.querySelectorAll("#via-selector .via-tab").forEach(tab => {
-        tab.addEventListener("click", () => setVia(tab.dataset.via));
-    });
+    // Via diagnòstic (details toggle)
+    const diagPanel = document.getElementById("via-diagnostic-panel");
+    if (diagPanel) diagPanel.addEventListener("toggle", updateCurrentVia);
 
     // Desplaçament del Bloc A
     document.querySelectorAll('input[name="desfase"]').forEach(r => {
@@ -1593,8 +1596,8 @@ function updateBlocALabel() {
     const label = document.getElementById("bloc-a-label");
     if (!label) return;
     label.textContent = mode === "grup"
-        ? "El GRUP globalment està:"
-        : "Aquest ALUMNE està:";
+        ? "El grup globalment llegeix i comprèn..."
+        : "Aquest alumne llegeix i comprèn...";
 }
 
 function getAdaptMode() {
