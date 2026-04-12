@@ -283,6 +283,7 @@ document.addEventListener("DOMContentLoaded", () => {
     checkHealth();
     bindEvents();
     updateMecrPreview();
+    updateStickyBar();
 });
 
 
@@ -499,6 +500,48 @@ function goToStep(n) {
         panel.classList.toggle("active", panel.id === `step-${n}`);
     });
     if (n === 3) requestProposal();
+    updateStickyBar();
+}
+
+function goToPrevStep() {
+    if (state.step > 1) goToStep(state.step - 1);
+}
+
+function goToNextStep() {
+    if (state.step === 3) {
+        // Al pas 3, "Continuar" = "Adaptar"
+        runAdaptation();
+    } else if (state.step < 4) {
+        goToStep(state.step + 1);
+    }
+}
+
+function updateStickyBar() {
+    const n = state.step;
+    const label = document.getElementById("sticky-step-label");
+    const fill = document.getElementById("sticky-progress-fill");
+    const btnBack = document.getElementById("btn-back");
+    const btnNext = document.getElementById("btn-next");
+
+    if (label) label.textContent = `Pas ${n} de 4`;
+    if (fill) fill.style.width = `${n * 25}%`;
+    if (btnBack) btnBack.style.visibility = n === 1 ? "hidden" : "visible";
+
+    if (btnNext) {
+        if (n === 3) {
+            btnNext.textContent = "Adaptar";
+            btnNext.className = "btn btn-ok";
+        } else if (n === 4) {
+            btnNext.textContent = "Nova adaptació";
+            btnNext.className = "btn btn-primary";
+            btnNext.onclick = () => goToStep(1);
+            return;
+        } else {
+            btnNext.textContent = "Continuar";
+            btnNext.className = "btn btn-primary";
+        }
+        btnNext.onclick = goToNextStep;
+    }
 }
 
 
@@ -968,9 +1011,8 @@ async function runAdaptation() {
     progressArea.classList.add("active");
     progressSteps.innerHTML = "";
 
-    const btn = document.getElementById("btn-adapt");
-    btn.disabled = true;
-    btn.textContent = "Adaptant...";
+    const btn = document.getElementById("btn-next") || document.getElementById("btn-adapt");
+    if (btn) { btn.disabled = true; btn.textContent = "Adaptant..."; }
 
     try {
         const modelSel = document.getElementById("model-selector");
@@ -1019,8 +1061,7 @@ async function runAdaptation() {
         progressSteps.innerHTML += `<div class="progress-step" style="color:var(--err);">Error: ${e.message}</div>`;
     }
 
-    btn.disabled = false;
-    btn.textContent = "ADAPTAR";
+    if (btn) { btn.disabled = false; btn.textContent = "Adaptar"; }
 }
 
 function handleSSEEvent(ev, container) {
@@ -1534,17 +1575,18 @@ function bindEvents() {
         tab.addEventListener("click", () => goToStep(parseInt(tab.dataset.step)));
     });
 
-    // Botons de pas
-    document.getElementById("btn-next-2").addEventListener("click", () => goToStep(2));
-    document.getElementById("btn-next-3").addEventListener("click", () => goToStep(3));
+    // Sticky bar navigation
+    const btnNext = document.getElementById("btn-next");
+    if (btnNext) btnNext.addEventListener("click", goToNextStep);
+    const btnBack = document.getElementById("btn-back");
+    if (btnBack) btnBack.addEventListener("click", goToPrevStep);
 
     // Perfils
     document.getElementById("btn-save-profile").addEventListener("click", saveProfile);
     document.getElementById("btn-load-profile").addEventListener("click", loadProfile);
     loadHistoryIfNeeded(); // pre-carregar historial en obrir l'app
 
-    // Adaptació
-    document.getElementById("btn-adapt").addEventListener("click", runAdaptation);
+    // Adaptació (ara gestionada per sticky bar btn-next al pas 3)
 
     // Word count
     document.getElementById("input-text").addEventListener("input", updateWordCount);

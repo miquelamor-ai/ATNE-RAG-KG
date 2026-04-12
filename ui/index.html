@@ -11,323 +11,313 @@
 </head>
 <body>
 
-<nav class="top-nav">
-    <a href="/ui/index.html" class="nav-active">Adaptador</a>
-    <a href="/ui/cuina.html">Cuina</a>
-    <a href="/ui/eval_dashboard.html">Avaluacio</a>
-    <a href="/ui/eval_cases.html">Casos</a>
-    <a href="/ui/eval_results.html">Resultats</a>
-    <a href="/ui/eval_progress.html">Progres</a>
-    <a href="/ui/informe.html">Informe</a>
-    <a href="/validacio">Validacio</a>
-    <a href="/dashboard">Xat 9</a>
-    <a href="/dashboard_complements">Complements</a>
-    <a href="/dashboard_questions">Questions</a>
-</nav>
-
-<div class="app-layout">
-
-    <!-- ── SIDEBAR ──────────────────────────────────────────────── -->
-    <aside class="sidebar">
-        <div class="logo">ATNE</div>
-        <div class="subtitle">Adaptador de Textos<br>a Necessitats Educatives</div>
-
-        <div class="health-bar" id="health-bar">
-            <span><span class="health-dot loading" id="dot-supabase"></span>Supabase</span>
-            <span><span class="health-dot loading" id="dot-gemini"></span>LLM</span>
+<!-- ── HEADER ────────────────────────────────────────────────── -->
+<header class="app-header">
+    <div class="header-inner">
+        <div class="header-brand">
+            <span class="header-logo">ATNE</span>
+            <span class="header-subtitle">Adaptador de Textos a Necessitats Educatives</span>
         </div>
-
-        <h2>Context docent</h2>
-
-        <div class="form-group">
-            <label for="ctx-etapa">Etapa</label>
-            <select id="ctx-etapa">
-                <option value="infantil">Infantil</option>
-                <option value="primaria">Primària</option>
-                <option value="ESO" selected>ESO</option>
-                <option value="batxillerat">Batxillerat</option>
-                <option value="FP">FP</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="ctx-curs">Curs</label>
-            <select id="ctx-curs">
-                <option value="1r">1r</option>
-                <option value="2n">2n</option>
-                <option value="3r" selected>3r</option>
-                <option value="4t">4t</option>
-                <option value="5e">5è</option>
-                <option value="6e">6è</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="ctx-ambit">Àmbit</label>
-            <select id="ctx-ambit">
-                <option value="cientific">Científic</option>
-                <option value="humanistic">Humanístic</option>
-                <option value="linguistic">Lingüístic</option>
-                <option value="artistic">Artístic</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="ctx-materia">Matèria</label>
-            <input type="text" id="ctx-materia" placeholder="Ex: Biologia, Història...">
-        </div>
-
-        <!-- Aula (oculta per defecte, a disposició) -->
-        <input type="hidden" name="ctx-aula" value="ordinaria">
-    </aside>
-
-    <!-- ── MAIN ─────────────────────────────────────────────────── -->
-    <main class="main">
-
-        <nav class="steps-nav">
-            <button class="step-tab active" data-step="1">1. Perfil</button>
-            <button class="step-tab" data-step="2">2. Text</button>
-            <button class="step-tab" data-step="3">3. Adaptació</button>
-            <button class="step-tab" data-step="4">4. Resultat</button>
+        <nav class="steps-nav" id="steps-nav">
+            <button class="step-tab active" data-step="1">Perfil</button>
+            <button class="step-tab" data-step="2">Text</button>
+            <button class="step-tab" data-step="3">Adaptació</button>
+            <button class="step-tab" data-step="4">Resultat</button>
         </nav>
+        <div class="header-status">
+            <span class="health-dot loading" id="dot-supabase"></span>
+            <span class="health-dot loading" id="dot-gemini"></span>
+        </div>
+    </div>
+</header>
 
-        <!-- ── PAS 1: Perfil ───────────────────────────────────── -->
-        <section class="step-panel active" id="step-1">
+<!-- ── MAIN ──────────────────────────────────────────────────── -->
+<main class="main">
 
-            <!-- Mode: alumne concret o grup -->
-            <div class="mode-card">
-                <h3>Per a qui és l'adaptació?</h3>
-                <label class="mode-option">
-                    <input type="radio" name="adapt-mode" value="alumne" checked>
-                    <span>
-                        <strong>Un alumne concret</strong>
-                        <span class="mode-desc">1 versió del text, adaptada al seu nivell</span>
-                    </span>
-                </label>
-                <label class="mode-option">
-                    <input type="radio" name="adapt-mode" value="grup">
-                    <span>
-                        <strong>Un grup amb diversitat de nivells</strong>
-                        <span class="mode-desc">3 versions simultànies: accessible, estàndard i exigent</span>
-                    </span>
-                </label>
-            </div>
+    <!-- ── PAS 1: Perfil ───────────────────────────────────── -->
+    <section class="step-panel active" id="step-1">
 
-            <!-- Bloc A: Desfase curricular -->
-            <div class="bloc-a">
-                <h3 id="bloc-a-label">Aquest alumne llegeix i comprèn...</h3>
-                <div class="desfase-scale" id="desfase-scale">
-                    <label class="desfase-opt"><input type="radio" name="desfase" value="2"> Molt per sobre</label>
-                    <label class="desfase-opt"><input type="radio" name="desfase" value="1"> Per sobre</label>
-                    <label class="desfase-opt"><input type="radio" name="desfase" value="0" checked> Al nivell del curs</label>
-                    <label class="desfase-opt"><input type="radio" name="desfase" value="-1"> Per sota</label>
-                    <label class="desfase-opt"><input type="radio" name="desfase" value="-2"> Molt per sota</label>
-                </div>
-                <div class="mecr-preview" id="desfase-mecr-preview">
-                    Nivell lingüístic de sortida: <strong id="mecr-preview-value">—</strong>
-                </div>
-            </div>
-
-            <!-- Bloc B: Doble columna observes → ajuts -->
-            <div class="bloc-b-grid">
-                <div class="bloc-b-card">
-                    <h3>Què observes?</h3>
-                    <div id="observable-behaviors">
-                        <!-- Generat per app.js -->
-                    </div>
-                </div>
-                <div class="bloc-b-card ajuts-card">
-                    <h3>
-                        Ajuts que s'aplicaran
-                        <span class="card-hint">Pots afegir-ne o treure'n manualment</span>
-                    </h3>
-                    <div id="ajuts-list">
-                        <!-- Generat per app.js -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Via diagnòstic (plegada) -->
-            <details class="via-diagnostic-toggle" id="via-diagnostic-panel">
-                <summary>Tinc un diagnòstic clínic — via diagnòstic</summary>
-                <div class="char-grid" id="char-grid">
-                    <!-- Generat per app.js -->
-                </div>
-            </details>
-
-            <!-- Camps amagats que el JS necessita -->
-            <select id="profile-canal" hidden>
-                <option value="mixte" selected>Mixte</option>
-                <option value="visual">Visual</option>
-                <option value="oral">Oral</option>
-                <option value="text">Textual</option>
-            </select>
-            <input type="hidden" id="profile-nom" value="">
-            <textarea id="profile-obs" hidden></textarea>
-
-            <!-- Perfils desats -->
-            <details class="via-diagnostic-toggle" style="margin-top:16px;">
-                <summary>Perfils desats</summary>
-                <div class="profile-header-minimal">
-                    <select id="profile-selector">
-                        <option value="_new">— Nou perfil —</option>
-                    </select>
-                    <button class="btn" id="btn-load-profile">Carregar</button>
-                    <button class="btn" id="btn-save-profile">Desar</button>
-                </div>
-            </details>
-
-            <button class="btn btn-primary btn-big" id="btn-next-2">Continuar</button>
-        </section>
-
-        <!-- ── PAS 2: Text Original ────────────────────────────── -->
-        <section class="step-panel" id="step-2">
-            <h2 class="step-title">Text original a adaptar</h2>
-
-            <div class="upload-row" id="upload-row">
-                <label for="file-input" class="btn">Pujar fitxer (PDF, DOCX, MD, TXT)</label>
-                <input type="file" id="file-input" accept=".pdf,.docx,.md,.txt" hidden>
-                <span class="upload-status" id="upload-status">o enganxa el text a continuació</span>
-            </div>
-
-            <textarea class="text-area" id="input-text" placeholder="Enganxa aquí el text que vols adaptar..."></textarea>
-            <div class="word-count" id="word-count">0 paraules</div>
-
-            <div class="history-panel" id="history-panel">
-                <button class="history-toggle" id="history-toggle" onclick="toggleHistory()">
-                    Textos anteriors
-                </button>
-                <div class="history-list" id="history-list" style="display:none;">
-                    <div class="history-loading" id="history-loading">Carregant historial…</div>
-                </div>
-            </div>
-
-            <div class="param-row" style="margin-top:16px;">
-                <label>Tipus de text</label>
-                <select id="input-genere-textual">
-                    <option value="">(detecta automàticament)</option>
-                    <option value="explicacio">Explicatiu</option>
-                    <option value="narracio">Narratiu</option>
-                    <option value="instruccio">Instructiu</option>
-                    <option value="argumentacio">Argumentatiu</option>
+        <!-- Context docent (antic sidebar, ara integrat) -->
+        <div class="context-bar">
+            <div class="context-field">
+                <label for="ctx-etapa">Etapa</label>
+                <select id="ctx-etapa">
+                    <option value="infantil">Infantil</option>
+                    <option value="primaria">Primària</option>
+                    <option value="ESO" selected>ESO</option>
+                    <option value="batxillerat">Batxillerat</option>
+                    <option value="FP">FP</option>
                 </select>
             </div>
-            <button class="btn btn-primary btn-big" id="btn-next-3">Continuar</button>
-        </section>
-
-        <!-- ── PAS 3: Adaptació ────────────────────────────────── -->
-        <section class="step-panel" id="step-3">
-            <div class="proposal-card">
-                <h3>Paràmetres <span class="info-badge" id="proposal-basis"></span></h3>
-                <div class="param-row">
-                    <label>Nivell DUA</label>
-                    <select id="param-dua">
-                        <option value="Acces">Accés (LF extrema)</option>
-                        <option value="Core" selected>Core (estàndard)</option>
-                        <option value="Enriquiment">Enriquiment (repte)</option>
-                    </select>
-                </div>
-                <div class="param-row">
-                    <label>Intensitat Lectura Fàcil</label>
-                    <select id="param-lf">
-                        <option value="1">1 — Mínima</option>
-                        <option value="2" selected>2 — Baixa</option>
-                        <option value="3">3 — Moderada</option>
-                        <option value="4">4 — Alta</option>
-                        <option value="5">5 — Màxima</option>
-                    </select>
-                </div>
-                <div class="param-row">
-                    <label>Nivell sortida (MECR)</label>
-                    <select id="param-mecr">
-                        <option value="pre-A1">pre-A1</option>
-                        <option value="A1">A1</option>
-                        <option value="A2">A2</option>
-                        <option value="B1">B1</option>
-                        <option value="B2" selected>B2</option>
-                    </select>
-                </div>
+            <div class="context-field">
+                <label for="ctx-curs">Curs</label>
+                <select id="ctx-curs">
+                    <option value="1r">1r</option>
+                    <option value="2n">2n</option>
+                    <option value="3r" selected>3r</option>
+                    <option value="4t">4t</option>
+                    <option value="5e">5è</option>
+                    <option value="6e">6è</option>
+                </select>
             </div>
+            <div class="context-field">
+                <label for="ctx-ambit">Àmbit</label>
+                <select id="ctx-ambit">
+                    <option value="cientific">Científic</option>
+                    <option value="humanistic">Humanístic</option>
+                    <option value="linguistic">Lingüístic</option>
+                    <option value="artistic">Artístic</option>
+                </select>
+            </div>
+            <div class="context-field">
+                <label for="ctx-materia">Matèria</label>
+                <input type="text" id="ctx-materia" placeholder="Ex: Biologia, Història...">
+            </div>
+        </div>
+        <input type="hidden" name="ctx-aula" value="ordinaria">
 
-            <div class="proposal-card">
-                <h3>Complements</h3>
-                <div class="complement-grid" id="complement-grid">
+        <!-- Mode: alumne concret o grup -->
+        <div class="mode-card">
+            <h3>Per a qui és l'adaptació?</h3>
+            <label class="mode-option">
+                <input type="radio" name="adapt-mode" value="alumne" checked>
+                <span>
+                    <strong>Un alumne concret</strong>
+                    <span class="mode-desc">1 versió del text, adaptada al seu nivell</span>
+                </span>
+            </label>
+            <label class="mode-option">
+                <input type="radio" name="adapt-mode" value="grup">
+                <span>
+                    <strong>Un grup amb diversitat de nivells</strong>
+                    <span class="mode-desc">3 versions simultànies: accessible, estàndard i exigent</span>
+                </span>
+            </label>
+        </div>
+
+        <!-- Bloc A: Desfase curricular -->
+        <div class="bloc-a">
+            <h3 id="bloc-a-label">Aquest alumne llegeix i comprèn...</h3>
+            <div class="desfase-scale" id="desfase-scale">
+                <label class="desfase-opt"><input type="radio" name="desfase" value="2"> Molt per sobre</label>
+                <label class="desfase-opt"><input type="radio" name="desfase" value="1"> Per sobre</label>
+                <label class="desfase-opt"><input type="radio" name="desfase" value="0" checked> Al nivell del curs</label>
+                <label class="desfase-opt"><input type="radio" name="desfase" value="-1"> Per sota</label>
+                <label class="desfase-opt"><input type="radio" name="desfase" value="-2"> Molt per sota</label>
+            </div>
+            <div class="mecr-preview" id="desfase-mecr-preview">
+                Nivell lingüístic de sortida: <strong id="mecr-preview-value">—</strong>
+            </div>
+        </div>
+
+        <!-- Bloc B: Doble columna observes → ajuts -->
+        <div class="bloc-b-grid">
+            <div class="bloc-b-card">
+                <h3>Què observes?</h3>
+                <div id="observable-behaviors">
                     <!-- Generat per app.js -->
                 </div>
             </div>
-
-            <div class="proposal-card">
-                <div class="param-row">
-                    <label>Model</label>
-                    <select id="model-selector">
-                        <option value="gemini">Gemini 2.5 Flash</option>
-                        <option value="gpt">GPT-4o-mini</option>
-                        <option value="mistral">Mistral Small</option>
-                        <option value="gemma4">Gemma 4 31B</option>
-                    </select>
-                </div>
-                <div class="param-row">
-                    <label>
-                        <input type="checkbox" id="verify-toggle" checked style="accent-color:var(--pri);">
-                        Auto-avaluació
-                    </label>
+            <div class="bloc-b-card ajuts-card">
+                <h3>
+                    Ajuts que s'aplicaran
+                    <span class="card-hint">Pots afegir-ne o treure'n manualment</span>
+                </h3>
+                <div id="ajuts-list">
+                    <!-- Generat per app.js -->
                 </div>
             </div>
+        </div>
 
-            <button class="btn btn-ok btn-big" id="btn-adapt">Adaptar</button>
-
-            <div class="progress-area" id="progress-area">
-                <div id="progress-steps"></div>
+        <!-- Via diagnòstic (plegada) -->
+        <details class="via-diagnostic-toggle" id="via-diagnostic-panel">
+            <summary>Tinc un diagnòstic clínic — via diagnòstic</summary>
+            <div class="char-grid" id="char-grid">
+                <!-- Generat per app.js -->
             </div>
-        </section>
+        </details>
 
-        <!-- ── PAS 4: Resultat ─────────────────────────────────── -->
-        <section class="step-panel" id="step-4">
-            <div id="version-tabs" style="display:none;">
-                <button type="button" class="version-tab version-active" data-version="accessible">Més accessible</button>
-                <button type="button" class="version-tab" data-version="estandard">Estàndard</button>
-                <button type="button" class="version-tab" data-version="exigent">Més exigent</button>
+        <!-- Camps amagats que el JS necessita -->
+        <select id="profile-canal" hidden>
+            <option value="mixte" selected>Mixte</option>
+            <option value="visual">Visual</option>
+            <option value="oral">Oral</option>
+            <option value="text">Textual</option>
+        </select>
+        <input type="hidden" id="profile-nom" value="">
+        <textarea id="profile-obs" hidden></textarea>
+
+        <!-- Perfils desats -->
+        <details class="via-diagnostic-toggle">
+            <summary>Perfils desats</summary>
+            <div class="profile-header-minimal">
+                <select id="profile-selector">
+                    <option value="_new">— Nou perfil —</option>
+                </select>
+                <button class="btn" id="btn-load-profile">Carregar</button>
+                <button class="btn" id="btn-save-profile">Desar</button>
             </div>
+        </details>
+    </section>
 
-            <div class="result-columns">
-                <div class="result-col">
-                    <h3>Text original</h3>
-                    <div class="content" id="result-original"></div>
-                </div>
-                <div class="result-col editable-col">
-                    <h3>Text adaptat <span class="edit-badge">Editable</span> <span id="version-label"></span></h3>
-                    <div class="content" id="result-adapted" contenteditable="true" spellcheck="true"></div>
-                </div>
+    <!-- ── PAS 2: Text Original ────────────────────────────── -->
+    <section class="step-panel" id="step-2">
+        <h2 class="step-title">Text original a adaptar</h2>
+
+        <div class="upload-row" id="upload-row">
+            <label for="file-input" class="btn">Pujar fitxer (PDF, DOCX, MD, TXT)</label>
+            <input type="file" id="file-input" accept=".pdf,.docx,.md,.txt" hidden>
+            <span class="upload-status" id="upload-status">o enganxa el text a continuació</span>
+        </div>
+
+        <textarea class="text-area" id="input-text" placeholder="Enganxa aquí el text que vols adaptar..."></textarea>
+        <div class="word-count" id="word-count">0 paraules</div>
+
+        <div class="history-panel" id="history-panel">
+            <button class="history-toggle" id="history-toggle" onclick="toggleHistory()">
+                Textos anteriors
+            </button>
+            <div class="history-list" id="history-list" style="display:none;">
+                <div class="history-loading" id="history-loading">Carregant historial…</div>
             </div>
+        </div>
 
-            <div id="result-word-stats" class="result-stats"></div>
+        <div class="param-row" style="margin-top:16px;">
+            <label>Tipus de text</label>
+            <select id="input-genere-textual">
+                <option value="">(detecta automàticament)</option>
+                <option value="explicacio">Explicatiu</option>
+                <option value="narracio">Narratiu</option>
+                <option value="instruccio">Instructiu</option>
+                <option value="argumentacio">Argumentatiu</option>
+            </select>
+        </div>
+    </section>
 
-            <div id="result-complements"></div>
-
-            <div class="feedback-row" id="feedback-row">
-                <span class="feedback-label">Com ha anat l'adaptació?</span>
-                <div class="feedback-buttons">
-                    <button class="btn feedback-btn" data-rating="1" onclick="rateFeedback(1)" title="Dolenta">Dolenta</button>
-                    <button class="btn feedback-btn" data-rating="2" onclick="rateFeedback(2)" title="Regular">Regular</button>
-                    <button class="btn feedback-btn" data-rating="3" onclick="rateFeedback(3)" title="Bona">Bona</button>
-                </div>
-                <div class="feedback-comment" id="feedback-comment-area" style="display:none;">
-                    <textarea id="feedback-comment" rows="2" placeholder="Què canviaries?"></textarea>
-                    <button class="btn btn-sm" onclick="submitFeedback()">Enviar</button>
-                </div>
-                <div id="feedback-thanks" style="display:none;" class="feedback-thanks">Gràcies!</div>
+    <!-- ── PAS 3: Adaptació ────────────────────────────────── -->
+    <section class="step-panel" id="step-3">
+        <div class="proposal-card">
+            <h3>Paràmetres <span class="info-badge" id="proposal-basis"></span></h3>
+            <div class="param-row">
+                <label>Nivell DUA</label>
+                <select id="param-dua">
+                    <option value="Acces">Accés (LF extrema)</option>
+                    <option value="Core" selected>Core (estàndard)</option>
+                    <option value="Enriquiment">Enriquiment (repte)</option>
+                </select>
             </div>
-
-            <div class="export-row">
-                <button class="btn" onclick="exportDoc('txt')">TXT</button>
-                <button class="btn btn-primary" onclick="exportDoc('docx')">DOCX</button>
-                <button class="btn" onclick="exportDoc('pdf')">PDF</button>
-                <button class="btn" onclick="goToStep(1)">Nova adaptació</button>
+            <div class="param-row">
+                <label>Intensitat Lectura Fàcil</label>
+                <select id="param-lf">
+                    <option value="1">1 — Mínima</option>
+                    <option value="2" selected>2 — Baixa</option>
+                    <option value="3">3 — Moderada</option>
+                    <option value="4">4 — Alta</option>
+                    <option value="5">5 — Màxima</option>
+                </select>
             </div>
-        </section>
+            <div class="param-row">
+                <label>Nivell sortida (MECR)</label>
+                <select id="param-mecr">
+                    <option value="pre-A1">pre-A1</option>
+                    <option value="A1">A1</option>
+                    <option value="A2">A2</option>
+                    <option value="B1">B1</option>
+                    <option value="B2" selected>B2</option>
+                </select>
+            </div>
+        </div>
 
-    </main>
-</div>
+        <div class="proposal-card">
+            <h3>Complements</h3>
+            <div class="complement-grid" id="complement-grid">
+                <!-- Generat per app.js -->
+            </div>
+        </div>
+
+        <div class="proposal-card">
+            <div class="param-row">
+                <label>Model</label>
+                <select id="model-selector">
+                    <option value="gemini">Gemini 2.5 Flash</option>
+                    <option value="gpt">GPT-4o-mini</option>
+                    <option value="mistral">Mistral Small</option>
+                    <option value="gemma4">Gemma 4 31B</option>
+                </select>
+            </div>
+            <div class="param-row">
+                <label>
+                    <input type="checkbox" id="verify-toggle" checked style="accent-color:var(--pri);">
+                    Auto-avaluació
+                </label>
+            </div>
+        </div>
+
+        <div class="progress-area" id="progress-area">
+            <div id="progress-steps"></div>
+        </div>
+    </section>
+
+    <!-- ── PAS 4: Resultat ─────────────────────────────────── -->
+    <section class="step-panel" id="step-4">
+        <div id="version-tabs" style="display:none;">
+            <button type="button" class="version-tab version-active" data-version="accessible">Més accessible</button>
+            <button type="button" class="version-tab" data-version="estandard">Estàndard</button>
+            <button type="button" class="version-tab" data-version="exigent">Més exigent</button>
+        </div>
+
+        <div class="result-columns">
+            <div class="result-col">
+                <h3>Text original</h3>
+                <div class="content" id="result-original"></div>
+            </div>
+            <div class="result-col editable-col">
+                <h3>Text adaptat <span class="edit-badge">Editable</span> <span id="version-label"></span></h3>
+                <div class="content" id="result-adapted" contenteditable="true" spellcheck="true"></div>
+            </div>
+        </div>
+
+        <div id="result-word-stats" class="result-stats"></div>
+
+        <div id="result-complements"></div>
+
+        <div class="feedback-row" id="feedback-row">
+            <span class="feedback-label">Com ha anat l'adaptació?</span>
+            <div class="feedback-buttons">
+                <button class="btn feedback-btn" data-rating="1" onclick="rateFeedback(1)" title="Dolenta">Dolenta</button>
+                <button class="btn feedback-btn" data-rating="2" onclick="rateFeedback(2)" title="Regular">Regular</button>
+                <button class="btn feedback-btn" data-rating="3" onclick="rateFeedback(3)" title="Bona">Bona</button>
+            </div>
+            <div class="feedback-comment" id="feedback-comment-area" style="display:none;">
+                <textarea id="feedback-comment" rows="2" placeholder="Què canviaries?"></textarea>
+                <button class="btn btn-sm" onclick="submitFeedback()">Enviar</button>
+            </div>
+            <div id="feedback-thanks" style="display:none;" class="feedback-thanks">Gràcies!</div>
+        </div>
+
+        <div class="export-row">
+            <button class="btn" onclick="exportDoc('txt')">TXT</button>
+            <button class="btn btn-primary" onclick="exportDoc('docx')">DOCX</button>
+            <button class="btn" onclick="exportDoc('pdf')">PDF</button>
+            <button class="btn" onclick="goToStep(1)">Nova adaptació</button>
+        </div>
+    </section>
+
+</main>
+
+<!-- ── BARRA FLOTANT ─────────────────────────────────────────── -->
+<footer class="sticky-bar" id="sticky-bar">
+    <div class="sticky-bar-inner">
+        <button class="btn" id="btn-back" onclick="goToPrevStep()">Enrere</button>
+        <div class="sticky-bar-progress">
+            <span class="sticky-bar-step" id="sticky-step-label">Pas 1 de 4</span>
+            <div class="sticky-bar-track">
+                <div class="sticky-bar-fill" id="sticky-progress-fill" style="width:25%"></div>
+            </div>
+        </div>
+        <button class="btn btn-primary" id="btn-next">Continuar</button>
+    </div>
+</footer>
 
 <script src="/ui/observable_mapping.js"></script>
 <script src="/ui/app.js"></script>
