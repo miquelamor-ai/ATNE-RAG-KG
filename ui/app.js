@@ -211,6 +211,7 @@ const AMBITS_PER_ETAPA = {
         { value: "religio", label: "Religió" },
         { value: "tutoria", label: "Tutoria" },
         { value: "aula_acollida", label: "Aula d'acollida" },
+        { value: "siei", label: "SIEI (Suport Intensiu per a l'Escolarització Inclusiva)" },
     ],
     // Decret 175/2022, Annex 3 — Matèries d'ESO
     ESO: [
@@ -238,6 +239,7 @@ const AMBITS_PER_ETAPA = {
         { value: "segona_llengua", label: "Segona Llengua Estrangera" },
         { value: "tutoria", label: "Tutoria" },
         { value: "aula_acollida", label: "Aula d'acollida" },
+        { value: "siei", label: "SIEI (Suport Intensiu per a l'Escolarització Inclusiva)" },
     ],
     // Decret 171/2022 — Modalitats + matèries comunes de batxillerat
     batxillerat: [
