@@ -82,8 +82,8 @@
                 </select>
             </div>
             <div class="context-field">
-                <label for="ctx-materia">Matèria</label>
-                <input type="text" id="ctx-materia" placeholder="Ex: Biologia, Història...">
+                <label for="ctx-materia" id="ctx-materia-label">Tema / UF</label>
+                <input type="text" id="ctx-materia" placeholder="Ex: La fotosíntesi, La Revolució Francesa...">
             </div>
         </div>
             </div>
@@ -154,6 +154,38 @@
                     <!-- Generat per app.js -->
                 </div>
             </div>
+        </div>
+
+        <!-- Configuració de grup (només visible en mode grup) -->
+        <div class="card" id="grup-config" style="display:none;">
+            <div class="card-header">
+                <div class="icon-box"><span class="material-symbols-outlined">groups</span></div>
+                <h3 class="card-title">Configuració del grup</h3>
+            </div>
+            <p style="font-size:0.875rem;color:var(--on-surface-variant);margin-bottom:1.5rem;">
+                Es generaran 3 versions del text adaptades a diferents nivells de l'aula.
+                El centre es calcula a partir de l'etapa i el curs.
+            </p>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+                <div style="background:var(--surface-container-low);border-radius:var(--radius-2xl);padding:1.25rem;text-align:center;">
+                    <div style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--on-surface-variant);margin-bottom:0.5rem;">Més accessible</div>
+                    <div style="font-size:1.25rem;font-weight:700;color:var(--primary);" id="grup-mecr-low">—</div>
+                </div>
+                <div style="background:var(--surface-container-high);border-radius:var(--radius-2xl);padding:1.25rem;text-align:center;">
+                    <div style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--on-surface-variant);margin-bottom:0.5rem;">Estàndard</div>
+                    <div style="font-size:1.25rem;font-weight:700;color:var(--primary);" id="grup-mecr-mid">—</div>
+                </div>
+                <div style="background:var(--surface-container-low);border-radius:var(--radius-2xl);padding:1.25rem;text-align:center;">
+                    <div style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--on-surface-variant);margin-bottom:0.5rem;">Més exigent</div>
+                    <div style="font-size:1.25rem;font-weight:700;color:var(--primary);" id="grup-mecr-high">—</div>
+                </div>
+            </div>
+            <details class="via-diagnostic-toggle">
+                <summary>Carregar perfils desats al grup</summary>
+                <div class="profile-header-minimal">
+                    <p style="font-size:0.8125rem;color:var(--on-surface-variant);margin:0.5rem 0;">Funcionalitat disponible properament. Per ara, les 3 versions es generen amb nivells MECR automàtics.</p>
+                </div>
+            </details>
         </div>
 
         <!-- Via diagnòstic (plegada) -->

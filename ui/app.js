@@ -458,16 +458,29 @@ function getDesfase() {
 
 function updateMecrPreview() {
     if (!window.ObservableMapping) return;
-    const preview = document.getElementById("mecr-preview-value");
-    if (!preview) return;
     const etapa = document.getElementById("ctx-etapa").value;
     const curs = document.getElementById("ctx-curs").value;
     const desfase = getDesfase();
     const mecr = window.ObservableMapping.computeMecr(etapa, curs, desfase);
     const ref = window.ObservableMapping.getMecrReferencia(etapa, curs);
-    preview.textContent = desfase === 0
-        ? `${mecr} (nivell del curs)`
-        : `${mecr} (desplaçat des de ${ref})`;
+
+    // Alumne individual
+    const preview = document.getElementById("mecr-preview-value");
+    if (preview) {
+        preview.textContent = desfase === 0
+            ? `${mecr} (nivell del curs)`
+            : `${mecr} (desplaçat des de ${ref})`;
+    }
+
+    // Grup: 3 nivells
+    const low = document.getElementById("grup-mecr-low");
+    const mid = document.getElementById("grup-mecr-mid");
+    const high = document.getElementById("grup-mecr-high");
+    if (low && mid && high) {
+        low.textContent = window.ObservableMapping.computeMecr(etapa, curs, -1);
+        mid.textContent = ref;
+        high.textContent = window.ObservableMapping.computeMecr(etapa, curs, 1);
+    }
 }
 
 function setVia(via) {
@@ -515,10 +528,20 @@ function updateEtapaSelects() {
         ambitSelect.value = ambitActual;
     }
 
-    // Canviar etiqueta: "Àmbit" per la majoria, "Família professional" per FP
+    // Canviar etiquetes segons etapa
     const ambitLabel = document.querySelector('label[for="ctx-ambit"]');
     if (ambitLabel) {
         ambitLabel.textContent = etapa === "FP" ? "Família professional" : "Àmbit";
+    }
+    const materiaLabel = document.getElementById("ctx-materia-label");
+    if (materiaLabel) {
+        materiaLabel.textContent = etapa === "FP" ? "Mòdul / UF" : "Tema";
+    }
+    const materiaInput = document.getElementById("ctx-materia");
+    if (materiaInput) {
+        materiaInput.placeholder = etapa === "FP"
+            ? "Ex: FOL, Sistemes informàtics..."
+            : "Ex: La fotosíntesi, La Revolució Francesa...";
     }
 }
 
@@ -601,44 +624,14 @@ function renderCharGrid() {
     const grid = document.getElementById("char-grid");
     grid.innerHTML = "";
 
-    // Contenidor per als chips
-    const chipsRow = document.createElement("div");
-    chipsRow.className = "nese-chips";
-
-    // Contenidor per les sub-variables (apareixen a sota del grid de chips)
-    const subvarsContainer = document.createElement("div");
-    subvarsContainer.className = "nese-subvars-container";
-    subvarsContainer.id = "nese-subvars";
-
     for (const [key, char] of Object.entries(CHARACTERISTICS)) {
-        // Chip
-        const chip = document.createElement("div");
-        chip.className = "char-item";
-        chip.dataset.key = key;
+        const div = document.createElement("div");
+        div.className = "char-item";
+        div.dataset.key = key;
 
-        chip.innerHTML = `
-            <label>
-                <input type="checkbox" data-char="${key}">
-                ${char.label}
-            </label>
-        `;
-
-        // Sub-variables panel (fora del chip)
-        let subvarsPanel = null;
+        let subvarsHTML = "";
         if (char.subvars.length > 0) {
-            subvarsPanel = document.createElement("div");
-            subvarsPanel.className = "char-subvars";
-            subvarsPanel.id = `subvars-${key}`;
-            subvarsPanel.style.display = "none";
-
-            const title = document.createElement("div");
-            title.className = "subvars-title";
-            title.textContent = char.label;
-            subvarsPanel.appendChild(title);
-
-            const rows = document.createElement("div");
-            rows.className = "subvars-grid";
-            rows.innerHTML = char.subvars.map(sv => {
+            const rows = char.subvars.map(sv => {
                 if (sv.type === "select") {
                     const opts = sv.options.map((o, i) => {
                         const label = sv.labels ? sv.labels[i] : o;
@@ -656,25 +649,25 @@ function renderCharGrid() {
                     </div>`;
                 }
             }).join("");
-            subvarsPanel.appendChild(rows);
-            subvarsContainer.appendChild(subvarsPanel);
+            subvarsHTML = `<div class="char-subvars">${rows}</div>`;
         }
 
-        // Toggle
-        const cb = chip.querySelector('input[type="checkbox"]');
+        div.innerHTML = `
+            <label>
+                <input type="checkbox" data-char="${key}">
+                ${char.label}
+            </label>
+            ${subvarsHTML}
+        `;
+
+        const cb = div.querySelector('input[type="checkbox"]');
         cb.addEventListener("change", () => {
-            chip.classList.toggle("checked", cb.checked);
-            if (subvarsPanel) {
-                subvarsPanel.style.display = cb.checked ? "block" : "none";
-            }
+            div.classList.toggle("checked", cb.checked);
             check2eAlert();
         });
 
-        chipsRow.appendChild(chip);
+        grid.appendChild(div);
     }
-
-    grid.appendChild(chipsRow);
-    grid.appendChild(subvarsContainer);
 }
 
 
@@ -1711,10 +1704,22 @@ function bindEvents() {
 function updateBlocALabel() {
     const mode = document.querySelector('input[name="adapt-mode"]:checked')?.value || "alumne";
     const label = document.getElementById("bloc-a-label");
-    if (!label) return;
-    label.textContent = mode === "grup"
-        ? "El grup globalment llegeix i comprèn..."
-        : "Aquest alumne llegeix i comprèn...";
+    if (label) {
+        label.textContent = mode === "grup"
+            ? "El grup globalment llegeix i comprèn..."
+            : "Aquest alumne llegeix i comprèn...";
+    }
+    // Mostrar/amagar zones segons mode
+    const alumneZones = document.querySelectorAll(".bloc-a, .bloc-b-grid, .via-diagnostic-toggle");
+    const grupZone = document.getElementById("grup-config");
+
+    if (mode === "grup") {
+        alumneZones.forEach(el => el.style.display = "none");
+        if (grupZone) grupZone.style.display = "block";
+    } else {
+        alumneZones.forEach(el => el.style.display = "");
+        if (grupZone) grupZone.style.display = "none";
+    }
 }
 
 function getAdaptMode() {
