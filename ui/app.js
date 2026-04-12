@@ -306,6 +306,32 @@ const COMPLEMENTS = {
     argumentacio_pedagogica: "Argumentació pedagògica",
 };
 
+// Agrupació dels complements per a la UI del Pas 3 + text clar per al docent
+const COMPLEMENT_GROUPS = {
+    "Dins del text": [
+        { key: "negretes", label: "Paraules clau destacades en negreta" },
+        { key: "definicions_integrades", label: "Definicions curtes entre parèntesis al text" },
+        { key: "traduccio_l1", label: "Traducció dels termes clau a la llengua materna" },
+        { key: "pictogrames", label: "Pictogrames o icones al costat dels conceptes" },
+    ],
+    "Al costat del text": [
+        { key: "glossari", label: "Glossari — llistat de paraules importants amb la seva definició" },
+        { key: "esquema_visual", label: "Esquema o resum visual dels conceptes" },
+        { key: "mapa_conceptual", label: "Mapa conceptual — relacions entre idees" },
+        { key: "mapa_mental", label: "Mapa mental — esquema creatiu del contingut" },
+    ],
+    "Per comprovar la comprensió": [
+        { key: "preguntes_comprensio", label: "Preguntes de comprensió lectora" },
+        { key: "bastides", label: "Preguntes-guia i pistes durant el text (bastides)" },
+    ],
+    "Per a alumnes amb alt rendiment": [
+        { key: "activitats_aprofundiment", label: "Activitats d'aprofundiment i ampliació" },
+    ],
+    "Per al docent": [
+        { key: "argumentacio_pedagogica", label: "Justificació pedagògica de les decisions d'adaptació" },
+    ],
+};
+
 
 // ── Estat de l'aplicació ───────────────────────────────────────────────────
 
@@ -707,14 +733,37 @@ function check2eAlert() {
 
 function renderComplementGrid() {
     const grid = document.getElementById("complement-grid");
+    if (!grid) return;
     grid.innerHTML = "";
-    for (const [key, label] of Object.entries(COMPLEMENTS)) {
-        grid.innerHTML += `
-            <label class="complement-item" id="comp-${key}">
-                <input type="checkbox" data-comp="${key}"> ${label}
-            </label>
-        `;
+
+    for (const [groupLabel, items] of Object.entries(COMPLEMENT_GROUPS)) {
+        const groupDiv = document.createElement("div");
+        groupDiv.className = "complement-group";
+        groupDiv.innerHTML = `<div class="complement-group-label">${groupLabel}</div>`;
+
+        const list = document.createElement("div");
+        list.className = "complement-group-list";
+
+        for (const item of items) {
+            list.innerHTML += `
+                <label class="complement-item" id="comp-${item.key}">
+                    <input type="checkbox" data-comp="${item.key}">
+                    <span class="complement-text">${item.label}</span>
+                    <span class="complement-auto-badge">Automàtic</span>
+                </label>
+            `;
+        }
+
+        groupDiv.appendChild(list);
+        grid.appendChild(groupDiv);
     }
+
+    // Listener: quan el docent toca un checkbox, treu el badge "Automàtic"
+    grid.querySelectorAll('input[data-comp]').forEach(cb => {
+        cb.addEventListener('change', () => {
+            cb.closest('.complement-item').classList.remove('auto');
+        });
+    });
 }
 
 

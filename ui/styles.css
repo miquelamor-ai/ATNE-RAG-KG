@@ -625,24 +625,83 @@ body {
     letter-spacing: 0;
 }
 
-/* ── Complements grid ──────────────────────────────────── */
+/* ── Complements (agrupats per categoria pedagògica) ──── */
 .complement-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.complement-group {
+    display: flex;
+    flex-direction: column;
     gap: 0.5rem;
+}
+
+.complement-group-label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--primary);
+    padding-left: 0.25rem;
+}
+
+.complement-group-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
 }
 
 .complement-item {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.75rem;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
     font-size: 0.875rem;
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-xl);
+    background: var(--surface-container-low);
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
-.complement-item.auto { background-color: var(--ok-light); }
-.complement-item input[type="checkbox"] { accent-color: var(--ok); }
+.complement-item:hover {
+    background: var(--surface-container-high);
+}
+
+.complement-item input[type="checkbox"] {
+    accent-color: var(--primary);
+    width: 1.125rem;
+    height: 1.125rem;
+    flex-shrink: 0;
+}
+
+.complement-text {
+    flex: 1;
+    color: var(--on-surface);
+}
+
+.complement-auto-badge {
+    display: none;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--primary);
+    background: var(--surface-container-lowest);
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+}
+
+.complement-item.auto .complement-auto-badge {
+    display: inline-block;
+}
+
+.complement-item.auto {
+    background: linear-gradient(135deg, rgba(51, 55, 166, 0.08), rgba(76, 81, 191, 0.04));
+    box-shadow: inset 0 0 0 1px rgba(51, 55, 166, 0.15);
+}
 
 /* ── Upload row ────────────────────────────────────────── */
 .upload-row {
