@@ -26,6 +26,7 @@
             <button class="step-tab" data-step="4">Resultat</button>
         </nav>
         <div class="header-status">
+            <a href="/saber-ne" class="header-link">Saber-ne+</a>
             <span class="health-dot loading" id="dot-supabase"></span>
             <span class="health-dot loading" id="dot-gemini"></span>
         </div>
@@ -309,10 +310,10 @@
                 <div class="param-row">
                     <label>Model d'IA</label>
                     <select id="model-selector">
-                        <option value="gemini">Gemini 2.5 Flash</option>
-                        <option value="gpt">GPT-4o-mini</option>
+                        <option value="gemma4" selected>Gemma 4 31B</option>
                         <option value="mistral">Mistral Small</option>
-                        <option value="gemma4">Gemma 4 31B</option>
+                        <option value="gpt">GPT-4o-mini</option>
+                        <option value="gemini">Gemini 2.5 Flash</option>
                     </select>
                 </div>
                 <div class="param-row">
@@ -379,7 +380,7 @@
 <!-- ── BARRA FLOTANT ─────────────────────────────────────────── -->
 <footer class="sticky-bar" id="sticky-bar">
     <div class="sticky-bar-inner">
-        <button class="btn" id="btn-back" onclick="goToPrevStep()">Enrere</button>
+        <button class="btn" id="btn-back">Enrere</button>
         <div class="sticky-bar-progress">
             <span class="sticky-bar-step" id="sticky-step-label">Pas 1 de 4</span>
             <div class="sticky-bar-track">

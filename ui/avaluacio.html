@@ -458,16 +458,7 @@
 
 <!-- ── Top nav global ──────────────────────────────── -->
 <nav class="top-nav">
-    <a href="/ui/index.html">Adaptador</a>
-    <a href="/ui/cuina.html">Cuina</a>
-    <a href="/ui/eval_dashboard.html">Avaluacio</a>
-    <a href="/ui/eval_cases.html">Casos</a>
-    <a href="/ui/eval_results.html">Resultats</a>
-    <a href="/ui/eval_progress.html">Progres</a>
-    <a href="/ui/informe.html">Informe</a>
-    <a href="/dashboard">Xat 9</a>
-    <a href="/dashboard_complements">Complements</a>
-    <a href="/dashboard_questions">Questions</a>
+    <a href="/">Adaptador</a>
     <a href="/saber-ne">Saber-ne+</a>
 </nav>
 
@@ -597,6 +588,9 @@
 
         <h3>Batches grans, paral·lelització free tier</h3>
         <p>Els experiments treballen amb volums de 160 a 604 parells. La paral·lelització per free tiers (Gemma 4, Mistral, Qwen via Groq) permet executar aquests batches amb cost marginal.</p>
+
+        <h3>Doble aproximació: rúbrica individual + judici comparatiu</h3>
+        <p>Cada adaptació s'ha avaluat de dues maneres complementàries que es validen mútuament. La primera és la <strong>puntuació individual amb rúbrica</strong> (1-5 per criteri), útil per mesurar si un text supera un llindar de qualitat absoluta. La segona és el <strong>judici comparatiu</strong> entre parells o trios d'adaptacions del mateix text original, on el jutge no posa nota sinó que indica quina és millor i per què — una aproximació inspirada en la <em>comparative judgement</em> que Daisy Christodoulou ha documentat per a l'avaluació educativa. El judici comparatiu és més fiable entre humans (i entre LLMs) perquè elimina el biaix de calibratge: és molt més fàcil dir «A és millor que B» que «A mereix un 4.2 i B un 3.8». Els dos mètodes s'han aplicat alhora als experiments Xat 9, complements i preguntes, i els dos convergeixen en la mateixa conclusió — una coincidència que reforça la triangulació.</p>
     </div>
 
     <!-- ═══════════════════════════════════════════════ -->

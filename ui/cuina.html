@@ -748,16 +748,7 @@
 </head>
 <body>
 <nav style="display:flex;gap:0;background:#111827;padding:0 1rem;position:sticky;top:0;z-index:1000">
-<a href="/ui/index.html" style="color:#d1d5db;text-decoration:none;padding:.6rem 1rem;font-size:.85rem;font-weight:500">Adaptador</a>
-<a href="/ui/cuina.html" style="background:#1a56db;color:#fff;text-decoration:none;padding:.6rem 1rem;font-size:.85rem;font-weight:500">Cuina</a>
-<a href="/ui/eval_dashboard.html" style="color:#d1d5db;text-decoration:none;padding:.6rem 1rem;font-size:.85rem;font-weight:500">Avaluacio</a>
-<a href="/ui/eval_cases.html" style="color:#d1d5db;text-decoration:none;padding:.6rem 1rem;font-size:.85rem;font-weight:500">Casos</a>
-<a href="/ui/eval_results.html" style="color:#d1d5db;text-decoration:none;padding:.6rem 1rem;font-size:.85rem;font-weight:500">Resultats</a>
-<a href="/ui/eval_progress.html" style="color:#d1d5db;text-decoration:none;padding:.6rem 1rem;font-size:.85rem;font-weight:500">Progres</a>
-<a href="/ui/informe.html" style="color:#d1d5db;text-decoration:none;padding:.6rem 1rem;font-size:.85rem;font-weight:500">Informe</a>
-<a href="/dashboard" style="color:#fbbf24;text-decoration:none;padding:.6rem 1rem;font-size:.85rem;font-weight:500">Xat 9</a>
-<a href="/dashboard_complements" style="color:#fbbf24;text-decoration:none;padding:.6rem 1rem;font-size:.85rem;font-weight:500">Complements</a>
-<a href="/dashboard_questions" style="color:#fbbf24;text-decoration:none;padding:.6rem 1rem;font-size:.85rem;font-weight:500">Questions</a>
+<a href="/" style="color:#d1d5db;text-decoration:none;padding:.6rem 1rem;font-size:.85rem;font-weight:500">Adaptador</a>
 <a href="/saber-ne" style="color:#a78bfa;text-decoration:none;padding:.6rem 1rem;font-size:.85rem;font-weight:500">Saber-ne+</a>
 </nav>
 
@@ -786,6 +777,52 @@
 </div>
 
 <div class="container">
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- INTRO: COM FUNCIONA ATNE — RESUM ACTUAL                                -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+    <div id="intro" style="background:white;border:1px solid #e5e7eb;border-radius:10px;padding:32px;margin-bottom:40px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+        <h1 style="font-size:28px;color:#111827;margin-bottom:12px;line-height:1.2;">Com funciona ATNE</h1>
+        <p style="font-size:16px;color:#374151;max-width:780px;margin-bottom:20px;">
+            ATNE transforma un text en una adaptació ajustada al perfil d'un alumne aplicant un catàleg de <strong>96 instruccions deterministes</strong> graduades per nivell MECR i activades per les característiques actives. No és un assistent conversacional: és un motor de regles amb un LLM d'execució al final del pipeline.
+        </p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:24px;">
+            <div style="background:#f8fafc;border-left:3px solid #1a56db;border-radius:6px;padding:16px 18px;">
+                <div style="font-size:11px;font-weight:700;color:#1a56db;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Arquitectura</div>
+                <div style="font-size:14px;color:#374151;line-height:1.55;">Determinista. El catàleg de 96 instruccions + el filtre per perfil + MECR construeixen el prompt. No hi ha recuperació dinàmica des d'una base de dades: el RAG es va desactivar el 2026-04-09 perquè els experiments van mostrar que les instruccions cobrien el "què fer" de forma exhaustiva.</div>
+            </div>
+            <div style="background:#f8fafc;border-left:3px solid #059669;border-radius:6px;padding:16px 18px;">
+                <div style="font-size:11px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Model d'execució</div>
+                <div style="font-size:14px;color:#374151;line-height:1.55;"><strong>Gemma 4 31B</strong> o <strong>Mistral Small</strong> segons configuració (env var <code>ATNE_MODEL</code>, default Mistral). Els dos al free tier. Després de la triangulació, Gemma 4 és el model recomanat per producció.</div>
+            </div>
+            <div style="background:#f8fafc;border-left:3px solid #d97706;border-radius:6px;padding:16px 18px;">
+                <div style="font-size:11px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Verify + Retry</div>
+                <div style="font-size:14px;color:#374151;line-height:1.55;">Cada adaptació passa per una verificació rúbrica amb llindar de qualitat (≥4.0/5). Si no el supera, es torna a generar. Màxim 2 intents automàtics. Millora la consistència sense intervenció humana.</div>
+            </div>
+            <div style="background:#f8fafc;border-left:3px solid #7c3aed;border-radius:6px;padding:16px 18px;">
+                <div style="font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Prompt preview (cost zero)</div>
+                <div style="font-size:14px;color:#374151;line-height:1.55;">L'endpoint <code>/api/prompt-preview</code> munta el prompt complet sense cridar l'LLM. Serveix per inspeccionar què farà el sistema abans d'executar. Útil per transparència i validació.</div>
+            </div>
+        </div>
+
+        <div style="margin-top:28px;padding:18px 22px;background:#fef3c7;border:1px solid #fde68a;border-radius:8px;">
+            <div style="font-size:12px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">El pipeline en 6 passos</div>
+            <ol style="margin:0;padding-left:22px;font-size:14px;color:#374151;line-height:1.75;">
+                <li><strong>El docent configura</strong> — text original, context (etapa, curs, matèria, gènere), perfil d'alumne (condicions + situacions + sub-variables)</li>
+                <li><strong>El sistema calcula automàticament</strong> — DUA (Accés/Core/Enriquiment), MECR de sortida i complements actius segons les regles a [server.py:337-439](/cuina#flux)</li>
+                <li><strong>Filtre d'instruccions</strong> — de les 96 del catàleg, se'n seleccionen ~40-60 segons perfil + MECR + sub-variables, i s'agrupen en 7-8 macrodirectives temàtiques</li>
+                <li><strong>Prompt assemblat</strong> — 4 capes: identitat fixa + macrodirectives + context (educatiu + persona-audience + blocs del corpus FJE) + format de sortida</li>
+                <li><strong>LLM genera</strong> — Gemma 4 o Mistral rep el system prompt + text original i produeix text adaptat + complements</li>
+                <li><strong>Verificació i entrega</strong> — rúbrica Python + possible retry + streaming SSE al frontend. El docent pot editar, exportar i deixar feedback</li>
+            </ol>
+        </div>
+
+        <p style="font-size:14px;color:#6b7280;margin-top:24px;font-style:italic;">
+            Avall, tres eines interactives per explorar el sistema: el <a href="#cataleg" style="color:#1a56db;font-weight:600;">catàleg complet d'instruccions</a>, el <a href="#corpus" style="color:#1a56db;font-weight:600;">visor del corpus FJE</a>, i el <a href="#preview" style="color:#1a56db;font-weight:600;">generador de prompt preview</a> (cost zero — no crida l'LLM).
+        </p>
+    </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
     <!-- SECCIÓ 1: FLUX DE TREBALL                                             -->
@@ -835,8 +872,8 @@
             <div class="flux-cards">
                 <div class="flux-card" style="border-color:#1a56db" onclick="toggleCard(this)">
                     <div class="flux-card-head"><h3 style="color:#1a56db">TEXT ORIGINAL</h3><span class="card-chevron">▼</span></div>
-                    <div style="padding:0 16px 10px;font-size:11px;color:#6b7280">Enganxa o puja el text a adaptar. S'envia com a <em>user message</em> a Gemini i tambe com a query RAG.</div>
-                    <div class="flux-card-body">El text que el docent vol adaptar. S'envia com a <strong>missatge d'usuari</strong> a Gemini (separat del prompt/system).<br><br>Tambe s'usa per construir la query de cerca al corpus RAG: les primeres 200 paraules + les caracteristiques actives formen la consulta de cerca vectorial.</div>
+                    <div style="padding:0 16px 10px;font-size:11px;color:#6b7280">Enganxa o puja el text a adaptar. S'envia com a <em>user message</em> a l'LLM d'execució (Gemma 4 o Mistral).</div>
+                    <div class="flux-card-body">El text que el docent vol adaptar. S'envia com a <strong>missatge d'usuari</strong> a l'LLM (separat del prompt/system). El model actiu es defineix amb la variable d'entorn <code>ATNE_MODEL</code>: per defecte <strong>mistral</strong> (Mistral Small) o <strong>gemma4</strong> (Gemma 4 31B). Els dos al free tier.</div>
                 </div>
                 <div class="flux-card" style="border-color:#1a56db" onclick="toggleCard(this)">
                     <div class="flux-card-head"><h3 style="color:#1a56db">CONTEXT DOCENT</h3><span class="card-chevron">▼</span></div>
@@ -882,10 +919,10 @@
                     <div class="flux-card-body">El sistema calcula automaticament a partir del perfil:<br><br>• <strong>DUA</strong> — DI sever o TEA nivell 3 o nouvingut pre-A1 → Acces. Altes cap. → Enriquiment. Resta → Core.<br>• <strong style="color:#d97706">MECR sortida</strong> — <span style="color:var(--err)">PARAMETRE MES IMPORTANT</span>: controla TOTES les instruccions NIVELL (max paraules/frase, subordinades, temps verbals, to...)<br>• <strong>Complements</strong> — glossari, esquema, preguntes... segons perfil</div>
                 </div>
                 <div class="flux-card" style="border-color:#059669" onclick="toggleCard(this)">
-                    <div style="padding:3px 16px 0;background:#d1fae5;border-radius:6px 6px 0 0"><span style="font-size:10px;font-weight:700;color:#059669">88 INSTRUCCIONS → 6-8 BLOCS TEMATICS</span></div>
+                    <div style="padding:3px 16px 0;background:#d1fae5;border-radius:6px 6px 0 0"><span style="font-size:10px;font-weight:700;color:#059669">96 INSTRUCCIONS → 7-8 BLOCS TEMÀTICS</span></div>
                     <div class="flux-card-head"><h3 style="color:#059669">FILTRE + MACRODIRECTIVES</h3><span class="card-chevron">▼</span></div>
                     <div style="padding:0 16px 10px;font-size:11px;color:#374151">1. Selecciona per perfil + MECR · 2. Aplica sub-variables · 3. Suprimeix redundants · 4. Intensifica · <strong>5. Agrupa en macrodirectives</strong></div>
-                    <div class="flux-card-body"><strong>4 criteris d'activacio:</strong><br><br><span style="background:#dbeafe;color:#1a56db;padding:2px 8px;border-radius:3px;font-weight:600">SEMPRE (12)</span> — Bones practiques universals<br><span style="background:#fef3c7;color:#d97706;padding:2px 8px;border-radius:3px;font-weight:600">NIVELL (31)</span> — Depenen del MECR sortida<br><span style="background:#d1fae5;color:#059669;padding:2px 8px;border-radius:3px;font-weight:600">PERFIL (38)</span> — Per caracteristiques actives + sub-variables<br><span style="background:#ede9fe;color:#7c3aed;padding:2px 8px;border-radius:3px;font-weight:600">COMPLEMENT (3)</span> — Pictogrames, esquema, mapa<br><br><strong>Supressio intel·ligent:</strong> si dislexia activa, A-01/A-03 no s'envien (H-08 ja ho cobreix). Si TEA actiu, A-05 no s'envia (H-02 ho cobreix).<br><br><strong>Intensificacio:</strong> tdah.baixa_memoria_treball → chunking 3 elements (no 5). tdah.grau=sever → micro-blocs 2-3 frases (no 3-5).<br><br><a href="#cataleg" style="color:var(--pri);font-weight:600;">Veure les 88 instruccions al cataleg complet ↓</a></div>
+                    <div class="flux-card-body"><strong>4 criteris d'activació:</strong><br><br><span style="background:#dbeafe;color:#1a56db;padding:2px 8px;border-radius:3px;font-weight:600">SEMPRE (~12)</span> — Bones pràctiques universals<br><span style="background:#fef3c7;color:#d97706;padding:2px 8px;border-radius:3px;font-weight:600">NIVELL (~31)</span> — Depenen del MECR de sortida<br><span style="background:#d1fae5;color:#059669;padding:2px 8px;border-radius:3px;font-weight:600">PERFIL (~38)</span> — Per característiques actives + sub-variables<br><span style="background:#ede9fe;color:#7c3aed;padding:2px 8px;border-radius:3px;font-weight:600">COMPLEMENT (~3)</span> — Pictogrames, esquema, mapa<br><br><strong>Supressió intel·ligent:</strong> si dislèxia activa, A-01/A-03 no s'envien (H-08 ja ho cobreix). Si TEA actiu, A-05 no s'envia (H-02 ho cobreix).<br><br><strong>Intensificació:</strong> tdah.baixa_memoria_treball → chunking 3 elements (no 5). tdah.grau=sever → micro-blocs 2-3 frases (no 3-5).<br><br><a href="#cataleg" style="color:var(--pri);font-weight:600;">Veure les 96 instruccions al catàleg complet ↓</a></div>
                 </div>
                 <div class="flux-card" style="border-color:#6b7280" onclick="toggleCard(this)">
                     <div class="flux-card-head"><h3 style="color:#6b7280">PERSONA-AUDIENCE</h3><span class="card-chevron">▼</span></div>
@@ -893,10 +930,10 @@
                     <div class="flux-card-body"><strong>Narrativa natural generada a partir de les sub-variables NARRATIVA.</strong><br><br>Exemple real:<br><div style="background:#f9fafb;padding:8px 12px;border-radius:4px;margin:8px 0;font-family:monospace;font-size:11px">Escrius per a un alumne de ESO (2n).<br>Alumne nouvingut que parla arab com a L1.<br>Alfabet no llati: necessita transliteracio fonetica.<br>Escolaritzacio previa parcial o interrompuda.<br>Llengua academica (CALP) inicial: no domina el registre escolar ni vocabulari abstracte.<br>Nivell MECR de sortida: A1.</div>No son ordres — son context perque l'LLM entengui <em>per a qui</em> escriu.</div>
                 </div>
                 <div class="flux-card" style="border-color:#7c3aed" onclick="toggleCard(this)">
-                    <div style="padding:3px 16px 0;background:#ede9fe;border-radius:6px 6px 0 0"><span style="font-size:10px;font-weight:700;color:#7c3aed">RAG + KNOWLEDGE GRAPH</span></div>
+                    <div style="padding:3px 16px 0;background:#ede9fe;border-radius:6px 6px 0 0"><span style="font-size:10px;font-weight:700;color:#7c3aed">BLOCS DEL CORPUS FJE</span></div>
                     <div class="flux-card-head"><h3 style="color:#7c3aed">CORPUS FJE</h3><span class="card-chevron">▼</span></div>
-                    <div style="padding:0 16px 10px;font-size:11px;color:#374151">1.443 chunks + 952 nodes + 2.294 arestes · Docs obligatoris per perfil</div>
-                    <div class="flux-card-body"><strong>Cerca vectorial</strong> — Embedding (Gemini) → cosinus similarity a pgvector (Supabase).<br><strong>Knowledge Graph</strong> — Conceptes de la query → expansio 1-2 salts pel graf.<br><strong>Score fusionat</strong>: 40% vector + 40% KG + 20% bonus si coincideixen.<br><br><strong>Docs obligatoris</strong> (sempre inclosos):<br>• Adaptacio → M3_lectura-facil + M2_DUA<br>• Nouvingut → M1_nouvingut + M1_acollida<br>• Avaluacio → M6_avaluacio-formativa<br><br>Resultat: 8-12 fragments que van al CONTEXT del prompt. No son ordres — son referencies teoriques.</div>
+                    <div style="padding:0 16px 10px;font-size:11px;color:#374151">Blocs DUA, gènere discursiu i creuaments — pre-carregats des del Markdown</div>
+                    <div class="flux-card-body"><strong>Nota:</strong> El RAG vectorial es va desactivar el 2026-04-09. Els blocs del corpus que s'injecten ara al prompt es llegeixen directament dels fitxers Markdown via <code>corpus_reader</code>, no via cerca dinàmica.<br><br><strong>Blocs inclosos al prompt:</strong><br>• <strong>Bloc DUA</strong> — segons nivell auto-computat (Accés / Core / Enriquiment)<br>• <strong>Bloc de gènere discursiu</strong> — si el docent l'ha especificat<br>• <strong>Blocs de creuament</strong> — per combinacions de perfils (ex. nouvingut + dislèxia)<br><br>La infraestructura RAG (1.443 chunks + 952 nodes + 2.294 arestes a Supabase) es manté per si cal reactivar-la, però no s'invoca al pipeline d'adaptació actual.</div>
                 </div>
             </div>
         </div>
@@ -932,8 +969,8 @@
                         <div class="flux-card-body">Exemple real (TDAH moderat B1):<br><div style="background:#f9fafb;padding:8px 10px;border-radius:4px;margin:6px 0;font-family:monospace;font-size:10px;line-height:1.6"><strong>LEXIC:</strong> Usa vocabulari frequent. Termes tecnics en negreta. Un terme = un concepte. Referents pronominals explicits. Elimina idiomatiques...<br><br><strong>SINTAXI:</strong> Una idea per frase. Veu activa. Subjecte explicit. Max 12-18 paraules...<br><br><strong>ESTRUCTURA:</strong> Paragrafs curts. Titols descriptius. Indicadors progres [X de Y]...<br><br><strong>PERFIL:</strong> TDAH: micro-blocs 3-5 frases. Retroalimentacio visual. Variacio dins text.</div>L'LLM no veu IDs (A-01, H-04...) — nomes prosa tematica agrupada.</div>
                     </div>
                     <div class="flux-prompt-layer" style="border-color:#059669" onclick="toggleCard(this)">
-                        <div class="flux-card-head"><h3 style="color:#059669;font-size:11px">CAPA 3: CONTEXT</h3><span class="card-hint">Educatiu + Persona + RAG + Complements</span><span class="card-chevron">▼</span></div>
-                        <div class="flux-card-body">Aqui <strong>NO hi ha ordres</strong> — son informacio de context:<br><br><strong>3a.</strong> Context educatiu: <span style="font-family:monospace;font-size:10px;background:#f9fafb;padding:2px 6px;border-radius:3px">Etapa: ESO | Curs: 3r | Materia: Biologia</span><br><strong>3b.</strong> Persona-audience: <span style="font-family:monospace;font-size:10px;background:#f9fafb;padding:2px 6px;border-radius:3px">Alumne nouvingut arabofon, CALP inicial, TEA nivell 2</span><br><strong>3c.</strong> Coneixement pedagogic (RAG): 8-12 fragments del corpus FJE<br><strong>3d.</strong> Complements activats: glossari, esquema, preguntes...</div>
+                        <div class="flux-card-head"><h3 style="color:#059669;font-size:11px">CAPA 3: CONTEXT</h3><span class="card-hint">Educatiu + Persona + Blocs corpus + Complements</span><span class="card-chevron">▼</span></div>
+                        <div class="flux-card-body">Aquí <strong>NO hi ha ordres</strong> — són informació de context:<br><br><strong>3a.</strong> Context educatiu: <span style="font-family:monospace;font-size:10px;background:#f9fafb;padding:2px 6px;border-radius:3px">Etapa: ESO | Curs: 3r | Matèria: Biologia</span><br><strong>3b.</strong> Persona-audience: <span style="font-family:monospace;font-size:10px;background:#f9fafb;padding:2px 6px;border-radius:3px">Alumne nouvingut arabòfon, CALP inicial, TEA nivell 2</span><br><strong>3c.</strong> Blocs del corpus FJE: DUA + gènere + creuaments (llegits des dels Markdown, no via RAG)<br><strong>3d.</strong> Complements activats: glossari, esquema, preguntes...</div>
                     </div>
                     <div class="flux-prompt-layer" style="border-color:#7c3aed" onclick="toggleCard(this)">
                         <div class="flux-card-head"><h3 style="color:#7c3aed;font-size:11px">CAPA 4: FORMAT SORTIDA</h3><span class="card-hint">## Text adaptat + seccions opcionals</span><span class="card-chevron">▼</span></div>
@@ -957,8 +994,8 @@
                 <div class="flux-eq-box" style="background:#ede9fe;color:#7c3aed;border:1.5px solid #7c3aed">System prompt<br><span style="font-size:10px;font-weight:400">(4 capes)</span></div>
                 <span class="flux-eq-op">→</span>
                 <div class="flux-card" style="border-color:#7c3aed;background:#7c3aed;cursor:pointer" onclick="toggleCard(this)">
-                    <div class="flux-card-head"><h3 style="color:white">GEMINI 2.5 Flash</h3><span class="card-chevron" style="color:rgba(255,255,255,.5)">▼</span></div>
-                    <div class="flux-card-body" style="background:white;border-radius:0 0 6px 6px">Temperatura: 0.4 · Max output: 16.384 tokens · Gratuit (capa free Google)<br><br>Despres de generar, Python verifica: llargada frases per MECR, vocabulari prohibit, metriques. L'LLM no compta be les paraules (3-4/10 fiabilitat) — la verificacio real es fa amb codi.</div>
+                    <div class="flux-card-head"><h3 style="color:white">Gemma 4 31B / Mistral Small</h3><span class="card-chevron" style="color:rgba(255,255,255,.5)">▼</span></div>
+                    <div class="flux-card-body" style="background:white;border-radius:0 0 6px 6px">Model configurable via <code>ATNE_MODEL</code>. Per defecte: Mistral Small; a producció FJE recomanat: Gemma 4 31B (free tier, guanyador triangulació). Temperatura: 0.4 · Max output: 16.384 tokens<br><br><strong>Verify + Retry:</strong> després de generar, Python verifica llargada de frases per MECR, vocabulari prohibit i mètriques amb una rúbrica. Si el score és &lt; 4.0/5, es torna a generar automàticament (màxim 2 intents). L'LLM no compta bé les paraules (3-4/10 de fiabilitat) — la verificació real es fa amb codi.</div>
                 </div>
             </div>
         </div>
@@ -989,11 +1026,70 @@
         <div style="margin-top:16px;padding:16px 20px;background:white;border:1px solid #e5e7eb;border-radius:8px">
             <strong style="color:#6b7280;font-size:11px;letter-spacing:1px;text-transform:uppercase">Com funcionen les macrodirectives</strong>
             <ol style="margin:8px 0 0 18px;font-size:13px;color:#374151;line-height:1.8">
-                <li>El cataleg te 88 instruccions individuals (A-01, A-02, H-04...) amb regles d'activacio.</li>
-                <li>El filtre selecciona nomes les rellevants pel cas (perfil + MECR + sub-variables).</li>
-                <li>Les agrupa en 6-8 blocs tematics (LEXIC, SINTAXI, ESTRUCTURA...) sense IDs.</li>
-                <li style="color:#059669;font-weight:600">L'LLM rep 6-8 blocs coherents en lloc de 45+ regles soltes → millor seguiment.</li>
+                <li>El catàleg té 96 instruccions individuals (A-01, A-02, H-04...) amb regles d'activació.</li>
+                <li>El filtre selecciona només les rellevants per al cas (perfil + MECR + sub-variables).</li>
+                <li>Les agrupa en 7-8 blocs temàtics (LÈXIC, SINTAXI, ESTRUCTURA, COGNITIU, QUALITAT, MULTIMODAL, AVALUACIÓ, PERSONALITZACIÓ) sense IDs.</li>
+                <li style="color:#059669;font-weight:600">L'LLM rep 7-8 blocs coherents en lloc de 45+ regles soltes → millor seguiment.</li>
             </ol>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- SECCIÓ: EVOLUCIÓ DE CONCEPTES                                         -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+    <div id="evolucio" style="background:white;border:1px solid #e5e7eb;border-radius:10px;padding:32px;margin:40px 0;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+        <h2 style="font-size:22px;color:#111827;margin-bottom:12px;">Com ha evolucionat l'arquitectura</h2>
+        <p style="color:#374151;max-width:780px;margin-bottom:24px;">ATNE no ha arribat a l'arquitectura actual de cop. Cada decisió ha estat el resultat d'un experiment concret. Aquests són els canvis de direcció més rellevants del projecte, en ordre cronològic.</p>
+
+        <div style="display:grid;gap:16px;">
+            <div style="padding:18px 22px;background:#f8fafc;border-left:3px solid #1a56db;border-radius:6px;">
+                <div style="font-size:11px;font-weight:700;color:#1a56db;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;">2026-03-27 · Arquitectura inicial</div>
+                <h4 style="font-size:15px;color:#111827;margin-bottom:6px;">De 30 instruccions denses a un catàleg jeràrquic de 96</h4>
+                <p style="font-size:13.5px;color:#374151;margin:0;line-height:1.55;">El primer catàleg tenia 30 instruccions duplicades i amb conflictes entre marcs teòrics. Una auditoria exhaustiva va produir l'arquitectura actual: identitat fixa + instruccions universals + condicionals per perfil + context. El nucli de 25 instruccions cobria el 80% de l'impacte.</p>
+            </div>
+
+            <div style="padding:18px 22px;background:#f8fafc;border-left:3px solid #059669;border-radius:6px;">
+                <div style="font-size:11px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;">2026-03-28 · RAG vs hardcoded</div>
+                <h4 style="font-size:15px;color:#111827;margin-bottom:6px;">Primera aposta per RAG dinàmic</h4>
+                <p style="font-size:13.5px;color:#374151;margin:0;line-height:1.55;">Un batch de 160 casos va comparar RAG (lectura dinàmica del corpus) vs prompt hardcoded. RAG va guanyar en riquesa: 3× més paraules i 3× més negretes. Es va adoptar com a via principal amb hardcoded com a fallback.</p>
+            </div>
+
+            <div style="padding:18px 22px;background:#f8fafc;border-left:3px solid #d97706;border-radius:6px;">
+                <div style="font-size:11px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;">2026-03-30 · Auditoria variables</div>
+                <h4 style="font-size:15px;color:#111827;margin-bottom:6px;">Només el 42% de les sub-variables connectaven amb el generador</h4>
+                <p style="font-size:13.5px;color:#374151;margin:0;line-height:1.55;">Una anàlisi estàtica va mostrar que de 36 sub-variables del formulari, només 15 arribaven al prompt. Es van afegir instruccions noves i gradacions per MECR per connectar més sub-variables. Actualment el 56% estan connectades (20/36).</p>
+            </div>
+
+            <div style="padding:18px 22px;background:#f8fafc;border-left:3px solid #7c3aed;border-radius:6px;">
+                <div style="font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;">2026-04-04 · Gemma 4 free tier</div>
+                <h4 style="font-size:15px;color:#111827;margin-bottom:6px;">Un motor de qualitat sense factura</h4>
+                <p style="font-size:13.5px;color:#374151;margin:0;line-height:1.55;">Es va confirmar Gemma 4 31B via API gratuïta de Google: 30 RPM, 14.400 RPD, 15.000 TPM sense billing. Amb 7 claus rotades es cobreix el consum de 1.000 docents. Això va canviar radicalment les matemàtiques d'escalat.</p>
+            </div>
+
+            <div style="padding:18px 22px;background:#f8fafc;border-left:3px solid #dc2626;border-radius:6px;">
+                <div style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;">2026-04-08 · Girada determinista</div>
+                <h4 style="font-size:15px;color:#111827;margin-bottom:6px;">El RAG es desactiva: el determinisme guanya per +0.26 punts</h4>
+                <p style="font-size:13.5px;color:#374151;margin:0;line-height:1.55;">Amb el catàleg complet de 96 instruccions, el prompt determinista supera el RAG en qualitat total. La raó: les instruccions cobreixen el "què fer" de forma exhaustiva; el RAG recuperava referències teòriques que l'LLM ja tenia integrades. La infraestructura RAG es manté per futures reutilitzacions però no s'invoca.</p>
+            </div>
+
+            <div style="padding:18px 22px;background:#f8fafc;border-left:3px solid #0891b2;border-radius:6px;">
+                <div style="font-size:11px;font-weight:700;color:#0891b2;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;">2026-04-11 · Terminologia del perfil</div>
+                <h4 style="font-size:15px;color:#111827;margin-bottom:6px;">De "característiques" a condicions + situacions contextuals</h4>
+                <p style="font-size:13.5px;color:#374151;margin:0;line-height:1.55;">La nomenclatura es va refinar: les <strong>condicions</strong> són permanents (TEA, TDAH, dislèxia...), les <strong>situacions contextuals</strong> són transitòries (nouvingut, vulnerabilitat, trastorn emocional). El perfil d'un alumne és la combinació única de diverses condicions i situacions, no una etiqueta única.</p>
+            </div>
+
+            <div style="padding:18px 22px;background:#f8fafc;border-left:3px solid #a78bfa;border-radius:6px;">
+                <div style="font-size:11px;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;">2026-04-11 · Via observable</div>
+                <h4 style="font-size:15px;color:#111827;margin-bottom:6px;">Adaptar sense diagnòstic</h4>
+                <p style="font-size:13.5px;color:#374151;margin:0;line-height:1.55;">La majoria de docents no tenen el diagnòstic clínic dels seus alumnes. Es va afegir una via d'entrada alternativa basada en 6 conductes observables a l'aula, que s'activa en paral·lel a la via diagnòstic. Les conductes no generen perfils clínics inferits — només determinen ajuts al text.</p>
+            </div>
+
+            <div style="padding:18px 22px;background:#f8fafc;border-left:3px solid #059669;border-radius:6px;">
+                <div style="font-size:11px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;">2026-04-12 · Triangulació Gemma 4</div>
+                <h4 style="font-size:15px;color:#111827;margin-bottom:6px;">Gemma 4 guanya en 3 experiments independents</h4>
+                <p style="font-size:13.5px;color:#374151;margin:0;line-height:1.55;">Tres experiments paral·lels (adaptacions, complements, preguntes de comprensió) amb 1.884 avaluacions totals confirmen Gemma 4 31B com a model recomanat: 4.75/5 en adaptacions, 4.58/5 en complements, 4.40/5 en preguntes. Els detalls són al bloc <a href="/avaluacio" style="color:#059669;font-weight:600;">Avaluació i decisions</a>.</p>
+            </div>
         </div>
     </div>
 

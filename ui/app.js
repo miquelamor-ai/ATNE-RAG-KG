@@ -607,7 +607,10 @@ function goToPrevStep() {
 }
 
 function goToNextStep() {
-    if (state.step === 3) {
+    if (state.step === 4) {
+        // Al pas 4, "Continuar" = "Nova adaptació" (torna al pas 1)
+        goToStep(1);
+    } else if (state.step === 3) {
         // Al pas 3, "Continuar" = "Adaptar"
         runAdaptation();
     } else if (state.step < 4) {
@@ -633,13 +636,10 @@ function updateStickyBar() {
         } else if (n === 4) {
             btnNext.textContent = "Nova adaptació";
             btnNext.className = "btn btn-primary";
-            btnNext.onclick = () => goToStep(1);
-            return;
         } else {
             btnNext.textContent = "Continuar";
             btnNext.className = "btn btn-primary";
         }
-        btnNext.onclick = goToNextStep;
     }
 }
 
