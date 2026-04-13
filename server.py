@@ -1765,6 +1765,18 @@ async def avaluacio_page():
     return HTMLResponse("<h1>Avaluació no disponible</h1>", status_code=404)
 
 
+@app.get("/demo", response_class=HTMLResponse)
+async def demo_v7_page():
+    """Serveix el mockup visual V7 de Stitch (Pas 1 redissenyat). Estàtic."""
+    html_path = UI_DIR / "v7_demo.html"
+    if html_path.exists():
+        return HTMLResponse(
+            html_path.read_text(encoding="utf-8"),
+            headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
+        )
+    return HTMLResponse("<h1>Demo V7 no disponible</h1>", status_code=404)
+
+
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard_xat9_page():
     """Serveix el dashboard del Xat 9 (experiment A/B multi-model)."""
