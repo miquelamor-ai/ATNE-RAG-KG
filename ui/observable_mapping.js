@@ -15,19 +15,20 @@
  *    sense passar per les conductes (via experta emergent).
  */
 
-// ── Les 6 conductes observables ────────────────────────────────────────────
+// ── Les 4 conductes observables (versió condensada 2026-04-12) ─────────────
+// Una conducta per perfil principal, patró "Li costa…", síntesi del més
+// significatiu de cada perfil. Si el docent vol més precisió o cobrir
+// perfils menys observables (DI, TEA, sensorials, AC), passa a la via
+// diagnòstic.
+//
 // Cada conducta defineix:
 //   - label: text que veu el docent
 //   - chars: característiques a activar al profile (amb sub-variables)
 //   - ajuts: IDs dels ajuts que s'activen automàticament a la dreta
-//
-// Fusió: si dues conductes activen la mateixa característica amb sub-variables
-// diferents (ex: 1 i 5 toquen tots dos 'tdah'), les sub-variables s'uneixen
-// (OR lògic per booleans, última guanya per categories).
 
 const OBSERVABLE_BEHAVIORS = {
-    b1_atencio: {
-        label: "Li costa mantenir l'atenció en textos llargs i sovint no els acaba",
+    atencio: {
+        label: "Li costa mantenir l'atenció en un text llarg",
         chars: {
             tdah: {
                 actiu: true,
@@ -36,11 +37,11 @@ const OBSERVABLE_BEHAVIORS = {
                 baixa_memoria_treball: true,
             },
         },
-        ajuts: ["fragmentar", "paragrafs_curts"],
+        ajuts: ["fragmentar", "paragrafs_curts", "una_idea_frase"],
     },
 
-    b2_descodificacio: {
-        label: "Llegeix paraula a paraula, sense fluïdesa, o fa errors freqüents en llegir",
+    fluidesa: {
+        label: "Li costa llegir amb fluïdesa",
         chars: {
             dislexia: {
                 actiu: true,
@@ -52,8 +53,8 @@ const OBSERVABLE_BEHAVIORS = {
         ajuts: ["una_idea_frase", "vocabulari_frequent", "tipografia_adaptada"],
     },
 
-    b3_oral_vs_escrit: {
-        label: "Entén millor quan se li explica oralment que quan llegeix sol/a",
+    comprensio: {
+        label: "Li costa entendre el que llegeix",
         chars: {
             tdl: {
                 actiu: true,
@@ -62,11 +63,11 @@ const OBSERVABLE_BEHAVIORS = {
                 grau: "moderat",
             },
         },
-        ajuts: ["connectors_explicits", "una_idea_frase"],
+        ajuts: ["connectors_explicits", "una_idea_frase", "destacats_visuals"],
     },
 
-    b4_vocabulari: {
-        label: "Té un vocabulari més reduït del que necessita per al curs",
+    vocabulari: {
+        label: "Li costa amb el vocabulari del curs",
         chars: {
             tdl: {
                 actiu: true,
@@ -75,31 +76,6 @@ const OBSERVABLE_BEHAVIORS = {
             },
         },
         ajuts: ["vocabulari_frequent", "glossari_integrat", "definicions_linia"],
-    },
-
-    b5_instruccions: {
-        label: "Necessita repetir o fraccionar les instruccions per poder seguir-les",
-        chars: {
-            tdah: {
-                actiu: true,
-                presentacio: "inatent",
-                baixa_memoria_treball: true,
-            },
-        },
-        ajuts: ["instruccions_numerades", "una_idea_frase"],
-    },
-
-    b6_comprensio_global: {
-        label: "Capta la idea general però li costa retenir els detalls concrets",
-        chars: {
-            tdl: {
-                actiu: true,
-                comprensio_lectora: true,
-                modalitat: "comprensiu",
-                grau: "lleu",
-            },
-        },
-        ajuts: ["destacats_visuals", "una_idea_frase"],
     },
 };
 
