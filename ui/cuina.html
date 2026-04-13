@@ -703,6 +703,47 @@
             color: var(--g500);
             font-size: 14px;
         }
+
+        /* ── Saber-ne+ master tab-bar ──────────────── */
+
+        .sn-bar {
+            background: #f5f3ff;
+            border-bottom: 1px solid #ddd6fe;
+        }
+        .sn-bar-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 14px 32px;
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            flex-wrap: wrap;
+        }
+        .sn-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #6d28d9;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .sn-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+        .sn-tab {
+            padding: 8px 16px;
+            text-decoration: none;
+            color: #6b7280;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.15s;
+        }
+        .sn-tab:hover {
+            background: rgba(167, 139, 250, 0.18);
+            color: #6d28d9;
+        }
+        .sn-tab.active {
+            background: #a78bfa;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -719,6 +760,18 @@
 <a href="/dashboard_questions" style="color:#fbbf24;text-decoration:none;padding:.6rem 1rem;font-size:.85rem;font-weight:500">Questions</a>
 <a href="/saber-ne" style="color:#a78bfa;text-decoration:none;padding:.6rem 1rem;font-size:.85rem;font-weight:500">Saber-ne+</a>
 </nav>
+
+<!-- ── Saber-ne+ master tab-bar ────────────────────── -->
+<div class="sn-bar">
+    <div class="sn-bar-inner">
+        <div class="sn-title">Saber-ne+</div>
+        <nav class="sn-tabs">
+            <a href="/saber-ne" class="sn-tab">Adaptar materials</a>
+            <a href="/cuina" class="sn-tab active">Com funciona ATNE</a>
+            <a href="/avaluacio" class="sn-tab">Avaluació i decisions</a>
+        </nav>
+    </div>
+</div>
 
 <div class="header">
     <div class="logo">ATNE <span>Cuina</span></div>

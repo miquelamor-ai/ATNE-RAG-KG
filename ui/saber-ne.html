@@ -52,6 +52,47 @@
         .top-nav a:hover { color: #fff; }
         .top-nav a.active { background: var(--pri); color: #fff; }
 
+        /* ── Saber-ne+ master tab-bar ──────────────── */
+
+        .sn-bar {
+            background: #f5f3ff;
+            border-bottom: 1px solid #ddd6fe;
+        }
+        .sn-bar-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 14px 32px;
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            flex-wrap: wrap;
+        }
+        .sn-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #6d28d9;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .sn-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+        .sn-tab {
+            padding: 8px 16px;
+            text-decoration: none;
+            color: #6b7280;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.15s;
+        }
+        .sn-tab:hover {
+            background: rgba(167, 139, 250, 0.18);
+            color: #6d28d9;
+        }
+        .sn-tab.active {
+            background: #a78bfa;
+            color: white;
+        }
+
         /* ── Header pàgina ─────────────────────────── */
 
         .page-header {
@@ -354,6 +395,168 @@
             border-left-color: var(--err);
         }
 
+        /* ── Principi rector destacat ──────────────── */
+
+        .principi-rector {
+            background: linear-gradient(135deg, #ecfdf5, white);
+            border: 1px solid var(--ok-light);
+            border-left: 4px solid var(--ok);
+            border-radius: var(--r);
+            padding: 24px 28px;
+            margin: 24px 0;
+            box-shadow: var(--shadow);
+        }
+        .principi-rector .label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--ok);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .principi-rector p {
+            font-size: 17px;
+            line-height: 1.55;
+            color: var(--g900);
+            font-weight: 500;
+            margin: 0;
+        }
+
+        /* ── Grid 2x2 principis ignasians ──────────── */
+
+        .principles-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+        }
+        @media (max-width: 640px) {
+            .principles-grid { grid-template-columns: 1fr; }
+        }
+        .principle {
+            background: white;
+            border: 1px solid var(--g200);
+            border-radius: var(--r);
+            padding: 14px 16px;
+            box-shadow: var(--shadow);
+        }
+        .principle-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--pri);
+            margin-bottom: 4px;
+        }
+        .principle-desc {
+            font-size: 13px;
+            color: var(--g700);
+            line-height: 1.5;
+        }
+
+        /* ── Contrast columns (SÍ / NO) ────────────── */
+
+        .contrast-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        @media (max-width: 720px) {
+            .contrast-columns { grid-template-columns: 1fr; }
+        }
+        .contrast-col h3 {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin: 0 0 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid;
+        }
+        .contrast-col.si h3 {
+            color: var(--ok);
+            border-bottom-color: var(--ok-light);
+        }
+        .contrast-col.no h3 {
+            color: var(--err);
+            border-bottom-color: var(--err-light);
+        }
+        .contrast-col .card {
+            margin-bottom: 10px;
+        }
+
+        /* ── Via cards (diagnòstic / observable) ─── */
+
+        .via-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 16px 0;
+        }
+        @media (max-width: 640px) {
+            .via-grid { grid-template-columns: 1fr; }
+        }
+        .via-card {
+            background: white;
+            border: 1px solid var(--g200);
+            border-top: 3px solid var(--pri);
+            border-radius: var(--r);
+            padding: 16px 18px;
+            box-shadow: var(--shadow);
+        }
+        .via-card.observable { border-top-color: var(--purple); }
+        .via-card h4 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--g900);
+            margin: 0 0 6px;
+        }
+        .via-card p {
+            font-size: 13px;
+            color: var(--g700);
+            margin: 0 0 10px;
+            line-height: 1.55;
+        }
+        .via-card .via-tag {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 2px 7px;
+            border-radius: 3px;
+            margin-bottom: 6px;
+        }
+        .via-card.diagnostic .via-tag { background: var(--pri-light); color: var(--pri); }
+        .via-card.observable .via-tag { background: var(--purple-light); color: var(--purple); }
+
+        /* ── Ajut chips (resum ajuts al Bloc 1) ──── */
+
+        .ajut-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 16px 0;
+        }
+        .ajut-chip {
+            background: white;
+            border: 1px solid var(--ok-light);
+            color: var(--g700);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .ajut-chip strong { color: var(--ok); font-weight: 600; }
+        .ajut-link {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 13px;
+            color: var(--pri);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .ajut-link:hover { text-decoration: underline; }
+
         .highlight-box.success {
             background: var(--ok-light);
             border-left-color: var(--ok);
@@ -377,15 +580,26 @@
     <a href="/saber-ne" class="active">Saber-ne+</a>
 </nav>
 
+<!-- ── Saber-ne+ master tab-bar ────────────────────── -->
+<div class="sn-bar">
+    <div class="sn-bar-inner">
+        <div class="sn-title">Saber-ne+</div>
+        <nav class="sn-tabs">
+            <a href="/saber-ne" class="sn-tab active">Adaptar materials</a>
+            <a href="/cuina" class="sn-tab">Com funciona ATNE</a>
+            <a href="/avaluacio" class="sn-tab">Avaluació i decisions</a>
+        </nav>
+    </div>
+</div>
+
 <!-- ── Header pàgina ───────────────────────────────── -->
 <div class="page-header">
     <div class="logo">ATNE <span>Saber-ne+</span></div>
     <nav>
         <a href="#mirada" class="active" onclick="scrollTo('mirada')">La mirada</a>
+        <a href="#definicio" onclick="scrollTo('definicio')">Què és adaptar</a>
         <a href="#eines" onclick="scrollTo('eines')">Eines</a>
         <a href="#diversitat" onclick="scrollTo('diversitat')">Diversitat</a>
-        <a href="#mecr" onclick="scrollTo('mecr')">MECR</a>
-        <a href="#mites" onclick="scrollTo('mites')">Mites</a>
         <a href="#ajuts" onclick="scrollTo('ajuts')">Ajuts</a>
         <a href="#matriu" onclick="scrollTo('matriu')">Matriu</a>
         <a href="#exemples" onclick="scrollTo('exemples')">Exemples</a>
@@ -406,24 +620,32 @@
     <!-- ═══════════════════════════════════════════════ -->
     <section class="section" id="mirada">
         <h2><span class="section-num">1</span> La mirada</h2>
-        <p>ATNE no és una eina tècnica neutra. Adaptar un text és un acte pedagògic que parteix d'una mirada concreta sobre la persona que aprèn.</p>
+        <p>Adaptar un text no és una operació tècnica neutra. És un acte pedagògic que parteix d'una mirada concreta sobre la persona que aprèn.</p>
 
         <h3>Tradició ignasiana</h3>
-        <p>La pedagogia ignasiana —fonament de Jesuïtes Educació— posa la persona al centre. Això es concreta en principis que travessen tota l'eina:</p>
+        <p>La pedagogia ignasiana —fonament de Jesuïtes Educació— posa la persona al centre. Quatre principis travessen tota l'adaptació:</p>
 
-        <ul>
-            <li><strong>Cura personalis</strong> — Atenció individualitzada. Cada alumne és únic i mereix un acompanyament ajustat a les seves circumstàncies.</li>
-            <li><strong>Adaptar-se a temps, llocs i persones</strong> — No hi ha una fórmula universal. El context determina l'acció.</li>
-            <li><strong>Salvar la proposició</strong> — Suposar sempre la bona intenció de l'altre. En clau ATNE: confiar en les capacitats de l'alumne, no en els seus dèficits.</li>
-            <li><strong>Magis</strong> — Aspirar sempre a més i millor. L'adaptació no és un sostre; és una plataforma.</li>
-        </ul>
+        <div class="principles-grid">
+            <div class="principle">
+                <div class="principle-name">Cura personalis</div>
+                <div class="principle-desc">Atenció individualitzada. Cada alumne és únic i mereix un acompanyament ajustat a les seves circumstàncies.</div>
+            </div>
+            <div class="principle">
+                <div class="principle-name">Adaptar-se a temps, llocs i persones</div>
+                <div class="principle-desc">No hi ha una fórmula universal. El context determina l'acció.</div>
+            </div>
+            <div class="principle">
+                <div class="principle-name">Salvar la proposició</div>
+                <div class="principle-desc">Confiar en les capacitats de l'alumne, no en els seus dèficits.</div>
+            </div>
+            <div class="principle">
+                <div class="principle-name">Magis</div>
+                <div class="principle-desc">Aspirar a més i millor. L'adaptació no és un sostre; és una plataforma.</div>
+            </div>
+        </div>
 
         <h3>Visió inclusiva</h3>
         <p>L'escola inclusiva no és un programa, és una manera d'entendre l'educació. L'alumnat no s'adapta a l'escola: l'escola s'adapta a l'alumnat.</p>
-
-        <div class="highlight-box success">
-            <strong>Principi rector d'ATNE:</strong> Adaptar no és rebaixar. És apropar-se a la Zona de Desenvolupament Pròxim, oferir ajuts perquè l'alumne progressi, i ajustar —no evitar— la fricció cognitiva. Dignificar la persona.
-        </div>
 
         <blockquote>
             No etiquetar l'alumne només pel seu origen: evitar reduir la persona a la seva condició de «nouvingut» o a la seva cultura d'origen. El perfil és «la suma de múltiples pertinences» i no es pot identificar «grups culturals o socials homogenis».
@@ -435,151 +657,189 @@
             <cite>— Corpus FJE, M1: TEA</cite>
         </blockquote>
 
-        <details>
-            <summary>Aprofundir: identitat de múltiples pertinences</summary>
-            <div class="detail-body">
-                <p>La identitat de cada alumne és la suma de múltiples pertinences, flexibles i canviants, que l'escola ha de reconèixer i valorar. Això vol dir que un alumne nouvingut amb TDAH no és «un nouvingut» ni «un TDAH»: és una persona amb una combinació única de condicions, situacions, interessos i capacitats.</p>
-                <p>Per això ATNE permet configurar <strong>múltiples condicions simultàniament</strong> al perfil de l'alumne, i el sistema combina els ajuts corresponents sense reduir la persona a cap etiqueta aïllada.</p>
-            </div>
-        </details>
     </section>
 
     <!-- ═══════════════════════════════════════════════ -->
-    <!-- 2. LES EINES DE L'ADAPTACIÓ                     -->
+    <!-- 2. QUÈ ÉS (I QUÈ NO ÉS) ADAPTAR                 -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <section class="section" id="definicio">
+        <h2><span class="section-num">2</span> Què és (i què no és) adaptar</h2>
+        <p>Abans d'entrar a eines i perfils, cal posar sobre la taula què entenem per adaptació. Aquí van les dues cares alhora: el que sí i el que no.</p>
+
+        <div class="contrast-columns">
+            <div class="contrast-col si">
+                <h3>Sí que és</h3>
+                <div class="card">
+                    <h4>Apropar-se a la ZDP</h4>
+                    <p>Situar el text a la Zona de Desenvolupament Pròxim: prou a l'abast perquè l'alumne pugui entrar-hi amb ajuts, prou lluny perquè aprengui alguna cosa.</p>
+                </div>
+                <div class="card">
+                    <h4>Oferir bastides</h4>
+                    <p>Proporcionar suports explícits (vocabulari, estructura, exemples, suport visual) que l'alumne pot retirar progressivament a mesura que guanya autonomia.</p>
+                </div>
+                <div class="card">
+                    <h4>Ajustar la fricció cognitiva</h4>
+                    <p>Modular la dificultat productiva —la que genera aprenentatge— i eliminar la que només genera soroll. Ajustar no és evitar.</p>
+                </div>
+                <div class="card">
+                    <h4>Transformar mantenint el rigor</h4>
+                    <p>Canviar la forma de presentar el contingut sense amputar-lo. Un text a pre-A1 segueix parlant de fotosíntesi; només canvien les paraules i l'estructura.</p>
+                </div>
+            </div>
+
+            <div class="contrast-col no">
+                <h3>No és</h3>
+                <div class="card">
+                    <span class="tag tag-mite">Mite</span>
+                    <h4>«Rebaixar»</h4>
+                    <p>Fals. Adaptar és apropar el text a la zona on l'alumne pot aprendre amb ajuts. No és treure contingut sinó fer-lo accessible sense perdre rigor.</p>
+                </div>
+                <div class="card">
+                    <span class="tag tag-mite">Mite</span>
+                    <h4>«Fer fàcil»</h4>
+                    <p>Fals. No es tracta d'eliminar la fricció cognitiva sinó d'<strong>ajustar-la</strong>. La dificultat productiva genera aprenentatge; la improductiva l'impedeix.</p>
+                </div>
+                <div class="card">
+                    <span class="tag tag-mite">Mite</span>
+                    <h4>«Treure»</h4>
+                    <p>Fals. Adaptar és transformar la manera de presentar el contingut, no amputar-lo.</p>
+                </div>
+                <div class="card">
+                    <span class="tag tag-mite">Mite</span>
+                    <h4>«Uniformar»</h4>
+                    <p>Fals. Adaptar és exactament el contrari: fer el text <strong>divers</strong> perquè arribi a persones diverses.</p>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- 3. LES EINES DE L'ADAPTACIÓ                     -->
     <!-- ═══════════════════════════════════════════════ -->
     <section class="section" id="eines">
-        <h2><span class="section-num">2</span> Les eines de l'adaptació</h2>
-        <p>ATNE utilitza quatre eines complementàries. Cadascuna té un rol diferent dins la mirada inclusiva.</p>
+        <h2><span class="section-num">3</span> Les eines de l'adaptació</h2>
+        <p>L'adaptació es recolza en quatre eines complementàries. Cadascuna té un rol diferent dins la mirada inclusiva.</p>
 
         <div class="card-grid">
             <div class="card">
                 <span class="tag tag-eina">Arquitectura</span>
                 <h4>DUA — Disseny Universal per a l'Aprenentatge</h4>
-                <p>L'arquitectura multinivell. Organitza l'adaptació en tres nivells (Accés, Core, Enriquiment) perquè tot l'alumnat accedeixi al mateix contingut amb diferents graus de suport.</p>
+                <p>El DUA proposa 3 principis: múltiples mitjans de <strong>representació</strong> (el QUÈ), d'<strong>acció i expressió</strong> (el COM) i d'<strong>implicació</strong> (el PER QUÈ). Adaptar materials escrits actua sobretot sobre el Principi I — transforma com es presenta el contingut. Per això organitzem l'adaptació en tres nivells: Accés, Core i Enriquiment.</p>
+                <details style="margin-top:12px;box-shadow:none;border-color:var(--g100);">
+                    <summary>Aprofundir: els 3 nivells</summary>
+                    <div class="detail-body">
+                        <p><strong>Accés</strong> — Lectura Fàcil extrema + suport visual + definicions integrades. Per a alumnat amb barreres importants d'accés al text.</p>
+                        <p><strong>Core</strong> — Adaptació estàndard mantenint rigor curricular. Per al grup de referència de l'aula.</p>
+                        <p><strong>Enriquiment</strong> — Profundització, pensament crític i connexió interdisciplinar. Per a alumnat amb capacitats avançades o que necessita repte addicional.</p>
+                    </div>
+                </details>
             </div>
+
             <div class="card">
                 <span class="tag tag-eina">Regulador</span>
                 <h4>MECR — Marc Europeu Comú de Referència</h4>
-                <p>El regulador lingüístic. Determina la complexitat del text de sortida (de pre-A1 a B2). És el sostre dur: cap instrucció genera text per sobre del nivell MECR configurat.</p>
+                <p>El regulador lingüístic. Determina la complexitat del text de sortida (de pre-A1 a B2). És el sostre: cap instrucció genera text per sobre del nivell MECR configurat.</p>
+                <details style="margin-top:12px;box-shadow:none;border-color:var(--g100);">
+                    <summary>Aprofundir: taula de nivells</summary>
+                    <div class="detail-body">
+                        <div style="overflow-x:auto;">
+                        <table style="font-size:12px;min-width:520px;">
+                            <tr>
+                                <th>Nivell</th>
+                                <th>Què vol dir a l'aula</th>
+                                <th>Frase tipus</th>
+                                <th>Longitud</th>
+                            </tr>
+                            <tr>
+                                <td><strong>pre-A1</strong></td>
+                                <td>Paraules aïllades i frases memoritzades. Necessita suport visual constant.</td>
+                                <td>«Les plantes fan menjar amb la llum.»</td>
+                                <td>3-5 paraules</td>
+                            </tr>
+                            <tr>
+                                <td><strong>A1</strong></td>
+                                <td>Frases simples sobre temes familiars. Vocabulari bàsic quotidià.</td>
+                                <td>«L'aparell digestiu transforma el menjar en nutrients.»</td>
+                                <td>5-8 paraules</td>
+                            </tr>
+                            <tr>
+                                <td><strong>A2</strong></td>
+                                <td>Comunicació en situacions habituals. Pot connectar frases amb «i», «però», «perquè».</td>
+                                <td>«La digestió comença a la boca, on les dents trituren el menjar.»</td>
+                                <td>8-12 paraules</td>
+                            </tr>
+                            <tr>
+                                <td><strong>B1</strong></td>
+                                <td>Comprèn textos sobre temes coneguts. Pot seguir una argumentació senzilla.</td>
+                                <td>«El procés digestiu implica diverses fases mecàniques i químiques que transformen els aliments.»</td>
+                                <td>12-18 paraules</td>
+                            </tr>
+                            <tr>
+                                <td><strong>B2</strong></td>
+                                <td>Comprèn textos complexos sobre temes abstractes. Registre formal i tècnic.</td>
+                                <td>Text original o amb adaptacions mínimes de claredat.</td>
+                                <td>fins a 25 paraules</td>
+                            </tr>
+                        </table>
+                        </div>
+                    </div>
+                </details>
             </div>
+
             <div class="card">
                 <span class="tag tag-eina">Tècnica</span>
                 <h4>Lectura Fàcil i Comunicació Clara</h4>
                 <p>Les tècniques d'adaptació textual. Lectura Fàcil (UNE 153101) per als nivells més accessibles, Comunicació Clara (ISO 24495) per als intermedis. Progressió: ordinari → CC → LF → CAA.</p>
+                <details style="margin-top:12px;box-shadow:none;border-color:var(--g100);">
+                    <summary>Aprofundir: normes i progressió</summary>
+                    <div class="detail-body">
+                        <p><strong>Dues normes complementàries:</strong></p>
+                        <ul>
+                            <li><strong>UNE 153101:2018 EX — Lectura Fàcil.</strong> Norma espanyola per als nivells més accessibles. Prescriu frases molt curtes, vocabulari freqüent, una idea per frase i imatges de suport. És el nivell més alt d'accessibilitat cognitiva.</li>
+                            <li><strong>ISO 24495-1:2023 — Plain Language.</strong> Norma internacional per als nivells intermedis. Privilegia el llenguatge directe, l'estructura clara i l'economia expressiva sense rebaixar el rigor curricular.</li>
+                        </ul>
+                        <p><strong>Progressió d'accessibilitat:</strong> text ordinari → Comunicació Clara (CC) → Lectura Fàcil (LF) → Comunicació Augmentativa i Alternativa (CAA). L'adaptació es col·loca al punt exacte que l'alumne necessita per poder accedir al contingut amb ajuts.</p>
+                        <p><strong>Quatre pilars compartits per les dues normes:</strong></p>
+                        <ol>
+                            <li><strong>Puntuació mínima.</strong> Als nivells baixos, només punts i dos punts. Res de punt i coma ni punts suspensius.</li>
+                            <li><strong>Veu activa, subjecte explícit.</strong> "El sol escalfa la Terra", no "La Terra és escalfada pel sol". La veu passiva només es permet a B2 si aporta claredat.</li>
+                            <li><strong>Una idea per frase.</strong> Cada frase diu una cosa. Les idees es connecten amb connectors explícits <em>entre</em> frases, no encadenades dins una sola.</li>
+                            <li><strong>Vocabulari freqüent.</strong> Termes del dia a dia. Els termes tècnics van en negreta i s'expliquen la primera vegada que apareixen al text.</li>
+                        </ol>
+                    </div>
+                </details>
             </div>
+
             <div class="card">
                 <span class="tag tag-eina">Fonament cognitiu</span>
                 <h4>CLT — Teoria de la Càrrega Cognitiva</h4>
                 <p>El fonament cognitiu. Explica per què funcionen les tècniques: reduir la càrrega extrínseca (soroll), gestionar la intrínseca (dificultat) i potenciar la germana (aprenentatge).</p>
+                <details style="margin-top:12px;box-shadow:none;border-color:var(--g100);">
+                    <summary>Aprofundir: els 3 tipus de càrrega</summary>
+                    <div class="detail-body">
+                        <p>La CLT (Sweller, 1988) distingeix tres tipus de càrrega sobre la memòria de treball:</p>
+                        <ul>
+                            <li><strong>Intrínseca</strong> — La dificultat pròpia del contingut. No es pot eliminar, però sí gestionar amb <em>chunking</em> (blocs de 3-5 elements).</li>
+                            <li><strong>Extrínseca</strong> — Soroll afegit per un mal disseny: frases llargues, vocabulari innecessari, estructura confusa. L'adaptació la redueix sistemàticament.</li>
+                            <li><strong>Germana</strong> — L'esforç productiu que genera aprenentatge: connectar idees, fer inferències. L'adaptació la potencia amb bastides, preguntes i organitzadors previs.</li>
+                        </ul>
+                        <blockquote>
+                            Un text ben organitzat redueix significativament la càrrega cognitiva perquè el lector no ha de reconstruir l'ordre lògic de la informació; el troba ja construït.
+                            <cite>— Corpus FJE, M3: Lectura Fàcil i Comunicació Clara</cite>
+                        </blockquote>
+                    </div>
+                </details>
             </div>
         </div>
-
-        <details>
-            <summary>Aprofundir: els tres nivells DUA</summary>
-            <div class="detail-body">
-                <p>El DUA es fonamenta en dissenyar un currículum flexible des del principi, que inclogui múltiples opcions per a tots els alumnes, en lloc de fer adaptacions individuals a posteriori.</p>
-                <table>
-                    <tr>
-                        <th>Nivell</th>
-                        <th>Què fa</th>
-                        <th>Tècnica textual</th>
-                        <th>Per a qui</th>
-                    </tr>
-                    <tr>
-                        <td><strong>Accés</strong></td>
-                        <td>Lectura Fàcil extrema + suport visual + definicions integrades</td>
-                        <td>LF (UNE 153101)</td>
-                        <td>Alumnat amb barreres importants d'accés al text</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Core</strong></td>
-                        <td>Adaptació estàndard mantenint rigor curricular</td>
-                        <td>Comunicació Clara (ISO 24495)</td>
-                        <td>Grup de referència — la majoria de l'aula</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Enriquiment</strong></td>
-                        <td>Profundització + pensament crític + connexió interdisciplinar</td>
-                        <td>Text enriquit</td>
-                        <td>Alumnat amb capacitats avançades o que necessita repte</td>
-                    </tr>
-                </table>
-            </div>
-        </details>
-
-        <details>
-            <summary>Aprofundir: els 3 principis del DUA</summary>
-            <div class="detail-body">
-                <p><strong>Principi I — Múltiples mitjans de representació (el QUÈ):</strong> Oferir els continguts en múltiples formats (text, imatge, vídeo, materials manipulatius) per assegurar que tothom hi accedeix.</p>
-                <p><strong>Principi II — Múltiples mitjans d'acció i expressió (el COM):</strong> Oferir opcions per demostrar el que se sap (oral, escrit, visual, corporal).</p>
-                <p><strong>Principi III — Múltiples mitjans d'implicació (el PER QUÈ):</strong> Oferir opcions per motivar i mantenir l'interès, l'esforç i l'autoregulació.</p>
-                <p>ATNE actua sobretot al <strong>Principi I</strong>: transforma la representació textual del contingut.</p>
-            </div>
-        </details>
-
-        <details>
-            <summary>Aprofundir: Teoria de la Càrrega Cognitiva</summary>
-            <div class="detail-body">
-                <p>La CLT (Sweller, 1988) distingeix tres tipus de càrrega sobre la memòria de treball:</p>
-                <ul>
-                    <li><strong>Intrínseca</strong> — La dificultat pròpia del contingut. No es pot eliminar, però sí gestionar amb <em>chunking</em> (blocs de 3-5 elements).</li>
-                    <li><strong>Extrínseca</strong> — Soroll afegit per un mal disseny: frases llargues, vocabulari innecessari, estructura confusa. ATNE la redueix sistemàticament.</li>
-                    <li><strong>Germana</strong> — L'esforç productiu que genera aprenentatge: connectar idees, fer inferències. ATNE la potencia amb bastides, preguntes i organitzadors previs.</li>
-                </ul>
-                <blockquote>
-                    Un text ben organitzat redueix significativament la càrrega cognitiva perquè el lector no ha de reconstruir l'ordre lògic de la informació; el troba ja construït.
-                    <cite>— Corpus FJE, M3: Lectura Fàcil i Comunicació Clara</cite>
-                </blockquote>
-            </div>
-        </details>
     </section>
-
-        <details>
-            <summary>Aprofundir: com processa ATNE les adaptacions (3 capes)</summary>
-            <div class="detail-body">
-                <p>ATNE treballa en tres capes. El docent interactua amb la primera; les altres dues són automàtiques.</p>
-
-                <table>
-                    <tr>
-                        <th>Capa</th>
-                        <th>Qui la veu</th>
-                        <th>Què conté</th>
-                        <th>Exemple</th>
-                    </tr>
-                    <tr>
-                        <td><strong>1. Ajuts visibles</strong></td>
-                        <td>El docent</td>
-                        <td>10-12 ajuts comprensibles (via observable) o 12+ complements (via NESE)</td>
-                        <td>"Fragmentar el text", "Glossari integrat"</td>
-                    </tr>
-                    <tr>
-                        <td><strong>2. Filtre d'instruccions</strong></td>
-                        <td>Automàtic</td>
-                        <td>Selecciona ~40-60 instruccions de les 98 del catàleg, segons perfil i sub-variables</td>
-                        <td>TDAH + memòria baixa → activa C-01, C-04, H-04 (chunking intensiu)</td>
-                    </tr>
-                    <tr>
-                        <td><strong>3. Instruccions per al LLM</strong></td>
-                        <td>L'LLM</td>
-                        <td>~98 regles atòmiques agrupades en macrodirectives (Lèxic, Sintaxi, Estructura, Cognitiu...)</td>
-                        <td>"Usa vocabulari d'alta freqüència", "Una idea per frase", "Veu activa, subjecte explícit"</td>
-                    </tr>
-                </table>
-
-                <p><strong>Cada ajut visible mapa a múltiples instruccions reals.</strong> Per exemple, quan el docent marca "Vocabulari freqüent", el sistema activa 3-5 instruccions: freqüència lèxica, concreció, recurrència, substitució de termes abstractes. El docent veu el resum; l'app fa la feina fina.</p>
-
-                <p>Les 98 instruccions estan graduades per nivell MECR: la mateixa instrucció produeix un resultat diferent a A1 que a B1. Això permet que un sol catàleg serveixi per a tots els nivells sense duplicar regles.</p>
-
-                <p><em>Pàgina de referència tècnica: <a href="/cuina">/cuina</a> mostra tot el catàleg d'instruccions amb les seves condicions d'activació, macrodirectives i sub-variables.</em></p>
-            </div>
-        </details>
 
     <!-- ═══════════════════════════════════════════════ -->
     <!-- 3. CONDICIONS I SITUACIONS CONTEXTUALS           -->
     <!-- ═══════════════════════════════════════════════ -->
     <section class="section" id="diversitat">
-        <h2><span class="section-num">3</span> Condicions i situacions contextuals</h2>
-        <p>La diversitat a l'aula no és un problema a resoldre sinó una riquesa. ATNE distingeix entre:</p>
+        <h2><span class="section-num">4</span> Condicions i situacions contextuals</h2>
+        <p>La diversitat a l'aula és molt més àmplia del que presentem aquí: hi ha diversitat funcional que no interfereix en l'accés a materials escrits, i diversitat identitària que interpel·la l'escola de maneres que van més enllà d'adaptar un text. En aquesta secció recollim només les condicions i situacions que han de ser tingudes en compte <strong>a l'hora d'adaptar materials escrits</strong>. Distingim entre:</p>
 
         <div class="highlight-box">
             <strong>Condicions</strong> (permanents): formen part constitutiva de la persona. <br>
@@ -630,58 +890,73 @@
                     </tbody>
                 </table>
 
-                <p><strong>Important:</strong> les NEE són un <em>subconjunt</em> de les NESE. Dir "alumne amb NESE" és més ampli i inclusiu que dir "alumne amb NEE". A ATNE cobrim totes les subcategories de NESE, no només les NEE.</p>
+                <p><strong>Important:</strong> les NEE són un <em>subconjunt</em> de les NESE. Dir "alumne amb NESE" és més ampli i inclusiu que dir "alumne amb NEE". L'adaptació cobreix totes les subcategories de NESE, no només les NEE.</p>
 
                 <p>Quan a l'aplicació diem <em>"Tinc informació sobre les seves necessitats (NESE)"</em>, ens referim a qualsevol d'aquestes subcategories: des d'un informe psicopedagògic formal fins a un PI (Pla Individualitzat) o una valoració del DOP.</p>
             </div>
         </details>
+
+        <h3>Dues vies per conèixer l'alumne</h3>
+        <p>L'adaptació pot arrencar des de qualsevol de les dues. Totes dues són vàlides.</p>
+        <div class="via-grid">
+            <div class="via-card diagnostic">
+                <span class="via-tag">Via diagnòstic</span>
+                <h4>Tens informació formal</h4>
+                <p>El docent disposa d'un informe psicopedagògic, un PI o una valoració del DOP que identifica condicions concretes (TEA, dislèxia, DI, etc.). L'adaptació parteix directament d'aquestes característiques.</p>
+            </div>
+            <div class="via-card observable">
+                <span class="via-tag">Via observable</span>
+                <h4>Només veus conductes a l'aula</h4>
+                <p>Sovint no es disposa de diagnòstic clínic de l'alumnat. En aquests casos, el docent marca el que observa (li costa mantenir l'atenció, llegeix paraula a paraula, etc.) i el sistema dedueix quins ajuts activar. Les conductes no estigmatitzen: només determinen ajuts al text.</p>
+            </div>
+        </div>
 
         <h3>Condicions (permanents)</h3>
         <div class="card-grid">
             <div class="card">
                 <span class="tag tag-condicio">Condició</span>
                 <h4>TEA — Trastorn de l'Espectre Autista</h4>
-                <p>Patrons de comportament restrictius i repetitius. Dificultats en interacció social i comunicació. Reaccions desproporcionades a canvis de rutina. ATNE: literalitat extrema, estructura previsible, suport visual.</p>
+                <p>Patrons de comportament restrictius i repetitius. Dificultats en interacció social i comunicació. Reaccions desproporcionades a canvis de rutina. Adaptació: literalitat extrema, estructura previsible, suport visual.</p>
             </div>
             <div class="card">
                 <span class="tag tag-condicio">Condició</span>
                 <h4>TDAH — Dèficit d'Atenció i Hiperactivitat</h4>
-                <p>Dificultat per seguir instruccions complexes. Respostes impulsives. Fatiga cognitiva ràpida. ATNE: chunking, seccions numerades, retall de text al 60-70%.</p>
+                <p>Dificultat per seguir instruccions complexes. Respostes impulsives. Fatiga cognitiva ràpida. Adaptació: chunking, seccions numerades, retall de text al 60-70%.</p>
             </div>
             <div class="card">
                 <span class="tag tag-condicio">Condició</span>
                 <h4>Dislèxia i dificultats lectores</h4>
-                <p>Dificultat en decodificació i fluïdesa lectora. ATNE: descomposició de paraules compostes, vocabulari d'alta freqüència, tipografia accessible.</p>
+                <p>Dificultat en decodificació i fluïdesa lectora. Adaptació: descomposició de paraules compostes, vocabulari d'alta freqüència, tipografia accessible.</p>
             </div>
             <div class="card">
                 <span class="tag tag-condicio">Condició</span>
                 <h4>DI — Discapacitat intel·lectual</h4>
-                <p>Necessita concreció extrema i repetició sistemàtica. ATNE: definicions integrades, pictogrames, bastides permanents, connexió amb experiència propera.</p>
+                <p>Necessita concreció extrema i repetició sistemàtica. Adaptació: definicions integrades, pictogrames, bastides permanents, connexió amb experiència propera.</p>
             </div>
             <div class="card">
                 <span class="tag tag-condicio">Condició</span>
                 <h4>TDL — Trastorn del Llenguatge</h4>
-                <p>Dificultats en comprensió i/o expressió lingüística. Afecta morfosintaxi, semàntica o pragmàtica. ATNE: frases molt curtes, vocabulari controlat, densitat lèxica reduïda.</p>
+                <p>Dificultats en comprensió i/o expressió lingüística. Afecta morfosintaxi, semàntica o pragmàtica. Adaptació: frases molt curtes, vocabulari controlat, densitat lèxica reduïda.</p>
             </div>
             <div class="card">
                 <span class="tag tag-condicio">Condició</span>
                 <h4>Altes capacitats / Superdotació</h4>
-                <p>Necessita profunditat, repte i connexions transdisciplinars. ATNE: enriquiment, preguntes de pensament crític, ampliació del registre lèxic.</p>
+                <p>Necessita profunditat, repte i connexions transdisciplinars. Adaptació: enriquiment, preguntes de pensament crític, ampliació del registre lèxic.</p>
             </div>
             <div class="card">
                 <span class="tag tag-condicio">Condició</span>
                 <h4>Discapacitat auditiva</h4>
-                <p>Retard de llenguatge per manca d'accés auditiu — NO retard cognitiu. ATNE: reforç visual, vocabulari explícit, estructura clara.</p>
+                <p>Retard de llenguatge per manca d'accés auditiu — NO retard cognitiu. Adaptació: reforç visual, vocabulari explícit, estructura clara.</p>
             </div>
             <div class="card">
                 <span class="tag tag-condicio">Condició</span>
                 <h4>Discapacitat visual</h4>
-                <p>Graus: baixa visió moderada/severa, ceguesa. ATNE: descripcions textuals de contingut visual, estructura lineal clara.</p>
+                <p>Graus: baixa visió moderada/severa, ceguesa. Adaptació: descripcions textuals de contingut visual, estructura lineal clara.</p>
             </div>
             <div class="card">
                 <span class="tag tag-condicio">Condició</span>
                 <h4>TDC / Dispraxia</h4>
-                <p>Dificultat en motricitat fina i/o gruixuda. ATNE: format que minimitza la necessitat de manipulació.</p>
+                <p>Dificultat en motricitat fina i/o gruixuda. Adaptació: format que minimitza la necessitat de manipulació.</p>
             </div>
         </div>
 
@@ -690,136 +965,24 @@
             <div class="card">
                 <span class="tag tag-situacio">Situació</span>
                 <h4>Alumnat nouvingut</h4>
-                <p>Barrera lingüística, no cognitiva. Fatiga per l'esforç constant de processar en una llengua nova. ATNE: glossari bilingüe, traduccions L1, suport visual, scaffolding decreixent.</p>
+                <p>Barrera lingüística, no cognitiva. Fatiga per l'esforç constant de processar en una llengua nova. Adaptació: glossari bilingüe, traduccions L1, suport visual, scaffolding decreixent.</p>
             </div>
             <div class="card">
                 <span class="tag tag-situacio">Situació</span>
                 <h4>Vulnerabilitat socioeducativa</h4>
-                <p>Pobresa, inestabilitat habitacional, trauma. Pot afectar la concentració i la motivació. ATNE: sensibilitat contextual, to acollidor, exemples propers.</p>
+                <p>Pobresa, inestabilitat habitacional, trauma. Pot afectar la concentració i la motivació. Adaptació: sensibilitat contextual, to acollidor, exemples propers.</p>
             </div>
             <div class="card">
                 <span class="tag tag-situacio">Situació</span>
                 <h4>Trastorn emocional i de conducta</h4>
-                <p>Ansietat, depressió o dificultats de regulació emocional. ATNE: to cuidadós, estructura previsible, sense pressió temporal.</p>
-            </div>
-        </div>
-
-        <details>
-            <summary>Aprofundir: la via observable — adaptar sense diagnòstic</summary>
-            <div class="detail-body">
-                <p>La majoria de docents (~60-80%) <strong>no coneixen el diagnòstic clínic</strong> dels seus alumnes. Només veuen conductes a l'aula. ATNE ofereix una <strong>via observable</strong> com a alternativa: el docent marca el que observa i el sistema dedueix quins ajuts activar.</p>
-
-                <p>Les 6 conductes observables cobreixen els perfils <strong>més habituals i menys diagnosticats</strong> (TDAH inatent, dislèxia lleu, TDL, baixa memòria de treball, comprensió lectora pobra):</p>
-
-                <ol>
-                    <li><strong>Li costa mantenir l'atenció en textos llargs i sovint no els acaba</strong> → Fragmentació, paràgrafs curts (TDAH inatent / atenció sostinguda)</li>
-                    <li><strong>Llegeix paraula a paraula, sense fluïdesa, o fa errors freqüents en llegir</strong> → Vocabulari freqüent, tipografia adaptada (dislèxia lleu/moderada)</li>
-                    <li><strong>Entén millor quan se li explica oralment que quan llegeix sol/a</strong> → Connectors explícits, una idea per frase (TDL comprensiu / comprensió lectora)</li>
-                    <li><strong>Té un vocabulari més reduït del que necessita per al curs</strong> → Glossari integrat, definicions en línia (TDL semàntic / exposició lingüística pobra)</li>
-                    <li><strong>Necessita repetir o fraccionar les instruccions per poder seguir-les</strong> → Instruccions numerades pas a pas (memòria de treball)</li>
-                    <li><strong>Capta la idea general però li costa retenir els detalls concrets</strong> → Destacats visuals, una idea per frase (comprensió lectora)</li>
-                </ol>
-
-                <p>El docent pot marcar-ne tantes com calgui. <strong>Una sola conducta ja activa ajuts.</strong> A la columna dreta de l'Adaptador, els ajuts s'autoactiven quan es marca una conducta, però el docent pot afegir-ne o treure'n manualment — així veu la traducció entre el que observa i el que l'app farà al text. Amb el temps, aprèn a fer el pas ell sol.</p>
-
-                <p><em>Nota: les conductes seleccionades no estigmatitzen l'alumne. L'app no mostra cap perfil clínic inferit, només els ajuts que s'aplicaran al text.</em></p>
-            </div>
-        </details>
-    </section>
-
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- 4. ELS NIVELLS MECR TRADUÏTS                     -->
-    <!-- ═══════════════════════════════════════════════ -->
-    <section class="section" id="mecr">
-        <h2><span class="section-num">4</span> Els nivells MECR traduïts a l'aula</h2>
-        <p>El MECR defineix nivells de competència lingüística. ATNE els utilitza com a sostre per calibrar la complexitat del text adaptat.</p>
-
-        <table>
-            <tr>
-                <th>Nivell</th>
-                <th>Què vol dir a l'aula</th>
-                <th>Frase tipus</th>
-                <th>Longitud frase</th>
-            </tr>
-            <tr>
-                <td><strong>pre-A1</strong></td>
-                <td>Paraules aïllades i frases memoritzades. Necessita suport visual constant.</td>
-                <td>«Les plantes fan menjar amb la llum.»</td>
-                <td>3-5 paraules</td>
-            </tr>
-            <tr>
-                <td><strong>A1</strong></td>
-                <td>Frases simples sobre temes familiars. Vocabulari bàsic quotidià.</td>
-                <td>«L'aparell digestiu transforma el menjar en nutrients.»</td>
-                <td>5-8 paraules</td>
-            </tr>
-            <tr>
-                <td><strong>A2</strong></td>
-                <td>Comunicació en situacions habituals. Pot connectar frases amb «i», «però», «perquè».</td>
-                <td>«La digestió comença a la boca, on les dents trituren el menjar.»</td>
-                <td>8-12 paraules</td>
-            </tr>
-            <tr>
-                <td><strong>B1</strong></td>
-                <td>Comprèn textos sobre temes coneguts. Pot seguir una argumentació senzilla.</td>
-                <td>«El procés digestiu implica diverses fases mecàniques i químiques que transformen els aliments.»</td>
-                <td>12-18 paraules</td>
-            </tr>
-            <tr>
-                <td><strong>B2</strong></td>
-                <td>Comprèn textos complexos sobre temes abstractes. Registre formal i tècnic.</td>
-                <td>Text original o amb adaptacions mínimes de claredat.</td>
-                <td>fins a 25 paraules</td>
-            </tr>
-        </table>
-
-        <details>
-            <summary>Aprofundir: com el MECR modula les instruccions</summary>
-            <div class="detail-body">
-                <p>ATNE té 22 instruccions amb <strong>gradació MECR</strong>: el text de la instrucció canvia segons el nivell configurat. Per exemple:</p>
-                <ul>
-                    <li><strong>Subordinades</strong> — pre-A1: zero subordinació. A1: coordinades simples. A2: subordinades relatives simples. B1: subordinades causals i condicionals. B2: sense restricció.</li>
-                    <li><strong>Veu passiva</strong> — pre-A1 a B1: veu activa obligatòria. B2: passiva permesa si aporta claredat.</li>
-                    <li><strong>Puntuació</strong> — pre-A1: només punts. A1-A2: punts i dos punts. B1: s'afegeix coma i guió. B2: sense restricció.</li>
-                </ul>
-            </div>
-        </details>
-    </section>
-
-    <!-- ═══════════════════════════════════════════════ -->
-    <!-- 5. QUÈ NO ÉS ADAPTAR                            -->
-    <!-- ═══════════════════════════════════════════════ -->
-    <section class="section" id="mites">
-        <h2><span class="section-num">5</span> Què NO és adaptar</h2>
-        <p>Quatre mites que ATNE combat activament:</p>
-
-        <div class="card-grid">
-            <div class="card">
-                <span class="tag tag-mite">Mite</span>
-                <h4>«Adaptar és rebaixar»</h4>
-                <p>Fals. Adaptar és apropar el text a la zona on l'alumne pot aprendre amb ajuts. No és treure contingut sinó fer-lo accessible sense perdre rigor.</p>
-            </div>
-            <div class="card">
-                <span class="tag tag-mite">Mite</span>
-                <h4>«Adaptar és fer fàcil»</h4>
-                <p>Fals. No es tracta d'eliminar la fricció cognitiva sinó d'<strong>ajustar-la</strong>. La dificultat productiva (càrrega germana) genera aprenentatge; la improductiva (càrrega extrínseca) l'impedeix.</p>
-            </div>
-            <div class="card">
-                <span class="tag tag-mite">Mite</span>
-                <h4>«Adaptar és treure»</h4>
-                <p>Fals. Adaptar és transformar la manera de presentar el contingut, no amputar-lo. Un text adaptat a pre-A1 segueix parlant de fotosíntesi — però amb paraules accessibles.</p>
-            </div>
-            <div class="card">
-                <span class="tag tag-mite">Mite</span>
-                <h4>«Adaptar és uniformar»</h4>
-                <p>Fals. Adaptar és exactament el contrari: fer el text <strong>divers</strong> perquè arribi a persones diverses. Per això el DUA defineix tres nivells, no un de sol.</p>
+                <p>Ansietat, depressió o dificultats de regulació emocional. Adaptació: to cuidadós, estructura previsible, sense pressió temporal.</p>
             </div>
         </div>
 
         <details>
             <summary>Aprofundir: línies vermelles del corpus FJE</summary>
             <div class="detail-body">
-                <p>El corpus FJE identifica pràctiques a evitar per a cada condició:</p>
+                <p>El corpus FJE identifica pràctiques a evitar per a algunes condicions. No es detallen totes; només les que més fàcilment es passen per alt:</p>
                 <ul>
                     <li><strong>DI:</strong> «Evitar tasques sense sentit o purament mecàniques, perquè no promouen un aprenentatge significatiu ni el desenvolupament de competències reals.»</li>
                     <li><strong>Nouvinguts:</strong> «No assumir un dèficit intel·lectual per la barrera lingüística.» «No centrar-se exclusivament en el dèficit lingüístic.»</li>
@@ -829,75 +992,93 @@
                 </ul>
             </div>
         </details>
+
+        <details>
+            <summary>Aprofundir: les 6 conductes observables</summary>
+            <div class="detail-body">
+                <p>Quan el docent no té diagnòstic, marca les conductes que veu. Les 6 conductes cobreixen els perfils més habituals i menys diagnosticats (TDAH inatent, dislèxia lleu, TDL, baixa memòria de treball, comprensió lectora pobra):</p>
+                <ol>
+                    <li><strong>Li costa mantenir l'atenció en textos llargs i sovint no els acaba</strong> → fragmentació, paràgrafs curts</li>
+                    <li><strong>Llegeix paraula a paraula, sense fluïdesa, o fa errors freqüents en llegir</strong> → vocabulari freqüent, tipografia adaptada</li>
+                    <li><strong>Entén millor quan se li explica oralment que quan llegeix sol/a</strong> → connectors explícits, una idea per frase</li>
+                    <li><strong>Té un vocabulari més reduït del que necessita per al curs</strong> → glossari integrat, definicions en línia</li>
+                    <li><strong>Necessita repetir o fraccionar les instruccions per poder seguir-les</strong> → instruccions numerades pas a pas</li>
+                    <li><strong>Capta la idea general però li costa retenir els detalls concrets</strong> → destacats visuals, una idea per frase</li>
+                </ol>
+                <p>Una sola conducta ja activa ajuts. El docent pot marcar-ne tantes com calgui, i afegir o treure ajuts manualment. Les conductes no estigmatitzen: no generen cap perfil clínic inferit, només ajuts al text.</p>
+            </div>
+        </details>
     </section>
 
     <!-- ═══════════════════════════════════════════════ -->
-    <!-- 6. EL CATÀLEG D'AJUTS                            -->
+    <!-- 5. EL CATÀLEG D'AJUTS                            -->
     <!-- ═══════════════════════════════════════════════ -->
     <section class="section" id="ajuts">
-        <h2><span class="section-num">6</span> El catàleg d'ajuts</h2>
-        <p>A més del text adaptat, ATNE pot generar complements: materials de suport que acompanyen l'adaptació.</p>
+        <h2><span class="section-num">5</span> El catàleg d'ajuts</h2>
+        <p>A més del text adaptat, el sistema pot generar complements: materials de suport que acompanyen l'adaptació. Cadascun té un rol pedagògic concret. La matriu de la secció següent mostra quins s'activen per a cada condició. <strong>Com es trien, quan s'activen i amb quines regles</strong> s'explica al Bloc 2.</p>
 
         <div class="card-grid">
             <div class="card">
-                <span class="tag tag-complement">Sempre actiu</span>
+                <span class="tag tag-complement">Lèxic</span>
                 <h4>Glossari</h4>
-                <p>Taula de termes clau amb definició simplificada. Si l'alumne és nouvingut, inclou traducció a la seva L1.</p>
+                <p>Taula al final del text amb els termes clau, la seva definició simplificada i, si cal, la traducció a la L1 de l'alumne. Construeix vocabulari accessible i el deixa consultable.</p>
             </div>
             <div class="card">
-                <span class="tag tag-complement">Sempre actiu</span>
+                <span class="tag tag-complement">Lèxic</span>
                 <h4>Negretes</h4>
-                <p>Termes tècnics destacats en negreta dins el text amb definició entre parèntesis la primera vegada.</p>
+                <p>Termes tècnics destacats en negreta dins del text, amb la seva explicació entre parèntesis la primera vegada que apareixen. Permet no interrompre la lectura.</p>
             </div>
             <div class="card">
-                <span class="tag tag-complement">Condicional</span>
+                <span class="tag tag-complement">Lèxic</span>
                 <h4>Definicions integrades</h4>
-                <p>Definicions dins del flux del text (no al glossari). S'activa amb DUA Accés, pre-A1/A1, DI o TDL.</p>
+                <p>Les definicions s'incorporen al flux del text (no al final), perquè l'alumne les trobi al moment en què necessita la paraula. Útil quan anar al glossari trencaria la lectura.</p>
             </div>
             <div class="card">
-                <span class="tag tag-complement">Condicional</span>
+                <span class="tag tag-complement">Lèxic</span>
                 <h4>Traducció L1</h4>
-                <p>Columna de traducció a la llengua materna integrada al glossari. Només per a nouvinguts.</p>
+                <p>Columna addicional al glossari amb la traducció a la llengua materna de l'alumne. Pensat per a alumnat nouvingut que encara construeix vocabulari en la llengua d'acollida.</p>
             </div>
             <div class="card">
-                <span class="tag tag-complement">Condicional</span>
+                <span class="tag tag-complement">Visual</span>
                 <h4>Pictogrames</h4>
-                <p>Indicacions per a suport visual amb pictogrames. S'activa amb DUA Accés, TEA sever, DI moderat/sever o LSC.</p>
+                <p>Indicacions per a suport visual amb pictogrames al costat de termes o idees clau. Redueix la dependència del codi textual per accedir al significat.</p>
             </div>
             <div class="card">
-                <span class="tag tag-complement">Condicional</span>
+                <span class="tag tag-complement">Estructura</span>
                 <h4>Esquema visual</h4>
-                <p>Esquema o diagrama que resumeix l'estructura del text. Per a TDAH, dislèxia, TEA i nouvinguts.</p>
+                <p>Diagrama o mapa que resumeix l'estructura del text (parts, seqüència, jerarquia d'idees). Ajuda a preveure la lectura i retenir-ne l'organització.</p>
             </div>
             <div class="card">
-                <span class="tag tag-complement">Condicional</span>
-                <h4>Bastides (scaffolding)</h4>
-                <p>Suports progressius que es retiren a mesura que l'alumne guanya autonomia (Vygotsky, ZDP). Per a nouvinguts, DI, TEA i dislèxia.</p>
+                <span class="tag tag-complement">Estructura</span>
+                <h4>Bastides (<em>scaffolding</em>)</h4>
+                <p>Suports progressius que l'alumne pot retirar a mesura que guanya autonomia (Vygotsky, ZDP): frases modelades, pautes de pensament, preguntes guia. Temporals per disseny.</p>
             </div>
             <div class="card">
-                <span class="tag tag-complement">Condicional</span>
+                <span class="tag tag-complement">Síntesi</span>
                 <h4>Mapa conceptual</h4>
-                <p>Estructura d'arbre textual amb conceptes i relacions. Per a DUA Core/Enriquiment a ESO o superior.</p>
+                <p>Representació en arbre o xarxa dels conceptes clau del text i les seves relacions. Útil a partir de l'ESO, quan s'espera síntesi més enllà de la lectura literal.</p>
             </div>
             <div class="card">
-                <span class="tag tag-complement">Condicional</span>
+                <span class="tag tag-complement">Comprensió</span>
                 <h4>Preguntes de comprensió</h4>
-                <p>Preguntes guiades per verificar la comprensió del text. Per a DUA Core (excepte infantil).</p>
+                <p>Preguntes graduades segons la taxonomia de Bloom (literal, inferencial, crítica) per verificar i aprofundir la comprensió del text.</p>
             </div>
             <div class="card">
-                <span class="tag tag-complement">Condicional</span>
+                <span class="tag tag-complement">Ampliació</span>
                 <h4>Activitats d'aprofundiment</h4>
-                <p>Propostes per anar més enllà: connexions interdisciplinars, investigació, debat. Per a DUA Enriquiment o altes capacitats.</p>
+                <p>Propostes per anar més enllà del text: connexions interdisciplinars, investigació, debat, creació. Per a alumnat amb capacitats avançades o al nivell Enriquiment del DUA.</p>
             </div>
         </div>
+
+        <a href="/cuina" class="ajut-link">Veure com s'activen i com es seleccionen al Bloc 2 — Com funciona ATNE →</a>
     </section>
 
     <!-- ═══════════════════════════════════════════════ -->
     <!-- 7. MATRIU CONDICIÓ → AJUTS                       -->
     <!-- ═══════════════════════════════════════════════ -->
     <section class="section" id="matriu">
-        <h2><span class="section-num">7</span> Matriu: condició → ajuts recomanats</h2>
-        <p>Quins complements s'activen automàticament per a cada condició o situació. L'eina ho fa sol, però aquí es veu la lògica.</p>
+        <h2><span class="section-num">6</span> Matriu: condició → ajuts recomanats</h2>
+        <p>Quins complements s'activen automàticament per a cada condició o situació. El sistema ho fa sol, però aquí es veu la lògica.</p>
 
         <div style="overflow-x: auto;">
         <table>
@@ -1041,7 +1222,7 @@
     <!-- 8. EXEMPLES ABANS/DESPRÉS                        -->
     <!-- ═══════════════════════════════════════════════ -->
     <section class="section" id="exemples">
-        <h2><span class="section-num">8</span> Exemples abans/després</h2>
+        <h2><span class="section-num">7</span> Exemples abans/després</h2>
         <p>Casos reals del corpus FJE. El mateix contingut, adaptat per a perfils diferents.</p>
 
         <!-- Exemple 1: Fotosíntesi — DI -->
@@ -1122,7 +1303,7 @@
     <!-- 9. PER ANAR MÉS LLUNY                           -->
     <!-- ═══════════════════════════════════════════════ -->
     <section class="section" id="bibliografia">
-        <h2><span class="section-num">9</span> Per anar més lluny</h2>
+        <h2><span class="section-num">8</span> Per anar més lluny</h2>
         <p>Fonts i marcs teòrics en què es fonamenta ATNE.</p>
 
         <h3>Lectura Fàcil i Comunicació Clara</h3>

@@ -1753,6 +1753,18 @@ async def saber_ne_page():
     return HTMLResponse("<h1>Saber-ne+ no disponible</h1>", status_code=404)
 
 
+@app.get("/avaluacio", response_class=HTMLResponse)
+async def avaluacio_page():
+    """Serveix el hub d'avaluació i decisions (Bloc 3 de Saber-ne+)."""
+    html_path = UI_DIR / "avaluacio.html"
+    if html_path.exists():
+        return HTMLResponse(
+            html_path.read_text(encoding="utf-8"),
+            headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
+        )
+    return HTMLResponse("<h1>Avaluació no disponible</h1>", status_code=404)
+
+
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard_xat9_page():
     """Serveix el dashboard del Xat 9 (experiment A/B multi-model)."""
