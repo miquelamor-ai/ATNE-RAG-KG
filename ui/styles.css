@@ -1882,3 +1882,91 @@ body {
     font-size: 0.875rem;
     color: var(--on-surface-variant);
 }
+
+/* ── Bento card com a <details> (col·lapsable) ───────────── */
+.bento-card[open] .bento-card-summary,
+details.bento-card .bento-card-summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0;
+    margin: 0;
+    user-select: none;
+}
+
+details.bento-card .bento-card-summary::-webkit-details-marker { display: none; }
+details.bento-card .bento-card-summary::marker { content: ""; }
+
+details.bento-card .bento-card-summary::after {
+    content: "▾";
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: var(--on-surface-variant);
+    transition: transform 0.2s;
+}
+
+details.bento-card[open] .bento-card-summary::after {
+    transform: rotate(180deg);
+}
+
+details.bento-card .bento-card-body {
+    padding-top: 1rem;
+    margin-top: 1rem;
+    border-top: 1px solid rgba(199, 197, 213, 0.15);
+}
+
+/* ── Generator card al sidebar (versió compacta) ──────────── */
+.bento-side .generator-card {
+    /* Override: la generator-card al sidebar és estreta, no necessita el grid 2 cols */
+}
+
+.bento-side .gen-field {
+    margin-bottom: 0.875rem;
+}
+
+.bento-side .gen-field:last-of-type {
+    margin-bottom: 1rem;
+}
+
+.bento-side .generator-card .btn-big {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.875rem 1rem;
+    font-size: 0.75rem;
+}
+
+.bento-side #btn-undo-generate {
+    width: 100%;
+    margin-top: 0.5rem;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    padding: 0.5rem;
+    font-size: 0.75rem;
+}
+
+.bento-side #btn-undo-generate .material-symbols-outlined {
+    font-size: 1rem;
+}
+
+.bento-side .gen-status {
+    margin-top: 0.75rem;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.75rem;
+}
+
+/* Eliminar el grid 2 cols dels gen-field-grid quan és al sidebar */
+.bento-side .gen-field-grid {
+    grid-template-columns: 1fr;
+    gap: 0.875rem;
+}
+
+/* Bento-side més ample per encabir el generador */
+@media (min-width: 1280px) {
+    .bento-grid {
+        grid-template-columns: minmax(0, 2fr) minmax(20rem, 1fr);
+    }
+}

@@ -265,22 +265,10 @@
     <section class="step-panel" id="step-2">
         <div class="workspace-header">
             <h1 class="workspace-title">Entrada de Text</h1>
-            <p class="workspace-subtitle">Introduïu o pengeu el contingut que voleu adaptar per als vostres alumnes.</p>
+            <p class="workspace-subtitle">Escriu, enganxa, puja un fitxer o demana a l'IA que generi un text base. Després el podràs refinar i adaptar.</p>
         </div>
 
-        <!-- Toggle: tinc el text vs genera'm un esborrany -->
-        <div class="input-mode-toggle" role="tablist">
-            <button type="button" class="input-mode-btn active" data-mode="have" id="mode-have-btn">
-                <span class="material-symbols-outlined">edit_note</span>
-                <span>Ja tinc el text</span>
-            </button>
-            <button type="button" class="input-mode-btn" data-mode="generate" id="mode-generate-btn">
-                <span class="material-symbols-outlined">auto_awesome</span>
-                <span>Genera'm un esborrany</span>
-            </button>
-        </div>
-
-        <!-- Bento "Ja tinc el text" -->
+        <!-- Layout permanent: editor central + sidebar dret amb generador i altres cards -->
         <div class="bento-grid" id="bento-have">
             <div class="bento-main">
                 <div class="editor-card">
@@ -370,149 +358,144 @@
                 </details>
             </div>
 
+            <!-- ── SIDEBAR DRET: Generador IA + altres cards ────── -->
             <div class="bento-side">
-                <div class="bento-card upload-card">
-                    <div class="bento-card-header">
-                        <span class="material-symbols-outlined bento-card-icon">upload_file</span>
-                        <h3 class="bento-card-title">Pujar fitxer</h3>
-                    </div>
-                    <p class="bento-card-desc">Suportem formats PDF, DOCX, MD i TXT per a una extracció automàtica de text.</p>
-                    <label class="drop-zone" for="file-input">
-                        <span class="material-symbols-outlined">cloud_upload</span>
-                        <p class="drop-zone-text" id="upload-status">Arrossega o prem per seleccionar</p>
-                    </label>
-                    <input type="file" id="file-input" accept=".pdf,.docx,.md,.txt" hidden>
-                </div>
 
-                <div class="bento-card">
+                <!-- Card: Generar amb IA (sempre visible, paràmetres permanents) -->
+                <div class="bento-card generator-card">
                     <div class="bento-card-header">
-                        <span class="material-symbols-outlined bento-card-icon amber">lightbulb</span>
-                        <h3 class="bento-card-title">Consells</h3>
-                    </div>
-                    <ul class="tips-list">
-                        <li>Assegura't que el text sigui coherent i complet per a millors resultats.</li>
-                        <li>Pots incloure preguntes o exercicis que també vulguis simplificar.</li>
-                        <li>L'IA reconeixerà automàticament l'idioma del contingut.</li>
-                    </ul>
-                </div>
-
-                <div class="bento-card">
-                    <div class="bento-card-header">
-                        <span class="material-symbols-outlined bento-card-icon">category</span>
-                        <h3 class="bento-card-title">Tipus de text</h3>
-                    </div>
-                    <select id="input-genere-textual" class="form-select">
-                        <option value="">(detecta automàticament)</option>
-                        <option value="explicacio">Explicatiu</option>
-                        <option value="narracio">Narratiu</option>
-                        <option value="instruccio">Instructiu</option>
-                        <option value="argumentacio">Argumentatiu</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bento "Genera'm un esborrany" (amagat per defecte) -->
-        <div class="bento-grid" id="bento-generate" style="display:none;">
-            <div class="bento-main">
-                <div class="generator-card">
-                    <div class="generator-card-header">
                         <span class="material-symbols-outlined bento-card-icon">auto_awesome</span>
-                        <h3 class="bento-card-title">Genera un text base</h3>
+                        <h3 class="bento-card-title">Generar amb IA</h3>
                     </div>
-                    <p class="bento-card-desc">L'assistent generarà un text al nivell del curs. Després el podràs revisar i adaptar al perfil de l'alumne.</p>
+                    <p class="bento-card-desc">L'assistent crearà un text base al nivell del curs. Modifica els paràmetres i regenera quan vulguis.</p>
 
                     <div class="gen-field">
                         <label for="gen-tema">Tema o tòpic</label>
                         <input type="text" id="gen-tema" placeholder="Ex: La fotosíntesi, La Revolució Francesa...">
-                        <p class="gen-hint">S'omple automàticament des del Context Docent (Pas 1).</p>
                     </div>
 
-                    <div class="gen-field-grid">
-                        <div class="gen-field">
-                            <label for="gen-genere">Gènere discursiu</label>
-                            <select id="gen-genere" class="form-select">
-                                <option value="Article de manual escolar" selected>Article de manual escolar</option>
-                                <option value="Article divulgatiu">Article divulgatiu</option>
-                                <option value="Notícia de premsa">Notícia de premsa</option>
-                                <option value="Conte o relat">Conte o relat</option>
-                                <option value="Relat fantàstic o llegendari">Relat fantàstic / llegendari</option>
-                                <option value="Carta o correu">Carta o correu</option>
-                                <option value="Article d'opinió">Article d'opinió</option>
-                                <option value="Procediment instructiu">Procediment / instructiu</option>
-                                <option value="Definició enciclopèdica">Definició enciclopèdica</option>
-                                <option value="Receptari">Receptari</option>
-                                <option value="Crònica">Crònica</option>
-                                <option value="Biografia">Biografia</option>
-                                <option value="Ressenya o crítica">Ressenya / crítica</option>
-                                <option value="Examen o pregunta de resposta oberta">Examen / pregunta oberta</option>
-                            </select>
-                        </div>
+                    <div class="gen-field">
+                        <label for="gen-genere">Gènere discursiu</label>
+                        <select id="gen-genere" class="form-select">
+                            <option value="Article de manual escolar" selected>Article de manual escolar</option>
+                            <option value="Article divulgatiu">Article divulgatiu</option>
+                            <option value="Notícia de premsa">Notícia de premsa</option>
+                            <option value="Conte o relat">Conte o relat</option>
+                            <option value="Relat fantàstic o llegendari">Relat fantàstic / llegendari</option>
+                            <option value="Carta o correu">Carta o correu</option>
+                            <option value="Article d'opinió">Article d'opinió</option>
+                            <option value="Procediment instructiu">Procediment / instructiu</option>
+                            <option value="Definició enciclopèdica">Definició enciclopèdica</option>
+                            <option value="Receptari">Receptari</option>
+                            <option value="Crònica">Crònica</option>
+                            <option value="Biografia">Biografia</option>
+                            <option value="Ressenya o crítica">Ressenya / crítica</option>
+                            <option value="Examen o pregunta de resposta oberta">Examen / pregunta oberta</option>
+                        </select>
+                    </div>
 
-                        <div class="gen-field">
-                            <label for="gen-tipologia">Tipologia textual</label>
-                            <select id="gen-tipologia" class="form-select">
-                                <option value="expositiva" selected>Expositiva (explica)</option>
-                                <option value="narrativa">Narrativa (relata)</option>
-                                <option value="descriptiva">Descriptiva (detalla)</option>
-                                <option value="argumentativa">Argumentativa (defensa)</option>
-                                <option value="instructiva">Instructiva (passes)</option>
-                                <option value="dialogada">Dialogada (conversa)</option>
-                            </select>
-                        </div>
+                    <div class="gen-field">
+                        <label for="gen-tipologia">Tipologia textual</label>
+                        <select id="gen-tipologia" class="form-select">
+                            <option value="expositiva" selected>Expositiva (explica)</option>
+                            <option value="narrativa">Narrativa (relata)</option>
+                            <option value="descriptiva">Descriptiva (detalla)</option>
+                            <option value="argumentativa">Argumentativa (defensa)</option>
+                            <option value="instructiva">Instructiva (passes)</option>
+                            <option value="dialogada">Dialogada (conversa)</option>
+                        </select>
+                    </div>
 
-                        <div class="gen-field">
-                            <label for="gen-to">To</label>
-                            <select id="gen-to" class="form-select">
-                                <option value="neutre" selected>Neutre / acadèmic</option>
-                                <option value="informal">Informal</option>
-                                <option value="creatiu">Creatiu / literari</option>
-                                <option value="motivador">Motivador</option>
-                                <option value="reflexiu">Reflexiu</option>
-                                <option value="empatic">Empàtic</option>
-                                <option value="humoristic">Humorístic / divertit</option>
-                                <option value="solemne">Solemne</option>
-                            </select>
-                        </div>
+                    <div class="gen-field">
+                        <label for="gen-to">To</label>
+                        <select id="gen-to" class="form-select">
+                            <option value="neutre" selected>Neutre / acadèmic</option>
+                            <option value="informal">Informal</option>
+                            <option value="creatiu">Creatiu / literari</option>
+                            <option value="motivador">Motivador</option>
+                            <option value="reflexiu">Reflexiu</option>
+                            <option value="empatic">Empàtic</option>
+                            <option value="humoristic">Humorístic / divertit</option>
+                            <option value="solemne">Solemne</option>
+                        </select>
+                    </div>
 
-                        <div class="gen-field">
-                            <label for="gen-extensio">Extensió</label>
-                            <select id="gen-extensio" class="form-select">
-                                <option value="micro">Micro (50-100 paraules)</option>
-                                <option value="curt">Curt (~200 paraules)</option>
-                                <option value="estandard" selected>Estàndard (~400 paraules)</option>
-                                <option value="extens">Extens (+600 paraules)</option>
-                            </select>
-                        </div>
+                    <div class="gen-field">
+                        <label for="gen-extensio">Extensió</label>
+                        <select id="gen-extensio" class="form-select">
+                            <option value="micro">Micro (50-100 par)</option>
+                            <option value="curt">Curt (~200 par)</option>
+                            <option value="estandard" selected>Estàndard (~400 par)</option>
+                            <option value="extens">Extens (+600 par)</option>
+                        </select>
                     </div>
 
                     <div class="gen-field">
                         <label for="gen-notes">Notes addicionals (opcional)</label>
-                        <textarea id="gen-notes" rows="3" placeholder="Ex: Vull que inclogui exemples de plantes pròpies de Catalunya. Cita Pompeu Fabra. No utilitzis la lletra ‘r’."></textarea>
+                        <textarea id="gen-notes" rows="3" placeholder="Ex: Inclou exemples de Catalunya. Cita Pompeu Fabra..."></textarea>
                     </div>
 
                     <button type="button" class="btn btn-primary btn-big" id="btn-generate-text">
                         <span class="material-symbols-outlined">auto_awesome</span>
-                        Generar esborrany
+                        <span id="btn-generate-label">Generar text</span>
+                    </button>
+
+                    <button type="button" class="btn btn-sm" id="btn-undo-generate" style="display:none;">
+                        <span class="material-symbols-outlined">undo</span>
+                        Desfer regeneració
                     </button>
 
                     <div class="gen-status" id="gen-status" style="display:none;"></div>
                 </div>
-            </div>
 
-            <div class="bento-side">
-                <div class="bento-card">
-                    <div class="bento-card-header">
-                        <span class="material-symbols-outlined bento-card-icon amber">lightbulb</span>
-                        <h3 class="bento-card-title">Consells per generar</h3>
+                <!-- Card: Pujar fitxer -->
+                <details class="bento-card upload-card" open>
+                    <summary class="bento-card-summary">
+                        <span class="material-symbols-outlined bento-card-icon">upload_file</span>
+                        <h3 class="bento-card-title">Pujar fitxer</h3>
+                    </summary>
+                    <div class="bento-card-body">
+                        <p class="bento-card-desc">PDF, DOCX, MD i TXT (extracció automàtica).</p>
+                        <label class="drop-zone" for="file-input">
+                            <span class="material-symbols-outlined">cloud_upload</span>
+                            <p class="drop-zone-text" id="upload-status">Arrossega o prem per seleccionar</p>
+                        </label>
+                        <input type="file" id="file-input" accept=".pdf,.docx,.md,.txt" hidden>
                     </div>
-                    <ul class="tips-list">
-                        <li>Sigues precís al tema. "La fotosíntesi a les plantes vasculars" dona millor resultat que "Plantes".</li>
-                        <li>Tria el gènere segons l'ús: si vols treballar comprensió de notícies, posa "Notícia de premsa".</li>
-                        <li>El to ha d'encaixar amb la matèria. "Solemne" per a història; "Lúdic" per a primària.</li>
-                        <li>Les notes addicionals són potents: cita autors, restringeix vocabulari, demana exemples concrets.</li>
-                    </ul>
-                </div>
+                </details>
+
+                <!-- Card: Tipus de text -->
+                <details class="bento-card">
+                    <summary class="bento-card-summary">
+                        <span class="material-symbols-outlined bento-card-icon">category</span>
+                        <h3 class="bento-card-title">Tipus de text</h3>
+                    </summary>
+                    <div class="bento-card-body">
+                        <select id="input-genere-textual" class="form-select">
+                            <option value="">(detecta automàticament)</option>
+                            <option value="explicacio">Explicatiu</option>
+                            <option value="narracio">Narratiu</option>
+                            <option value="instruccio">Instructiu</option>
+                            <option value="argumentacio">Argumentatiu</option>
+                        </select>
+                    </div>
+                </details>
+
+                <!-- Card: Consells -->
+                <details class="bento-card">
+                    <summary class="bento-card-summary">
+                        <span class="material-symbols-outlined bento-card-icon amber">lightbulb</span>
+                        <h3 class="bento-card-title">Consells</h3>
+                    </summary>
+                    <div class="bento-card-body">
+                        <ul class="tips-list">
+                            <li>Sigues precís al tema. "La fotosíntesi a les plantes vasculars" dona millor resultat que "Plantes".</li>
+                            <li>Tria el gènere segons l'ús: per comprensió de notícies, posa "Notícia de premsa".</li>
+                            <li>El to ha d'encaixar amb la matèria. "Solemne" per a història; "Humorístic" per a primària.</li>
+                            <li>Les notes addicionals són potents: cita autors, restringeix vocabulari.</li>
+                        </ul>
+                    </div>
+                </details>
             </div>
         </div>
 

@@ -1697,39 +1697,35 @@ async function handleFileUpload(ev) {
 }
 
 
-// ── Toggle "Tinc text" / "Genera esborrany" ───────────────────────────────
+// ── Generació de text base (layout permanent) ─────────────────────────────
 
-function setInputMode(mode) {
-    document.querySelectorAll(".input-mode-btn").forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.mode === mode);
-    });
-    const have = document.getElementById("bento-have");
-    const generate = document.getElementById("bento-generate");
-    if (have) have.style.display = mode === "have" ? "" : "none";
-    if (generate) generate.style.display = mode === "generate" ? "" : "none";
+// Estat per a "Desfer regeneració" — guarda l'últim text abans de regenerar
+let _lastTextBeforeGeneration = null;
 
-    // Pre-omplir tema des del context si estem en mode generate
-    if (mode === "generate") {
-        const genTema = document.getElementById("gen-tema");
-        const ctxMateria = document.getElementById("ctx-materia");
-        if (genTema && ctxMateria && !genTema.value) {
-            genTema.value = ctxMateria.value;
-        }
-    }
+function updateGenerateButtonLabel() {
+    const textarea = document.getElementById("input-text");
+    const label = document.getElementById("btn-generate-label");
+    if (!textarea || !label) return;
+    label.textContent = textarea.value.trim() ? "Regenerar text" : "Generar text";
 }
 
-// ── Generació de text base ─────────────────────────────────────────────────
-
 async function generateDraftText() {
-    const tema = document.getElementById("gen-tema").value.trim();
+    const tema = document.getElementById("gen-tema").value.trim() ||
+                 document.getElementById("ctx-materia").value.trim();
     const status = document.getElementById("gen-status");
     const btn = document.getElementById("btn-generate-text");
 
     if (!tema) {
-        status.textContent = "Has d'indicar el tema del text.";
+        status.textContent = "Has d'indicar el tema (al Pas 1 o al camp Tema d'aquí).";
         status.style.display = "block";
         status.style.color = "#b91c1c";
         return;
+    }
+
+    // Guardar text actual per a "Desfer regeneració"
+    const textarea = document.getElementById("input-text");
+    if (textarea && textarea.value.trim()) {
+        _lastTextBeforeGeneration = textarea.value;
     }
 
     const payload = {
@@ -1744,7 +1740,7 @@ async function generateDraftText() {
 
     btn.disabled = true;
     const oldHTML = btn.innerHTML;
-    btn.innerHTML = '<span class="material-symbols-outlined">hourglass_top</span> Generant esborrany...';
+    btn.innerHTML = '<span class="material-symbols-outlined">hourglass_top</span> Generant...';
     status.style.display = "block";
     status.style.color = "var(--on-surface-variant)";
     status.textContent = "Generant amb Gemma 4... pot trigar 15-30 segons.";
@@ -1763,23 +1759,40 @@ async function generateDraftText() {
             return;
         }
 
-        // Posar el text generat al textarea principal i canviar a mode "have"
-        const textarea = document.getElementById("input-text");
         if (textarea) textarea.value = data.text;
         updateWordCount();
+        updateGenerateButtonLabel();
 
-        status.textContent = `Esborrany generat (${data.paraules} paraules). Pots revisar-lo i editar-lo abans d'adaptar.`;
+        status.textContent = `Text generat (${data.paraules} paraules). Modifica paràmetres i regenera, refina'l, o continua.`;
         status.style.color = "#15803d";
 
-        // Canviar al mode "have" perquè el docent vegi el text generat al textarea
-        setTimeout(() => setInputMode("have"), 800);
+        // Mostrar botó de "Desfer regeneració" si teníem text previ
+        const btnUndo = document.getElementById("btn-undo-generate");
+        if (btnUndo && _lastTextBeforeGeneration) btnUndo.style.display = "flex";
     } catch (e) {
         status.textContent = `Error de xarxa: ${e.message}`;
         status.style.color = "#b91c1c";
     } finally {
         btn.disabled = false;
         btn.innerHTML = oldHTML;
+        updateGenerateButtonLabel();
     }
+}
+
+function undoLastGeneration() {
+    if (!_lastTextBeforeGeneration) return;
+    const textarea = document.getElementById("input-text");
+    if (textarea) textarea.value = _lastTextBeforeGeneration;
+    _lastTextBeforeGeneration = null;
+    const btnUndo = document.getElementById("btn-undo-generate");
+    if (btnUndo) btnUndo.style.display = "none";
+    const status = document.getElementById("gen-status");
+    if (status) {
+        status.textContent = "Regeneració desfeta. El text anterior s'ha restaurat.";
+        status.style.color = "var(--on-surface-variant)";
+    }
+    updateWordCount();
+    updateGenerateButtonLabel();
 }
 
 
@@ -1885,6 +1898,7 @@ function updateWordCount() {
     const wc = document.getElementById("word-count");
     if (wc) wc.textContent = `${words} paraules`;
     toggleRefinePanel();
+    updateGenerateButtonLabel();
 }
 
 
@@ -1920,14 +1934,11 @@ function bindEvents() {
     const fileInput = document.getElementById("file-input");
     if (fileInput) fileInput.addEventListener("change", handleFileUpload);
 
-    // Toggle "Tinc text" / "Genera esborrany"
-    document.querySelectorAll(".input-mode-btn").forEach(btn => {
-        btn.addEventListener("click", () => setInputMode(btn.dataset.mode));
-    });
-
-    // Botó generar esborrany
+    // Botó generar/regenerar text
     const btnGen = document.getElementById("btn-generate-text");
     if (btnGen) btnGen.addEventListener("click", generateDraftText);
+    const btnUndoGen = document.getElementById("btn-undo-generate");
+    if (btnUndoGen) btnUndoGen.addEventListener("click", undoLastGeneration);
 
     // Pre-omplir camp tema del generador des del context (Pas 1)
     const ctxMateria = document.getElementById("ctx-materia");
