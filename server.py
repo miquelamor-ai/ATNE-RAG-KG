@@ -1907,7 +1907,11 @@ LANGUAGETOOL_URL = os.getenv("LANGUAGETOOL_URL", "https://api.languagetool.org/v
 # però ATENCIÓ: usem OPENAI_API_KEY institucional → NO canviar a models premium
 # sense aprovació explícita (gpt-4o, gpt-4.1 són 10-30x més cars).
 ATNE_AUDITOR_MODEL = os.getenv("ATNE_AUDITOR_MODEL", "gpt-4o-mini")
-ATNE_AUDITOR_ENABLED = os.getenv("ATNE_AUDITOR_ENABLED", "true").lower() == "true"
+
+# Auditor DESACTIVAT per defecte des del 14/04/26: proves empíriques amb
+# 3 models (Gemma/GPT/Mistral) van mostrar ~15% precisió i ~85% falsos positius.
+# El docent el pot reactivar via UI (toggle al Pas 2) per a casos específics.
+ATNE_AUDITOR_ENABLED = os.getenv("ATNE_AUDITOR_ENABLED", "false").lower() == "true"
 
 
 def _languagetool_correct(text: str) -> tuple[str, int, list[dict]]:

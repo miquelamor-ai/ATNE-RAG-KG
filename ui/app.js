@@ -1139,6 +1139,7 @@ function collectParams() {
         mecr_sortida: mecr,
         genere_discursiu: genere,
         complements,
+        auditor: getAuditorEnabled(),
     };
 }
 
@@ -1775,6 +1776,7 @@ async function generateDraftText() {
         notes: document.getElementById("gen-notes").value.trim(),
         context: collectContext(),
         model: getSelectedGenModel(),
+        auditor: getAuditorEnabled(),
     };
 
     btn.disabled = true;
@@ -2080,6 +2082,34 @@ function initGenModelSelector() {
             setSelectedGenModel(chip.dataset.model);
         });
     });
+}
+
+// ── Toggle auditor LLM experimental (Pas 2, opt-in) ───────────────────────
+const AUDITOR_STORAGE_KEY = "atne_auditor_enabled";
+
+function getAuditorEnabled() {
+    try {
+        return localStorage.getItem(AUDITOR_STORAGE_KEY) === "true";
+    } catch (e) {
+        return false;
+    }
+}
+
+function setAuditorEnabled(enabled) {
+    try {
+        localStorage.setItem(AUDITOR_STORAGE_KEY, enabled ? "true" : "false");
+    } catch (e) { /* noop */ }
+    const cb = document.getElementById("gen-auditor-enabled");
+    if (cb) cb.checked = enabled;
+}
+
+function initAuditorToggle() {
+    const saved = getAuditorEnabled();
+    setAuditorEnabled(saved);
+    const cb = document.getElementById("gen-auditor-enabled");
+    if (cb) {
+        cb.addEventListener("change", () => setAuditorEnabled(cb.checked));
+    }
 }
 
 // ── Quality Report (Pas 2 generació + Pas 4 adaptació) ───────────────────
@@ -2596,6 +2626,9 @@ function bindEvents() {
 
     // Selector de model de generació (Pas 2)
     initGenModelSelector();
+
+    // Toggle auditoria LLM experimental (Pas 2)
+    initAuditorToggle();
 
     // Mode tabs (multimode Pas 2)
     document.querySelectorAll(".mode-tab").forEach(tab => {

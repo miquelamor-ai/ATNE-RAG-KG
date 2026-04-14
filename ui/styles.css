@@ -3982,6 +3982,72 @@ details.bento-card .bento-card-body {
     flex-shrink: 0;
 }
 
+/* Toggle "Auditoria LLM experimental" */
+#step-2 .gen-auditor-toggle {
+    margin-top: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+#step-2 .gen-auditor-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.625rem;
+    color: var(--on-surface-variant);
+    font-weight: 500;
+    padding: 0.25rem 0;
+}
+
+#step-2 .gen-auditor-switch input[type="checkbox"] {
+    display: none;
+}
+
+#step-2 .gen-auditor-slider {
+    display: inline-block;
+    position: relative;
+    width: 1.75rem;
+    height: 1rem;
+    background: var(--surface-container-high);
+    border-radius: 9999px;
+    transition: background 0.2s ease;
+    flex-shrink: 0;
+}
+
+#step-2 .gen-auditor-slider::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease;
+}
+
+#step-2 .gen-auditor-switch input[type="checkbox"]:checked ~ .gen-auditor-slider {
+    background: var(--primary);
+}
+
+#step-2 .gen-auditor-switch input[type="checkbox"]:checked ~ .gen-auditor-slider::after {
+    transform: translateX(0.75rem);
+}
+
+#step-2 .gen-auditor-label-text {
+    color: var(--on-surface);
+    font-weight: 600;
+}
+
+#step-2 .gen-auditor-label-text em {
+    color: var(--on-surface-variant);
+    font-weight: 500;
+    font-style: italic;
+    font-size: 0.5625rem;
+}
+
 /* ═══ Footer bar (refine + desar) ═══ */
 #step-2 .editor-footer-bar {
     padding: 0.5rem 0.75rem;
