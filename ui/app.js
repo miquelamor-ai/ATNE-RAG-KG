@@ -648,20 +648,34 @@ function updateStickyBar() {
     const btnBack = document.getElementById("btn-back");
     const btnNext = document.getElementById("btn-next");
 
-    if (label) label.textContent = `Pas ${n} de 4`;
+    if (label) {
+        label.textContent = `Pas ${n} de 4`;
+        label.removeAttribute("hidden");
+        label.dataset.progress = String(n);
+    }
     if (fill) fill.style.width = `${n * 25}%`;
     if (btnBack) btnBack.style.visibility = n === 1 ? "hidden" : "visible";
 
     if (btnNext) {
+        // Preservar estructura: span.btn-label + icon
+        const labelSpan = btnNext.querySelector(".btn-label");
+        const icon = btnNext.querySelector(".material-symbols-outlined");
+        let text = "Continuar";
+        let cls = "sticky-bar-v2-btn";
         if (n === 3) {
-            btnNext.textContent = "Adaptar";
-            btnNext.className = "btn btn-ok";
+            text = "Adaptar";
+            cls = "sticky-bar-v2-btn sticky-bar-v2-btn-ok";
         } else if (n === 4) {
-            btnNext.textContent = "Nova adaptació";
-            btnNext.className = "btn btn-primary";
-        } else {
-            btnNext.textContent = "Continuar";
-            btnNext.className = "btn btn-primary";
+            text = "Nova adaptació";
+        }
+        if (labelSpan) labelSpan.textContent = text;
+        btnNext.className = cls;
+        // Assegurar que l'icona no s'ha perdut
+        if (!icon && labelSpan) {
+            const newIcon = document.createElement("span");
+            newIcon.className = "material-symbols-outlined";
+            newIcon.textContent = "arrow_forward";
+            btnNext.appendChild(newIcon);
         }
     }
 }
