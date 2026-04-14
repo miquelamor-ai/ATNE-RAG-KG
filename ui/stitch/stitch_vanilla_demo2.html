@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ca"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ATNE - Context i Perfil</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error-container": "#93000a",
+                        "secondary-fixed": "#e0e0ff",
+                        "secondary": "#4953bc",
+                        "inverse-surface": "#213145",
+                        "on-primary": "#ffffff",
+                        "surface-variant": "#d3e4fe",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error": "#ffffff",
+                        "on-tertiary-container": "#d3d5ff",
+                        "on-primary-fixed-variant": "#3337a6",
+                        "error": "#ba1a1a",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-primary-container": "#d4d5ff",
+                        "tertiary-fixed": "#dfe0ff",
+                        "secondary-fixed-dim": "#bdc2ff",
+                        "primary-container": "#4c51bf",
+                        "background": "#f8f9ff",
+                        "surface": "#f8f9ff",
+                        "outline": "#767684",
+                        "inverse-primary": "#bfc1ff",
+                        "error-container": "#ffdad6",
+                        "surface-bright": "#f8f9ff",
+                        "on-secondary-container": "#17228f",
+                        "on-tertiary-fixed-variant": "#2b38aa",
+                        "surface-container": "#e5eeff",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#03006d",
+                        "on-tertiary-fixed": "#000965",
+                        "tertiary": "#2b38a9",
+                        "surface-tint": "#4c51bf",
+                        "on-secondary-fixed-variant": "#2f3aa3",
+                        "tertiary-container": "#4552c2",
+                        "secondary-container": "#8792fe",
+                        "primary-fixed-dim": "#bfc1ff",
+                        "on-secondary-fixed": "#000767",
+                        "surface-container-high": "#dce9ff",
+                        "on-background": "#0b1c30",
+                        "on-surface": "#0b1c30",
+                        "outline-variant": "#c7c5d5",
+                        "on-tertiary": "#ffffff",
+                        "surface-dim": "#cbdbf5",
+                        "tertiary-fixed-dim": "#bdc2ff",
+                        "primary": "#3337a6",
+                        "primary-fixed": "#e1e0ff",
+                        "on-surface-variant": "#464653",
+                        "surface-container-low": "#eff4ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9ff;
+            color: #0b1c30;
+        }
+        h1, h2, h3 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .editorial-shadow {
+            box-shadow: 0 10px 40px -10px rgba(11, 28, 48, 0.06);
+        }
+        /* Mobile menu overlay */
+        #mobile-menu-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-24">
+<!-- TopAppBar Component -->
+<header class="w-full top-0 sticky z-50 bg-[#f8f9ff] dark:bg-slate-950">
+<div class="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-[#eff4ff] dark:hover:bg-slate-800 transition-colors rounded-full" id="menu-toggle-btn">
+<span class="material-symbols-outlined text-[#3337a6] dark:text-[#d3e4fe]">menu</span>
+</button>
+<span class="text-2xl font-bold tracking-tight text-[#3337a6] dark:text-[#d3e4fe]">ATNE</span>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-[#3337a6] dark:text-[#d3e4fe] font-bold font-['Plus_Jakarta_Sans'] text-lg" href="#">Context &amp; Profile</a>
+<a class="text-slate-500 dark:text-slate-400 font-['Plus_Jakarta_Sans'] text-lg hover:text-[#3337a6] transition-colors" href="#">Text Input</a>
+<a class="text-slate-500 dark:text-slate-400 font-['Plus_Jakarta_Sans'] text-lg hover:text-[#3337a6] transition-colors" href="#">Adaptation</a>
+<a class="text-slate-500 dark:text-slate-400 font-['Plus_Jakarta_Sans'] text-lg hover:text-[#3337a6] transition-colors" href="#">Results</a>
+</nav>
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border-2 border-white shadow-sm">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5HiikiMbAx1USgBqYNBhzBT40z1c0QbiswGS-cmhYCbZbLnpZQImf9o_TxF01lqGAta-w76f8Nvwj2iRsSUPprC9Zo5BI-fNN8cgj4yTNuRAtCEbbt-AOSFabAZKshc4tqvsiYphyMJVe8t_jO8gHYpWFFK9HrkIZLeIm2qVMyZoqx-oGWeeDEXXXLlRVQduQfQLXsqqkBVG79X2D2ucvPvPUNFNHBF_13UbeB4P4teXCCDdT7M1bbEhgDIdUH5Pm9gtjD6-tNT4"/>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-6 py-12">
+<div class="grid grid-cols-12 gap-8">
+<!-- Left Side: Instructions / Summary -->
+<aside class="col-span-12 lg:col-span-3 space-y-8">
+<div class="bg-surface-container-low p-8 rounded-3xl space-y-6">
+<div class="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-3xl">psychology</span>
+</div>
+<h2 class="text-2xl font-bold text-on-surface leading-tight">Context i Perfil</h2>
+<p class="text-on-surface-variant leading-relaxed">
+                    Defineix l'entorn educatiu per permetre que la IA personalitzi els materials de forma precisa. 
+                </p>
+<ul class="space-y-4 pt-4">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-sm mt-1" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-sm font-medium text-on-surface">Personalització curricular</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-sm mt-1" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-sm font-medium text-on-surface">Ajust de nivell cognitiu</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-sm mt-1" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-sm font-medium text-on-surface">Atenció a la diversitat</span>
+</li>
+</ul>
+</div>
+<div class="relative rounded-3xl overflow-hidden aspect-square editorial-shadow group">
+<img alt="Learning environment" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKXlRZVAQhTeNc8oxSBqmw3DA8VcKFW_bjsom6ytDxKAlp1stnx6nY-bauGYCWiEPXQrrfwUL8Rhwv4xWglM8uHuiUZyRPdhv_voEHTHi8WB20uNDeo6L6AiZWLXXWH2v0RaTtrxTSQCOCi2YIyUfvcG3tRm42SsagNNKqfVsvvSosZwIrDI1uueyvWx3aDK2UaMD-Xu849MlQjirCN2uYM9lG7XoFXq1EQOG8lJFfDj_y9jzOmVY7YUJUBVvJq9DCoARzlRYWJnc"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent flex flex-col justify-end p-6">
+<p class="text-white text-xs font-bold uppercase tracking-widest mb-1">Inspiració</p>
+<p class="text-white text-lg font-semibold leading-snug">Crea espais d'aprenentatge inclusius.</p>
+</div>
+</div>
+</aside>
+<!-- Center: Main Form -->
+<section class="col-span-12 lg:col-span-6">
+<form class="bg-surface-container-lowest p-10 rounded-3xl editorial-shadow space-y-10" id="classroom-config-form">
+<div class="space-y-2">
+<h3 class="text-xl font-semibold text-on-surface">Configuració de l'Aula</h3>
+<div class="h-1 w-20 bg-gradient-to-r from-primary to-primary-container rounded-full"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Etapa -->
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface-variant px-1" for="etapa">Etapa Educativa</label>
+<select class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary/40 transition-all appearance-none" id="etapa" name="etapa">
+<option value="primaria">Educació Primària</option>
+<option value="eso">Educació Secundària (ESO)</option>
+<option value="batxillerat">Batxillerat</option>
+<option value="cicles">Cicles Formatius</option>
+</select>
+</div>
+<!-- Curs -->
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface-variant px-1" for="curs">Curs</label>
+<select class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary/40 transition-all appearance-none" id="curs" name="curs">
+<option value="1r">1r Curs</option>
+<option value="2n">2n Curs</option>
+<option value="3r">3r Curs</option>
+<option value="4t">4t Curs</option>
+<option value="5e">5è Curs</option>
+<option value="6e">6è Curs</option>
+</select>
+</div>
+<!-- Àmbit -->
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface-variant px-1" for="ambit">Àmbit</label>
+<select class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary/40 transition-all appearance-none" id="ambit" name="ambit">
+<option value="linguistic">Linguistic</option>
+<option value="cientific">Científic-Tecnològic</option>
+<option value="social">Social</option>
+<option value="artistic">Artístic</option>
+</select>
+</div>
+<!-- Matèria -->
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface-variant px-1" for="materia">Matèria</label>
+<input class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-on-surface focus:ring-2 focus:ring-primary/40 placeholder:text-slate-400 transition-all" id="materia" name="materia" placeholder="Ex: Llengua Catalana" type="text"/>
+</div>
+</div>
+<!-- Progress Bar (Internal) -->
+<div class="pt-6 border-t border-slate-100 space-y-4">
+<div class="flex justify-between items-center text-xs font-bold text-on-surface-variant tracking-wider uppercase">
+<span>Pas 1 de 4</span>
+<span class="text-primary" id="progress-text">25% Completat</span>
+</div>
+<div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary to-primary-container w-1/4 rounded-full transition-all duration-500" id="progress-bar-fill"></div>
+</div>
+</div>
+</form>
+</section>
+<!-- Right Side: User Profile / Observacions -->
+<aside class="col-span-12 lg:col-span-3 space-y-8">
+<div class="bg-surface-container-low p-8 rounded-3xl space-y-6">
+<h3 class="text-lg font-bold text-on-surface">Observacions</h3>
+<p class="text-xs font-medium text-on-surface-variant leading-relaxed">
+                    Afegeix qualsevol detall específic sobre el perfil de l'alumne o les necessitats del grup-classe.
+                </p>
+<textarea class="w-full bg-surface-container-lowest border-none rounded-2xl p-4 text-sm text-on-surface focus:ring-2 focus:ring-primary/40 placeholder:text-slate-400 transition-all resize-none" id="observacions-text" placeholder="Escriu aquí les teves observacions..." rows="6"></textarea>
+<div class="flex items-center gap-3 p-3 bg-primary/5 rounded-2xl">
+<span class="material-symbols-outlined text-primary text-xl">info</span>
+<p class="text-xs text-primary font-medium">Aquesta informació no es compartirà externament.</p>
+</div>
+</div>
+<div class="p-6 bg-white rounded-3xl editorial-shadow border border-slate-50">
+<div class="flex items-center gap-4 mb-4">
+<div class="w-12 h-12 bg-surface-container-high rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">verified_user</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Perfil Docent</p>
+<p class="text-xs text-on-surface-variant">Actiu fa 2 minuts</p>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between text-xs border-b border-slate-50 pb-2">
+<span class="text-on-surface-variant">Adaptacions generades</span>
+<span class="font-bold">12</span>
+</div>
+<div class="flex justify-between text-xs">
+<span class="text-on-surface-variant">Qualitat mitjana AI</span>
+<span class="font-bold text-green-600">Alta</span>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<!-- BottomNavBar Component - Acting as Action Bar -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-end items-center px-8 py-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-100 dark:border-slate-800 shadow-[0_-10px_40px_-10px_rgba(11,28,48,0.06)]">
+<div class="max-w-7xl mx-auto w-full flex justify-between items-center">
+<button class="px-6 py-3 text-[#3337a6] font-semibold text-sm hover:bg-[#eff4ff] rounded-xl transition-colors" id="back-btn">
+            Enrere
+        </button>
+<button class="bg-gradient-to-br from-[#3337a6] to-[#4c51bf] text-white rounded-xl px-10 py-3 flex items-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all editorial-shadow" id="continue-btn">
+<span class="font-['Inter'] font-semibold tracking-wide uppercase text-sm">Continuar</span>
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 0;">arrow_forward</span>
+</button>
+</div>
+</footer>
+<!-- Navigation Drawer -->
+<div class="fixed left-0 top-0 h-screen w-20 z-40 p-4 transition-all duration-300 ease-in-out hover:w-80 group" id="side-drawer">
+<div class="bg-white dark:bg-slate-900 h-full rounded-3xl shadow-2xl overflow-hidden flex flex-col p-4 border border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-4 mb-10 px-2">
+<span class="material-symbols-outlined text-[#3337a6] text-3xl">school</span>
+<span class="text-xl font-bold text-[#3337a6] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">ATNE Progress</span>
+</div>
+<nav class="flex-1 space-y-2">
+<div class="bg-[#d3e4fe] dark:bg-[#3337a6]/30 text-[#3337a6] dark:text-white font-bold rounded-xl p-3 flex items-center gap-4 cursor-pointer">
+<span class="material-symbols-outlined">psychology</span>
+<span class="opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-sm font-medium">Context &amp; Profile</span>
+</div>
+<div class="text-slate-600 dark:text-slate-400 hover:bg-[#eff4ff] dark:hover:bg-slate-800 p-3 rounded-xl flex items-center gap-4 transition-all cursor-pointer">
+<span class="material-symbols-outlined">edit_note</span>
+<span class="opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-sm font-medium">Text Input</span>
+</div>
+<div class="text-slate-600 dark:text-slate-400 hover:bg-[#eff4ff] dark:hover:bg-slate-800 p-3 rounded-xl flex items-center gap-4 transition-all cursor-pointer">
+<span class="material-symbols-outlined">tune</span>
+<span class="opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-sm font-medium">Adaptation Configuration</span>
+</div>
+<div class="text-slate-600 dark:text-slate-400 hover:bg-[#eff4ff] dark:hover:bg-slate-800 p-3 rounded-xl flex items-center gap-4 transition-all cursor-pointer">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-sm font-medium">Results</span>
+</div>
+</nav>
+<div class="pt-6 border-t border-slate-100 px-2">
+<div class="flex items-center gap-4 text-slate-400 hover:text-primary transition-colors cursor-pointer" id="settings-trigger">
+<span class="material-symbols-outlined">settings</span>
+<span class="opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-sm font-medium">Configuració</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Mobile Drawer Overlay and Logic -->
+<div class="fixed inset-0 z-30 hidden opacity-0" id="mobile-menu-overlay"></div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Elements
+        const continueBtn = document.getElementById('continue-btn');
+        const backBtn = document.getElementById('back-btn');
+        const menuToggleBtn = document.getElementById('menu-toggle-btn');
+        const sideDrawer = document.getElementById('side-drawer');
+        const mobileOverlay = document.getElementById('mobile-menu-overlay');
+        const configForm = document.getElementById('classroom-config-form');
+        const materiaInput = document.getElementById('materia');
+        const progressBar = document.getElementById('progress-bar-fill');
+        const progressText = document.getElementById('progress-text');
+
+        // Form Submission / Data handling
+        continueBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const formData = new FormData(configForm);
+            const data = Object.fromEntries(formData.entries());
+            data.observacions = document.getElementById('observacions-text').value;
+            
+            console.log('Continuant amb les dades:', data);
+            
+            // Simple visual feedback
+            continueBtn.classList.add('scale-95', 'opacity-80');
+            setTimeout(() => {
+                continueBtn.classList.remove('scale-95', 'opacity-80');
+                // Normally you would redirect here: window.location.href = '/next-step';
+                alert('Dades guardades. Continuant al següent pas...');
+            }, 200);
+        });
+
+        backBtn.addEventListener('click', () => {
+            console.log('Enrere clicat');
+            history.back();
+        });
+
+        // Navigation drawer mobile toggle (simulated since it's desktop-first with hover)
+        menuToggleBtn.addEventListener('click', () => {
+            const isExpanded = sideDrawer.classList.contains('w-80');
+            if (window.innerWidth < 1024) { // Mobile behavior
+                if (sideDrawer.classList.contains('-translate-x-full')) {
+                    openMobileMenu();
+                } else {
+                    closeMobileMenu();
+                }
+            } else {
+                // Toggle wide state manually for desktop if button clicked
+                sideDrawer.classList.toggle('w-80');
+                sideDrawer.classList.toggle('w-20');
+            }
+        });
+
+        function openMobileMenu() {
+            sideDrawer.classList.remove('-translate-x-full');
+            mobileOverlay.classList.remove('hidden');
+            setTimeout(() => mobileOverlay.classList.add('opacity-100'), 10);
+        }
+
+        function closeMobileMenu() {
+            sideDrawer.classList.add('-translate-x-full');
+            mobileOverlay.classList.remove('opacity-100');
+            setTimeout(() => mobileOverlay.classList.add('hidden'), 300);
+        }
+
+        mobileOverlay.addEventListener('click', closeMobileMenu);
+
+        // Progress bar dynamic update (simple example)
+        function updateProgress() {
+            let fieldsFilled = 0;
+            const inputs = configForm.querySelectorAll('select, input');
+            inputs.forEach(input => {
+                if (input.value.trim() !== '') fieldsFilled++;
+            });
+
+            // Base 25% + extra based on input
+            const percentage = Math.min(25 + (fieldsFilled * 15), 100);
+            progressBar.style.width = `${percentage}%`;
+            progressText.innerText = `${percentage}% Completat`;
+        }
+
+        configForm.addEventListener('change', updateProgress);
+        materiaInput.addEventListener('input', updateProgress);
+
+        // Settings interaction
+        document.getElementById('settings-trigger').addEventListener('click', () => {
+            console.log('Obrint configuració...');
+        });
+
+        // Initialize state for mobile
+        if (window.innerWidth < 1024) {
+            sideDrawer.classList.add('-translate-x-full', 'w-80');
+            sideDrawer.classList.remove('w-20');
+        }
+    });
+</script>
+</body></html>

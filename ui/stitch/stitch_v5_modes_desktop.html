@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ca"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ATNE - Context i Perfil</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,FILL@0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#4953bc",
+                        "secondary-fixed-dim": "#bdc2ff",
+                        "on-tertiary-fixed-variant": "#2b38aa",
+                        "tertiary-fixed": "#dfe0ff",
+                        "background": "#f8f9ff",
+                        "on-background": "#0b1c30",
+                        "tertiary-container": "#4552c2",
+                        "secondary-container": "#8792fe",
+                        "primary-fixed-dim": "#bfc1ff",
+                        "surface": "#f8f9ff",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-primary": "#ffffff",
+                        "inverse-surface": "#213145",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-tertiary-container": "#d3d5ff",
+                        "outline-variant": "#c7c5d5",
+                        "surface-tint": "#4c51bf",
+                        "on-error": "#ffffff",
+                        "tertiary": "#2b38a9",
+                        "on-tertiary-fixed": "#000965",
+                        "on-secondary-fixed-variant": "#2f3aa3",
+                        "surface-container-high": "#dce9ff",
+                        "primary": "#3337a6",
+                        "error": "#ba1a1a",
+                        "on-secondary-container": "#17228f",
+                        "on-primary-container": "#d4d5ff",
+                        "on-tertiary": "#ffffff",
+                        "surface-container": "#e5eeff",
+                        "outline": "#767684",
+                        "on-secondary-fixed": "#000767",
+                        "surface-container-low": "#eff4ff",
+                        "secondary-fixed": "#e0e0ff",
+                        "surface-dim": "#cbdbf5",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#d3e4fe",
+                        "on-surface": "#0b1c30",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#464653",
+                        "on-primary-fixed-variant": "#3337a6",
+                        "tertiary-fixed-dim": "#bdc2ff",
+                        "primary-fixed": "#e1e0ff",
+                        "surface-bright": "#f8f9ff",
+                        "primary-container": "#4c51bf",
+                        "on-primary-fixed": "#03006d",
+                        "inverse-primary": "#bfc1ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; transform: scale(0.9); transform-origin: top center; width: 111.11%; height: 111.11%; }
+        h1, h2, h3, .brand-logo { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #d3e4fe; border-radius: 10px; }
+        
+        .chip-checkbox:checked + .chip-label {
+            background-color: #3337a6;
+            color: white;
+            border-color: #3337a6;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface selection:bg-primary/10 overflow-x-hidden">
+<!-- TopNavBar -->
+<header class="bg-[#f8f9ff] dark:bg-slate-950 flex justify-between items-center px-8 py-3 w-full max-w-7xl mx-auto">
+<div class="text-2xl font-bold text-[#3337a6] dark:text-[#4c51bf] tracking-tight">ATNE</div>
+<nav class="hidden md:flex gap-6 items-center">
+<a class="font-['Plus_Jakarta_Sans'] font-semibold text-sm text-[#3337a6] dark:text-[#d3e4fe] border-b-2 border-[#3337a6] pb-1" href="#">Perfil</a>
+<a class="font-['Plus_Jakarta_Sans'] font-semibold text-sm text-slate-500 dark:text-slate-400 font-medium hover:text-[#4c51bf] transition-colors" href="#">Text</a>
+<a class="font-['Plus_Jakarta_Sans'] font-semibold text-sm text-slate-500 dark:text-slate-400 font-medium hover:text-[#4c51bf] transition-colors" href="#">Adaptació</a>
+<a class="font-['Plus_Jakarta_Sans'] font-semibold text-sm text-slate-500 dark:text-slate-400 font-medium hover:text-[#4c51bf] transition-colors" href="#">Resultat</a>
+</nav>
+<div class="flex items-center gap-3">
+<button class="material-symbols-outlined text-on-surface-variant p-2 rounded-full hover:bg-surface-container transition-colors">settings</button>
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-white text-xs font-bold">JD</div>
+</div>
+</header>
+<main class="max-w-6xl mx-auto px-6 pt-6 pb-24">
+<!-- Header Section -->
+<div class="mb-6">
+<span class="text-[10px] font-bold tracking-widest text-primary/80 bg-primary/5 px-2 py-0.5 rounded-full uppercase">Pas 1 de 4</span>
+<h1 class="text-2xl md:text-3xl font-extrabold text-on-surface mt-1 leading-tight tracking-tight">Configura el context d'aprenentatge</h1>
+<p class="text-on-surface-variant text-sm mt-1 max-w-2xl">Defineix l'entorn educatiu i el perfil de l'alumne per personalitzar l'adaptació.</p>
+</div>
+<!-- Context Docent Bar -->
+<section class="bg-surface-container-low rounded-2xl p-3 mb-6 grid grid-cols-2 md:grid-cols-4 gap-3 items-end">
+<div class="space-y-1">
+<label class="text-[10px] font-semibold text-on-surface-variant/80 uppercase ml-1">Etapa</label>
+<select class="w-full bg-surface-container-lowest border-none rounded-lg text-xs py-2 px-3 focus:ring-2 focus:ring-primary/20 appearance-none transition-shadow">
+<option>Primària</option>
+<option>Secundària</option>
+<option>Batxillerat</option>
+</select>
+</div>
+<div class="space-y-1">
+<label class="text-[10px] font-semibold text-on-surface-variant/80 uppercase ml-1">Curs</label>
+<select class="w-full bg-surface-container-lowest border-none rounded-lg text-xs py-2 px-3 focus:ring-2 focus:ring-primary/20 appearance-none transition-shadow">
+<option>1r d'ESO</option>
+<option>2n d'ESO</option>
+<option>3r d'ESO</option>
+</select>
+</div>
+<div class="space-y-1">
+<label class="text-[10px] font-semibold text-on-surface-variant/80 uppercase ml-1">Àmbit</label>
+<select class="w-full bg-surface-container-lowest border-none rounded-lg text-xs py-2 px-3 focus:ring-2 focus:ring-primary/20 appearance-none transition-shadow">
+<option>Lingüístic</option>
+<option>Científic-Tecnològic</option>
+<option>Social</option>
+</select>
+</div>
+<div class="space-y-1">
+<label class="text-[10px] font-semibold text-on-surface-variant/80 uppercase ml-1">Matèria</label>
+<input class="w-full bg-surface-container-lowest border-none rounded-lg text-xs py-2 px-3 focus:ring-2 focus:ring-primary/20 placeholder:text-on-surface-variant/40 transition-shadow" placeholder="Ex: Llengua Catalana" type="text"/>
+</div>
+</section>
+<!-- Main Card Group -->
+<div class="space-y-5">
+<section class="bg-surface-container-lowest rounded-3xl p-6 md:p-8 border border-outline-variant/10">
+<h2 class="text-lg font-bold text-on-surface mb-5 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">person_search</span>
+                    Per a qui és l'adaptació?
+                </h2>
+<!-- Mode Selector -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+<label class="relative group cursor-pointer">
+<input checked="" class="peer sr-only" name="mode" type="radio"/>
+<div class="flex items-center gap-4 p-4 rounded-2xl bg-surface-container-low border-2 border-transparent peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+<div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">person</span>
+</div>
+<div>
+<p class="font-bold text-sm">Un alumne</p>
+<p class="text-xs text-on-surface-variant">Adaptació individualitzada.</p>
+</div>
+</div>
+</label>
+<label class="relative group cursor-pointer">
+<input class="peer sr-only" name="mode" type="radio"/>
+<div class="flex items-center gap-4 p-4 rounded-2xl bg-surface-container-low border-2 border-transparent peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+<div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">group</span>
+</div>
+<div>
+<p class="font-bold text-sm">Un grup</p>
+<p class="text-xs text-on-surface-variant">Adaptació per a l'aula.</p>
+</div>
+</div>
+</label>
+</div>
+<!-- Reading Level -->
+<div class="mb-8">
+<div class="flex justify-between items-end mb-3">
+<label class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Nivell de lectura</label>
+<span class="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md">Nivell lingüístic de sortida: B1</span>
+</div>
+<div class="flex gap-1 bg-surface-container-low p-1 rounded-xl">
+<button class="flex-1 py-2 text-[10px] font-bold rounded-lg text-on-surface-variant hover:bg-white/50 transition-colors">Molt per sota</button>
+<button class="flex-1 py-2 text-[10px] font-bold rounded-lg text-on-surface-variant hover:bg-white/50 transition-colors">Per sota</button>
+<button class="flex-1 py-2 text-[10px] font-bold rounded-lg bg-white shadow-sm text-primary ring-1 ring-primary/10">Estàndard</button>
+<button class="flex-1 py-2 text-[10px] font-bold rounded-lg text-on-surface-variant hover:bg-white/50 transition-colors">Per sobre</button>
+<button class="flex-1 py-2 text-[10px] font-bold rounded-lg text-on-surface-variant hover:bg-white/50 transition-colors">Molt per sobre</button>
+</div>
+</div>
+<!-- Clinical / NESE Section -->
+<div class="mb-8">
+<h3 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-4 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Perfil Clínic / NESE
+                    </h3>
+<div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+<label class="relative cursor-pointer">
+<input class="sr-only chip-checkbox" type="checkbox"/>
+<div class="chip-label flex items-center justify-center px-3 py-2 bg-surface-container-low border border-outline-variant/20 rounded-xl text-[10px] font-bold text-on-surface-variant transition-all hover:bg-surface-container-high text-center h-full">TEA</div>
+</label>
+<label class="relative cursor-pointer">
+<input class="sr-only chip-checkbox" type="checkbox"/>
+<div class="chip-label flex items-center justify-center px-3 py-2 bg-surface-container-low border border-outline-variant/20 rounded-xl text-[10px] font-bold text-on-surface-variant transition-all hover:bg-surface-container-high text-center h-full">TDAH</div>
+</label>
+<label class="relative cursor-pointer">
+<input class="sr-only chip-checkbox" type="checkbox"/>
+<div class="chip-label flex items-center justify-center px-3 py-2 bg-surface-container-low border border-outline-variant/20 rounded-xl text-[10px] font-bold text-on-surface-variant transition-all hover:bg-surface-container-high text-center h-full">Dislèxia</div>
+</label>
+<label class="relative cursor-pointer">
+<input class="sr-only chip-checkbox" type="checkbox"/>
+<div class="chip-label flex items-center justify-center px-3 py-2 bg-surface-container-low border border-outline-variant/20 rounded-xl text-[10px] font-bold text-on-surface-variant transition-all hover:bg-surface-container-high text-center h-full">Discalcúlia</div>
+</label>
+<label class="relative cursor-pointer">
+<input class="sr-only chip-checkbox" type="checkbox"/>
+<div class="chip-label flex items-center justify-center px-3 py-2 bg-surface-container-low border border-outline-variant/20 rounded-xl text-[10px] font-bold text-on-surface-variant transition-all hover:bg-surface-container-high text-center h-full">TDL</div>
+</label>
+<label class="relative cursor-pointer">
+<input class="sr-only chip-checkbox" type="checkbox"/>
+<div class="chip-label flex items-center justify-center px-3 py-2 bg-surface-container-low border border-outline-variant/20 rounded-xl text-[10px] font-bold text-on-surface-variant transition-all hover:bg-surface-container-high text-center h-full">TAN</div>
+</label>
+<label class="relative cursor-pointer">
+<input class="sr-only chip-checkbox" type="checkbox"/>
+<div class="chip-label flex items-center justify-center px-3 py-2 bg-surface-container-low border border-outline-variant/20 rounded-xl text-[10px] font-bold text-on-surface-variant transition-all hover:bg-surface-container-high text-center h-full">Altes Capacitats</div>
+</label>
+<label class="relative cursor-pointer">
+<input class="sr-only chip-checkbox" type="checkbox"/>
+<div class="chip-label flex items-center justify-center px-3 py-2 bg-surface-container-low border border-outline-variant/20 rounded-xl text-[10px] font-bold text-on-surface-variant transition-all hover:bg-surface-container-high text-center h-full">Altres</div>
+</label>
+</div>
+</div>
+<!-- Observations Grid -->
+<div class="grid md:grid-cols-2 gap-8">
+<!-- Left: Què observes? -->
+<div>
+<h3 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-4 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Què observes?
+                        </h3>
+<div class="space-y-2">
+<label class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-surface-container-low cursor-pointer transition-colors group">
+<input class="rounded-md border-outline-variant text-primary focus:ring-primary/20 transition-all" type="checkbox"/>
+<span class="text-xs text-on-surface-variant group-hover:text-on-surface">Li costa mantenir l'atenció sostinguda</span>
+</label>
+<label class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-surface-container-low cursor-pointer transition-colors group">
+<input checked="" class="rounded-md border-outline-variant text-primary focus:ring-primary/20 transition-all" type="checkbox"/>
+<span class="text-xs text-on-surface-variant group-hover:text-on-surface">Necessita més temps per descodificar</span>
+</label>
+<label class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-surface-container-low cursor-pointer transition-colors group">
+<input class="rounded-md border-outline-variant text-primary focus:ring-primary/20 transition-all" type="checkbox"/>
+<span class="text-xs text-on-surface-variant group-hover:text-on-surface">Dificultat en el vocabulari abstracte</span>
+</label>
+<label class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-surface-container-low cursor-pointer transition-colors group">
+<input class="rounded-md border-outline-variant text-primary focus:ring-primary/20 transition-all" type="checkbox"/>
+<span class="text-xs text-on-surface-variant group-hover:text-on-surface">Se sent aclaparat per textos llargs</span>
+</label>
+<label class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-surface-container-low cursor-pointer transition-colors group">
+<input class="rounded-md border-outline-variant text-primary focus:ring-primary/20 transition-all" type="checkbox"/>
+<span class="text-xs text-on-surface-variant group-hover:text-on-surface">Problemes per estructurar les idees</span>
+</label>
+</div>
+</div>
+<!-- Right: Ajuts que s'aplicaran -->
+<div class="bg-surface-container-low/50 rounded-2xl p-4">
+<h3 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-4 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Ajuts que s'aplicaran
+                        </h3>
+<div class="space-y-4">
+<div>
+<p class="text-[10px] font-extrabold text-on-surface-variant/60 uppercase mb-2">Estructura</p>
+<div class="flex flex-wrap gap-2">
+<label class="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-white shadow-sm cursor-pointer hover:ring-1 hover:ring-primary/20 transition-all">
+<input checked="" class="rounded text-primary focus:ring-0 w-3 h-3" type="checkbox"/>
+<span class="text-[10px] font-medium ml-2">Índex de continguts</span>
+</label>
+<label class="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-white shadow-sm cursor-pointer hover:ring-1 hover:ring-primary/20 transition-all">
+<input class="rounded text-primary focus:ring-0 w-3 h-3" type="checkbox"/>
+<span class="text-[10px] font-medium ml-2">Resum inicial</span>
+</label>
+</div>
+</div>
+<div>
+<p class="text-[10px] font-extrabold text-on-surface-variant/60 uppercase mb-2">Llengua</p>
+<div class="flex flex-wrap gap-2">
+<label class="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-white shadow-sm cursor-pointer hover:ring-1 hover:ring-primary/20 transition-all">
+<input checked="" class="rounded text-primary focus:ring-0 w-3 h-3" type="checkbox"/>
+<span class="text-[10px] font-medium ml-2">Glossari de termes</span>
+</label>
+<label class="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-white shadow-sm cursor-pointer hover:ring-1 hover:ring-primary/20 transition-all">
+<input class="rounded text-primary focus:ring-0 w-3 h-3" type="checkbox"/>
+<span class="text-[10px] font-medium ml-2">Simplificació sintàctica</span>
+</label>
+</div>
+</div>
+<div>
+<p class="text-[10px] font-extrabold text-on-surface-variant/60 uppercase mb-2">Accessibilitat &amp; Cognitiu</p>
+<div class="flex flex-wrap gap-2">
+<label class="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-white shadow-sm cursor-pointer hover:ring-1 hover:ring-primary/20 transition-all">
+<input class="rounded text-primary focus:ring-0 w-3 h-3" type="checkbox"/>
+<span class="text-[10px] font-medium ml-2">Tipografia amigable</span>
+</label>
+<label class="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-white shadow-sm cursor-pointer hover:ring-1 hover:ring-primary/20 transition-all">
+<input class="rounded text-primary focus:ring-0 w-3 h-3" type="checkbox"/>
+<span class="text-[10px] font-medium ml-2">Suport visual (Pictogrames)</span>
+</label>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Clinical Info Collapsible -->
+<details class="mt-8 border-t border-outline-variant/10 pt-6 group">
+<summary class="flex items-center justify-between cursor-pointer list-none">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant group-open:rotate-180 transition-transform">expand_more</span>
+<span class="text-sm font-bold text-on-surface">Tinc informació del seu pla de suport (PI/PIE)</span>
+</div>
+<div class="h-px flex-1 bg-outline-variant/10 mx-4"></div>
+</summary>
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mt-5">
+<button class="p-3 rounded-xl bg-surface-container-low hover:bg-primary/10 hover:text-primary transition-all text-center">
+<span class="material-symbols-outlined block mb-1">psychology</span>
+<span class="text-[10px] font-bold">Resum PI</span>
+</button>
+<button class="p-3 rounded-xl bg-surface-container-low hover:bg-primary/10 hover:text-primary transition-all text-center">
+<span class="material-symbols-outlined block mb-1">hearing_disabled</span>
+<span class="text-[10px] font-bold">D. Auditiva</span>
+</button>
+<button class="p-3 rounded-xl bg-surface-container-low hover:bg-primary/10 hover:text-primary transition-all text-center">
+<span class="material-symbols-outlined block mb-1">visibility_off</span>
+<span class="text-[10px] font-bold">D. Visual</span>
+</button>
+<button class="p-3 rounded-xl bg-surface-container-low hover:bg-primary/10 hover:text-primary transition-all text-center">
+<span class="material-symbols-outlined block mb-1">add_circle</span>
+<span class="text-[10px] font-bold">Detalls mèdics</span>
+</button>
+</div>
+</details>
+</section>
+<!-- Additional Observations & Profiles -->
+<div class="grid md:grid-cols-12 gap-5">
+<section class="md:col-span-8 bg-surface-container-lowest rounded-3xl p-5 border border-outline-variant/10">
+<h3 class="text-xs font-bold uppercase text-on-surface-variant mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">edit_note</span> Observacions addicionals
+                    </h3>
+<textarea class="w-full h-24 bg-surface-container-low border-none rounded-xl text-xs p-4 focus:ring-2 focus:ring-primary/20 placeholder:text-on-surface-variant/40 resize-none" placeholder="Escriu aquí qualsevol detall rellevant..."></textarea>
+</section>
+<section class="md:col-span-4 bg-surface-container-lowest rounded-3xl p-5 border border-outline-variant/10 flex flex-col">
+<details class="group flex-1">
+<summary class="flex items-center justify-between cursor-pointer list-none mb-3">
+<span class="text-xs font-bold uppercase text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">save</span> Perfils guardats
+                            </span>
+<span class="material-symbols-outlined text-xs group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<div class="space-y-3 pt-1">
+<select class="w-full bg-surface-container-low border-none rounded-lg text-xs py-2 px-3 focus:ring-2 focus:ring-primary/20">
+<option>Selecciona un perfil...</option>
+<option>Grup Reforç A</option>
+<option>Marc (PIE Lectura)</option>
+</select>
+<div class="grid grid-cols-2 gap-2">
+<button class="py-2 px-3 bg-surface-container-high text-primary font-bold text-[10px] rounded-lg hover:bg-surface-container-highest transition-colors">Carregar</button>
+<button class="py-2 px-3 bg-primary/10 text-primary font-bold text-[10px] rounded-lg hover:bg-primary/20 transition-colors">Guardar actual</button>
+</div>
+</div>
+</details>
+</section>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<footer class="fixed bottom-0 w-full z-50 flex justify-between items-center px-8 py-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-[0_-10px_40px_-10px_rgba(11,28,48,0.06)] rounded-t-3xl border-t border-outline-variant/10">
+<button class="text-[#3337a6] dark:text-slate-300 px-6 py-2 font-['Inter'] font-semibold text-sm hover:opacity-90 transition-opacity active:scale-95">
+            Enrere
+        </button>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center gap-1">
+<div class="w-8 h-1 rounded-full bg-primary"></div>
+<div class="w-2 h-1 rounded-full bg-surface-container-highest"></div>
+<div class="w-2 h-1 rounded-full bg-surface-container-highest"></div>
+<div class="w-2 h-1 rounded-full bg-surface-container-highest"></div>
+</div>
+<button class="bg-gradient-to-br from-[#3337a6] to-[#4c51bf] text-white px-8 py-2.5 rounded-xl font-['Inter'] font-bold text-sm shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity active:scale-95">
+                Continuar
+            </button>
+</div>
+</footer>
+</body></html>

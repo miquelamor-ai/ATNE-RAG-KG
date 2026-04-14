@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ca"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary": "#2b38a9",
+                    "on-tertiary": "#ffffff",
+                    "secondary-fixed": "#e0e0ff",
+                    "on-tertiary-container": "#d3d5ff",
+                    "on-error-container": "#93000a",
+                    "surface-tint": "#4c51bf",
+                    "secondary-container": "#8792fe",
+                    "on-tertiary-fixed-variant": "#2b38aa",
+                    "on-secondary-fixed": "#000767",
+                    "on-error": "#ffffff",
+                    "primary-fixed-dim": "#bfc1ff",
+                    "surface-container-low": "#eff4ff",
+                    "surface-variant": "#d3e4fe",
+                    "on-primary-container": "#d4d5ff",
+                    "on-surface-variant": "#464653",
+                    "tertiary-fixed-dim": "#bdc2ff",
+                    "secondary": "#4953bc",
+                    "primary": "#3337a6",
+                    "on-background": "#0b1c30",
+                    "on-primary-fixed-variant": "#3337a6",
+                    "surface": "#f8f9ff",
+                    "error-container": "#ffdad6",
+                    "surface-bright": "#f8f9ff",
+                    "outline-variant": "#c7c5d5",
+                    "on-primary": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-container": "#17228f",
+                    "on-surface": "#0b1c30",
+                    "primary-fixed": "#e1e0ff",
+                    "on-secondary-fixed-variant": "#2f3aa3",
+                    "surface-container": "#e5eeff",
+                    "inverse-primary": "#bfc1ff",
+                    "error": "#ba1a1a",
+                    "background": "#f8f9ff",
+                    "surface-container-highest": "#d3e4fe",
+                    "primary-container": "#4c51bf",
+                    "secondary-fixed-dim": "#bdc2ff",
+                    "tertiary-fixed": "#dfe0ff",
+                    "tertiary-container": "#4552c2",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-surface": "#213145",
+                    "inverse-on-surface": "#eaf1ff",
+                    "surface-container-high": "#dce9ff",
+                    "surface-dim": "#cbdbf5",
+                    "on-primary-fixed": "#03006d",
+                    "outline": "#767684",
+                    "on-tertiary-fixed": "#000965"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "2xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-panel {
+            background: rgba(248, 249, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f8f9ff; }
+        ::-webkit-scrollbar-thumb { background: #d3e4fe; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface selection:bg-primary/10">
+<!-- TopNavBar -->
+<nav class="sticky top-0 z-50 flex justify-between items-center w-full px-8 h-16 bg-[#f8f9ff]/80 backdrop-blur-md">
+<div class="text-xl font-bold text-[#3337a6] tracking-tight font-headline">Saber-ne+</div>
+<div class="hidden md:flex items-center gap-8 font-headline font-semibold text-sm">
+<a class="text-slate-500 hover:text-[#4c51bf] transition-colors duration-200" href="#">Adaptar materials</a>
+<a class="text-[#3337a6] border-b-2 border-[#3337a6] pb-1" href="#">Com funciona ATNE</a>
+<a class="text-slate-500 hover:text-[#4c51bf] transition-colors duration-200" href="#">Avaluació i decisions</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined text-[#3337a6]" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</nav>
+<div class="max-w-[1280px] mx-auto flex px-8 py-12 gap-12">
+<!-- SideNavBar -->
+<aside class="sticky top-24 left-0 w-64 h-fit flex flex-col gap-4 py-8 px-4 font-body text-sm font-medium">
+<div class="mb-6 pl-5">
+<h3 class="font-headline font-bold text-[#3337a6] text-lg leading-tight">Com funciona ATNE</h3>
+<p class="text-on-surface-variant text-xs font-label mt-1">TECHNICAL GUIDE</p>
+</div>
+<a class="text-[#3337a6] font-bold border-l-4 border-[#3337a6] pl-4 flex items-center gap-3 py-2" href="#flux">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span> Flux
+            </a>
+<a class="text-slate-400 pl-5 hover:bg-[#eff4ff] rounded-lg transition-all flex items-center gap-3 py-2" href="#memoria">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span> Memòria
+            </a>
+<a class="text-slate-400 pl-5 hover:bg-[#eff4ff] rounded-lg transition-all flex items-center gap-3 py-2" href="#instruccions">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span> Instruccions
+            </a>
+<a class="text-slate-400 pl-5 hover:bg-[#eff4ff] rounded-lg transition-all flex items-center gap-3 py-2" href="#catalog">
+<span class="material-symbols-outlined" data-icon="library_books">library_books</span> Catalog
+            </a>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 max-w-[1100px]">
+<!-- Header Section -->
+<header class="mb-16">
+<div class="inline-block px-3 py-1 bg-surface-container-high text-primary rounded-full text-[10px] font-bold tracking-widest uppercase mb-4">Bloc 2 • Arquitectura</div>
+<h1 class="font-headline text-5xl font-extrabold text-on-surface tracking-tight mb-6">L'engranatge de la intel·ligència educativa</h1>
+<p class="text-xl text-on-surface-variant max-w-2xl leading-relaxed">Explora com ATNE processa, entén i transforma el contingut educatiu mitjançant un flux cognitiu avançat.</p>
+</header>
+<!-- Section 1: Flux d'adaptació -->
+<section class="mb-24 scroll-mt-24" id="flux">
+<div class="flex items-center gap-4 mb-8">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="account_tree">account_tree</span>
+<h2 class="font-headline text-2xl font-bold">El flux d'adaptació</h2>
+</div>
+<div class="relative flex flex-wrap lg:flex-nowrap gap-4 items-center overflow-x-auto pb-8">
+<!-- Phase 1 -->
+<div class="min-w-[180px] flex-1 bg-surface-container-lowest p-6 rounded-2xl shadow-sm group hover:scale-[1.02] transition-transform">
+<div class="text-primary-container font-label text-[10px] font-bold mb-2">01. INICI</div>
+<h4 class="font-bold text-lg mb-2">Entrada</h4>
+<p class="text-xs text-on-surface-variant leading-relaxed">Càrrega de PDF, DOCX o text pla de l'usuari.</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant rotate-90 lg:rotate-0" data-icon="arrow_forward">arrow_forward</span>
+<!-- Phase 2 -->
+<div class="min-w-[180px] flex-1 bg-surface-container-lowest p-6 rounded-2xl shadow-sm group hover:scale-[1.02] transition-transform">
+<div class="text-primary-container font-label text-[10px] font-bold mb-2">02. PERFIL</div>
+<h4 class="font-bold text-lg mb-2">Configuració</h4>
+<p class="text-xs text-on-surface-variant leading-relaxed">Selecció de l'estudiant i criteris NEAE.</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant rotate-90 lg:rotate-0" data-icon="arrow_forward">arrow_forward</span>
+<!-- Phase 3 -->
+<div class="min-w-[180px] flex-1 bg-primary-container p-6 rounded-2xl shadow-md text-on-primary group hover:scale-[1.02] transition-transform">
+<div class="text-on-primary/60 font-label text-[10px] font-bold mb-2">03. MOTOR</div>
+<h4 class="font-bold text-lg mb-2 text-white">Retrieval</h4>
+<p class="text-xs text-on-primary/80 leading-relaxed">Cerca semàntica a la base de coneixement.</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant rotate-90 lg:rotate-0" data-icon="arrow_forward">arrow_forward</span>
+<!-- Phase 4 -->
+<div class="min-w-[180px] flex-1 bg-surface-container-lowest p-6 rounded-2xl shadow-sm group hover:scale-[1.02] transition-transform">
+<div class="text-primary-container font-label text-[10px] font-bold mb-2">04. CORE</div>
+<h4 class="font-bold text-lg mb-2">Adaptació</h4>
+<p class="text-xs text-on-surface-variant leading-relaxed">Execució de les instruccions pedagògiques.</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant rotate-90 lg:rotate-0" data-icon="arrow_forward">arrow_forward</span>
+<!-- Phase 5 -->
+<div class="min-w-[180px] flex-1 bg-surface-container-lowest p-6 rounded-2xl shadow-sm group hover:scale-[1.02] transition-transform">
+<div class="text-primary-container font-label text-[10px] font-bold mb-2">05. FINAL</div>
+<h4 class="font-bold text-lg mb-2">Sortida</h4>
+<p class="text-xs text-on-surface-variant leading-relaxed">Material a punt per descarregar i editar.</p>
+</div>
+</div>
+</section>
+<!-- Section 2: La memòria triàdica -->
+<section class="mb-24 scroll-mt-24" id="memoria">
+<div class="flex items-center gap-4 mb-8">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="psychology">psychology</span>
+<h2 class="font-headline text-2xl font-bold">La memòria triàdica</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-surface-container-low p-8 rounded-2xl group hover:bg-surface-container-high transition-colors">
+<div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-6 shadow-sm">
+<span class="material-symbols-outlined text-primary" data-icon="person">person</span>
+</div>
+<h3 class="text-xl font-bold mb-3 font-headline">Memòria de l'Alumne</h3>
+<p class="text-on-surface-variant leading-relaxed">Emmagatzema necessitats específiques, fortaleses i l'historial d'adaptacions que han funcionat millor.</p>
+</div>
+<div class="bg-surface-container-low p-8 rounded-2xl group hover:bg-surface-container-high transition-colors">
+<div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-6 shadow-sm">
+<span class="material-symbols-outlined text-primary" data-icon="groups">groups</span>
+</div>
+<h3 class="text-xl font-bold mb-3 font-headline">Memòria de la Classe</h3>
+<p class="text-on-surface-variant leading-relaxed">Entén la dinàmica de grup i el nivell base del currículum que s'està impartint a l'aula.</p>
+</div>
+<div class="bg-surface-container-low p-8 rounded-2xl group hover:bg-surface-container-high transition-colors">
+<div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-6 shadow-sm">
+<span class="material-symbols-outlined text-primary" data-icon="auto_stories">auto_stories</span>
+</div>
+<h3 class="text-xl font-bold mb-3 font-headline">Memòria de la Matèria</h3>
+<p class="text-on-surface-variant leading-relaxed">Vocabulari tècnic, conceptes clau i mapes conceptuals propis de cada àrea de coneixement.</p>
+</div>
+</div>
+</section>
+<!-- Section 3: Les 88 instruccions -->
+<section class="mb-24 scroll-mt-24" id="instruccions">
+<div class="flex items-center gap-4 mb-8">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="menu_book">menu_book</span>
+<h2 class="font-headline text-2xl font-bold">Les 88 instruccions</h2>
+</div>
+<div class="bg-surface-container-low rounded-2xl p-8">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+<!-- Instruction Card 1 -->
+<div class="bg-white p-6 rounded-xl border-l-4 border-primary shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<span class="text-[10px] font-bold text-primary-container bg-surface-container-low px-2 py-1 rounded">CATEGORIA: SINTAXI</span>
+<span class="material-symbols-outlined text-outline-variant text-sm" data-icon="bolt">bolt</span>
+</div>
+<h4 class="font-bold text-lg mb-2">Simplificació Oracional</h4>
+<p class="text-xs text-on-surface-variant mb-4 italic">Trigger: Frases amb més de 2 subordinades</p>
+<div class="bg-surface-container-low p-3 rounded-lg text-xs font-mono text-on-surface">
+                                [REGHLA]: Divideix en frases curtes d'estructura S-V-O.
+                            </div>
+</div>
+<!-- Instruction Card 2 -->
+<div class="bg-white p-6 rounded-xl border-l-4 border-secondary shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<span class="text-[10px] font-bold text-on-secondary-container bg-secondary-container/20 px-2 py-1 rounded">CATEGORIA: VISUAL</span>
+<span class="material-symbols-outlined text-outline-variant text-sm" data-icon="visibility">visibility</span>
+</div>
+<h4 class="font-bold text-lg mb-2">Suport per Imatges</h4>
+<p class="text-xs text-on-surface-variant mb-4 italic">Trigger: Substantius de caràcter abstracte</p>
+<div class="bg-surface-container-low p-3 rounded-lg text-xs font-mono text-on-surface">
+                                [REGHLA]: Insereix pictogrames ARASAAC rellevants.
+                            </div>
+</div>
+</div>
+<button class="w-full py-4 bg-surface-container-highest rounded-xl text-primary font-bold flex items-center justify-center gap-2 hover:bg-surface-container-high transition-colors">
+                        Veure totes les 88 instruccions
+                        <span class="material-symbols-outlined" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+</section>
+<!-- Section 4: Catàleg de complements -->
+<section class="mb-24 scroll-mt-24" id="catalog">
+<div class="flex items-center gap-4 mb-8">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="library_books">library_books</span>
+<h2 class="font-headline text-2xl font-bold">El catàleg de complements</h2>
+</div>
+<div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+<!-- Component Items -->
+<div class="aspect-square bg-surface-container-low rounded-2xl flex flex-col items-center justify-center p-4 text-center hover:bg-primary hover:text-white transition-all cursor-default group">
+<span class="material-symbols-outlined text-3xl mb-3 group-hover:scale-110 transition-transform" data-icon="menu_book">menu_book</span>
+<span class="text-xs font-bold">Glossari</span>
+</div>
+<div class="aspect-square bg-surface-container-low rounded-2xl flex flex-col items-center justify-center p-4 text-center hover:bg-primary hover:text-white transition-all cursor-default group">
+<span class="material-symbols-outlined text-3xl mb-3 group-hover:scale-110 transition-transform" data-icon="format_bold">format_bold</span>
+<span class="text-xs font-bold">Negretes</span>
+</div>
+<div class="aspect-square bg-surface-container-low rounded-2xl flex flex-col items-center justify-center p-4 text-center hover:bg-primary hover:text-white transition-all cursor-default group">
+<span class="material-symbols-outlined text-3xl mb-3 group-hover:scale-110 transition-transform" data-icon="emoji_emotions">emoji_emotions</span>
+<span class="text-xs font-bold">Pictogrames</span>
+</div>
+<div class="aspect-square bg-surface-container-low rounded-2xl flex flex-col items-center justify-center p-4 text-center hover:bg-primary hover:text-white transition-all cursor-default group">
+<span class="material-symbols-outlined text-3xl mb-3 group-hover:scale-110 transition-transform" data-icon="list_alt">list_alt</span>
+<span class="text-xs font-bold">Checklists</span>
+</div>
+<div class="aspect-square bg-surface-container-low rounded-2xl flex flex-col items-center justify-center p-4 text-center hover:bg-primary hover:text-white transition-all cursor-default group">
+<span class="material-symbols-outlined text-3xl mb-3 group-hover:scale-110 transition-transform" data-icon="help">help</span>
+<span class="text-xs font-bold">Preguntes</span>
+</div>
+<div class="aspect-square bg-surface-container-low rounded-2xl flex flex-col items-center justify-center p-4 text-center hover:bg-primary hover:text-white transition-all cursor-default group">
+<span class="material-symbols-outlined text-3xl mb-3 group-hover:scale-110 transition-transform" data-icon="summarize">summarize</span>
+<span class="text-xs font-bold">Resums</span>
+</div>
+<div class="aspect-square bg-surface-container-low rounded-2xl flex flex-col items-center justify-center p-4 text-center hover:bg-primary hover:text-white transition-all cursor-default group">
+<span class="material-symbols-outlined text-3xl mb-3 group-hover:scale-110 transition-transform" data-icon="schema">schema</span>
+<span class="text-xs font-bold">Esquemes</span>
+</div>
+<div class="aspect-square bg-surface-container-low rounded-2xl flex flex-col items-center justify-center p-4 text-center hover:bg-primary hover:text-white transition-all cursor-default group">
+<span class="material-symbols-outlined text-3xl mb-3 group-hover:scale-110 transition-transform" data-icon="edit_note">edit_note</span>
+<span class="text-xs font-bold">Autocorrecció</span>
+</div>
+<div class="aspect-square bg-surface-container-low rounded-2xl flex flex-col items-center justify-center p-4 text-center hover:bg-primary hover:text-white transition-all cursor-default group">
+<span class="material-symbols-outlined text-3xl mb-3 group-hover:scale-110 transition-transform" data-icon="record_voice_over">record_voice_over</span>
+<span class="text-xs font-bold">Àudios</span>
+</div>
+<div class="aspect-square bg-surface-container-low rounded-2xl flex flex-col items-center justify-center p-4 text-center hover:bg-primary hover:text-white transition-all cursor-default group">
+<span class="material-symbols-outlined text-3xl mb-3 group-hover:scale-110 transition-transform" data-icon="translate">translate</span>
+<span class="text-xs font-bold">Traduccions</span>
+</div>
+</div>
+</section>
+<!-- Section 5: RAG + Knowledge Graph -->
+<section class="mb-24 scroll-mt-24" id="rag">
+<div class="flex items-center gap-4 mb-8">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="hub">hub</span>
+<h2 class="font-headline text-2xl font-bold">RAG + Knowledge Graph</h2>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Vector Search -->
+<div class="bg-white p-8 rounded-2xl shadow-sm">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-secondary" data-icon="search">search</span>
+<h4 class="font-bold text-xl">Cerca Vectorial (RAG)</h4>
+</div>
+<p class="text-on-surface-variant text-sm mb-8 leading-relaxed">Localització de fragments de text basats en similitud semàntica purament lingüística.</p>
+<div class="space-y-4">
+<div class="flex justify-between items-center text-xs font-label">
+<span>Dimensions</span>
+<span class="bg-surface-container-low px-2 py-1 rounded font-bold">1536d</span>
+</div>
+<div class="w-full bg-surface-container-low h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full w-[85%]"></div>
+</div>
+<div class="flex justify-between items-center text-xs font-label">
+<span>Latència retrieval</span>
+<span class="bg-surface-container-low px-2 py-1 rounded font-bold">42ms</span>
+</div>
+</div>
+</div>
+<!-- Knowledge Graph -->
+<div class="bg-white p-8 rounded-2xl shadow-sm">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary" data-icon="account_tree">account_tree</span>
+<h4 class="font-bold text-xl">Expansió per KG</h4>
+</div>
+<p class="text-on-surface-variant text-sm mb-8 leading-relaxed">Enriquiment del context mitjançant relacions ontològiques predefinides (ex: "Mammífer" ISA "Animal").</p>
+<div class="space-y-4">
+<div class="flex justify-between items-center text-xs font-label">
+<span>Nodes</span>
+<span class="bg-surface-container-low px-2 py-1 rounded font-bold">12.4k</span>
+</div>
+<div class="w-full bg-surface-container-low h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[65%]"></div>
+</div>
+<div class="flex justify-between items-center text-xs font-label">
+<span>Edges (Relacions)</span>
+<span class="bg-surface-container-low px-2 py-1 rounded font-bold">85k+</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 6: Prompt Preview -->
+<section class="mb-24 scroll-mt-24" id="prompt">
+<div class="flex items-center gap-4 mb-8">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="terminal">terminal</span>
+<h2 class="font-headline text-2xl font-bold">Prompt Preview</h2>
+</div>
+<div class="bg-inverse-surface rounded-2xl overflow-hidden shadow-xl">
+<div class="bg-slate-800 px-4 py-3 flex gap-2 border-b border-slate-700">
+<div class="w-3 h-3 rounded-full bg-red-400"></div>
+<div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+<div class="w-3 h-3 rounded-full bg-green-400"></div>
+<span class="ml-4 text-[10px] text-slate-400 font-mono">system_prompt_v2.4.md</span>
+</div>
+<div class="p-8 font-mono text-sm leading-relaxed overflow-x-auto">
+<pre class="text-blue-300"># ROLE DEFINITION</pre>
+<pre class="text-slate-100">Ets un expert en pedagogia inclusiva i NEAE.</pre>
+<br/>
+<pre class="text-blue-300"># CONTEXT</pre>
+<pre class="text-slate-100">- Estudiant: <span class="text-emerald-400">{student_profile}</span></pre>
+<pre class="text-slate-100">- Matèria: <span class="text-emerald-400">{subject_context}</span></pre>
+<pre class="text-slate-100">- Dificultats: <span class="text-emerald-400">{cognitive_load_params}</span></pre>
+<br/>
+<pre class="text-blue-300"># GUIDELINES</pre>
+<pre class="text-slate-100">1. Aplica les regles de lectura fàcil.</pre>
+<pre class="text-slate-100">2. Re-estructura el text segons <span class="text-yellow-300">active_instructions_list</span>.</pre>
+<pre class="text-slate-100">3. Manté el rigor acadèmic però redueix la densitat sintàctica.</pre>
+<br/>
+<pre class="text-slate-500">// Output: Markdown format ready for export.</pre>
+</div>
+</div>
+</section>
+<!-- Bottom CTA / Support -->
+<footer class="pt-12 border-t border-surface-container-high text-center">
+<p class="text-on-surface-variant text-sm mb-6">Necessites més detalls tècnics sobre el model d'IA?</p>
+<div class="flex justify-center gap-4">
+<button class="bg-primary text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+                        Documentació API
+                    </button>
+<button class="bg-surface-container-lowest text-primary px-6 py-3 rounded-xl font-bold border border-primary/10 hover:bg-surface-container-low transition-all active:scale-95">
+                        Contactar amb Suport
+                    </button>
+</div>
+</footer>
+</main>
+</div>
+<!-- Background Decoration -->
+<div class="fixed top-0 right-0 -z-10 w-1/3 h-full bg-gradient-to-l from-surface-container-low to-transparent opacity-50"></div>
+<div class="fixed -bottom-48 -left-48 -z-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
+</body></html>

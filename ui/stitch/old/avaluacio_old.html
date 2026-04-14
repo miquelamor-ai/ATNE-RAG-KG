@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATNE — Avaluació i decisions</title>
+    <style>
+        :root {
+            --pri: #3337a6;
+            --pri-light: #e1e0ff;
+            --pri-subtle: #eff4ff;
+            --ok: #059669;
+            --ok-light: #d1fae5;
+            --warn: #d97706;
+            --warn-light: #fef3c7;
+            --err: #dc2626;
+            --err-light: #fde8e8;
+            --purple: #7c3aed;
+            --purple-light: #ede9fe;
+            --g50: #f8f9ff;
+            --g100: #f3f4f6;
+            --g200: #e5e7eb;
+            --g300: #d1d5db;
+            --g500: #6b7280;
+            --g700: #374151;
+            --g900: #111827;
+            --r: 8px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-lg: 0 4px 16px -4px rgba(0,0,0,0.06);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--g50);
+            color: var(--g900);
+            line-height: 1.65;
+            font-size: 15px;
+        }
+
+        /* ── Top nav global ────────────────────────── */
+        .top-nav {
+            display: flex; gap: 0; background: #111827;
+            padding: 0 1rem; position: sticky; top: 0; z-index: 1000;
+        }
+        .top-nav a {
+            color: #d1d5db; text-decoration: none;
+            padding: .6rem 1rem; font-size: .85rem; font-weight: 500;
+        }
+        .top-nav a:hover { color: #fff; }
+        .top-nav a.active { background: var(--pri); color: #fff; }
+
+        /* ── Saber-ne+ master tab-bar ──────────────── */
+        .sn-bar {
+            background: #f5f3ff;
+            border-bottom: 1px solid #ddd6fe;
+        }
+        .sn-bar-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 14px 32px;
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            flex-wrap: wrap;
+        }
+        .sn-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #6d28d9;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .sn-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+        .sn-tab {
+            padding: 8px 16px;
+            text-decoration: none;
+            color: #6b7280;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.15s;
+        }
+        .sn-tab:hover {
+            background: rgba(167, 139, 250, 0.18);
+            color: #6d28d9;
+        }
+        .sn-tab.active {
+            background: #a78bfa;
+            color: white;
+        }
+
+        /* ── Header pàgina ─────────────────────────── */
+        .page-header {
+            background: white;
+            border-bottom: 1px solid var(--g200);
+            padding: 20px 32px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        .page-header .logo {
+            font-size: 20px; font-weight: 700; color: var(--pri);
+            white-space: nowrap;
+        }
+        .page-header .logo span { font-weight: 400; color: var(--g500); margin-left: 6px; }
+
+        /* ── Container ─────────────────────────────── */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 32px 80px;
+        }
+
+        .intro {
+            background: white;
+            border: 1px solid var(--g200);
+            border-radius: var(--r);
+            padding: 32px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+        }
+        .intro h1 {
+            font-size: 30px;
+            color: var(--g900);
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+        .intro p {
+            color: var(--g700);
+            max-width: 780px;
+            font-size: 16px;
+        }
+
+        /* ── Seccions ──────────────────────────────── */
+        .section {
+            margin-bottom: 56px;
+        }
+        .section h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--g900);
+            margin-bottom: 8px;
+        }
+        .section .section-sub {
+            font-size: 14px;
+            color: var(--g500);
+            margin-bottom: 24px;
+            max-width: 780px;
+        }
+        .section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--g700);
+            margin-top: 24px;
+            margin-bottom: 10px;
+        }
+        .section p { color: var(--g700); margin-bottom: 10px; max-width: 780px; }
+
+        /* ── Principi sostenibilitat (callout) ─────── */
+        .sustainability {
+            background: linear-gradient(135deg, #ecfdf5, white);
+            border: 1px solid var(--ok-light);
+            border-left: 4px solid var(--ok);
+            border-radius: var(--r);
+            padding: 28px 32px;
+            margin-bottom: 48px;
+            box-shadow: var(--shadow);
+        }
+        .sustainability .label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--ok);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .sustainability h2 {
+            font-size: 20px;
+            color: var(--g900);
+            margin-bottom: 12px;
+        }
+        .sustainability p {
+            color: var(--g700);
+            margin-bottom: 10px;
+            max-width: 780px;
+        }
+        .sustainability .two-axes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 18px;
+        }
+        @media (max-width: 680px) {
+            .sustainability .two-axes { grid-template-columns: 1fr; }
+        }
+        .sustainability .axis {
+            background: white;
+            border-radius: 6px;
+            padding: 16px 18px;
+            border: 1px solid var(--ok-light);
+        }
+        .sustainability .axis h4 {
+            font-size: 14px;
+            color: var(--ok);
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+        .sustainability .axis p {
+            font-size: 13.5px;
+            margin: 0;
+        }
+
+        /* ── Timeline preguntes ────────────────────── */
+        .questions-list {
+            display: grid;
+            gap: 14px;
+            margin-top: 18px;
+        }
+        .question {
+            background: white;
+            border: 1px solid var(--g200);
+            border-left: 3px solid var(--pri);
+            border-radius: var(--r);
+            padding: 16px 20px;
+            box-shadow: var(--shadow);
+        }
+        .question .q-meta {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+        }
+        .question .q-num {
+            background: var(--pri);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        .question .q-date {
+            font-size: 12px;
+            color: var(--g500);
+        }
+        .question h4 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--g900);
+            margin-bottom: 6px;
+        }
+        .question p {
+            font-size: 13.5px;
+            color: var(--g700);
+            margin: 0;
+        }
+
+        /* ── Experiment result cards ───────────────── */
+        .exp-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+            margin-top: 18px;
+        }
+        .exp-card {
+            background: white;
+            border: 1px solid var(--g200);
+            border-radius: var(--r);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+        .exp-card .exp-date {
+            font-size: 11px;
+            color: var(--g500);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 6px;
+        }
+        .exp-card h4 {
+            font-size: 16px;
+            color: var(--g900);
+            margin-bottom: 8px;
+        }
+        .exp-card .exp-setup {
+            font-size: 13px;
+            color: var(--g500);
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed var(--g200);
+        }
+        .exp-card .exp-result {
+            font-size: 13.5px;
+            color: var(--g700);
+            margin-bottom: 10px;
+            flex-grow: 1;
+        }
+        .exp-card .exp-result strong { color: var(--g900); }
+        .exp-card .exp-learning {
+            font-size: 12.5px;
+            color: var(--pri);
+            font-weight: 500;
+            padding-top: 10px;
+            border-top: 1px dashed var(--g200);
+        }
+
+        /* ── Triangulation callout ────────────────── */
+        .triangulation {
+            background: var(--purple-light);
+            border-radius: var(--r);
+            padding: 24px 28px;
+            margin-bottom: 40px;
+            border-left: 4px solid var(--purple);
+        }
+        .triangulation h2 {
+            color: #5b21b6;
+            margin-bottom: 12px;
+        }
+        .triangulation p {
+            color: var(--g700);
+            max-width: 780px;
+        }
+        .triangulation .tri-bars {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 18px;
+        }
+        @media (max-width: 720px) {
+            .triangulation .tri-bars { grid-template-columns: 1fr; }
+        }
+        .tri-bar {
+            background: white;
+            border-radius: 6px;
+            padding: 16px 18px;
+        }
+        .tri-bar .tri-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--purple);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 4px;
+        }
+        .tri-bar .tri-score {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--g900);
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+        .tri-bar .tri-score span {
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--g500);
+        }
+        .tri-bar .tri-desc {
+            font-size: 12.5px;
+            color: var(--g700);
+            line-height: 1.5;
+        }
+
+        /* ── Limits / validity concerns ────────────── */
+        .limits {
+            display: grid;
+            gap: 12px;
+            margin-top: 18px;
+        }
+        .limit {
+            background: white;
+            border: 1px solid var(--warn-light);
+            border-left: 3px solid var(--warn);
+            border-radius: var(--r);
+            padding: 14px 18px;
+        }
+        .limit h4 {
+            font-size: 14px;
+            color: var(--warn);
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+        .limit p {
+            font-size: 13px;
+            color: var(--g700);
+            margin: 0;
+        }
+
+        /* ── Cards (destination) ───────────────────── */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            margin-top: 18px;
+        }
+        .card {
+            background: white;
+            border: 1px solid var(--g200);
+            border-radius: var(--r);
+            padding: 20px;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.15s;
+            box-shadow: var(--shadow);
+        }
+        .card:hover {
+            border-color: var(--purple);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-1px);
+        }
+        .card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--g900);
+            margin-top: 0;
+            margin-bottom: 6px;
+        }
+        .card .meta {
+            font-size: 12px;
+            color: var(--g500);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        .card p {
+            font-size: 13.5px;
+            color: var(--g700);
+            line-height: 1.55;
+            flex-grow: 1;
+            max-width: none;
+        }
+        .card .arrow {
+            margin-top: 14px;
+            font-size: 13px;
+            color: var(--purple);
+            font-weight: 600;
+        }
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 10px;
+        }
+        .tag-ok { background: var(--ok-light); color: var(--ok); }
+        .tag-warn { background: var(--warn-light); color: var(--warn); }
+        .tag-info { background: var(--pri-light); color: var(--pri); }
+    </style>
+</head>
+<body>
+
+<!-- ── Top nav global ──────────────────────────────── -->
+<nav class="top-nav">
+    <a href="/">Adaptador</a>
+    <a href="/saber-ne">Saber-ne+</a>
+</nav>
+
+<!-- ── Saber-ne+ master tab-bar ────────────────────── -->
+<div class="sn-bar">
+    <div class="sn-bar-inner">
+        <div class="sn-title">Saber-ne+</div>
+        <nav class="sn-tabs">
+            <a href="/saber-ne" class="sn-tab">Adaptar materials</a>
+            <a href="/cuina" class="sn-tab">Com funciona ATNE</a>
+            <a href="/avaluacio" class="sn-tab active">Avaluació i decisions</a>
+        </nav>
+    </div>
+</div>
+
+<!-- ── Header pàgina ───────────────────────────────── -->
+<div class="page-header">
+    <div class="logo">ATNE <span>Avaluació i decisions</span></div>
+</div>
+
+<!-- ── Contingut ───────────────────────────────────── -->
+<div class="container">
+
+    <div class="intro">
+        <h1>Avaluació i decisions</h1>
+        <p>Les preguntes que ens hem fet, la metodologia que hem aplicat i els resultats que han orientat les decisions tecnopedagògiques d'ATNE. Aquest és el rastre empíric que sosté l'eina.</p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- EL PRINCIPI DE SOSTENIBILITAT                   -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="sustainability">
+        <div class="label">Principi de sostenibilitat</div>
+        <h2>Eficaç i eficient, en totes dues dimensions</h2>
+        <p>Al llarg de tot el projecte hem prioritzat les opcions més sostenibles com a principi de decisió, conscients que els motors amb més capacitat sovint donen més qualitat però amb un cost que es pot disparar quan l'assistent escala a milers de docents. La sostenibilitat no és només contenir la despesa: és assegurar que el projecte sigui viable a llarg termini en totes dues dimensions.</p>
+
+        <div class="two-axes">
+            <div class="axis">
+                <h4>Sostenibilitat econòmica</h4>
+                <p>Escollir la millor solució econòmicament viable a l'escala d'ús real. Validar free tiers, rotació de claus, models open-source, arquitectures deterministes que estalvien crides innecessàries.</p>
+            </div>
+            <div class="axis">
+                <h4>Sostenibilitat en qualitat</h4>
+                <p>Garantir el llindar mínim de qualitat pedagògica que fa l'eina realment útil a l'aula. No sacrificar rigor per preu: si la qualitat cau per sota del punt útil, l'estalvi deixa de ser estalvi.</p>
+            </div>
+        </div>
+
+        <p style="margin-top:18px;"><strong>Una tercera dimensió, sovint oblidada: sostenibilitat docent.</strong> ATNE no substitueix la feina del docent — la fa viable. Moltes adaptacions no s'arribarien mai a fer sense l'assistent, simplement per falta de temps o capacitat operativa. L'eina allibera temps perquè el docent el pugui invertir allà on aporta més valor: mirar l'alumne, ajustar, acompanyar.</p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- LES PREGUNTES QUE ENS HEM FET                   -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="section">
+        <h2>Les preguntes que ens hem fet</h2>
+        <p class="section-sub">Cada pregunta va emergir d'un bloqueig real del projecte. No hem fet recerca acadèmica sinó recerca d'acció: una pregunta, un experiment, una decisió, la següent pregunta.</p>
+
+        <div class="questions-list">
+            <div class="question">
+                <div class="q-meta"><span class="q-num">Q1</span><span class="q-date">2026-03-27</span></div>
+                <h4>Com redissenyar el catàleg d'instruccions?</h4>
+                <p>El catàleg inicial tenia 30 instruccions denses, duplicades i amb conflictes irresolubles entre marcs teòrics (DUA, MECR, Lectura Fàcil). Calia una arquitectura jeràrquica coherent.</p>
+            </div>
+            <div class="question">
+                <div class="q-meta"><span class="q-num">Q2</span><span class="q-date">2026-03-28</span></div>
+                <h4>RAG dinàmic o prompt hardcoded?</h4>
+                <p>Dues arquitectures candidates: recuperar blocs del corpus Markdown (RAG) o embedar les regles com a constants al codi. Quina minimitza errors sense sacrificar riquesa adaptativa?</p>
+            </div>
+            <div class="question">
+                <div class="q-meta"><span class="q-num">Q3</span><span class="q-date">2026-03-30</span></div>
+                <h4>Quines sub-variables del formulari realment connecten amb el generador?</h4>
+                <p>Una auditoria de la UI va mostrar que només 15 de 36 sub-variables (42%) estaven connectades al sistema d'instruccions. Les altres 21 eren dades mortes que el docent omplia sense efecte.</p>
+            </div>
+            <div class="question">
+                <div class="q-meta"><span class="q-num">Q4</span><span class="q-date">2026-03-31</span></div>
+                <h4>Quins jutges externs són viables per avaluar milers de casos?</h4>
+                <p>Per poder fer avaluació a escala calien jutges LLM barats, coherents entre si i sense conflicte d'interès. Quina combinació ofereix fiabilitat estadística a cost sostenible?</p>
+            </div>
+            <div class="question">
+                <div class="q-meta"><span class="q-num">Q5</span><span class="q-date">2026-04-04</span></div>
+                <h4>És viable Gemma 4 31B via API gratuïta?</h4>
+                <p>Un motor obert de qualitat comparable als privats, sense factura. Si funciona, canvia radicalment les matemàtiques d'escalat a centenars o milers de docents.</p>
+            </div>
+            <div class="question">
+                <div class="q-meta"><span class="q-num">Q6</span><span class="q-date">2026-04-07</span></div>
+                <h4>Quin és el rànquing de qualitat entre 5 models?</h4>
+                <p>Primera comparació sistemàtica amb jutges externs (sense auto-avaluació): GPT, Gemma 4, Mistral, Gemini, Sonnet. Quins models superen el llindar mínim d'ús pedagògic real?</p>
+            </div>
+            <div class="question">
+                <div class="q-meta"><span class="q-num">Q7</span><span class="q-date">2026-04-08</span></div>
+                <h4>El determinisme supera el RAG? Prompt complet vs mínim?</h4>
+                <p>Dues preguntes vinculades. La primera qüestiona l'arquitectura; la segona pregunta si el catàleg exhaustiu aporta valor o si és simplement pes afegit al prompt.</p>
+            </div>
+            <div class="question">
+                <div class="q-meta"><span class="q-num">Q8</span><span class="q-date">2026-04-09</span></div>
+                <h4>Quin model guanya en una A/B massiva multi-model?</h4>
+                <p>604 parells, 4 models en paral·lel, 5 jutges externs, rúbrica de 5 criteris. El resultat d'aquesta pregunta determina el model per defecte de producció.</p>
+            </div>
+            <div class="question">
+                <div class="q-meta"><span class="q-num">Q9</span><span class="q-date">2026-04-11</span></div>
+                <h4>Com adaptar quan el docent no té el diagnòstic?</h4>
+                <p>La majoria de docents (60-80%) no coneixen el diagnòstic clínic dels seus alumnes. Només veuen conductes a l'aula. Com oferir una via d'entrada basada en el que observen?</p>
+            </div>
+            <div class="question">
+                <div class="q-meta"><span class="q-num">Q10</span><span class="q-date">2026-04-11</span></div>
+                <h4>Els resultats es mantenen en complements i preguntes?</h4>
+                <p>La superioritat d'un model en adaptacions no implica superioritat en generar complements o preguntes de comprensió. Tres experiments paral·lels per triangular la conclusió.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- LA METODOLOGIA                                  -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="section">
+        <h2>La metodologia</h2>
+        <p class="section-sub">Els experiments comparteixen patrons metodològics per fer-los comparables i minimitzar biaixos.</p>
+
+        <h3>Triangulació multi-jutge</h3>
+        <p>Cada adaptació s'avalua amb un mínim de 3 jutges LLM externs (mai el mateix model que l'ha generada). La concordança entre jutges es mesura amb Pearson r, que sistemàticament es manté entre 0.61 i 0.75 als jutges validats (GPT-4o, Gemini Flash, Qwen, Mistral). El jutge Llama va quedar descartat per soroll (r≈0.3).</p>
+
+        <h3>Rúbrica ponderada de 5 criteris</h3>
+        <p>Cada adaptació es puntua en una escala 1-5 sobre: (1) adequació lingüística al nivell MECR configurat, (2) fidelitat al contingut curricular original, (3) adaptació al perfil de l'alumne, (4) llegibilitat i càrrega cognitiva, (5) qualitat dels complements generats. Els criteris pedagògics (3, 5) tenen més pes.</p>
+
+        <h3>Exclusió d'auto-avaluació</h3>
+        <p>Cap model pot ser jutge del seu propi output. Quan s'avalua una generació de GPT, els jutges són Gemini + Qwen + Mistral. Aquest principi es va afegir després de detectar biaix inflacionista a les primeres avaluacions en què un mateix model generava i jutjava en paral·lel.</p>
+
+        <h3>Batches grans, paral·lelització free tier</h3>
+        <p>Els experiments treballen amb volums de 160 a 604 parells. La paral·lelització per free tiers (Gemma 4, Mistral, Qwen via Groq) permet executar aquests batches amb cost marginal.</p>
+
+        <h3>Doble aproximació: rúbrica individual + judici comparatiu</h3>
+        <p>Cada adaptació s'ha avaluat de dues maneres complementàries que es validen mútuament. La primera és la <strong>puntuació individual amb rúbrica</strong> (1-5 per criteri), útil per mesurar si un text supera un llindar de qualitat absoluta. La segona és el <strong>judici comparatiu</strong> entre parells o trios d'adaptacions del mateix text original, on el jutge no posa nota sinó que indica quina és millor i per què — una aproximació inspirada en la <em>comparative judgement</em> que Daisy Christodoulou ha documentat per a l'avaluació educativa. El judici comparatiu és més fiable entre humans (i entre LLMs) perquè elimina el biaix de calibratge: és molt més fàcil dir «A és millor que B» que «A mereix un 4.2 i B un 3.8». Els dos mètodes s'han aplicat alhora als experiments Xat 9, complements i preguntes, i els dos convergeixen en la mateixa conclusió — una coincidència que reforça la triangulació.</p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- ELS EXPERIMENTS I ELS RESULTATS                 -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="section">
+        <h2>Els experiments i els resultats</h2>
+        <p class="section-sub">Cada experiment respon una pregunta de la secció anterior. Aquí només un resum: els dashboards enllaçats més avall contenen la inspecció cas a cas.</p>
+
+        <div class="exp-grid">
+            <div class="exp-card">
+                <div class="exp-date">2026-04-08 · Q7</div>
+                <h4>Determinista vs RAG v3</h4>
+                <div class="exp-setup">60 generacions · 3 models (GPT, Gemini, Mistral) · jutge GPT · rúbrica 5 criteris</div>
+                <div class="exp-result"><strong>Determinista 4.49</strong> vs RAG 4.22. Delta <strong>+0.26</strong> a favor del determinista, amb diferències més grans als criteris pedagògics (+0.35 B2 i +0.33 C1).</div>
+                <div class="exp-learning">→ Decisió: arquitectura determinista a producció. RAG queda com a infraestructura retenida però no activa.</div>
+            </div>
+
+            <div class="exp-card">
+                <div class="exp-date">2026-04-05 · Q6</div>
+                <h4>Rànquing final 5 models</h4>
+                <div class="exp-setup">200 casos × 5 generadors · jutges externs · rúbrica 5 criteris · cost ~€5</div>
+                <div class="exp-result"><strong>GPT-4o-mini 4.44</strong>, Gemma 4 31B <strong>4.23</strong> (free), Mistral Small <strong>4.19</strong> (free), Gemini Flash 3.93, Sonnet 2.04 (afectat per bug RAG-v2).</div>
+                <div class="exp-learning">→ Els tres models free tier superen el llindar 4.0. Migració a producció pot ser cost zero.</div>
+            </div>
+
+            <div class="exp-card">
+                <div class="exp-date">2026-04-11 · Q8</div>
+                <h4>Xat 9 — A/B multi-model 604 parells</h4>
+                <div class="exp-setup">604 parells · 4 models × ~180 parells × 2 condicions (prompt mínim vs complet) · 5 jutges · rúbrica ponderada</div>
+                <div class="exp-result"><strong>Gemma 4 31B 4.75/5</strong> (1r en 4/5 criteris), Mistral Small 4.64, Llama 3.3 70B 4.26, GPT-4o-mini 4.19. Delta prompt complet: gran per GPT (+0.62, d=1.19), petit per open-source (+0.14 Gemma).</div>
+                <div class="exp-learning">→ Gemma 4 és el model per defecte. El catàleg complet només és crític per GPT; els open-source ja porten scaffolding implícit.</div>
+            </div>
+
+            <div class="exp-card">
+                <div class="exp-date">2026-04-12 · Q10a</div>
+                <h4>Complements — 8 tipus</h4>
+                <div class="exp-setup">513 avaluacions · 4 models × 8 tipus de complement · 5 jutges</div>
+                <div class="exp-result"><strong>Gemma 4 31B 4.58/5</strong>, guanya en els 8 tipus i en els 6 perfils d'alumne. GPT 4.46, Llama 4.37 (parcial per quota), Mistral 4.34.</div>
+                <div class="exp-learning">→ Gemma 4 també guanya en complements. Primera confirmació de la triangulació.</div>
+            </div>
+
+            <div class="exp-card">
+                <div class="exp-date">2026-04-12 · Q10b</div>
+                <h4>Preguntes de comprensió — 9 tipus Bloom</h4>
+                <div class="exp-setup">767 avaluacions · 4 models × 9 nivells de la taxonomia Bloom · 5 jutges</div>
+                <div class="exp-result"><strong>Gemma 4 31B 4.40/5</strong>, guanya en 7 dels 9 tipus. Consistent a dominis cognitius diversos.</div>
+                <div class="exp-learning">→ Segona confirmació. La victòria de Gemma 4 queda triangulada en tres experiments independents.</div>
+            </div>
+
+            <div class="exp-card">
+                <div class="exp-date">2026-04-07 · costat</div>
+                <h4>Test Salamandra 7B</h4>
+                <div class="exp-setup">3 casos (P1 nouvingut, P5 dislèxia, P7 altes capacitats) · Colab T4 4-bit</div>
+                <div class="exp-result">Salamandra genera 65 paraules/cas de mitjana (vs 300-630 dels altres), zero glossaris, zero negretes, errors factuals. Escriu correctament en català però no segueix instruccions complexes.</div>
+                <div class="exp-learning">→ Hipòtesi pendent: amb fine-tuning educatiu, Salamandra podria ser un model públic català viable. Parking lot.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- LA TRIANGULACIÓ                                 -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="triangulation">
+        <h2>La triangulació de Gemma 4</h2>
+        <p>El resultat més sòlid de tota l'avaluació: <strong>Gemma 4 31B guanya de manera consistent en tres experiments independents</strong> amb rúbriques diferents, jutges diferents i dimensions diferents. La concordança entre jutges (Pearson r≈0.61-0.75) i l'absència d'auto-avaluació descarten biaixos accidentals.</p>
+
+        <div class="tri-bars">
+            <div class="tri-bar">
+                <div class="tri-name">Adaptacions (Xat 9)</div>
+                <div class="tri-score">4.75<span>/5</span></div>
+                <div class="tri-desc">604 parells A/B, 4 models, 5 jutges externs. Gemma 4 lidera en 4 dels 5 criteris de la rúbrica.</div>
+            </div>
+            <div class="tri-bar">
+                <div class="tri-name">Complements</div>
+                <div class="tri-score">4.58<span>/5</span></div>
+                <div class="tri-desc">513 avaluacions en 8 tipus de complement (glossari, esquemes, pictogrames, bastides...). Gemma 4 guanya en els 8.</div>
+            </div>
+            <div class="tri-bar">
+                <div class="tri-name">Preguntes</div>
+                <div class="tri-score">4.40<span>/5</span></div>
+                <div class="tri-desc">767 avaluacions en 9 nivells de la taxonomia Bloom. Gemma 4 guanya en 7 dels 9 nivells.</div>
+            </div>
+        </div>
+
+        <p style="margin-top:20px;">Totals: <strong>1.884 avaluacions</strong> contribueixen a aquesta conclusió, distribuïdes en tres dominis que es toquen poc entre si (adaptar un text, generar un material de suport, formular una pregunta pedagògica). Una victòria coherent en tres dominis distintats és un senyal molt més fort que una victòria en qualsevol d'ells aïlladament.</p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- LÍMITS I VALIDACIÓ PENDENT                      -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="section">
+        <h2>Límits i validació pendent</h2>
+        <p class="section-sub">L'avaluació té fortaleses però també límits que cal mantenir en primer pla. Cap conclusió es presenta com a definitiva sense aquesta salvaguarda.</p>
+
+        <div class="limits">
+            <div class="limit">
+                <h4>El jutge GPT infla puntuacions</h4>
+                <p>La validació humana ad hoc d'una mostra va revelar que GPT puntua en el rang 4.5-4.7 texts que docents humans valoren entre 3.0 i 3.5. Les puntuacions absolutes no són equivalents a valoracions humanes; el rànquing relatiu (A &gt; B) és més fiable que els valors absoluts.</p>
+            </div>
+            <div class="limit">
+                <h4>Validació humana docent pendent</h4>
+                <p>Els ranquings de complements (glossaris multilingües, pictogrames, transliteracions) estan basats en avaluacions LLM, no en docents reals. Un glossari àrab puntuat 4.5/5 per un jutge LLM pot ser pedagògicament desajustat sense que el jutge ho detecti. Cal auditoria amb 50-100 casos FJE durant el pilot 20/04-08/05.</p>
+            </div>
+            <div class="limit">
+                <h4>Llama via Groq no escala</h4>
+                <p>El límit de tokens per minut del free tier Groq (6K TPM) és insuficient per al nostre prompt complet (~7K tokens). Llama 3.3 70B només va completar fracció dels casos, fet que deixa el seu rànquing parcialment fonamentat.</p>
+            </div>
+            <div class="limit">
+                <h4>Riscos detectats i corregits</h4>
+                <p>El motor Gemini 2.5 Flash activava per defecte "thinking tokens" (cost multiplicat) fins que es va detectar i desactivar. Es van retirar 43 avaluacions invàlides per auto-avaluació del dataset final. Aquestes correccions estan incorporades als resultats actuals.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- DASHBOARDS — DESTINATIONS                       -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="section">
+        <h2>Dashboards i inspecció cas a cas</h2>
+        <p class="section-sub">Els tres experiments principals estan disponibles amb inspecció interactiva: cada cas individual, cada puntuació, cada comentari del jutge.</p>
+
+        <div class="card-grid">
+            <a href="/dashboard" class="card">
+                <span class="tag tag-ok">Triangulació base</span>
+                <h3>Xat 9 — Adaptacions A/B</h3>
+                <div class="meta">604 parells · 4 models · 5 jutges</div>
+                <p>Comparació de qualitat entre prompt mínim i prompt complet en 4 models. Gemma 4 31B amb prompt complet guanya 4.75/5. Inspecció cas a cas, heatmap, filtrat per perfil.</p>
+                <span class="arrow">Veure dashboard →</span>
+            </a>
+
+            <a href="/dashboard_complements" class="card">
+                <span class="tag tag-ok">Triangulació</span>
+                <h3>Complements</h3>
+                <div class="meta">513 avaluacions · 8 tipus</div>
+                <p>Generació i avaluació de 8 tipus de complements (glossari, esquema, mapa conceptual, pictogrames, bastides, etc.). Gemma 4 guanya 4.58/5 en els 8.</p>
+                <span class="arrow">Veure dashboard →</span>
+            </a>
+
+            <a href="/dashboard_questions" class="card">
+                <span class="tag tag-ok">Triangulació</span>
+                <h3>Preguntes de comprensió</h3>
+                <div class="meta">767 avaluacions · 9 nivells Bloom</div>
+                <p>Generació de preguntes segons la taxonomia de Bloom. Gemma 4 guanya 4.40/5 en 7 dels 9 nivells cognitius.</p>
+                <span class="arrow">Veure dashboard →</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- ANÀLISI I CASOS                                 -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="section">
+        <h2>Anàlisi qualitativa</h2>
+        <p class="section-sub">Eines auxiliars per inspeccionar casos individuals, comparatives i progrés d'execució.</p>
+
+        <div class="card-grid">
+            <a href="/ui/eval_dashboard.html" class="card">
+                <span class="tag tag-info">Dashboard</span>
+                <h3>Avaluació general</h3>
+                <div class="meta">Vista agregada · Heatmap</div>
+                <p>Ràtios per model, dimensió i jutge. Heatmap de coherència entre jutges.</p>
+                <span class="arrow">Obrir →</span>
+            </a>
+
+            <a href="/ui/eval_cases.html" class="card">
+                <span class="tag tag-info">Inspecció</span>
+                <h3>Casos individuals</h3>
+                <div class="meta">Navegació cas a cas</div>
+                <p>Text original, text adaptat, configuració, puntuacions i comentaris del jutge per cada cas.</p>
+                <span class="arrow">Obrir →</span>
+            </a>
+
+            <a href="/ui/eval_results.html" class="card">
+                <span class="tag tag-info">Comparativa</span>
+                <h3>Resultats comparats</h3>
+                <div class="meta">Taula heatmap</div>
+                <p>Mitjanes per model i dimensió. Detecta d'un cop d'ull on cada model destaca o falla.</p>
+                <span class="arrow">Obrir →</span>
+            </a>
+
+            <a href="/ui/eval_progress.html" class="card">
+                <span class="tag tag-warn">En curs</span>
+                <h3>Progrés d'avaluacions</h3>
+                <div class="meta">Estat live</div>
+                <p>Estat en temps real de les avaluacions que s'estan executant i errors detectats.</p>
+                <span class="arrow">Obrir →</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- INFORMES                                        -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="section">
+        <h2>Informes</h2>
+        <p class="section-sub">Documents de síntesi per compartir amb direccions i equips tècnics.</p>
+
+        <div class="card-grid">
+            <a href="/ui/informe.html" class="card">
+                <span class="tag tag-info">HTML</span>
+                <h3>Informe complet</h3>
+                <div class="meta">Visualització web</div>
+                <p>Informe complet en format web: metodologia, resultats, conclusions i recomanacions per al pilot.</p>
+                <span class="arrow">Llegir →</span>
+            </a>
+
+            <a href="/informe_fje" class="card" download>
+                <span class="tag tag-ok">Descàrrega</span>
+                <h3>Informe FJE</h3>
+                <div class="meta">Per a direccions</div>
+                <p>Versió executiva per a Jesuïtes Educació: decisions clau, calendari de desplegament, prioritats del pilot.</p>
+                <span class="arrow">Descarregar ↓</span>
+            </a>
+
+            <a href="/informe_tecnic" class="card" download>
+                <span class="tag tag-info">Descàrrega</span>
+                <h3>Informe tècnic</h3>
+                <div class="meta">Per a equip tècnic</div>
+                <p>Detalls metodològics: arquitectura, paràmetres dels experiments, mètriques i validació.</p>
+                <span class="arrow">Descarregar ↓</span>
+            </a>
+        </div>
+    </div>
+
+</div><!-- /container -->
+
+</body>
+</html>

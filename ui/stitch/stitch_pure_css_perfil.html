@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+
+<html lang="ca"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --primary: #3337a6;
+            --primary-container: #4c51bf;
+            --on-primary: #ffffff;
+            --surface: #f8f9ff;
+            --surface-container: #e5eeff;
+            --surface-container-low: #eff4ff;
+            --surface-container-lowest: #ffffff;
+            --surface-container-high: #dce9ff;
+            --surface-container-highest: #d3e4fe;
+            --on-surface: #0b1c30;
+            --on-surface-variant: #464653;
+            --outline-variant: #c7c5d5;
+            --error: #ba1a1a;
+            
+            --font-headline: 'Plus Jakarta Sans', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            
+            --radius-lg: 0.5rem;
+            --radius-xl: 0.75rem;
+            --radius-2xl: 1rem;
+            --radius-3xl: 1.5rem;
+            --radius-full: 9999px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--surface);
+            color: var(--on-surface);
+            font-family: var(--font-body);
+            line-height: 1.5;
+            min-height: 100dvh;
+            padding-bottom: 5rem;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            user-select: none;
+        }
+
+        /* Header */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background-color: var(--surface);
+            width: 100%;
+        }
+
+        .header-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            padding: 0.5rem;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+
+        .menu-btn:hover {
+            background-color: var(--surface-container-low);
+        }
+
+        .logo {
+            font-family: var(--font-headline);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.025em;
+        }
+
+        .header-nav {
+            display: none;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .header-nav {
+                display: flex;
+            }
+        }
+
+        .nav-link {
+            text-decoration: none;
+            font-family: var(--font-headline);
+            font-size: 1.125rem;
+            color: #64748b;
+            transition: color 0.2s;
+        }
+
+        .nav-link.active {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .nav-link:hover:not(.active) {
+            color: var(--primary);
+        }
+
+        .profile-wrapper {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: var(--radius-full);
+            border: 2px solid var(--primary);
+            overflow: hidden;
+            background-color: var(--surface-container-highest);
+        }
+
+        .profile-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Layout */
+        main {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 1024px) {
+            main {
+                grid-template-columns: repeat(12, 1fr);
+            }
+            .sidebar {
+                grid-column: span 3;
+            }
+            .content-canvas {
+                grid-column: span 9;
+            }
+        }
+
+        /* Sidebar */
+        .sidebar-card {
+            background-color: var(--surface-container-lowest);
+            border-radius: 0 var(--radius-3xl) var(--radius-3xl) 0;
+            padding: 1.5rem;
+            position: sticky;
+            top: 6rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h2 {
+            font-family: var(--font-headline);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 2rem;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-xl);
+            color: #475569;
+            transition: all 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .step-item.active {
+            background-color: var(--surface-container-highest);
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .step-item.active .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1;
+        }
+
+        .step-item:hover:not(.active) {
+            background-color: var(--surface-container-low);
+        }
+
+        .step-text {
+            font-size: 0.875rem;
+            font-medium: 500;
+        }
+
+        /* Main Sections */
+        .content-canvas {
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        .page-header {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .step-indicator {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--primary);
+            font-family: var(--font-body);
+        }
+
+        .page-title {
+            font-family: var(--font-headline);
+            font-size: 2.25rem;
+            font-weight: 800;
+            line-height: 1.1;
+            color: var(--on-surface);
+        }
+
+        .page-desc {
+            font-size: 1.125rem;
+            color: var(--on-surface-variant);
+            max-width: 42rem;
+        }
+
+        /* Form Card */
+        .card {
+            background-color: var(--surface-container-lowest);
+            border-radius: var(--radius-3xl);
+            padding: 2rem;
+            border: 1px solid rgba(199, 197, 213, 0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .icon-box {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: var(--radius-xl);
+            background-color: var(--surface-container-low);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+        }
+
+        .card-title {
+            font-family: var(--font-headline);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-left: 0.25rem;
+        }
+
+        .form-select {
+            width: 100%;
+            background-color: var(--surface-container-low);
+            border: none;
+            border-radius: var(--radius-xl);
+            padding: 0.875rem 1rem;
+            color: var(--on-surface);
+            font-family: var(--font-body);
+            transition: box-shadow 0.2s;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23464653'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.25rem;
+        }
+
+        .form-select:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(51, 55, 166, 0.4);
+        }
+
+        /* Profile Selection */
+        .profile-card {
+            background-color: var(--surface-container-low);
+        }
+
+        .radio-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .radio-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem;
+            background-color: var(--surface-container-lowest);
+            border-radius: var(--radius-2xl);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .radio-option:hover {
+            box-shadow: 0 0 0 2px rgba(51, 55, 166, 0.2);
+        }
+
+        .radio-option.disabled {
+            opacity: 0.6;
+        }
+
+        .radio-option input[type="radio"] {
+            width: 1.25rem;
+            height: 1.25rem;
+            accent-color: var(--primary);
+        }
+
+        .radio-info {
+            margin-left: 1rem;
+        }
+
+        .radio-label {
+            display: block;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .radio-sub {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--on-surface-variant);
+        }
+
+        /* Slider Section */
+        .slider-box {
+            background-color: var(--surface-container-high);
+            border-radius: var(--radius-2xl);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .slider-title {
+            font-family: var(--font-headline);
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .slider-container {
+            padding-top: 1.5rem;
+            position: relative;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .slider-label {
+            font-size: 0.75rem;
+            color: var(--on-surface-variant);
+            font-weight: 500;
+        }
+
+        .slider-label.active {
+            color: var(--primary);
+            font-weight: 700;
+            background-color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+        }
+
+        .slider-track {
+            height: 0.75rem;
+            width: 100%;
+            background-color: var(--surface-container-highest);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .slider-fill {
+            height: 100%;
+            width: 25%;
+            background: linear-gradient(to right, var(--primary), var(--primary-container));
+            border-radius: var(--radius-full);
+            transition: width 0.3s ease;
+        }
+
+        /* Checklist */
+        .checklist-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .checklist-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checklist-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
+        @media (min-width: 768px) {
+            .checklist-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            background-color: var(--surface-container-lowest);
+            border-radius: var(--radius-xl);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .check-item:hover {
+            background-color: white;
+        }
+
+        .check-item input[type="checkbox"] {
+            width: 1.25rem;
+            height: 1.25rem;
+            accent-color: var(--primary);
+            border-radius: 4px;
+        }
+
+        .check-text {
+            margin-left: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--on-surface-variant);
+            transition: color 0.2s;
+        }
+
+        .check-item:hover .check-text {
+            color: var(--on-surface);
+        }
+
+        /* Bento Grid Tips */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .bento-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .bento-large {
+                grid-column: span 2;
+            }
+        }
+
+        .bento-card-blue {
+            background: linear-gradient(135deg, var(--primary), var(--primary-container));
+            border-radius: var(--radius-3xl);
+            padding: 2rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .bento-card-white {
+            background-color: white;
+            border-radius: var(--radius-3xl);
+            padding: 2rem;
+            border: 1px solid rgba(199, 197, 213, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .tip-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .tip-body {
+            color: #dbeafe;
+            opacity: 0.9;
+            position: relative;
+            z-index: 2;
+        }
+
+        .tip-bg-icon {
+            position: absolute;
+            bottom: -1rem;
+            right: -1rem;
+            font-size: 120px;
+            color: rgba(255, 255, 255, 0.1);
+            font-variation-settings: 'FILL' 1;
+        }
+
+        .history-icon {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .history-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .history-desc {
+            font-size: 0.75rem;
+            color: var(--on-surface-variant);
+        }
+
+        .load-btn {
+            background: none;
+            border: none;
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+        }
+
+        .load-btn:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 50;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid #f1f5f9;
+            border-radius: 1.5rem 1.5rem 0 0;
+            box-shadow: 0 -10px 40px -10px rgba(11, 28, 48, 0.06);
+        }
+
+        .continue-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-container));
+            color: white;
+            border: none;
+            border-radius: var(--radius-xl);
+            padding: 0.75rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .continue-btn:hover {
+            opacity: 0.9;
+        }
+
+        .continue-btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+<header>
+<div class="header-content">
+<div class="header-left">
+<button class="menu-btn">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="logo">ATNE</div>
+</div>
+<div class="header-left">
+<nav class="header-nav">
+<a class="nav-link active" href="#">Context &amp; Profile</a>
+<a class="nav-link" href="#">Text Input</a>
+<a class="nav-link" href="#">Adaptation Configuration</a>
+</nav>
+<div class="profile-wrapper">
+<img alt="User profile" class="profile-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBR_NSOwVQJ0TPFVssbl18KenDmdyPFmwQtpAuCAuXiaEiI-pcm8jB2bXmbLpWoekqWqpKh5Q7344SASQeyzz0AZAFUcvlkot1L_RLwlQDoCbruoGkGuLBi2GsmAM3Vy-kOaE7a4NqKZ9ydBXwwzz54f4F7hTt_mPtlGTm80Ju7-X-4ygYnA8h2k3UKs2zoNUR4_85HaD4auMeoBRvUi6p8eLxJBV7kBym5ZpXKZhG7dccRzGnRTj352bHuRDEk4Z9Dnpe7mhjxBqM"/>
+</div>
+</div>
+</div>
+</header>
+<main>
+<!-- Sidebar -->
+<aside class="sidebar">
+<div class="sidebar-card">
+<h2>ATNE Progress</h2>
+<div style="display: flex; flex-direction: column; gap: 0.5rem;">
+<a class="step-item active" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span class="step-text">Context &amp; Profile</span>
+</a>
+<a class="step-item" href="#">
+<span class="material-symbols-outlined">edit_note</span>
+<span class="step-text">Text Input</span>
+</a>
+<a class="step-item" href="#">
+<span class="material-symbols-outlined">tune</span>
+<span class="step-text">Adaptation Configuration</span>
+</a>
+<a class="step-item" href="#">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="step-text">Results</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<div class="content-canvas">
+<section class="page-header">
+<span class="step-indicator">Pas 1 de 4</span>
+<h1 class="page-title">Configura el context d'aprenentatge</h1>
+<p class="page-desc">Defineix l'entorn educatiu i el perfil de l'alumne per personalitzar l'adaptació curricular amb precisió.</p>
+</section>
+<!-- Card 1: Context Docent -->
+<div class="card">
+<div class="card-header">
+<div class="icon-box">
+<span class="material-symbols-outlined">school</span>
+</div>
+<h3 class="card-title">Context Docent</h3>
+</div>
+<div class="form-grid">
+<div class="form-group">
+<label class="form-label">Etapa</label>
+<select class="form-select">
+<option>Primària</option>
+<option>ESO</option>
+<option>Batxillerat</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label">Curs</label>
+<select class="form-select">
+<option>1r de Primària</option>
+<option>2n de Primària</option>
+<option>3r de Primària</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label">Àmbit</label>
+<select class="form-select">
+<option>Lingüístic</option>
+<option>Científic-tecnològic</option>
+<option>Social</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label">Matèria</label>
+<select class="form-select">
+<option>Llengua Catalana i Literatura</option>
+<option>Llengua Castellana</option>
+<option>Anglès</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Card 2: Per a qui -->
+<div class="card profile-card">
+<div class="card-header">
+<div class="icon-box" style="background-color: var(--surface-container-lowest);">
+<span class="material-symbols-outlined">group</span>
+</div>
+<h3 class="card-title">Per a qui és l'adaptació?</h3>
+</div>
+<div class="radio-grid">
+<label class="radio-option">
+<input checked="" name="target" type="radio"/>
+<div class="radio-info">
+<span class="radio-label">Un alumne concret</span>
+<span class="radio-sub">Adaptació focalitzada en un perfil específic</span>
+</div>
+</label>
+<label class="radio-option disabled">
+<input name="target" type="radio"/>
+<div class="radio-info">
+<span class="radio-label">Un grup amb diversitat de nivells</span>
+<span class="radio-sub">Disseny universal per a l'aula</span>
+</div>
+</label>
+</div>
+<div class="slider-box">
+<h4 class="slider-title">Aquest alumne llegeix i comprèn...</h4>
+<div class="slider-container">
+<div class="slider-labels">
+<span class="slider-label active">Lletra de pal</span>
+<span class="slider-label">Lletra lligada</span>
+<span class="slider-label">Frases curtes</span>
+<span class="slider-label">Textos complexos</span>
+</div>
+<div class="slider-track">
+<div class="slider-fill"></div>
+</div>
+</div>
+</div>
+<div class="checklist-section">
+<div class="checklist-header">
+<span class="material-symbols-outlined" style="color: var(--primary);">visibility</span>
+<h4 class="slider-title">Què observes?</h4>
+</div>
+<div class="checklist-grid">
+<label class="check-item">
+<input type="checkbox"/>
+<span class="check-text">Dificultat en la lectura fluida</span>
+</label>
+<label class="check-item">
+<input checked="" type="checkbox"/>
+<span class="check-text">Necessita suport visual constant</span>
+</label>
+<label class="check-item">
+<input type="checkbox"/>
+<span class="check-text">Manca de comprensió abstracta</span>
+</label>
+<label class="check-item">
+<input type="checkbox"/>
+<span class="check-text">Alta capacitat d'atenció visual</span>
+</label>
+</div>
+</div>
+</div>
+<!-- Bento Grid -->
+<div class="bento-grid">
+<div class="bento-card-blue bento-large">
+<h4 class="tip-title">Consell Intel·ligent</h4>
+<p class="tip-body">Seleccionar "Lletra de pal" activarà automàticament el generador d'imatges pictogràfiques per a conceptes clau.</p>
+<span class="material-symbols-outlined tip-bg-icon">lightbulb</span>
+</div>
+<div class="bento-card-white">
+<span class="material-symbols-outlined history-icon">history</span>
+<span class="history-title">Últim perfil usat</span>
+<span class="history-desc">Pau G. - 3r Primària</span>
+<button class="load-btn">Carregar</button>
+</div>
+</div>
+</div>
+</main>
+<footer>
+<button class="continue-btn" onclick="nextStep()">
+            Continuar
+            <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</footer>
+<script>
+        function nextStep() {
+            console.log('Progressing to next step...');
+            // Navigation logic would go here
+        }
+
+        // Simple interactive demo for checkboxes
+        document.querySelectorAll('.check-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                if (e.target.tagName !== 'INPUT') {
+                    const checkbox = item.querySelector('input');
+                    checkbox.checked = !checkbox.checked;
+                }
+            });
+        });
+    </script>
+</body></html>

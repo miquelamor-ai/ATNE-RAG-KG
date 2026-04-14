@@ -1740,8 +1740,9 @@ async function generateDraftText() {
     };
 
     btn.disabled = true;
+    btn.classList.add("is-loading");
     const oldHTML = btn.innerHTML;
-    btn.innerHTML = '<span class="material-symbols-outlined">hourglass_top</span> Generant...';
+    btn.innerHTML = '<span class="material-symbols-outlined">autorenew</span> <span>Generant...</span>';
     status.style.display = "block";
     status.style.color = "var(--on-surface-variant)";
     status.textContent = "Generant amb Gemma 4... pot trigar 15-30 segons.";
@@ -1775,6 +1776,7 @@ async function generateDraftText() {
         status.style.color = "#b91c1c";
     } finally {
         btn.disabled = false;
+        btn.classList.remove("is-loading");
         btn.innerHTML = oldHTML;
         updateGenerateButtonLabel();
     }

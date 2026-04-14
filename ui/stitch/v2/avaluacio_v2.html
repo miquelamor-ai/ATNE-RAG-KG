@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ca"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Avaluació i decisions - ATNE Saber-ne+</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#0b1c30",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#dfe0ff",
+                        "surface": "#f8f9ff",
+                        "primary-fixed": "#e1e0ff",
+                        "secondary": "#4953bc",
+                        "surface-container": "#e5eeff",
+                        "background": "#f8f9ff",
+                        "surface-container-low": "#eff4ff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#213145",
+                        "tertiary": "#2b38a9",
+                        "on-primary": "#ffffff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "secondary-fixed": "#e0e0ff",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#d3e4fe",
+                        "surface-bright": "#f8f9ff",
+                        "on-surface-variant": "#464653",
+                        "on-primary-fixed-variant": "#3337a6",
+                        "on-secondary-fixed": "#000767",
+                        "inverse-primary": "#bfc1ff",
+                        "on-error-container": "#93000a",
+                        "surface-container-highest": "#d3e4fe",
+                        "primary-fixed-dim": "#bfc1ff",
+                        "outline": "#767684",
+                        "surface-container-high": "#dce9ff",
+                        "outline-variant": "#c7c5d5",
+                        "primary": "#3337a6",
+                        "surface-tint": "#4c51bf",
+                        "on-primary-fixed": "#03006d",
+                        "secondary-container": "#8792fe",
+                        "on-tertiary-fixed-variant": "#2b38aa",
+                        "primary-container": "#4c51bf",
+                        "on-tertiary-container": "#d3d5ff",
+                        "on-surface": "#0b1c30",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#cbdbf5",
+                        "on-tertiary-fixed": "#000965",
+                        "on-primary-container": "#d4d5ff",
+                        "on-secondary-fixed-variant": "#2f3aa3",
+                        "secondary-fixed-dim": "#bdc2ff",
+                        "on-secondary-container": "#17228f",
+                        "tertiary-fixed-dim": "#bdc2ff",
+                        "tertiary-container": "#4552c2",
+                        "error": "#ba1a1a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9ff;
+            color: #0b1c30;
+        }
+        h1, h2, h3 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .editorial-gradient {
+            background: linear-gradient(135deg, #3337a6 0%, #4c51bf 100%);
+        }
+        .ghost-border {
+            outline: 1px solid rgba(199, 197, 213, 0.15);
+        }
+        .score-bar {
+            height: 12px;
+            background: #e1e0ff;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+        .score-fill {
+            height: 100%;
+            background: #3337a6;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface selection:bg-primary-fixed">
+<!-- TopAppBar Shell -->
+<header class="bg-[#f8f9ff] dark:bg-slate-950 backdrop-blur-md bg-opacity-80 docked full-width top-0 sticky z-50 shadow-none">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-[1440px] mx-auto">
+<div class="flex items-center gap-8">
+<span class="text-xl font-extrabold text-[#3337a6] dark:text-[#d3e4fe] tracking-tight">Saber-ne+</span>
+<nav class="hidden md:flex gap-6 items-center">
+<a class="font-['Plus_Jakarta_Sans'] font-semibold text-sm tracking-wide text-slate-500 dark:text-slate-400 hover:text-[#3337a6] transition-colors" href="#">Adaptar materials</a>
+<a class="font-['Plus_Jakarta_Sans'] font-semibold text-sm tracking-wide text-slate-500 dark:text-slate-400 hover:text-[#3337a6] transition-colors" href="#">Com funciona ATNE</a>
+<a class="font-['Plus_Jakarta_Sans'] font-semibold text-sm tracking-wide text-[#3337a6] dark:text-[#d3e4fe] border-b-2 border-[#3337a6] pb-1" href="#">Avaluació i decisions</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden lg:flex bg-[#eff4ff] dark:bg-slate-900 rounded-lg px-3 py-1.5 items-center gap-2">
+<span class="material-symbols-outlined text-slate-400 text-lg">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-48 text-on-surface-variant placeholder:text-slate-400" placeholder="Cerca en informes..." type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-slate-500 hover:bg-[#eff4ff] dark:hover:bg-slate-800 rounded-lg transition-all scale-95 active:scale-90 duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-[#eff4ff] dark:hover:bg-slate-800 rounded-lg transition-all scale-95 active:scale-90 duration-200">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<img alt="User profile avatar" class="w-8 h-8 rounded-full ml-2 border border-surface-container-highest" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4BKdJMzVhuOy3flxj__0ecnegZRT2TR6t6uFbgp6oPg0QHYhpFR7Xgds67-p1bESUjtRYegk4ckl_np_wk7JxlkrdNw1cJFJQUUTt7parM23d8sdi07kVJzQosGnQrk4gAu28SfJqB8nzhFe-CjOm7QrfJVBE9y3tsF6wpa5c6FVxOnDjZME_SXnd2O4uzlJpmPHgo1m592QE2WucwZfZwRu_pIE8yIUF5K1IE3ObI6X2C47_PoWmcmnR2S1VsXpLdU-UfbbODqQ"/>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-[1100px] mx-auto px-6 py-16">
+<!-- Hero Section -->
+<section class="mb-20 max-w-[780px]">
+<h1 class="text-[3.5rem] leading-tight font-bold text-on-surface mb-6 tracking-tight">
+                Avaluació i decisions
+            </h1>
+<p class="text-[1.125rem] text-on-surface-variant leading-relaxed">
+                Què hem provat, com ho hem mesurat, quines decisions tecnopedagògiques se n'han derivat.
+            </p>
+</section>
+<!-- SECTION 1 — PRINCIPI DE SOSTENIBILITAT -->
+<section class="mb-20">
+<div class="bg-primary/5 rounded-2xl p-10 border border-primary/10">
+<div class="max-w-[780px] mb-10">
+<h2 class="text-2xl font-bold text-primary mb-4">Eficaç i eficient, en totes tres dimensions</h2>
+<p class="text-on-surface-variant leading-relaxed">
+                        Al llarg de tot el projecte hem prioritzat les opcions més sostenibles com a principi de decisió, conscients que els motors amb més capacitat sovint donen més qualitat però amb un cost que pot disparar-se quan l'assistent escala a milers de docents.
+                    </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-white p-6 rounded-xl shadow-sm border border-outline-variant/30">
+<span class="material-symbols-outlined text-primary mb-4">payments</span>
+<h3 class="font-bold text-sm mb-2 uppercase tracking-wide">Sostenibilitat Econòmica</h3>
+<p class="text-sm text-on-surface-variant">Escollir la millor solució econòmicament viable a l'escala d'ús real. Validar free tiers, rotació de claus, models open-source.</p>
+</div>
+<div class="bg-white p-6 rounded-xl shadow-sm border border-outline-variant/30">
+<span class="material-symbols-outlined text-primary mb-4">verified</span>
+<h3 class="font-bold text-sm mb-2 uppercase tracking-wide">Sostenibilitat en Qualitat</h3>
+<p class="text-sm text-on-surface-variant">Garantir el llindar mínim de qualitat pedagògica que fa l'eina realment útil a l'aula. No sacrificar rigor per preu.</p>
+</div>
+<div class="bg-white p-6 rounded-xl shadow-sm border border-outline-variant/30">
+<span class="material-symbols-outlined text-primary mb-4">groups</span>
+<h3 class="font-bold text-sm mb-2 uppercase tracking-wide">Sostenibilitat Docent</h3>
+<p class="text-sm text-on-surface-variant">ATNE no substitueix la feina del docent: la fa viable. L'eina allibera temps per mirar l'alumne, ajustar, acompanyar.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Executive Summary -->
+<section class="mb-20 bg-surface-container-high rounded-xl p-10 relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 editorial-gradient"></div>
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10">
+<h2 class="text-xl font-bold text-primary tracking-tight">Decisions principals</h2>
+<span class="text-[0.75rem] font-medium text-primary bg-surface-container-lowest px-3 py-1 rounded-full uppercase tracking-wider">Resum Executiu</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="flex gap-4 items-start group transition-transform duration-200 hover:translate-x-1">
+<div class="mt-1 w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">trending_up</span>
+</div>
+<div>
+<p class="text-[1rem] font-medium text-on-surface group-hover:text-primary transition-colors">Gemma 4 31B guanya en adaptacions, complements i preguntes</p>
+<p class="text-[0.75rem] text-on-surface-variant mt-1 uppercase tracking-wider">Triangulació en 3 experiments</p>
+</div>
+</div>
+<div class="flex gap-4 items-start group transition-transform duration-200 hover:translate-x-1">
+<div class="mt-1 w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">terminal</span>
+</div>
+<div>
+<p class="text-[1rem] font-medium text-on-surface group-hover:text-primary transition-colors">Prompt determinista supera RAG hardcoded (+0.26)</p>
+<p class="text-[0.75rem] text-on-surface-variant mt-1 uppercase tracking-wider">Mètrica d'eficiència tècnica</p>
+</div>
+</div>
+<div class="flex gap-4 items-start group transition-transform duration-200 hover:translate-x-1">
+<div class="mt-1 w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+</div>
+<div>
+<p class="text-[1rem] font-medium text-on-surface group-hover:text-primary transition-colors">Jutge GPT infla puntuacions — validació humana pendent</p>
+<p class="text-[0.75rem] text-on-surface-variant mt-1 uppercase tracking-wider">Biaix algorítmic detectat</p>
+</div>
+</div>
+<div class="flex gap-4 items-start group transition-transform duration-200 hover:translate-x-1">
+<div class="mt-1 w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">analytics</span>
+</div>
+<div>
+<p class="text-[1rem] font-medium text-on-surface group-hover:text-primary transition-colors">1.280 avaluacions en 6 models en paral·lel</p>
+<p class="text-[0.75rem] text-on-surface-variant mt-1 uppercase tracking-wider">Volum de dades analitzat</p>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 2 — LES PREGUNTES QUE ENS HEM FET -->
+<section class="mb-20">
+<div class="flex items-center gap-4 mb-8">
+<h2 class="text-2xl font-bold text-on-surface">Les preguntes que ens hem fet</h2>
+<div class="h-px flex-grow bg-outline-variant opacity-20"></div>
+</div>
+<div class="space-y-4">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+<div class="p-4 bg-white rounded-lg border border-outline-variant/30 flex gap-4">
+<span class="text-primary font-bold">Q1</span>
+<div>
+<span class="text-[0.65rem] font-bold text-slate-400 block mb-1">2026-03-27</span>
+<p class="text-sm font-semibold">Com redissenyar el catàleg d'instruccions?</p>
+</div>
+</div>
+<div class="p-4 bg-white rounded-lg border border-outline-variant/30 flex gap-4">
+<span class="text-primary font-bold">Q2</span>
+<div>
+<span class="text-[0.65rem] font-bold text-slate-400 block mb-1">2026-03-28</span>
+<p class="text-sm font-semibold">RAG dinàmic o prompt hardcoded?</p>
+</div>
+</div>
+<div class="p-4 bg-white rounded-lg border border-outline-variant/30 flex gap-4">
+<span class="text-primary font-bold">Q3</span>
+<div>
+<span class="text-[0.65rem] font-bold text-slate-400 block mb-1">2026-03-30</span>
+<p class="text-sm font-semibold">Quins models open-source s'apropen a GPT-4o?</p>
+</div>
+</div>
+<div class="p-4 bg-white rounded-lg border border-outline-variant/30 flex gap-4">
+<span class="text-primary font-bold">Q4</span>
+<div>
+<span class="text-[0.65rem] font-bold text-slate-400 block mb-1">2026-04-01</span>
+<p class="text-sm font-semibold">És fiable el 'Jutge LLM' en català?</p>
+</div>
+</div>
+<div class="p-4 bg-white rounded-lg border border-outline-variant/30 flex gap-4">
+<span class="text-primary font-bold">Q5</span>
+<div>
+<span class="text-[0.65rem] font-bold text-slate-400 block mb-1">2026-04-03</span>
+<p class="text-sm font-semibold">Com afecta la latència a l'experiència docent?</p>
+</div>
+</div>
+<div class="p-4 bg-white rounded-lg border border-outline-variant/30 flex gap-4">
+<span class="text-primary font-bold">Q6</span>
+<div>
+<span class="text-[0.65rem] font-bold text-slate-400 block mb-1">2026-04-05</span>
+<p class="text-sm font-semibold">Rànquing de models en tasques de resum?</p>
+</div>
+</div>
+<div class="p-4 bg-white rounded-lg border border-outline-variant/30 flex gap-4">
+<span class="text-primary font-bold">Q7</span>
+<div>
+<span class="text-[0.65rem] font-bold text-slate-400 block mb-1">2026-04-08</span>
+<p class="text-sm font-semibold">Millora el determinisme amb prompts estructurats?</p>
+</div>
+</div>
+<div class="p-4 bg-white rounded-lg border border-outline-variant/30 flex gap-4">
+<span class="text-primary font-bold">Q8</span>
+<div>
+<span class="text-[0.65rem] font-bold text-slate-400 block mb-1">2026-04-11</span>
+<p class="text-sm font-semibold">Xat 9: Preferència en diàlegs llargs?</p>
+</div>
+</div>
+<div class="p-4 bg-white rounded-lg border border-outline-variant/30 flex gap-4">
+<span class="text-primary font-bold">Q9</span>
+<div>
+<span class="text-[0.65rem] font-bold text-slate-400 block mb-1">2026-04-12</span>
+<p class="text-sm font-semibold">Escalabilitat de tokens per sessió?</p>
+</div>
+</div>
+<div class="p-4 bg-white rounded-lg border border-outline-variant/30 flex gap-4">
+<span class="text-primary font-bold">Q10</span>
+<div>
+<span class="text-[0.65rem] font-bold text-slate-400 block mb-1">2026-04-13</span>
+<p class="text-sm font-semibold">Els resultats es mantenen en complements i preguntes?</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 3 — LA METODOLOGIA -->
+<section class="mb-20">
+<div class="flex items-center gap-4 mb-8">
+<h2 class="text-2xl font-bold text-on-surface">La metodologia</h2>
+<div class="h-px flex-grow bg-outline-variant opacity-20"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+<div class="p-6 bg-surface-container-low rounded-xl">
+<span class="text-xs font-bold text-primary block mb-3 uppercase tracking-widest">01</span>
+<h3 class="font-bold text-sm mb-2">Triangulació multi-jutge</h3>
+<p class="text-xs text-on-surface-variant">GPT-4o, Gemini Flash, Qwen i Mistral validen cada resposta.</p>
+</div>
+<div class="p-6 bg-surface-container-low rounded-xl">
+<span class="text-xs font-bold text-primary block mb-3 uppercase tracking-widest">02</span>
+<h3 class="font-bold text-sm mb-2">Rúbrica ponderada</h3>
+<p class="text-xs text-on-surface-variant">Avaluació de 5 criteris pedagògics per cada ítem generat.</p>
+</div>
+<div class="p-6 bg-surface-container-low rounded-xl">
+<span class="text-xs font-bold text-primary block mb-3 uppercase tracking-widest">03</span>
+<h3 class="font-bold text-sm mb-2">Sense auto-avaluació</h3>
+<p class="text-xs text-on-surface-variant">Un model mai avalua les seves pròpies sortides per evitar biaixos.</p>
+</div>
+<div class="p-6 bg-surface-container-low rounded-xl">
+<span class="text-xs font-bold text-primary block mb-3 uppercase tracking-widest">04</span>
+<h3 class="font-bold text-sm mb-2">Batches de dades</h3>
+<p class="text-xs text-on-surface-variant">Anàlisi massiva de 160 a 604 parells de respostes per test.</p>
+</div>
+<div class="p-6 bg-surface-container-low rounded-xl">
+<span class="text-xs font-bold text-primary block mb-3 uppercase tracking-widest">05</span>
+<h3 class="font-bold text-sm mb-2">Doble aproximació</h3>
+<p class="text-xs text-on-surface-variant">Rúbrica 1-5 + Judici Comparatiu (Side-by-side).</p>
+</div>
+</div>
+</section>
+<!-- SECTION 4 — ELS EXPERIMENTS I ELS RESULTATS -->
+<section class="mb-20">
+<div class="flex items-center gap-4 mb-8">
+<h2 class="text-2xl font-bold text-on-surface">Experiments i resultats</h2>
+<div class="h-px flex-grow bg-outline-variant opacity-20"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Exp 1 -->
+<div class="bg-white p-6 rounded-xl border border-outline-variant/30 shadow-sm">
+<div class="flex justify-between mb-4">
+<span class="text-[0.65rem] font-bold px-2 py-0.5 bg-slate-100 rounded text-slate-500">2026-04-08</span>
+<span class="text-[0.65rem] font-bold text-primary">EXP 1</span>
+</div>
+<h3 class="font-bold mb-2">Determinista vs RAG</h3>
+<p class="text-xs text-on-surface-variant mb-4">Comparativa d'eficiència en prompt estructural.</p>
+<div class="flex items-center gap-2">
+<span class="text-lg font-bold text-primary">+0.26</span>
+<span class="text-[0.6rem] text-on-surface-variant uppercase">Millora mètrica</span>
+</div>
+<div class="mt-4 pt-4 border-t border-slate-50">
+<span class="text-[0.6rem] font-bold uppercase text-slate-400 block">Decisió</span>
+<p class="text-[0.7rem] font-medium">Adoptar prompt determinista.</p>
+</div>
+</div>
+<!-- Exp 2 -->
+<div class="bg-white p-6 rounded-xl border border-outline-variant/30 shadow-sm">
+<div class="flex justify-between mb-4">
+<span class="text-[0.65rem] font-bold px-2 py-0.5 bg-slate-100 rounded text-slate-500">2026-04-05</span>
+<span class="text-[0.65rem] font-bold text-primary">EXP 2</span>
+</div>
+<h3 class="font-bold mb-2">Rànquing 5 models</h3>
+<p class="text-xs text-on-surface-variant mb-4">Benchmarking de models open vs tancats.</p>
+<div class="flex items-center gap-2">
+<span class="text-lg font-bold text-primary">92%</span>
+<span class="text-[0.6rem] text-on-surface-variant uppercase">Acord entre jutges</span>
+</div>
+<div class="mt-4 pt-4 border-t border-slate-50">
+<span class="text-[0.6rem] font-bold uppercase text-slate-400 block">Decisió</span>
+<p class="text-[0.7rem] font-medium">Focalitzar en Gemma 4 i Mistral.</p>
+</div>
+</div>
+<!-- Exp 3 -->
+<div class="bg-white p-6 rounded-xl border border-outline-variant/30 shadow-sm">
+<div class="flex justify-between mb-4">
+<span class="text-[0.65rem] font-bold px-2 py-0.5 bg-slate-100 rounded text-slate-500">2026-04-11</span>
+<span class="text-[0.65rem] font-bold text-primary">EXP 3</span>
+</div>
+<h3 class="font-bold mb-2">Xat 9 A/B</h3>
+<p class="text-xs text-on-surface-variant mb-4">604 parells de respostes pedagògiques.</p>
+<div class="flex items-center gap-2">
+<span class="text-lg font-bold text-primary">68%</span>
+<span class="text-[0.6rem] text-on-surface-variant uppercase">Pref. Gemma 4</span>
+</div>
+<div class="mt-4 pt-4 border-t border-slate-50">
+<span class="text-[0.6rem] font-bold uppercase text-slate-400 block">Decisió</span>
+<p class="text-[0.7rem] font-medium">Motor principal pel Xat.</p>
+</div>
+</div>
+<!-- Exp 4 -->
+<div class="bg-white p-6 rounded-xl border border-outline-variant/30 shadow-sm">
+<div class="flex justify-between mb-4">
+<span class="text-[0.65rem] font-bold px-2 py-0.5 bg-slate-100 rounded text-slate-500">2026-04-12</span>
+<span class="text-[0.65rem] font-bold text-primary">EXP 4</span>
+</div>
+<h3 class="font-bold mb-2">Complements</h3>
+<p class="text-xs text-on-surface-variant mb-4">Avaluació de materials auxiliars.</p>
+<div class="flex items-center gap-2">
+<span class="text-lg font-bold text-primary">4.58</span>
+<span class="text-[0.6rem] text-on-surface-variant uppercase">Puntuació mitjana</span>
+</div>
+<div class="mt-4 pt-4 border-t border-slate-50">
+<span class="text-[0.6rem] font-bold uppercase text-slate-400 block">Decisió</span>
+<p class="text-[0.7rem] font-medium">Validat per producció.</p>
+</div>
+</div>
+<!-- Exp 5 -->
+<div class="bg-white p-6 rounded-xl border border-outline-variant/30 shadow-sm">
+<div class="flex justify-between mb-4">
+<span class="text-[0.65rem] font-bold px-2 py-0.5 bg-slate-100 rounded text-slate-500">2026-04-13</span>
+<span class="text-[0.65rem] font-bold text-primary">EXP 5</span>
+</div>
+<h3 class="font-bold mb-2">Preguntes</h3>
+<p class="text-xs text-on-surface-variant mb-4">Generació d'ítems Bloom 1-3.</p>
+<div class="flex items-center gap-2">
+<span class="text-lg font-bold text-primary">84%</span>
+<span class="text-[0.6rem] text-on-surface-variant uppercase">Rigor taxonòmic</span>
+</div>
+<div class="mt-4 pt-4 border-t border-slate-50">
+<span class="text-[0.6rem] font-bold uppercase text-slate-400 block">Decisió</span>
+<p class="text-[0.7rem] font-medium">Limitació a Bloom nivell 3.</p>
+</div>
+</div>
+<!-- Exp 6 -->
+<div class="bg-white p-6 rounded-xl border border-outline-variant/30 shadow-sm">
+<div class="flex justify-between mb-4">
+<span class="text-[0.65rem] font-bold px-2 py-0.5 bg-slate-100 rounded text-slate-500">2026-04-14</span>
+<span class="text-[0.65rem] font-bold text-primary">EXP 6</span>
+</div>
+<h3 class="font-bold mb-2">Test Salamandra 7B</h3>
+<p class="text-xs text-on-surface-variant mb-4">Prova de model ultra-lleuger.</p>
+<div class="flex items-center gap-2">
+<span class="text-lg font-bold text-error">Insuf.</span>
+<span class="text-[0.6rem] text-on-surface-variant uppercase">Qualitat català</span>
+</div>
+<div class="mt-4 pt-4 border-t border-slate-50">
+<span class="text-[0.6rem] font-bold uppercase text-slate-400 block">Decisió</span>
+<p class="text-[0.7rem] font-medium text-error">Descartat per baixa qualitat.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 5 — LA TRIANGULACIÓ DE GEMMA 4 -->
+<section class="mb-20">
+<div class="bg-on-surface rounded-2xl p-10 text-white overflow-hidden relative">
+<div class="absolute right-0 top-0 opacity-10">
+<span class="material-symbols-outlined text-[12rem]">verified</span>
+</div>
+<div class="max-w-[780px] relative z-10">
+<h2 class="text-3xl font-bold mb-8">La triangulació de Gemma 4</h2>
+<div class="space-y-8 mb-10">
+<div>
+<div class="flex justify-between mb-2">
+<span class="text-sm font-semibold uppercase tracking-wider text-surface-variant">ADAPTACIONS (Xat 9)</span>
+<span class="text-sm font-bold">4.75 / 5</span>
+</div>
+<div class="score-bar"><div class="score-fill" style="width: 95%;"></div></div>
+</div>
+<div>
+<div class="flex justify-between mb-2">
+<span class="text-sm font-semibold uppercase tracking-wider text-surface-variant">COMPLEMENTS</span>
+<span class="text-sm font-bold">4.58 / 5</span>
+</div>
+<div class="score-bar"><div class="score-fill" style="width: 91.6%;"></div></div>
+</div>
+<div>
+<div class="flex justify-between mb-2">
+<span class="text-sm font-semibold uppercase tracking-wider text-surface-variant">PREGUNTES</span>
+<span class="text-sm font-bold">4.40 / 5</span>
+</div>
+<div class="score-bar"><div class="score-fill" style="width: 88%;"></div></div>
+</div>
+</div>
+<p class="text-sm text-surface-variant/80 italic">Totals: 1.884 avaluacions contribueixen a aquesta conclusió.</p>
+</div>
+</div>
+</section>
+<!-- SECTION 6 — LÍMITS I VALIDACIÓ PENDENT -->
+<section class="mb-20">
+<div class="flex items-center gap-4 mb-8">
+<h2 class="text-2xl font-bold text-on-surface">Límits i validació pendent</h2>
+<div class="h-px flex-grow bg-outline-variant opacity-20"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="p-6 rounded-xl border border-amber-200 bg-amber-50/50">
+<div class="flex gap-4 items-start">
+<span class="material-symbols-outlined text-amber-600">warning</span>
+<div>
+<h3 class="font-bold text-on-surface mb-2">El jutge GPT infla puntuacions</h3>
+<p class="text-sm text-on-surface-variant">Detectat un biaix de preferència per la verbositat del model. Delta de +0.4 respecte l'avaluació humana.</p>
+</div>
+</div>
+</div>
+<div class="p-6 rounded-xl border border-amber-200 bg-amber-50/50">
+<div class="flex gap-4 items-start">
+<span class="material-symbols-outlined text-amber-600">hourglass_empty</span>
+<div>
+<h3 class="font-bold text-on-surface mb-2">Validació humana docent pendent</h3>
+<p class="text-sm text-on-surface-variant">Fase de pilotatge programada: 20/04 al 08/05 amb 40 docents de diferents etapes.</p>
+</div>
+</div>
+</div>
+<div class="p-6 rounded-xl border border-amber-200 bg-amber-50/50">
+<div class="flex gap-4 items-start">
+<span class="material-symbols-outlined text-amber-600">speed</span>
+<div>
+<h3 class="font-bold text-on-surface mb-2">Llama via Groq no escala</h3>
+<p class="text-sm text-on-surface-variant">Límits de TPM massa baixos per l'ús massiu simultani del professorat en hores punta.</p>
+</div>
+</div>
+</div>
+<div class="p-6 rounded-xl border border-amber-200 bg-amber-50/50">
+<div class="flex gap-4 items-start">
+<span class="material-symbols-outlined text-amber-600">psychology_alt</span>
+<div>
+<h3 class="font-bold text-on-surface mb-2">Riscos detectats</h3>
+<p class="text-sm text-on-surface-variant">Consum de tokens de 'thinking' en Gemini, risc d'auto-avaluació en sistemes de feedback tancats.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Experiments: Destination Cards -->
+<section class="mb-20">
+<div class="flex items-center gap-4 mb-8">
+<h2 class="text-2xl font-bold text-on-surface">Experiments principals</h2>
+<div class="h-px flex-grow bg-outline-variant opacity-20"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<a class="group block bg-surface-container-lowest rounded-xl p-8 transition-all hover:shadow-[0_10px_40px_-10px_rgba(11,28,48,0.06)] hover:-translate-y-1 ghost-border" href="#">
+<div class="flex justify-between items-start mb-6">
+<span class="inline-block px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[0.7rem] font-bold uppercase tracking-widest">Triangulació</span>
+<span class="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors">arrow_forward_ios</span>
+</div>
+<h3 class="text-lg font-bold text-on-surface mb-2">Xat 9</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">Avaluació de la coherència en diàlegs pedagògics complexos.</p>
+</a>
+<a class="group block bg-surface-container-lowest rounded-xl p-8 transition-all hover:shadow-[0_10px_40px_-10px_rgba(11,28,48,0.06)] hover:-translate-y-1 ghost-border" href="#">
+<div class="flex justify-between items-start mb-6">
+<span class="inline-block px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[0.7rem] font-bold uppercase tracking-widest">Triangulació</span>
+<span class="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors">arrow_forward_ios</span>
+</div>
+<h3 class="text-lg font-bold text-on-surface mb-2">Complements</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">Qualitat de la generació de materials didàctics auxiliars.</p>
+</a>
+<a class="group block bg-surface-container-lowest rounded-xl p-8 transition-all hover:shadow-[0_10px_40px_-10px_rgba(11,28,48,0.06)] hover:-translate-y-1 ghost-border" href="#">
+<div class="flex justify-between items-start mb-6">
+<span class="inline-block px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[0.7rem] font-bold uppercase tracking-widest">Triangulació</span>
+<span class="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors">arrow_forward_ios</span>
+</div>
+<h3 class="text-lg font-bold text-on-surface mb-2">Preguntes</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">Taxonomia de Bloom i precisió en la generació d'ítems.</p>
+</a>
+</div>
+</section>
+<!-- Qualitative Analysis -->
+<section class="mb-20">
+<div class="flex items-center gap-4 mb-8">
+<h2 class="text-2xl font-bold text-on-surface">Anàlisi qualitativa i casos</h2>
+<div class="h-px flex-grow bg-outline-variant opacity-20"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="group relative bg-surface-container-low rounded-xl p-8 hover:bg-surface-container-highest transition-colors cursor-pointer">
+<div class="flex justify-between items-center mb-4">
+<span class="px-2.5 py-0.5 rounded bg-primary/10 text-primary text-[0.7rem] font-bold uppercase">Indigo Focus</span>
+<span class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</span>
+</div>
+<h3 class="text-xl font-bold mb-3">Avaluació general</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">Visió holística dels resultats a través de tots els pilars d'ATNE.</p>
+</div>
+<div class="group relative bg-surface-container-low rounded-xl p-8 hover:bg-surface-container-highest transition-colors cursor-pointer">
+<div class="flex justify-between items-center mb-4">
+<span class="px-2.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[0.7rem] font-bold uppercase">Cas Pràctic</span>
+<span class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</span>
+</div>
+<h3 class="text-xl font-bold mb-3">Casos individuals</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">Exploració detallada de respostes anòmales i èxits específics.</p>
+</div>
+<div class="group relative bg-surface-container-low rounded-xl p-8 hover:bg-surface-container-highest transition-colors cursor-pointer">
+<div class="flex justify-between items-center mb-4">
+<span class="px-2.5 py-0.5 rounded bg-primary/10 text-primary text-[0.7rem] font-bold uppercase">Mètriques</span>
+<span class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</span>
+</div>
+<h3 class="text-xl font-bold mb-3">Resultats comparats</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">Benchmark entre models open-source i propietaris.</p>
+</div>
+<div class="group relative bg-surface-container-low rounded-xl p-8 hover:bg-surface-container-highest transition-colors cursor-pointer">
+<div class="flex justify-between items-center mb-4">
+<span class="px-2.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[0.7rem] font-bold uppercase">Timeline</span>
+<span class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</span>
+</div>
+<h3 class="text-xl font-bold mb-3">Progrés d'avaluacions</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">Evolució de la precisió del sistema segons les versions del prompt.</p>
+</div>
+</div>
+</section>
+<!-- Reports -->
+<section class="mb-20">
+<div class="flex items-center gap-4 mb-8">
+<h2 class="text-2xl font-bold text-on-surface">Informes</h2>
+<div class="h-px flex-grow bg-outline-variant opacity-20"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-surface-container-lowest rounded-xl p-6 flex flex-col justify-between h-48 ghost-border transition-all hover:border-primary/30">
+<div>
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-primary">description</span>
+</div>
+<h3 class="font-bold text-on-surface">Informe Complet</h3>
+<p class="text-[0.75rem] text-on-surface-variant mt-1">42 pàgines • PDF</p>
+</div>
+<button class="flex items-center justify-between text-primary font-semibold text-sm group">
+                        Descarregar
+                        <span class="material-symbols-outlined group-hover:translate-y-0.5 transition-transform">download</span>
+</button>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-6 flex flex-col justify-between h-48 ghost-border transition-all hover:border-primary/30">
+<div>
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-primary">school</span>
+</div>
+<h3 class="font-bold text-on-surface">Informe FJE</h3>
+<p class="text-[0.75rem] text-on-surface-variant mt-1">12 pàgines • PDF</p>
+</div>
+<button class="flex items-center justify-between text-primary font-semibold text-sm group">
+                        Descarregar
+                        <span class="material-symbols-outlined group-hover:translate-y-0.5 transition-transform">download</span>
+</button>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-6 flex flex-col justify-between h-48 ghost-border transition-all hover:border-primary/30">
+<div>
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-primary">settings_ethernet</span>
+</div>
+<h3 class="font-bold text-on-surface">Informe Tècnic</h3>
+<p class="text-[0.75rem] text-on-surface-variant mt-1">28 pàgines • PDF</p>
+</div>
+<button class="flex items-center justify-between text-primary font-semibold text-sm group">
+                        Descarregar
+                        <span class="material-symbols-outlined group-hover:translate-y-0.5 transition-transform">download</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer Space -->
+<footer class="py-12 bg-surface-container-low">
+<div class="max-w-[1100px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="text-sm text-on-surface-variant">
+                © 2024 ATNE • Institució Educativa • Panell de Gestió
+            </div>
+<div class="flex gap-8">
+<a class="text-sm font-medium text-slate-500 hover:text-primary transition-colors" href="#">Privadesa</a>
+<a class="text-sm font-medium text-slate-500 hover:text-primary transition-colors" href="#">Accessibilitat</a>
+<a class="text-sm font-medium text-slate-500 hover:text-primary transition-colors" href="#">Suport tècnic</a>
+</div>
+</div>
+</footer>
+</body></html>

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ca"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#93000a",
+                    "secondary-fixed": "#e0e0ff",
+                    "secondary": "#4953bc",
+                    "inverse-surface": "#213145",
+                    "on-primary": "#ffffff",
+                    "surface-variant": "#d3e4fe",
+                    "surface-container-lowest": "#ffffff",
+                    "on-error": "#ffffff",
+                    "on-tertiary-container": "#d3d5ff",
+                    "on-primary-fixed-variant": "#3337a6",
+                    "error": "#ba1a1a",
+                    "inverse-on-surface": "#eaf1ff",
+                    "surface-container-highest": "#d3e4fe",
+                    "on-primary-container": "#d4d5ff",
+                    "tertiary-fixed": "#dfe0ff",
+                    "secondary-fixed-dim": "#bdc2ff",
+                    "primary-container": "#4c51bf",
+                    "background": "#f8f9ff",
+                    "surface": "#f8f9ff",
+                    "outline": "#767684",
+                    "inverse-primary": "#bfc1ff",
+                    "error-container": "#ffdad6",
+                    "surface-bright": "#f8f9ff",
+                    "on-secondary-container": "#17228f",
+                    "on-tertiary-fixed-variant": "#2b38aa",
+                    "surface-container": "#e5eeff",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed": "#03006d",
+                    "on-tertiary-fixed": "#000965",
+                    "tertiary": "#2b38a9",
+                    "surface-tint": "#4c51bf",
+                    "on-secondary-fixed-variant": "#2f3aa3",
+                    "tertiary-container": "#4552c2",
+                    "secondary-container": "#8792fe",
+                    "primary-fixed-dim": "#bfc1ff",
+                    "on-secondary-fixed": "#000767",
+                    "surface-container-high": "#dce9ff",
+                    "on-background": "#0b1c30",
+                    "on-surface": "#0b1c30",
+                    "outline-variant": "#c7c5d5",
+                    "on-tertiary": "#ffffff",
+                    "surface-dim": "#cbdbf5",
+                    "tertiary-fixed-dim": "#bdc2ff",
+                    "primary": "#3337a6",
+                    "primary-fixed": "#e1e0ff",
+                    "on-surface-variant": "#464653",
+                    "surface-container-low": "#eff4ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "2xl": "1rem",
+                    "3xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-primary-gradient {
+            background: linear-gradient(135deg, #3337a6 0%, #4c51bf 100%);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky z-50 bg-[#f8f9ff] dark:bg-slate-950">
+<div class="flex items-center justify-between px-6 py-4 max-w-[1600px] mx-auto">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#3337a6] cursor-pointer" data-icon="menu">menu</span>
+<span class="text-2xl font-bold tracking-tight text-[#3337a6] dark:text-[#d3e4fe] font-headline">ATNE</span>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex gap-8">
+<a class="text-slate-500 hover:text-[#3337a6] font-medium transition-colors" href="#">Projectes</a>
+<a class="text-[#3337a6] dark:text-[#d3e4fe] font-bold" href="#">Adaptació</a>
+<a class="text-slate-500 hover:text-[#3337a6] font-medium transition-colors" href="#">Biblioteca</a>
+</nav>
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border-2 border-primary/10">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="professional portrait of a middle-aged teacher smiling with soft natural lighting and neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbeAEkViKmLJmaEPwe6UvyrnAFOAEI6SBBrtLyaCs05XJUC53UTAgfIdJ9gAIh_UsWqV5wfNImmPi5ZV53mky7SXXgM8DaHd-KD3FRivEmRQkDtF-YH0fY8tYXiHHpiLl8y4-Ki6p0rxglAdIeeg52HWd5r6TS_gE2eWZ27ayt1jpTO7P46h8nlH3wrHcdIvImsBYIkQ5cZonxoARDZidzn-Lhgr1CxxwNNbGaUpYP76jr3no1tqj6x-FuLAaLK5nTPHNcu6b06b8"/>
+</div>
+</div>
+</div>
+</header>
+<div class="flex max-w-[1600px] mx-auto h-[calc(100vh-80px)] overflow-hidden">
+<!-- NavigationDrawer (Sidebar) -->
+<aside class="fixed left-0 top-20 h-full w-80 z-40 p-4 hidden xl:block">
+<div class="bg-white dark:bg-slate-900 rounded-r-3xl h-full shadow-xl flex flex-col p-6">
+<h2 class="font-headline text-xl font-bold text-[#3337a6] mb-8">ATNE Progress</h2>
+<nav class="space-y-2">
+<div class="flex items-center gap-4 p-4 text-slate-600 dark:text-slate-400 font-medium transition-all duration-300">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+<span class="font-['Inter'] text-sm font-medium">Context &amp; Profile</span>
+</div>
+<div class="flex items-center gap-4 p-4 text-slate-600 dark:text-slate-400 font-medium transition-all duration-300">
+<span class="material-symbols-outlined" data-icon="edit_note">edit_note</span>
+<span class="font-['Inter'] text-sm font-medium">Text Input</span>
+</div>
+<div class="flex items-center gap-4 p-4 bg-[#d3e4fe] dark:bg-[#3337a6]/30 text-[#3337a6] dark:text-white font-bold rounded-xl transition-all duration-300">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+<span class="font-['Inter'] text-sm font-medium">Adaptation Configuration</span>
+</div>
+<div class="flex items-center gap-4 p-4 text-slate-600 dark:text-slate-400 font-medium transition-all duration-300 opacity-50 cursor-not-allowed">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-['Inter'] text-sm font-medium">Results</span>
+</div>
+</nav>
+<div class="mt-auto pt-8">
+<div class="p-4 bg-surface-container-low rounded-2xl">
+<p class="text-[10px] uppercase tracking-widest text-outline mb-2 font-bold">ESTAT ACTUAL</p>
+<div class="h-2 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full w-[75%] bg-primary-gradient rounded-full"></div>
+</div>
+<p class="text-xs mt-2 text-on-surface-variant">Configurant els paràmetres de l'algoritme...</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 ml-0 xl:ml-80 overflow-y-auto px-8 py-8 lg:px-12">
+<div class="max-w-4xl">
+<header class="mb-10">
+<h1 class="font-headline text-4xl font-bold text-on-surface mb-2 tracking-tight">Configuració de l'Adaptació</h1>
+<p class="text-on-surface-variant text-lg">Defineix com l'intel·ligència artificial ha de transformar el material educatiu.</p>
+</header>
+<div class="grid grid-cols-1 gap-12">
+<!-- Section: Estructura -->
+<section class="space-y-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+</div>
+<h3 class="font-headline text-xl font-semibold">Estructura del Contingut</h3>
+</div>
+<div class="bg-surface-container-lowest rounded-3xl p-8 border border-outline-variant/15 shadow-sm space-y-8">
+<div class="flex items-center justify-between">
+<div class="max-w-md">
+<h4 class="font-semibold text-on-surface mb-1">Simplificació Sintàctica</h4>
+<p class="text-sm text-on-surface-variant">Redueix la complexitat de les oracions mantenint el significat original.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-14 h-7 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<div class="max-w-md">
+<h4 class="font-semibold text-on-surface mb-1">Llistes de Verificació</h4>
+<p class="text-sm text-on-surface-variant">Converteix paràgrafs densos en punts clau o check-lists accionables.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-14 h-7 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</section>
+<!-- Section: Llengua -->
+<section class="space-y-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="translate">translate</span>
+</div>
+<h3 class="font-headline text-xl font-semibold">Llengua i Vocabulari</h3>
+</div>
+<div class="bg-surface-container-lowest rounded-3xl p-8 border border-outline-variant/15 shadow-sm">
+<div class="space-y-6">
+<div>
+<label class="block text-sm font-semibold text-on-surface mb-3">Nivell de Vocabulari</label>
+<div class="grid grid-cols-3 gap-4">
+<button class="px-6 py-4 rounded-2xl border-2 border-primary text-primary font-bold bg-primary/5 flex flex-col items-center gap-2">
+<span class="text-xs">BÀSIC</span>
+<span class="text-[10px] font-normal opacity-70">A1 - A2</span>
+</button>
+<button class="px-6 py-4 rounded-2xl border-2 border-outline-variant/20 hover:border-primary/40 transition-colors flex flex-col items-center gap-2">
+<span class="text-xs">INTERMEDI</span>
+<span class="text-[10px] font-normal opacity-70">B1 - B2</span>
+</button>
+<button class="px-6 py-4 rounded-2xl border-2 border-outline-variant/20 hover:border-primary/40 transition-colors flex flex-col items-center gap-2">
+<span class="text-xs">AVANÇAT</span>
+<span class="text-[10px] font-normal opacity-70">C1 - C2</span>
+</button>
+</div>
+</div>
+<div class="pt-4">
+<div class="flex items-center justify-between">
+<div class="max-w-md">
+<h4 class="font-semibold text-on-surface mb-1">Glosari Automàtic</h4>
+<p class="text-sm text-on-surface-variant">Identifica paraules difícils i afegeix definicions al marge.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-14 h-7 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Accessibilitat Visual -->
+<section class="space-y-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
+</div>
+<h3 class="font-headline text-xl font-semibold">Accessibilitat Visual</h3>
+</div>
+<div class="bg-surface-container-low rounded-3xl p-8 space-y-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="bg-white p-6 rounded-2xl shadow-sm">
+<h5 class="text-xs font-bold text-outline uppercase tracking-wider mb-4">Tipografia</h5>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-3 rounded-xl hover:bg-surface transition-colors cursor-pointer border border-transparent hover:border-outline-variant/10">
+<span class="font-medium">OpenDyslexic</span>
+<span class="material-symbols-outlined text-primary" data-icon="check_circle">check_circle</span>
+</div>
+<div class="flex items-center justify-between p-3 rounded-xl hover:bg-surface transition-colors cursor-pointer">
+<span class="font-medium">Arial (Sans Serif)</span>
+<span class="w-5 h-5 rounded-full border-2 border-outline-variant"></span>
+</div>
+</div>
+</div>
+<div class="bg-white p-6 rounded-2xl shadow-sm">
+<h5 class="text-xs font-bold text-outline uppercase tracking-wider mb-4">Mida del Text</h5>
+<input class="w-full h-2 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary" type="range"/>
+<div class="flex justify-between mt-2 text-[10px] text-outline-variant font-bold">
+<span>ESTÀNDARD</span>
+<span>GRAN</span>
+<span>EXTRA</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Spacer for fixed bottom bar -->
+<div class="h-32"></div>
+</div>
+</main>
+<!-- Right Side: Persistent Algorithm Preview Card -->
+<aside class="w-[420px] h-full p-8 hidden 2xl:block border-l border-outline-variant/10">
+<div class="sticky top-8 bg-white rounded-3xl p-8 shadow-xl flex flex-col h-[700px] border border-outline-variant/5">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-8 h-8 rounded-full bg-primary-gradient flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-sm" data-icon="bolt" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+<h3 class="font-headline text-lg font-bold">Visió Prèvia de l'Algoritme</h3>
+</div>
+<div class="flex-1 overflow-y-auto space-y-6">
+<div class="p-5 rounded-2xl bg-surface-container-low border border-primary/5">
+<div class="flex items-center gap-2 mb-3">
+<span class="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">MODIFICACIÓ</span>
+<span class="text-[10px] font-medium text-on-surface-variant">Fa 2 segons</span>
+</div>
+<p class="text-xs italic text-on-surface-variant leading-relaxed">
+                            "L'atne és una eina que ens ajuda a millorar..." 
+                            <span class="bg-primary/20 text-primary font-semibold px-1 rounded">→</span> 
+                            "Aquest programa facilita el nostre treball..."
+                        </p>
+<div class="mt-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="auto_fix">auto_fix</span>
+<span class="text-[10px] font-semibold text-primary uppercase">Simplificació aplicada</span>
+</div>
+</div>
+<div class="p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/10">
+<div class="flex items-center gap-2 mb-3">
+<span class="text-[10px] font-bold text-secondary bg-secondary/10 px-2 py-0.5 rounded">ESTRUCTURA</span>
+</div>
+<div class="space-y-2">
+<div class="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full w-full bg-secondary-container"></div>
+</div>
+<div class="h-2 w-3/4 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full w-full bg-secondary-container"></div>
+</div>
+<div class="h-2 w-1/2 bg-surface-container rounded-full overflow-hidden"></div>
+</div>
+<p class="text-[10px] mt-3 text-on-surface-variant">S'ha detectat una densitat textual alta. L'algoritme proposa un desglossament en 3 punts clau.</p>
+</div>
+<div class="relative overflow-hidden rounded-2xl aspect-video group">
+<img alt="Educational Tech" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="high-quality minimalist image of a tablet showing educational diagrams on a clean wooden desk with soft morning light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAprf5mHYRy6H7ydIZxgf-lTu0fj0BLzcorzHjYhUsDRbOJbJmbBdYTniQ0iBjL7Lhx0Mrerx7JyY3iLzDiRa195P18s0bORvumwGlDszc2CXNARHSIITZ5o3_5zueOxwKRN214QlCbeD11DTd8kWHZiPOTdW4EGv0MmvFa8UcCHhRYnZ6PHwexdJCLOUYJqK1o3lnd0xNgF8uNSGP_F2CcayDrWGDQ_1wiVWb8Fnuv-AHprLnmY1R_FEapTE2rKE-gCvCp_7kMcMA"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent flex flex-col justify-end p-4">
+<p class="text-white text-[10px] font-bold uppercase tracking-widest">Optimització visual</p>
+<p class="text-white/80 text-[10px]">Augmentant contrast del 15%</p>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-6 border-t border-outline-variant/10">
+<button class="w-full py-4 rounded-2xl bg-surface-container-highest text-primary font-bold hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="refresh">refresh</span>
+                        Actualitzar Projecció
+                    </button>
+</div>
+</div>
+</aside>
+</div>
+<!-- BottomNavBar (Action Bar) -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-end items-center px-8 py-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-100 dark:border-slate-800 shadow-[0_-10px_40px_-10px_rgba(11,28,48,0.06)]">
+<div class="flex items-center gap-4">
+<button class="px-8 py-3 text-[#3337a6] font-semibold text-sm hover:bg-[#eff4ff] rounded-xl transition-colors">
+                Enrere
+            </button>
+<button class="bg-gradient-to-br from-[#3337a6] to-[#4c51bf] text-white rounded-xl px-10 py-3 flex items-center gap-3 font-['Inter'] font-semibold tracking-wide uppercase text-xs active:scale-[0.98] transition-all shadow-lg shadow-primary/20">
+<span>Continuar</span>
+<span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</footer>
+</body></html>

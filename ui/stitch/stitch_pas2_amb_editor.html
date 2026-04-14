@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html lang="ca"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Entrada de Text - Cognitive Concierge</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --primary: #3337a6;
+            --primary-light: #4c51bf;
+            --primary-container: #d3e4fe;
+            --on-surface: #0b1c30;
+            --on-surface-variant: #464653;
+            --surface: #f8f9ff;
+            --surface-container: #eff4ff;
+            --surface-low: #f0f4ff;
+            --background: #f8f9ff;
+            --outline: #c7c5d5;
+            --white: #ffffff;
+            
+            --font-headline: 'Plus Jakarta Sans', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            
+            /* Reduced spacing/typography by ~20% */
+            --spacing-unit: 0.8rem;
+            --font-size-base: 0.9rem;
+            --radius-lg: 0.6rem;
+            --radius-xl: 1rem;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--background);
+            color: var(--on-surface);
+            line-height: 1.5;
+            font-size: var(--font-size-base);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, .headline {
+            font-family: var(--font-headline);
+            font-weight: 700;
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 52px;
+            background: rgba(248, 249, 255, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; border-bottom: 1px solid rgba(199, 197, 213, 0.2); z-index: 100; }
+
+        .logo { font-family: var(--font-headline); font-weight: 800; color: var(--primary); font-size: 1.1rem; letter-spacing: -0.02em; }
+        .nav-links { display: flex; gap: 1.5rem; margin-left: 2rem; }
+        .nav-links a { text-decoration: none; color: var(--on-surface-variant); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--primary); }
+        .nav-links a.active { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 4px; }
+        .nav-actions { display: flex; align-items: center; gap: 1rem; }
+        .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--outline); overflow: hidden; }
+        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Main Layout */
+        .main-container { max-width: 1000px; margin: 0 auto; padding: 80px 2rem 120px; display: flex; flex-direction: column; gap: 2rem; }
+        .header-content { max-width: 600px; }
+        .stepper-text { color: var(--primary); font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 0.5rem; display: block; }
+        .main-title { font-size: 1.8rem; margin-bottom: 0.75rem; letter-spacing: -0.01em; }
+        .description { color: var(--on-surface-variant); font-size: 0.95rem; line-height: 1.4; }
+        .grid-layout { display: grid; grid-template-columns: 1.8fr 1fr; gap: 2rem; align-items: start; }
+
+        /* Editor Card */
+        .editor-card { background: var(--white); border-radius: var(--radius-xl); padding: 1.5rem; box-shadow: 0 4px 20px -4px rgba(11, 28, 48, 0.05); border: 1px solid rgba(199, 197, 213, 0.3); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+        .card-title { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.95rem; }
+        .card-title .material-symbols-outlined { color: var(--primary); font-size: 1.2rem; }
+        .btn-clear { background: none; border: none; color: var(--primary); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; display: flex; align-items: center; gap: 0.25rem; padding: 0.4rem 0.6rem; border-radius: 4px; transition: background 0.2s; }
+        .btn-clear:hover { background: var(--surface-container); }
+        .textarea-container { position: relative; }
+        textarea { width: 100%; height: 320px; background: var(--surface-low); border: 1px solid transparent; border-radius: var(--radius-lg); padding: 1.25rem; font-family: var(--font-body); font-size: 0.95rem; color: var(--on-surface); resize: none; transition: all 0.2s; }
+        textarea:focus { outline: none; border-color: var(--primary-light); background: var(--white); box-shadow: 0 0 0 3px rgba(76, 81, 191, 0.1); }
+        .char-count { position: absolute; bottom: 1rem; right: 1rem; background: var(--white); padding: 0.25rem 0.6rem; border-radius: 20px; font-size: 0.7rem; font-weight: 700; border: 1px solid rgba(199, 197, 213, 0.4); color: var(--primary); }
+        .char-count span { color: var(--on-surface-variant); font-weight: 400; }
+
+        /* Sidebar Cards */
+        .sidebar { display: flex; flex-direction: column; gap: 1.25rem; }
+        .upload-card { background: var(--surface-low); border: 1px dashed var(--outline); border-radius: var(--radius-xl); padding: 2rem 1.5rem; text-align: center; }
+        .upload-icon { width: 48px; height: 48px; background: var(--primary); color: var(--white); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+        .upload-card h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+        .upload-card p { font-size: 0.75rem; color: var(--on-surface-variant); margin-bottom: 1.25rem; }
+        .btn-upload { background: var(--white); border: 1px solid var(--outline); padding: 0.6rem 1.25rem; border-radius: var(--radius-lg); font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; color: var(--primary); }
+        .btn-upload:hover { border-color: var(--primary); background: var(--surface-container); }
+
+        .tips-card { background: var(--primary-container); border-radius: var(--radius-xl); padding: 1.5rem; color: var(--on-surface); }
+        .tips-title { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem; }
+        .tips-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .tips-list li { font-size: 0.8rem; line-height: 1.4; display: flex; gap: 0.6rem; color: var(--on-surface-variant); }
+        .tips-list li::before { content: "•"; color: var(--primary); font-weight: bold; }
+
+        /* Bottom Sticky Bar */
+        .bottom-bar { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); width: 90%; max-width: 800px; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); padding: 0.75rem 1rem; border-radius: 2rem; box-shadow: 0 10px 40px -10px rgba(11, 28, 48, 0.15); display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(199, 197, 213, 0.3); z-index: 100; }
+        .progress-indicator { display: flex; align-items: center; gap: 1rem; padding-left: 1rem; }
+        .dots { display: flex; gap: 0.4rem; }
+        .dot { height: 4px; background: #e2e8f0; border-radius: 2px; }
+        .dot.s { width: 16px; }
+        .dot.active { width: 32px; background: var(--primary); }
+        .step-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--on-surface-variant); }
+        .bar-actions { display: flex; gap: 0.75rem; }
+        .btn-back { background: none; border: none; color: var(--primary); font-weight: 600; padding: 0.75rem 1.25rem; cursor: pointer; border-radius: var(--radius-lg); transition: background 0.2s; }
+        .btn-back:hover { background: var(--surface-container); }
+        .btn-continue { background: var(--primary); color: var(--white); border: none; font-weight: 700; padding: 0.75rem 2rem; border-radius: var(--radius-lg); cursor: pointer; display: flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 12px rgba(51, 55, 166, 0.2); transition: transform 0.1s, background 0.2s; }
+        .btn-continue:hover { background: var(--primary-light); }
+        .btn-continue:active { transform: scale(0.98); }
+
+        @media (max-width: 850px) {
+            .grid-layout { grid-template-columns: 1fr; }
+            .sidebar { flex-direction: column; }
+        }
+    </style>
+<style>
+    .textarea-wrapper {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    .formatting-toolbar {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: var(--white);
+        border: 1px solid rgba(199, 197, 213, 0.4);
+        border-radius: var(--radius-lg);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .toolbar-btn {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        border-radius: 4px;
+        color: var(--primary);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .toolbar-btn:hover {
+        background: var(--surface-container);
+        color: var(--primary-light);
+    }
+    .toolbar-btn .material-symbols-outlined {
+        font-size: 20px;
+    }
+</style></head>
+<body>
+<header class="top-nav">
+<div style="display: flex; align-items: center;">
+<div class="logo">Cognitive Concierge</div>
+<nav class="nav-links">
+<a href="#">Projects</a>
+<a class="active" href="#">Adaptation Tool</a>
+<a href="#">Library</a>
+</nav>
+</div>
+<div class="nav-actions">
+<span class="material-symbols-outlined" style="color: var(--on-surface-variant); font-size: 20px; cursor: pointer;">notifications</span>
+<span class="material-symbols-outlined" style="color: var(--on-surface-variant); font-size: 20px; cursor: pointer;">settings</span>
+<div class="user-avatar">
+<img alt="Profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcBRdTxJVKIC5rT23MTqbv8gwzakUdqHOAV-vvfrSCS5LPO1m9L9Gy9wW_BI5HxP2_zNmczHAR4RXnMQLdTduhyvaapifcMGQJ01GoN38BnGRpoAcFv-i0o66EQ1RZ-OfP9isJj9gU8zekvGxE4LnUdeL5i-o_F4n5uIekY-eRKFSaWxxZBo9-LSgDjEzOLPRwnCzhlo5yNcWhEFt9Dan2pF-COqVOEODtLASpUKGFN6ITE6Y1TvX_FxlkpwIjEUnXBMEPiShU3zE"/>
+</div>
+</div>
+</header>
+<main class="main-container">
+<div class="header-content">
+<span class="stepper-text">Pas 2 de 4</span>
+<h1 class="main-title">Introdueix el text a adaptar</h1>
+<p class="description">Enganxa el contingut educatiu que vols treballar o puja un fitxer. El nostre motor d'IA analitzarà l'estructura i el vocabulari per a la seva posterior personalització.</p>
+</div>
+<div class="grid-layout">
+<!-- Left Column: Editor -->
+<div class="editor-card">
+<div class="card-header">
+<div class="card-title">
+<span class="material-symbols-outlined">description</span>
+                        Contingut del document
+                    </div>
+<button class="btn-clear" id="clearBtn">
+<span class="material-symbols-outlined" style="font-size: 14px;">delete</span>
+                        Netejar
+                    </button>
+</div>
+<div class="textarea-container textarea-wrapper"><div class="formatting-toolbar">
+<button class="toolbar-btn" onclick="formatText('bold')" title="Negreta">
+<span class="material-symbols-outlined">format_bold</span>
+</button>
+<button class="toolbar-btn" onclick="formatText('italic')" title="Cursiva">
+<span class="material-symbols-outlined">format_italic</span>
+</button>
+<button class="toolbar-btn" onclick="formatText('bullet')" title="Punts de llista">
+<span class="material-symbols-outlined">format_list_bulleted</span>
+</button>
+</div>
+<textarea id="editor" placeholder="Escriu o enganxa el teu text aquí..."></textarea>
+<div class="char-count">
+<span id="charNum">0</span><span> / 5,000 caràcters</span>
+</div>
+</div>
+</div>
+<!-- Right Column: Sidebar -->
+<div class="sidebar">
+<div class="upload-card">
+<div class="upload-icon">
+<span class="material-symbols-outlined">upload_file</span>
+</div>
+<h3>Puja un fitxer</h3>
+<p>Suporta formats PDF, DOCX i TXT fins a 10MB.</p>
+<button class="btn-upload">Seleccionar fitxer</button>
+</div>
+<div class="tips-card">
+<div class="tips-title">
+<span class="material-symbols-outlined" style="font-size: 16px;">tips_and_updates</span>
+                        Consells ràpids
+                    </div>
+<ul class="tips-list">
+<li>Mantingues el text original per a millors resultats d'adaptació.</li>
+<li>Pots incloure instruccions específiques entre claudàtors [com aquestes].</li>
+</ul>
+</div>
+</div>
+</div>
+</main>
+<footer class="bottom-bar">
+<div class="progress-indicator">
+<div class="dots">
+<div class="dot s"></div>
+<div class="dot active"></div>
+<div class="dot s"></div>
+<div class="dot s"></div>
+</div>
+<span class="step-label">Pas 2: Text Input</span>
+</div>
+<div class="bar-actions">
+<button class="btn-back" onclick="console.log('Enrere clicked')">Enrere</button>
+<button class="btn-continue" onclick="console.log('Continuar clicked')">
+                Continuar
+                <span class="material-symbols-outlined" style="font-size: 18px;">arrow_forward</span>
+</button>
+</div>
+</footer>
+<script>
+        const editor = document.getElementById('editor');
+        const charNum = document.getElementById('charNum');
+        const clearBtn = document.getElementById('clearBtn');
+        const MAX_CHARS = 5000;
+
+        // Initialize with dummy data if needed or leave empty
+        // editor.value = "Exemple de text..."; 
+
+        function updateCharCount() {
+            const currentLength = editor.value.length;
+            charNum.innerText = currentLength.toLocaleString();
+            
+            if (currentLength > MAX_CHARS) {
+                charNum.style.color = '#ba1a1a'; // Error color
+            } else {
+                charNum.style.color = 'var(--primary)';
+            }
+        }
+
+        editor.addEventListener('input', updateCharCount);
+
+        clearBtn.addEventListener('click', () => {
+            if (confirm('Estàs segur que vols netejar tot el text?')) {
+                editor.value = '';
+                updateCharCount();
+            }
+        });
+
+        // Initial count
+        updateCharCount();
+    </script>
+<script>
+    function formatText(type) {
+        const textarea = document.getElementById('editor');
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const selectedText = textarea.value.substring(start, end);
+        let replacement = '';
+
+        switch(type) {
+            case 'bold':
+                replacement = `**${selectedText}**`;
+                break;
+            case 'italic':
+                replacement = `_${selectedText}_`;
+                break;
+            case 'bullet':
+                replacement = `\n• ${selectedText}`;
+                break;
+        }
+
+        textarea.setRangeText(replacement, start, end, 'select');
+        textarea.focus();
+        updateCharCount();
+    }
+</script></body></html>
