@@ -440,61 +440,6 @@
                         </div>
                     </div>
 
-                    <!-- Footer bar: Refinar + Desar (sempre accessible si hi ha text) -->
-                    <div class="editor-footer-bar" id="editor-footer-bar">
-                        <div class="footer-refine">
-                            <div class="footer-refine-label">
-                                <span class="material-symbols-outlined">auto_fix_high</span>
-                                Refinar
-                            </div>
-                            <div class="footer-refine-chips" id="refine-chips-row">
-                                <button type="button" class="refine-chip" data-preset="catala" title="Corregir català">
-                                    <span class="material-symbols-outlined">spellcheck</span>
-                                    <span>Català</span>
-                                </button>
-                                <button type="button" class="refine-chip" data-preset="simplificar" title="Simplificar">
-                                    <span class="material-symbols-outlined">compress</span>
-                                    <span>Simplificar</span>
-                                </button>
-                                <button type="button" class="refine-chip" data-preset="ampliar" title="Ampliar">
-                                    <span class="material-symbols-outlined">expand</span>
-                                    <span>Ampliar</span>
-                                </button>
-                                <button type="button" class="refine-chip" data-preset="escurcar" title="Escurçar">
-                                    <span class="material-symbols-outlined">vertical_align_center</span>
-                                    <span>Escurçar</span>
-                                </button>
-                                <button type="button" class="refine-chip" data-preset="to_mes_proper" title="To més proper">
-                                    <span class="material-symbols-outlined">forum</span>
-                                    <span>+Proper</span>
-                                </button>
-                                <button type="button" class="refine-chip" data-preset="to_mes_formal" title="To més formal">
-                                    <span class="material-symbols-outlined">corporate_fare</span>
-                                    <span>+Formal</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="footer-actions">
-                            <button type="button" class="btn btn-ghost" id="btn-save-draft" title="Desa el text actual com a esborrany">
-                                <span class="material-symbols-outlined">bookmark_add</span>
-                                Desar
-                            </button>
-                        </div>
-                    </div>
-                    <div class="refine-status" id="refine-status" style="display:none;"></div>
-
-                    <!-- Instrucció pròpia de refinament (plegable) -->
-                    <details class="refine-custom-toggle">
-                        <summary>Instrucció de refinament pròpia</summary>
-                        <div class="refine-custom-body">
-                            <textarea id="refine-instruction" rows="2" placeholder="Ex: Substitueix 'ensemble' per 'conjunt'..."></textarea>
-                            <button type="button" class="btn btn-primary btn-sm" id="btn-refine-custom">
-                                <span class="material-symbols-outlined">auto_fix_high</span>
-                                Aplicar
-                            </button>
-                        </div>
-                    </details>
-
                     <!-- Botons compat JS -->
                     <button type="button" id="btn-editor-copy-all" hidden></button>
                     <div class="refine-panel" id="refine-panel" hidden>
@@ -503,8 +448,57 @@
                 </div>
             </main>
 
-            <!-- ── COL DRETA: Històric + Tipus + Tips ─────────────── -->
+            <!-- ── COL DRETA: Refinar + Històric + Tipus + Tips ─────── -->
             <aside class="bento-side pas2-right">
+
+                <!-- Card: Refinar el text (alineat amb l'editor) -->
+                <div class="bento-card refine-card-v3">
+                    <div class="bento-card-header">
+                        <span class="material-symbols-outlined bento-card-icon">auto_fix_high</span>
+                        <h3 class="bento-card-title">Refinar el text</h3>
+                    </div>
+                    <div class="refine-chips-grid" id="refine-chips-row">
+                        <button type="button" class="refine-chip" data-preset="catala" title="Corregir català">
+                            <span class="material-symbols-outlined">spellcheck</span>
+                            <span>Català</span>
+                        </button>
+                        <button type="button" class="refine-chip" data-preset="simplificar" title="Simplificar">
+                            <span class="material-symbols-outlined">compress</span>
+                            <span>Simplificar</span>
+                        </button>
+                        <button type="button" class="refine-chip" data-preset="ampliar" title="Ampliar">
+                            <span class="material-symbols-outlined">expand</span>
+                            <span>Ampliar</span>
+                        </button>
+                        <button type="button" class="refine-chip" data-preset="escurcar" title="Escurçar">
+                            <span class="material-symbols-outlined">vertical_align_center</span>
+                            <span>Escurçar</span>
+                        </button>
+                        <button type="button" class="refine-chip" data-preset="to_mes_proper" title="To més proper">
+                            <span class="material-symbols-outlined">forum</span>
+                            <span>+Proper</span>
+                        </button>
+                        <button type="button" class="refine-chip" data-preset="to_mes_formal" title="To més formal">
+                            <span class="material-symbols-outlined">corporate_fare</span>
+                            <span>+Formal</span>
+                        </button>
+                    </div>
+                    <details class="refine-custom-toggle">
+                        <summary>Instrucció pròpia</summary>
+                        <div class="refine-custom-body">
+                            <textarea id="refine-instruction" rows="2" placeholder="Ex: Substitueix 'ensemble' per 'conjunt'..."></textarea>
+                            <button type="button" class="btn btn-primary btn-sm" id="btn-refine-custom">
+                                <span class="material-symbols-outlined">auto_fix_high</span>
+                                Aplicar
+                            </button>
+                        </div>
+                    </details>
+                    <div class="refine-status" id="refine-status" style="display:none;"></div>
+                    <button type="button" class="btn btn-ghost btn-save-full" id="btn-save-draft" title="Desa el text actual com a esborrany">
+                        <span class="material-symbols-outlined">bookmark_add</span>
+                        Desar com a esborrany
+                    </button>
+                </div>
 
                 <!-- Card: Textos anteriors -->
                 <div class="bento-card history-card-v2">
