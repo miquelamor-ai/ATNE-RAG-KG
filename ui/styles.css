@@ -1970,3 +1970,24 @@ details.bento-card .bento-card-body {
         grid-template-columns: minmax(0, 2fr) minmax(20rem, 1fr);
     }
 }
+
+/* ── Pill de context (Pas 2) ──────────────────────────────── */
+.context-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    padding: 0.5rem 1rem;
+    background: var(--surface-container-low);
+    color: var(--primary);
+    border-radius: var(--radius-full);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border: 1px solid rgba(51, 55, 166, 0.15);
+    width: fit-content;
+}
+
+.context-pill .material-symbols-outlined {
+    font-size: 1.125rem;
+    font-variation-settings: 'FILL' 1;
+}

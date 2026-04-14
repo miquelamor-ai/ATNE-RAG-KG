@@ -604,6 +604,7 @@ function goToStep(n) {
         panel.classList.toggle("active", panel.id === `step-${n}`);
     });
     if (n === 3) requestProposal();
+    if (n === 2) updateContextPill();
     updateStickyBar();
     updateAsideProgress();
 }
@@ -1840,6 +1841,101 @@ async function refineText(preset, customInstruction) {
     }
 }
 
+// ── Botons editor: format markdown (negreta/cursiva/vinyeta) ──────────────
+
+function editorApplyFormat(format) {
+    const ta = document.getElementById("input-text");
+    if (!ta) return;
+    ta.focus();
+
+    const start = ta.selectionStart;
+    const end = ta.selectionEnd;
+    const selected = ta.value.substring(start, end);
+    const before = ta.value.substring(0, start);
+    const after = ta.value.substring(end);
+
+    let wrapped = "";
+    if (format === "bold") {
+        wrapped = selected ? `**${selected}**` : "**text en negreta**";
+    } else if (format === "italic") {
+        wrapped = selected ? `*${selected}*` : "*text en cursiva*";
+    } else if (format === "bullet") {
+        if (selected) {
+            wrapped = selected.split("\n").map(l => l.trim() ? `- ${l}` : l).join("\n");
+        } else {
+            wrapped = "- ";
+        }
+    }
+
+    // Inserir mantenint l'historial undo/redo
+    if (document.execCommand) {
+        ta.setRangeText(wrapped, start, end, "end");
+    } else {
+        ta.value = before + wrapped + after;
+        ta.selectionStart = ta.selectionEnd = start + wrapped.length;
+    }
+    updateWordCount();
+}
+
+function editorUndo() {
+    const ta = document.getElementById("input-text");
+    if (!ta) return;
+    ta.focus();
+    document.execCommand("undo");
+    updateWordCount();
+}
+
+function editorRedo() {
+    const ta = document.getElementById("input-text");
+    if (!ta) return;
+    ta.focus();
+    document.execCommand("redo");
+    updateWordCount();
+}
+
+// ── Pill de context (mostra etapa+curs+matèria+perfil al Pas 2) ───────────
+
+function updateContextPill() {
+    const pill = document.getElementById("context-pill-text");
+    if (!pill) return;
+
+    const etapa = document.getElementById("ctx-etapa")?.value;
+    const curs = document.getElementById("ctx-curs")?.value;
+    const ambit = document.getElementById("ctx-ambit")?.value;
+    const materia = document.getElementById("ctx-materia")?.value.trim();
+
+    const parts = [];
+    if (etapa && curs) parts.push(`${curs} ${etapa.toUpperCase()}`);
+    else if (etapa) parts.push(etapa.toUpperCase());
+
+    if (materia) parts.push(materia);
+    else if (ambit) parts.push(ambit);
+
+    // Resum del perfil de l'alumne
+    const mode = document.querySelector('input[name="adapt-mode"]:checked')?.value || "alumne";
+    if (mode === "grup") {
+        parts.push("Grup d'aula (3 versions)");
+    } else {
+        const behaviorIds = typeof getActiveBehaviorIds === "function" ? getActiveBehaviorIds() : [];
+        if (behaviorIds.length > 0) {
+            parts.push(`Alumne · ${behaviorIds.length} ${behaviorIds.length === 1 ? 'observació' : 'observacions'}`);
+        } else {
+            // Mirar si hi ha característiques NESE actives
+            const charsActive = document.querySelectorAll('input[type="checkbox"][data-char]:checked');
+            if (charsActive.length > 0) {
+                parts.push(`Alumne · ${charsActive.length} ${charsActive.length === 1 ? 'condició' : 'condicions'}`);
+            } else {
+                parts.push("Alumne genèric");
+            }
+        }
+    }
+
+    pill.textContent = parts.length > 0
+        ? parts.join(" · ")
+        : "Configura el Pas 1 per veure el context";
+}
+
+
 // ── Botons editor: copiar/enganxar/netejar ────────────────────────────────
 
 async function editorCopyAll() {
@@ -1948,6 +2044,17 @@ function bindEvents() {
             if (genTema && !genTema.value) genTema.value = ctxMateria.value;
         });
     }
+
+    // Botons editor: format markdown (negreta/cursiva/vinyeta)
+    document.querySelectorAll("[data-format]").forEach(btn => {
+        btn.addEventListener("click", () => editorApplyFormat(btn.dataset.format));
+    });
+
+    // Botons editor: undo/redo
+    const btnUndo = document.getElementById("btn-editor-undo");
+    if (btnUndo) btnUndo.addEventListener("click", editorUndo);
+    const btnRedo = document.getElementById("btn-editor-redo");
+    if (btnRedo) btnRedo.addEventListener("click", editorRedo);
 
     // Botons editor (copiar/enganxar/netejar)
     const btnCopy = document.getElementById("btn-editor-copy");

@@ -266,6 +266,10 @@
         <div class="workspace-header">
             <h1 class="workspace-title">Entrada de Text</h1>
             <p class="workspace-subtitle">Escriu, enganxa, puja un fitxer o demana a l'IA que generi un text base. Després el podràs refinar i adaptar.</p>
+            <div class="context-pill" id="context-pill">
+                <span class="material-symbols-outlined">person_pin</span>
+                <span id="context-pill-text">Configura el Pas 1 per veure el context</span>
+            </div>
         </div>
 
         <!-- Layout permanent: editor central + sidebar dret amb generador i altres cards -->
@@ -274,21 +278,28 @@
                 <div class="editor-card">
                     <div class="editor-toolbar">
                         <div class="editor-toolbar-actions">
+                            <button class="editor-toolbar-btn" type="button" title="Desfer (Ctrl+Z)" id="btn-editor-undo">
+                                <span class="material-symbols-outlined">undo</span>
+                            </button>
+                            <button class="editor-toolbar-btn" type="button" title="Refer (Ctrl+Y)" id="btn-editor-redo">
+                                <span class="material-symbols-outlined">redo</span>
+                            </button>
+                            <span class="editor-toolbar-divider"></span>
+                            <button class="editor-toolbar-btn" type="button" title="Negreta (markdown **text**)" data-format="bold">
+                                <span class="material-symbols-outlined">format_bold</span>
+                            </button>
+                            <button class="editor-toolbar-btn" type="button" title="Cursiva (markdown *text*)" data-format="italic">
+                                <span class="material-symbols-outlined">format_italic</span>
+                            </button>
+                            <button class="editor-toolbar-btn" type="button" title="Llista amb vinyetes" data-format="bullet">
+                                <span class="material-symbols-outlined">format_list_bulleted</span>
+                            </button>
+                            <span class="editor-toolbar-divider"></span>
                             <button class="editor-toolbar-btn" type="button" title="Copiar tot el text" id="btn-editor-copy">
                                 <span class="material-symbols-outlined">content_copy</span>
                             </button>
                             <button class="editor-toolbar-btn" type="button" title="Enganxar des del porta-retalls" id="btn-editor-paste">
                                 <span class="material-symbols-outlined">content_paste</span>
-                            </button>
-                            <span class="editor-toolbar-divider"></span>
-                            <button class="editor-toolbar-btn" type="button" title="Negreta">
-                                <span class="material-symbols-outlined">format_bold</span>
-                            </button>
-                            <button class="editor-toolbar-btn" type="button" title="Cursiva">
-                                <span class="material-symbols-outlined">format_italic</span>
-                            </button>
-                            <button class="editor-toolbar-btn" type="button" title="Llista">
-                                <span class="material-symbols-outlined">format_list_bulleted</span>
                             </button>
                         </div>
                         <span class="editor-wordcount" id="word-count">0 paraules</span>
