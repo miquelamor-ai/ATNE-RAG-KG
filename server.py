@@ -1654,19 +1654,28 @@ REFINE_PRESETS = {
         "concordances. NO canviïs el contingut, només la correcció lingüística."
     ),
     "simplificar": (
-        "Simplifica el llenguatge sense canviar el contingut. Substitueix "
-        "paraules complexes per sinònims més freqüents. Trenca frases "
-        "llargues en frases més curtes. Mantén el to i l'estructura."
+        "Simplifica el llenguatge sense canviar el contingut ni la longitud. "
+        "Substitueix paraules complexes per sinònims més freqüents. Trenca "
+        "frases llargues en frases més curtes. Mantén el to general. "
+        "OBJECTIU: mateix missatge, vocabulari més senzill."
     ),
     "ampliar": (
-        "Amplia el text afegint exemples concrets, contextualització i "
-        "detalls que enriqueixin el contingut. NO canviïs l'estructura ni "
-        "el to. Augmenta'l aproximadament un 30%."
+        "AMPLIA EL TEXT. El text resultant HA DE SER MÉS LLARG que l'original, "
+        "no més curt. Afegeix exemples concrets, contextualització, detalls "
+        "explicatius i matisos que enriqueixin el contingut. Mantén l'estructura "
+        "general i el to. OBJECTIU OBLIGATORI: el text ampliat ha de tenir "
+        "aproximadament entre un 30% i un 50% més de paraules que l'original. "
+        "NO escurcis. NO retornis un text més breu. Si l'original té 200 paraules, "
+        "el resultat ha de tenir com a mínim 260 paraules."
     ),
     "escurcar": (
-        "Escurça el text mantenint totes les idees principals. Elimina "
-        "paraules redundants, frases secundàries i exemples superflus. "
-        "Conserva el to i l'estructura. Redueix-lo aproximadament un 30%."
+        "ESCURÇA EL TEXT. El text resultant HA DE SER MÉS CURT que l'original, "
+        "no més llarg. Elimina paraules redundants, repeticions, frases "
+        "secundàries, exemples superflus i digressions. Mantén TOTES les idees "
+        "principals intactes. OBJECTIU OBLIGATORI: el text escurçat ha de tenir "
+        "aproximadament entre un 25% i un 40% menys de paraules que l'original. "
+        "NO ampliïs. NO retornis un text més llarg. Si l'original té 200 paraules, "
+        "el resultat ha de tenir entre 120 i 150 paraules."
     ),
     "to_mes_proper": (
         "Reescriu el text amb un to més proper i informal, parlant "
@@ -1711,6 +1720,28 @@ async def refine_text(payload: dict = Body(...)):
         return JSONResponse(
             {"error": "Cal especificar un preset o una instrucció lliure."},
             status_code=400,
+        )
+
+    # Per ampliar/escurcar, injectar objectius numèrics explícits basats en
+    # el recompte real de paraules per evitar que Gemma 4 faci el contrari.
+    paraules_in = len(text.split())
+    if preset == "ampliar":
+        target_min = int(paraules_in * 1.30)
+        target_max = int(paraules_in * 1.50)
+        instruccio_final += (
+            f"\n\nRECOMPTE OBLIGATORI: l'original té {paraules_in} paraules. "
+            f"El text resultant HA DE TENIR entre {target_min} i {target_max} paraules. "
+            f"Si retornes menys de {target_min} paraules, és un ERROR. "
+            f"Compta les paraules del resultat abans de retornar-lo."
+        )
+    elif preset == "escurcar":
+        target_min = int(paraules_in * 0.60)
+        target_max = int(paraules_in * 0.75)
+        instruccio_final += (
+            f"\n\nRECOMPTE OBLIGATORI: l'original té {paraules_in} paraules. "
+            f"El text resultant HA DE TENIR entre {target_min} i {target_max} paraules. "
+            f"Si retornes més de {target_max} paraules, és un ERROR. "
+            f"Compta les paraules del resultat abans de retornar-lo."
         )
 
     prompt = f"""# ROL

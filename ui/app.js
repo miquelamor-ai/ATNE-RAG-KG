@@ -1689,6 +1689,8 @@ async function handleFileUpload(ev) {
         updateWordCount();
         status.textContent = `${file.name} — ${data.paraules} paraules extretes (${data.format_detectat.toUpperCase()})`;
         status.style.color = "#15803d";
+        // Auto-switch a mode "write" després de pujar
+        if (typeof switchMode === "function") switchMode("write");
     } catch (e) {
         status.textContent = `Error de xarxa: ${e.message}`;
         status.style.color = "#b91c1c";
@@ -1768,6 +1770,9 @@ async function generateDraftText() {
         status.textContent = `Text generat (${data.paraules} paraules). Modifica paràmetres i regenera, refina'l, o continua.`;
         status.style.color = "#15803d";
 
+        // Auto-switch a mode "write" perquè es vegi el text generat
+        if (typeof switchMode === "function") setTimeout(() => switchMode("write"), 500);
+
         // Mostrar botó de "Desfer regeneració" si teníem text previ
         const btnUndo = document.getElementById("btn-undo-generate");
         if (btnUndo && _lastTextBeforeGeneration) btnUndo.style.display = "flex";
@@ -1801,19 +1806,46 @@ function undoLastGeneration() {
 
 // ── Refinament de text (ajusts sense regenerar) ───────────────────────────
 
-async function refineText(preset, customInstruction) {
+const REFINE_LABELS = {
+    catala: "Corregint català",
+    simplificar: "Simplificant",
+    ampliar: "Ampliant",
+    escurcar: "Escurçant",
+    to_mes_proper: "Aplicant to més proper",
+    to_mes_formal: "Aplicant to més formal",
+};
+
+async function refineText(preset, customInstruction, triggerBtn) {
     const textarea = document.getElementById("input-text");
     const status = document.getElementById("refine-status");
     if (!textarea || !textarea.value.trim()) {
-        status.textContent = "No hi ha text a refinar.";
-        status.style.display = "block";
-        status.style.color = "#b91c1c";
+        if (status) {
+            status.textContent = "Primer escriu o genera un text per refinar-lo.";
+            status.style.display = "block";
+            status.style.color = "#b91c1c";
+        }
         return;
     }
 
-    status.style.display = "block";
-    status.style.color = "var(--on-surface-variant)";
-    status.textContent = "Refinant amb Gemma 4... pot trigar 10-20 segons.";
+    const paraulesIn = textarea.value.trim().split(/\s+/).length;
+    const label = preset ? (REFINE_LABELS[preset] || "Refinant") : "Aplicant instrucció";
+
+    // Estat visual: chip activa + tots els altres desactivats
+    const allChips = document.querySelectorAll(".refine-chip");
+    allChips.forEach(c => {
+        if (c === triggerBtn) {
+            c.setAttribute("aria-busy", "true");
+            c.classList.add("is-loading");
+        } else {
+            c.setAttribute("disabled", "disabled");
+        }
+    });
+
+    if (status) {
+        status.style.display = "block";
+        status.style.color = "var(--primary)";
+        status.innerHTML = `<strong>${label}…</strong> (${paraulesIn} paraules · pot trigar 10-20 s)`;
+    }
 
     const payload = { text: textarea.value };
     if (preset) payload.preset = preset;
@@ -1828,18 +1860,82 @@ async function refineText(preset, customInstruction) {
         const data = await resp.json();
 
         if (!resp.ok) {
-            status.textContent = `Error: ${data.error || resp.statusText}`;
-            status.style.color = "#b91c1c";
+            if (status) {
+                status.textContent = `Error: ${data.error || resp.statusText}`;
+                status.style.color = "#b91c1c";
+            }
             return;
         }
 
         textarea.value = data.text;
         updateWordCount();
-        status.textContent = `Text refinat (${data.paraules} paraules). Pots tornar a refinar si cal.`;
-        status.style.color = "#15803d";
+        if (status) {
+            const delta = data.paraules - paraulesIn;
+            const arrow = delta > 0 ? "↑" : delta < 0 ? "↓" : "=";
+            const sign = delta > 0 ? "+" : "";
+            status.innerHTML = `<strong>${label} ✓</strong> (${paraulesIn} → ${data.paraules} paraules ${arrow} ${sign}${delta})`;
+            status.style.color = "#15803d";
+            // Auto-hide després de 4s
+            setTimeout(() => {
+                if (status) status.style.display = "none";
+            }, 4000);
+        }
     } catch (e) {
-        status.textContent = `Error de xarxa: ${e.message}`;
-        status.style.color = "#b91c1c";
+        if (status) {
+            status.textContent = `Error de xarxa: ${e.message}`;
+            status.style.color = "#b91c1c";
+        }
+    } finally {
+        // Restaurar tots els chips
+        allChips.forEach(c => {
+            c.removeAttribute("aria-busy");
+            c.removeAttribute("disabled");
+            c.classList.remove("is-loading");
+        });
+        // Re-aplicar toggleRefinePanel per si ha quedat sense text
+        toggleRefinePanel();
+    }
+}
+
+// ── Mode switcher multimode (Escriure / Pujar / Generar) ──────────────────
+function switchMode(mode) {
+    document.querySelectorAll(".mode-tab").forEach(tab => {
+        tab.classList.toggle("active", tab.dataset.mode === mode);
+    });
+    document.querySelectorAll(".mode-content").forEach(content => {
+        const on = content.dataset.modeContent === mode;
+        if (on) content.removeAttribute("hidden");
+        else content.setAttribute("hidden", "hidden");
+    });
+    // El textarea és sempre visible sota (shared-textarea)
+}
+
+// ── Desar esborrany (localStorage) ────────────────────────────────────────
+function saveDraft() {
+    const textarea = document.getElementById("input-text");
+    if (!textarea || !textarea.value.trim()) {
+        alert("No hi ha text per desar.");
+        return;
+    }
+    const draft = {
+        text: textarea.value,
+        timestamp: new Date().toISOString(),
+        materia: document.getElementById("ctx-materia")?.value || "",
+        etapa: document.getElementById("ctx-etapa")?.value || "",
+    };
+    const drafts = JSON.parse(localStorage.getItem("atne_drafts") || "[]");
+    drafts.unshift(draft);
+    localStorage.setItem("atne_drafts", JSON.stringify(drafts.slice(0, 20)));
+
+    const btn = document.getElementById("btn-save-draft");
+    if (btn) {
+        const prevHTML = btn.innerHTML;
+        btn.classList.add("is-saved");
+        btn.innerHTML = '<span class="material-symbols-outlined">check</span>Desat';
+        setTimeout(() => {
+            btn.classList.remove("is-saved");
+            btn.innerHTML = prevHTML;
+        }, 2000);
     }
 }
 
@@ -2102,13 +2198,42 @@ function bindEvents() {
     const btnClear = document.getElementById("btn-editor-clear");
     if (btnClear) btnClear.addEventListener("click", editorClearAll);
 
-    // Botons refinador (chips compactes)
+    // Botons refinador (chips compactes) — passa el botó per mostrar loading
     document.querySelectorAll(".refine-chip, .refine-preset").forEach(btn => {
-        btn.addEventListener("click", () => refineText(btn.dataset.preset, null));
+        btn.addEventListener("click", () => refineText(btn.dataset.preset, null, btn));
     });
 
     // Generator v3: botons clicables sync amb selects ocults
     initGeneratorButtons();
+
+    // Mode tabs (multimode Pas 2)
+    document.querySelectorAll(".mode-tab").forEach(tab => {
+        tab.addEventListener("click", () => switchMode(tab.dataset.mode));
+    });
+
+    // Desar esborrany
+    const btnSave = document.getElementById("btn-save-draft");
+    if (btnSave) btnSave.addEventListener("click", saveDraft);
+
+    // Drag & drop al dropzone
+    const dropzone = document.getElementById("dropzone");
+    if (dropzone) {
+        dropzone.addEventListener("dragover", e => {
+            e.preventDefault();
+            dropzone.classList.add("drag-over");
+        });
+        dropzone.addEventListener("dragleave", () => dropzone.classList.remove("drag-over"));
+        dropzone.addEventListener("drop", e => {
+            e.preventDefault();
+            dropzone.classList.remove("drag-over");
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const fileInput = document.getElementById("file-input");
+                fileInput.files = files;
+                fileInput.dispatchEvent(new Event("change"));
+            }
+        });
+    }
     const btnRefineCustom = document.getElementById("btn-refine-custom");
     if (btnRefineCustom) {
         btnRefineCustom.addEventListener("click", () => {

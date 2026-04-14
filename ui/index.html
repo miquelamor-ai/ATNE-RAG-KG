@@ -272,21 +272,32 @@
             </div>
         </div>
 
-        <!-- Layout 3 columnes Stitch: Generator (esq) | Editor (centre) | Refine+History (dre) -->
+        <!-- Layout multimode: editor gran amb 3 tabs (Escriure/Pujar/Generar) + dreta amb història -->
         <div class="pas2-grid-v3" id="bento-have">
 
-            <!-- pas2-left eliminat: Generator+Upload ara a pas2-right -->
-
-            <!-- ── COL CENTRE: Editor ──────────────────────────────── -->
+            <!-- ── COL PRINCIPAL: Editor multimode ─────────────────── -->
             <main class="pas2-center">
-                <!-- Editor card Stitch-style: header (títol + toolbar horitzontal) + textarea -->
-                <div class="editor-card-v2">
-                    <div class="card-header editor-header-v3">
-                        <div class="card-title">
-                            <span class="material-symbols-outlined">description</span>
-                            <span id="editor-title-text">Contingut del document</span>
-                        </div>
-                        <div class="editor-header-actions">
+                <div class="editor-card-v2 editor-multimode">
+
+                    <!-- Mode tabs (3 opcions: Escriure / Pujar / Generar) -->
+                    <div class="mode-tabs" role="tablist">
+                        <button class="mode-tab active" type="button" role="tab" data-mode="write">
+                            <span class="material-symbols-outlined">edit_note</span>
+                            <span>Escriure</span>
+                        </button>
+                        <button class="mode-tab" type="button" role="tab" data-mode="upload">
+                            <span class="material-symbols-outlined">upload_file</span>
+                            <span>Pujar fitxer</span>
+                        </button>
+                        <button class="mode-tab" type="button" role="tab" data-mode="generate">
+                            <span class="material-symbols-outlined">auto_awesome</span>
+                            <span>Generar amb IA</span>
+                        </button>
+                    </div>
+
+                    <!-- Mode 1: Escriure (format toolbar + textarea sempre al DOM) -->
+                    <div class="mode-content" data-mode-content="write">
+                        <div class="write-toolbar-row">
                             <div class="formatting-toolbar formatting-toolbar-h">
                                 <button class="toolbar-btn" type="button" title="Negreta" data-format="bold">
                                     <span class="material-symbols-outlined">format_bold</span>
@@ -308,7 +319,7 @@
                                 <button class="toolbar-btn" type="button" title="Copiar tot el text" id="btn-editor-copy">
                                     <span class="material-symbols-outlined">content_copy</span>
                                 </button>
-                                <button class="toolbar-btn" type="button" title="Enganxar des del porta-retalls" id="btn-editor-paste">
+                                <button class="toolbar-btn" type="button" title="Enganxar" id="btn-editor-paste">
                                     <span class="material-symbols-outlined">content_paste</span>
                                 </button>
                             </div>
@@ -318,152 +329,182 @@
                             </button>
                         </div>
                     </div>
-                    <div class="textarea-container">
+
+                    <!-- Mode 2: Pujar (dropzone gran) -->
+                    <div class="mode-content" data-mode-content="upload" hidden>
+                        <div class="dropzone-large" id="dropzone">
+                            <span class="material-symbols-outlined dropzone-icon">cloud_upload</span>
+                            <h3>Puja un fitxer</h3>
+                            <p class="dropzone-desc">Arrossega aquí el fitxer o prem per seleccionar</p>
+                            <label for="file-input" class="btn btn-primary btn-big dropzone-btn">
+                                <span class="material-symbols-outlined">attach_file</span>
+                                Seleccionar fitxer
+                            </label>
+                            <input type="file" id="file-input" accept=".pdf,.docx,.md,.txt" hidden>
+                            <p class="dropzone-hint">PDF, DOCX, MD o TXT · màxim 5 MB</p>
+                            <p id="upload-status" class="dropzone-status"></p>
+                        </div>
+                    </div>
+
+                    <!-- Mode 3: Generar (formulari compacte) -->
+                    <div class="mode-content" data-mode-content="generate" hidden>
+                        <div class="gen-form-compact">
+                            <div class="gen-field">
+                                <label for="gen-tema">Tema o tòpic</label>
+                                <input type="text" id="gen-tema" placeholder="Ex: La fotosíntesi, La Revolució Francesa...">
+                            </div>
+
+                            <div class="gen-field gen-field-row">
+                                <div>
+                                    <label for="gen-genere">Gènere</label>
+                                    <select id="gen-genere">
+                                        <option value="Article de manual escolar" selected>Manual escolar</option>
+                                        <option value="Article divulgatiu">Article divulgatiu</option>
+                                        <option value="Notícia de premsa">Notícia de premsa</option>
+                                        <option value="Conte o relat">Conte o relat</option>
+                                        <option value="Relat fantàstic o llegendari">Relat fantàstic</option>
+                                        <option value="Carta o correu">Carta o correu</option>
+                                        <option value="Article d'opinió">Article d'opinió</option>
+                                        <option value="Procediment instructiu">Procediment instructiu</option>
+                                        <option value="Definició enciclopèdica">Definició enciclopèdica</option>
+                                        <option value="Receptari">Receptari</option>
+                                        <option value="Crònica">Crònica</option>
+                                        <option value="Biografia">Biografia</option>
+                                        <option value="Ressenya o crítica">Ressenya</option>
+                                        <option value="Examen o pregunta de resposta oberta">Examen</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="gen-tipologia">Tipologia</label>
+                                    <select id="gen-tipologia">
+                                        <option value="expositiva" selected>Expositiva</option>
+                                        <option value="narrativa">Narrativa</option>
+                                        <option value="descriptiva">Descriptiva</option>
+                                        <option value="argumentativa">Argumentativa</option>
+                                        <option value="instructiva">Instructiva</option>
+                                        <option value="dialogada">Dialogada</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="gen-field gen-field-row">
+                                <div>
+                                    <label for="gen-to">To</label>
+                                    <select id="gen-to">
+                                        <option value="neutre" selected>Neutre</option>
+                                        <option value="informal">Informal</option>
+                                        <option value="creatiu">Creatiu</option>
+                                        <option value="motivador">Motivador</option>
+                                        <option value="reflexiu">Reflexiu</option>
+                                        <option value="empatic">Empàtic</option>
+                                        <option value="humoristic">Humorístic</option>
+                                        <option value="solemne">Solemne</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="gen-extensio">Extensió</label>
+                                    <select id="gen-extensio">
+                                        <option value="micro">Micro (50-100)</option>
+                                        <option value="curt">Curt (~200)</option>
+                                        <option value="estandard" selected>Estàndard (~400)</option>
+                                        <option value="extens">Extens (+600)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <details class="gen-notes-details">
+                                <summary>Notes addicionals (opcional)</summary>
+                                <textarea id="gen-notes" rows="2" placeholder="Ex: Inclou exemples de Catalunya..."></textarea>
+                            </details>
+
+                            <div class="gen-actions-row">
+                                <button type="button" class="btn btn-primary btn-big" id="btn-generate-text">
+                                    <span class="material-symbols-outlined">auto_awesome</span>
+                                    <span id="btn-generate-label">Generar text</span>
+                                </button>
+                                <button type="button" class="btn btn-sm" id="btn-undo-generate" style="display:none;">
+                                    <span class="material-symbols-outlined">undo</span>
+                                    Desfer
+                                </button>
+                            </div>
+                            <div class="gen-status" id="gen-status" style="display:none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Textarea COMPARTIT: sempre al DOM, visible només quan hi ha text o en mode write -->
+                    <div class="textarea-container shared-textarea">
                         <textarea class="editor-textarea-v2" id="input-text" placeholder="Escriu o enganxa el text aquí..."></textarea>
                         <div class="char-count-pill">
                             <span class="material-symbols-outlined">text_fields</span>
                             <span id="word-count">0 paraules</span>
                         </div>
                     </div>
-                </div>
 
-                <!-- Botó antic (per compat amb JS) — no visible -->
-                <button type="button" id="btn-editor-copy-all" hidden></button>
-            </main>
-
-            <!-- ── COL DRETA: Generator + Refine + History + Upload + Tips ── -->
-            <aside class="bento-side pas2-right">
-
-                <!-- Card: Generar amb IA (compacta amb selects) -->
-                <div class="bento-card generator-card generator-card-v3">
-                    <div class="bento-card-header">
-                        <span class="material-symbols-outlined bento-card-icon">psychology</span>
-                        <h3 class="bento-card-title">Generar amb IA</h3>
-                    </div>
-
-                    <div class="gen-field">
-                        <label for="gen-tema">Tema o tòpic</label>
-                        <input type="text" id="gen-tema" placeholder="Ex: La fotosíntesi...">
-                    </div>
-
-                    <div class="gen-field">
-                        <label for="gen-genere">Gènere discursiu</label>
-                        <select id="gen-genere">
-                            <option value="Article de manual escolar" selected>Article de manual escolar</option>
-                            <option value="Article divulgatiu">Article divulgatiu</option>
-                            <option value="Notícia de premsa">Notícia de premsa</option>
-                            <option value="Conte o relat">Conte o relat</option>
-                            <option value="Relat fantàstic o llegendari">Relat fantàstic / llegendari</option>
-                            <option value="Carta o correu">Carta o correu</option>
-                            <option value="Article d'opinió">Article d'opinió</option>
-                            <option value="Procediment instructiu">Procediment / instructiu</option>
-                            <option value="Definició enciclopèdica">Definició enciclopèdica</option>
-                            <option value="Receptari">Receptari</option>
-                            <option value="Crònica">Crònica</option>
-                            <option value="Biografia">Biografia</option>
-                            <option value="Ressenya o crítica">Ressenya / crítica</option>
-                            <option value="Examen o pregunta de resposta oberta">Examen / pregunta oberta</option>
-                        </select>
-                    </div>
-
-                    <div class="gen-field gen-field-row">
-                        <div>
-                            <label for="gen-tipologia">Tipologia</label>
-                            <select id="gen-tipologia">
-                                <option value="expositiva" selected>Expositiva</option>
-                                <option value="narrativa">Narrativa</option>
-                                <option value="descriptiva">Descriptiva</option>
-                                <option value="argumentativa">Argumentativa</option>
-                                <option value="instructiva">Instructiva</option>
-                                <option value="dialogada">Dialogada</option>
-                            </select>
+                    <!-- Footer bar: Refinar + Desar (sempre accessible si hi ha text) -->
+                    <div class="editor-footer-bar" id="editor-footer-bar">
+                        <div class="footer-refine">
+                            <div class="footer-refine-label">
+                                <span class="material-symbols-outlined">auto_fix_high</span>
+                                Refinar
+                            </div>
+                            <div class="footer-refine-chips" id="refine-chips-row">
+                                <button type="button" class="refine-chip" data-preset="catala" title="Corregir català">
+                                    <span class="material-symbols-outlined">spellcheck</span>
+                                    <span>Català</span>
+                                </button>
+                                <button type="button" class="refine-chip" data-preset="simplificar" title="Simplificar">
+                                    <span class="material-symbols-outlined">compress</span>
+                                    <span>Simplificar</span>
+                                </button>
+                                <button type="button" class="refine-chip" data-preset="ampliar" title="Ampliar">
+                                    <span class="material-symbols-outlined">expand</span>
+                                    <span>Ampliar</span>
+                                </button>
+                                <button type="button" class="refine-chip" data-preset="escurcar" title="Escurçar">
+                                    <span class="material-symbols-outlined">vertical_align_center</span>
+                                    <span>Escurçar</span>
+                                </button>
+                                <button type="button" class="refine-chip" data-preset="to_mes_proper" title="To més proper">
+                                    <span class="material-symbols-outlined">forum</span>
+                                    <span>+Proper</span>
+                                </button>
+                                <button type="button" class="refine-chip" data-preset="to_mes_formal" title="To més formal">
+                                    <span class="material-symbols-outlined">corporate_fare</span>
+                                    <span>+Formal</span>
+                                </button>
+                            </div>
                         </div>
-                        <div>
-                            <label for="gen-to">To</label>
-                            <select id="gen-to">
-                                <option value="neutre" selected>Neutre</option>
-                                <option value="informal">Informal</option>
-                                <option value="creatiu">Creatiu</option>
-                                <option value="motivador">Motivador</option>
-                                <option value="reflexiu">Reflexiu</option>
-                                <option value="empatic">Empàtic</option>
-                                <option value="humoristic">Humorístic</option>
-                                <option value="solemne">Solemne</option>
-                            </select>
+                        <div class="footer-actions">
+                            <button type="button" class="btn btn-ghost" id="btn-save-draft" title="Desa el text actual com a esborrany">
+                                <span class="material-symbols-outlined">bookmark_add</span>
+                                Desar
+                            </button>
                         </div>
-                    </div>
-
-                    <div class="gen-field">
-                        <label for="gen-extensio">Extensió</label>
-                        <select id="gen-extensio">
-                            <option value="micro">Micro (50-100)</option>
-                            <option value="curt">Curt (~200)</option>
-                            <option value="estandard" selected>Estàndard (~400)</option>
-                            <option value="extens">Extens (+600)</option>
-                        </select>
-                    </div>
-
-                    <details class="gen-notes-details">
-                        <summary>Notes addicionals (opcional)</summary>
-                        <textarea id="gen-notes" rows="2" placeholder="Ex: Inclou exemples de Catalunya..."></textarea>
-                    </details>
-
-                    <button type="button" class="btn btn-primary btn-big" id="btn-generate-text">
-                        <span class="material-symbols-outlined">auto_awesome</span>
-                        <span id="btn-generate-label">Generar text</span>
-                    </button>
-
-                    <button type="button" class="btn btn-sm" id="btn-undo-generate" style="display:none;">
-                        <span class="material-symbols-outlined">undo</span>
-                        Desfer regeneració
-                    </button>
-
-                    <div class="gen-status" id="gen-status" style="display:none;"></div>
-                </div>
-
-                <!-- Card: Refinar el text (compacta, sempre visible) -->
-                <div class="refine-panel refine-panel-compact" id="refine-panel">
-                    <div class="refine-header">
-                        <span class="material-symbols-outlined bento-card-icon">auto_fix_high</span>
-                        <h3 class="bento-card-title">Refinar el text</h3>
-                    </div>
-                    <p class="bento-card-desc refine-hint" id="refine-hint">Quan hi hagi text, podràs demanar ajustos sense regenerar-ho tot.</p>
-                    <div class="refine-chips">
-                        <button type="button" class="refine-chip" data-preset="catala" title="Corregir català">
-                            <span class="material-symbols-outlined">spellcheck</span>
-                            <span>Català</span>
-                        </button>
-                        <button type="button" class="refine-chip" data-preset="simplificar" title="Simplificar">
-                            <span class="material-symbols-outlined">compress</span>
-                            <span>Simplificar</span>
-                        </button>
-                        <button type="button" class="refine-chip" data-preset="ampliar" title="Ampliar">
-                            <span class="material-symbols-outlined">expand</span>
-                            <span>Ampliar</span>
-                        </button>
-                        <button type="button" class="refine-chip" data-preset="escurcar" title="Escurçar">
-                            <span class="material-symbols-outlined">vertical_align_center</span>
-                            <span>Escurçar</span>
-                        </button>
-                        <button type="button" class="refine-chip" data-preset="to_mes_proper" title="To més proper">
-                            <span class="material-symbols-outlined">forum</span>
-                            <span>+Proper</span>
-                        </button>
-                        <button type="button" class="refine-chip" data-preset="to_mes_formal" title="To més formal">
-                            <span class="material-symbols-outlined">corporate_fare</span>
-                            <span>+Formal</span>
-                        </button>
-                    </div>
-                    <div class="refine-custom refine-custom-compact">
-                        <label for="refine-instruction">Instrucció pròpia</label>
-                        <textarea id="refine-instruction" rows="2" placeholder="Ex: Substitueix 'ensemble' per 'conjunt'..."></textarea>
-                        <button type="button" class="btn btn-primary btn-sm" id="btn-refine-custom">
-                            <span class="material-symbols-outlined">auto_fix_high</span>
-                            Aplicar
-                        </button>
                     </div>
                     <div class="refine-status" id="refine-status" style="display:none;"></div>
+
+                    <!-- Instrucció pròpia de refinament (plegable) -->
+                    <details class="refine-custom-toggle">
+                        <summary>Instrucció de refinament pròpia</summary>
+                        <div class="refine-custom-body">
+                            <textarea id="refine-instruction" rows="2" placeholder="Ex: Substitueix 'ensemble' per 'conjunt'..."></textarea>
+                            <button type="button" class="btn btn-primary btn-sm" id="btn-refine-custom">
+                                <span class="material-symbols-outlined">auto_fix_high</span>
+                                Aplicar
+                            </button>
+                        </div>
+                    </details>
+
+                    <!-- Botons compat JS -->
+                    <button type="button" id="btn-editor-copy-all" hidden></button>
+                    <div class="refine-panel" id="refine-panel" hidden>
+                        <div class="refine-hint" id="refine-hint" hidden></div>
+                    </div>
                 </div>
+            </main>
+
+            <!-- ── COL DRETA: Històric + Tipus + Tips ─────────────── -->
+            <aside class="bento-side pas2-right">
 
                 <!-- Card: Textos anteriors -->
                 <div class="bento-card history-card-v2">
@@ -474,19 +515,6 @@
                     <div class="history-list" id="history-list">
                         <div class="history-loading" id="history-loading">Carregant historial…</div>
                     </div>
-                </div>
-
-                <!-- Upload fitxer compacta -->
-                <div class="upload-card-compact">
-                    <label for="file-input" class="upload-compact-btn">
-                        <span class="material-symbols-outlined">upload_file</span>
-                        <div>
-                            <strong>Puja un fitxer</strong>
-                            <small>PDF, DOCX, MD, TXT · màx 5 MB</small>
-                        </div>
-                    </label>
-                    <input type="file" id="file-input" accept=".pdf,.docx,.md,.txt" hidden>
-                    <p id="upload-status" class="upload-status-compact"></p>
                 </div>
 
                 <!-- Tipus de text (plegable, secundari) -->
@@ -513,9 +541,9 @@
                         Consells ràpids
                     </div>
                     <ul class="tips-list">
-                        <li>Sigues precís al tema. "La fotosíntesi a les plantes vasculars" funciona millor que "Plantes".</li>
-                        <li>Tria el gènere segons l'ús: per comprensió de notícies, "Notícia de premsa".</li>
-                        <li>El to ha d'encaixar amb la matèria: "Solemne" per història, "Humorístic" per primària.</li>
+                        <li>Comença amb qualsevol dels 3 modes: escriure a mà, pujar un fitxer o generar amb IA.</li>
+                        <li>Un cop tinguis el text, els botons de <strong>Refinar</strong> del peu l'ajustaran sense regenerar.</li>
+                        <li>Desa el text com a esborrany per recuperar-lo més tard sense perdre-ho.</li>
                     </ul>
                 </div>
             </aside>
