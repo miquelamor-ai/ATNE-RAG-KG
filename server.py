@@ -806,51 +806,154 @@ CONCEPTE CENTRAL
 Mostra les relacions jeràrquiques entre els conceptes principals del text.
 """)
 
+    # Variables de context per als complements pedagògics (MALL/TILC)
+    materia_complement = params.get("materia") or context.get("materia") or "la matèria corresponent"
+    etapa_complement = params.get("etapa") or context.get("etapa") or "l'etapa educativa corresponent"
+    mecr_complement = params.get("mecr") or "el nivell MECR indicat"
+    genere_complement = params.get("genere_discursiu") or "no especificat"
+    # Detectar si és text literari o informatiu (heurística a partir del gènere)
+    literari_keywords = ("conte", "relat", "poesia", "poema", "llegendari", "fantàstic", "narrativa", "literari")
+    es_literari = any(k in genere_complement.lower() for k in literari_keywords)
+    modalitat_text = "LITERARI (deixa espais interpretatius, afectius, d'identificació)" if es_literari else "INFORMATIU (precisió conceptual, dades, relacions causa-efecte)"
+
     if comp.get("preguntes_comprensio"):
-        output_sections.append("""
+        output_sections.append(f"""
 ## Preguntes de comprensió
-ACTIVAT — Genera preguntes GRADUADES en 3 nivells de dificultat:
+ACTIVAT — Genera un guió de comprensió lectora segons el model MALL/TILC
+(3 moments × 3 nivells de lectura amb formats variats).
 
-### Nivell 1: Resposta curta (reconeixement)
-3 preguntes que es responen buscant informació directa al text.
+### CONTEXT PEDAGÒGIC (l'has d'usar per modular les preguntes)
+- Matèria/àmbit: {materia_complement}
+- Etapa: {etapa_complement} · Nivell MECR: {mecr_complement}
+- Gènere discursiu: {genere_complement}
+- Modalitat del text: {modalitat_text}
 
-### Nivell 2: Verdader o fals
-3 afirmacions per marcar ✅ o ❌, barrejant correctes i incorrectes.
+### MOMENT 1 — Abans de llegir (activació) · 3 preguntes
+Objectiu: activar coneixements previs, formular hipòtesis i fixar propòsit.
+Genera:
+- **[Hipòtesi]** 1 pregunta sobre el títol o imatges ("De què creus que parlarà…?")
+- **[Activació]** 1 pregunta per connectar amb el que l'alumne ja sap
+- **[Propòsit]** 1 pregunta sobre què volem aprendre amb aquest text
 
-### Nivell 3: Relaciona o completa
-2-3 activitats de relacionar conceptes (amb fletxes) o completar frases.
+### MOMENT 2 — Durant la lectura (processament actiu) · 3 preguntes
+Objectiu: fer l'alumne lector actiu, que verifiqui hipòtesis i treballi el lèxic.
+Genera:
+- **[Inferència en curs]** 1 pregunta del tipus "Per què creus que diu…?" o "Què vol dir quan afirma…?"
+- **[Visualització]** 1 pregunta per crear imatge mental ("Imagina't…", "Quins sons…", "Com el dibuixaries?")
+- **[Lèxic en context]** 1 pregunta per deduir el significat d'una paraula difícil del text a partir del context (no donar la resposta)
 
-Adapta la dificultat de les preguntes al nivell MECR de sortida.
+### MOMENT 3 — Després de llegir · distribuïdes en 3 nivells de comprensió
+Genera **7-8 preguntes en TOTAL**, distribuïdes així i amb FORMATS DIFERENTS
+(alterna obertes, verdader/fals, opció múltiple, omplir buits, relaciona amb fletxes):
+
+**Nivell LITERAL** — "Llegir les línies" · 2-3 preguntes
+Informació explícita. Exemples de format a alternar:
+- **[Literal · oberta curta]** "On vivia…?" / "Què servia per…?"
+- **[Literal · V/F amb justificació]** 3 afirmacions on l'alumne marca ✓/✗ i cita la frase que ho demostra
+- **[Literal · opció múltiple]** 1 pregunta amb 3-4 opcions (1 correcta)
+- **[Literal · omplir buits]** "El ______ es feia servir per ______." (amb o sense banc de paraules)
+- **[Literal · relaciona]** 2 columnes (concepte ↔ definició del text)
+
+**Nivell INFERENCIAL** — "Llegir entre línies" · 2-3 preguntes
+Deducció, causa-efecte, intencions no explícites:
+- **[Inferencial · per què]** "Per què creus que …?"
+- **[Inferencial · i si…]** "Què passaria si …?" (contrafactual)
+- **[Inferencial · relaciona causa-efecte]** 2 columnes (causa ↔ conseqüència)
+
+**Nivell CRÍTIC/PROFUND** — "Llegir rere les línies" · 2 preguntes
+Judici, transferència, connexió amb l'experiència pròpia:
+- **[Crític · argumentativa]** Pregunta oberta que demana posició argumentada amb dades del text
+  (la bastida al complement Bastides ajudarà a respondre-la)
+- **[Crític · jo / transferència]** "Què faries tu si…?" o "Com connecta això amb…?"
+  (També vàlid: lectura crítica de biaixos si el text n'ha)
+
+### ADEQUACIÓ PER ETAPA (imprescindible)
+- **Infantil / Cicle Inicial (A1)**: predomina predicció visual, connexió amb el jo,
+  dibuix. EVITA mots com "justifica" o "argumenta". Preguntes molt curtes i concretes.
+- **Cicle Mitjà / Superior primària (A2-B1)**: idea principal, relacions entre idees,
+  verificació d'hipòtesis, comparacions.
+- **Secundària (B1-B2)**: arguments de l'autor, connectors lògics, contrast de fonts,
+  explicar vs justificar (connectar amb el model teòric de la matèria).
+- **Batxillerat/FP (C1)**: anàlisi crítica, intertextualitat, biaixos, multiplicitat de fonts.
+
+### DISTINCIÓ LITERARI vs INFORMATIU
+- Si és LITERARI: deixa "buits" interpretatius — preguntes afectives, d'identificació,
+  d'imatges mentals, de reescriptura creativa.
+- Si és INFORMATIU: precisió conceptual — dades, definicions, relacions causa-efecte,
+  connexió amb el model teòric de {materia_complement}.
+
+### FORMAT DE SORTIDA
+- Cada moment amb encapçalament ### i les preguntes numerades.
+- Davant de cada pregunta posa entre claudàtors la ETIQUETA del tipus
+  (ex: [Literal · V/F], [Inferencial · per què], [Crític · argumentativa]).
+- Si és omplir buits o relacionar, presenta-ho visualment (amb fletxes, guions, etc.).
 """)
 
     if comp.get("activitats_aprofundiment"):
-        output_sections.append("""
+        output_sections.append(f"""
 ## Activitats d'aprofundiment
-ACTIVAT — Genera 2-3 activitats de repte cognitiu:
-- Connexions interdisciplinars
-- Pensament crític (per què? i si...?)
-- Recerca guiada
-- Debat o reflexió
+ACTIVAT — Genera 2-3 activitats de repte cognitiu per a {etapa_complement}:
+- Connexions interdisciplinars amb altres matèries
+- Pensament crític (per què? i si…? què passaria si…?)
+- Recerca guiada (a casa o a biblioteca)
+- Debat o reflexió argumentada
+- Si el text ho permet: dimensió plurilingüe (com es diu X en altres llengües de l'aula?)
 """)
 
     if comp.get("bastides"):
         output_sections.append(f"""
 ## Bastides (scaffolding)
-ACTIVAT — Genera suports didàctics estructurats en 4 blocs:
+ACTIVAT — Suports didàctics reals per AJUDAR L'ALUMNE A PRODUIR les respostes
+(model MALL/TILC: patró lingüístic de la matèria + connectors + lèxic temàtic).
 
-### Frases model
-3-5 frases incompletes que l'alumne ha de completar amb informació del text.
-Exemple: "Les plantes necessiten ______ per fer la fotosíntesi."
+### CONTEXT
+- Matèria: {materia_complement}
+- Etapa: {etapa_complement} · MECR: {mecr_complement}
+- Si l'alumne és nouvingut, L1: {l1_display}
 
-### Banc de paraules
-Llista de 8-12 paraules clau que l'alumne pot usar per completar les frases i activitats.
-Format: paraula1 – paraula2 – paraula3 – ...
+### 1. Taula de connectors lògics
+Taula amb els connectors del tipus de raonament que demanen les preguntes:
+| Funció | Connectors (adequats al MECR {mecr_complement}) |
+|---|---|
+| Causa | perquè, com que, ja que, a causa de |
+| Conseqüència | per tant, així doncs, en conseqüència, per això |
+| Oposició / contrast | però, en canvi, tanmateix, malgrat que |
+| Exemplificació | per exemple, com ara, en concret |
+| Conclusió | en resum, per acabar, en definitiva |
+Adapta la quantitat i complexitat al nivell.
 
-### Suport visual
-Indica quins suports visuals usar (icones, colors, esquemes, imatges recomanades).
+### 2. Frases model per argumentar amb el text
+4-6 bastides d'inici de frase perquè l'alumne escrigui respostes ben formulades:
+- "Segons el text, ______ perquè ______."
+- "Podem deduir que ______ ja que el text diu que ______."
+- "A diferència de ______, ______ s'assembla a ______ perquè ______."
+- "Un exemple d'això és ______."
+- "Jo crec que ______, i ho justifico perquè ______."
+Adapta la complexitat al MECR: més simples a A1-A2, més sofisticades a B1-C1.
 
-### Suport L1
-Si l'alumne és nouvingut, inclou pistes en {l1_display} per als conceptes més abstractes.
+### 3. Banc de paraules (lèxic temàtic de {materia_complement})
+8-12 paraules del patró lingüístic de la matèria, extretes del text o complementàries,
+que l'alumne pot usar per respondre. Si escau, agrupa-les per camp semàntic.
+Format: paraula1 – paraula2 – paraula3 – …
+
+### 4. Suport visual recomanat
+Indica 2-3 suports visuals concrets que afegirien valor (icones, colors destacats,
+esquemes, línies de temps, mapes, gràfiques, fotografies…) i on ubicar-los al text.
+
+### 5. Crosses de lectura (abans d'engegar)
+2-3 pistes concretes perquè l'alumne enfoqui bé la lectura:
+- Què ha de buscar mentre llegeix (1-2 elements clau)?
+- Com marcar el que és important (subratllar, prendre nota, fletxes)?
+- Quin és el propòsit d'aquesta lectura?
+
+### 6. Suport L1
+Si l'alumne és nouvingut, tradueix 5-8 conceptes més abstractes a {l1_display}
+(en l'alfabet original si escau: àrab, xinès, urdú, etc.).
+
+### ADEQUACIÓ PER ETAPA
+- Infantil / Cicle Inicial: crosses FÍSIQUES i VISUALS (imatges, colors, referents sonors).
+- Cicle Mitjà / Superior / ESO: crosses PROCEDIMENTALS (estratègies, plantilles, taules).
+- Batxillerat / FP: estratègies de SÍNTESI i anàlisi crítica de múltiples fonts.
 """)
 
     if comp.get("mapa_mental"):
