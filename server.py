@@ -1425,21 +1425,67 @@ async def extract_text_from_file(file: UploadFile = File(...)):
 # ── Generació de text base (per a docents sense text propi) ───────────────
 
 GENERATE_EXTENSIONS = {
-    "micro": "Genera un text de 50-100 paraules. Molt curt, una idea principal.",
-    "curt": "Genera un text d'unes 200 paraules. Concís, 2-3 idees principals.",
-    "estandard": "Genera un text d'unes 400 paraules. Amb desenvolupament i exemples.",
-    "extens": "Genera un text de més de 600 paraules. Desenvolupat, amb diverses seccions o subapartats.",
+    "micro": (
+        "Micro (50-100 paraules). Prioritza la SÍNTESI extrema. "
+        "Una sola idea principal, sense exemples llargs. Pensa en un tuit o "
+        "una entrada d'enciclopèdia molt breu."
+    ),
+    "curt": (
+        "Curt (~200 paraules, marge 180-240). Concís, 2-3 idees principals "
+        "lligades. Sense subapartats. Una entrada de blog breu o un paràgraf "
+        "introductori d'un manual."
+    ),
+    "estandard": (
+        "Estàndard (~400 paraules, marge 350-450). Amb desenvolupament: "
+        "introducció breu, cos amb 3-4 idees connectades amb exemples concrets, "
+        "i tancament. Sense subtítols obligatoris però admet 1-2 si ajuden."
+    ),
+    "extens": (
+        "Extens (+600 paraules, marge 600-900). Desenvolupament complet amb "
+        "subapartats clars (usa títols H2 o H3), detalls tècnics, exemples "
+        "concrets, contextualització i tancament. Estructura editorial."
+    ),
 }
 
 GENERATE_TONS = {
-    "neutre": "neutre i acadèmic, vocabulari precís, distancia",
-    "informal": "informal i col·loquial, com si parlessis directament a l'alumne",
-    "creatiu": "creatiu i literari, evocador, amb imatges i metàfores",
-    "motivador": "motivador i engrescador, generant interès des de la primera frase",
-    "reflexiu": "reflexiu, amb preguntes obertes i convidant a pensar",
-    "empatic": "empàtic i cuidadós, especialment sensible amb temes delicats",
-    "humoristic": "humorístic i divertit, amb tocs lleugers que mantinguin l'atenció",
-    "solemne": "solemne, formal i ple de respecte, propi de textos històrics o commemoratius",
+    "neutre": (
+        "neutre i acadèmic. Vocabulari precís, frases ben construïdes, "
+        "distancia objectiva. Cap referència personal del tipus 'tu' o 'jo'."
+    ),
+    "informal": (
+        "informal i col·loquial. Tutejant directament al lector ('tu', 'sabies "
+        "que...?'), amb expressions properes i exemples del dia a dia. Estàndard "
+        "oral català però respectant la normativa de l'IEC."
+    ),
+    "creatiu": (
+        "creatiu i literari. Evocador, amb imatges, metàfores, ritme i música "
+        "del llenguatge. Permet recursos retòrics: anàfora, comparació, "
+        "personificació. Sense perdre rigor sobre el tema."
+    ),
+    "motivador": (
+        "motivador i engrescador. Comença amb un ganxo (pregunta retòrica, "
+        "anècdota intrigant o dada sorprenent) i manté l'interès amb verbs "
+        "actius i frases dinàmiques."
+    ),
+    "reflexiu": (
+        "reflexiu. Convida a pensar amb preguntes obertes intercalades, "
+        "contrastos, exploració de matisos. No dona respostes tancades."
+    ),
+    "empatic": (
+        "empàtic i cuidadós, especialment sensible amb temes delicats "
+        "(trauma, vulnerabilitat, identitat). Vocabulari respectuós, evita "
+        "judicis de valor, dona espai al lector."
+    ),
+    "humoristic": (
+        "humorístic i divertit, amb tocs lleugers, jocs de paraules, "
+        "comparacions enginyoses. Sense caure en la frivolitat: el contingut "
+        "ha de ser rigorós, el to amable."
+    ),
+    "solemne": (
+        "solemne, formal i ple de respecte. Propi de textos històrics, "
+        "commemoratius o de memòria. Vocabulari elevat, frases ben mesurades, "
+        "absència d'humor."
+    ),
 }
 
 
@@ -1477,32 +1523,83 @@ async def generate_text(payload: dict = Body(...)):
     extensio_instr = GENERATE_EXTENSIONS.get(extensio, GENERATE_EXTENSIONS["estandard"])
     to_instr = GENERATE_TONS.get(to, GENERATE_TONS["neutre"])
 
-    prompt = f"""Genera un text BASE en català per a un docent que el vol adaptar després.
+    notes_block = f"\n## INSTRUCCIONS ADDICIONALS DEL DOCENT (prioritàries)\n{notes}\n" if notes else ""
 
-CONTEXT EDUCATIU:
+    prompt = f"""# ROL
+Ets un expert en lingüística catalana i comunicació educativa. La teva
+tasca és generar textos basant-te estrictament en tres eixos: GÈNERE
+DISCURSIU (el motlle social), TIPOLOGIA TEXTUAL (l'esquelet intern) i
+TO (la veu). Has de respectar les convencions del currículum escolar
+català (Decret 175/2022) i l'estàndard de l'IEC.
+
+# CONTEXT EDUCATIU
 - Etapa: {etapa}
 - Curs: {curs}
 - Àmbit: {ambit}
 - Matèria: {materia}
 
-PARÀMETRES DEL TEXT:
-- TEMA: {tema}
+# COMANDA DEL DOCENT
+- TEMA / TÒPIC: {tema}
 - GÈNERE DISCURSIU: {genere}
-- TIPOLOGIA TEXTUAL: {tipologia} (segons el currículum català)
+- TIPOLOGIA TEXTUAL: {tipologia}
 - TO: {to_instr}
 - EXTENSIÓ: {extensio_instr}
+{notes_block}
+# REGLES OBLIGATÒRIES
 
-{f'INSTRUCCIONS ADDICIONALS DEL DOCENT:\\n{notes}\\n' if notes else ''}
-INSTRUCCIONS:
-1. Genera el text com si fos un text ESTÀNDARD per al curs i etapa indicats. NO el simplifiquis ni l'adaptis encara — això es farà després.
-2. Respecta el gènere discursiu (l'estructura, el motlle social del text).
-3. Respecta la tipologia textual (la intenció comunicativa).
-4. Respecta el to indicat al llarg de tot el text.
-5. Adequa el vocabulari i la complexitat al nivell del curs.
-6. Genera NOMÉS el text, sense títols administratius, sense "Aquí tens el text:", sense explicacions meta. Comença directament amb el contingut.
-7. Si el gènere ho requereix (ex: notícia, carta), inclou els elements estructurals propis (titular, salutació, etc.).
+## 1. Eix Gènere (mana sobre el FORMAT)
+El gènere "{genere}" determina l'estructura social del text. Has d'incloure
+els elements estructurals propis del gènere (per exemple: titular i lead
+en una notícia; salutació i comiat en un correu; passos numerats en un
+procediment; referent i valoració en una ressenya).
 
-Genera el text ara:"""
+## 2. Eix Tipologia (mana sobre l'ESTRUCTURA INTERNA)
+La tipologia "{tipologia}" determina la intenció comunicativa.
+- Expositiva: presentar informació de forma clara i objectiva.
+- Narrativa: relatar fets ordenats temporalment, amb personatges i acció.
+- Descriptiva: detallar com és un objecte, lloc o persona amb adjectius i precisió sensorial.
+- Argumentativa: defensar una tesi amb arguments connectats per connectors causals.
+- Instructiva: donar passes en ordre, amb verbs en imperatiu o infinitiu.
+- Dialogada: alternança de veus amb marques tipogràfiques.
+
+EXEMPLES DE COMBINACIÓ:
+- Gènere "Notícia" + Tipologia "Argumentativa" → article d'opinió periodístic.
+- Gènere "Correu" + Tipologia "Instructiva" → e-mail tutorial pas a pas.
+- Gènere "Conte" + Tipologia "Descriptiva" → conte amb passatges descriptius rics.
+
+## 3. Eix To (mana sobre la VEU)
+Mantén el to "{to}" de manera consistent al llarg de TOT el text. El to
+afecta la tria lèxica i la proximitat amb el lector, però NO altera els
+fets ni la rigor del contingut.
+
+## 4. Centralitat del tema
+El text ha de girar EXCLUSIVAMENT al voltant del tema indicat:
+"{tema}". Evita divagacions, exemples genèrics o continguts tangencials.
+Cada paràgraf ha de servir el tema central.
+
+## 5. Rigor factual (zero al·lucinacions)
+Si el tema implica fets científics, històrics, geogràfics o tècnics,
+mantén la PRECISIÓ. NO inventis dades, dates, noms o xifres. Si no
+estàs segur d'un fet, expressa-ho amb construccions com "es considera
+que", "habitualment", o omet la dada concreta. El to canvia COM expliques
+els fets, no QUINS fets són certs.
+
+## 6. Adequació al curs
+Adequa el vocabulari, la complexitat sintàctica i el grau d'abstracció
+al nivell del curs ({curs} de {etapa}). NO simplifiquis més del necessari:
+és un text ESTÀNDARD per al curs, no una adaptació. L'adaptació al
+perfil de l'alumne es farà en una segona fase amb un altre pipeline.
+
+## 7. Format de sortida
+- Genera NOMÉS el text demanat. Sense títols administratius, sense
+  "Aquí tens el text:", sense explicacions meta, sense disclaimers.
+- Comença directament amb el contingut.
+- Si el gènere ho exigeix (notícia, correu, recepta), inclou els elements
+  estructurals propis al començament.
+- Usa salts de paràgraf normals. Per a extensions "Extens", usa
+  subtítols H2 o H3 amb format markdown (## o ###).
+
+# GENERA EL TEXT ARA"""
 
     try:
         text = _call_llm("gemma4", prompt, "")
