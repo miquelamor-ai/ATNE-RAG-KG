@@ -1599,6 +1599,23 @@ perfil de l'alumne es farà en una segona fase amb un altre pipeline.
 - Usa salts de paràgraf normals. Per a extensions "Extens", usa
   subtítols H2 o H3 amb format markdown (## o ###).
 
+## 8. Català normatiu (IEC) — REGLA CRÍTICA
+- TOT el text ha de ser en català estàndard normatiu de l'Institut
+  d'Estudis Catalans (IEC). Cap paraula en cap altra llengua.
+- ATENCIÓ a les paraules conflictives: usa "èssers vius" (mai "ser vius"),
+  "conjunt" (mai "ensemble"), "obstant" (mai "obstant això" si no cal),
+  "tanmateix", "no obstant això".
+- Vigila les interferències del castellà ("haver-hi" no "haver", "moltes
+  vegades" no "moltíssim", "anar-se'n" no "marxar-se").
+- Vigila les interferències del francès o l'anglès: cap paraula com
+  "ensemble", "rendezvous", "feedback", "skill", "background". Tradueix-ho
+  sempre al català.
+- Apostrofa correctament: "l'arbre", "d'aquest", "n'hi ha".
+- Pluralització: "èssers" (no "essers"), "homes" (no "homens"), "joves"
+  (no "jóvens").
+- Si dubtes d'una paraula, prefereix sinònims segurs ("conjunt", "grup",
+  "unitat") en lloc d'arriscar-te amb termes possiblement mal tokenitzats.
+
 # GENERA EL TEXT ARA"""
 
     try:
@@ -1622,6 +1639,120 @@ perfil de l'alumne es farà en una segona fase amb un altre pipeline.
         "tipologia": tipologia,
         "to": to,
         "extensio": extensio,
+    }
+
+
+# ── Refinament de text (sense regenerar) ──────────────────────────────────
+
+REFINE_PRESETS = {
+    "catala": (
+        "Revisa tot el text per assegurar que és en català estàndard "
+        "normatiu (IEC). Corregeix qualsevol paraula en una altra llengua "
+        "(francès, castellà, anglès) traduint-la al català correcte. "
+        "Corregeix errors típics com 'ser vius' → 'éssers vius', "
+        "'ensemble' → 'conjunt', etc. Vigila apostrofacions, accents, "
+        "concordances. NO canviïs el contingut, només la correcció lingüística."
+    ),
+    "simplificar": (
+        "Simplifica el llenguatge sense canviar el contingut. Substitueix "
+        "paraules complexes per sinònims més freqüents. Trenca frases "
+        "llargues en frases més curtes. Mantén el to i l'estructura."
+    ),
+    "ampliar": (
+        "Amplia el text afegint exemples concrets, contextualització i "
+        "detalls que enriqueixin el contingut. NO canviïs l'estructura ni "
+        "el to. Augmenta'l aproximadament un 30%."
+    ),
+    "escurcar": (
+        "Escurça el text mantenint totes les idees principals. Elimina "
+        "paraules redundants, frases secundàries i exemples superflus. "
+        "Conserva el to i l'estructura. Redueix-lo aproximadament un 30%."
+    ),
+    "to_mes_proper": (
+        "Reescriu el text amb un to més proper i informal, parlant "
+        "directament al lector ('tu', 'sabies que...?'). Mantén el contingut "
+        "intacte."
+    ),
+    "to_mes_formal": (
+        "Reescriu el text amb un to més formal i acadèmic. Elimina "
+        "expressions col·loquials. Mantén el contingut intacte."
+    ),
+}
+
+
+@app.post("/api/refine-text")
+async def refine_text(payload: dict = Body(...)):
+    """
+    Refina un text existent segons una instrucció.
+    No regenera des de zero — modifica el text actual.
+
+    Payload:
+        text: str (required) — el text a refinar
+        preset: str (opcional) — clau de REFINE_PRESETS per instruccions ràpides
+        instruccio: str (opcional) — instrucció lliure del docent
+    """
+    text = (payload.get("text") or "").strip()
+    if not text:
+        return JSONResponse({"error": "Cal proporcionar el text a refinar."}, status_code=400)
+
+    preset = (payload.get("preset") or "").strip().lower()
+    instruccio_lliure = (payload.get("instruccio") or "").strip()
+
+    instruccio_final = ""
+    if preset and preset in REFINE_PRESETS:
+        instruccio_final = REFINE_PRESETS[preset]
+    if instruccio_lliure:
+        if instruccio_final:
+            instruccio_final += "\n\nA més, el docent demana específicament: " + instruccio_lliure
+        else:
+            instruccio_final = instruccio_lliure
+
+    if not instruccio_final:
+        return JSONResponse(
+            {"error": "Cal especificar un preset o una instrucció lliure."},
+            status_code=400,
+        )
+
+    prompt = f"""# ROL
+Ets un expert en lingüística catalana. Has de REFINAR el text que
+et passen segons les instruccions del docent. NO el regeneris des de
+zero — modifica'l mantenint l'estructura general i el contingut.
+
+# REGLES
+1. Tot el text final ha de ser en català estàndard normatiu (IEC).
+2. NO afegeixis explicacions meta del tipus "Aquí tens el text refinat:".
+   Retorna NOMÉS el text corregit, directament.
+3. NO canviïs el contingut substantiu del text. Només aplica les
+   instruccions de refinament demanades.
+4. Si detectes paraules en altres llengües (francès, castellà, anglès),
+   tradueix-les al català correcte sempre.
+5. Vigila errors típics: "ser vius" → "èssers vius", "ensemble" → "conjunt",
+   apostrofacions, concordances de gènere i nombre.
+
+# INSTRUCCIONS DEL DOCENT
+{instruccio_final}
+
+# TEXT A REFINAR
+{text}
+
+# RETORNA EL TEXT REFINAT (NOMÉS EL TEXT, RES MÉS)"""
+
+    try:
+        result = _call_llm("gemma4", prompt, "")
+        result = clean_gemini_output(result).strip()
+    except Exception as e:
+        return JSONResponse(
+            {"error": f"Error refinant el text: {type(e).__name__}: {e}"},
+            status_code=500,
+        )
+
+    if not result:
+        return JSONResponse({"error": "L'LLM ha retornat un text buit."}, status_code=500)
+
+    return {
+        "text": result,
+        "paraules": len(result.split()),
+        "preset_aplicat": preset or None,
     }
 
 

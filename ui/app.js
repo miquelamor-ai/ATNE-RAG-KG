@@ -1783,12 +1783,108 @@ async function generateDraftText() {
 }
 
 
+// ── Refinament de text (ajusts sense regenerar) ───────────────────────────
+
+async function refineText(preset, customInstruction) {
+    const textarea = document.getElementById("input-text");
+    const status = document.getElementById("refine-status");
+    if (!textarea || !textarea.value.trim()) {
+        status.textContent = "No hi ha text a refinar.";
+        status.style.display = "block";
+        status.style.color = "#b91c1c";
+        return;
+    }
+
+    status.style.display = "block";
+    status.style.color = "var(--on-surface-variant)";
+    status.textContent = "Refinant amb Gemma 4... pot trigar 10-20 segons.";
+
+    const payload = { text: textarea.value };
+    if (preset) payload.preset = preset;
+    if (customInstruction) payload.instruccio = customInstruction;
+
+    try {
+        const resp = await fetch("/api/refine-text", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
+        const data = await resp.json();
+
+        if (!resp.ok) {
+            status.textContent = `Error: ${data.error || resp.statusText}`;
+            status.style.color = "#b91c1c";
+            return;
+        }
+
+        textarea.value = data.text;
+        updateWordCount();
+        status.textContent = `Text refinat (${data.paraules} paraules). Pots tornar a refinar si cal.`;
+        status.style.color = "#15803d";
+    } catch (e) {
+        status.textContent = `Error de xarxa: ${e.message}`;
+        status.style.color = "#b91c1c";
+    }
+}
+
+// ── Botons editor: copiar/enganxar/netejar ────────────────────────────────
+
+async function editorCopyAll() {
+    const textarea = document.getElementById("input-text");
+    if (!textarea || !textarea.value) return;
+    try {
+        await navigator.clipboard.writeText(textarea.value);
+        const status = document.getElementById("upload-status");
+        if (status) {
+            const old = status.textContent;
+            status.textContent = "Text copiat al porta-retalls ✓";
+            status.style.color = "#15803d";
+            setTimeout(() => { status.textContent = old; status.style.color = ""; }, 2000);
+        }
+    } catch {
+        textarea.select();
+        document.execCommand("copy");
+    }
+}
+
+async function editorPaste() {
+    const textarea = document.getElementById("input-text");
+    if (!textarea) return;
+    try {
+        const text = await navigator.clipboard.readText();
+        textarea.value = text;
+        updateWordCount();
+        toggleRefinePanel();
+    } catch (e) {
+        alert("No s'ha pogut llegir el porta-retalls. Enganxa manualment amb Ctrl+V al textarea.");
+    }
+}
+
+function editorClearAll() {
+    const textarea = document.getElementById("input-text");
+    if (!textarea) return;
+    if (textarea.value && !confirm("Segur que vols esborrar tot el text?")) return;
+    textarea.value = "";
+    updateWordCount();
+    toggleRefinePanel();
+}
+
+function toggleRefinePanel() {
+    const panel = document.getElementById("refine-panel");
+    const textarea = document.getElementById("input-text");
+    if (!panel || !textarea) return;
+    panel.style.display = textarea.value.trim() ? "block" : "none";
+}
+
+
 // ── Comptador de paraules ──────────────────────────────────────────────────
 
 function updateWordCount() {
     const text = document.getElementById("input-text").value;
     const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-    document.getElementById("word-count").textContent = `${words} paraules`;
+    const wc = document.getElementById("word-count");
+    if (wc) wc.textContent = `${words} paraules`;
+    toggleRefinePanel();
 }
 
 
@@ -1839,6 +1935,28 @@ function bindEvents() {
         ctxMateria.addEventListener("input", () => {
             const genTema = document.getElementById("gen-tema");
             if (genTema && !genTema.value) genTema.value = ctxMateria.value;
+        });
+    }
+
+    // Botons editor (copiar/enganxar/netejar)
+    const btnCopy = document.getElementById("btn-editor-copy");
+    if (btnCopy) btnCopy.addEventListener("click", editorCopyAll);
+    const btnPaste = document.getElementById("btn-editor-paste");
+    if (btnPaste) btnPaste.addEventListener("click", editorPaste);
+    const btnCopyAll = document.getElementById("btn-editor-copy-all");
+    if (btnCopyAll) btnCopyAll.addEventListener("click", editorCopyAll);
+    const btnClear = document.getElementById("btn-editor-clear");
+    if (btnClear) btnClear.addEventListener("click", editorClearAll);
+
+    // Botons refinador
+    document.querySelectorAll(".refine-preset").forEach(btn => {
+        btn.addEventListener("click", () => refineText(btn.dataset.preset, null));
+    });
+    const btnRefineCustom = document.getElementById("btn-refine-custom");
+    if (btnRefineCustom) {
+        btnRefineCustom.addEventListener("click", () => {
+            const instr = document.getElementById("refine-instruction").value.trim();
+            if (instr) refineText(null, instr);
         });
     }
 

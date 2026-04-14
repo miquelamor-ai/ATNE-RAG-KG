@@ -286,6 +286,13 @@
                 <div class="editor-card">
                     <div class="editor-toolbar">
                         <div class="editor-toolbar-actions">
+                            <button class="editor-toolbar-btn" type="button" title="Copiar tot el text" id="btn-editor-copy">
+                                <span class="material-symbols-outlined">content_copy</span>
+                            </button>
+                            <button class="editor-toolbar-btn" type="button" title="Enganxar des del porta-retalls" id="btn-editor-paste">
+                                <span class="material-symbols-outlined">content_paste</span>
+                            </button>
+                            <span class="editor-toolbar-divider"></span>
                             <button class="editor-toolbar-btn" type="button" title="Negreta">
                                 <span class="material-symbols-outlined">format_bold</span>
                             </button>
@@ -299,6 +306,60 @@
                         <span class="editor-wordcount" id="word-count">0 paraules</span>
                     </div>
                     <textarea class="editor-textarea" id="input-text" placeholder="Escriu o enganxa el text aquí..."></textarea>
+                    <div class="editor-footer-actions">
+                        <button type="button" class="btn btn-sm" id="btn-editor-clear">
+                            <span class="material-symbols-outlined">delete_sweep</span>
+                            Netejar tot
+                        </button>
+                        <button type="button" class="btn btn-sm" id="btn-editor-copy-all">
+                            <span class="material-symbols-outlined">content_copy</span>
+                            Copiar tot
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Refinar text (només visible quan hi ha text) -->
+                <div class="refine-panel" id="refine-panel" style="display:none;">
+                    <div class="refine-header">
+                        <span class="material-symbols-outlined bento-card-icon">auto_fix_high</span>
+                        <h3 class="bento-card-title">Refinar el text</h3>
+                    </div>
+                    <p class="bento-card-desc">Demana ajustos sense regenerar tot el text. L'IA modificarà només el que demanis.</p>
+                    <div class="refine-presets">
+                        <button type="button" class="btn refine-preset" data-preset="catala">
+                            <span class="material-symbols-outlined">spellcheck</span>
+                            Corregir català
+                        </button>
+                        <button type="button" class="btn refine-preset" data-preset="simplificar">
+                            <span class="material-symbols-outlined">compress</span>
+                            Simplificar
+                        </button>
+                        <button type="button" class="btn refine-preset" data-preset="ampliar">
+                            <span class="material-symbols-outlined">expand</span>
+                            Ampliar
+                        </button>
+                        <button type="button" class="btn refine-preset" data-preset="escurcar">
+                            <span class="material-symbols-outlined">vertical_align_center</span>
+                            Escurçar
+                        </button>
+                        <button type="button" class="btn refine-preset" data-preset="to_mes_proper">
+                            <span class="material-symbols-outlined">forum</span>
+                            To més proper
+                        </button>
+                        <button type="button" class="btn refine-preset" data-preset="to_mes_formal">
+                            <span class="material-symbols-outlined">corporate_fare</span>
+                            To més formal
+                        </button>
+                    </div>
+                    <div class="refine-custom">
+                        <label for="refine-instruction">O escriu una instrucció pròpia:</label>
+                        <textarea id="refine-instruction" rows="2" placeholder="Ex: Substitueix tots els 'ensemble' per 'conjunt'. Afegeix un exemple de Catalunya. Treu la primera frase..."></textarea>
+                        <button type="button" class="btn btn-primary" id="btn-refine-custom">
+                            <span class="material-symbols-outlined">auto_fix_high</span>
+                            Aplicar instrucció
+                        </button>
+                    </div>
+                    <div class="refine-status" id="refine-status" style="display:none;"></div>
                 </div>
 
                 <details class="via-diagnostic-toggle">

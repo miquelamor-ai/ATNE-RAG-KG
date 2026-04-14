@@ -1744,3 +1744,141 @@ body {
     align-items: center;
     gap: 0.625rem;
 }
+
+/* ── Editor toolbar extra (divider + footer) ──────────────── */
+.editor-toolbar-divider {
+    width: 1px;
+    height: 1.25rem;
+    background: var(--outline-variant);
+    margin: 0 0.25rem;
+    opacity: 0.4;
+}
+
+.editor-footer-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    border-top: 1px solid rgba(199, 197, 213, 0.1);
+    background: var(--surface-container-lowest);
+}
+
+.editor-footer-actions .btn {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.75rem;
+    padding: 0.5rem 0.875rem;
+}
+
+.editor-footer-actions .material-symbols-outlined {
+    font-size: 1rem;
+}
+
+/* ── Refine panel (Pas 2) ─────────────────────────────────── */
+.refine-panel {
+    background: var(--surface-container-lowest);
+    border-radius: var(--radius-3xl);
+    padding: 1.75rem;
+    border: 1px solid rgba(199, 197, 213, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.refine-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.refine-presets {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+}
+
+@media (min-width: 1024px) {
+    .refine-presets { grid-template-columns: repeat(3, 1fr); }
+}
+
+.refine-preset {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.8125rem;
+    background: var(--surface-container-low);
+    color: var(--on-surface);
+    border: none;
+    border-radius: var(--radius-xl);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--font-body);
+    font-weight: 500;
+}
+
+.refine-preset:hover {
+    background: var(--surface-container-high);
+    color: var(--primary);
+}
+
+.refine-preset .material-symbols-outlined {
+    font-size: 1.125rem;
+}
+
+.refine-custom {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(199, 197, 213, 0.15);
+}
+
+.refine-custom label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--primary);
+    padding-left: 0.25rem;
+}
+
+.refine-custom textarea {
+    width: 100%;
+    background: var(--surface-container-low);
+    border: none;
+    border-radius: var(--radius-xl);
+    padding: 0.875rem 1rem;
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    color: var(--on-surface);
+    resize: vertical;
+    min-height: 4rem;
+    line-height: 1.5;
+    transition: box-shadow 0.2s;
+}
+
+.refine-custom textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(51, 55, 166, 0.4);
+}
+
+#btn-refine-custom {
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.8125rem;
+}
+
+.refine-status {
+    padding: 0.875rem 1rem;
+    border-radius: var(--radius-xl);
+    background: var(--surface-container-low);
+    font-size: 0.875rem;
+    color: var(--on-surface-variant);
+}
