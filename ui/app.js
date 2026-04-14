@@ -306,30 +306,80 @@ const COMPLEMENTS = {
     argumentacio_pedagogica: "Argumentació pedagògica",
 };
 
-// Agrupació dels complements per a la UI del Pas 3 + text clar per al docent
+// Agrupació epistemològica dels complements ("ajuts") per a la UI del Pas 3.
+// Taxonomia unificada amb Saber-ne+ (Bloc 1 §5): Lèxics / Visuals / Estructurals
+// / Síntesi / Comprensió / Ampliació, més "Docent" per a la transparència
+// pedagògica (no és un ajut per a l'alumne).
+//
+// NOTA IMPORTANT: aquestes categories són d'AJUTS QUE S'AFEGEIXEN al text
+// adaptat. NO són les categories de les instruccions d'adaptació (aquelles
+// són les macrodirectives al backend: LÈXIC, SINTAXI, ESTRUCTURA, GESTIÓ,
+// PROTECCIÓ, que descriuen com l'LLM transforma el text). Les categories
+// d'AQUÍ són "què s'afegeix AL COSTAT del text", no "què fa l'LLM AL text".
+//
+// Referència taxonomia: Saber-ne+ §5 + projectes.xtec.cat/tilc
 const COMPLEMENT_GROUPS = {
-    "Dins del text": [
-        { key: "negretes", label: "Paraules clau destacades en negreta" },
-        { key: "definicions_integrades", label: "Definicions curtes entre parèntesis al text" },
-        { key: "traduccio_l1", label: "Traducció dels termes clau a la llengua materna" },
-        { key: "pictogrames", label: "Pictogrames o icones al costat dels conceptes" },
-    ],
-    "Al costat del text": [
-        { key: "glossari", label: "Glossari — llistat de paraules importants amb la seva definició" },
-        { key: "esquema_visual", label: "Esquema o resum visual dels conceptes" },
-        { key: "mapa_conceptual", label: "Mapa conceptual — relacions entre idees" },
-        { key: "mapa_mental", label: "Mapa mental — esquema creatiu del contingut" },
-    ],
-    "Per comprovar la comprensió": [
-        { key: "preguntes_comprensio", label: "Preguntes de comprensió lectora" },
-        { key: "bastides", label: "Preguntes-guia i pistes durant el text (bastides)" },
-    ],
-    "Per a alumnes amb alt rendiment": [
-        { key: "activitats_aprofundiment", label: "Activitats d'aprofundiment i ampliació" },
-    ],
-    "Per al docent": [
-        { key: "argumentacio_pedagogica", label: "Justificació pedagògica de les decisions d'adaptació" },
-    ],
+    "Ajuts lèxics": {
+        cat: "lexic",
+        icon: "list",
+        desc: "Paraules i significat",
+        items: [
+            { key: "negretes", label: "Paraules clau destacades en negreta al text" },
+            { key: "definicions_integrades", label: "Definicions curtes entre parèntesis al flux del text" },
+            { key: "glossari", label: "Glossari al final amb termes i definicions simples" },
+            { key: "traduccio_l1", label: "Traducció a la llengua materna (per a nouvinguts)" },
+        ],
+    },
+    "Ajuts visuals": {
+        cat: "visual",
+        icon: "image",
+        desc: "Suport icònic i multimodal",
+        items: [
+            { key: "pictogrames", label: "Pictogrames o icones al costat dels conceptes clau" },
+        ],
+    },
+    "Ajuts estructurals": {
+        cat: "estructura",
+        icon: "schema",
+        desc: "Organització visible del contingut",
+        items: [
+            { key: "esquema_visual", label: "Esquema o diagrama de l'estructura del text" },
+        ],
+    },
+    "Ajuts de síntesi": {
+        cat: "sintesi",
+        icon: "hub",
+        desc: "Xarxes de conceptes i relacions",
+        items: [
+            { key: "mapa_conceptual", label: "Mapa conceptual — nodes + relacions (ESO endavant)" },
+            { key: "mapa_mental", label: "Mapa mental — esquema radial creatiu" },
+        ],
+    },
+    "Ajuts de comprensió": {
+        cat: "comprensio",
+        icon: "quiz",
+        desc: "Verificació i suports (ZDP, Vygotsky)",
+        items: [
+            { key: "preguntes_comprensio", label: "Preguntes graduades (MALL/TILC: 3 moments × 3 nivells)" },
+            { key: "bastides", label: "Bastides: suports progressius (connectors, frases model, banc paraules)" },
+        ],
+    },
+    "Ajuts d'ampliació": {
+        cat: "ampliacio",
+        icon: "rocket_launch",
+        desc: "Repte cognitiu i anar més enllà",
+        items: [
+            { key: "activitats_aprofundiment", label: "Activitats d'aprofundiment: connexions, recerca, debat" },
+        ],
+    },
+    "Transparència docent": {
+        cat: "docent",
+        icon: "psychology",
+        desc: "Per al docent, no per a l'alumne",
+        items: [
+            { key: "argumentacio_pedagogica", label: "Justificació pedagògica de les decisions d'adaptació" },
+        ],
+    },
 };
 
 
@@ -773,15 +823,24 @@ function renderComplementGrid() {
     if (!grid) return;
     grid.innerHTML = "";
 
-    for (const [groupLabel, items] of Object.entries(COMPLEMENT_GROUPS)) {
+    for (const [groupLabel, group] of Object.entries(COMPLEMENT_GROUPS)) {
         const groupDiv = document.createElement("div");
         groupDiv.className = "complement-group";
-        groupDiv.innerHTML = `<div class="complement-group-label">${groupLabel}</div>`;
+        groupDiv.dataset.cat = group.cat;
+        groupDiv.innerHTML = `
+            <div class="complement-group-header">
+                <span class="complement-group-icon material-symbols-outlined">${group.icon}</span>
+                <div class="complement-group-meta">
+                    <div class="complement-group-label">${groupLabel}</div>
+                    <div class="complement-group-desc">${group.desc}</div>
+                </div>
+            </div>
+        `;
 
         const list = document.createElement("div");
         list.className = "complement-group-list";
 
-        for (const item of items) {
+        for (const item of group.items) {
             list.innerHTML += `
                 <label class="complement-item" id="comp-${item.key}">
                     <input type="checkbox" data-comp="${item.key}">
