@@ -2183,6 +2183,66 @@ function renderQualityReport(reportId, bodyId, badgeId, report) {
         `);
     }
 
+    // 5. Auditor LLM (Layer 3) — warnings qualitatius no detectables per LT
+    const avisosAuditor = report.avisos_auditor || [];
+    const auditorDisponible = report.auditor_disponible === true;
+    const auditorModel = report.auditor_model || "LLM";
+
+    if (auditorDisponible && avisosAuditor.length === 0) {
+        rows.push(`
+            <div class="quality-row q-ok">
+                <span class="material-symbols-outlined q-icon">psychology</span>
+                <div class="q-content">
+                    <p class="q-title">Auditor pedagògic (${escapeHtml(auditorModel)}): sense avisos</p>
+                    <p class="q-detail">L'inspector LLM no ha detectat problemes qualitatius.</p>
+                </div>
+            </div>
+        `);
+    } else if (avisosAuditor.length > 0) {
+        const tipusIcones = {
+            confusa: "help",
+            salt: "alt_route",
+            vocabulari: "translate",
+            repeticio: "repeat",
+            connector: "link",
+            calc: "g_translate",
+        };
+        const avisosItems = avisosAuditor.slice(0, 8).map(a => {
+            const icon = tipusIcones[a.tipus] || "flag";
+            return `
+                <li class="auditor-item">
+                    <span class="material-symbols-outlined auditor-item-icon">${icon}</span>
+                    <div class="auditor-item-body">
+                        <span class="auditor-item-tipus">${escapeHtml(a.tipus || "avís")}</span>
+                        <em class="auditor-item-fragment">"${escapeHtml(a.fragment || "")}"</em>
+                        <span class="auditor-item-motiu">${escapeHtml(a.motiu || "")}</span>
+                    </div>
+                </li>
+            `;
+        }).join("");
+        const status = avisosAuditor.length > 4 ? "q-warn" : "q-ok";
+        rows.push(`
+            <div class="quality-row ${status}">
+                <span class="material-symbols-outlined q-icon">psychology</span>
+                <div class="q-content">
+                    <p class="q-title">Auditor pedagògic (${escapeHtml(auditorModel)}): ${avisosAuditor.length} avís${avisosAuditor.length === 1 ? "" : "os"}</p>
+                    <p class="q-detail">Revisió qualitativa LLM per detectar problemes que LanguageTool no veu (confusió, salts lògics, vocabulari…).</p>
+                    <ul class="auditor-list">${avisosItems}</ul>
+                </div>
+            </div>
+        `);
+    } else if (!auditorDisponible && report.auditor_model) {
+        rows.push(`
+            <div class="quality-row q-warn">
+                <span class="material-symbols-outlined q-icon">psychology_off</span>
+                <div class="q-content">
+                    <p class="q-title">Auditor LLM no disponible</p>
+                    <p class="q-detail">No s'ha pogut fer la revisió pedagògica (clau API no configurada o error).</p>
+                </div>
+            </div>
+        `);
+    }
+
     body.innerHTML = rows.join("");
     card.removeAttribute("hidden");
 }

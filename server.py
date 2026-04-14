@@ -1283,15 +1283,25 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
     for w in pp.get("warnings", []):
         cb({"type": "step", "step": "warning", "msg": w})
 
-    # 7. Pipeline de qualitat català (LanguageTool + llegibilitat)
+    # 7. Pipeline de qualitat català (LanguageTool + llegibilitat + LLM Auditor)
     #    Fa servir el MECR real de sortida per avaluar la llegibilitat.
     quality_enabled = params.get("quality_check", True)
+    use_auditor = params.get("auditor")
+    if use_auditor is None:
+        use_auditor = ATNE_AUDITOR_ENABLED
+    etapa_pp = context.get("etapa", "")
     quality = None
     if quality_enabled:
-        cb({"type": "step", "step": "quality", "msg": "Verificant qualitat català (LanguageTool + llegibilitat)..."})
+        cb({"type": "step", "step": "quality",
+            "msg": "Verificant qualitat (LanguageTool + llegibilitat + auditor LLM)..."})
         try:
-            quality = post_process_catalan(adapted, target_mecr=mecr, enable_lt=True)
-            # Si LanguageTool ha aplicat correccions, substituïm el text
+            quality = post_process_catalan(
+                adapted,
+                target_mecr=mecr,
+                enable_lt=True,
+                enable_auditor=bool(use_auditor),
+                etapa=etapa_pp,
+            )
             if quality["n_correccions"] > 0:
                 adapted = quality["text"]
                 cb({"type": "step", "step": "quality_ok",
@@ -1302,6 +1312,9 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
             if not quality["llegibilitat"].get("ok", True):
                 cb({"type": "step", "step": "warning",
                     "msg": quality["llegibilitat"].get("missatge", "Llegibilitat fora del llindar")})
+            if quality["avisos_auditor"]:
+                cb({"type": "step", "step": "warning",
+                    "msg": f"Auditor LLM: {len(quality['avisos_auditor'])} avisos pedagògics"})
         except Exception as e:
             cb({"type": "step", "step": "warning", "msg": f"Quality check fallit: {e}"})
 
@@ -1315,7 +1328,10 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
             "paraules_sospitoses": quality["paraules_sospitoses"][:20],
             "avisos_estil": quality["avisos_estil"][:10],
             "llegibilitat": quality["llegibilitat"],
+            "avisos_auditor": quality["avisos_auditor"],
             "lt_disponible": quality["lt_disponible"],
+            "auditor_disponible": quality["auditor_disponible"],
+            "auditor_model": quality["auditor_model"],
         }
     cb(result_ev)
     cb({"type": "done"})
@@ -1772,7 +1788,16 @@ perfil de l'alumne es farà en una segona fase amb un altre pipeline.
     # Deduir MECR objectiu del context educatiu
     target_mecr = payload.get("target_mecr") or _mecr_from_etapa_curs(etapa, curs)
     verify = payload.get("verify") if payload.get("verify") is not None else True
-    quality = post_process_catalan(text, target_mecr=target_mecr, enable_lt=bool(verify))
+    use_auditor = payload.get("auditor")
+    if use_auditor is None:
+        use_auditor = ATNE_AUDITOR_ENABLED
+    quality = post_process_catalan(
+        text,
+        target_mecr=target_mecr,
+        enable_lt=bool(verify),
+        enable_auditor=bool(use_auditor),
+        etapa=etapa,
+    )
 
     paraules = len(quality["text"].split())
     return {
@@ -1790,7 +1815,10 @@ perfil de l'alumne es farà en una segona fase amb un altre pipeline.
             "paraules_sospitoses": quality["paraules_sospitoses"][:20],
             "avisos_estil": quality["avisos_estil"][:10],
             "llegibilitat": quality["llegibilitat"],
+            "avisos_auditor": quality["avisos_auditor"],
             "lt_disponible": quality["lt_disponible"],
+            "auditor_disponible": quality["auditor_disponible"],
+            "auditor_model": quality["auditor_model"],
         },
     }
 
@@ -1868,6 +1896,13 @@ REFINE_PRESETS = {
 
 
 LANGUAGETOOL_URL = os.getenv("LANGUAGETOOL_URL", "https://api.languagetool.org/v2/check")
+
+# Model LLM utilitzat per a l'auditor pedagògic (Layer 3 del pipeline de qualitat).
+# Per defecte gpt-4o-mini (barat + ràpid). Canviable via env var si cal,
+# però ATENCIÓ: usem OPENAI_API_KEY institucional → NO canviar a models premium
+# sense aprovació explícita (gpt-4o, gpt-4.1 són 10-30x més cars).
+ATNE_AUDITOR_MODEL = os.getenv("ATNE_AUDITOR_MODEL", "gpt-4o-mini")
+ATNE_AUDITOR_ENABLED = os.getenv("ATNE_AUDITOR_ENABLED", "true").lower() == "true"
 
 
 def _languagetool_correct(text: str) -> tuple[str, int, list[dict]]:
@@ -2278,18 +2313,119 @@ def _readability_score(text: str, target_mecr: str = "") -> dict:
     return result
 
 
-def post_process_catalan(text: str, target_mecr: str = "", enable_lt: bool = True) -> dict:
+def _llm_audit(text: str, target_mecr: str = "", etapa: str = "") -> dict:
+    """
+    Layer 3 del pipeline: auditor pedagògic via LLM (GPT-4o-mini per defecte).
+    NO modifica el text — només emet avisos qualitatius que LanguageTool no veu:
+    frases confuses, salts lògics, vocabulari desajustat, repeticions, connectors
+    mal usats, calcs d'altres llengües.
+
+    Retorna: {"avisos": [...], "disponible": bool, "model": str, "error": str?}
+    - avisos és una llista de dicts {"tipus", "fragment", "motiu"}
+    - disponible indica si s'ha pogut fer la crida (fallback silent a LT si no)
+    """
+    result = {"avisos": [], "disponible": False, "model": ATNE_AUDITOR_MODEL}
+
+    if not text or not text.strip():
+        result["error"] = "text buit"
+        return result
+
+    if not os.getenv("OPENAI_API_KEY"):
+        result["error"] = "OPENAI_API_KEY no configurada"
+        return result
+
+    contexte_etapa = f"alumne de {etapa}" if etapa else "un alumne d'escola catalana"
+    contexte_mecr = f"nivell MECR {target_mecr}" if target_mecr else "nivell estàndard"
+
+    prompt = f"""Ets un inspector pedagògic en català. Has d'auditar el text següent pensant en un {contexte_etapa} amb {contexte_mecr}.
+
+NO modifiquis el text. NOMÉS emet fins a 6 avisos qualitatius sobre:
+- Frases ambigües o confuses
+- Salts lògics o idees que perden el fil
+- Vocabulari massa complex o inadequat per al nivell
+- Repeticions que no aporten
+- Connectors mal usats (connectors causals, consecutius, adversatius usats incorrectament)
+- Construccions no naturals en català (calcs del castellà, francès o anglès)
+
+Retorna NOMÉS un objecte JSON vàlid (sense marcadors markdown, sense explicacions extra), amb aquesta estructura exacta:
+
+{{"avisos": [{{"tipus": "confusa|salt|vocabulari|repeticio|connector|calc", "fragment": "fragment literal del text (max 100 car)", "motiu": "explicació breu del problema"}}]}}
+
+Si el text és adequat al nivell i no hi ha problemes rellevants, retorna {{"avisos": []}}.
+
+TEXT A AUDITAR:
+{text}"""
+
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        resp = client.chat.completions.create(
+            model=ATNE_AUDITOR_MODEL,
+            messages=[
+                {"role": "system", "content": "Ets un auditor pedagògic que retorna NOMÉS JSON vàlid, sense marcadors markdown ni text addicional."},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=1200,
+            temperature=0.2,
+            timeout=20,
+        )
+        raw = (resp.choices[0].message.content or "").strip()
+    except Exception as e:
+        print(f"[LLM Auditor] Error: {type(e).__name__}: {e}")
+        result["error"] = f"{type(e).__name__}: {e}"
+        return result
+
+    # Netejar markdown fences si existeixen
+    if raw.startswith("```"):
+        raw = re.sub(r"^```(?:json)?\s*", "", raw)
+        raw = re.sub(r"\s*```$", "", raw)
+
+    try:
+        data = json.loads(raw)
+        avisos_raw = data.get("avisos", [])
+        if not isinstance(avisos_raw, list):
+            avisos_raw = []
+        clean_avisos: list[dict] = []
+        for a in avisos_raw[:10]:
+            if isinstance(a, dict) and a.get("fragment"):
+                clean_avisos.append({
+                    "tipus": str(a.get("tipus", "")).strip()[:30],
+                    "fragment": str(a.get("fragment", "")).strip()[:300],
+                    "motiu": str(a.get("motiu", "")).strip()[:300],
+                })
+        result["avisos"] = clean_avisos
+        result["disponible"] = True
+    except Exception as e:
+        print(f"[LLM Auditor] JSON parse error: {e}. Raw: {raw[:200]}")
+        result["error"] = f"JSON invàlid: {e}"
+
+    return result
+
+
+def post_process_catalan(text: str, target_mecr: str = "", enable_lt: bool = True,
+                         enable_auditor: bool = None, etapa: str = "") -> dict:
     """
     Pipeline complet de qualitat català per a un text generat o adaptat.
+
+    Capes:
+      1. LanguageTool (determinista): ortografia, gramàtica, paraules desconegudes
+      2. Llegibilitat (heurística): paraules/frase + % paraules llargues vs MECR
+      3. LLM Auditor (opcional): avisos pedagògics qualitatius (GPT-4o-mini)
+
+    Les capes 1 i 3 s'executen EN PARAL·LEL amb ThreadPoolExecutor.
+
     Retorna un dict amb:
       - text: text final (amb correccions auto-aplicades si enable_lt)
-      - n_correccions: nombre de correccions LT auto-aplicades
-      - correccions: llista detallada de correccions
-      - paraules_sospitoses: paraules no trobades al diccionari (warnings)
-      - avisos_estil: avisos d'estil (no crítics)
-      - llegibilitat: indicadors i comparació amb target MECR
-      - lt_disponible: si LanguageTool ha respost
+      - n_correccions, correccions: LanguageTool
+      - paraules_sospitoses: paraules no trobades al diccionari
+      - avisos_estil: avisos estilístics de LanguageTool (no crítics)
+      - llegibilitat: indicadors + estat vs MECR objectiu
+      - avisos_auditor: warnings qualitatius del LLM auditor
+      - lt_disponible, auditor_disponible, auditor_model
     """
+    if enable_auditor is None:
+        enable_auditor = ATNE_AUDITOR_ENABLED
+
     if not text or not text.strip():
         return {
             "text": text,
@@ -2298,21 +2434,44 @@ def post_process_catalan(text: str, target_mecr: str = "", enable_lt: bool = Tru
             "paraules_sospitoses": [],
             "avisos_estil": [],
             "llegibilitat": _readability_score("", target_mecr),
+            "avisos_auditor": [],
             "lt_disponible": False,
+            "auditor_disponible": False,
+            "auditor_model": ATNE_AUDITOR_MODEL,
         }
 
-    if enable_lt:
-        lt_result = _languagetool_full_analysis(text)
+    # Paral·lelitzar LanguageTool + LLM Auditor per estalviar temps
+    lt_result = None
+    audit_result = {"avisos": [], "disponible": False, "model": ATNE_AUDITOR_MODEL}
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+        lt_future = pool.submit(_languagetool_full_analysis, text) if enable_lt else None
+        audit_future = pool.submit(_llm_audit, text, target_mecr, etapa) if enable_auditor else None
+
+        if lt_future is not None:
+            try:
+                lt_result = lt_future.result(timeout=45)
+            except Exception as e:
+                print(f"[LT] Timeout/Error: {e}")
+                lt_result = None
+        if audit_future is not None:
+            try:
+                audit_result = audit_future.result(timeout=30)
+            except Exception as e:
+                print(f"[Auditor] Timeout/Error: {e}")
+                audit_result = {"avisos": [], "disponible": False, "model": ATNE_AUDITOR_MODEL, "error": str(e)}
+
+    if lt_result:
         text_final = lt_result["text_corregit"]
         correccions = lt_result["correccions"]
         desconegudes = lt_result["paraules_desconegudes"]
-        avisos = lt_result["avisos_estil"]
+        avisos_estil = lt_result["avisos_estil"]
         lt_disponible = lt_result["lt_disponible"]
     else:
         text_final = text
         correccions = []
         desconegudes = []
-        avisos = []
+        avisos_estil = []
         lt_disponible = False
 
     llegibilitat = _readability_score(text_final, target_mecr)
@@ -2322,9 +2481,12 @@ def post_process_catalan(text: str, target_mecr: str = "", enable_lt: bool = Tru
         "n_correccions": len(correccions),
         "correccions": correccions,
         "paraules_sospitoses": desconegudes,
-        "avisos_estil": avisos,
+        "avisos_estil": avisos_estil,
         "llegibilitat": llegibilitat,
+        "avisos_auditor": audit_result.get("avisos", []),
         "lt_disponible": lt_disponible,
+        "auditor_disponible": audit_result.get("disponible", False),
+        "auditor_model": audit_result.get("model", ATNE_AUDITOR_MODEL),
     }
 
 
