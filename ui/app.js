@@ -1238,8 +1238,12 @@ function handleSSEEvent(ev, container) {
         // Acumulem per versió. Si no hi ha level, és una versió única.
         if (state.adaptMode === "grup" && level) {
             state.versions[level] = ev.adapted;
+            // En mode grup guardem el quality report per nivell
+            state.qualityReports = state.qualityReports || {};
+            if (ev.quality_report) state.qualityReports[level] = ev.quality_report;
         } else {
             state.adaptedText = ev.adapted;
+            state.lastQualityReport = ev.quality_report || null;
         }
     } else if (ev.type === "done_level") {
         // Un nivell individual ha acabat. En mode grup, això pot dispar el
@@ -1311,6 +1315,12 @@ function switchVersion(level) {
     }
 
     updateVersionTabsUI();
+
+    // Actualitzar Quality Report per al nivell actiu
+    const qr = state.qualityReports && state.qualityReports[level];
+    if (qr) {
+        renderQualityReport("quality-report-p4", "quality-body-p4", "quality-badge-p4", qr);
+    }
 }
 
 function updateVersionTabsUI() {
@@ -1420,6 +1430,16 @@ function showResult() {
             <span style="color:#6b7280">|</span>
             <span style="color:${mainWords <= origWords ? '#059669' : '#d97706'}">${mainWords <= origWords ? '↓' : '↑'} ${Math.abs(Math.round((mainWords/origWords-1)*100))}% vs original</span>
         `;
+    }
+
+    // Quality Report al Pas 4 (si disponible)
+    const qualityReport = state.adaptMode === "grup" && state.currentVersion && state.qualityReports
+        ? state.qualityReports[state.currentVersion]
+        : state.lastQualityReport;
+    if (qualityReport) {
+        renderQualityReport("quality-report-p4", "quality-body-p4", "quality-badge-p4", qualityReport);
+    } else {
+        document.getElementById("quality-report-p4")?.setAttribute("hidden", "hidden");
     }
 
     // Resetar feedback
@@ -1785,7 +1805,12 @@ async function generateDraftText() {
         updateWordCount();
         updateGenerateButtonLabel();
 
-        status.textContent = `Text generat (${data.paraules} paraules). Modifica paràmetres i regenera, refina'l, o continua.`;
+        // Quality Report (si disponible)
+        if (data.quality_report) {
+            renderQualityReport("quality-report-p2", "quality-body-p2", "quality-badge-p2", data.quality_report);
+        }
+
+        status.textContent = `Text generat (${data.paraules} paraules${data.model ? " · " + data.model : ""}). Modifica paràmetres i regenera, refina'l, o continua.`;
         status.style.color = "#15803d";
 
         // Auto-switch a mode "write" perquè es vegi el text generat
@@ -2023,6 +2048,153 @@ function editorApplyFormat(format) {
         ta.selectionStart = ta.selectionEnd = start + wrapped.length;
     }
     updateWordCount();
+}
+
+// ── Quality Report (Pas 2 generació + Pas 4 adaptació) ───────────────────
+
+function renderQualityReport(reportId, bodyId, badgeId, report) {
+    const card = document.getElementById(reportId);
+    const body = document.getElementById(bodyId);
+    const badge = document.getElementById(badgeId);
+    if (!card || !body || !badge || !report) return;
+
+    // Decidir l'estat global: ok / warn / err
+    const nCorr = report.n_correccions || 0;
+    const sospitoses = report.paraules_sospitoses || [];
+    const avisos = report.avisos_estil || [];
+    const llegibilitat = report.llegibilitat || {};
+    const llegOk = llegibilitat.ok !== false;
+
+    let globalStatus = "ok";
+    if (!report.lt_disponible) {
+        globalStatus = "warn"; // no hem pogut verificar
+    } else if (sospitoses.length > 5 || !llegOk) {
+        globalStatus = "warn";
+    }
+    if (sospitoses.length > 15) {
+        globalStatus = "err";
+    }
+
+    // Badge
+    badge.classList.remove("q-ok", "q-warn", "q-err");
+    if (globalStatus === "ok") {
+        badge.classList.add("q-ok");
+        badge.textContent = "OK";
+    } else if (globalStatus === "warn") {
+        badge.classList.add("q-warn");
+        badge.textContent = "Revisa";
+    } else {
+        badge.classList.add("q-err");
+        badge.textContent = "Atenció";
+    }
+
+    // Construir contingut
+    const rows = [];
+
+    // 1. LanguageTool
+    if (!report.lt_disponible) {
+        rows.push(`
+            <div class="quality-row q-warn">
+                <span class="material-symbols-outlined q-icon">cloud_off</span>
+                <div class="q-content">
+                    <p class="q-title">LanguageTool no disponible</p>
+                    <p class="q-detail">No s'ha pogut verificar automàticament. Revisa el text amb més atenció.</p>
+                </div>
+            </div>
+        `);
+    } else if (nCorr === 0) {
+        rows.push(`
+            <div class="quality-row q-ok">
+                <span class="material-symbols-outlined q-icon">check_circle</span>
+                <div class="q-content">
+                    <p class="q-title">LanguageTool: sense errors detectats</p>
+                    <p class="q-detail">Cap error ortogràfic o gramàtic obvi al text.</p>
+                </div>
+            </div>
+        `);
+    } else {
+        const correccionsItems = (report.correccions || []).slice(0, 10).map(c =>
+            `<li><code>${escapeHtml(c.original)}</code> → <code>${escapeHtml(c.corregit)}</code> <em>(${escapeHtml(c.missatge || "")})</em></li>`
+        ).join("");
+        rows.push(`
+            <div class="quality-row q-ok">
+                <span class="material-symbols-outlined q-icon">auto_fix_high</span>
+                <div class="q-content">
+                    <p class="q-title">LanguageTool: ${nCorr} correccio${nCorr === 1 ? "" : "ns"} aplicada${nCorr === 1 ? "" : "s"}</p>
+                    <p class="q-detail">Errors ortogràfics/gramàtics detectats i corregits automàticament.</p>
+                    <details>
+                        <summary>Veure correccions (${Math.min(10, nCorr)} de ${nCorr})</summary>
+                        <ul class="quality-corrections-list">${correccionsItems}</ul>
+                    </details>
+                </div>
+            </div>
+        `);
+    }
+
+    // 2. Paraules sospitoses
+    if (sospitoses.length > 0) {
+        const chips = sospitoses.slice(0, 20).map(p => {
+            const sug = (p.suggeriments || []).filter(s => s).slice(0, 3).join(", ");
+            const tooltip = sug ? `Suggeriments: ${sug}` : (p.missatge || "Paraula no trobada al diccionari");
+            return `<span class="quality-word-chip" title="${escapeHtml(tooltip)}">${escapeHtml(p.paraula)}</span>`;
+        }).join("");
+        const status = sospitoses.length > 15 ? "q-err" : "q-warn";
+        rows.push(`
+            <div class="quality-row ${status}">
+                <span class="material-symbols-outlined q-icon">dictionary</span>
+                <div class="q-content">
+                    <p class="q-title">Paraules no trobades al diccionari (${sospitoses.length})</p>
+                    <p class="q-detail">Poden ser noms propis, tecnicismes o paraules inventades per l'IA. Revisa manualment:</p>
+                    <div class="q-words">${chips}</div>
+                </div>
+            </div>
+        `);
+    }
+
+    // 3. Llegibilitat
+    const llegClass = llegOk ? "q-ok" : "q-warn";
+    const llegIcon = llegOk ? "speed" : "warning";
+    const target = llegibilitat.target_mecr || "";
+    const wps = llegibilitat.wps || 0;
+    const longPct = llegibilitat.long_pct || 0;
+    rows.push(`
+        <div class="quality-row ${llegClass}">
+            <span class="material-symbols-outlined q-icon">${llegIcon}</span>
+            <div class="q-content">
+                <p class="q-title">Llegibilitat${target ? " (objectiu " + target + ")" : ""}</p>
+                <p class="q-detail">${escapeHtml(llegibilitat.missatge || "")}</p>
+                <p class="q-detail" style="margin-top:0.25rem">
+                    ${wps} paraules/frase · ${longPct}% paraules llargues · ${llegibilitat.n_words || 0} paraules totals
+                </p>
+            </div>
+        </div>
+    `);
+
+    // 4. Avisos d'estil (opcional, només si n'hi ha)
+    if (avisos.length > 0) {
+        rows.push(`
+            <div class="quality-row q-warn">
+                <span class="material-symbols-outlined q-icon">edit_note</span>
+                <div class="q-content">
+                    <p class="q-title">${avisos.length} avisos d'estil</p>
+                    <p class="q-detail">Consells de redacció (redundàncies, tipografia, estil). No són errors greus.</p>
+                </div>
+            </div>
+        `);
+    }
+
+    body.innerHTML = rows.join("");
+    card.removeAttribute("hidden");
+}
+
+function escapeHtml(str) {
+    if (str == null) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
 // ── Historial d'undo/redo manual per al textarea (Pas 2) ──────────────────

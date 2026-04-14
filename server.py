@@ -1283,9 +1283,40 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
     for w in pp.get("warnings", []):
         cb({"type": "step", "step": "warning", "msg": w})
 
+    # 7. Pipeline de qualitat català (LanguageTool + llegibilitat)
+    #    Fa servir el MECR real de sortida per avaluar la llegibilitat.
+    quality_enabled = params.get("quality_check", True)
+    quality = None
+    if quality_enabled:
+        cb({"type": "step", "step": "quality", "msg": "Verificant qualitat català (LanguageTool + llegibilitat)..."})
+        try:
+            quality = post_process_catalan(adapted, target_mecr=mecr, enable_lt=True)
+            # Si LanguageTool ha aplicat correccions, substituïm el text
+            if quality["n_correccions"] > 0:
+                adapted = quality["text"]
+                cb({"type": "step", "step": "quality_ok",
+                    "msg": f"LanguageTool: {quality['n_correccions']} correccions auto-aplicades"})
+            if quality["paraules_sospitoses"]:
+                cb({"type": "step", "step": "warning",
+                    "msg": f"{len(quality['paraules_sospitoses'])} paraules sospitoses — revisa al Quality Report"})
+            if not quality["llegibilitat"].get("ok", True):
+                cb({"type": "step", "step": "warning",
+                    "msg": quality["llegibilitat"].get("missatge", "Llegibilitat fora del llindar")})
+        except Exception as e:
+            cb({"type": "step", "step": "warning", "msg": f"Quality check fallit: {e}"})
+
     result_ev = {"type": "result", "adapted": adapted, "post_process": pp}
     if verify_info is not None:
         result_ev["verify"] = {"score": best_score, **verify_info}
+    if quality is not None:
+        result_ev["quality_report"] = {
+            "n_correccions": quality["n_correccions"],
+            "correccions": quality["correccions"][:20],
+            "paraules_sospitoses": quality["paraules_sospitoses"][:20],
+            "avisos_estil": quality["avisos_estil"][:10],
+            "llegibilitat": quality["llegibilitat"],
+            "lt_disponible": quality["lt_disponible"],
+        }
     cb(result_ev)
     cb({"type": "done"})
     return adapted
@@ -1721,8 +1752,12 @@ perfil de l'alumne es farà en una segona fase amb un altre pipeline.
 
 # GENERA EL TEXT ARA"""
 
+    # Selecció de model via payload (fallback a ATNE_MODEL)
+    model_payload = (payload.get("model") or "").strip().lower()
+    model_usat = model_payload if model_payload in ("gemma4", "mistral", "gpt", "gemini") else ATNE_MODEL
+
     try:
-        text = _call_llm("gemma4", prompt, "")
+        text = _call_llm(model_usat, prompt, "")
         text = clean_gemini_output(text).strip()
     except Exception as e:
         return JSONResponse(
@@ -1733,15 +1768,30 @@ perfil de l'alumne es farà en una segona fase amb un altre pipeline.
     if not text:
         return JSONResponse({"error": "L'LLM ha retornat un text buit."}, status_code=500)
 
-    paraules = len(text.split())
+    # ═══ Pipeline de qualitat post-generació ═══
+    # Deduir MECR objectiu del context educatiu
+    target_mecr = payload.get("target_mecr") or _mecr_from_etapa_curs(etapa, curs)
+    verify = payload.get("verify") if payload.get("verify") is not None else True
+    quality = post_process_catalan(text, target_mecr=target_mecr, enable_lt=bool(verify))
+
+    paraules = len(quality["text"].split())
     return {
-        "text": text,
+        "text": quality["text"],
         "paraules": paraules,
         "tema": tema,
         "genere": genere,
         "tipologia": tipologia,
         "to": to,
         "extensio": extensio,
+        "model": model_usat,
+        "quality_report": {
+            "n_correccions": quality["n_correccions"],
+            "correccions": quality["correccions"][:20],
+            "paraules_sospitoses": quality["paraules_sospitoses"][:20],
+            "avisos_estil": quality["avisos_estil"][:10],
+            "llegibilitat": quality["llegibilitat"],
+            "lt_disponible": quality["lt_disponible"],
+        },
     }
 
 
@@ -1878,6 +1928,309 @@ def _languagetool_correct(text: str) -> tuple[str, int, list[dict]]:
     # Retornar canvis en ordre d'aparició al text
     changes.reverse()
     return corrected, len(changes), changes
+
+
+# ═══ Pipeline de qualitat català (post-processament) ══════════════════════════
+
+# Taula etapa+curs → MECR aproximat per al target de llegibilitat
+# Usada quan el client no envia target_mecr explícit.
+def _mecr_from_etapa_curs(etapa: str, curs: str = "") -> str:
+    etapa_lower = (etapa or "").lower()
+    curs_lower = (curs or "").lower()
+    if "infantil" in etapa_lower:
+        return "pre-A1"
+    if "primari" in etapa_lower:
+        # Cicle inicial (1-2): A1; Mitjà (3-4): A2; Superior (5-6): B1
+        if any(x in curs_lower for x in ("1r", "1", "2n", "2")):
+            return "A1"
+        if any(x in curs_lower for x in ("3r", "3", "4t", "4")):
+            return "A2"
+        return "B1"
+    if "eso" in etapa_lower:
+        # 1-2 ESO: B1; 3-4 ESO: B2
+        if any(x in curs_lower for x in ("1r", "1", "2n", "2")):
+            return "B1"
+        return "B2"
+    if "batxillerat" in etapa_lower or "batx" in etapa_lower or "fp" in etapa_lower:
+        return "C1"
+    return "B1"  # default segur
+
+
+# Regles de LanguageTool que indiquen paraula desconeguda al diccionari català
+_LT_UNKNOWN_WORD_RULES = {
+    "MORFOLOGIK_RULE_CA_ES",  # Catalan ortografia general
+    "MORFOLOGIK_RULE_CA_ES_V",
+    "MORFOLOGIK_RULE_CA_ES_VALENCIA",
+}
+
+# Llindars de llegibilitat per MECR (mitjana paraules/frase i % paraules llargues >7 caràcters)
+_READABILITY_TARGETS = {
+    "pre-A1": {"max_wps": 8, "max_long_pct": 12},
+    "A1": {"max_wps": 10, "max_long_pct": 15},
+    "A2": {"max_wps": 14, "max_long_pct": 20},
+    "B1": {"max_wps": 18, "max_long_pct": 28},
+    "B2": {"max_wps": 25, "max_long_pct": 35},
+    "C1": {"max_wps": 30, "max_long_pct": 42},
+}
+
+
+def _languagetool_full_analysis(text: str) -> dict:
+    """
+    Crida LanguageTool i separa matches en 3 categories:
+    - correccions automàtiques (ortografia, gramàtica amb suggeriment clar)
+    - paraules desconegudes (warnings, no auto-corregides)
+    - avisos d'estil (info, no crítics)
+    Retorna un dict amb text corregit i les 3 llistes.
+    """
+    result = {
+        "text_original": text,
+        "text_corregit": text,
+        "correccions": [],
+        "paraules_desconegudes": [],
+        "avisos_estil": [],
+        "lt_disponible": False,
+    }
+
+    try:
+        resp = requests.post(
+            LANGUAGETOOL_URL,
+            data={
+                "text": text,
+                "language": "ca",
+                "level": "picky",
+                "enabledOnly": "false",
+            },
+            headers={"Accept": "application/json"},
+            timeout=30,
+        )
+        if resp.status_code != 200:
+            return result
+        data = resp.json()
+        result["lt_disponible"] = True
+    except Exception as e:
+        print(f"[LanguageTool] Error: {type(e).__name__}: {e}")
+        return result
+
+    matches = data.get("matches", [])
+    if not matches:
+        return result
+
+    sorted_matches = sorted(matches, key=lambda m: m.get("offset", 0), reverse=True)
+
+    corrected = text
+    correccions: list[dict] = []
+    desconegudes: list[dict] = []
+    avisos: list[dict] = []
+
+    for m in sorted_matches:
+        offset = m.get("offset", 0)
+        length = m.get("length", 0)
+        replacements = m.get("replacements", [])
+        rule_id = m.get("rule", {}).get("id", "")
+        rule_cat = m.get("rule", {}).get("category", {}).get("id", "")
+        old_value = text[offset:offset + length] if offset >= 0 else ""
+        missatge = m.get("shortMessage") or m.get("message", "")
+
+        # Si és paraula desconeguda i no hi ha suggeriment clar → warning
+        if rule_id in _LT_UNKNOWN_WORD_RULES or "MORFOLOGIK" in rule_id:
+            desconegudes.append({
+                "paraula": old_value,
+                "suggeriments": [r.get("value", "") for r in replacements[:3]],
+                "missatge": missatge,
+                "regla": rule_id,
+            })
+            # Si hi ha suggeriment clar (top 1 pràcticament idèntic, només diferència d'accent/apostrofació)
+            # → auto-apliquem; si no, només warning
+            if replacements and _suggestion_is_safe(old_value, replacements[0].get("value", "")):
+                new_value = replacements[0].get("value", "")
+                if new_value and new_value != old_value:
+                    corrected = corrected[:offset] + new_value + corrected[offset + length:]
+                    correccions.append({
+                        "original": old_value,
+                        "corregit": new_value,
+                        "missatge": missatge,
+                        "regla": rule_id,
+                    })
+            continue
+
+        # Estil (categoria STYLE) → warning, no auto-correcció
+        if rule_cat in ("STYLE", "REDUNDANCY", "TYPOGRAPHY"):
+            avisos.append({
+                "fragment": old_value,
+                "suggeriment": replacements[0].get("value", "") if replacements else "",
+                "missatge": missatge,
+                "regla": rule_id,
+            })
+            continue
+
+        # Resta → correcció automàtica (gramàtica clara, ortografia, concordances)
+        if replacements and length > 0:
+            new_value = replacements[0].get("value", "")
+            if new_value and new_value != old_value:
+                corrected = corrected[:offset] + new_value + corrected[offset + length:]
+                correccions.append({
+                    "original": old_value,
+                    "corregit": new_value,
+                    "missatge": missatge,
+                    "regla": rule_id,
+                })
+
+    # Revertir ordres per lectura natural
+    correccions.reverse()
+    desconegudes.reverse()
+    avisos.reverse()
+
+    result["text_corregit"] = corrected
+    result["correccions"] = correccions
+    result["paraules_desconegudes"] = desconegudes
+    result["avisos_estil"] = avisos
+    return result
+
+
+def _suggestion_is_safe(original: str, suggestion: str) -> bool:
+    """
+    Un suggeriment es considera "segur" per a auto-aplicació si és pràcticament
+    idèntic (diferències d'accents, apostrofacions, majúscules, o guió).
+    """
+    if not original or not suggestion:
+        return False
+
+    def _norm(s: str) -> str:
+        import unicodedata
+        return unicodedata.normalize("NFKD", s.lower()).encode("ascii", "ignore").decode("ascii")
+
+    return _norm(original) == _norm(suggestion)
+
+
+def _readability_score(text: str, target_mecr: str = "") -> dict:
+    """
+    Calcula indicadors de llegibilitat del text en català:
+    - paraules per frase (mitjana)
+    - percentatge de paraules llargues (>7 caràcters)
+    - longitud mitjana de paraula
+    Compara amb els llindars del MECR objectiu i retorna un estat:
+    "ok" / "sobre" (text més complex del que caldria) / "sota" (massa simple).
+    """
+    import re
+
+    text_clean = text.strip()
+    if not text_clean:
+        return {"ok": True, "wps": 0, "long_pct": 0, "avg_word_len": 0,
+                "target_mecr": target_mecr, "estat": "buit",
+                "missatge": "Text buit"}
+
+    # Trencar en frases per punts i signes d'interrogació/exclamació finals
+    sentences = [s.strip() for s in re.split(r"[.!?]+", text_clean) if s.strip()]
+    n_sentences = max(1, len(sentences))
+
+    words = re.findall(r"\b[\wàèéíòóú·ïü]+\b", text_clean, flags=re.IGNORECASE)
+    n_words = max(1, len(words))
+
+    wps = round(n_words / n_sentences, 1)
+    long_words = [w for w in words if len(w) > 7]
+    long_pct = round(100 * len(long_words) / n_words, 1)
+    avg_word_len = round(sum(len(w) for w in words) / n_words, 1)
+
+    result = {
+        "wps": wps,
+        "long_pct": long_pct,
+        "avg_word_len": avg_word_len,
+        "n_words": n_words,
+        "n_sentences": n_sentences,
+        "target_mecr": target_mecr,
+    }
+
+    target = _READABILITY_TARGETS.get(target_mecr)
+    if not target:
+        result["ok"] = True
+        result["estat"] = "sense_objectiu"
+        result["missatge"] = f"Llegibilitat: {wps} par/frase · {long_pct}% paraules llargues"
+        return result
+
+    sobrepassa_wps = wps > target["max_wps"]
+    sobrepassa_long = long_pct > target["max_long_pct"]
+
+    if sobrepassa_wps and sobrepassa_long:
+        result["ok"] = False
+        result["estat"] = "sobre"
+        result["missatge"] = (
+            f"El text és més complex del que caldria per a {target_mecr}: "
+            f"{wps} par/frase (màx {target['max_wps']}) i "
+            f"{long_pct}% paraules llargues (màx {target['max_long_pct']}%)."
+        )
+    elif sobrepassa_wps:
+        result["ok"] = False
+        result["estat"] = "sobre"
+        result["missatge"] = (
+            f"Frases massa llargues per a {target_mecr}: "
+            f"{wps} par/frase (màx recomanat {target['max_wps']})."
+        )
+    elif sobrepassa_long:
+        result["ok"] = False
+        result["estat"] = "sobre"
+        result["missatge"] = (
+            f"Vocabulari potser massa complex per a {target_mecr}: "
+            f"{long_pct}% paraules llargues (màx recomanat {target['max_long_pct']}%)."
+        )
+    else:
+        result["ok"] = True
+        result["estat"] = "ok"
+        result["missatge"] = (
+            f"Llegibilitat adequada per a {target_mecr}: "
+            f"{wps} par/frase · {long_pct}% paraules llargues."
+        )
+
+    return result
+
+
+def post_process_catalan(text: str, target_mecr: str = "", enable_lt: bool = True) -> dict:
+    """
+    Pipeline complet de qualitat català per a un text generat o adaptat.
+    Retorna un dict amb:
+      - text: text final (amb correccions auto-aplicades si enable_lt)
+      - n_correccions: nombre de correccions LT auto-aplicades
+      - correccions: llista detallada de correccions
+      - paraules_sospitoses: paraules no trobades al diccionari (warnings)
+      - avisos_estil: avisos d'estil (no crítics)
+      - llegibilitat: indicadors i comparació amb target MECR
+      - lt_disponible: si LanguageTool ha respost
+    """
+    if not text or not text.strip():
+        return {
+            "text": text,
+            "n_correccions": 0,
+            "correccions": [],
+            "paraules_sospitoses": [],
+            "avisos_estil": [],
+            "llegibilitat": _readability_score("", target_mecr),
+            "lt_disponible": False,
+        }
+
+    if enable_lt:
+        lt_result = _languagetool_full_analysis(text)
+        text_final = lt_result["text_corregit"]
+        correccions = lt_result["correccions"]
+        desconegudes = lt_result["paraules_desconegudes"]
+        avisos = lt_result["avisos_estil"]
+        lt_disponible = lt_result["lt_disponible"]
+    else:
+        text_final = text
+        correccions = []
+        desconegudes = []
+        avisos = []
+        lt_disponible = False
+
+    llegibilitat = _readability_score(text_final, target_mecr)
+
+    return {
+        "text": text_final,
+        "n_correccions": len(correccions),
+        "correccions": correccions,
+        "paraules_sospitoses": desconegudes,
+        "avisos_estil": avisos,
+        "llegibilitat": llegibilitat,
+        "lt_disponible": lt_disponible,
+    }
 
 
 @app.post("/api/refine-text")

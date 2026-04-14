@@ -3426,6 +3426,196 @@ details.bento-card .bento-card-body {
     animation: spin-slow 1.2s linear infinite;
 }
 
+/* ═══ Quality Report card (Pas 2 + Pas 4) ══════════════════════ */
+.quality-report-card {
+    background: var(--surface-container-lowest);
+    border-radius: var(--radius-xl);
+    padding: 1rem 1.125rem;
+    box-shadow: 0 4px 20px -4px rgba(11, 28, 48, 0.05);
+    border: 1px solid rgba(199, 197, 213, 0.3);
+    margin-top: 0.75rem;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.quality-report-card[hidden] {
+    display: none !important;
+}
+
+.quality-report-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.625rem;
+}
+
+.quality-report-header h3 {
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--on-surface);
+    margin: 0;
+    flex: 1;
+}
+
+.quality-report-header .material-symbols-outlined {
+    color: var(--primary);
+    font-size: 1.125rem;
+    font-variation-settings: 'FILL' 1;
+}
+
+.quality-report-badge {
+    font-size: 0.5625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.1875rem 0.5rem;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+}
+
+.quality-report-badge.q-ok {
+    background: rgba(16, 185, 129, 0.12);
+    color: #047857;
+}
+
+.quality-report-badge.q-warn {
+    background: rgba(245, 158, 11, 0.14);
+    color: #b45309;
+}
+
+.quality-report-badge.q-err {
+    background: rgba(239, 68, 68, 0.12);
+    color: #b91c1c;
+}
+
+.quality-report-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    font-size: 0.75rem;
+    color: var(--on-surface);
+    line-height: 1.45;
+}
+
+.quality-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.5rem 0.625rem;
+    background: var(--surface-container-low);
+    border-radius: var(--radius-lg);
+    border-left: 3px solid transparent;
+}
+
+.quality-row.q-ok {
+    border-left-color: #10b981;
+}
+
+.quality-row.q-warn {
+    border-left-color: #f59e0b;
+}
+
+.quality-row.q-err {
+    border-left-color: #ef4444;
+}
+
+.quality-row .q-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+    margin-top: 0.0625rem;
+}
+
+.quality-row.q-ok .q-icon { color: #10b981; }
+.quality-row.q-warn .q-icon { color: #f59e0b; }
+.quality-row.q-err .q-icon { color: #ef4444; }
+
+.quality-row .q-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.quality-row .q-title {
+    font-weight: 700;
+    font-size: 0.75rem;
+    margin: 0 0 0.1875rem;
+}
+
+.quality-row .q-detail {
+    font-size: 0.6875rem;
+    color: var(--on-surface-variant);
+    margin: 0;
+}
+
+.quality-row .q-words {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 0.375rem;
+}
+
+.quality-word-chip {
+    font-size: 0.625rem;
+    font-weight: 600;
+    padding: 0.125rem 0.4375rem;
+    background: rgba(245, 158, 11, 0.12);
+    color: #b45309;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+.quality-word-chip[title] {
+    cursor: help;
+}
+
+.quality-corrections-list {
+    font-size: 0.625rem;
+    color: var(--on-surface-variant);
+    max-height: 120px;
+    overflow-y: auto;
+    padding-left: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.quality-corrections-list li {
+    margin-bottom: 0.125rem;
+}
+
+.quality-corrections-list code {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 0.625rem;
+    background: var(--surface-container-high);
+    padding: 0 0.25rem;
+    border-radius: 3px;
+}
+
+.quality-row details {
+    margin-top: 0.375rem;
+}
+
+.quality-row summary {
+    cursor: pointer;
+    font-size: 0.625rem;
+    color: var(--primary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    list-style: none;
+}
+
+.quality-row summary::-webkit-details-marker {
+    display: none;
+}
+
+.quality-row summary::before {
+    content: "▸ ";
+}
+
+.quality-row details[open] summary::before {
+    content: "▾ ";
+}
+
 /* ═══════════════════════════════════════════════════════════════
    OVERRIDES Pas 2: tipografia unificada + espais reduïts
    Alta especificitat per guanyar als estils antics (.gen-field select)
