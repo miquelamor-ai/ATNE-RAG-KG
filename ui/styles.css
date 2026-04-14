@@ -1096,3 +1096,501 @@ body {
     .export-row { flex-direction: column; }
     .export-row .btn { width: 100%; }
 }
+
+/* ═══════════════════════════════════════════════════════════ */
+/* SHELL V2 — Stitch design (header + aside + main + sticky)   */
+/* ═══════════════════════════════════════════════════════════ */
+
+.app-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ── Header v2 ─────────────────────────────────────────────── */
+.shell-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--surface);
+    width: 100%;
+}
+
+.shell-header-inner {
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.shell-header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.shell-menu-btn {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    color: var(--primary);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s;
+}
+
+.shell-menu-btn:hover { background: var(--surface-container-low); }
+
+.shell-logo {
+    font-family: var(--font-headline);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    letter-spacing: -0.025em;
+}
+
+.shell-tabs {
+    display: none;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .shell-tabs { display: flex; }
+}
+
+.shell-tab {
+    background: none;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-lg);
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.shell-tab:hover {
+    background: var(--surface-container-low);
+}
+
+.shell-tab.active {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.shell-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radius-full);
+    background: var(--surface-container-high);
+    border: 1px solid rgba(199, 197, 213, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    overflow: hidden;
+}
+
+.shell-avatar .material-symbols-outlined { font-size: 1.5rem; }
+
+/* ── Main amb aside ────────────────────────────────────────── */
+.shell-main {
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+    .shell-main {
+        flex-direction: row;
+        padding: 3rem 1.5rem 8rem;
+    }
+}
+
+/* ── Aside (sidebar dins del main) ─────────────────────────── */
+.shell-aside {
+    display: none;
+    width: 18rem;
+    flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+    .shell-aside { display: block; }
+}
+
+.aside-card {
+    background: var(--surface-container-lowest);
+    border-radius: var(--radius-3xl);
+    padding: 1.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+    position: sticky;
+    top: 6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.aside-title {
+    font-family: var(--font-headline);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+}
+
+.aside-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.aside-step {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: var(--radius-xl);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: none;
+    border: none;
+    text-align: left;
+    width: 100%;
+    font-family: var(--font-body);
+}
+
+.aside-step:hover {
+    color: var(--primary);
+    background: var(--surface-container-low);
+}
+
+.aside-step.active {
+    background: var(--surface-container-highest);
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.aside-step .material-symbols-outlined {
+    font-size: 1.25rem;
+}
+
+.aside-step.active .material-symbols-outlined {
+    font-variation-settings: 'FILL' 1;
+}
+
+.aside-progress {
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(199, 197, 213, 0.15);
+}
+
+.aside-progress-label {
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+}
+
+.aside-progress-bar {
+    width: 100%;
+    height: 0.5rem;
+    background: var(--surface-container-highest);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.aside-progress-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--primary), var(--primary-container));
+    border-radius: var(--radius-full);
+    transition: width 0.3s ease;
+}
+
+.aside-progress-text {
+    font-size: 0.625rem;
+    color: var(--on-surface-variant);
+    font-weight: 500;
+    margin-top: 0.5rem;
+}
+
+/* ── Workspace (contingut principal) ───────────────────────── */
+.shell-workspace {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-width: 0;
+}
+
+.workspace-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.workspace-title {
+    font-family: var(--font-headline);
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--on-surface);
+    letter-spacing: -0.025em;
+    margin: 0;
+}
+
+@media (min-width: 768px) {
+    .workspace-title { font-size: 2.25rem; }
+}
+
+.workspace-subtitle {
+    font-size: 1.125rem;
+    color: var(--on-surface-variant);
+    max-width: 42rem;
+}
+
+/* ── Bento layout (Pas 2) ──────────────────────────────────── */
+.bento-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 1280px) {
+    .bento-grid {
+        grid-template-columns: 2fr 1fr;
+    }
+}
+
+.bento-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.bento-side {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* ── Editor card (textarea amb toolbar) ────────────────────── */
+.editor-card {
+    background: var(--surface-container-lowest);
+    border-radius: var(--radius-3xl);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(199, 197, 213, 0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 600px;
+}
+
+.editor-toolbar {
+    background: var(--surface-container-low);
+    padding: 0.75rem 1.5rem;
+    border-bottom: 1px solid rgba(199, 197, 213, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.editor-toolbar-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.editor-toolbar-btn {
+    background: none;
+    border: none;
+    color: var(--on-surface-variant);
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
+
+.editor-toolbar-btn:hover { color: var(--primary); }
+
+.editor-wordcount {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--on-surface-variant);
+}
+
+.editor-textarea {
+    flex: 1;
+    padding: 2rem;
+    font-family: var(--font-body);
+    font-size: 1.125rem;
+    line-height: 1.7;
+    color: var(--on-surface);
+    background: transparent;
+    border: none;
+    resize: none;
+    outline: none;
+    width: 100%;
+}
+
+.editor-textarea::placeholder {
+    color: rgba(118, 118, 132, 0.5);
+}
+
+/* ── Bento side cards ──────────────────────────────────────── */
+.bento-card {
+    background: var(--surface-container-lowest);
+    border-radius: var(--radius-3xl);
+    padding: 1.5rem;
+    border: 1px solid rgba(199, 197, 213, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.bento-card.upload-card {
+    background: var(--surface-container-low);
+    border: 1px solid rgba(51, 55, 166, 0.1);
+}
+
+.bento-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.bento-card-icon {
+    color: var(--primary);
+    font-size: 1.5rem;
+}
+
+.bento-card-icon.amber { color: #f59e0b; }
+
+.bento-card-title {
+    font-family: var(--font-headline);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--on-surface);
+    margin: 0;
+}
+
+.bento-card-desc {
+    font-size: 0.875rem;
+    color: var(--on-surface-variant);
+    margin-bottom: 1.5rem;
+}
+
+/* Drop zone */
+.drop-zone {
+    border: 2px dashed var(--outline-variant);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+    background: rgba(255, 255, 255, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.drop-zone:hover {
+    border-color: rgba(51, 55, 166, 0.5);
+}
+
+.drop-zone .material-symbols-outlined {
+    color: var(--outline-variant);
+    font-size: 2.5rem;
+}
+
+.drop-zone-text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--on-surface-variant);
+    margin: 0;
+}
+
+/* Tips list */
+.tips-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.tips-list li {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    font-size: 0.875rem;
+    color: var(--on-surface-variant);
+    line-height: 1.5;
+}
+
+.tips-list li::before {
+    content: "";
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 50%;
+    background: var(--primary);
+    flex-shrink: 0;
+    margin-top: 0.625rem;
+}
+
+/* ── Sticky bar v2 (només botó Continuar) ─────────────────── */
+.sticky-bar-v2 {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(241, 245, 249, 1);
+    box-shadow: 0 -10px 40px -10px rgba(11, 28, 48, 0.06);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.sticky-bar-v2-btn {
+    background: linear-gradient(135deg, var(--primary), var(--primary-container));
+    color: white;
+    border: none;
+    border-radius: var(--radius-xl);
+    padding: 1rem 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 10px 15px -3px rgba(51, 55, 166, 0.2);
+    font-family: var(--font-body);
+}
+
+.sticky-bar-v2-btn:hover { opacity: 0.9; }
+.sticky-bar-v2-btn:active { transform: scale(0.98); }
+
+.sticky-bar-v2-btn .btn-label {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.75rem;
+}

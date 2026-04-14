@@ -360,6 +360,7 @@ document.addEventListener("DOMContentLoaded", () => {
     bindEvents();
     updateMecrPreview();
     updateStickyBar();
+    updateAsideProgress();
 });
 
 
@@ -595,11 +596,32 @@ function goToStep(n) {
     document.querySelectorAll(".step-tab").forEach(tab => {
         tab.classList.toggle("active", parseInt(tab.dataset.step) === n);
     });
+    // Aside steps (Stitch shell v2)
+    document.querySelectorAll(".aside-step").forEach(step => {
+        step.classList.toggle("active", parseInt(step.dataset.step) === n);
+    });
     document.querySelectorAll(".step-panel").forEach(panel => {
         panel.classList.toggle("active", panel.id === `step-${n}`);
     });
     if (n === 3) requestProposal();
     updateStickyBar();
+    updateAsideProgress();
+}
+
+function updateAsideProgress() {
+    const n = state.step;
+    const fill = document.getElementById("aside-progress-fill");
+    const text = document.getElementById("aside-progress-text");
+    if (fill) fill.style.width = `${n * 25}%`;
+    if (text) {
+        const labels = {
+            1: "Pas 1 de 4: Context i Perfil",
+            2: "Pas 2 de 4: Entrada de Text",
+            3: "Pas 3 de 4: Adaptació",
+            4: "Pas 4 de 4: Resultats",
+        };
+        text.textContent = labels[n] || "";
+    }
 }
 
 function goToPrevStep() {
@@ -1690,6 +1712,10 @@ function bindEvents() {
     // Navegació per tabs
     document.querySelectorAll(".step-tab").forEach(tab => {
         tab.addEventListener("click", () => goToStep(parseInt(tab.dataset.step)));
+    });
+    // Aside nav steps (Stitch shell v2)
+    document.querySelectorAll(".aside-step").forEach(step => {
+        step.addEventListener("click", () => goToStep(parseInt(step.dataset.step)));
     });
 
     // Sticky bar navigation

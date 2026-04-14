@@ -10,31 +10,73 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/ui/styles.css">
 </head>
-<body>
+<body class="app-shell">
 
-<!-- ── HEADER ────────────────────────────────────────────────── -->
-<header class="app-header">
-    <div class="header-inner">
-        <div class="header-brand">
-            <span class="header-logo">ATNE</span>
-            <span class="header-subtitle">Adaptador de Textos a Necessitats Educatives</span>
+<!-- ── HEADER V2 (Stitch design) ─────────────────────────────── -->
+<header class="shell-header">
+    <div class="shell-header-inner">
+        <div class="shell-header-left">
+            <button class="shell-menu-btn" aria-label="Menú">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+            <span class="shell-logo">ATNE</span>
         </div>
-        <nav class="steps-nav" id="steps-nav">
-            <button class="step-tab active" data-step="1">Perfil</button>
-            <button class="step-tab" data-step="2">Text</button>
-            <button class="step-tab" data-step="3">Adaptació</button>
-            <button class="step-tab" data-step="4">Resultat</button>
+        <nav class="shell-tabs" id="steps-nav">
+            <button class="shell-tab step-tab active" data-step="1">Context i Perfil</button>
+            <button class="shell-tab step-tab" data-step="2">Text</button>
+            <button class="shell-tab step-tab" data-step="3">Adaptació</button>
+            <button class="shell-tab step-tab" data-step="4">Resultats</button>
         </nav>
         <div class="header-status">
-            <a href="/saber-ne" class="header-link">Saber-ne+</a>
+            <a href="/saber-ne" class="header-link" style="margin-right:0.75rem;font-size:0.875rem;color:var(--primary);text-decoration:none;font-weight:500;">Saber-ne+</a>
             <span class="health-dot loading" id="dot-supabase"></span>
             <span class="health-dot loading" id="dot-gemini"></span>
+            <div class="shell-avatar">
+                <span class="material-symbols-outlined">person</span>
+            </div>
         </div>
     </div>
 </header>
 
-<!-- ── MAIN ──────────────────────────────────────────────────── -->
-<main class="main">
+<!-- ── MAIN amb ASIDE (Stitch design) ────────────────────────── -->
+<main class="shell-main">
+
+    <!-- ── ASIDE: Progres ATNE ─────────────────────────────── -->
+    <aside class="shell-aside">
+        <div class="aside-card">
+            <div>
+                <h2 class="aside-title">Progrés ATNE</h2>
+                <nav class="aside-nav">
+                    <button class="aside-step active" data-step="1" type="button">
+                        <span class="material-symbols-outlined">psychology</span>
+                        <span>Context i Perfil</span>
+                    </button>
+                    <button class="aside-step" data-step="2" type="button">
+                        <span class="material-symbols-outlined">edit_note</span>
+                        <span>Entrada de Text</span>
+                    </button>
+                    <button class="aside-step" data-step="3" type="button">
+                        <span class="material-symbols-outlined">tune</span>
+                        <span>Adaptació</span>
+                    </button>
+                    <button class="aside-step" data-step="4" type="button">
+                        <span class="material-symbols-outlined">auto_awesome</span>
+                        <span>Resultats</span>
+                    </button>
+                </nav>
+            </div>
+            <div class="aside-progress">
+                <p class="aside-progress-label">Estat de l'adaptació</p>
+                <div class="aside-progress-bar">
+                    <div class="aside-progress-fill" id="aside-progress-fill" style="width:25%"></div>
+                </div>
+                <p class="aside-progress-text" id="aside-progress-text">Pas 1 de 4: Context i Perfil</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ── WORKSPACE ───────────────────────────────────────── -->
+    <div class="shell-workspace">
 
     <!-- ── PAS 1: Perfil ───────────────────────────────────── -->
     <section class="step-panel active" id="step-1">
@@ -220,38 +262,91 @@
         </details>
     </section>
 
-    <!-- ── PAS 2: Text Original ────────────────────────────── -->
+    <!-- ── PAS 2: Entrada de Text (Stitch design) ──────────── -->
     <section class="step-panel" id="step-2">
-        <h2 class="step-title">Text original a adaptar</h2>
-
-        <div class="upload-row" id="upload-row">
-            <label for="file-input" class="btn">Pujar fitxer (PDF, DOCX, MD, TXT)</label>
-            <input type="file" id="file-input" accept=".pdf,.docx,.md,.txt" hidden>
-            <span class="upload-status" id="upload-status">o enganxa el text a continuació</span>
+        <div class="workspace-header">
+            <h1 class="workspace-title">Entrada de Text</h1>
+            <p class="workspace-subtitle">Introduïu o pengeu el contingut que voleu adaptar per als vostres alumnes.</p>
         </div>
 
-        <textarea class="text-area" id="input-text" placeholder="Enganxa aquí el text que vols adaptar..."></textarea>
-        <div class="word-count" id="word-count">0 paraules</div>
+        <div class="bento-grid">
+            <!-- Editor card (textarea amb toolbar) -->
+            <div class="bento-main">
+                <div class="editor-card">
+                    <div class="editor-toolbar">
+                        <div class="editor-toolbar-actions">
+                            <button class="editor-toolbar-btn" type="button" title="Negreta">
+                                <span class="material-symbols-outlined">format_bold</span>
+                            </button>
+                            <button class="editor-toolbar-btn" type="button" title="Cursiva">
+                                <span class="material-symbols-outlined">format_italic</span>
+                            </button>
+                            <button class="editor-toolbar-btn" type="button" title="Llista">
+                                <span class="material-symbols-outlined">format_list_bulleted</span>
+                            </button>
+                        </div>
+                        <span class="editor-wordcount" id="word-count">0 paraules</span>
+                    </div>
+                    <textarea class="editor-textarea" id="input-text" placeholder="Escriu o enganxa el text aquí..."></textarea>
+                </div>
 
-        <div class="history-panel" id="history-panel">
-            <button class="history-toggle" id="history-toggle" onclick="toggleHistory()">
-                Textos anteriors
-            </button>
-            <div class="history-list" id="history-list" style="display:none;">
-                <div class="history-loading" id="history-loading">Carregant historial…</div>
+                <!-- Historial textos anteriors (plegat per defecte) -->
+                <details class="via-diagnostic-toggle">
+                    <summary>Textos anteriors</summary>
+                    <div class="history-list" id="history-list">
+                        <div class="history-loading" id="history-loading">Carregant historial…</div>
+                    </div>
+                </details>
+            </div>
+
+            <!-- Side panel: upload + tips -->
+            <div class="bento-side">
+                <!-- Upload card -->
+                <div class="bento-card upload-card">
+                    <div class="bento-card-header">
+                        <span class="material-symbols-outlined bento-card-icon">upload_file</span>
+                        <h3 class="bento-card-title">Pujar fitxer</h3>
+                    </div>
+                    <p class="bento-card-desc">Suportem formats PDF, DOCX, MD i TXT per a una extracció automàtica de text.</p>
+                    <label class="drop-zone" for="file-input">
+                        <span class="material-symbols-outlined">cloud_upload</span>
+                        <p class="drop-zone-text" id="upload-status">Arrossega o prem per seleccionar</p>
+                    </label>
+                    <input type="file" id="file-input" accept=".pdf,.docx,.md,.txt" hidden>
+                </div>
+
+                <!-- Tips card -->
+                <div class="bento-card">
+                    <div class="bento-card-header">
+                        <span class="material-symbols-outlined bento-card-icon amber">lightbulb</span>
+                        <h3 class="bento-card-title">Consells</h3>
+                    </div>
+                    <ul class="tips-list">
+                        <li>Assegura't que el text sigui coherent i complet per a millors resultats.</li>
+                        <li>Pots incloure preguntes o exercicis que també vulguis simplificar.</li>
+                        <li>L'IA reconeixerà automàticament l'idioma del contingut.</li>
+                    </ul>
+                </div>
+
+                <!-- Tipus de text -->
+                <div class="bento-card">
+                    <div class="bento-card-header">
+                        <span class="material-symbols-outlined bento-card-icon">category</span>
+                        <h3 class="bento-card-title">Tipus de text</h3>
+                    </div>
+                    <select id="input-genere-textual" class="form-select">
+                        <option value="">(detecta automàticament)</option>
+                        <option value="explicacio">Explicatiu</option>
+                        <option value="narracio">Narratiu</option>
+                        <option value="instruccio">Instructiu</option>
+                        <option value="argumentacio">Argumentatiu</option>
+                    </select>
+                </div>
             </div>
         </div>
 
-        <div class="param-row" style="margin-top:16px;">
-            <label>Tipus de text</label>
-            <select id="input-genere-textual">
-                <option value="">(detecta automàticament)</option>
-                <option value="explicacio">Explicatiu</option>
-                <option value="narracio">Narratiu</option>
-                <option value="instruccio">Instructiu</option>
-                <option value="argumentacio">Argumentatiu</option>
-            </select>
-        </div>
+        <!-- Botó history toggle ocult per compat amb JS antic -->
+        <button id="history-toggle" type="button" hidden></button>
     </section>
 
     <!-- ── PAS 3: Adaptació ────────────────────────────────── -->
@@ -365,20 +460,18 @@
         </div>
     </section>
 
+    </div><!-- /shell-workspace -->
 </main>
 
-<!-- ── BARRA FLOTANT ─────────────────────────────────────────── -->
-<footer class="sticky-bar" id="sticky-bar">
-    <div class="sticky-bar-inner">
-        <button class="btn" id="btn-back">Enrere</button>
-        <div class="sticky-bar-progress">
-            <span class="sticky-bar-step" id="sticky-step-label">Pas 1 de 4</span>
-            <div class="sticky-bar-track">
-                <div class="sticky-bar-fill" id="sticky-progress-fill" style="width:25%"></div>
-            </div>
-        </div>
-        <button class="btn btn-primary" id="btn-next">Continuar</button>
-    </div>
+<!-- ── STICKY BAR V2 (només Continuar, com Stitch) ──────────── -->
+<footer class="sticky-bar-v2" id="sticky-bar">
+    <button class="btn" id="btn-back" hidden></button>
+    <span class="sticky-bar-step" id="sticky-step-label" hidden>Pas 1 de 4</span>
+    <div class="sticky-bar-fill" id="sticky-progress-fill" style="width:25%;display:none;"></div>
+    <button class="sticky-bar-v2-btn" id="btn-next" type="button">
+        <span class="btn-label">Continuar</span>
+        <span class="material-symbols-outlined">arrow_forward</span>
+    </button>
 </footer>
 
 <script src="/ui/observable_mapping.js"></script>
