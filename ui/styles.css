@@ -1561,11 +1561,9 @@ body {
 }
 
 /* ── Editor multimode (3 tabs: Escriure / Pujar / Generar) ─── */
-.editor-multimode {
-    padding: 0 !important;
-    overflow: visible !important;
-    gap: 0 !important;
-}
+/* .editor-multimode: mantenim neutral, les regles de padding/overflow/gap
+   les defineix el bloc d'overrides #step-2 .editor-card-v2 més avall.
+   (Abans tenia !important però anul·lava els overrides del Pas 2.) */
 
 .mode-tabs {
     display: flex;
