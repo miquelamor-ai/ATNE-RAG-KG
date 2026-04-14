@@ -1387,15 +1387,15 @@ body {
 
 @media (min-width: 1024px) {
     .pas2-grid-v3 {
-        grid-template-columns: minmax(0, 1fr) 300px;
+        grid-template-columns: minmax(0, 1fr) 340px;
         align-items: stretch;
     }
 }
 
 @media (min-width: 1400px) {
     .pas2-grid-v3 {
-        grid-template-columns: minmax(0, 1fr) 320px;
-        gap: 1.25rem;
+        grid-template-columns: minmax(0, 1fr) 360px;
+        gap: 1.5rem;
     }
 }
 
@@ -3431,53 +3431,54 @@ details.bento-card .bento-card-body {
    Alta especificitat per guanyar als estils antics (.gen-field select)
    ═══════════════════════════════════════════════════════════════ */
 
-/* Workspace header més compacte */
+/* Workspace header compacte però llegible */
 #step-2 .workspace-header {
-    gap: 0.125rem;
-    margin-bottom: 0.5rem;
+    gap: 0.25rem;
+    margin-bottom: 0.875rem;
 }
 
 #step-2 .workspace-title {
-    font-size: 1rem;
+    font-size: 1.25rem;
     font-weight: 700;
     line-height: 1.2;
 }
 
 #step-2 .workspace-subtitle {
-    font-size: 0.75rem;
-    line-height: 1.35;
+    font-size: 0.8125rem;
+    line-height: 1.4;
 }
 
 #step-2 .context-pill {
-    margin-top: 0.25rem;
-    padding: 0.25rem 0.625rem 0.25rem 0.4375rem;
-    font-size: 0.625rem;
-    gap: 0.3125rem;
+    margin-top: 0.4375rem;
+    padding: 0.375rem 0.75rem 0.375rem 0.5625rem;
+    font-size: 0.6875rem;
+    gap: 0.375rem;
 }
 
 #step-2 .context-pill .material-symbols-outlined {
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
 }
 
-/* Mode tabs compactes */
+/* Mode tabs */
 #step-2 .mode-tabs {
-    padding: 0.5rem 0.5rem 0;
-    gap: 0.1875rem;
+    padding: 0.75rem 0.75rem 0;
+    gap: 0.25rem;
 }
 
 #step-2 .mode-tab {
-    padding: 0.4375rem 0.625rem;
-    font-size: 0.6875rem;
-    gap: 0.3125rem;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8125rem;
+    gap: 0.4375rem;
+    font-weight: 600;
 }
 
 #step-2 .mode-tab .material-symbols-outlined {
-    font-size: 0.875rem;
+    font-size: 1.0625rem;
 }
 
 /* Mode content */
 #step-2 .mode-content {
-    padding: 0.5rem 0.75rem 0;
+    padding: 0.875rem 1rem 0;
 }
 
 #step-2 .shared-textarea {
@@ -3538,10 +3539,10 @@ details.bento-card .bento-card-body {
     font-size: 0.8125rem;
 }
 
-/* ═══ Generator form compacte (máxima especificitat) ═══ */
+/* ═══ Generator form (equilibrat) ═══ */
 #step-2 .gen-form-compact {
-    gap: 0.5rem;
-    font-size: 0.75rem;
+    gap: 0.75rem;
+    font-size: 0.8125rem;
 }
 
 #step-2 .gen-form-compact .gen-field {
@@ -3549,10 +3550,10 @@ details.bento-card .bento-card-body {
 }
 
 #step-2 .gen-form-compact .gen-field label {
-    font-size: 0.5625rem;
+    font-size: 0.6875rem;
     font-weight: 700;
     letter-spacing: 0.06em;
-    margin-bottom: 0.1875rem;
+    margin-bottom: 0.3125rem;
     line-height: 1.2;
 }
 
@@ -3564,14 +3565,14 @@ details.bento-card .bento-card-body {
 #step-2 .gen-form-compact .gen-field select,
 #step-2 .gen-form-compact .gen-field textarea {
     width: 100%;
-    padding: 0.375rem 0.625rem;
+    padding: 0.5625rem 0.75rem;
     border-radius: var(--radius-lg);
     border: 1px solid rgba(199, 197, 213, 0.35);
     background: var(--surface-container-lowest);
     font-family: var(--font-body);
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 500;
-    line-height: 1.25;
+    line-height: 1.3;
     color: var(--on-surface);
     box-sizing: border-box;
     min-height: 0;
@@ -3603,39 +3604,39 @@ details.bento-card .bento-card-body {
 }
 
 #step-2 .gen-form-compact .gen-notes-details summary {
-    font-size: 0.5625rem;
-    margin-bottom: 0.25rem;
+    font-size: 0.6875rem;
+    margin-bottom: 0.375rem;
 }
 
 #step-2 .gen-form-compact .gen-notes-details textarea {
-    margin-top: 0.25rem;
-    font-size: 0.75rem;
-    padding: 0.375rem 0.625rem;
+    margin-top: 0.375rem;
+    font-size: 0.8125rem;
+    padding: 0.5625rem 0.75rem;
 }
 
-/* Botó GENERAR TEXT compacte */
+/* Botó GENERAR TEXT */
 #step-2 .gen-actions-row {
-    margin-top: 0.25rem;
-    gap: 0.375rem;
+    margin-top: 0.375rem;
+    gap: 0.5rem;
 }
 
 #step-2 .gen-actions-row .btn-big,
 #step-2 .gen-form-compact .btn-big {
-    padding: 0.625rem 1rem !important;
-    font-size: 0.625rem !important;
+    padding: 0.8125rem 1.25rem !important;
+    font-size: 0.75rem !important;
     letter-spacing: 0.08em;
     min-height: 0;
-    gap: 0.375rem;
+    gap: 0.5rem;
 }
 
 #step-2 .gen-actions-row .btn-big .material-symbols-outlined {
-    font-size: 0.9375rem;
+    font-size: 1.0625rem;
 }
 
 #step-2 .gen-form-compact .gen-status {
-    font-size: 0.6875rem;
-    padding: 0.375rem 0.625rem;
-    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    margin-top: 0.375rem;
 }
 
 /* ═══ Footer bar (refine + desar) ═══ */
@@ -3723,99 +3724,99 @@ details.bento-card .bento-card-body {
     margin: 0.375rem 0 0;
 }
 
-/* ═══ Columna dreta (history + tipus + tips) ═══ */
+/* ═══ Columna dreta (refine + history + tipus + tips) ═══ */
 #step-2 .pas2-right {
-    gap: 0.625rem !important;
+    gap: 0.875rem !important;
 }
 
 #step-2 .pas2-right .bento-card,
 #step-2 .pas2-right .tips-card-v2 {
-    padding: 0.75rem 0.875rem;
+    padding: 1rem 1.125rem;
 }
 
 #step-2 .pas2-right .bento-card-header {
-    margin-bottom: 0.4375rem;
-    gap: 0.375rem;
+    margin-bottom: 0.625rem;
+    gap: 0.5rem;
 }
 
 #step-2 .pas2-right .bento-card-icon {
-    font-size: 0.9375rem;
+    font-size: 1.125rem;
 }
 
 #step-2 .pas2-right .bento-card-title {
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     font-weight: 700;
     margin: 0;
 }
 
 #step-2 .pas2-right .bento-card-summary {
     padding: 0;
-    gap: 0.375rem;
+    gap: 0.5rem;
 }
 
 #step-2 .pas2-right details[open] .bento-card-body {
-    margin-top: 0.375rem;
+    margin-top: 0.5rem;
 }
 
 #step-2 .pas2-right .form-select {
-    padding: 0.375rem 0.625rem !important;
-    font-size: 0.6875rem !important;
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.75rem !important;
     border-radius: var(--radius-lg);
 }
 
-/* History list compacta */
+/* History list */
 #step-2 .history-card-v2 .history-list {
-    max-height: 220px;
-    gap: 0.375rem;
+    max-height: 280px;
+    gap: 0.5rem;
 }
 
 #step-2 .history-card-v2 .history-loading {
-    font-size: 0.625rem;
-    padding: 0.5rem 0;
+    font-size: 0.75rem;
+    padding: 0.625rem 0;
 }
 
 #step-2 .history-list .history-item {
-    padding: 0.5rem 0.625rem;
-    font-size: 0.6875rem;
+    padding: 0.625rem 0.75rem;
+    font-size: 0.75rem;
 }
 
 #step-2 .history-list .history-item strong,
 #step-2 .history-list .history-item .history-title,
 #step-2 .history-list .history-item h4 {
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
 }
 
 #step-2 .history-list .history-item p,
 #step-2 .history-list .history-item .history-preview {
-    font-size: 0.625rem;
-    line-height: 1.35;
+    font-size: 0.6875rem;
+    line-height: 1.4;
 }
 
 #step-2 .history-list .history-item button,
 #step-2 .history-list .history-item .history-btn {
-    font-size: 0.5625rem;
-    padding: 0.25rem 0.4375rem;
+    font-size: 0.625rem;
+    padding: 0.3125rem 0.5625rem;
 }
 
-/* Tips card compacta */
+/* Tips card */
 #step-2 .tips-card-v2 .tips-title {
-    font-size: 0.6875rem;
-    gap: 0.375rem;
-    margin-bottom: 0.4375rem;
+    font-size: 0.8125rem;
+    gap: 0.4375rem;
+    margin-bottom: 0.5625rem;
 }
 
 #step-2 .tips-card-v2 .tips-title .material-symbols-outlined {
-    font-size: 0.9375rem;
+    font-size: 1.0625rem;
 }
 
 #step-2 .tips-card-v2 .tips-list {
-    gap: 0.375rem;
+    gap: 0.5rem;
 }
 
 #step-2 .tips-card-v2 .tips-list li {
-    font-size: 0.625rem;
-    line-height: 1.4;
-    padding-left: 0.75rem;
+    font-size: 0.6875rem;
+    line-height: 1.45;
+    padding-left: 0.875rem;
 }
 
 /* refine-custom-toggle compacte */
@@ -3850,22 +3851,22 @@ details.bento-card .bento-card-body {
 
 /* ═══ Refine card dreta (alineat amb editor) ═══ */
 #step-2 .refine-card-v3 {
-    padding: 0.75rem 0.875rem;
+    padding: 1rem 1.125rem;
 }
 
 #step-2 .refine-card-v3 .bento-card-header {
-    margin-bottom: 0.5rem;
-    gap: 0.375rem;
+    margin-bottom: 0.75rem;
+    gap: 0.5rem;
 }
 
 #step-2 .refine-card-v3 .bento-card-icon {
     color: var(--primary);
     font-variation-settings: 'FILL' 1;
-    font-size: 1rem;
+    font-size: 1.125rem;
 }
 
 #step-2 .refine-card-v3 .bento-card-title {
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     font-weight: 700;
     margin: 0;
 }
@@ -3873,21 +3874,21 @@ details.bento-card .bento-card-body {
 #step-2 .refine-chips-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.375rem;
-    margin-bottom: 0.5rem;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
 }
 
 #step-2 .refine-chips-grid .refine-chip {
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 0.3125rem;
-    padding: 0.4375rem 0.5rem;
+    gap: 0.4375rem;
+    padding: 0.625rem 0.75rem;
     background: var(--surface-container-lowest);
     border: 1px solid rgba(199, 197, 213, 0.35);
     border-radius: var(--radius-lg);
     font-family: var(--font-body);
-    font-size: 0.625rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: var(--on-surface);
     cursor: pointer;
@@ -3896,7 +3897,7 @@ details.bento-card .bento-card-body {
 }
 
 #step-2 .refine-chips-grid .refine-chip .material-symbols-outlined {
-    font-size: 0.8125rem;
+    font-size: 0.9375rem;
     color: var(--primary);
 }
 
@@ -3932,7 +3933,7 @@ details.bento-card .bento-card-body {
 }
 
 #step-2 .refine-card-v3 .refine-custom-toggle summary {
-    font-size: 0.5625rem;
+    font-size: 0.6875rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -3963,19 +3964,19 @@ details.bento-card .bento-card-body {
 
 #step-2 .refine-card-v3 .refine-custom-toggle textarea {
     width: 100%;
-    padding: 0.375rem 0.5rem;
+    padding: 0.5625rem 0.75rem;
     border-radius: var(--radius-lg);
     border: 1px solid rgba(199, 197, 213, 0.35);
     background: var(--surface-container-lowest);
     font-family: var(--font-body);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     box-sizing: border-box;
     resize: vertical;
 }
 
 #step-2 .refine-card-v3 .refine-custom-toggle .btn-sm {
-    padding: 0.375rem 0.625rem;
-    font-size: 0.5625rem;
+    padding: 0.5625rem 0.875rem;
+    font-size: 0.6875rem;
     font-weight: 700;
     text-transform: uppercase;
     background: linear-gradient(135deg, var(--primary), var(--primary-container));
@@ -3986,21 +3987,21 @@ details.bento-card .bento-card-body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.25rem;
+    gap: 0.375rem;
 }
 
 #step-2 .refine-card-v3 .refine-custom-toggle .btn-sm .material-symbols-outlined {
-    font-size: 0.8125rem;
+    font-size: 0.9375rem;
 }
 
 #step-2 .refine-card-v3 .btn-save-full {
     width: 100%;
-    margin-top: 0.625rem;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.5625rem;
+    margin-top: 0.875rem;
+    padding: 0.6875rem 1rem;
+    font-size: 0.6875rem;
     justify-content: center;
 }
 
 #step-2 .refine-card-v3 .btn-save-full .material-symbols-outlined {
-    font-size: 0.8125rem;
+    font-size: 0.9375rem;
 }
