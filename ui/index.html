@@ -307,21 +307,11 @@
                         <option value="B2" selected>B2</option>
                     </select>
                 </div>
-                <div class="param-row">
-                    <label>Model d'IA</label>
-                    <select id="model-selector">
-                        <option value="gemma4" selected>Gemma 4 31B</option>
-                        <option value="mistral">Mistral Small</option>
-                        <option value="gpt">GPT-4o-mini</option>
-                        <option value="gemini">Gemini 2.5 Flash</option>
-                    </select>
-                </div>
-                <div class="param-row">
-                    <label>
-                        <input type="checkbox" id="verify-toggle" checked style="accent-color:var(--primary);">
-                        Auto-avaluació amb retry
-                    </label>
-                </div>
+                <!-- Model i auto-avaluacio amagats pel pilot (Gemma 4 + verify sempre ON) -->
+                <select id="model-selector" hidden>
+                    <option value="gemma4" selected>Gemma 4 31B</option>
+                </select>
+                <input type="checkbox" id="verify-toggle" checked hidden>
             </div>
         </details>
 

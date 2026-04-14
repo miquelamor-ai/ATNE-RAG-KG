@@ -37,10 +37,10 @@ GEMMA4_API_KEYS = [k for k in [os.getenv(f"GEMMA4_API_KEY{s}", "")
 GEMMA4_API_KEY = GEMMA4_API_KEYS[0] if GEMMA4_API_KEYS else ""
 _gemma4_key_idx = 0  # índex actual de rotació
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "")
-# ATNE_MODEL: gemini | gemma4 | mistral (default: el que tingui clau disponible)
-ATNE_MODEL = os.getenv("ATNE_MODEL", "").lower()
-if not ATNE_MODEL:
-    ATNE_MODEL = "mistral" if MISTRAL_API_KEY else "gemma4"
+# ATNE_MODEL: gemini | gemma4 | mistral
+# Per defecte gemma4 (decidit pel pilot 2026-04-12). Mistral disponible al codi
+# però amagat de la UI; s'activarà al pilot HITL cec a partir del 20/04.
+ATNE_MODEL = os.getenv("ATNE_MODEL", "gemma4").lower()
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
 
