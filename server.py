@@ -2031,7 +2031,18 @@ def _languagetool_full_analysis(text: str) -> dict:
         old_value = text[offset:offset + length] if offset >= 0 else ""
         missatge = m.get("shortMessage") or m.get("message", "")
 
-        # Si és paraula desconeguda i no hi ha suggeriment clar → warning
+        # Estil explícit → warning, MAI auto-aplicar
+        if rule_cat in _STYLE_WARNING_CATEGORIES:
+            avisos.append({
+                "fragment": old_value,
+                "suggeriment": replacements[0].get("value", "") if replacements else "",
+                "missatge": missatge,
+                "regla": rule_id,
+            })
+            continue
+
+        # Si és paraula desconeguda (MORFOLOGIK) → warning, i mirem si és
+        # segur auto-aplicar (només si norm igual: accents, majúscules, etc.)
         if rule_id in _LT_UNKNOWN_WORD_RULES or "MORFOLOGIK" in rule_id:
             desconegudes.append({
                 "paraula": old_value,
@@ -2039,9 +2050,9 @@ def _languagetool_full_analysis(text: str) -> dict:
                 "missatge": missatge,
                 "regla": rule_id,
             })
-            # Si hi ha suggeriment clar (top 1 pràcticament idèntic, només diferència d'accent/apostrofació)
-            # → auto-apliquem; si no, només warning
-            if replacements and _suggestion_is_safe(old_value, replacements[0].get("value", "")):
+            if replacements and _suggestion_is_safe(
+                old_value, replacements[0].get("value", ""), rule_id, rule_cat
+            ):
                 new_value = replacements[0].get("value", "")
                 if new_value and new_value != old_value:
                     corrected = corrected[:offset] + new_value + corrected[offset + length:]
@@ -2053,24 +2064,24 @@ def _languagetool_full_analysis(text: str) -> dict:
                     })
             continue
 
-        # Estil (categoria STYLE) → warning, no auto-correcció
-        if rule_cat in ("STYLE", "REDUNDANCY", "TYPOGRAPHY"):
-            avisos.append({
-                "fragment": old_value,
-                "suggeriment": replacements[0].get("value", "") if replacements else "",
-                "missatge": missatge,
-                "regla": rule_id,
-            })
-            continue
-
-        # Resta → correcció automàtica (gramàtica clara, ortografia, concordances)
+        # Resta → auto-aplicar NOMÉS si és segur (categoria/prefix o norm)
         if replacements and length > 0:
             new_value = replacements[0].get("value", "")
-            if new_value and new_value != old_value:
+            if new_value and new_value != old_value and _suggestion_is_safe(
+                old_value, new_value, rule_id, rule_cat
+            ):
                 corrected = corrected[:offset] + new_value + corrected[offset + length:]
                 correccions.append({
                     "original": old_value,
                     "corregit": new_value,
+                    "missatge": missatge,
+                    "regla": rule_id,
+                })
+            elif replacements:
+                # No segur → emetre com a avís (l'usuari decideix)
+                avisos.append({
+                    "fragment": old_value,
+                    "suggeriment": new_value,
                     "missatge": missatge,
                     "regla": rule_id,
                 })
@@ -2087,17 +2098,101 @@ def _languagetool_full_analysis(text: str) -> dict:
     return result
 
 
-def _suggestion_is_safe(original: str, suggestion: str) -> bool:
+## Categories de rules de LanguageTool que considerem SEGURES per auto-aplicació
+## (no canvien el lema ni la semàntica — només ortografia / apostrofació / etc.)
+_SAFE_RULE_CATEGORIES = {
+    "PUNCTUATION",
+    "TYPOGRAPHY",
+    "CASING",
+    "HYPHENATION",
+    "WHITESPACE",
+    "DIACRITICS_CA",
+    "DIACRITICS",
+}
+
+## Prefixos de rule_id que són segurs (IEC-determinístics)
+_SAFE_RULE_PREFIXES = (
+    "L_APOSTROF",              # L' apostrofació catalana (el home → l'home)
+    "APOSTROPHE",
+    "APOSTROFAT",
+    "APOSTROF",
+    "DIACRITICS",              # accents diacrítics
+    "ACCENTUATION",
+    "HIAT",                    # hiatus
+    "WHITESPACE",
+    "DOUBLE_PUNCTUATION",
+    "UPPERCASE_SENTENCE_START",
+    "UPPERCASE_",
+    "NUMBER_SPACE",
+    "PUNT_FINAL",              # punt final
+    "A_EL",                    # a el → al
+    "DE_EL",                   # de el → del
+    "PER_A_EL",                # per a el → pel
+    "GUIONET",                 # guionet
+    "HYPHEN",
+    "COMMA_",                  # comes missing o extra
+    "COMMA_PARENTHESIS",
+)
+
+## Categories que NO auto-apliquem (warnings d'estil, revisió humana recomanada)
+_STYLE_WARNING_CATEGORIES = {
+    "STYLE",
+    "REDUNDANCY",
+    "REGISTER",
+    "COLLOQUIAL",
+}
+
+
+def _suggestion_is_safe(original: str, suggestion: str,
+                        rule_id: str = "", rule_category: str = "") -> bool:
     """
-    Un suggeriment es considera "segur" per a auto-aplicació si és pràcticament
-    idèntic (diferències d'accents, apostrofacions, majúscules, o guió).
+    Un suggeriment es considera "segur" per a auto-aplicació si es compleix
+    alguna d'aquestes condicions:
+      1. La rule_category o el rule_id coincideix amb les llistes de rules
+         segures (apostrofacions, accents, majúscules, puntuació, etc.)
+      2. La normalització alfanumèrica (sense accents ni caràcters no alfanums)
+         és idèntica entre original i suggeriment — això cobreix variacions
+         d'accent, apostrof, majúscules i puntuació sense canviar el lema.
+
+    Exemples de canvis AUTOAPLICABLES:
+      - "dona" → "dóna"                (accent)
+      - "l home" → "l'home"            (apostrof)
+      - "el home" → "l'home"           (apostrof via rule L_APOSTROF)
+      - "tambe" → "també"              (accent)
+      - "Pompeu fabra" → "Pompeu Fabra" (majúscula)
+      - "pel·lícula " → "pel·lícula"   (whitespace)
+
+    Exemples de canvis NO autoaplicables (warnings):
+      - "tal i com" → "tal com"        (treu una paraula — canvia lema)
+      - "ser vius" → "éssers vius"     (canvia lema)
+      - "moltíssim" → "molt"           (sinonimia, revisió humana)
     """
     if not original or not suggestion:
         return False
 
+    rid = (rule_id or "").upper()
+    rcat = (rule_category or "").upper()
+
+    # 1. Rule category segura
+    if rcat in _SAFE_RULE_CATEGORIES:
+        return True
+
+    # 2. Rule ID amb prefix segur
+    if any(rid.startswith(p) for p in _SAFE_RULE_PREFIXES):
+        return True
+
+    # 3. Categoria explícita de warning d'estil → mai segur
+    if rcat in _STYLE_WARNING_CATEGORIES:
+        return False
+
+    # 4. Normalització alfanumèrica: iguals?
+    #    Elimina accents, puntuació, espais i passa a minúscules.
+    import unicodedata
+
     def _norm(s: str) -> str:
-        import unicodedata
-        return unicodedata.normalize("NFKD", s.lower()).encode("ascii", "ignore").decode("ascii")
+        s_norm = unicodedata.normalize("NFKD", s.lower())
+        s_ascii = s_norm.encode("ascii", "ignore").decode("ascii")
+        return "".join(c for c in s_ascii if c.isalnum())
 
     return _norm(original) == _norm(suggestion)
 
