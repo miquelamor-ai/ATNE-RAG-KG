@@ -417,6 +417,25 @@
                                 <textarea id="gen-notes" rows="2" placeholder="Ex: Inclou exemples de Catalunya..."></textarea>
                             </details>
 
+                            <!-- Selector de model (només per generació de textos) -->
+                            <div class="gen-model-selector">
+                                <label class="gen-model-label">Model de generació</label>
+                                <div class="gen-model-chips" role="radiogroup" aria-label="Model LLM">
+                                    <button type="button" class="gen-model-chip selected" data-model="gemma4" title="Gemma 4 31B (defecte)">
+                                        <span class="gen-model-dot" style="background:#3337a6"></span>
+                                        Gemma 4
+                                    </button>
+                                    <button type="button" class="gen-model-chip" data-model="mistral" title="Mistral Small (free tier)">
+                                        <span class="gen-model-dot" style="background:#f97316"></span>
+                                        Mistral
+                                    </button>
+                                    <button type="button" class="gen-model-chip" data-model="gpt" title="GPT-4o-mini (OpenAI)">
+                                        <span class="gen-model-dot" style="background:#10b981"></span>
+                                        GPT-4o-mini
+                                    </button>
+                                </div>
+                            </div>
+
                             <div class="gen-actions-row">
                                 <button type="button" class="btn btn-primary btn-big" id="btn-generate-text">
                                     <span class="material-symbols-outlined">auto_awesome</span>

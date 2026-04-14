@@ -3923,6 +3923,65 @@ details.bento-card .bento-card-body {
     margin-top: 0.375rem;
 }
 
+/* Selector de model al Generator (chips) */
+#step-2 .gen-model-selector {
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+#step-2 .gen-model-label {
+    display: block;
+    font-size: 0.5625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--on-surface-variant);
+    margin-bottom: 0.3125rem;
+    line-height: 1.2;
+}
+
+#step-2 .gen-model-chips {
+    display: flex;
+    gap: 0.3125rem;
+    flex-wrap: wrap;
+}
+
+#step-2 .gen-model-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.3125rem 0.5625rem;
+    background: var(--surface-container-lowest);
+    border: 1px solid rgba(199, 197, 213, 0.35);
+    border-radius: var(--radius-full);
+    font-family: var(--font-body);
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: var(--on-surface);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+#step-2 .gen-model-chip:hover:not(.selected) {
+    background: var(--surface-container-low);
+    border-color: rgba(51, 55, 166, 0.3);
+}
+
+#step-2 .gen-model-chip.selected {
+    background: rgba(51, 55, 166, 0.08);
+    border-color: rgba(51, 55, 166, 0.4);
+    color: var(--primary);
+    font-weight: 700;
+}
+
+#step-2 .gen-model-dot {
+    width: 0.4375rem;
+    height: 0.4375rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
 /* ═══ Footer bar (refine + desar) ═══ */
 #step-2 .editor-footer-bar {
     padding: 0.5rem 0.75rem;

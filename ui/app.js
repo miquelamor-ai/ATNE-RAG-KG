@@ -1774,6 +1774,7 @@ async function generateDraftText() {
         extensio: document.getElementById("gen-extensio").value,
         notes: document.getElementById("gen-notes").value.trim(),
         context: collectContext(),
+        model: getSelectedGenModel(),
     };
 
     btn.disabled = true;
@@ -2048,6 +2049,37 @@ function editorApplyFormat(format) {
         ta.selectionStart = ta.selectionEnd = start + wrapped.length;
     }
     updateWordCount();
+}
+
+// ── Selector de model (només per generació de textos, Pas 2) ─────────────
+const GEN_MODEL_STORAGE_KEY = "atne_gen_model";
+const GEN_MODEL_DEFAULT = "gemma4";
+
+function getSelectedGenModel() {
+    try {
+        return localStorage.getItem(GEN_MODEL_STORAGE_KEY) || GEN_MODEL_DEFAULT;
+    } catch (e) {
+        return GEN_MODEL_DEFAULT;
+    }
+}
+
+function setSelectedGenModel(model) {
+    try {
+        localStorage.setItem(GEN_MODEL_STORAGE_KEY, model);
+    } catch (e) { /* noop */ }
+    document.querySelectorAll(".gen-model-chip").forEach(chip => {
+        chip.classList.toggle("selected", chip.dataset.model === model);
+    });
+}
+
+function initGenModelSelector() {
+    const saved = getSelectedGenModel();
+    setSelectedGenModel(saved);
+    document.querySelectorAll(".gen-model-chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+            setSelectedGenModel(chip.dataset.model);
+        });
+    });
 }
 
 // ── Quality Report (Pas 2 generació + Pas 4 adaptació) ───────────────────
@@ -2561,6 +2593,9 @@ function bindEvents() {
 
     // Generator v3: botons clicables sync amb selects ocults
     initGeneratorButtons();
+
+    // Selector de model de generació (Pas 2)
+    initGenModelSelector();
 
     // Mode tabs (multimode Pas 2)
     document.querySelectorAll(".mode-tab").forEach(tab => {
