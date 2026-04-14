@@ -278,79 +278,142 @@
             <!-- ── COL ESQUERRA: Generator IA (permanent) + Upload ───── -->
             <aside class="bento-side pas2-left">
 
-                <!-- Card: Generar amb IA (sempre visible, paràmetres permanents) -->
-                <div class="bento-card generator-card">
+                <!-- Card: Generar amb IA (Stitch: grids de botons clicables) -->
+                <div class="bento-card generator-card generator-card-v3">
                     <div class="bento-card-header">
-                        <span class="material-symbols-outlined bento-card-icon">auto_awesome</span>
+                        <span class="material-symbols-outlined bento-card-icon">psychology</span>
                         <h3 class="bento-card-title">Generar amb IA</h3>
                     </div>
-                    <p class="bento-card-desc">Defineix el contingut i l'IA escriurà el text base.</p>
 
+                    <!-- Tema (input text) -->
                     <div class="gen-field">
                         <label for="gen-tema">Tema o tòpic</label>
-                        <input type="text" id="gen-tema" placeholder="Ex: La fotosíntesi, La Revolució Francesa...">
+                        <input type="text" id="gen-tema" placeholder="Ex: La fotosíntesi...">
                     </div>
 
+                    <!-- Gènere discursiu (14 botons grid 2 cols) -->
                     <div class="gen-field">
-                        <label for="gen-genere">Gènere discursiu</label>
-                        <select id="gen-genere" class="form-select">
-                            <option value="Article de manual escolar" selected>Article de manual escolar</option>
-                            <option value="Article divulgatiu">Article divulgatiu</option>
-                            <option value="Notícia de premsa">Notícia de premsa</option>
-                            <option value="Conte o relat">Conte o relat</option>
-                            <option value="Relat fantàstic o llegendari">Relat fantàstic / llegendari</option>
-                            <option value="Carta o correu">Carta o correu</option>
-                            <option value="Article d'opinió">Article d'opinió</option>
-                            <option value="Procediment instructiu">Procediment / instructiu</option>
-                            <option value="Definició enciclopèdica">Definició enciclopèdica</option>
-                            <option value="Receptari">Receptari</option>
-                            <option value="Crònica">Crònica</option>
-                            <option value="Biografia">Biografia</option>
-                            <option value="Ressenya o crítica">Ressenya / crítica</option>
-                            <option value="Examen o pregunta de resposta oberta">Examen / pregunta oberta</option>
-                        </select>
+                        <label class="gen-label-count">Gèneres discursius <span class="gen-count">(14)</span></label>
+                        <div class="gen-option-grid gen-option-grid-2col" data-target="gen-genere">
+                            <button class="gen-option" type="button" data-value="Article de manual escolar">Manual escolar</button>
+                            <button class="gen-option" type="button" data-value="Article divulgatiu">Divulgatiu</button>
+                            <button class="gen-option" type="button" data-value="Notícia de premsa">Notícia</button>
+                            <button class="gen-option" type="button" data-value="Conte o relat">Conte</button>
+                            <button class="gen-option" type="button" data-value="Relat fantàstic o llegendari">Fantàstic</button>
+                            <button class="gen-option" type="button" data-value="Carta o correu">Carta</button>
+                            <button class="gen-option" type="button" data-value="Article d'opinió">Opinió</button>
+                            <button class="gen-option" type="button" data-value="Procediment instructiu">Instructiu</button>
+                            <button class="gen-option" type="button" data-value="Definició enciclopèdica">Enciclopèdic</button>
+                            <button class="gen-option" type="button" data-value="Receptari">Receptari</button>
+                            <button class="gen-option" type="button" data-value="Crònica">Crònica</button>
+                            <button class="gen-option" type="button" data-value="Biografia">Biografia</button>
+                            <button class="gen-option" type="button" data-value="Ressenya o crítica">Ressenya</button>
+                            <button class="gen-option" type="button" data-value="Examen o pregunta de resposta oberta">Examen</button>
+                        </div>
                     </div>
 
+                    <!-- Tipologia textual (6 pills) -->
                     <div class="gen-field">
-                        <label for="gen-tipologia">Tipologia textual</label>
-                        <select id="gen-tipologia" class="form-select">
-                            <option value="expositiva" selected>Expositiva (explica)</option>
-                            <option value="narrativa">Narrativa (relata)</option>
-                            <option value="descriptiva">Descriptiva (detalla)</option>
-                            <option value="argumentativa">Argumentativa (defensa)</option>
-                            <option value="instructiva">Instructiva (passes)</option>
-                            <option value="dialogada">Dialogada (conversa)</option>
-                        </select>
+                        <label class="gen-label-count">Tipologia textual</label>
+                        <div class="gen-option-pills" data-target="gen-tipologia">
+                            <button class="gen-option gen-pill" type="button" data-value="expositiva">Expositiva</button>
+                            <button class="gen-option gen-pill" type="button" data-value="narrativa">Narrativa</button>
+                            <button class="gen-option gen-pill" type="button" data-value="descriptiva">Descriptiva</button>
+                            <button class="gen-option gen-pill" type="button" data-value="argumentativa">Argumentativa</button>
+                            <button class="gen-option gen-pill" type="button" data-value="instructiva">Instructiva</button>
+                            <button class="gen-option gen-pill" type="button" data-value="dialogada">Dialogada</button>
+                        </div>
                     </div>
 
+                    <!-- Tons (8 botons amb punt de color) -->
                     <div class="gen-field">
-                        <label for="gen-to">To</label>
-                        <select id="gen-to" class="form-select">
-                            <option value="neutre" selected>Neutre / acadèmic</option>
-                            <option value="informal">Informal</option>
-                            <option value="creatiu">Creatiu / literari</option>
-                            <option value="motivador">Motivador</option>
-                            <option value="reflexiu">Reflexiu</option>
-                            <option value="empatic">Empàtic</option>
-                            <option value="humoristic">Humorístic / divertit</option>
-                            <option value="solemne">Solemne</option>
-                        </select>
+                        <label class="gen-label-count">Tons <span class="gen-count">(8)</span></label>
+                        <div class="gen-option-grid gen-option-grid-2col gen-option-tons" data-target="gen-to">
+                            <button class="gen-option gen-ton" type="button" data-value="neutre">
+                                <span class="gen-ton-dot" style="background:#64748b"></span>Neutre
+                            </button>
+                            <button class="gen-option gen-ton" type="button" data-value="informal">
+                                <span class="gen-ton-dot" style="background:#f59e0b"></span>Informal
+                            </button>
+                            <button class="gen-option gen-ton" type="button" data-value="creatiu">
+                                <span class="gen-ton-dot" style="background:#a855f7"></span>Creatiu
+                            </button>
+                            <button class="gen-option gen-ton" type="button" data-value="motivador">
+                                <span class="gen-ton-dot" style="background:#f43f5e"></span>Motivador
+                            </button>
+                            <button class="gen-option gen-ton" type="button" data-value="reflexiu">
+                                <span class="gen-ton-dot" style="background:#3b82f6"></span>Reflexiu
+                            </button>
+                            <button class="gen-option gen-ton" type="button" data-value="empatic">
+                                <span class="gen-ton-dot" style="background:#10b981"></span>Empàtic
+                            </button>
+                            <button class="gen-option gen-ton" type="button" data-value="humoristic">
+                                <span class="gen-ton-dot" style="background:#eab308"></span>Humorístic
+                            </button>
+                            <button class="gen-option gen-ton" type="button" data-value="solemne">
+                                <span class="gen-ton-dot" style="background:#4338ca"></span>Solemne
+                            </button>
+                        </div>
                     </div>
 
+                    <!-- Extensió (4 botons row) -->
                     <div class="gen-field">
-                        <label for="gen-extensio">Extensió</label>
-                        <select id="gen-extensio" class="form-select">
-                            <option value="micro">Micro (50-100 par)</option>
-                            <option value="curt">Curt (~200 par)</option>
-                            <option value="estandard" selected>Estàndard (~400 par)</option>
-                            <option value="extens">Extens (+600 par)</option>
-                        </select>
+                        <label class="gen-label-count">Extensió</label>
+                        <div class="gen-option-row" data-target="gen-extensio">
+                            <button class="gen-option gen-ext-btn" type="button" data-value="micro">Micro</button>
+                            <button class="gen-option gen-ext-btn" type="button" data-value="curt">Curt</button>
+                            <button class="gen-option gen-ext-btn" type="button" data-value="estandard">Estàndard</button>
+                            <button class="gen-option gen-ext-btn" type="button" data-value="extens">Extens</button>
+                        </div>
                     </div>
 
+                    <!-- Notes (textarea) -->
                     <div class="gen-field">
                         <label for="gen-notes">Notes addicionals (opcional)</label>
-                        <textarea id="gen-notes" rows="3" placeholder="Ex: Inclou exemples de Catalunya. Cita Pompeu Fabra..."></textarea>
+                        <textarea id="gen-notes" rows="3" placeholder="Ex: Inclou exemples de Catalunya..."></textarea>
                     </div>
+
+                    <!-- Selects ocults per compat JS -->
+                    <select id="gen-genere" hidden>
+                        <option value="Article de manual escolar" selected>Article de manual escolar</option>
+                        <option value="Article divulgatiu">Article divulgatiu</option>
+                        <option value="Notícia de premsa">Notícia de premsa</option>
+                        <option value="Conte o relat">Conte o relat</option>
+                        <option value="Relat fantàstic o llegendari">Relat fantàstic o llegendari</option>
+                        <option value="Carta o correu">Carta o correu</option>
+                        <option value="Article d'opinió">Article d'opinió</option>
+                        <option value="Procediment instructiu">Procediment instructiu</option>
+                        <option value="Definició enciclopèdica">Definició enciclopèdica</option>
+                        <option value="Receptari">Receptari</option>
+                        <option value="Crònica">Crònica</option>
+                        <option value="Biografia">Biografia</option>
+                        <option value="Ressenya o crítica">Ressenya o crítica</option>
+                        <option value="Examen o pregunta de resposta oberta">Examen o pregunta de resposta oberta</option>
+                    </select>
+                    <select id="gen-tipologia" hidden>
+                        <option value="expositiva" selected>Expositiva</option>
+                        <option value="narrativa">Narrativa</option>
+                        <option value="descriptiva">Descriptiva</option>
+                        <option value="argumentativa">Argumentativa</option>
+                        <option value="instructiva">Instructiva</option>
+                        <option value="dialogada">Dialogada</option>
+                    </select>
+                    <select id="gen-to" hidden>
+                        <option value="neutre" selected>Neutre</option>
+                        <option value="informal">Informal</option>
+                        <option value="creatiu">Creatiu</option>
+                        <option value="motivador">Motivador</option>
+                        <option value="reflexiu">Reflexiu</option>
+                        <option value="empatic">Empàtic</option>
+                        <option value="humoristic">Humorístic</option>
+                        <option value="solemne">Solemne</option>
+                    </select>
+                    <select id="gen-extensio" hidden>
+                        <option value="micro">Micro</option>
+                        <option value="curt">Curt</option>
+                        <option value="estandard" selected>Estàndard</option>
+                        <option value="extens">Extens</option>
+                    </select>
 
                     <button type="button" class="btn btn-primary btn-big" id="btn-generate-text">
                         <span class="material-symbols-outlined">auto_awesome</span>
@@ -383,50 +446,50 @@
 
             <!-- ── COL CENTRE: Editor ──────────────────────────────── -->
             <main class="pas2-center">
-                <!-- Editor card Stitch-style: header + toolbar vertical + textarea -->
+                <!-- Editor card Stitch-style: header (títol + toolbar horitzontal) + textarea -->
                 <div class="editor-card-v2">
-                    <div class="card-header">
+                    <div class="card-header editor-header-v3">
                         <div class="card-title">
                             <span class="material-symbols-outlined">description</span>
-                            Contingut del document
+                            <span id="editor-title-text">Contingut del document</span>
                         </div>
-                        <button class="btn-clear" type="button" id="btn-editor-clear">
-                            <span class="material-symbols-outlined">delete</span>
-                            Netejar
-                        </button>
-                    </div>
-                    <div class="textarea-wrapper">
-                        <div class="formatting-toolbar">
-                            <button class="toolbar-btn" type="button" title="Negreta" data-format="bold">
-                                <span class="material-symbols-outlined">format_bold</span>
-                            </button>
-                            <button class="toolbar-btn" type="button" title="Cursiva" data-format="italic">
-                                <span class="material-symbols-outlined">format_italic</span>
-                            </button>
-                            <button class="toolbar-btn" type="button" title="Llista amb vinyetes" data-format="bullet">
-                                <span class="material-symbols-outlined">format_list_bulleted</span>
-                            </button>
-                            <div class="toolbar-divider"></div>
-                            <button class="toolbar-btn" type="button" title="Desfer (Ctrl+Z)" id="btn-editor-undo">
-                                <span class="material-symbols-outlined">undo</span>
-                            </button>
-                            <button class="toolbar-btn" type="button" title="Refer (Ctrl+Y)" id="btn-editor-redo">
-                                <span class="material-symbols-outlined">redo</span>
-                            </button>
-                            <div class="toolbar-divider"></div>
-                            <button class="toolbar-btn" type="button" title="Copiar tot el text" id="btn-editor-copy">
-                                <span class="material-symbols-outlined">content_copy</span>
-                            </button>
-                            <button class="toolbar-btn" type="button" title="Enganxar des del porta-retalls" id="btn-editor-paste">
-                                <span class="material-symbols-outlined">content_paste</span>
-                            </button>
-                        </div>
-                        <div class="textarea-container">
-                            <textarea class="editor-textarea-v2" id="input-text" placeholder="Escriu o enganxa el text aquí..."></textarea>
-                            <div class="char-count-pill">
-                                <span class="material-symbols-outlined">text_fields</span>
-                                <span id="word-count">0 paraules</span>
+                        <div class="editor-header-actions">
+                            <div class="formatting-toolbar formatting-toolbar-h">
+                                <button class="toolbar-btn" type="button" title="Negreta" data-format="bold">
+                                    <span class="material-symbols-outlined">format_bold</span>
+                                </button>
+                                <button class="toolbar-btn" type="button" title="Cursiva" data-format="italic">
+                                    <span class="material-symbols-outlined">format_italic</span>
+                                </button>
+                                <button class="toolbar-btn" type="button" title="Llista amb vinyetes" data-format="bullet">
+                                    <span class="material-symbols-outlined">format_list_bulleted</span>
+                                </button>
+                                <div class="toolbar-divider"></div>
+                                <button class="toolbar-btn" type="button" title="Desfer (Ctrl+Z)" id="btn-editor-undo">
+                                    <span class="material-symbols-outlined">undo</span>
+                                </button>
+                                <button class="toolbar-btn" type="button" title="Refer (Ctrl+Y)" id="btn-editor-redo">
+                                    <span class="material-symbols-outlined">redo</span>
+                                </button>
+                                <div class="toolbar-divider"></div>
+                                <button class="toolbar-btn" type="button" title="Copiar tot el text" id="btn-editor-copy">
+                                    <span class="material-symbols-outlined">content_copy</span>
+                                </button>
+                                <button class="toolbar-btn" type="button" title="Enganxar des del porta-retalls" id="btn-editor-paste">
+                                    <span class="material-symbols-outlined">content_paste</span>
+                                </button>
                             </div>
+                            <button class="btn-clear" type="button" id="btn-editor-clear">
+                                <span class="material-symbols-outlined">delete</span>
+                                Netejar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="textarea-container">
+                        <textarea class="editor-textarea-v2" id="input-text" placeholder="Escriu o enganxa el text aquí..."></textarea>
+                        <div class="char-count-pill">
+                            <span class="material-symbols-outlined">text_fields</span>
+                            <span id="word-count">0 paraules</span>
                         </div>
                     </div>
                 </div>

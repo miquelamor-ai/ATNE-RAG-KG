@@ -1980,6 +1980,31 @@ function editorClearAll() {
     toggleRefinePanel();
 }
 
+// ── Generator v3: sync botons clicables amb selects ocults ────────────────
+function initGeneratorButtons() {
+    document.querySelectorAll(".generator-card-v3 [data-target]").forEach(container => {
+        const targetId = container.dataset.target;
+        const select = document.getElementById(targetId);
+        if (!select) return;
+
+        // Marca inicial (coincidint amb valor del select)
+        const currentVal = select.value;
+        container.querySelectorAll(".gen-option").forEach(btn => {
+            btn.classList.toggle("selected", btn.dataset.value === currentVal);
+        });
+
+        // Click: actualitza selected + valor del select
+        container.querySelectorAll(".gen-option").forEach(btn => {
+            btn.addEventListener("click", () => {
+                container.querySelectorAll(".gen-option").forEach(b => b.classList.remove("selected"));
+                btn.classList.add("selected");
+                select.value = btn.dataset.value;
+                select.dispatchEvent(new Event("change"));
+            });
+        });
+    });
+}
+
 function toggleRefinePanel() {
     // Panell ara sempre visible; només togglegem estat "actiu" i el hint
     const panel = document.getElementById("refine-panel");
@@ -2081,6 +2106,9 @@ function bindEvents() {
     document.querySelectorAll(".refine-chip, .refine-preset").forEach(btn => {
         btn.addEventListener("click", () => refineText(btn.dataset.preset, null));
     });
+
+    // Generator v3: botons clicables sync amb selects ocults
+    initGeneratorButtons();
     const btnRefineCustom = document.getElementById("btn-refine-custom");
     if (btnRefineCustom) {
         btnRefineCustom.addEventListener("click", () => {
