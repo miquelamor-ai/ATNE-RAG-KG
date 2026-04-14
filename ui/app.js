@@ -1697,6 +1697,92 @@ async function handleFileUpload(ev) {
 }
 
 
+// ── Toggle "Tinc text" / "Genera esborrany" ───────────────────────────────
+
+function setInputMode(mode) {
+    document.querySelectorAll(".input-mode-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.mode === mode);
+    });
+    const have = document.getElementById("bento-have");
+    const generate = document.getElementById("bento-generate");
+    if (have) have.style.display = mode === "have" ? "" : "none";
+    if (generate) generate.style.display = mode === "generate" ? "" : "none";
+
+    // Pre-omplir tema des del context si estem en mode generate
+    if (mode === "generate") {
+        const genTema = document.getElementById("gen-tema");
+        const ctxMateria = document.getElementById("ctx-materia");
+        if (genTema && ctxMateria && !genTema.value) {
+            genTema.value = ctxMateria.value;
+        }
+    }
+}
+
+// ── Generació de text base ─────────────────────────────────────────────────
+
+async function generateDraftText() {
+    const tema = document.getElementById("gen-tema").value.trim();
+    const status = document.getElementById("gen-status");
+    const btn = document.getElementById("btn-generate-text");
+
+    if (!tema) {
+        status.textContent = "Has d'indicar el tema del text.";
+        status.style.display = "block";
+        status.style.color = "#b91c1c";
+        return;
+    }
+
+    const payload = {
+        tema,
+        genere: document.getElementById("gen-genere").value,
+        tipologia: document.getElementById("gen-tipologia").value,
+        to: document.getElementById("gen-to").value,
+        extensio: document.getElementById("gen-extensio").value,
+        notes: document.getElementById("gen-notes").value.trim(),
+        context: collectContext(),
+    };
+
+    btn.disabled = true;
+    const oldHTML = btn.innerHTML;
+    btn.innerHTML = '<span class="material-symbols-outlined">hourglass_top</span> Generant esborrany...';
+    status.style.display = "block";
+    status.style.color = "var(--on-surface-variant)";
+    status.textContent = "Generant amb Gemma 4... pot trigar 15-30 segons.";
+
+    try {
+        const resp = await fetch("/api/generate-text", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
+        const data = await resp.json();
+
+        if (!resp.ok) {
+            status.textContent = `Error: ${data.error || resp.statusText}`;
+            status.style.color = "#b91c1c";
+            return;
+        }
+
+        // Posar el text generat al textarea principal i canviar a mode "have"
+        const textarea = document.getElementById("input-text");
+        if (textarea) textarea.value = data.text;
+        updateWordCount();
+
+        status.textContent = `Esborrany generat (${data.paraules} paraules). Pots revisar-lo i editar-lo abans d'adaptar.`;
+        status.style.color = "#15803d";
+
+        // Canviar al mode "have" perquè el docent vegi el text generat al textarea
+        setTimeout(() => setInputMode("have"), 800);
+    } catch (e) {
+        status.textContent = `Error de xarxa: ${e.message}`;
+        status.style.color = "#b91c1c";
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = oldHTML;
+    }
+}
+
+
 // ── Comptador de paraules ──────────────────────────────────────────────────
 
 function updateWordCount() {
@@ -1737,6 +1823,24 @@ function bindEvents() {
     // Upload de fitxer
     const fileInput = document.getElementById("file-input");
     if (fileInput) fileInput.addEventListener("change", handleFileUpload);
+
+    // Toggle "Tinc text" / "Genera esborrany"
+    document.querySelectorAll(".input-mode-btn").forEach(btn => {
+        btn.addEventListener("click", () => setInputMode(btn.dataset.mode));
+    });
+
+    // Botó generar esborrany
+    const btnGen = document.getElementById("btn-generate-text");
+    if (btnGen) btnGen.addEventListener("click", generateDraftText);
+
+    // Pre-omplir camp tema del generador des del context (Pas 1)
+    const ctxMateria = document.getElementById("ctx-materia");
+    if (ctxMateria) {
+        ctxMateria.addEventListener("input", () => {
+            const genTema = document.getElementById("gen-tema");
+            if (genTema && !genTema.value) genTema.value = ctxMateria.value;
+        });
+    }
 
     // Carregar historial quan s'arriba al pas 2
     document.querySelectorAll('.step-tab').forEach(tab => {

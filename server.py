@@ -1422,6 +1422,112 @@ async def extract_text_from_file(file: UploadFile = File(...)):
     }
 
 
+# ── Generació de text base (per a docents sense text propi) ───────────────
+
+GENERATE_EXTENSIONS = {
+    "micro": "Genera un text de 50-100 paraules. Molt curt, una idea principal.",
+    "curt": "Genera un text d'unes 200 paraules. Concís, 2-3 idees principals.",
+    "estandard": "Genera un text d'unes 400 paraules. Amb desenvolupament i exemples.",
+    "extens": "Genera un text de més de 600 paraules. Desenvolupat, amb diverses seccions o subapartats.",
+}
+
+GENERATE_TONS = {
+    "neutre": "neutre i acadèmic, vocabulari precís, distancia",
+    "informal": "informal i col·loquial, com si parlessis directament a l'alumne",
+    "creatiu": "creatiu i literari, evocador, amb imatges i metàfores",
+    "motivador": "motivador i engrescador, generant interès des de la primera frase",
+    "reflexiu": "reflexiu, amb preguntes obertes i convidant a pensar",
+    "empatic": "empàtic i cuidadós, especialment sensible amb temes delicats",
+    "humoristic": "humorístic i divertit, amb tocs lleugers que mantinguin l'atenció",
+    "solemne": "solemne, formal i ple de respecte, propi de textos històrics o commemoratius",
+}
+
+
+@app.post("/api/generate-text")
+async def generate_text(payload: dict = Body(...)):
+    """
+    Genera un text base segons context i paràmetres.
+    Per a docents que no disposen del text que volen adaptar.
+
+    Payload:
+        tema: str (required)
+        genere: str (gènere discursiu, ex: "Article divulgatiu")
+        tipologia: str (expositiva | narrativa | descriptiva | argumentativa | instructiva | dialogada)
+        to: str (clau de GENERATE_TONS)
+        extensio: str (clau de GENERATE_EXTENSIONS)
+        notes: str (instruccions addicionals, opcional)
+        context: dict amb etapa, curs, ambit (opcional, per ajustar nivell)
+    """
+    tema = (payload.get("tema") or "").strip()
+    if not tema:
+        return JSONResponse({"error": "Cal especificar un tema."}, status_code=400)
+
+    genere = (payload.get("genere") or "Article divulgatiu").strip()
+    tipologia = (payload.get("tipologia") or "expositiva").strip().lower()
+    to = (payload.get("to") or "neutre").strip().lower()
+    extensio = (payload.get("extensio") or "estandard").strip().lower()
+    notes = (payload.get("notes") or "").strip()
+    ctx = payload.get("context") or {}
+
+    etapa = ctx.get("etapa", "ESO")
+    curs = ctx.get("curs", "3r")
+    ambit = ctx.get("ambit", "")
+    materia = ctx.get("materia", "")
+
+    extensio_instr = GENERATE_EXTENSIONS.get(extensio, GENERATE_EXTENSIONS["estandard"])
+    to_instr = GENERATE_TONS.get(to, GENERATE_TONS["neutre"])
+
+    prompt = f"""Genera un text BASE en català per a un docent que el vol adaptar després.
+
+CONTEXT EDUCATIU:
+- Etapa: {etapa}
+- Curs: {curs}
+- Àmbit: {ambit}
+- Matèria: {materia}
+
+PARÀMETRES DEL TEXT:
+- TEMA: {tema}
+- GÈNERE DISCURSIU: {genere}
+- TIPOLOGIA TEXTUAL: {tipologia} (segons el currículum català)
+- TO: {to_instr}
+- EXTENSIÓ: {extensio_instr}
+
+{f'INSTRUCCIONS ADDICIONALS DEL DOCENT:\\n{notes}\\n' if notes else ''}
+INSTRUCCIONS:
+1. Genera el text com si fos un text ESTÀNDARD per al curs i etapa indicats. NO el simplifiquis ni l'adaptis encara — això es farà després.
+2. Respecta el gènere discursiu (l'estructura, el motlle social del text).
+3. Respecta la tipologia textual (la intenció comunicativa).
+4. Respecta el to indicat al llarg de tot el text.
+5. Adequa el vocabulari i la complexitat al nivell del curs.
+6. Genera NOMÉS el text, sense títols administratius, sense "Aquí tens el text:", sense explicacions meta. Comença directament amb el contingut.
+7. Si el gènere ho requereix (ex: notícia, carta), inclou els elements estructurals propis (titular, salutació, etc.).
+
+Genera el text ara:"""
+
+    try:
+        text = _call_llm("gemma4", prompt, "")
+        text = clean_gemini_output(text).strip()
+    except Exception as e:
+        return JSONResponse(
+            {"error": f"Error generant el text: {type(e).__name__}: {e}"},
+            status_code=500,
+        )
+
+    if not text:
+        return JSONResponse({"error": "L'LLM ha retornat un text buit."}, status_code=500)
+
+    paraules = len(text.split())
+    return {
+        "text": text,
+        "paraules": paraules,
+        "tema": tema,
+        "genere": genere,
+        "tipologia": tipologia,
+        "to": to,
+        "extensio": extensio,
+    }
+
+
 # ── Adaptació (SSE stream) ─────────────────────────────────────────────────
 
 # ── Multinivell: desplaçar MECR ±1 per a mode grup ─────────────────────────
