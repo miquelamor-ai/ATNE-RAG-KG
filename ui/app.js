@@ -1699,6 +1699,7 @@ async function handleFileUpload(ev) {
             return;
         }
 
+        editorPushUndo();
         textarea.value = data.text;
         updateWordCount();
         status.textContent = `${file.name} — ${data.paraules} paraules extretes (${data.format_detectat.toUpperCase()})`;
@@ -1777,7 +1778,10 @@ async function generateDraftText() {
             return;
         }
 
-        if (textarea) textarea.value = data.text;
+        if (textarea) {
+            editorPushUndo();
+            textarea.value = data.text;
+        }
         updateWordCount();
         updateGenerateButtonLabel();
 
@@ -1829,10 +1833,25 @@ const REFINE_LABELS = {
     to_mes_formal: "Aplicant to més formal",
 };
 
-async function refineText(preset, customInstruction, triggerBtn) {
-    const textarea = document.getElementById("input-text");
-    const status = document.getElementById("refine-status");
-    if (!textarea || !textarea.value.trim()) {
+async function refineText(preset, customInstruction, triggerBtn, targetId, statusId) {
+    // Per defecte, treballa amb el textarea del Pas 2
+    targetId = targetId || "input-text";
+    statusId = statusId || "refine-status";
+
+    const target = document.getElementById(targetId);
+    const status = document.getElementById(statusId);
+    if (!target) return;
+
+    // Detectar si és textarea o contenteditable
+    const isContentEditable = target.isContentEditable;
+    const getCurrentText = () => isContentEditable ? target.innerText : target.value;
+    const setNewText = (txt) => {
+        if (isContentEditable) target.innerText = txt;
+        else target.value = txt;
+    };
+
+    const currentText = getCurrentText();
+    if (!currentText || !currentText.trim()) {
         if (status) {
             status.textContent = "Primer escriu o genera un text per refinar-lo.";
             status.style.display = "block";
@@ -1841,11 +1860,12 @@ async function refineText(preset, customInstruction, triggerBtn) {
         return;
     }
 
-    const paraulesIn = textarea.value.trim().split(/\s+/).length;
+    const paraulesIn = currentText.trim().split(/\s+/).length;
     const label = preset ? (REFINE_LABELS[preset] || "Refinant") : "Aplicant instrucció";
 
-    // Estat visual: chip activa + tots els altres desactivats
-    const allChips = document.querySelectorAll(".refine-chip");
+    // Estat visual: només toquem els chips del mateix step que el botó activat
+    const parentStep = triggerBtn?.closest(".step-panel") || document;
+    const allChips = parentStep.querySelectorAll(".refine-chip, .refine-chip-p4");
     allChips.forEach(c => {
         if (c === triggerBtn) {
             c.setAttribute("aria-busy", "true");
@@ -1861,7 +1881,7 @@ async function refineText(preset, customInstruction, triggerBtn) {
         status.innerHTML = `<strong>${label}…</strong> (${paraulesIn} paraules · pot trigar 10-20 s)`;
     }
 
-    const payload = { text: textarea.value };
+    const payload = { text: currentText };
     if (preset) payload.preset = preset;
     if (customInstruction) payload.instruccio = customInstruction;
 
@@ -1881,18 +1901,31 @@ async function refineText(preset, customInstruction, triggerBtn) {
             return;
         }
 
-        textarea.value = data.text;
-        updateWordCount();
+        // Push undo abans de substituir (només per al textarea del Pas 2)
+        if (!isContentEditable && targetId === "input-text") editorPushUndo();
+        setNewText(data.text);
+        if (!isContentEditable) updateWordCount();
         if (status) {
-            const delta = data.paraules - paraulesIn;
-            const arrow = delta > 0 ? "↑" : delta < 0 ? "↓" : "=";
-            const sign = delta > 0 ? "+" : "";
-            status.innerHTML = `<strong>${label} ✓</strong> (${paraulesIn} → ${data.paraules} paraules ${arrow} ${sign}${delta})`;
+            // Si és LanguageTool (preset català) → mostrar n canvis
+            if (data.mode === "languagetool") {
+                const n = data.n_canvis || 0;
+                if (n === 0) {
+                    status.innerHTML = `<strong>Català ✓</strong> No s'han trobat errors (LanguageTool)`;
+                } else {
+                    status.innerHTML = `<strong>Català ✓</strong> ${n} correcció${n === 1 ? "" : "s"} aplicada${n === 1 ? "" : "s"} (LanguageTool)`;
+                }
+            } else {
+                const delta = data.paraules - paraulesIn;
+                const arrow = delta > 0 ? "↑" : delta < 0 ? "↓" : "=";
+                const sign = delta > 0 ? "+" : "";
+                status.innerHTML = `<strong>${label} ✓</strong> (${paraulesIn} → ${data.paraules} paraules ${arrow} ${sign}${delta})`;
+            }
             status.style.color = "#15803d";
-            // Auto-hide després de 4s
+            status.style.display = "block";
+            // Auto-hide després de 5s
             setTimeout(() => {
                 if (status) status.style.display = "none";
-            }, 4000);
+            }, 5000);
         }
     } catch (e) {
         if (status) {
@@ -1906,8 +1939,8 @@ async function refineText(preset, customInstruction, triggerBtn) {
             c.removeAttribute("disabled");
             c.classList.remove("is-loading");
         });
-        // Re-aplicar toggleRefinePanel per si ha quedat sense text
-        toggleRefinePanel();
+        // Re-aplicar toggleRefinePanel només si estem al Pas 2 (textarea)
+        if (!isContentEditable) toggleRefinePanel();
     }
 }
 
@@ -1979,6 +2012,9 @@ function editorApplyFormat(format) {
         }
     }
 
+    // Guardar snapshot pel nostre undo stack
+    editorPushUndo();
+
     // Inserir mantenint l'historial undo/redo
     if (document.execCommand) {
         ta.setRangeText(wrapped, start, end, "end");
@@ -1989,11 +2025,39 @@ function editorApplyFormat(format) {
     updateWordCount();
 }
 
+// ── Historial d'undo/redo manual per al textarea (Pas 2) ──────────────────
+// document.execCommand("undo") no captura canvis programàtics (textarea.value=...)
+// per això mantenim el nostre propi stack.
+const _editorUndoStack = [];
+const _editorRedoStack = [];
+const EDITOR_UNDO_MAX = 40;
+
+function editorPushUndo() {
+    const ta = document.getElementById("input-text");
+    if (!ta) return;
+    const last = _editorUndoStack[_editorUndoStack.length - 1];
+    if (last === ta.value) return; // no push si és idèntic
+    _editorUndoStack.push(ta.value);
+    if (_editorUndoStack.length > EDITOR_UNDO_MAX) _editorUndoStack.shift();
+    _editorRedoStack.length = 0; // nova acció invalida el redo
+}
+
 function editorUndo() {
     const ta = document.getElementById("input-text");
     if (!ta) return;
     ta.focus();
-    document.execCommand("undo");
+    // Primer intenta l'historial del navegador (canvis manuals de tecla)
+    try {
+        const ok = document.execCommand("undo");
+        if (ok) {
+            updateWordCount();
+            return;
+        }
+    } catch (e) { /* noop */ }
+    // Si no, utilitza el nostre stack manual
+    if (_editorUndoStack.length === 0) return;
+    _editorRedoStack.push(ta.value);
+    ta.value = _editorUndoStack.pop();
     updateWordCount();
 }
 
@@ -2001,7 +2065,16 @@ function editorRedo() {
     const ta = document.getElementById("input-text");
     if (!ta) return;
     ta.focus();
-    document.execCommand("redo");
+    try {
+        const ok = document.execCommand("redo");
+        if (ok) {
+            updateWordCount();
+            return;
+        }
+    } catch (e) { /* noop */ }
+    if (_editorRedoStack.length === 0) return;
+    _editorUndoStack.push(ta.value);
+    ta.value = _editorRedoStack.pop();
     updateWordCount();
 }
 
@@ -2073,6 +2146,7 @@ async function editorPaste() {
     if (!textarea) return;
     try {
         const text = await navigator.clipboard.readText();
+        editorPushUndo();
         textarea.value = text;
         updateWordCount();
         toggleRefinePanel();
@@ -2085,6 +2159,7 @@ function editorClearAll() {
     const textarea = document.getElementById("input-text");
     if (!textarea) return;
     if (textarea.value && !confirm("Segur que vols esborrar tot el text?")) return;
+    editorPushUndo();
     textarea.value = "";
     updateWordCount();
     toggleRefinePanel();
@@ -2116,19 +2191,17 @@ function initGeneratorButtons() {
 }
 
 function toggleRefinePanel() {
-    // Panell ara sempre visible; només togglegem estat "actiu" i el hint
-    const panel = document.getElementById("refine-panel");
+    // Panell ara sempre visible; només togglegem estat "actiu" i el hint (només Pas 2)
     const textarea = document.getElementById("input-text");
-    const hint = document.getElementById("refine-hint");
-    if (!panel || !textarea) return;
+    if (!textarea) return;
     const hasText = !!textarea.value.trim();
-    panel.classList.toggle("refine-panel-active", hasText);
-    if (hint) hint.style.display = hasText ? "none" : "block";
-    // Desactivar chips si no hi ha text
-    panel.querySelectorAll(".refine-chip, #btn-refine-custom, #refine-instruction").forEach(el => {
+    // Desactivar chips del Pas 2 si no hi ha text
+    document.querySelectorAll("#step-2 .refine-chip, #btn-refine-custom, #refine-instruction").forEach(el => {
         if (hasText) el.removeAttribute("disabled");
         else el.setAttribute("disabled", "disabled");
     });
+    const hint = document.getElementById("refine-hint");
+    if (hint) hint.style.display = hasText ? "none" : "block";
 }
 
 
@@ -2212,10 +2285,24 @@ function bindEvents() {
     const btnClear = document.getElementById("btn-editor-clear");
     if (btnClear) btnClear.addEventListener("click", editorClearAll);
 
-    // Botons refinador (chips compactes) — passa el botó per mostrar loading
-    document.querySelectorAll(".refine-chip, .refine-preset").forEach(btn => {
-        btn.addEventListener("click", () => refineText(btn.dataset.preset, null, btn));
+    // Botons refinador Pas 2 (chips compactes) — targeten input-text
+    document.querySelectorAll("#step-2 .refine-chip, #step-2 .refine-preset").forEach(btn => {
+        btn.addEventListener("click", () => refineText(btn.dataset.preset, null, btn, "input-text", "refine-status"));
     });
+
+    // Botons refinador Pas 4 (chips al text adaptat) — targeten result-adapted
+    document.querySelectorAll("#step-4 .refine-chip-p4").forEach(btn => {
+        btn.addEventListener("click", () => refineText(btn.dataset.preset, null, btn, "result-adapted", "refine-status-p4"));
+    });
+
+    // Instrucció pròpia refine Pas 4
+    const btnRefineCustomP4 = document.getElementById("btn-refine-custom-p4");
+    if (btnRefineCustomP4) {
+        btnRefineCustomP4.addEventListener("click", () => {
+            const instr = document.getElementById("refine-instruction-p4")?.value.trim();
+            if (instr) refineText(null, instr, btnRefineCustomP4, "result-adapted", "refine-status-p4");
+        });
+    }
 
     // Generator v3: botons clicables sync amb selects ocults
     initGeneratorButtons();

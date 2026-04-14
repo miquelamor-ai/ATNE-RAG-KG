@@ -1714,6 +1714,69 @@ REFINE_PRESETS = {
 }
 
 
+LANGUAGETOOL_URL = os.getenv("LANGUAGETOOL_URL", "https://api.languagetool.org/v2/check")
+
+
+def _languagetool_correct(text: str) -> tuple[str, int, list[dict]]:
+    """
+    Corregeix un text via LanguageTool API pública (determinista, no LLM).
+    Retorna: (text_corregit, n_canvis, llista_canvis).
+    Si LanguageTool falla, retorna (text, 0, []).
+    """
+    try:
+        resp = requests.post(
+            LANGUAGETOOL_URL,
+            data={
+                "text": text,
+                "language": "ca",
+                "level": "picky",
+                "enabledOnly": "false",
+            },
+            headers={"Accept": "application/json"},
+            timeout=30,
+        )
+        if resp.status_code != 200:
+            return text, 0, []
+        data = resp.json()
+    except Exception as e:
+        print(f"[LanguageTool] Error: {type(e).__name__}: {e}")
+        return text, 0, []
+
+    matches = data.get("matches", [])
+    if not matches:
+        return text, 0, []
+
+    # Aplicar correccions d'esquerra a dreta inverses (per no desplaçar offsets)
+    sorted_matches = sorted(matches, key=lambda m: m.get("offset", 0), reverse=True)
+
+    corrected = text
+    changes: list[dict] = []
+    for m in sorted_matches:
+        offset = m.get("offset", 0)
+        length = m.get("length", 0)
+        replacements = m.get("replacements", [])
+        if not replacements or length <= 0:
+            continue
+        new_value = replacements[0].get("value", "")
+        if new_value is None:
+            continue
+        old_value = corrected[offset:offset + length]
+        # Saltar si la substitució és idèntica
+        if new_value == old_value:
+            continue
+        corrected = corrected[:offset] + new_value + corrected[offset + length:]
+        changes.append({
+            "original": old_value,
+            "corregit": new_value,
+            "missatge": m.get("shortMessage") or m.get("message", ""),
+            "regla": m.get("rule", {}).get("id", ""),
+        })
+
+    # Retornar canvis en ordre d'aparició al text
+    changes.reverse()
+    return corrected, len(changes), changes
+
+
 @app.post("/api/refine-text")
 async def refine_text(payload: dict = Body(...)):
     """
@@ -1731,6 +1794,18 @@ async def refine_text(payload: dict = Body(...)):
 
     preset = (payload.get("preset") or "").strip().lower()
     instruccio_lliure = (payload.get("instruccio") or "").strip()
+
+    # Preset "catala" → LanguageTool (determinista, no LLM)
+    if preset == "catala" and not instruccio_lliure:
+        corrected, n_canvis, canvis = _languagetool_correct(text)
+        return {
+            "text": corrected,
+            "paraules": len(corrected.split()),
+            "preset_aplicat": "catala",
+            "mode": "languagetool",
+            "n_canvis": n_canvis,
+            "canvis": canvis,
+        }
 
     instruccio_final = ""
     if preset and preset in REFINE_PRESETS:

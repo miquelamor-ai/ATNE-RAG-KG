@@ -615,46 +615,131 @@
 
     <!-- ── PAS 4: Resultat ─────────────────────────────────── -->
     <section class="step-panel" id="step-4">
-        <div id="version-tabs" style="display:none;">
-            <button type="button" class="version-tab version-active" data-version="accessible">Més accessible</button>
-            <button type="button" class="version-tab" data-version="estandard">Estàndard</button>
-            <button type="button" class="version-tab" data-version="exigent">Més exigent</button>
+        <div class="workspace-header">
+            <h1 class="workspace-title">Text adaptat</h1>
+            <p class="workspace-subtitle">Revisa i edita el text. Pots refinar-lo amb LanguageTool i les eines de l'assistent.</p>
         </div>
 
-        <div class="result-columns">
-            <div class="result-col">
-                <h3>Text original</h3>
-                <div class="content" id="result-original"></div>
-            </div>
-            <div class="result-col editable-col">
-                <h3>Text adaptat <span class="edit-badge">Editable</span> <span id="version-label"></span></h3>
-                <div class="content" id="result-adapted" contenteditable="true" spellcheck="true"></div>
-            </div>
-        </div>
+        <div class="pas2-grid-v3" id="pas4-grid">
 
-        <div id="result-word-stats" class="result-stats"></div>
+            <!-- ── COL PRINCIPAL: Editor text adaptat ─────────────── -->
+            <main class="pas2-center">
+                <div class="editor-card-v2">
 
-        <div id="result-complements"></div>
+                    <!-- Version tabs (multinivell) -->
+                    <div class="mode-tabs" id="version-tabs" style="display:none;">
+                        <button type="button" class="mode-tab version-tab version-active" data-version="accessible">
+                            <span class="material-symbols-outlined">accessibility_new</span>
+                            Més accessible
+                        </button>
+                        <button type="button" class="mode-tab version-tab" data-version="estandard">
+                            <span class="material-symbols-outlined">description</span>
+                            Estàndard
+                        </button>
+                        <button type="button" class="mode-tab version-tab" data-version="exigent">
+                            <span class="material-symbols-outlined">school</span>
+                            Més exigent
+                        </button>
+                    </div>
 
-        <div class="feedback-row" id="feedback-row">
-            <span class="feedback-label">Com ha anat l'adaptació?</span>
-            <div class="feedback-buttons">
-                <button class="btn feedback-btn" data-rating="1" onclick="rateFeedback(1)" title="Dolenta">Dolenta</button>
-                <button class="btn feedback-btn" data-rating="2" onclick="rateFeedback(2)" title="Regular">Regular</button>
-                <button class="btn feedback-btn" data-rating="3" onclick="rateFeedback(3)" title="Bona">Bona</button>
-            </div>
-            <div class="feedback-comment" id="feedback-comment-area" style="display:none;">
-                <textarea id="feedback-comment" rows="2" placeholder="Què canviaries?"></textarea>
-                <button class="btn btn-sm" onclick="submitFeedback()">Enviar</button>
-            </div>
-            <div id="feedback-thanks" style="display:none;" class="feedback-thanks">Gràcies!</div>
-        </div>
+                    <!-- Capçalera editor adaptat -->
+                    <div class="adapted-header">
+                        <div class="adapted-title">
+                            <span class="material-symbols-outlined">auto_awesome</span>
+                            <span>Text adaptat</span>
+                            <span class="edit-badge">Editable</span>
+                            <span id="version-label"></span>
+                        </div>
+                    </div>
 
-        <div class="export-row">
-            <button class="btn" onclick="exportDoc('txt')">TXT</button>
-            <button class="btn btn-primary" onclick="exportDoc('docx')">DOCX</button>
-            <button class="btn" onclick="exportDoc('pdf')">PDF</button>
-            <button class="btn" onclick="goToStep(1)">Nova adaptació</button>
+                    <!-- Editor contenteditable adaptat -->
+                    <div class="adapted-editor-wrap">
+                        <div class="content editable-content" id="result-adapted" contenteditable="true" spellcheck="true"></div>
+                    </div>
+
+                    <div id="result-word-stats" class="result-stats"></div>
+
+                    <!-- Comparar amb original (plegable) -->
+                    <details class="adapted-compare">
+                        <summary>
+                            <span class="material-symbols-outlined">compare</span>
+                            Comparar amb el text original
+                        </summary>
+                        <div class="content" id="result-original"></div>
+                    </details>
+                </div>
+
+                <!-- Complements + feedback + export fora del card editor -->
+                <div id="result-complements"></div>
+
+                <div class="feedback-row" id="feedback-row">
+                    <span class="feedback-label">Com ha anat l'adaptació?</span>
+                    <div class="feedback-buttons">
+                        <button class="btn feedback-btn" data-rating="1" onclick="rateFeedback(1)" title="Dolenta">Dolenta</button>
+                        <button class="btn feedback-btn" data-rating="2" onclick="rateFeedback(2)" title="Regular">Regular</button>
+                        <button class="btn feedback-btn" data-rating="3" onclick="rateFeedback(3)" title="Bona">Bona</button>
+                    </div>
+                    <div class="feedback-comment" id="feedback-comment-area" style="display:none;">
+                        <textarea id="feedback-comment" rows="2" placeholder="Què canviaries?"></textarea>
+                        <button class="btn btn-sm" onclick="submitFeedback()">Enviar</button>
+                    </div>
+                    <div id="feedback-thanks" style="display:none;" class="feedback-thanks">Gràcies!</div>
+                </div>
+
+                <div class="export-row">
+                    <button class="btn" onclick="exportDoc('txt')">TXT</button>
+                    <button class="btn btn-primary" onclick="exportDoc('docx')">DOCX</button>
+                    <button class="btn" onclick="exportDoc('pdf')">PDF</button>
+                    <button class="btn" onclick="goToStep(1)">Nova adaptació</button>
+                </div>
+            </main>
+
+            <!-- ── COL DRETA: Refine card (aplicat al text adaptat) ─── -->
+            <aside class="bento-side pas2-right">
+                <div class="bento-card refine-card-v3" data-target-editor="result-adapted">
+                    <div class="bento-card-header">
+                        <span class="material-symbols-outlined bento-card-icon">auto_fix_high</span>
+                        <h3 class="bento-card-title">Refinar el text adaptat</h3>
+                    </div>
+                    <div class="refine-chips-grid">
+                        <button type="button" class="refine-chip refine-chip-p4" data-preset="catala" title="Corregir català amb LanguageTool">
+                            <span class="material-symbols-outlined">spellcheck</span>
+                            <span>Català (LT)</span>
+                        </button>
+                        <button type="button" class="refine-chip refine-chip-p4" data-preset="simplificar" title="Simplificar">
+                            <span class="material-symbols-outlined">compress</span>
+                            <span>Simplificar</span>
+                        </button>
+                        <button type="button" class="refine-chip refine-chip-p4" data-preset="ampliar" title="Ampliar">
+                            <span class="material-symbols-outlined">expand</span>
+                            <span>Ampliar</span>
+                        </button>
+                        <button type="button" class="refine-chip refine-chip-p4" data-preset="escurcar" title="Escurçar">
+                            <span class="material-symbols-outlined">vertical_align_center</span>
+                            <span>Escurçar</span>
+                        </button>
+                        <button type="button" class="refine-chip refine-chip-p4" data-preset="to_mes_proper" title="To més proper">
+                            <span class="material-symbols-outlined">forum</span>
+                            <span>+Proper</span>
+                        </button>
+                        <button type="button" class="refine-chip refine-chip-p4" data-preset="to_mes_formal" title="To més formal">
+                            <span class="material-symbols-outlined">corporate_fare</span>
+                            <span>+Formal</span>
+                        </button>
+                    </div>
+                    <details class="refine-custom-toggle">
+                        <summary>Instrucció pròpia</summary>
+                        <div class="refine-custom-body">
+                            <textarea id="refine-instruction-p4" rows="2" placeholder="Ex: Afegeix un exemple pràctic..."></textarea>
+                            <button type="button" class="btn btn-primary btn-sm" id="btn-refine-custom-p4">
+                                <span class="material-symbols-outlined">auto_fix_high</span>
+                                Aplicar
+                            </button>
+                        </div>
+                    </details>
+                    <div class="refine-status" id="refine-status-p4" style="display:none;"></div>
+                </div>
+            </aside>
         </div>
     </section>
 
