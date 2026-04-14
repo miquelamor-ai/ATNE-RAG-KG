@@ -272,114 +272,11 @@
             </div>
         </div>
 
-        <!-- Layout permanent: editor central + sidebar dret amb generador i altres cards -->
-        <div class="bento-grid" id="bento-have">
-            <div class="bento-main">
-                <!-- Editor card Stitch-style: header + toolbar vertical + textarea -->
-                <div class="editor-card-v2">
-                    <div class="card-header">
-                        <div class="card-title">
-                            <span class="material-symbols-outlined">description</span>
-                            Contingut del document
-                        </div>
-                        <button class="btn-clear" type="button" id="btn-editor-clear">
-                            <span class="material-symbols-outlined">delete</span>
-                            Netejar
-                        </button>
-                    </div>
-                    <div class="textarea-wrapper">
-                        <div class="formatting-toolbar">
-                            <button class="toolbar-btn" type="button" title="Negreta" data-format="bold">
-                                <span class="material-symbols-outlined">format_bold</span>
-                            </button>
-                            <button class="toolbar-btn" type="button" title="Cursiva" data-format="italic">
-                                <span class="material-symbols-outlined">format_italic</span>
-                            </button>
-                            <button class="toolbar-btn" type="button" title="Llista amb vinyetes" data-format="bullet">
-                                <span class="material-symbols-outlined">format_list_bulleted</span>
-                            </button>
-                            <div class="toolbar-divider"></div>
-                            <button class="toolbar-btn" type="button" title="Desfer (Ctrl+Z)" id="btn-editor-undo">
-                                <span class="material-symbols-outlined">undo</span>
-                            </button>
-                            <button class="toolbar-btn" type="button" title="Refer (Ctrl+Y)" id="btn-editor-redo">
-                                <span class="material-symbols-outlined">redo</span>
-                            </button>
-                            <div class="toolbar-divider"></div>
-                            <button class="toolbar-btn" type="button" title="Copiar tot el text" id="btn-editor-copy">
-                                <span class="material-symbols-outlined">content_copy</span>
-                            </button>
-                            <button class="toolbar-btn" type="button" title="Enganxar des del porta-retalls" id="btn-editor-paste">
-                                <span class="material-symbols-outlined">content_paste</span>
-                            </button>
-                        </div>
-                        <div class="textarea-container">
-                            <textarea class="editor-textarea-v2" id="input-text" placeholder="Escriu o enganxa el text aquí..."></textarea>
-                            <div class="char-count-pill">
-                                <span class="material-symbols-outlined">text_fields</span>
-                                <span id="word-count">0 paraules</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <!-- Layout 3 columnes Stitch: Generator (esq) | Editor (centre) | Refine+History (dre) -->
+        <div class="pas2-grid-v3" id="bento-have">
 
-                <!-- Botó antic (per compat amb JS) — no visible -->
-                <button type="button" id="btn-editor-copy-all" hidden></button>
-
-                <!-- Refinar text (només visible quan hi ha text) -->
-                <div class="refine-panel" id="refine-panel" style="display:none;">
-                    <div class="refine-header">
-                        <span class="material-symbols-outlined bento-card-icon">auto_fix_high</span>
-                        <h3 class="bento-card-title">Refinar el text</h3>
-                    </div>
-                    <p class="bento-card-desc">Demana ajustos sense regenerar tot el text. L'IA modificarà només el que demanis.</p>
-                    <div class="refine-presets">
-                        <button type="button" class="btn refine-preset" data-preset="catala">
-                            <span class="material-symbols-outlined">spellcheck</span>
-                            Corregir català
-                        </button>
-                        <button type="button" class="btn refine-preset" data-preset="simplificar">
-                            <span class="material-symbols-outlined">compress</span>
-                            Simplificar
-                        </button>
-                        <button type="button" class="btn refine-preset" data-preset="ampliar">
-                            <span class="material-symbols-outlined">expand</span>
-                            Ampliar
-                        </button>
-                        <button type="button" class="btn refine-preset" data-preset="escurcar">
-                            <span class="material-symbols-outlined">vertical_align_center</span>
-                            Escurçar
-                        </button>
-                        <button type="button" class="btn refine-preset" data-preset="to_mes_proper">
-                            <span class="material-symbols-outlined">forum</span>
-                            To més proper
-                        </button>
-                        <button type="button" class="btn refine-preset" data-preset="to_mes_formal">
-                            <span class="material-symbols-outlined">corporate_fare</span>
-                            To més formal
-                        </button>
-                    </div>
-                    <div class="refine-custom">
-                        <label for="refine-instruction">O escriu una instrucció pròpia:</label>
-                        <textarea id="refine-instruction" rows="2" placeholder="Ex: Substitueix tots els 'ensemble' per 'conjunt'. Afegeix un exemple de Catalunya. Treu la primera frase..."></textarea>
-                        <button type="button" class="btn btn-primary" id="btn-refine-custom">
-                            <span class="material-symbols-outlined">auto_fix_high</span>
-                            Aplicar instrucció
-                        </button>
-                    </div>
-                    <div class="refine-status" id="refine-status" style="display:none;"></div>
-                </div>
-
-                <details class="via-diagnostic-toggle">
-                    <summary>Textos anteriors</summary>
-                    <div class="history-list" id="history-list">
-                        <div class="history-loading" id="history-loading">Carregant historial…</div>
-                    </div>
-                </details>
-            </div>
-
-            <!-- ── SIDEBAR DRET: Generador IA + altres cards ────── -->
-            <div class="bento-side">
+            <!-- ── COL ESQUERRA: Generator IA (permanent) + Upload ───── -->
+            <aside class="bento-side pas2-left">
 
                 <!-- Card: Generar amb IA (sempre visible, paràmetres permanents) -->
                 <div class="bento-card generator-card">
@@ -387,7 +284,7 @@
                         <span class="material-symbols-outlined bento-card-icon">auto_awesome</span>
                         <h3 class="bento-card-title">Generar amb IA</h3>
                     </div>
-                    <p class="bento-card-desc">L'assistent crearà un text base al nivell del curs. Modifica els paràmetres i regenera quan vulguis.</p>
+                    <p class="bento-card-desc">Defineix el contingut i l'IA escriurà el text base.</p>
 
                     <div class="gen-field">
                         <label for="gen-tema">Tema o tòpic</label>
@@ -468,13 +365,13 @@
                     <div class="gen-status" id="gen-status" style="display:none;"></div>
                 </div>
 
-                <!-- Card: Pujar fitxer (estil Stitch v2) -->
+                <!-- Card: Pujar fitxer (compacta) -->
                 <div class="upload-card-v2">
                     <div class="upload-icon-circle">
                         <span class="material-symbols-outlined">upload_file</span>
                     </div>
                     <h3>Puja un fitxer</h3>
-                    <p>Suporta PDF, DOCX, MD i TXT fins a 5 MB.</p>
+                    <p>PDF, DOCX, MD i TXT fins a 5 MB.</p>
                     <label for="file-input" class="btn-upload-v2">
                         <span class="material-symbols-outlined" style="font-size:1rem;">attach_file</span>
                         Seleccionar fitxer
@@ -482,8 +379,121 @@
                     <input type="file" id="file-input" accept=".pdf,.docx,.md,.txt" hidden>
                     <p id="upload-status" style="margin-top:0.75rem;font-size:0.6875rem;color:var(--on-surface-variant);"></p>
                 </div>
+            </aside>
 
-                <!-- Card: Tipus de text (plegable, com abans) -->
+            <!-- ── COL CENTRE: Editor ──────────────────────────────── -->
+            <main class="pas2-center">
+                <!-- Editor card Stitch-style: header + toolbar vertical + textarea -->
+                <div class="editor-card-v2">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="material-symbols-outlined">description</span>
+                            Contingut del document
+                        </div>
+                        <button class="btn-clear" type="button" id="btn-editor-clear">
+                            <span class="material-symbols-outlined">delete</span>
+                            Netejar
+                        </button>
+                    </div>
+                    <div class="textarea-wrapper">
+                        <div class="formatting-toolbar">
+                            <button class="toolbar-btn" type="button" title="Negreta" data-format="bold">
+                                <span class="material-symbols-outlined">format_bold</span>
+                            </button>
+                            <button class="toolbar-btn" type="button" title="Cursiva" data-format="italic">
+                                <span class="material-symbols-outlined">format_italic</span>
+                            </button>
+                            <button class="toolbar-btn" type="button" title="Llista amb vinyetes" data-format="bullet">
+                                <span class="material-symbols-outlined">format_list_bulleted</span>
+                            </button>
+                            <div class="toolbar-divider"></div>
+                            <button class="toolbar-btn" type="button" title="Desfer (Ctrl+Z)" id="btn-editor-undo">
+                                <span class="material-symbols-outlined">undo</span>
+                            </button>
+                            <button class="toolbar-btn" type="button" title="Refer (Ctrl+Y)" id="btn-editor-redo">
+                                <span class="material-symbols-outlined">redo</span>
+                            </button>
+                            <div class="toolbar-divider"></div>
+                            <button class="toolbar-btn" type="button" title="Copiar tot el text" id="btn-editor-copy">
+                                <span class="material-symbols-outlined">content_copy</span>
+                            </button>
+                            <button class="toolbar-btn" type="button" title="Enganxar des del porta-retalls" id="btn-editor-paste">
+                                <span class="material-symbols-outlined">content_paste</span>
+                            </button>
+                        </div>
+                        <div class="textarea-container">
+                            <textarea class="editor-textarea-v2" id="input-text" placeholder="Escriu o enganxa el text aquí..."></textarea>
+                            <div class="char-count-pill">
+                                <span class="material-symbols-outlined">text_fields</span>
+                                <span id="word-count">0 paraules</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botó antic (per compat amb JS) — no visible -->
+                <button type="button" id="btn-editor-copy-all" hidden></button>
+            </main>
+
+            <!-- ── COL DRETA: Refinar + Textos anteriors + Consells ────── -->
+            <aside class="bento-side pas2-right">
+
+                <!-- Card: Refinar el text (compacta, sempre visible) -->
+                <div class="refine-panel refine-panel-compact" id="refine-panel">
+                    <div class="refine-header">
+                        <span class="material-symbols-outlined bento-card-icon">auto_fix_high</span>
+                        <h3 class="bento-card-title">Refinar el text</h3>
+                    </div>
+                    <p class="bento-card-desc refine-hint" id="refine-hint">Quan hi hagi text, podràs demanar ajustos sense regenerar-ho tot.</p>
+                    <div class="refine-chips">
+                        <button type="button" class="refine-chip" data-preset="catala" title="Corregir català">
+                            <span class="material-symbols-outlined">spellcheck</span>
+                            <span>Català</span>
+                        </button>
+                        <button type="button" class="refine-chip" data-preset="simplificar" title="Simplificar">
+                            <span class="material-symbols-outlined">compress</span>
+                            <span>Simplificar</span>
+                        </button>
+                        <button type="button" class="refine-chip" data-preset="ampliar" title="Ampliar">
+                            <span class="material-symbols-outlined">expand</span>
+                            <span>Ampliar</span>
+                        </button>
+                        <button type="button" class="refine-chip" data-preset="escurcar" title="Escurçar">
+                            <span class="material-symbols-outlined">vertical_align_center</span>
+                            <span>Escurçar</span>
+                        </button>
+                        <button type="button" class="refine-chip" data-preset="to_mes_proper" title="To més proper">
+                            <span class="material-symbols-outlined">forum</span>
+                            <span>+Proper</span>
+                        </button>
+                        <button type="button" class="refine-chip" data-preset="to_mes_formal" title="To més formal">
+                            <span class="material-symbols-outlined">corporate_fare</span>
+                            <span>+Formal</span>
+                        </button>
+                    </div>
+                    <div class="refine-custom refine-custom-compact">
+                        <label for="refine-instruction">Instrucció pròpia</label>
+                        <textarea id="refine-instruction" rows="2" placeholder="Ex: Substitueix 'ensemble' per 'conjunt'..."></textarea>
+                        <button type="button" class="btn btn-primary btn-sm" id="btn-refine-custom">
+                            <span class="material-symbols-outlined">auto_fix_high</span>
+                            Aplicar
+                        </button>
+                    </div>
+                    <div class="refine-status" id="refine-status" style="display:none;"></div>
+                </div>
+
+                <!-- Card: Textos anteriors -->
+                <div class="bento-card history-card-v2">
+                    <div class="bento-card-header">
+                        <span class="material-symbols-outlined bento-card-icon">history</span>
+                        <h3 class="bento-card-title">Textos anteriors</h3>
+                    </div>
+                    <div class="history-list" id="history-list">
+                        <div class="history-loading" id="history-loading">Carregant historial…</div>
+                    </div>
+                </div>
+
+                <!-- Tipus de text (plegable, secundari) -->
                 <details class="bento-card">
                     <summary class="bento-card-summary">
                         <span class="material-symbols-outlined bento-card-icon">category</span>
@@ -500,20 +510,19 @@
                     </div>
                 </details>
 
-                <!-- Card: Consells ràpids (estil Stitch v2) -->
+                <!-- Consells ràpids -->
                 <div class="tips-card-v2">
                     <div class="tips-title">
                         <span class="material-symbols-outlined">tips_and_updates</span>
                         Consells ràpids
                     </div>
                     <ul class="tips-list">
-                        <li>Sigues precís al tema. "La fotosíntesi a les plantes vasculars" dona millor resultat que "Plantes".</li>
-                        <li>Tria el gènere segons l'ús: per comprensió de notícies, posa "Notícia de premsa".</li>
-                        <li>El to ha d'encaixar amb la matèria. "Solemne" per a història; "Humorístic" per a primària.</li>
-                        <li>Les notes addicionals són potents: cita autors, restringeix vocabulari.</li>
+                        <li>Sigues precís al tema. "La fotosíntesi a les plantes vasculars" funciona millor que "Plantes".</li>
+                        <li>Tria el gènere segons l'ús: per comprensió de notícies, "Notícia de premsa".</li>
+                        <li>El to ha d'encaixar amb la matèria: "Solemne" per història, "Humorístic" per primària.</li>
                     </ul>
                 </div>
-            </div>
+            </aside>
         </div>
 
         <!-- Botó history toggle ocult per compat amb JS antic -->

@@ -1981,10 +1981,19 @@ function editorClearAll() {
 }
 
 function toggleRefinePanel() {
+    // Panell ara sempre visible; només togglegem estat "actiu" i el hint
     const panel = document.getElementById("refine-panel");
     const textarea = document.getElementById("input-text");
+    const hint = document.getElementById("refine-hint");
     if (!panel || !textarea) return;
-    panel.style.display = textarea.value.trim() ? "block" : "none";
+    const hasText = !!textarea.value.trim();
+    panel.classList.toggle("refine-panel-active", hasText);
+    if (hint) hint.style.display = hasText ? "none" : "block";
+    // Desactivar chips si no hi ha text
+    panel.querySelectorAll(".refine-chip, #btn-refine-custom, #refine-instruction").forEach(el => {
+        if (hasText) el.removeAttribute("disabled");
+        else el.setAttribute("disabled", "disabled");
+    });
 }
 
 
@@ -2068,8 +2077,8 @@ function bindEvents() {
     const btnClear = document.getElementById("btn-editor-clear");
     if (btnClear) btnClear.addEventListener("click", editorClearAll);
 
-    // Botons refinador
-    document.querySelectorAll(".refine-preset").forEach(btn => {
+    // Botons refinador (chips compactes)
+    document.querySelectorAll(".refine-chip, .refine-preset").forEach(btn => {
         btn.addEventListener("click", () => refineText(btn.dataset.preset, null));
     });
     const btnRefineCustom = document.getElementById("btn-refine-custom");
