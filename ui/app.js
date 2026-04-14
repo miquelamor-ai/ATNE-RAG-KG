@@ -2064,6 +2064,7 @@ function renderQualityReport(reportId, bodyId, badgeId, report) {
     const avisos = report.avisos_estil || [];
     const llegibilitat = report.llegibilitat || {};
     const llegOk = llegibilitat.ok !== false;
+    const caractersExotics = report.caracters_exotics || [];
 
     let globalStatus = "ok";
     if (!report.lt_disponible) {
@@ -2072,6 +2073,10 @@ function renderQualityReport(reportId, bodyId, badgeId, report) {
         globalStatus = "warn";
     }
     if (sospitoses.length > 15) {
+        globalStatus = "err";
+    }
+    // Els caràcters exòtics sempre pugen el badge a atenció
+    if (caractersExotics.length > 0) {
         globalStatus = "err";
     }
 
@@ -2090,6 +2095,24 @@ function renderQualityReport(reportId, bodyId, badgeId, report) {
 
     // Construir contingut
     const rows = [];
+
+    // 0. Caràcters exòtics (prioritat màxima — LLM glitches tipus '홈olatge')
+    if (caractersExotics.length > 0) {
+        const chips = caractersExotics.slice(0, 10).map(e => {
+            const tooltip = `${e.codepoint} · ${e.script} · ${e.ocurrencies} ocurrència${e.ocurrencies === 1 ? "" : "s"}\nContext: ${e.context}`;
+            return `<span class="exotic-char-chip" title="${escapeHtml(tooltip)}">${escapeHtml(e.caracter)} <small>${escapeHtml(e.script)}</small></span>`;
+        }).join("");
+        rows.push(`
+            <div class="quality-row q-err">
+                <span class="material-symbols-outlined q-icon">error</span>
+                <div class="q-content">
+                    <p class="q-title">⚠ Caràcters exòtics detectats (${caractersExotics.length})</p>
+                    <p class="q-detail">S'han detectat caràcters fora de l'alfabet llatí/català. Probablement són errors de generació de l'LLM (tokenització incorrecta). <strong>Revisa el text manualment</strong> i substitueix-los.</p>
+                    <div class="q-words">${chips}</div>
+                </div>
+            </div>
+        `);
+    }
 
     // 1. LanguageTool
     if (!report.lt_disponible) {

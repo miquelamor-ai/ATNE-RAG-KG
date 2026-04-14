@@ -1329,10 +1329,14 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
             "avisos_estil": quality["avisos_estil"][:10],
             "llegibilitat": quality["llegibilitat"],
             "avisos_auditor": quality["avisos_auditor"],
+            "caracters_exotics": quality.get("caracters_exotics", []),
             "lt_disponible": quality["lt_disponible"],
             "auditor_disponible": quality["auditor_disponible"],
             "auditor_model": quality["auditor_model"],
         }
+        if quality.get("caracters_exotics"):
+            cb({"type": "step", "step": "warning",
+                "msg": f"{len(quality['caracters_exotics'])} caràcter(s) exòtic(s) detectats — revisa al Quality Report"})
     cb(result_ev)
     cb({"type": "done"})
     return adapted
@@ -1816,6 +1820,7 @@ perfil de l'alumne es farà en una segona fase amb un altre pipeline.
             "avisos_estil": quality["avisos_estil"][:10],
             "llegibilitat": quality["llegibilitat"],
             "avisos_auditor": quality["avisos_auditor"],
+            "caracters_exotics": quality.get("caracters_exotics", []),
             "lt_disponible": quality["lt_disponible"],
             "auditor_disponible": quality["auditor_disponible"],
             "auditor_model": quality["auditor_model"],
@@ -1989,6 +1994,106 @@ def _mecr_from_etapa_curs(etapa: str, curs: str = "") -> str:
     if "batxillerat" in etapa_lower or "batx" in etapa_lower or "fp" in etapa_lower:
         return "C1"
     return "B1"  # default segur
+
+
+# ═══ Filtre de caràcters exòtics (CJK, ciríl·lic, àrab, etc.) ══════════════
+# Rangs Unicode permesos per a text català. Tota la resta genera alerta.
+_ALLOWED_UNICODE_RANGES = [
+    (0x0009, 0x000A),   # Tab, LF
+    (0x000D, 0x000D),   # CR
+    (0x0020, 0x007E),   # ASCII printable
+    (0x00A0, 0x024F),   # Latin-1 Supplement + Latin Extended-A/B (à, é, ç, ñ, etc.)
+    (0x2000, 0x206F),   # General Punctuation (em dash, smart quotes, bullet, ellipsis)
+    (0x20A0, 0x20CF),   # Currency symbols (€, £, ¥)
+    (0x2100, 0x214F),   # Letterlike (™, ℃, ℉)
+    (0x2190, 0x21FF),   # Arrows (↑ ↓ → ←) — per esquemes
+    (0x2200, 0x22FF),   # Mathematical Operators (+, ±, ×)
+    (0x2500, 0x257F),   # Box drawing (├ ─ └) — per esquemes
+    (0x25A0, 0x25FF),   # Geometric shapes (● ■ ▲)
+    (0x2600, 0x27BF),   # Miscellaneous Symbols (☀ ♪ ⚡)
+    (0x1F300, 0x1F9FF), # Emojis (alguns complements demanen pictogrames)
+    (0x1FA70, 0x1FAFF), # Emojis v13+
+]
+
+
+def _is_char_allowed(ch: str) -> bool:
+    cp = ord(ch)
+    for start, end in _ALLOWED_UNICODE_RANGES:
+        if start <= cp <= end:
+            return True
+    return False
+
+
+def _detect_script(cp: int) -> str:
+    """Identifica aproximadament l'script d'un codepoint."""
+    if 0x0400 <= cp <= 0x04FF or 0x0500 <= cp <= 0x052F:
+        return "ciríl·lic"
+    if 0x0590 <= cp <= 0x05FF:
+        return "hebreu"
+    if 0x0600 <= cp <= 0x06FF or 0x0750 <= cp <= 0x077F or 0x08A0 <= cp <= 0x08FF:
+        return "àrab"
+    if 0x0900 <= cp <= 0x097F:
+        return "devanagari (hindi)"
+    if 0x0E00 <= cp <= 0x0E7F:
+        return "tailandès"
+    if 0x3000 <= cp <= 0x303F:
+        return "CJK puntuació"
+    if 0x3040 <= cp <= 0x309F:
+        return "hiragana (japonès)"
+    if 0x30A0 <= cp <= 0x30FF:
+        return "katakana (japonès)"
+    if 0x4E00 <= cp <= 0x9FFF:
+        return "xinès"
+    if 0xAC00 <= cp <= 0xD7AF:
+        return "coreà (hangul)"
+    if 0xE000 <= cp <= 0xF8FF:
+        return "ús privat"
+    if 0xFB00 <= cp <= 0xFB4F:
+        return "presentacions alfabètiques"
+    return "desconegut"
+
+
+def _exotic_char_scan(text: str) -> list[dict]:
+    """
+    Escaneja el text en cerca de caràcters no esperats per a text català
+    (CJK, ciríl·lic, àrab, hangul, ús privat, etc.). Retorna una llista
+    amb un màxim de 10 entrades úniques amb {caracter, codepoint, script,
+    context, ocurrencies}.
+
+    Motivació: els LLMs (vam veure Gemma amb '홈olatge') ocasionalment
+    insereixen caràcters d'altres scripts per artefactes de tokenització.
+    Aquest filtre ho detecta de manera determinista abans que cap altre
+    pas del pipeline.
+    """
+    if not text:
+        return []
+
+    grouped: dict[str, dict] = {}
+    for i, ch in enumerate(text):
+        if ch in (" ", "\n", "\t", "\r"):
+            continue
+        if _is_char_allowed(ch):
+            continue
+        cp = ord(ch)
+        key = ch
+        if key not in grouped:
+            context_start = max(0, i - 18)
+            context_end = min(len(text), i + 18)
+            context_raw = text[context_start:context_end]
+            context = context_raw.replace(ch, f"«{ch}»", 1)
+            grouped[key] = {
+                "caracter": ch,
+                "codepoint": f"U+{cp:04X}",
+                "script": _detect_script(cp),
+                "context": context,
+                "ocurrencies": 1,
+            }
+        else:
+            grouped[key]["ocurrencies"] += 1
+        if len(grouped) >= 10:
+            break
+
+    return list(grouped.values())
 
 
 # Regles de LanguageTool que indiquen paraula desconeguda al diccionari català
@@ -2435,10 +2540,16 @@ def post_process_catalan(text: str, target_mecr: str = "", enable_lt: bool = Tru
             "avisos_estil": [],
             "llegibilitat": _readability_score("", target_mecr),
             "avisos_auditor": [],
+            "caracters_exotics": [],
             "lt_disponible": False,
             "auditor_disponible": False,
             "auditor_model": ATNE_AUDITOR_MODEL,
         }
+
+    # Capa 0 (determinista, ràpid): detectar caràcters exòtics abans de res.
+    #    Capta glitches com '홈olatge' (coreà) o lletres ciríl·liques inserides
+    #    per errors de tokenització.
+    caracters_exotics = _exotic_char_scan(text)
 
     # Paral·lelitzar LanguageTool + LLM Auditor per estalviar temps
     lt_result = None
@@ -2484,6 +2595,7 @@ def post_process_catalan(text: str, target_mecr: str = "", enable_lt: bool = Tru
         "avisos_estil": avisos_estil,
         "llegibilitat": llegibilitat,
         "avisos_auditor": audit_result.get("avisos", []),
+        "caracters_exotics": caracters_exotics,
         "lt_disponible": lt_disponible,
         "auditor_disponible": audit_result.get("disponible", False),
         "auditor_model": audit_result.get("model", ATNE_AUDITOR_MODEL),

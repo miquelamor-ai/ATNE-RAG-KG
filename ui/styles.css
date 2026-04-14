@@ -3569,6 +3569,31 @@ details.bento-card .bento-card-body {
     cursor: help;
 }
 
+.exotic-char-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3125rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+    background: rgba(239, 68, 68, 0.12);
+    color: #b91c1c;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    cursor: help;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    white-space: nowrap;
+    margin: 0.125rem;
+}
+
+.exotic-char-chip small {
+    font-size: 0.5625rem;
+    font-weight: 600;
+    font-family: var(--font-body);
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
 .quality-corrections-list {
     font-size: 0.625rem;
     color: var(--on-surface-variant);
