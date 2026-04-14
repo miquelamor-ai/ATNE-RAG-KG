@@ -1,71 +1,69 @@
 <!DOCTYPE html>
-
 <html class="light" lang="ca"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<title>Com funciona ATNE | Saber-ne+</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <script id="tailwind-config">
       tailwind.config = {
         darkMode: "class",
         theme: {
           extend: {
             "colors": {
-                    "tertiary": "#2b38a9",
-                    "on-tertiary": "#ffffff",
-                    "secondary-fixed": "#e0e0ff",
-                    "on-tertiary-container": "#d3d5ff",
-                    "on-error-container": "#93000a",
-                    "surface-tint": "#4c51bf",
-                    "secondary-container": "#8792fe",
-                    "on-tertiary-fixed-variant": "#2b38aa",
-                    "on-secondary-fixed": "#000767",
-                    "on-error": "#ffffff",
-                    "primary-fixed-dim": "#bfc1ff",
-                    "surface-container-low": "#eff4ff",
-                    "surface-variant": "#d3e4fe",
-                    "on-primary-container": "#d4d5ff",
-                    "on-surface-variant": "#464653",
+                    "on-tertiary-fixed": "#000965",
                     "tertiary-fixed-dim": "#bdc2ff",
-                    "secondary": "#4953bc",
-                    "primary": "#3337a6",
-                    "on-background": "#0b1c30",
-                    "on-primary-fixed-variant": "#3337a6",
-                    "surface": "#f8f9ff",
-                    "error-container": "#ffdad6",
-                    "surface-bright": "#f8f9ff",
-                    "outline-variant": "#c7c5d5",
-                    "on-primary": "#ffffff",
-                    "on-secondary": "#ffffff",
-                    "on-secondary-container": "#17228f",
-                    "on-surface": "#0b1c30",
-                    "primary-fixed": "#e1e0ff",
-                    "on-secondary-fixed-variant": "#2f3aa3",
-                    "surface-container": "#e5eeff",
+                    "surface-tint": "#4c51bf",
                     "inverse-primary": "#bfc1ff",
-                    "error": "#ba1a1a",
-                    "background": "#f8f9ff",
-                    "surface-container-highest": "#d3e4fe",
-                    "primary-container": "#4c51bf",
-                    "secondary-fixed-dim": "#bdc2ff",
-                    "tertiary-fixed": "#dfe0ff",
                     "tertiary-container": "#4552c2",
-                    "surface-container-lowest": "#ffffff",
+                    "tertiary-fixed": "#dfe0ff",
                     "inverse-surface": "#213145",
-                    "inverse-on-surface": "#eaf1ff",
+                    "surface-container-highest": "#d3e4fe",
                     "surface-container-high": "#dce9ff",
-                    "surface-dim": "#cbdbf5",
-                    "on-primary-fixed": "#03006d",
+                    "secondary-fixed": "#e0e0ff",
+                    "primary-container": "#4c51bf",
+                    "on-tertiary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "primary-fixed": "#e1e0ff",
+                    "on-surface-variant": "#464653",
+                    "primary": "#3337a6",
                     "outline": "#767684",
-                    "on-tertiary-fixed": "#000965"
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed": "#000767",
+                    "background": "#f8f9ff",
+                    "on-primary-fixed-variant": "#3337a6",
+                    "primary-fixed-dim": "#bfc1ff",
+                    "error-container": "#ffdad6",
+                    "on-tertiary-container": "#d3d5ff",
+                    "surface": "#f8f9ff",
+                    "on-surface": "#0b1c30",
+                    "error": "#ba1a1a",
+                    "secondary-fixed-dim": "#bdc2ff",
+                    "secondary-container": "#8792fe",
+                    "tertiary": "#2b38a9",
+                    "inverse-on-surface": "#eaf1ff",
+                    "on-primary-container": "#d4d5ff",
+                    "surface-dim": "#cbdbf5",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-low": "#eff4ff",
+                    "on-background": "#0b1c30",
+                    "on-primary": "#ffffff",
+                    "surface-container": "#e5eeff",
+                    "outline-variant": "#c7c5d5",
+                    "on-tertiary-fixed-variant": "#2b38aa",
+                    "surface-variant": "#d3e4fe",
+                    "surface-bright": "#f8f9ff",
+                    "on-secondary-fixed-variant": "#2f3aa3",
+                    "on-secondary-container": "#17228f",
+                    "on-primary-fixed": "#03006d",
+                    "on-secondary": "#ffffff",
+                    "secondary": "#4953bc"
             },
             "borderRadius": {
                     "DEFAULT": "0.25rem",
                     "lg": "0.5rem",
-                    "xl": "0.75rem",
-                    "2xl": "1.5rem",
+                    "xl": "1.5rem",
                     "full": "9999px"
             },
             "fontFamily": {
@@ -78,323 +76,510 @@
       }
     </script>
 <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-            vertical-align: middle;
-        }
-        .glass-panel {
-            background: rgba(248, 249, 255, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f8f9ff; }
-        ::-webkit-scrollbar-thumb { background: #d3e4fe; border-radius: 10px; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, h4, .brand-font { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        html { scroll-behavior: smooth; }
+        details > summary { list-style: none; cursor: pointer; }
+        details > summary::-webkit-details-marker { display: none; }
+        details[open] .expand-icon { transform: rotate(180deg); }
+        .expand-icon { transition: transform 0.2s ease; }
     </style>
 </head>
-<body class="bg-surface font-body text-on-surface selection:bg-primary/10">
-<!-- TopNavBar -->
-<nav class="sticky top-0 z-50 flex justify-between items-center w-full px-8 h-16 bg-[#f8f9ff]/80 backdrop-blur-md">
-<div class="text-xl font-bold text-[#3337a6] tracking-tight font-headline"><a href="/" class="hover:opacity-80 transition-opacity">Saber-ne+</a></div>
-<div class="hidden md:flex items-center gap-8 font-headline font-semibold text-sm">
-<a class="text-slate-500 hover:text-[#4c51bf] transition-colors duration-200" href="/saber-ne">Adaptar materials</a>
-<a class="text-[#3337a6] border-b-2 border-[#3337a6] pb-1" href="/cuina">Com funciona ATNE</a>
-<a class="text-slate-500 hover:text-[#4c51bf] transition-colors duration-200" href="/avaluacio">Avaluació i decisions</a>
+<body class="bg-background text-on-surface selection:bg-primary/10 selection:text-primary min-h-screen flex flex-col">
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- TopNavBar                                                   -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<nav class="bg-white/80 backdrop-blur-md fixed top-0 w-full z-50 flex justify-between items-center px-6 py-3 border-b border-outline-variant/30">
+<div class="flex items-center gap-4">
+<div class="brand-font text-xl font-bold tracking-tight text-primary"><a class="hover:opacity-80 transition-opacity" href="/">Saber-ne+</a></div>
+<div class="h-6 w-[1px] bg-outline-variant mx-2"></div>
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Technical Reference</span>
+</div>
+<div class="hidden md:flex items-center gap-6">
+<a class="text-on-surface-variant font-medium text-sm hover:text-primary transition-colors" href="/saber-ne">Adaptar materials</a>
+<a class="text-primary font-semibold text-sm" href="/cuina">Com funciona ATNE</a>
+<a class="text-on-surface-variant font-medium text-sm hover:text-primary transition-colors" href="/avaluacio">Avaluació i decisions</a>
 </div>
 <div class="flex items-center gap-4">
-<button class="p-2 rounded-full hover:bg-surface-container-low transition-all">
-<span class="material-symbols-outlined text-[#3337a6]" data-icon="account_circle">account_circle</span>
-</button>
+<a class="text-xs font-semibold text-on-surface-variant hover:text-primary transition-colors" href="/">← Adaptador</a>
+<button class="material-symbols-outlined text-primary">account_circle</button>
 </div>
 </nav>
-<div class="max-w-[1280px] mx-auto flex px-8 py-12 gap-12">
-<!-- SideNavBar -->
-<aside class="sticky top-24 left-0 w-64 h-fit flex flex-col gap-4 py-8 px-4 font-body text-sm font-medium">
-<div class="mb-6 pl-5">
-<h3 class="font-headline font-bold text-[#3337a6] text-lg leading-tight">Com funciona ATNE</h3>
-<p class="text-on-surface-variant text-xs font-label mt-1">TECHNICAL GUIDE</p>
+
+<div class="flex pt-[57px] min-h-screen">
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- Sidebar                                                     -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<aside class="w-64 bg-white border-r border-outline-variant/30 fixed left-0 h-[calc(100vh-57px)] overflow-y-auto hidden lg:block z-30">
+<div class="p-6">
+<h3 class="text-[10px] font-bold uppercase tracking-widest text-outline mb-6">Navegació del Document</h3>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-surface-container transition-colors" href="#pilars"><span class="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary text-[10px] rounded-full">01</span>Pilars</a>
+<a class="flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-surface-container transition-colors" href="#flux"><span class="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary text-[10px] rounded-full">02</span>Flux del pipeline</a>
+<a class="flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-surface-container transition-colors" href="#memoria"><span class="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary text-[10px] rounded-full">03</span>Memòria triàdica</a>
+<a class="flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-surface-container transition-colors" href="#cataleg"><span class="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary text-[10px] rounded-full">04</span>Catàleg instruccions</a>
+<a class="flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-surface-container transition-colors" href="#corpus"><span class="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary text-[10px] rounded-full">05</span>Corpus FJE</a>
+<a class="flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-surface-container transition-colors" href="#preview"><span class="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary text-[10px] rounded-full">06</span>Prompt preview</a>
+<a class="flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-surface-container transition-colors" href="#rag"><span class="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary text-[10px] rounded-full">07</span>RAG + KG</a>
+<a class="flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-surface-container transition-colors" href="#evolucio"><span class="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary text-[10px] rounded-full">08</span>Evolució</a>
+</nav>
 </div>
-<a class="text-[#3337a6] font-bold border-l-4 border-[#3337a6] pl-4 flex items-center gap-3 py-2" href="#flux">
-<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span> Flux
-            </a>
-<a class="text-slate-400 pl-5 hover:bg-[#eff4ff] rounded-lg transition-all flex items-center gap-3 py-2" href="#memoria">
-<span class="material-symbols-outlined" data-icon="psychology">psychology</span> Memòria
-            </a>
-<a class="text-slate-400 pl-5 hover:bg-[#eff4ff] rounded-lg transition-all flex items-center gap-3 py-2" href="#instruccions">
-<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span> Instruccions
-            </a>
-<a class="text-slate-400 pl-5 hover:bg-[#eff4ff] rounded-lg transition-all flex items-center gap-3 py-2" href="#catalog">
-<span class="material-symbols-outlined" data-icon="library_books">library_books</span> Catalog
-            </a>
 </aside>
-<!-- Main Content -->
-<main class="flex-1 max-w-[1100px]">
-<!-- Header Section -->
-<header class="mb-16">
-<div class="inline-block px-3 py-1 bg-surface-container-high text-primary rounded-full text-[10px] font-bold tracking-widest uppercase mb-4">Bloc 2 • Arquitectura</div>
-<h1 class="font-headline text-5xl font-extrabold text-on-surface tracking-tight mb-6">L'engranatge de la intel·ligència educativa</h1>
-<p class="text-xl text-on-surface-variant max-w-2xl leading-relaxed">Explora com ATNE processa, entén i transforma el contingut educatiu mitjançant un flux cognitiu avançat.</p>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- Main                                                        -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<main class="flex-1 lg:ml-64 bg-background p-8">
+<div class="max-w-[1400px] mx-auto">
+
+<header class="mb-12">
+<h1 class="text-4xl font-extrabold text-on-surface mb-3 tracking-tight">L'engranatge de la intel·ligència educativa</h1>
+<p class="text-lg text-on-surface-variant max-w-3xl">Com ATNE transforma un text en una adaptació ajustada al perfil d'un alumne, pas a pas. Arquitectura determinista, 96 instruccions, model open-source al free tier, verificació automàtica i transparència total via prompt preview.</p>
 </header>
-<!-- Section 1: Flux d'adaptació -->
-<section class="mb-24 scroll-mt-24" id="flux">
-<div class="flex items-center gap-4 mb-8">
-<span class="material-symbols-outlined text-primary text-3xl" data-icon="account_tree">account_tree</span>
-<h2 class="font-headline text-2xl font-bold">El flux d'adaptació</h2>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- §1 Pilars — 4 cards                                         -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="mb-16 scroll-mt-24" id="pilars">
+<div class="flex items-center gap-3 mb-6">
+<span class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm">01</span>
+<h2 class="text-2xl font-bold">Els 4 pilars</h2>
 </div>
-<div class="relative flex flex-wrap lg:flex-nowrap gap-4 items-center overflow-x-auto pb-8">
-<!-- Phase 1 -->
-<div class="min-w-[180px] flex-1 bg-surface-container-lowest p-6 rounded-2xl shadow-sm group hover:scale-[1.02] transition-transform">
-<div class="text-primary-container font-label text-[10px] font-bold mb-2">01. INICI</div>
-<h4 class="font-bold text-lg mb-2">Entrada</h4>
-<p class="text-xs text-on-surface-variant leading-relaxed">Càrrega de PDF, DOCX o text pla de l'usuari.</p>
+<p class="text-on-surface-variant mb-6 max-w-3xl">ATNE no és un assistent conversacional. És un motor de regles deterministes amb un LLM d'execució al final del pipeline. Aquests són els seus quatre pilars tècnics.</p>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+<div class="p-6 bg-white rounded-xl shadow-sm border border-outline-variant/20 hover:border-primary/50 transition-colors">
+<div class="w-10 h-10 rounded bg-indigo-100 text-indigo-700 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined">precision_manufacturing</span>
 </div>
-<span class="material-symbols-outlined text-outline-variant rotate-90 lg:rotate-0" data-icon="arrow_forward">arrow_forward</span>
-<!-- Phase 2 -->
-<div class="min-w-[180px] flex-1 bg-surface-container-lowest p-6 rounded-2xl shadow-sm group hover:scale-[1.02] transition-transform">
-<div class="text-primary-container font-label text-[10px] font-bold mb-2">02. PERFIL</div>
-<h4 class="font-bold text-lg mb-2">Configuració</h4>
-<p class="text-xs text-on-surface-variant leading-relaxed">Selecció de l'estudiant i criteris NEAE.</p>
+<h3 class="font-bold text-lg mb-2">Arquitectura determinista</h3>
+<p class="text-sm text-on-surface-variant leading-snug">Catàleg de <strong class="text-on-surface">96 instruccions</strong> graduades per MECR i activades per perfil. Sense recuperació dinàmica. El RAG es va desactivar el 2026-04-09 perquè les instruccions cobrien exhaustivament el "què fer".</p>
 </div>
-<span class="material-symbols-outlined text-outline-variant rotate-90 lg:rotate-0" data-icon="arrow_forward">arrow_forward</span>
-<!-- Phase 3 -->
-<div class="min-w-[180px] flex-1 bg-primary-container p-6 rounded-2xl shadow-md text-on-primary group hover:scale-[1.02] transition-transform">
-<div class="text-on-primary/60 font-label text-[10px] font-bold mb-2">03. MOTOR</div>
-<h4 class="font-bold text-lg mb-2 text-white">Retrieval</h4>
-<p class="text-xs text-on-primary/80 leading-relaxed">Cerca semàntica a la base de coneixement.</p>
+
+<div class="p-6 bg-white rounded-xl shadow-sm border border-outline-variant/20 hover:border-primary/50 transition-colors">
+<div class="w-10 h-10 rounded bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined">smart_toy</span>
 </div>
-<span class="material-symbols-outlined text-outline-variant rotate-90 lg:rotate-0" data-icon="arrow_forward">arrow_forward</span>
-<!-- Phase 4 -->
-<div class="min-w-[180px] flex-1 bg-surface-container-lowest p-6 rounded-2xl shadow-sm group hover:scale-[1.02] transition-transform">
-<div class="text-primary-container font-label text-[10px] font-bold mb-2">04. CORE</div>
-<h4 class="font-bold text-lg mb-2">Adaptació</h4>
-<p class="text-xs text-on-surface-variant leading-relaxed">Execució de les instruccions pedagògiques.</p>
+<h3 class="font-bold text-lg mb-2">Model d'execució</h3>
+<p class="text-sm text-on-surface-variant leading-snug"><strong class="text-on-surface">Gemma 4 31B</strong> o <strong class="text-on-surface">Mistral Small</strong> segons env var <code class="text-[10px] bg-surface-container px-1 rounded">ATNE_MODEL</code>. Els dos al free tier. Gemma 4 és el recomanat a producció FJE (triangulació).</p>
 </div>
-<span class="material-symbols-outlined text-outline-variant rotate-90 lg:rotate-0" data-icon="arrow_forward">arrow_forward</span>
-<!-- Phase 5 -->
-<div class="min-w-[180px] flex-1 bg-surface-container-lowest p-6 rounded-2xl shadow-sm group hover:scale-[1.02] transition-transform">
-<div class="text-primary-container font-label text-[10px] font-bold mb-2">05. FINAL</div>
-<h4 class="font-bold text-lg mb-2">Sortida</h4>
-<p class="text-xs text-on-surface-variant leading-relaxed">Material a punt per descarregar i editar.</p>
+
+<div class="p-6 bg-white rounded-xl shadow-sm border border-outline-variant/20 hover:border-primary/50 transition-colors">
+<div class="w-10 h-10 rounded bg-amber-100 text-amber-700 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined">task_alt</span>
+</div>
+<h3 class="font-bold text-lg mb-2">Verify + Retry</h3>
+<p class="text-sm text-on-surface-variant leading-snug">Cada adaptació passa per verificació rúbrica Python. Llindar <strong class="text-on-surface">≥4.0/5</strong>. Si no passa, es regenera. Màxim <strong class="text-on-surface">2 intents</strong> automàtics. Millora la consistència sense intervenció humana.</p>
+</div>
+
+<div class="p-6 bg-white rounded-xl shadow-sm border border-outline-variant/20 hover:border-primary/50 transition-colors">
+<div class="w-10 h-10 rounded bg-rose-100 text-rose-700 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined">visibility</span>
+</div>
+<h3 class="font-bold text-lg mb-2">Prompt Preview</h3>
+<p class="text-sm text-on-surface-variant leading-snug">L'endpoint <code class="text-[10px] bg-surface-container px-1 rounded">/api/prompt-preview</code> munta el prompt complet <strong class="text-on-surface">sense cridar l'LLM</strong>. Cost zero. Per transparència i inspecció.</p>
+</div>
+
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- §2 Flux del pipeline — 6 passos                             -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="mb-16 scroll-mt-24" id="flux">
+<div class="flex items-center gap-3 mb-6">
+<span class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm">02</span>
+<h2 class="text-2xl font-bold">Flux del pipeline</h2>
+</div>
+<p class="text-on-surface-variant mb-6 max-w-3xl">El pipeline complet en 6 passos, des que el docent enganxa un text fins que rep l'adaptació verificada.</p>
+
+<div class="space-y-4">
+<div class="flex gap-4 p-6 bg-white rounded-xl border border-outline-variant/20">
+<span class="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold">01</span>
+<div class="flex-1">
+<h3 class="font-bold text-base mb-2">El docent configura</h3>
+<p class="text-sm text-on-surface-variant">Enganxa o puja el text. Defineix el context (etapa, curs, àmbit, matèria, gènere discursiu). Defineix el perfil de l'alumne — <strong class="text-on-surface">via diagnòstic</strong> (condicions + situacions + sub-variables) o <strong class="text-on-surface">via observable</strong> (5 conductes).</p>
+</div>
+</div>
+
+<div class="flex gap-4 p-6 bg-white rounded-xl border border-outline-variant/20">
+<span class="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold">02</span>
+<div class="flex-1">
+<h3 class="font-bold text-base mb-2">El sistema calcula automàticament</h3>
+<p class="text-sm text-on-surface-variant">DUA (<strong class="text-on-surface">Accés / Core / Enriquiment</strong>) auto-computat per severitat de perfil. MECR de sortida calculat des de l'etapa + barreres lingüístiques. Complements activats per regles ([server.py:337-439](/cuina#flux)).</p>
+</div>
+</div>
+
+<div class="flex gap-4 p-6 bg-white rounded-xl border border-outline-variant/20">
+<span class="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold">03</span>
+<div class="flex-1">
+<h3 class="font-bold text-base mb-2">Filtre d'instruccions</h3>
+<p class="text-sm text-on-surface-variant">De les <strong class="text-on-surface">96 instruccions</strong> del catàleg, se'n seleccionen ~40-60 segons perfil + MECR + sub-variables. Supressió intel·ligent de redundants. Intensificació per gravetat. Agrupació en <strong class="text-on-surface">7-8 macrodirectives</strong> (LÈXIC, SINTAXI, ESTRUCTURA, COGNITIU, QUALITAT, MULTIMODAL, AVALUACIÓ, PERSONALITZACIÓ).</p>
+</div>
+</div>
+
+<div class="flex gap-4 p-6 bg-white rounded-xl border border-outline-variant/20">
+<span class="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold">04</span>
+<div class="flex-1">
+<h3 class="font-bold text-base mb-2">Prompt assemblat — 4 capes</h3>
+<p class="text-sm text-on-surface-variant"><strong class="text-on-surface">Capa 1</strong> Identitat (fixa: "Ets ATNE de Jesuïtes Educació"). <strong class="text-on-surface">Capa 2</strong> Macrodirectives (7-8 blocs sense IDs visibles). <strong class="text-on-surface">Capa 3</strong> Context (educatiu + persona-audience + blocs del corpus FJE). <strong class="text-on-surface">Capa 4</strong> Format de sortida (## Text adaptat + seccions opcionals).</p>
+</div>
+</div>
+
+<div class="flex gap-4 p-6 bg-white rounded-xl border border-outline-variant/20">
+<span class="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold">05</span>
+<div class="flex-1">
+<h3 class="font-bold text-base mb-2">LLM genera</h3>
+<p class="text-sm text-on-surface-variant">Gemma 4 31B o Mistral Small rep el system prompt + text original. Temperatura <strong class="text-on-surface">0.4</strong>, max output <strong class="text-on-surface">16.384 tokens</strong>. Streaming SSE al frontend. L'LLM no veu els IDs d'instruccions — només macrodirectives temàtiques.</p>
+</div>
+</div>
+
+<div class="flex gap-4 p-6 bg-white rounded-xl border border-outline-variant/20">
+<span class="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold">06</span>
+<div class="flex-1">
+<h3 class="font-bold text-base mb-2">Verify + Retry i entrega</h3>
+<p class="text-sm text-on-surface-variant">Rúbrica Python verifica llargada de frases per MECR, vocabulari prohibit, mètriques. Score <strong class="text-on-surface">&lt; 4.0/5</strong> dispara retry automàtic (max 2 intents). El docent rep el text a la columna dreta: editable, amb feedback i export PDF/DOCX/TXT.</p>
+</div>
 </div>
 </div>
 </section>
-<!-- Section 2: La memòria triàdica -->
-<section class="mb-24 scroll-mt-24" id="memoria">
-<div class="flex items-center gap-4 mb-8">
-<span class="material-symbols-outlined text-primary text-3xl" data-icon="psychology">psychology</span>
-<h2 class="font-headline text-2xl font-bold">La memòria triàdica</h2>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- §3 Memòria triàdica                                          -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="mb-16 scroll-mt-24" id="memoria">
+<div class="flex items-center gap-3 mb-6">
+<span class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm">03</span>
+<h2 class="text-2xl font-bold">Memòria triàdica</h2>
 </div>
+<p class="text-on-surface-variant mb-6 max-w-3xl">Tres capes de context que el sistema envia al LLM per entendre <em>per a qui</em> escriu. Important: avui el context es passa per petició, no es persisteix entre sessions — aquesta memòria és <strong class="text-on-surface">aspiracional</strong>, serà completa a la v2.</p>
+
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-<div class="bg-surface-container-low p-8 rounded-2xl group hover:bg-surface-container-high transition-colors">
-<div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-6 shadow-sm">
-<span class="material-symbols-outlined text-primary" data-icon="person">person</span>
+<div class="p-6 bg-white rounded-xl border border-outline-variant/20">
+<div class="w-10 h-10 rounded bg-indigo-100 text-indigo-700 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined">person</span>
 </div>
-<h3 class="text-xl font-bold mb-3 font-headline">Memòria de l'Alumne</h3>
-<p class="text-on-surface-variant leading-relaxed">Emmagatzema necessitats específiques, fortaleses i l'historial d'adaptacions que han funcionat millor.</p>
+<h3 class="font-bold text-lg mb-2">Alumne</h3>
+<p class="text-sm text-on-surface-variant leading-snug mb-3">Origen, L1, MECR, alfabetització llatina, condicions i situacions actives, sub-variables fines (grau, severitat, presentació).</p>
+<p class="text-[11px] text-primary/80 italic">Estat: per petició. Pendent: perfil persistent per alumne.</p>
 </div>
-<div class="bg-surface-container-low p-8 rounded-2xl group hover:bg-surface-container-high transition-colors">
-<div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-6 shadow-sm">
-<span class="material-symbols-outlined text-primary" data-icon="groups">groups</span>
+<div class="p-6 bg-white rounded-xl border border-outline-variant/20">
+<div class="w-10 h-10 rounded bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined">groups</span>
 </div>
-<h3 class="text-xl font-bold mb-3 font-headline">Memòria de la Classe</h3>
-<p class="text-on-surface-variant leading-relaxed">Entén la dinàmica de grup i el nivell base del currículum que s'està impartint a l'aula.</p>
+<h3 class="font-bold text-lg mb-2">Classe</h3>
+<p class="text-sm text-on-surface-variant leading-snug mb-3">Configuració multinivell (distribució d'alumnes per nivell DUA), estil de suport preferit del docent, recursos disponibles a l'aula.</p>
+<p class="text-[11px] text-primary/80 italic">Estat: no implementat. Pendent: configuració per grup classe.</p>
 </div>
-<div class="bg-surface-container-low p-8 rounded-2xl group hover:bg-surface-container-high transition-colors">
-<div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-6 shadow-sm">
-<span class="material-symbols-outlined text-primary" data-icon="auto_stories">auto_stories</span>
+<div class="p-6 bg-white rounded-xl border border-outline-variant/20">
+<div class="w-10 h-10 rounded bg-amber-100 text-amber-700 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined">menu_book</span>
 </div>
-<h3 class="text-xl font-bold mb-3 font-headline">Memòria de la Matèria</h3>
-<p class="text-on-surface-variant leading-relaxed">Vocabulari tècnic, conceptes clau i mapes conceptuals propis de cada àrea de coneixement.</p>
-</div>
-</div>
-</section>
-<!-- Section 3: Les 88 instruccions -->
-<section class="mb-24 scroll-mt-24" id="instruccions">
-<div class="flex items-center gap-4 mb-8">
-<span class="material-symbols-outlined text-primary text-3xl" data-icon="menu_book">menu_book</span>
-<h2 class="font-headline text-2xl font-bold">Les 88 instruccions</h2>
-</div>
-<div class="bg-surface-container-low rounded-2xl p-8">
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-<!-- Instruction Card 1 -->
-<div class="bg-white p-6 rounded-xl border-l-4 border-primary shadow-sm">
-<div class="flex justify-between items-start mb-4">
-<span class="text-[10px] font-bold text-primary-container bg-surface-container-low px-2 py-1 rounded">CATEGORIA: SINTAXI</span>
-<span class="material-symbols-outlined text-outline-variant text-sm" data-icon="bolt">bolt</span>
-</div>
-<h4 class="font-bold text-lg mb-2">Simplificació Oracional</h4>
-<p class="text-xs text-on-surface-variant mb-4 italic">Trigger: Frases amb més de 2 subordinades</p>
-<div class="bg-surface-container-low p-3 rounded-lg text-xs font-mono text-on-surface">
-                                [REGHLA]: Divideix en frases curtes d'estructura S-V-O.
-                            </div>
-</div>
-<!-- Instruction Card 2 -->
-<div class="bg-white p-6 rounded-xl border-l-4 border-secondary shadow-sm">
-<div class="flex justify-between items-start mb-4">
-<span class="text-[10px] font-bold text-on-secondary-container bg-secondary-container/20 px-2 py-1 rounded">CATEGORIA: VISUAL</span>
-<span class="material-symbols-outlined text-outline-variant text-sm" data-icon="visibility">visibility</span>
-</div>
-<h4 class="font-bold text-lg mb-2">Suport per Imatges</h4>
-<p class="text-xs text-on-surface-variant mb-4 italic">Trigger: Substantius de caràcter abstracte</p>
-<div class="bg-surface-container-low p-3 rounded-lg text-xs font-mono text-on-surface">
-                                [REGHLA]: Insereix pictogrames ARASAAC rellevants.
-                            </div>
-</div>
-</div>
-<button class="w-full py-4 bg-surface-container-highest rounded-xl text-primary font-bold flex items-center justify-center gap-2 hover:bg-surface-container-high transition-colors">
-                        Veure totes les 88 instruccions
-                        <span class="material-symbols-outlined" data-icon="expand_more">expand_more</span>
-</button>
-</div>
-</section>
-<!-- Section 4: Catàleg de complements -->
-<section class="mb-24 scroll-mt-24" id="catalog">
-<div class="flex items-center gap-4 mb-8">
-<span class="material-symbols-outlined text-primary text-3xl" data-icon="library_books">library_books</span>
-<h2 class="font-headline text-2xl font-bold">El catàleg de complements</h2>
-</div>
-<div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
-<!-- Component Items -->
-<div class="aspect-square bg-surface-container-low rounded-2xl flex flex-col items-center justify-center p-4 text-center hover:bg-primary hover:text-white transition-all cursor-default group">
-<span class="material-symbols-outlined text-3xl mb-3 group-hover:scale-110 transition-transform" data-icon="menu_book">menu_book</span>
-<span class="text-xs font-bold">Glossari</span>
-</div>
-<div class="aspect-square bg-surface-container-low rounded-2xl flex flex-col items-center justify-center p-4 text-center hover:bg-primary hover:text-white transition-all cursor-default group">
-<span class="material-symbols-outlined text-3xl mb-3 group-hover:scale-110 transition-transform" data-icon="format_bold">format_bold</span>
-<span class="text-xs font-bold">Negretes</span>
-</div>
-<div class="aspect-square bg-surface-container-low rounded-2xl flex flex-col items-center justify-center p-4 text-center hover:bg-primary hover:text-white transition-all cursor-default group">
-<span class="material-symbols-outlined text-3xl mb-3 group-hover:scale-110 transition-transform" data-icon="emoji_emotions">emoji_emotions</span>
-<span class="text-xs font-bold">Pictogrames</span>
-</div>
-<div class="aspect-square bg-surface-container-low rounded-2xl flex flex-col items-center justify-center p-4 text-center hover:bg-primary hover:text-white transition-all cursor-default group">
-<span class="material-symbols-outlined text-3xl mb-3 group-hover:scale-110 transition-transform" data-icon="list_alt">list_alt</span>
-<span class="text-xs font-bold">Checklists</span>
-</div>
-<div class="aspect-square bg-surface-container-low rounded-2xl flex flex-col items-center justify-center p-4 text-center hover:bg-primary hover:text-white transition-all cursor-default group">
-<span class="material-symbols-outlined text-3xl mb-3 group-hover:scale-110 transition-transform" data-icon="help">help</span>
-<span class="text-xs font-bold">Preguntes</span>
-</div>
-<div class="aspect-square bg-surface-container-low rounded-2xl flex flex-col items-center justify-center p-4 text-center hover:bg-primary hover:text-white transition-all cursor-default group">
-<span class="material-symbols-outlined text-3xl mb-3 group-hover:scale-110 transition-transform" data-icon="summarize">summarize</span>
-<span class="text-xs font-bold">Resums</span>
-</div>
-<div class="aspect-square bg-surface-container-low rounded-2xl flex flex-col items-center justify-center p-4 text-center hover:bg-primary hover:text-white transition-all cursor-default group">
-<span class="material-symbols-outlined text-3xl mb-3 group-hover:scale-110 transition-transform" data-icon="schema">schema</span>
-<span class="text-xs font-bold">Esquemes</span>
-</div>
-<div class="aspect-square bg-surface-container-low rounded-2xl flex flex-col items-center justify-center p-4 text-center hover:bg-primary hover:text-white transition-all cursor-default group">
-<span class="material-symbols-outlined text-3xl mb-3 group-hover:scale-110 transition-transform" data-icon="edit_note">edit_note</span>
-<span class="text-xs font-bold">Autocorrecció</span>
-</div>
-<div class="aspect-square bg-surface-container-low rounded-2xl flex flex-col items-center justify-center p-4 text-center hover:bg-primary hover:text-white transition-all cursor-default group">
-<span class="material-symbols-outlined text-3xl mb-3 group-hover:scale-110 transition-transform" data-icon="record_voice_over">record_voice_over</span>
-<span class="text-xs font-bold">Àudios</span>
-</div>
-<div class="aspect-square bg-surface-container-low rounded-2xl flex flex-col items-center justify-center p-4 text-center hover:bg-primary hover:text-white transition-all cursor-default group">
-<span class="material-symbols-outlined text-3xl mb-3 group-hover:scale-110 transition-transform" data-icon="translate">translate</span>
-<span class="text-xs font-bold">Traduccions</span>
+<h3 class="font-bold text-lg mb-2">Matèria</h3>
+<p class="text-sm text-on-surface-variant leading-snug mb-3">Assignatura, estil de redacció esperat, termes intocables (nomenclatura binomial a biologia, topònims a geografia, etc.), gèneres discursius propis.</p>
+<p class="text-[11px] text-primary/80 italic">Estat: camp present, no activat per instruccions. Parking lot.</p>
 </div>
 </div>
 </section>
-<!-- Section 5: RAG + Knowledge Graph -->
-<section class="mb-24 scroll-mt-24" id="rag">
-<div class="flex items-center gap-4 mb-8">
-<span class="material-symbols-outlined text-primary text-3xl" data-icon="hub">hub</span>
-<h2 class="font-headline text-2xl font-bold">RAG + Knowledge Graph</h2>
-</div>
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-<!-- Vector Search -->
-<div class="bg-white p-8 rounded-2xl shadow-sm">
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- §4 Catàleg d'instruccions (interactive)                      -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="mb-16 scroll-mt-24" id="cataleg">
 <div class="flex items-center gap-3 mb-6">
-<span class="material-symbols-outlined text-secondary" data-icon="search">search</span>
-<h4 class="font-bold text-xl">Cerca Vectorial (RAG)</h4>
+<span class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm">04</span>
+<h2 class="text-2xl font-bold">Catàleg de 96 instruccions</h2>
 </div>
-<p class="text-on-surface-variant text-sm mb-8 leading-relaxed">Localització de fragments de text basats en similitud semàntica purament lingüística.</p>
-<div class="space-y-4">
-<div class="flex justify-between items-center text-xs font-label">
-<span>Dimensions</span>
-<span class="bg-surface-container-low px-2 py-1 rounded font-bold">1536d</span>
+<p class="text-on-surface-variant mb-6 max-w-3xl">El motor deterministic. Cada instrucció té un ID (A-01, H-04...), un criteri d'activació i una gradació opcional per MECR. El filtre en selecciona ~40-60 per cas i les agrupa en macrodirectives temàtiques.</p>
+
+<!-- Stats bar -->
+<div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+<div class="p-5 bg-white rounded-xl border border-outline-variant/20 text-center">
+<div class="text-3xl font-extrabold text-primary">96</div>
+<div class="text-[10px] font-bold uppercase tracking-widest text-outline mt-1">Total</div>
 </div>
-<div class="w-full bg-surface-container-low h-2 rounded-full overflow-hidden">
-<div class="bg-secondary h-full w-[85%]"></div>
+<div class="p-5 bg-white rounded-xl border border-outline-variant/20 text-center">
+<div class="text-3xl font-extrabold text-primary">~12</div>
+<div class="text-[10px] font-bold uppercase tracking-widest text-outline mt-1">Sempre</div>
 </div>
-<div class="flex justify-between items-center text-xs font-label">
-<span>Latència retrieval</span>
-<span class="bg-surface-container-low px-2 py-1 rounded font-bold">42ms</span>
+<div class="p-5 bg-white rounded-xl border border-outline-variant/20 text-center">
+<div class="text-3xl font-extrabold text-primary">~31</div>
+<div class="text-[10px] font-bold uppercase tracking-widest text-outline mt-1">Nivell MECR</div>
+</div>
+<div class="p-5 bg-white rounded-xl border border-outline-variant/20 text-center">
+<div class="text-3xl font-extrabold text-primary">~38</div>
+<div class="text-[10px] font-bold uppercase tracking-widest text-outline mt-1">Perfil</div>
+</div>
+<div class="p-5 bg-white rounded-xl border border-outline-variant/20 text-center">
+<div class="text-3xl font-extrabold text-primary">~3</div>
+<div class="text-[10px] font-bold uppercase tracking-widest text-outline mt-1">Complement</div>
+</div>
+</div>
+
+<!-- Example cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+<div class="p-5 bg-white rounded-xl border border-outline-variant/20">
+<div class="flex items-center gap-2 mb-2">
+<span class="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">A-01</span>
+<span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded uppercase tracking-wider">LÈXIC · Sempre</span>
+</div>
+<h4 class="font-bold text-sm mb-1">Vocabulari d'alta freqüència</h4>
+<p class="text-xs text-on-surface-variant leading-snug">Usa preferentment paraules del corpus català contemporani freqüent. Els termes tècnics van en negreta amb explicació la primera vegada.</p>
+</div>
+
+<div class="p-5 bg-white rounded-xl border border-outline-variant/20">
+<div class="flex items-center gap-2 mb-2">
+<span class="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">H-04</span>
+<span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded uppercase tracking-wider">PERFIL · TDAH</span>
+</div>
+<h4 class="font-bold text-sm mb-1">Chunking en micro-blocs</h4>
+<p class="text-xs text-on-surface-variant leading-snug">Divideix el text en blocs de 3-5 frases. Si <code class="text-[10px]">baixa_memoria_treball=true</code>, intensifica a blocs de 2-3 frases.</p>
+</div>
+
+<div class="p-5 bg-white rounded-xl border border-outline-variant/20">
+<div class="flex items-center gap-2 mb-2">
+<span class="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">C-01</span>
+<span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded uppercase tracking-wider">NIVELL · Graduada MECR</span>
+</div>
+<h4 class="font-bold text-sm mb-1">Una idea per frase</h4>
+<p class="text-xs text-on-surface-variant leading-snug">pre-A1/A1: frases de 3-8 paraules. A2: fins a 12. B1: fins a 18. B2: sense restricció fixa. Connectors explícits entre frases.</p>
+</div>
+</div>
+
+<!-- Interactive placeholder -->
+<div class="p-8 bg-primary/5 border-2 border-dashed border-primary/30 rounded-xl">
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-primary text-3xl">data_object</span>
+<div class="flex-1">
+<h4 class="font-bold text-primary mb-2">Vista interactiva del catàleg</h4>
+<p class="text-sm text-on-surface-variant mb-4">A producció, aquesta secció és una eina interactiva que crida l'endpoint <code class="text-[11px] bg-surface-container px-1 rounded">GET /api/catalog</code> i mostra les 96 instruccions amb filtres (activació, categoria, perfil) + estadístiques dinàmiques + vista per perfil. Permet explorar quines instruccions s'activen per a cada combinació perfil + MECR + sub-variables.</p>
+<button class="px-4 py-2 bg-primary text-white text-sm font-bold rounded-lg hover:bg-primary-container transition-colors">Veure catàleg interactiu →</button>
 </div>
 </div>
 </div>
-<!-- Knowledge Graph -->
-<div class="bg-white p-8 rounded-2xl shadow-sm">
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- §5 Corpus FJE                                                -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="mb-16 scroll-mt-24" id="corpus">
 <div class="flex items-center gap-3 mb-6">
-<span class="material-symbols-outlined text-primary" data-icon="account_tree">account_tree</span>
-<h4 class="font-bold text-xl">Expansió per KG</h4>
+<span class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm">05</span>
+<h2 class="text-2xl font-bold">Corpus pedagògic FJE</h2>
 </div>
-<p class="text-on-surface-variant text-sm mb-8 leading-relaxed">Enriquiment del context mitjançant relacions ontològiques predefinides (ex: "Mammífer" ISA "Animal").</p>
+<p class="text-on-surface-variant mb-6 max-w-3xl">El corpus de Jesuïtes Educació està organitzat en 10 mòduls (M0-M9) que cobreixen des de la identitat institucional fins al marc legal. Els blocs rellevants s'injecten al system prompt sota la Capa 3 de Context.</p>
+
+<div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+<div class="p-3 bg-white rounded-lg border border-outline-variant/20 text-center"><div class="text-xs font-bold text-primary">M0</div><div class="text-[10px] text-on-surface-variant">Identitat i Missió</div></div>
+<div class="p-3 bg-white rounded-lg border border-outline-variant/20 text-center"><div class="text-xs font-bold text-primary">M1</div><div class="text-[10px] text-on-surface-variant">Subjecte</div></div>
+<div class="p-3 bg-white rounded-lg border border-outline-variant/20 text-center"><div class="text-xs font-bold text-primary">M2</div><div class="text-[10px] text-on-surface-variant">Mètode (DUA)</div></div>
+<div class="p-3 bg-white rounded-lg border border-outline-variant/20 text-center"><div class="text-xs font-bold text-primary">M3</div><div class="text-[10px] text-on-surface-variant">Llengua (LF/CC)</div></div>
+<div class="p-3 bg-white rounded-lg border border-outline-variant/20 text-center"><div class="text-xs font-bold text-primary">M4</div><div class="text-[10px] text-on-surface-variant">Contingut</div></div>
+<div class="p-3 bg-white rounded-lg border border-outline-variant/20 text-center"><div class="text-xs font-bold text-primary">M5</div><div class="text-[10px] text-on-surface-variant">Tecnopedagogia</div></div>
+<div class="p-3 bg-white rounded-lg border border-outline-variant/20 text-center"><div class="text-xs font-bold text-primary">M6</div><div class="text-[10px] text-on-surface-variant">Avaluació</div></div>
+<div class="p-3 bg-white rounded-lg border border-outline-variant/20 text-center"><div class="text-xs font-bold text-primary">M7</div><div class="text-[10px] text-on-surface-variant">Entorn i Família</div></div>
+<div class="p-3 bg-white rounded-lg border border-outline-variant/20 text-center"><div class="text-xs font-bold text-primary">M8</div><div class="text-[10px] text-on-surface-variant">Governança</div></div>
+<div class="p-3 bg-white rounded-lg border border-outline-variant/20 text-center"><div class="text-xs font-bold text-primary">M9</div><div class="text-[10px] text-on-surface-variant">Marc Legal</div></div>
+</div>
+
+<!-- Interactive placeholder -->
+<div class="p-8 bg-primary/5 border-2 border-dashed border-primary/30 rounded-xl">
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-primary text-3xl">menu_book</span>
+<div class="flex-1">
+<h4 class="font-bold text-primary mb-2">Visualitzador del corpus</h4>
+<p class="text-sm text-on-surface-variant mb-4">A producció, aquesta secció crida <code class="text-[11px] bg-surface-container px-1 rounded">GET /api/corpus</code> i mostra els 17 documents fundacionals del corpus FJE amb navegació per seccions i preview Markdown. Serveix per auditar quins continguts del corpus s'utilitzen a cada adaptació.</p>
+<button class="px-4 py-2 bg-primary text-white text-sm font-bold rounded-lg hover:bg-primary-container transition-colors">Obrir visor del corpus →</button>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- §6 Prompt Preview                                            -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="mb-16 scroll-mt-24" id="preview">
+<div class="flex items-center gap-3 mb-6">
+<span class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm">06</span>
+<h2 class="text-2xl font-bold">Prompt preview (cost zero)</h2>
+</div>
+<p class="text-on-surface-variant mb-6 max-w-3xl">Eina de transparència radical: dona-li una configuració i el sistema munta el prompt complet <strong class="text-on-surface">sense cridar l'LLM</strong>. Útil per auditoria, validació docent i debugging.</p>
+
+<!-- 4 capes mockup -->
+<div class="space-y-3 mb-6">
+<div class="p-5 bg-white rounded-xl border border-outline-variant/30">
+<div class="flex items-center justify-between mb-2">
+<span class="text-[10px] font-bold text-indigo-700 uppercase tracking-wider">Capa 1 · Identitat</span>
+<span class="text-[10px] text-outline">fixa</span>
+</div>
+<p class="text-xs text-on-surface font-mono bg-surface-container-low p-3 rounded">"Ets ATNE de Jesuïtes Educació. Restriccions: NO inventis contingut. NO meta-text. Preserva termes tècnics. Adapta, no crees."</p>
+</div>
+
+<div class="p-5 bg-white rounded-xl border border-outline-variant/30">
+<div class="flex items-center justify-between mb-2">
+<span class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Capa 2 · Macrodirectives</span>
+<span class="text-[10px] text-outline">variable — 7-8 blocs temàtics</span>
+</div>
+<p class="text-xs text-on-surface leading-relaxed">LÈXIC (vocabulari, termes, referents) · SINTAXI (longitud frase, ordre SVO, connectors) · ESTRUCTURA (paràgrafs, títols, fragmentació) · COGNITIU (chunking, càrrega, bastides) · QUALITAT (no inventar, preservar rigor) · MULTIMODAL (pictogrames, esquemes) · AVALUACIÓ (preguntes, comprensió) · PERSONALITZACIÓ (ajustos perfil)</p>
+</div>
+
+<div class="p-5 bg-white rounded-xl border border-outline-variant/30">
+<div class="flex items-center justify-between mb-2">
+<span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider">Capa 3 · Context</span>
+<span class="text-[10px] text-outline">variable — educatiu + persona + blocs corpus</span>
+</div>
+<p class="text-xs text-on-surface leading-relaxed">Context educatiu (etapa, curs, matèria, gènere discursiu) · Persona-audience (narrativa natural de l'alumne: origen, L1, CALP, MECR, necessitats) · Blocs del corpus FJE (DUA block + gènere block + blocs de creuament) · Complements activats (glossari, esquema, preguntes...)</p>
+</div>
+
+<div class="p-5 bg-white rounded-xl border border-outline-variant/30">
+<div class="flex items-center justify-between mb-2">
+<span class="text-[10px] font-bold text-rose-700 uppercase tracking-wider">Capa 4 · Format de sortida</span>
+<span class="text-[10px] text-outline">fixa</span>
+</div>
+<p class="text-xs text-on-surface font-mono bg-surface-container-low p-3 rounded">## Text adaptat<br>## Argumentació pedagògica<br>(## Glossari · ## Esquema visual · ## Mapa conceptual · ## Preguntes de comprensió · ## Bastides · ## Activitats d'aprofundiment)</p>
+</div>
+</div>
+
+<!-- Interactive placeholder -->
+<div class="p-8 bg-primary/5 border-2 border-dashed border-primary/30 rounded-xl">
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-primary text-3xl">terminal</span>
+<div class="flex-1">
+<h4 class="font-bold text-primary mb-2">Generador de prompt preview</h4>
+<p class="text-sm text-on-surface-variant mb-4">A producció, aquesta secció té selectors (perfil, etapa, MECR, DUA, complements) que criden <code class="text-[11px] bg-surface-container px-1 rounded">POST /api/prompt-preview</code> i retornen el prompt complet assemblat — sense cridar l'LLM, <strong class="text-on-surface">cost zero</strong>. Inclou mètriques (nombre de paraules, tokens estimats, instruccions activades, capes).</p>
+<button class="px-4 py-2 bg-primary text-white text-sm font-bold rounded-lg hover:bg-primary-container transition-colors">Muntar prompt preview →</button>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- §7 RAG + KG                                                  -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="mb-16 scroll-mt-24" id="rag">
+<div class="flex items-center gap-3 mb-6">
+<span class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm">07</span>
+<h2 class="text-2xl font-bold">RAG + Knowledge Graph</h2>
+</div>
+<div class="p-4 bg-amber-50 border border-amber-200 rounded-xl mb-6">
+<p class="text-sm text-amber-900"><strong class="font-bold">Nota important:</strong> la infraestructura RAG+KG està <strong>desactivada</strong> des del 2026-04-09. Es manté retenguda per si cal reactivar-la en el futur, però el pipeline d'adaptació actual NO fa cerca vectorial. Els blocs del corpus FJE s'injecten directament des dels fitxers Markdown via <code class="text-[11px] bg-surface-container px-1 rounded">corpus_reader</code>, no via RAG dinàmic.</p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="p-6 bg-white rounded-xl border border-outline-variant/20">
+<div class="w-10 h-10 rounded bg-indigo-100 text-indigo-700 flex items-center justify-center mb-4"><span class="material-symbols-outlined">scatter_plot</span></div>
+<h3 class="font-bold text-lg mb-2">Cerca vectorial</h3>
+<p class="text-sm text-on-surface-variant leading-snug mb-3"><strong class="text-on-surface">1.443 chunks</strong> · embeddings 768d · Supabase pgvector · funció <code class="text-[10px]">match_rag_fje</code>.</p>
+<p class="text-[11px] text-outline italic">Infraestructura a Supabase, no invocada pel pipeline actual.</p>
+</div>
+<div class="p-6 bg-white rounded-xl border border-outline-variant/20">
+<div class="w-10 h-10 rounded bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4"><span class="material-symbols-outlined">hub</span></div>
+<h3 class="font-bold text-lg mb-2">Knowledge Graph</h3>
+<p class="text-sm text-on-surface-variant leading-snug mb-3"><strong class="text-on-surface">952 nodes</strong> + <strong class="text-on-surface">2.294 arestes</strong> · taules <code class="text-[10px]">kg_nodes</code>/<code class="text-[10px]">kg_edges</code> · expansió 1-2 salts via <code class="text-[10px]">kg_expand</code>.</p>
+<p class="text-[11px] text-outline italic">Infraestructura retenguda, no invocada pel pipeline actual.</p>
+</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- §8 Evolució de l'arquitectura — 8 fites                      -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="mb-24 scroll-mt-24" id="evolucio">
+<div class="flex items-center gap-3 mb-6">
+<span class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm">08</span>
+<h2 class="text-2xl font-bold">Com ha evolucionat l'arquitectura</h2>
+</div>
+<p class="text-on-surface-variant mb-6 max-w-3xl">ATNE no ha arribat a l'arquitectura actual de cop. Cada decisió ha estat el resultat d'un experiment concret. Aquestes són les 8 fites més rellevants del projecte, en ordre cronològic.</p>
+
 <div class="space-y-4">
-<div class="flex justify-between items-center text-xs font-label">
-<span>Nodes</span>
-<span class="bg-surface-container-low px-2 py-1 rounded font-bold">12.4k</span>
+<div class="flex gap-4 p-5 bg-white rounded-xl border border-outline-variant/30">
+<div class="flex-shrink-0 text-[10px] font-bold text-indigo-700 uppercase tracking-wider w-24">2026-03-27</div>
+<div>
+<h4 class="font-bold text-sm mb-1">Arquitectura inicial — catàleg jeràrquic de 96</h4>
+<p class="text-xs text-on-surface-variant">El primer catàleg tenia 30 instruccions duplicades i amb conflictes. Una auditoria exhaustiva va produir l'arquitectura actual: identitat fixa + instruccions universals + condicionals per perfil + context. El nucli de 25 instruccions cobria el 80% de l'impacte.</p>
 </div>
-<div class="w-full bg-surface-container-low h-2 rounded-full overflow-hidden">
-<div class="bg-primary h-full w-[65%]"></div>
 </div>
-<div class="flex justify-between items-center text-xs font-label">
-<span>Edges (Relacions)</span>
-<span class="bg-surface-container-low px-2 py-1 rounded font-bold">85k+</span>
+
+<div class="flex gap-4 p-5 bg-white rounded-xl border border-outline-variant/30">
+<div class="flex-shrink-0 text-[10px] font-bold text-emerald-700 uppercase tracking-wider w-24">2026-03-28</div>
+<div>
+<h4 class="font-bold text-sm mb-1">RAG vs hardcoded — primera aposta per RAG</h4>
+<p class="text-xs text-on-surface-variant">Un batch de 160 casos va comparar RAG (lectura dinàmica del corpus) vs prompt hardcoded. RAG va guanyar en riquesa: 3× més paraules i 3× més negretes. Es va adoptar com a via principal amb hardcoded com a fallback.</p>
 </div>
+</div>
+
+<div class="flex gap-4 p-5 bg-white rounded-xl border border-outline-variant/30">
+<div class="flex-shrink-0 text-[10px] font-bold text-amber-700 uppercase tracking-wider w-24">2026-03-30</div>
+<div>
+<h4 class="font-bold text-sm mb-1">Auditoria variables — només el 42% connectaven</h4>
+<p class="text-xs text-on-surface-variant">De 36 sub-variables del formulari, només 15 arribaven al prompt. Es van afegir instruccions noves i gradacions per MECR per connectar-ne més. Actualment el 56% (20/36) estan connectades.</p>
+</div>
+</div>
+
+<div class="flex gap-4 p-5 bg-white rounded-xl border border-outline-variant/30">
+<div class="flex-shrink-0 text-[10px] font-bold text-rose-700 uppercase tracking-wider w-24">2026-04-04</div>
+<div>
+<h4 class="font-bold text-sm mb-1">Gemma 4 free tier — motor sense factura</h4>
+<p class="text-xs text-on-surface-variant">Es va confirmar Gemma 4 31B via API gratuïta de Google: 30 RPM, 14.400 RPD, 15.000 TPM sense billing. Amb 7 claus rotades es cobreix el consum d'unes 1.000 docents. Canvia radicalment les matemàtiques d'escalat.</p>
+</div>
+</div>
+
+<div class="flex gap-4 p-5 bg-white rounded-xl border border-outline-variant/30">
+<div class="flex-shrink-0 text-[10px] font-bold text-error uppercase tracking-wider w-24">2026-04-08</div>
+<div>
+<h4 class="font-bold text-sm mb-1">Girada determinista — el RAG es desactiva</h4>
+<p class="text-xs text-on-surface-variant">Amb el catàleg complet de 96 instruccions, el prompt determinista supera el RAG en qualitat per <strong class="text-on-surface">+0.26 punts</strong>. El RAG recuperava referències teòriques que l'LLM ja tenia integrades. La infraestructura RAG es manté retenguda però no s'invoca.</p>
+</div>
+</div>
+
+<div class="flex gap-4 p-5 bg-white rounded-xl border border-outline-variant/30">
+<div class="flex-shrink-0 text-[10px] font-bold text-cyan-700 uppercase tracking-wider w-24">2026-04-11</div>
+<div>
+<h4 class="font-bold text-sm mb-1">Terminologia del perfil — condicions + situacions</h4>
+<p class="text-xs text-on-surface-variant">De "característiques" a <strong class="text-on-surface">condicions</strong> (permanents: TEA, TDAH, dislèxia...) + <strong class="text-on-surface">situacions contextuals</strong> (transitòries: nouvingut, vulnerabilitat, trastorn emocional). El perfil d'un alumne és la combinació única de diverses.</p>
+</div>
+</div>
+
+<div class="flex gap-4 p-5 bg-white rounded-xl border border-outline-variant/30">
+<div class="flex-shrink-0 text-[10px] font-bold text-purple-700 uppercase tracking-wider w-24">2026-04-11</div>
+<div>
+<h4 class="font-bold text-sm mb-1">Via observable — adaptar sense diagnòstic</h4>
+<p class="text-xs text-on-surface-variant">Via d'entrada alternativa per a docents sense diagnòstic clínic (60-80% dels casos reals). El docent marca <strong class="text-on-surface">5 conductes observables</strong> i el sistema dedueix perfils aproximats. Les conductes no estigmatitzen — només determinen ajuts al text.</p>
+</div>
+</div>
+
+<div class="flex gap-4 p-5 bg-white rounded-xl border border-outline-variant/30">
+<div class="flex-shrink-0 text-[10px] font-bold text-emerald-700 uppercase tracking-wider w-24">2026-04-12</div>
+<div>
+<h4 class="font-bold text-sm mb-1">Triangulació Gemma 4 — 3 experiments independents</h4>
+<p class="text-xs text-on-surface-variant">Gemma 4 31B guanya en adaptacions (<strong class="text-on-surface">4.75/5</strong>), complements (<strong class="text-on-surface">4.58/5</strong>) i preguntes de comprensió (<strong class="text-on-surface">4.40/5</strong>). Total: <strong class="text-on-surface">1.884 avaluacions</strong> en tres dominis independents. Recomanat com a model per defecte a la migració FJE. Detalls al bloc <a class="text-primary font-semibold hover:underline" href="/avaluacio">Avaluació i decisions</a>.</p>
 </div>
 </div>
 </div>
 </section>
-<!-- Section 6: Prompt Preview -->
-<section class="mb-24 scroll-mt-24" id="prompt">
-<div class="flex items-center gap-4 mb-8">
-<span class="material-symbols-outlined text-primary text-3xl" data-icon="terminal">terminal</span>
-<h2 class="font-headline text-2xl font-bold">Prompt Preview</h2>
+
 </div>
-<div class="bg-inverse-surface rounded-2xl overflow-hidden shadow-xl">
-<div class="bg-slate-800 px-4 py-3 flex gap-2 border-b border-slate-700">
-<div class="w-3 h-3 rounded-full bg-red-400"></div>
-<div class="w-3 h-3 rounded-full bg-yellow-400"></div>
-<div class="w-3 h-3 rounded-full bg-green-400"></div>
-<span class="ml-4 text-[10px] text-slate-400 font-mono">system_prompt_v2.4.md</span>
+</main>
+
 </div>
-<div class="p-8 font-mono text-sm leading-relaxed overflow-x-auto">
-<pre class="text-blue-300"># ROLE DEFINITION</pre>
-<pre class="text-slate-100">Ets un expert en pedagogia inclusiva i NEAE.</pre>
-<br/>
-<pre class="text-blue-300"># CONTEXT</pre>
-<pre class="text-slate-100">- Estudiant: <span class="text-emerald-400">{student_profile}</span></pre>
-<pre class="text-slate-100">- Matèria: <span class="text-emerald-400">{subject_context}</span></pre>
-<pre class="text-slate-100">- Dificultats: <span class="text-emerald-400">{cognitive_load_params}</span></pre>
-<br/>
-<pre class="text-blue-300"># GUIDELINES</pre>
-<pre class="text-slate-100">1. Aplica les regles de lectura fàcil.</pre>
-<pre class="text-slate-100">2. Re-estructura el text segons <span class="text-yellow-300">active_instructions_list</span>.</pre>
-<pre class="text-slate-100">3. Manté el rigor acadèmic però redueix la densitat sintàctica.</pre>
-<br/>
-<pre class="text-slate-500">// Output: Markdown format ready for export.</pre>
+
+<!-- Footer -->
+<footer class="bg-white py-8 lg:ml-64 px-8 border-t border-outline-variant/30">
+<div class="max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="brand-font text-lg font-bold text-primary"><a class="hover:opacity-80 transition-opacity" href="/">Saber-ne+</a></div>
+<div class="flex gap-6 text-[10px] font-bold uppercase text-on-surface-variant">
+<a class="hover:text-primary" href="/">Adaptador</a>
+<a class="hover:text-primary" href="/saber-ne">Adaptar materials</a>
+<a class="hover:text-primary" href="/avaluacio">Avaluació</a>
 </div>
-</div>
-</section>
-<!-- Bottom CTA / Support -->
-<footer class="pt-12 border-t border-surface-container-high text-center">
-<p class="text-on-surface-variant text-sm mb-6">Necessites més detalls tècnics sobre el model d'IA?</p>
-<div class="flex justify-center gap-4">
-<button class="bg-primary text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95">
-<span class="material-symbols-outlined" data-icon="description">description</span>
-                        Documentació API
-                    </button>
-<button class="bg-surface-container-lowest text-primary px-6 py-3 rounded-xl font-bold border border-primary/10 hover:bg-surface-container-low transition-all active:scale-95">
-                        Contactar amb Suport
-                    </button>
+<div class="text-[10px] text-outline font-medium">© 2026 ATNE · Jesuïtes Educació</div>
 </div>
 </footer>
-</main>
-</div>
-<!-- Background Decoration -->
-<div class="fixed top-0 right-0 -z-10 w-1/3 h-full bg-gradient-to-l from-surface-container-low to-transparent opacity-50"></div>
-<div class="fixed -bottom-48 -left-48 -z-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
-</body></html>
+</body>
+</html>

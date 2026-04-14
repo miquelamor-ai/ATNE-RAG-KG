@@ -15,7 +15,7 @@
  *    sense passar per les conductes (via experta emergent).
  */
 
-// ── Les 4 conductes observables (versió condensada 2026-04-12) ─────────────
+// ── Les 5 conductes observables ────────────────────────────────────────────
 // Una conducta per perfil principal, patró "Li costa…", síntesi del més
 // significatiu de cada perfil. Si el docent vol més precisió o cobrir
 // perfils menys observables (DI, TEA, sensorials, AC), passa a la via
@@ -76,6 +76,18 @@ const OBSERVABLE_BEHAVIORS = {
             },
         },
         ajuts: ["vocabulari_frequent", "glossari_integrat", "definicions_linia"],
+    },
+
+    instruccions: {
+        label: "Li costa seguir instruccions de més d'un pas",
+        chars: {
+            tdah: {
+                actiu: true,
+                presentacio: "inatent",
+                baixa_memoria_treball: true,
+            },
+        },
+        ajuts: ["instruccions_numerades", "una_idea_frase"],
     },
 };
 
