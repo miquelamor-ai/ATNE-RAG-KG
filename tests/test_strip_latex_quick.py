@@ -2,6 +2,8 @@
 import re
 
 _LATEX_PATTERNS = [
+    (r'\$\s*\\xrightarrow\{[^}]*\}\s*\$', '→'),
+    (r'\$\s*\\xleftarrow\{[^}]*\}\s*\$', '←'),
     (r'\$\s*\\rightarrow\s*\$', '→'),
     (r'\$\s*\\leftarrow\s*\$', '←'),
     (r'\$\s*\\uparrow\s*\$', '↑'),
@@ -9,8 +11,12 @@ _LATEX_PATTERNS = [
     (r'\$\s*\\leftrightarrow\s*\$', '↔'),
     (r'\$\s*\\Rightarrow\s*\$', '⇒'),
     (r'\$\s*\\Leftarrow\s*\$', '⇐'),
-    (r'\$\s*\\xrightarrow\{[^}]*\}\s*\$', '→'),
-    (r'\$\s*\\xleftarrow\{[^}]*\}\s*\$', '←'),
+    (r'\$\\text\{[^}]*\}\$', '___'),
+    (r'\\text\{[^}]*\}', '___'),
+    (r'\$\\textbf\{[^}]*\}\$', '___'),
+    (r'\\textbf\{[^}]*\}', '___'),
+    (r'\$\\underline\{[^}]*\}\$', '___'),
+    (r'\\underline\{[^}]*\}', '___'),
     (r'\\rightarrow\b', '→'),
     (r'\\leftarrow\b', '←'),
     (r'\\uparrow\b', '↑'),
@@ -96,5 +102,41 @@ assert '\\\\\\\\' not in r7
 assert '→' in r7
 assert '___' in r7
 print('T7 OK\n')
+
+# TEST 8: $\text{...}$ amb backslashes dins (cas nou sessio 15/04)
+t8 = r'Augment de fàbriques $\rightarrow$ $\text{\\\\\\\\\\}$ (Opcions: Més contaminació / Més agricultura)'
+r8 = strip(t8)
+print('T8 IN :', repr(t8))
+print('T8 OUT:', repr(r8))
+assert r'\text' not in r8
+assert r'\rightarrow' not in r8
+assert '→' in r8
+assert '___' in r8
+print('T8 OK\n')
+
+# TEST 9: \text{...} orfe sense $
+t9 = r'El \text{\\\\\} i els canals van facilitar el comerç.'
+r9 = strip(t9)
+print('T9 IN :', repr(t9))
+print('T9 OUT:', repr(r9))
+assert r'\text' not in r9
+assert '___' in r9
+print('T9 OK\n')
+
+# TEST 10: real prompt sortida complement amb tot junt
+t10 = r"""[Literal · V/F amb justificació] Marca si és V o F:
+La classe treballadora tenia condicions de vida molt bones. ( ) $\rightarrow$ ""
+[Literal · omplir buits] El $\text{\\\\\\\\\\}$ i els canals van facilitar el comerç.
+[Inferencial · relaciona] Augment de fàbriques $\rightarrow$ $\text{\\\\\\\\\\}$"""
+r10 = strip(t10)
+print('T10 IN :')
+print(t10)
+print('T10 OUT:')
+print(r10)
+assert r'\rightarrow' not in r10
+assert r'\text{' not in r10
+assert '→' in r10
+assert '___' in r10
+print('T10 OK\n')
 
 print('ALL TESTS PASSED')

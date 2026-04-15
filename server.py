@@ -1107,6 +1107,9 @@ def clean_gemini_output(text: str) -> str:
 # abans del Quality Report i abans de l'enviament al frontend.
 
 _LATEX_PATTERNS = [
+    # Fletxes (més específic primer)
+    (r'\$\s*\\xrightarrow\{[^}]*\}\s*\$', '→'),
+    (r'\$\s*\\xleftarrow\{[^}]*\}\s*\$', '←'),
     (r'\$\s*\\rightarrow\s*\$', '→'),
     (r'\$\s*\\leftarrow\s*\$', '←'),
     (r'\$\s*\\uparrow\s*\$', '↑'),
@@ -1114,8 +1117,15 @@ _LATEX_PATTERNS = [
     (r'\$\s*\\leftrightarrow\s*\$', '↔'),
     (r'\$\s*\\Rightarrow\s*\$', '⇒'),
     (r'\$\s*\\Leftarrow\s*\$', '⇐'),
-    (r'\$\s*\\xrightarrow\{[^}]*\}\s*\$', '→'),
-    (r'\$\s*\\xleftarrow\{[^}]*\}\s*\$', '←'),
+    # \text{...} i altres comandos amb arguments — típicament són buits
+    # d'omplir ("$\text{\\\\\\\\}$"). Els convertim a ___ (placeholder).
+    (r'\$\\text\{[^}]*\}\$', '___'),
+    (r'\\text\{[^}]*\}', '___'),
+    (r'\$\\textbf\{[^}]*\}\$', '___'),
+    (r'\\textbf\{[^}]*\}', '___'),
+    (r'\$\\underline\{[^}]*\}\$', '___'),
+    (r'\\underline\{[^}]*\}', '___'),
+    # Fletxes orfes sense dollars
     (r'\\rightarrow\b', '→'),
     (r'\\leftarrow\b', '←'),
     (r'\\uparrow\b', '↑'),
