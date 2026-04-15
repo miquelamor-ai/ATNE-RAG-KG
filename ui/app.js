@@ -2143,6 +2143,41 @@ function initGenModelSelector() {
     });
 }
 
+// ── Toggle Comparar amb original (Pas 4) ──────────────────────────────────
+const COMPARE_STORAGE_KEY = "atne_pas4_compare";
+
+function getCompareMode() {
+    try {
+        return localStorage.getItem(COMPARE_STORAGE_KEY) === "on";
+    } catch (e) {
+        return false;
+    }
+}
+
+function setCompareMode(on) {
+    try {
+        localStorage.setItem(COMPARE_STORAGE_KEY, on ? "on" : "off");
+    } catch (e) { /* noop */ }
+    const card = document.querySelector(".pas4-editor-card");
+    if (card) card.dataset.compare = on ? "on" : "off";
+    const btn = document.getElementById("btn-compare-toggle");
+    if (btn) {
+        const label = btn.querySelector(".btn-compare-label");
+        if (label) label.textContent = on ? "Tancar comparació" : "Comparar amb original";
+    }
+}
+
+function toggleCompareMode() {
+    setCompareMode(!getCompareMode());
+}
+
+function initCompareToggle() {
+    // Aplicar estat inicial (per defecte: off)
+    setCompareMode(getCompareMode());
+    const btn = document.getElementById("btn-compare-toggle");
+    if (btn) btn.addEventListener("click", toggleCompareMode);
+}
+
 // ── Toggle auditor LLM experimental (Pas 2, opt-in) ───────────────────────
 const AUDITOR_STORAGE_KEY = "atne_auditor_enabled";
 
@@ -2688,6 +2723,9 @@ function bindEvents() {
 
     // Toggle auditoria LLM experimental (Pas 2)
     initAuditorToggle();
+
+    // Toggle Comparar amb original (Pas 4)
+    initCompareToggle();
 
     // Mode tabs (multimode Pas 2)
     document.querySelectorAll(".mode-tab").forEach(tab => {
