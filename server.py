@@ -1098,6 +1098,55 @@ def clean_gemini_output(text: str) -> str:
     return text.strip()
 
 
+# ── Post-processador d'artefactes LaTeX ─────────────────────────────────────
+# Alguns LLMs (Gemma 4, GPT-4o-mini i d'altres) injecten espontàniament
+# marques LaTeX quan veuen patrons estructurats com "omplir buits", "fletxes"
+# o "esquemes". Els prompts del catàleg usen fletxes Unicode pures (→, ↔)
+# i guions baixos normals, però els models les reprodueixen en sintaxi LaTeX.
+# Aquest post-processador es determinista, sense LLM, i normalitza la sortida
+# abans del Quality Report i abans de l'enviament al frontend.
+
+_LATEX_PATTERNS = [
+    (r'\$\s*\\rightarrow\s*\$', '→'),
+    (r'\$\s*\\leftarrow\s*\$', '←'),
+    (r'\$\s*\\uparrow\s*\$', '↑'),
+    (r'\$\s*\\downarrow\s*\$', '↓'),
+    (r'\$\s*\\leftrightarrow\s*\$', '↔'),
+    (r'\$\s*\\Rightarrow\s*\$', '⇒'),
+    (r'\$\s*\\Leftarrow\s*\$', '⇐'),
+    (r'\$\s*\\xrightarrow\{[^}]*\}\s*\$', '→'),
+    (r'\$\s*\\xleftarrow\{[^}]*\}\s*\$', '←'),
+    (r'\\rightarrow\b', '→'),
+    (r'\\leftarrow\b', '←'),
+    (r'\\uparrow\b', '↑'),
+    (r'\\downarrow\b', '↓'),
+    (r'\\leftrightarrow\b', '↔'),
+    (r'\\Rightarrow\b', '⇒'),
+    (r'\\Leftarrow\b', '⇐'),
+]
+
+
+def _strip_latex_artifacts(text: str) -> str:
+    """Neteja artefactes LaTeX que alguns LLMs injecten als complements.
+
+    Normalitza:
+    - `$\\rightarrow$`, `$\\xrightarrow{...}$`, etc. → fletxes Unicode
+    - Seqüències de 2+ backslashes seguides de `_` → `___` (omplir buits)
+    - Seqüències de 4+ backslashes soles → `___` (omplir buits sense `_`)
+
+    No toca `$` aïllats (preus en euros) ni fletxes Unicode ja correctes.
+    """
+    if not text:
+        return text
+    for pattern, replacement in _LATEX_PATTERNS:
+        text = re.sub(pattern, replacement, text)
+    # Fill-in-the-blank: \\\\\\\\_ → ___
+    text = re.sub(r'\\{2,}_', '___', text)
+    # Fill-in-the-blank sense underscore: \\\\\\\\ → ___
+    text = re.sub(r'\\{4,}', '___', text)
+    return text
+
+
 def _call_llm(active_model: str, system_prompt: str, text: str) -> str:
     """Wrapper unificat de crida al LLM (Mistral o Gemma 4)."""
     global _gemma4_key_idx, _gemini_key_idx
@@ -1247,6 +1296,7 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
         try:
             adapted = _call_llm(active_model, system_prompt, text)
             adapted = clean_gemini_output(adapted)
+            adapted = _strip_latex_artifacts(adapted)
         except Exception as e:
             adapted = f"Error en la generació ({active_model}): {e}"
             break
@@ -1834,6 +1884,7 @@ perfil de l'alumne es farà en una segona fase amb un altre pipeline.
     try:
         text = _call_llm(model_usat, prompt, "")
         text = clean_gemini_output(text).strip()
+        text = _strip_latex_artifacts(text)
     except Exception as e:
         return JSONResponse(
             {"error": f"Error generant el text: {type(e).__name__}: {e}"},
@@ -2755,6 +2806,7 @@ zero — modifica'l mantenint l'estructura general i el contingut.
     try:
         result = _call_llm("gemma4", prompt, "")
         result = clean_gemini_output(result).strip()
+        result = _strip_latex_artifacts(result)
     except Exception as e:
         return JSONResponse(
             {"error": f"Error refinant el text: {type(e).__name__}: {e}"},
