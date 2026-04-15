@@ -587,67 +587,80 @@
 
     <!-- ── PAS 3: Adaptació ────────────────────────────────── -->
     <section class="step-panel" id="step-3">
-        <div class="page-header">
-            <span class="step-indicator">Pas 3 de 4</span>
-            <h1 class="page-title">Revisa els ajuts que s'aplicaran</h1>
-            <p class="page-desc">
-                L'app ha triat aquests ajuts segons el perfil que has configurat.
-                Pots afegir-ne o treure'n si vols personalitzar l'adaptació.
-                <span id="proposal-basis" class="info-badge"></span>
-            </p>
+        <div class="workspace-header">
+            <h1 class="workspace-title">Revisa els ajuts</h1>
+            <p class="workspace-subtitle">L'app ha triat aquests ajuts segons el perfil. Pots ajustar-los si vols personalitzar.</p>
+            <span id="proposal-basis" class="info-badge" style="margin-top:0.375rem;"></span>
         </div>
 
-        <div class="card">
-            <div class="card-header">
-                <div class="icon-box"><span class="material-symbols-outlined">auto_awesome</span></div>
-                <h3 class="card-title">Complements i ajuts</h3>
-            </div>
-            <div class="complement-grid" id="complement-grid">
-                <!-- Generat per app.js -->
-            </div>
-        </div>
+        <div class="pas3-layout">
 
-        <details class="via-diagnostic-toggle">
-            <summary>Paràmetres avançats</summary>
-            <div style="padding:1rem 0;">
-                <div class="param-row">
-                    <label>Nivell DUA</label>
-                    <select id="param-dua">
-                        <option value="Acces">Accés (LF extrema)</option>
-                        <option value="Core" selected>Core (estàndard)</option>
-                        <option value="Enriquiment">Enriquiment (repte)</option>
-                    </select>
+            <!-- ── COL ESQUERRA: perfil al qual s'adapta (fix/sticky) ── -->
+            <aside class="pas3-profile-card" id="pas3-profile-card">
+                <div class="pas3-profile-header">
+                    <span class="material-symbols-outlined">person_pin</span>
+                    <h3>Adaptant per a</h3>
                 </div>
-                <div class="param-row">
-                    <label>Intensitat Lectura Fàcil</label>
-                    <select id="param-lf">
-                        <option value="1">1 — Mínima</option>
-                        <option value="2" selected>2 — Baixa</option>
-                        <option value="3">3 — Moderada</option>
-                        <option value="4">4 — Alta</option>
-                        <option value="5">5 — Màxima</option>
-                    </select>
+                <div class="pas3-profile-body" id="pas3-profile-body">
+                    <p class="pas3-profile-empty">Carregant perfil…</p>
                 </div>
-                <div class="param-row">
-                    <label>Nivell sortida (MECR)</label>
-                    <select id="param-mecr">
-                        <option value="pre-A1">pre-A1</option>
-                        <option value="A1">A1</option>
-                        <option value="A2">A2</option>
-                        <option value="B1">B1</option>
-                        <option value="B2" selected>B2</option>
-                    </select>
-                </div>
-                <!-- Model i auto-avaluacio amagats pel pilot (Gemma 4 + verify sempre ON) -->
-                <select id="model-selector" hidden>
-                    <option value="gemma4" selected>Gemma 4 31B</option>
-                </select>
-                <input type="checkbox" id="verify-toggle" checked hidden>
-            </div>
-        </details>
+            </aside>
 
-        <div class="progress-area" id="progress-area">
-            <div id="progress-steps"></div>
+            <!-- ── COL DRETA: complements (grid 2 cols intern) + params ── -->
+            <main class="pas3-main">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="icon-box"><span class="material-symbols-outlined">auto_awesome</span></div>
+                        <h3 class="card-title">Ajuts i complements</h3>
+                    </div>
+                    <div class="complement-grid complement-grid-2col" id="complement-grid">
+                        <!-- Generat per app.js -->
+                    </div>
+                </div>
+
+                <details class="via-diagnostic-toggle">
+                    <summary>Paràmetres avançats</summary>
+                    <div style="padding:1rem 0;">
+                        <div class="param-row">
+                            <label>Nivell DUA</label>
+                            <select id="param-dua">
+                                <option value="Acces">Accés (LF extrema)</option>
+                                <option value="Core" selected>Core (estàndard)</option>
+                                <option value="Enriquiment">Enriquiment (repte)</option>
+                            </select>
+                        </div>
+                        <div class="param-row">
+                            <label>Intensitat Lectura Fàcil</label>
+                            <select id="param-lf">
+                                <option value="1">1 — Mínima</option>
+                                <option value="2" selected>2 — Baixa</option>
+                                <option value="3">3 — Moderada</option>
+                                <option value="4">4 — Alta</option>
+                                <option value="5">5 — Màxima</option>
+                            </select>
+                        </div>
+                        <div class="param-row">
+                            <label>Nivell sortida (MECR)</label>
+                            <select id="param-mecr">
+                                <option value="pre-A1">pre-A1</option>
+                                <option value="A1">A1</option>
+                                <option value="A2">A2</option>
+                                <option value="B1">B1</option>
+                                <option value="B2" selected>B2</option>
+                            </select>
+                        </div>
+                        <!-- Model i auto-avaluacio amagats pel pilot -->
+                        <select id="model-selector" hidden>
+                            <option value="gemma4" selected>Gemma 4 31B</option>
+                        </select>
+                        <input type="checkbox" id="verify-toggle" checked hidden>
+                    </div>
+                </details>
+
+                <div class="progress-area" id="progress-area">
+                    <div id="progress-steps"></div>
+                </div>
+            </main>
         </div>
     </section>
 

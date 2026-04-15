@@ -4383,6 +4383,221 @@ details.bento-card .bento-card-body {
 }
 
 /* ═══ Pas 4: editor text adaptat (reutilitza pas2-grid-v3 + editor-card-v2) ═══ */
+/* ═══════════════════════════════════════════════════════════════
+   PAS 3: layout 2 columnes (perfil esquerra fix + complements dreta)
+   ═══════════════════════════════════════════════════════════════ */
+#step-3 .workspace-header {
+    gap: 0.1875rem;
+    margin-bottom: 0.75rem;
+}
+
+#step-3 .workspace-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+#step-3 .workspace-subtitle {
+    font-size: 0.75rem;
+    line-height: 1.4;
+}
+
+#step-3 .info-badge {
+    font-size: 0.5625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.1875rem 0.4375rem;
+    border-radius: var(--radius-full);
+    background: rgba(51, 55, 166, 0.08);
+    color: var(--primary);
+}
+
+#step-3 .pas3-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    align-items: start;
+}
+
+@media (min-width: 1024px) {
+    #step-3 .pas3-layout {
+        grid-template-columns: 260px minmax(0, 1fr);
+    }
+}
+
+@media (min-width: 1400px) {
+    #step-3 .pas3-layout {
+        grid-template-columns: 280px minmax(0, 1fr);
+        gap: 1.25rem;
+    }
+}
+
+/* Card perfil esquerra (sticky) */
+#step-3 .pas3-profile-card {
+    background: var(--surface-container-lowest);
+    border-radius: var(--radius-xl);
+    border: 1px solid rgba(199, 197, 213, 0.3);
+    padding: 0.875rem 1rem;
+    box-shadow: 0 4px 20px -4px rgba(11, 28, 48, 0.05);
+    position: sticky;
+    top: 5rem;
+    max-height: calc(100vh - 7rem);
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+#step-3 .pas3-profile-header {
+    display: flex;
+    align-items: center;
+    gap: 0.4375rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.625rem;
+    border-bottom: 1px solid rgba(199, 197, 213, 0.25);
+}
+
+#step-3 .pas3-profile-header .material-symbols-outlined {
+    color: var(--primary);
+    font-size: 1rem;
+    font-variation-settings: 'FILL' 1;
+}
+
+#step-3 .pas3-profile-header h3 {
+    font-family: var(--font-body);
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--on-surface-variant);
+    margin: 0;
+}
+
+#step-3 .pas3-profile-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+#step-3 .pas3-profile-empty {
+    font-size: 0.6875rem;
+    color: var(--on-surface-variant);
+    font-style: italic;
+    margin: 0;
+}
+
+#step-3 .pas3-profile-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+#step-3 .pas3-profile-label {
+    font-size: 0.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--on-surface-variant);
+}
+
+#step-3 .pas3-profile-value {
+    font-size: 0.75rem;
+    color: var(--on-surface);
+    font-weight: 500;
+    line-height: 1.35;
+}
+
+#step-3 .pas3-profile-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 0.125rem;
+}
+
+#step-3 .pas3-profile-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.1875rem 0.5rem;
+    background: rgba(51, 55, 166, 0.08);
+    color: var(--primary);
+    border-radius: var(--radius-full);
+    font-size: 0.5625rem;
+    font-weight: 600;
+}
+
+/* Col dreta: complements i resta */
+#step-3 .pas3-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    min-width: 0;
+}
+
+#step-3 .card {
+    padding: 1rem 1.125rem;
+}
+
+#step-3 .card-header {
+    margin-bottom: 0.75rem;
+    gap: 0.5rem;
+}
+
+#step-3 .card-title {
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+#step-3 .icon-box {
+    width: 2rem;
+    height: 2rem;
+}
+
+#step-3 .icon-box .material-symbols-outlined {
+    font-size: 1rem;
+}
+
+/* Complement grid: 2 columnes al Pas 3 (cada categoria un card) */
+#step-3 .complement-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+}
+
+@media (min-width: 900px) {
+    #step-3 .complement-grid-2col {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+#step-3 .complement-group {
+    padding: 0.75rem 0.875rem;
+    font-size: 0.75rem;
+}
+
+#step-3 .complement-group-label {
+    font-size: 0.5625rem;
+}
+
+#step-3 .complement-group-desc {
+    font-size: 0.5625rem;
+}
+
+#step-3 .complement-item {
+    padding: 0.5625rem 0.75rem;
+    font-size: 0.75rem;
+    gap: 0.5rem;
+}
+
+#step-3 .complement-item input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+}
+
+#step-3 .complement-auto-badge {
+    font-size: 0.5rem;
+    padding: 0.125rem 0.4375rem;
+}
+
 #step-4 .workspace-header {
     gap: 0.25rem;
     margin-bottom: 1rem;

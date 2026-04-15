@@ -1123,8 +1123,102 @@ function applyProposal(proposal, profile) {
     document.getElementById("proposal-basis").textContent =
         actives.length > 0 ? `Basat en: ${actives.join(" + ")}` : "Perfil genèric";
 
+    // Renderitzar el card resum del perfil a l'esquerra del Pas 3
+    renderPas3ProfileSummary(profile, proposal);
+
     // Bloc 2e a la proposta
     show2eProposalBlock(chars);
+}
+
+// ── Render del card "Adaptant per a" (Pas 3, columna esquerra) ────────────
+function renderPas3ProfileSummary(profile, proposal) {
+    const body = document.getElementById("pas3-profile-body");
+    if (!body) return;
+
+    const context = collectContext();
+    const chars = profile.caracteristiques || {};
+    const activeChars = Object.entries(chars)
+        .filter(([_, v]) => v && v.actiu)
+        .map(([k]) => CHARACTERISTICS[k]?.label || k);
+
+    const params = collectParams();
+    const mecr = params.mecr_sortida || proposal.mecr_sortida || "";
+    const dua = params.dua || proposal.dua || "";
+
+    // Materia + etapa/curs
+    const etapaLine = [context.etapa, context.curs].filter(Boolean).join(" · ");
+    const materia = context.materia || "";
+    const ambit = context.ambit || "";
+
+    const sections = [];
+
+    // Context educatiu
+    if (etapaLine || materia || ambit) {
+        sections.push(`
+            <div class="pas3-profile-section">
+                <div class="pas3-profile-label">Context</div>
+                ${etapaLine ? `<div class="pas3-profile-value">${escapeHtml(etapaLine)}</div>` : ""}
+                ${materia ? `<div class="pas3-profile-value">${escapeHtml(materia)}</div>` : ""}
+                ${ambit ? `<div class="pas3-profile-value" style="opacity:0.7">${escapeHtml(ambit)}</div>` : ""}
+            </div>
+        `);
+    }
+
+    // Perfil (nom + mode)
+    const profileName = profile.nom || "Sense nom";
+    const viaLabel = profile._via === "observable" ? "Via observable" : "Via diagnòstic";
+    sections.push(`
+        <div class="pas3-profile-section">
+            <div class="pas3-profile-label">Perfil</div>
+            <div class="pas3-profile-value">${escapeHtml(profileName)}</div>
+            <div class="pas3-profile-value" style="font-size:0.625rem;opacity:0.7">${viaLabel}</div>
+        </div>
+    `);
+
+    // Característiques actives
+    if (activeChars.length > 0) {
+        const tags = activeChars.map(c =>
+            `<span class="pas3-profile-tag">${escapeHtml(c)}</span>`
+        ).join("");
+        sections.push(`
+            <div class="pas3-profile-section">
+                <div class="pas3-profile-label">Característiques</div>
+                <div class="pas3-profile-tags">${tags}</div>
+            </div>
+        `);
+    } else {
+        sections.push(`
+            <div class="pas3-profile-section">
+                <div class="pas3-profile-label">Característiques</div>
+                <div class="pas3-profile-value" style="font-style:italic;opacity:0.7">Perfil genèric (sense marcadors)</div>
+            </div>
+        `);
+    }
+
+    // Observacions
+    if (profile.observacions && profile.observacions.trim()) {
+        sections.push(`
+            <div class="pas3-profile-section">
+                <div class="pas3-profile-label">Observacions</div>
+                <div class="pas3-profile-value" style="font-size:0.6875rem;line-height:1.4">${escapeHtml(profile.observacions.trim())}</div>
+            </div>
+        `);
+    }
+
+    // Nivell MECR + DUA
+    if (mecr || dua) {
+        sections.push(`
+            <div class="pas3-profile-section">
+                <div class="pas3-profile-label">Objectiu</div>
+                <div class="pas3-profile-tags">
+                    ${mecr ? `<span class="pas3-profile-tag">MECR ${escapeHtml(mecr)}</span>` : ""}
+                    ${dua ? `<span class="pas3-profile-tag">DUA ${escapeHtml(dua)}</span>` : ""}
+                </div>
+            </div>
+        `);
+    }
+
+    body.innerHTML = sections.join("");
 }
 
 function show2eProposalBlock(chars) {
