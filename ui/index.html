@@ -587,11 +587,7 @@
 
     <!-- ── PAS 3: Adaptació ────────────────────────────────── -->
     <section class="step-panel" id="step-3">
-        <div class="workspace-header">
-            <h1 class="workspace-title">Revisa els ajuts</h1>
-            <p class="workspace-subtitle">L'app ha triat aquests ajuts segons el perfil. Pots ajustar-los si vols personalitzar.</p>
-            <span id="proposal-basis" class="info-badge" style="margin-top:0.375rem;"></span>
-        </div>
+        <!-- Sense workspace-header: el card d'"Ajuts i complements" ja porta titol -->
 
         <div class="pas3-layout">
 
@@ -609,9 +605,15 @@
             <!-- ── COL DRETA: complements (grid 2 cols intern) + params ── -->
             <main class="pas3-main">
                 <div class="card">
-                    <div class="card-header">
-                        <div class="icon-box"><span class="material-symbols-outlined">auto_awesome</span></div>
-                        <h3 class="card-title">Ajuts i complements</h3>
+                    <div class="card-header pas3-card-header">
+                        <div class="card-header-left">
+                            <div class="icon-box"><span class="material-symbols-outlined">auto_awesome</span></div>
+                            <div class="card-header-text">
+                                <h3 class="card-title">Ajuts i complements</h3>
+                                <p class="card-subtitle">L'app ha triat aquests segons el perfil. Afegeix-ne o treu-ne per personalitzar.</p>
+                            </div>
+                        </div>
+                        <span id="proposal-basis" class="info-badge"></span>
                     </div>
                     <div class="complement-grid complement-grid-2col" id="complement-grid">
                         <!-- Generat per app.js -->
@@ -665,12 +667,8 @@
     </section>
 
     <!-- ── PAS 4: Resultat (single-column amb Comparar on-demand) ─── -->
+    <!-- Sense workspace-header: el card editor ja porta titol "Text adaptat" i badge -->
     <section class="step-panel" id="step-4">
-        <div class="workspace-header">
-            <h1 class="workspace-title">Text adaptat</h1>
-            <p class="workspace-subtitle">Revisa, edita i refina el text. Pots comparar-lo amb l'original en qualsevol moment.</p>
-        </div>
-
         <div class="pas4-layout">
 
             <!-- Editor card full-width amb toggle Comparar -->
@@ -692,13 +690,16 @@
                     </button>
                 </div>
 
-                <!-- Capçalera: títol + badge + toggle Comparar -->
+                <!-- Capçalera: títol + hint + badge + toggle Comparar -->
                 <div class="adapted-header pas4-header">
-                    <div class="adapted-title">
-                        <span class="material-symbols-outlined">auto_awesome</span>
-                        <span>Text adaptat</span>
-                        <span class="edit-badge">Editable</span>
-                        <span id="version-label"></span>
+                    <div class="adapted-title-group">
+                        <div class="adapted-title">
+                            <span class="material-symbols-outlined">auto_awesome</span>
+                            <span>Text adaptat</span>
+                            <span class="edit-badge">Editable</span>
+                            <span id="version-label"></span>
+                        </div>
+                        <p class="adapted-subtitle">Revisa, edita i refina el text. Pots comparar-lo amb l'original i aplicar refinaments.</p>
                     </div>
                     <button type="button" class="btn-compare-toggle" id="btn-compare-toggle" title="Mostra l'original al costat per comparar">
                         <span class="material-symbols-outlined">compare_arrows</span>

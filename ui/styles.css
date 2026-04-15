@@ -4592,26 +4592,75 @@ details.bento-card .bento-card-body {
 }
 
 #step-3 .card {
-    padding: 1rem 1.125rem;
+    padding: 0.875rem 1rem 1rem;
 }
 
-#step-3 .card-header {
+#step-3 .card-header.pas3-card-header {
     margin-bottom: 0.75rem;
-    gap: 0.5rem;
+    gap: 0.75rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+#step-3 .card-header-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    flex: 1;
+    min-width: 0;
+}
+
+#step-3 .card-header-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+    flex: 1;
 }
 
 #step-3 .card-title {
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     font-weight: 700;
+    margin: 0;
+    line-height: 1.2;
+}
+
+#step-3 .card-subtitle {
+    font-size: 0.6875rem;
+    color: var(--on-surface-variant);
+    margin: 0;
+    line-height: 1.35;
+    font-weight: 400;
 }
 
 #step-3 .icon-box {
     width: 2rem;
     height: 2rem;
+    flex-shrink: 0;
 }
 
 #step-3 .icon-box .material-symbols-outlined {
     font-size: 1rem;
+}
+
+#step-3 .info-badge {
+    font-size: 0.5625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-full);
+    background: rgba(51, 55, 166, 0.08);
+    color: var(--primary);
+    white-space: nowrap;
+    flex-shrink: 0;
+    align-self: center;
+}
+
+#step-3 .info-badge:empty {
+    display: none;
 }
 
 /* Complement grid: 2 columnes al Pas 3 (cada categoria un card) */
@@ -4714,15 +4763,32 @@ details.bento-card .bento-card-body {
     border-color: rgba(199, 197, 213, 0.3);
 }
 
-/* Capçalera text adaptat (títol a l'esquerra + toggle Comparar a la dreta) */
+/* Capçalera text adaptat (títol+hint a l'esquerra + toggle Comparar a la dreta) */
 #step-4 .adapted-header,
 #step-4 .pas4-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 0.75rem;
     padding: 0;
     flex-wrap: wrap;
+}
+
+#step-4 .adapted-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1875rem;
+    flex: 1;
+    min-width: 0;
+}
+
+#step-4 .adapted-subtitle {
+    font-size: 0.6875rem;
+    color: var(--on-surface-variant);
+    margin: 0;
+    line-height: 1.35;
+    font-weight: 400;
+    max-width: 38rem;
 }
 
 #step-4 .btn-compare-toggle {
