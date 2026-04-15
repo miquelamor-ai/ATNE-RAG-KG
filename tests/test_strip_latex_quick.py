@@ -34,6 +34,9 @@ def strip(text):
         text = re.sub(p, r, text)
     text = re.sub(r'\\{2,}_', '___', text)
     text = re.sub(r'\\{4,}', '___', text)
+    # LaTeX malformat amb arrow ($(ightarrow$, $\ri(tarrow$, etc.)
+    text = re.sub(r'\$[^$\n]{0,15}(?:right|rightar|ight)arrow[^$\n]{0,5}\$', '→', text)
+    text = re.sub(r'\$[^$\n]{0,15}(?:left|leftar|eft)arrow[^$\n]{0,5}\$', '←', text)
     return text
 
 
@@ -138,5 +141,139 @@ assert r'\text{' not in r10
 assert '→' in r10
 assert '___' in r10
 print('T10 OK\n')
+
+# ── NOVES FUNCIONS DE POST-PROCESSAT ─────────────────────────────────────
+
+_ENGLISH_REPLACEMENTS = {
+    'owners': 'propietaris', 'owner': 'propietari',
+    'workers': 'treballadors', 'worker': 'treballador',
+    'factory': 'fàbrica', 'factories': 'fàbriques',
+    'inventions': 'invencions', 'invention': 'invenció',
+    'employees': 'empleats', 'employee': 'empleat',
+}
+
+
+def fix_english(text):
+    if not text:
+        return text
+    for en, cat in _ENGLISH_REPLACEMENTS.items():
+        text = re.sub(r'\b' + re.escape(en) + r'\b', cat, text)
+        text = re.sub(r'\b' + re.escape(en.capitalize()) + r'\b', cat.capitalize(), text)
+        text = re.sub(r'\b' + re.escape(en.upper()) + r'\b', cat.upper(), text)
+    return text
+
+
+_TYPO_FIXES = {
+    'possuïen': 'posseïen', 'possuïa': 'posseïa',
+    'luitar': 'lluitar', 'luita': 'lluita',
+    'produïguessin': 'produïssin',
+    'sobrecarga': 'sobrecàrrega', 'localizar': 'localitzar',
+}
+
+
+def fix_typos(text):
+    if not text:
+        return text
+    for bad, good in _TYPO_FIXES.items():
+        text = re.sub(r'\b' + re.escape(bad) + r'\b', good, text)
+        text = re.sub(r'\b' + re.escape(bad.capitalize()) + r'\b', good.capitalize(), text)
+    return text
+
+
+_CONCAT_RE = re.compile(r'\b[A-Za-zÀ-ÿ]{8,25}\b')
+
+
+def fix_concat(text):
+    if not text:
+        return text
+    def repl(m):
+        w = m.group(0)
+        for i in range(3, len(w) - 2):
+            if w[i:].lower().startswith(w[:i].lower()):
+                return w[i:]
+        return w
+    return _CONCAT_RE.sub(repl, text)
+
+
+def full_post_process(text):
+    text = strip(text)
+    text = fix_concat(text)
+    text = fix_english(text)
+    text = fix_typos(text)
+    return text
+
+
+print('\n── NOUS TESTS ──\n')
+
+# T11: owners → propietaris
+t11 = 'Persones riques que eren owners de les fàbriques. La Burgesia són els Owners.'
+r11 = full_post_process(t11)
+print('T11:', r11)
+assert 'owners' not in r11.lower()
+assert 'propietaris' in r11
+assert 'Propietaris' in r11
+print('T11 OK\n')
+
+# T12: typos
+t12 = 'La gent possuïa fàbriques i volia luitar contra la sobrecarga.'
+r12 = full_post_process(t12)
+print('T12:', r12)
+assert 'possuïa' not in r12  # typo has disappeared
+assert 'sobrecarga ' not in r12 and 'sobrecarga.' not in r12  # no castellanisme
+assert 'posseïa' in r12
+assert 'lluitar' in r12
+assert 'sobrecàrrega' in r12
+# Verificar que 'luitar' només apareix com a part de 'lluitar' (no com a mot sol)
+assert re.search(r'\bluitar\b', r12) is None
+print('T12 OK\n')
+
+# T13: concatenacions
+t13 = 'La Revolrevolució industrial va ser important. Els moviments sociasocials.'
+r13 = full_post_process(t13)
+print('T13:', r13)
+assert 'Revolrevolució' not in r13
+assert 'sociasocials' not in r13
+assert 'revolució' in r13.lower()
+assert 'socials' in r13
+print('T13 OK\n')
+
+# T14: Revolucirevolució (concat mes llarga)
+t14 = 'La Revolucirevolució industrial'
+r14 = full_post_process(t14)
+print('T14:', r14)
+assert 'Revolucirevolució' not in r14
+assert 'revolució' in r14.lower()
+print('T14 OK\n')
+
+# T15: paraules legitimes no tocades
+t15 = 'Conseqüències de la Revolució industrial per a la societat moderna.'
+r15 = full_post_process(t15)
+print('T15:', r15)
+assert r15 == t15, f"Legitimate text modified: {repr(r15)}"
+print('T15 OK\n')
+
+# T16: LaTeX malformat $(ightarrow$
+t16 = r'La classe treballadora. () $(ightarrow$ _____________'
+r16 = full_post_process(t16)
+print('T16:', r16)
+assert '(ightarrow' not in r16
+assert '→' in r16
+print('T16 OK\n')
+
+# T17: real complement output (combinat)
+t17 = r"""La burgesia (les persones riques que eren owners de les fàbriques).
+La classe treballadora possuïa pocs drets i volia luitar.
+La Revolrevolució industrial va ser important.
+Augment de fàbriques $\rightarrow$ $\text{\\\\\\\\}$"""
+r17 = full_post_process(t17)
+print('T17:')
+print(r17)
+assert 'owners' not in r17
+assert 'possuïa' not in r17
+assert re.search(r'\bluitar\b', r17) is None
+assert 'Revolrevolució' not in r17
+assert r'\rightarrow' not in r17
+assert r'\text{' not in r17
+print('T17 OK\n')
 
 print('ALL TESTS PASSED')

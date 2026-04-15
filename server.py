@@ -1141,8 +1141,10 @@ def _strip_latex_artifacts(text: str) -> str:
 
     Normalitza:
     - `$\\rightarrow$`, `$\\xrightarrow{...}$`, etc. → fletxes Unicode
-    - Seqüències de 2+ backslashes seguides de `_` → `___` (omplir buits)
-    - Seqüències de 4+ backslashes soles → `___` (omplir buits sense `_`)
+    - `$\\text{...}$`, `\\textbf{...}` → `___` (placeholder omplir buit)
+    - Seqüències de 2+ backslashes seguides de `_` → `___`
+    - Seqüències de 4+ backslashes soles → `___`
+    - LaTeX malformat tipus `$(ightarrow$` (backslash → parèntesi)
 
     No toca `$` aïllats (preus en euros) ni fletxes Unicode ja correctes.
     """
@@ -1154,6 +1156,130 @@ def _strip_latex_artifacts(text: str) -> str:
     text = re.sub(r'\\{2,}_', '___', text)
     # Fill-in-the-blank sense underscore: \\\\\\\\ → ___
     text = re.sub(r'\\{4,}', '___', text)
+    # LaTeX malformat amb arrow: $(ightarrow$, $\ri(tarrow$, etc.
+    # Qualsevol $...rightarrow...$ o $...leftarrow...$ → fletxa Unicode
+    text = re.sub(r'\$[^$\n]{0,15}(?:right|rightar|ight)arrow[^$\n]{0,5}\$', '→', text)
+    text = re.sub(r'\$[^$\n]{0,15}(?:left|leftar|eft)arrow[^$\n]{0,5}\$', '←', text)
+    return text
+
+
+# ── Substitucions de paraules anglès → català ──────────────────────────────
+# Els LLMs a vegades injecten paraules angleses quan els termes catalans són
+# baixos en freqüència. Mapping conservador per a termes clarament històrics
+# que NO es farien servir en text educatiu català en lliçó normal.
+_ENGLISH_REPLACEMENTS = {
+    'owners': 'propietaris',
+    'owner': 'propietari',
+    'workers': 'treballadors',
+    'worker': 'treballador',
+    'factory': 'fàbrica',
+    'factories': 'fàbriques',
+    'inventions': 'invencions',
+    'invention': 'invenció',
+    'employees': 'empleats',
+    'employee': 'empleat',
+}
+
+
+def _fix_english_words(text: str) -> str:
+    """Substitueix paraules angleses injectades pel LLM per l'equivalent català.
+    Preserva majúscules inicials. Cas-sensible en el sentit que 'Owners' → 'Propietaris'.
+    """
+    if not text:
+        return text
+    for en, cat in _ENGLISH_REPLACEMENTS.items():
+        text = re.sub(r'\b' + re.escape(en) + r'\b', cat, text)
+        text = re.sub(r'\b' + re.escape(en.capitalize()) + r'\b', cat.capitalize(), text)
+        text = re.sub(r'\b' + re.escape(en.upper()) + r'\b', cat.upper(), text)
+    return text
+
+
+# ── Typos coneguts del LLM ─────────────────────────────────────────────────
+# Catàleg conservador: només errors que hem observat empíricament a les
+# proves del 14-15/04 i que tenen una correcció inequívoca.
+_TYPO_FIXES = {
+    'possuïen': 'posseïen',
+    'possuïa': 'posseïa',
+    'possuïr': 'posseir',
+    'possuïm': 'posseïm',
+    'possuïs': 'posseïs',
+    'luitar': 'lluitar',
+    'luitava': 'lluitava',
+    'luitaven': 'lluitaven',
+    'luita': 'lluita',
+    'produïguessin': 'produïssin',
+    'produïguessi': 'produïssi',
+    'collhita': 'collita',
+    'feudum': 'feu',
+    'sobrecarga': 'sobrecàrrega',
+    'localizar': 'localitzar',
+    'localizada': 'localitzada',
+}
+
+
+def _fix_typos(text: str) -> str:
+    """Corregeix typos del LLM a partir d'un catàleg conservador observat empíricament."""
+    if not text:
+        return text
+    for bad, good in _TYPO_FIXES.items():
+        text = re.sub(r'\b' + re.escape(bad) + r'\b', good, text)
+        text = re.sub(r'\b' + re.escape(bad.capitalize()) + r'\b', good.capitalize(), text)
+    return text
+
+
+# ── Concatenacions repetides (Revolrevolució, sociasocials, ...) ───────────
+# Patro observat: el LLM de vegades comença a escriure una paraula, es talla
+# a mig, i reinicia la mateixa paraula sencera — produint "Revol"+"revolució"
+# = "Revolrevolució". Detecció algorísmica: si una paraula de 8-25 caràcters
+# conté una repetició de prefix (les N primeres lletres tornen a aparèixer
+# a partir de la posició N), col·lapsem a la segona meitat.
+
+_CONCAT_WORD_RE = re.compile(r'\b[A-Za-zÀ-ÿ]{8,25}\b')
+
+
+def _fix_word_concatenations(text: str) -> str:
+    """Elimina repeticions de prefix dins d'una mateixa paraula.
+
+    Exemples que col·lapsa:
+    - 'Revolrevolució' → 'revolució' (i=5, head='Revol', tail comença amb 'revol')
+    - 'Revolucirevolució' → 'revolució' (i=8, head='Revoluci')
+    - 'sociasocials' → 'socials' (i=5, head='socia')
+
+    Ignora paraules <8 caràcters o >25 (no afecta vocabulari normal).
+    """
+    if not text:
+        return text
+
+    def repl(m):
+        word = m.group(0)
+        # Provem cada punt de tall entre 3 i len-3
+        for i in range(3, len(word) - 2):
+            head = word[:i].lower()
+            tail = word[i:].lower()
+            if tail.startswith(head):
+                return word[i:]
+        return word
+
+    return _CONCAT_WORD_RE.sub(repl, text)
+
+
+def _post_process_llm_output(text: str) -> str:
+    """Pipeline complet de neteja post-LLM abans del Quality Report.
+
+    Aplica en ordre:
+    1. Strip artefactes LaTeX
+    2. Fix concatenacions de prefix (Revolrevolució → revolució)
+    3. Substitució de paraules angleses (owners → propietaris)
+    4. Correcció de typos coneguts (possuïen → posseïen)
+
+    Ordre crític: el LaTeX primer (pot contenir fragments que trenquin els
+    altres regex), concatenacions abans que typos (una concatenació pot
+    contenir un typo com a substring).
+    """
+    text = _strip_latex_artifacts(text)
+    text = _fix_word_concatenations(text)
+    text = _fix_english_words(text)
+    text = _fix_typos(text)
     return text
 
 
@@ -1306,7 +1432,7 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
         try:
             adapted = _call_llm(active_model, system_prompt, text)
             adapted = clean_gemini_output(adapted)
-            adapted = _strip_latex_artifacts(adapted)
+            adapted = _post_process_llm_output(adapted)
         except Exception as e:
             adapted = f"Error en la generació ({active_model}): {e}"
             break
@@ -1894,7 +2020,7 @@ perfil de l'alumne es farà en una segona fase amb un altre pipeline.
     try:
         text = _call_llm(model_usat, prompt, "")
         text = clean_gemini_output(text).strip()
-        text = _strip_latex_artifacts(text)
+        text = _post_process_llm_output(text)
     except Exception as e:
         return JSONResponse(
             {"error": f"Error generant el text: {type(e).__name__}: {e}"},
@@ -2816,7 +2942,7 @@ zero — modifica'l mantenint l'estructura general i el contingut.
     try:
         result = _call_llm("gemma4", prompt, "")
         result = clean_gemini_output(result).strip()
-        result = _strip_latex_artifacts(result)
+        result = _post_process_llm_output(result)
     except Exception as e:
         return JSONResponse(
             {"error": f"Error refinant el text: {type(e).__name__}: {e}"},
