@@ -3822,6 +3822,38 @@ details.bento-card .bento-card-body {
     color: var(--on-surface-variant);
 }
 
+/* Disclaimer final al peu del Quality Report (sempre visible) */
+.quality-disclaimer {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.625rem 0.75rem;
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    border-radius: var(--radius-lg);
+    margin-top: 0.5rem;
+}
+
+.quality-disclaimer .material-symbols-outlined {
+    font-size: 0.9375rem;
+    color: #b45309;
+    flex-shrink: 0;
+    margin-top: 0.0625rem;
+}
+
+.quality-disclaimer p {
+    font-size: 0.625rem;
+    line-height: 1.4;
+    color: #92400e;
+    margin: 0;
+    font-weight: 500;
+}
+
+.quality-disclaimer strong {
+    color: #78350f;
+    font-weight: 700;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    OVERRIDES Pas 2: tipografia unificada + espais reduïts
    Alta especificitat per guanyar als estils antics (.gen-field select)

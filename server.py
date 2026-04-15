@@ -1346,8 +1346,46 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
 
 @app.get("/api/health")
 async def health():
-    """Verifica connectivitat amb Supabase i Gemini."""
-    checks = {"supabase": False, "llm": False, "model": ATNE_MODEL}
+    """
+    Verifica l'estat complet del sistema:
+    - Supabase (vector store)
+    - Claus API de tots els models LLM suportats (booleans, sense valor)
+    - Connectivitat amb LanguageTool
+    - Configuració del pipeline de qualitat (auditor LLM opt-in)
+    Retorna 200 si Supabase + model default funcionen, 503 en cas contrari.
+    """
+    checks = {
+        "supabase": False,
+        "llm": False,
+        "model_default": ATNE_MODEL,
+        "keys": {
+            "gemma4": {
+                "configured": bool(GEMMA4_API_KEYS and any(GEMMA4_API_KEYS)),
+                "count": len([k for k in GEMMA4_API_KEYS if k]),
+            },
+            "mistral": {
+                "configured": bool(MISTRAL_API_KEY),
+            },
+            "openai": {
+                "configured": bool(os.getenv("OPENAI_API_KEY")),
+            },
+            "gemini": {
+                "configured": bool(GEMINI_API_KEYS and any(GEMINI_API_KEYS)),
+                "count": len([k for k in GEMINI_API_KEYS if k]),
+            },
+        },
+        "languagetool": {
+            "url": LANGUAGETOOL_URL,
+            "reachable": False,
+        },
+        "auditor": {
+            "enabled": ATNE_AUDITOR_ENABLED,
+            "model": ATNE_AUDITOR_MODEL,
+            "can_run": bool(os.getenv("OPENAI_API_KEY")),
+        },
+    }
+
+    # Supabase check
     try:
         resp = requests.get(
             f"{SUPABASE_URL}/rest/v1/rag_fje",
@@ -1358,19 +1396,36 @@ async def health():
         checks["supabase"] = resp.status_code == 200
     except Exception:
         pass
+
+    # Model default check
     try:
         if ATNE_MODEL == "mistral":
-            r = requests.get("https://api.mistral.ai/v1/models",
-                headers={"Authorization": f"Bearer {MISTRAL_API_KEY}"}, timeout=5)
+            r = requests.get(
+                "https://api.mistral.ai/v1/models",
+                headers={"Authorization": f"Bearer {MISTRAL_API_KEY}"},
+                timeout=5,
+            )
             checks["llm"] = r.status_code == 200
         elif ATNE_MODEL == "gemma4":
             gemini_client.models.get(model="gemma-4-31b-it")
             checks["llm"] = True
+        elif ATNE_MODEL == "gpt":
+            # Només comprovar que la clau hi és (evita cost de crida)
+            checks["llm"] = bool(os.getenv("OPENAI_API_KEY"))
         else:
             gemini_client.models.get(model="gemini-2.5-flash")
             checks["llm"] = True
     except Exception:
         pass
+
+    # LanguageTool connectivity check (quick probe a /languages endpoint)
+    try:
+        base = LANGUAGETOOL_URL.rsplit("/check", 1)[0]
+        r = requests.get(f"{base}/languages", timeout=4)
+        checks["languagetool"]["reachable"] = r.status_code == 200
+    except Exception:
+        pass
+
     ok = checks["supabase"] and checks["llm"]
     return JSONResponse({"ok": ok, **checks}, status_code=200 if ok else 503)
 

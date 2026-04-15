@@ -2516,6 +2516,14 @@ function renderQualityReport(reportId, bodyId, badgeId, report) {
         `);
     }
 
+    // Disclaimer final sempre visible: l'assistent no substitueix la revisió humana
+    rows.push(`
+        <div class="quality-disclaimer">
+            <span class="material-symbols-outlined">info</span>
+            <p>Aquest assistent ajuda, però <strong>no substitueix la revisió humana</strong>. Revisa sempre el text final abans d'usar-lo amb els alumnes.</p>
+        </div>
+    `);
+
     body.innerHTML = rows.join("");
     card.removeAttribute("hidden");
 }
