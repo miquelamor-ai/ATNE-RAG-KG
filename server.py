@@ -2206,7 +2206,7 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
     quality_enabled = params.get("quality_check", True)
     use_auditor = params.get("auditor")
     if use_auditor is None:
-        use_auditor = ATNE_AUDITOR_ENABLED
+        use_auditor = _AUDITOR_ENABLED_RUNTIME
     etapa_pp = context.get("etapa", "")
     quality = None
     if quality_enabled:
@@ -2297,7 +2297,7 @@ async def health():
             "reachable": False,
         },
         "auditor": {
-            "enabled": ATNE_AUDITOR_ENABLED,
+            "enabled": _AUDITOR_ENABLED_RUNTIME,
             "model": ATNE_AUDITOR_MODEL,
             "can_run": bool(os.getenv("OPENAI_API_KEY")),
         },
@@ -3833,7 +3833,7 @@ def post_process_catalan(text: str, target_mecr: str = "", enable_lt: bool = Tru
       - lt_disponible, auditor_disponible, auditor_model
     """
     if enable_auditor is None:
-        enable_auditor = ATNE_AUDITOR_ENABLED
+        enable_auditor = _AUDITOR_ENABLED_RUNTIME
 
     if not text or not text.strip():
         return {
