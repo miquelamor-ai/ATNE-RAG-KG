@@ -78,187 +78,244 @@
     <!-- ── WORKSPACE ───────────────────────────────────────── -->
     <div class="shell-workspace">
 
-    <!-- ── PAS 1: Perfil ───────────────────────────────────── -->
+    <!-- ── PAS 1: Perfil — Layout 3 columnes ─────────────── -->
     <section class="step-panel active" id="step-1">
 
         <div class="page-header">
             <span class="step-indicator">Pas 1 de 4</span>
             <h1 class="page-title">Configura el context d'aprenentatge</h1>
-            <p class="page-desc">Defineix l'entorn educatiu i el perfil de l'alumne per personalitzar l'adaptació curricular amb precisió.</p>
         </div>
 
-        <!-- Context docent -->
-        <div class="card">
-            <div class="card-header">
-                <div class="icon-box"><span class="material-symbols-outlined">school</span></div>
-                <h3 class="card-title">Context Docent</h3>
-            </div>
-            <div class="context-bar" style="padding:0;border:none;box-shadow:none;border-radius:0;background:transparent;">
-            <div class="context-field">
-                <label for="ctx-etapa">Etapa</label>
-                <select id="ctx-etapa">
-                    <option value="infantil">Infantil</option>
-                    <option value="primaria">Primària</option>
-                    <option value="ESO" selected>ESO</option>
-                    <option value="batxillerat">Batxillerat</option>
-                    <option value="FP">FP</option>
-                </select>
-            </div>
-            <div class="context-field">
-                <label for="ctx-curs">Curs</label>
-                <select id="ctx-curs">
-                    <option value="1r">1r</option>
-                    <option value="2n">2n</option>
-                    <option value="3r" selected>3r</option>
-                    <option value="4t">4t</option>
-                    <option value="5e">5è</option>
-                    <option value="6e">6è</option>
-                </select>
-            </div>
-            <div class="context-field">
-                <label for="ctx-ambit">Àmbit</label>
-                <select id="ctx-ambit">
-                    <option value="cientific">Científic</option>
-                    <option value="humanistic">Humanístic</option>
-                    <option value="linguistic">Lingüístic</option>
-                    <option value="artistic">Artístic</option>
-                </select>
-            </div>
-            <div class="context-field">
-                <label for="ctx-materia" id="ctx-materia-label">Tema / UF</label>
-                <input type="text" id="ctx-materia" placeholder="Ex: La fotosíntesi, La Revolució Francesa...">
-            </div>
-            </div><!-- /context-bar -->
-        </div><!-- /card Context Docent -->
-        <input type="hidden" name="ctx-aula" value="ordinaria">
+        <div class="pas1-grid">
 
-        <!-- Mode: alumne concret o grup -->
-        <div class="mode-card">
-            <div class="card-header">
-                <div class="icon-box"><span class="material-symbols-outlined">group</span></div>
-                <h3 class="card-title">Per a qui és l'adaptació?</h3>
-            </div>
-            <div class="radio-grid">
-            <label class="mode-option">
-                <input type="radio" name="adapt-mode" value="alumne" checked>
-                <span>
-                    <strong>Un alumne concret</strong>
-                    <span class="mode-desc">1 versió del text, adaptada al seu nivell</span>
-                </span>
-            </label>
-            <label class="mode-option">
-                <input type="radio" name="adapt-mode" value="grup">
-                <span>
-                    <strong>Un grup amb diversitat de nivells</strong>
-                    <span class="mode-desc">3 versions simultànies: accessible, estàndard i exigent</span>
-                </span>
-            </label>
-            </div>
-        </div>
+        <!-- ── COL 1-2: Mode + Configuració alumne/grup ───── -->
+        <div class="pas1-main">
 
-        <!-- Bloc A: Desfase curricular -->
-        <div class="bloc-a">
-            <div class="card-header">
-                <div class="icon-box"><span class="material-symbols-outlined">trending_up</span></div>
-                <h3 class="card-title" id="bloc-a-label">Aquest alumne llegeix i comprèn...</h3>
-            </div>
-            <div class="desfase-scale" id="desfase-scale">
-                <label class="desfase-opt"><input type="radio" name="desfase" value="2"> Molt per sobre</label>
-                <label class="desfase-opt"><input type="radio" name="desfase" value="1"> Per sobre</label>
-                <label class="desfase-opt"><input type="radio" name="desfase" value="0" checked> Al nivell del curs</label>
-                <label class="desfase-opt"><input type="radio" name="desfase" value="-1"> Per sota</label>
-                <label class="desfase-opt"><input type="radio" name="desfase" value="-2"> Molt per sota</label>
-            </div>
-            <div class="mecr-preview" id="desfase-mecr-preview">
-                Nivell lingüístic de sortida: <strong id="mecr-preview-value">—</strong>
-            </div>
-        </div>
-
-        <!-- Bloc B: Doble columna observes → ajuts -->
-        <div class="bloc-b-grid">
-            <div class="bloc-b-card">
+            <!-- Mode: alumne concret o grup -->
+            <div class="mode-card pas1-compact">
                 <div class="card-header">
-                    <div class="icon-box"><span class="material-symbols-outlined">visibility</span></div>
-                    <h3 class="card-title">Què observes?</h3>
+                    <div class="icon-box"><span class="material-symbols-outlined">group</span></div>
+                    <h3 class="card-title">Per a qui és l'adaptació?</h3>
                 </div>
-                <div id="observable-behaviors">
-                    <!-- Generat per app.js -->
+                <div class="radio-grid">
+                <label class="mode-option">
+                    <input type="radio" name="adapt-mode" value="alumne" checked>
+                    <span>
+                        <strong>Un alumne concret</strong>
+                        <span class="mode-desc">1 versió adaptada al seu nivell</span>
+                    </span>
+                </label>
+                <label class="mode-option">
+                    <input type="radio" name="adapt-mode" value="grup">
+                    <span>
+                        <strong>Un grup divers</strong>
+                        <span class="mode-desc">3 versions: accessible, estàndard, exigent</span>
+                    </span>
+                </label>
                 </div>
             </div>
-            <div class="bloc-b-card ajuts-card">
+
+            <!-- ══ PANELL ALUMNE (visible per defecte) ═══════ -->
+            <div id="alumne-panel">
+
+                <!-- Desfase curricular -->
+                <div class="bloc-a pas1-compact">
+                    <div class="card-header">
+                        <div class="icon-box"><span class="material-symbols-outlined">trending_up</span></div>
+                        <h3 class="card-title" id="bloc-a-label">Llegeix i comprèn...</h3>
+                    </div>
+                    <div class="desfase-scale" id="desfase-scale">
+                        <label class="desfase-opt"><input type="radio" name="desfase" value="2"> Molt per sobre</label>
+                        <label class="desfase-opt"><input type="radio" name="desfase" value="1"> Per sobre</label>
+                        <label class="desfase-opt"><input type="radio" name="desfase" value="0" checked> Al nivell</label>
+                        <label class="desfase-opt"><input type="radio" name="desfase" value="-1"> Per sota</label>
+                        <label class="desfase-opt"><input type="radio" name="desfase" value="-2"> Molt per sota</label>
+                    </div>
+                    <div class="mecr-preview" id="desfase-mecr-preview">
+                        Nivell sortida: <strong id="mecr-preview-value">—</strong>
+                    </div>
+                </div>
+
+                <!-- Doble columna: observes → ajuts -->
+                <div class="bloc-b-grid">
+                    <div class="bloc-b-card pas1-compact">
+                        <div class="card-header">
+                            <div class="icon-box"><span class="material-symbols-outlined">visibility</span></div>
+                            <h3 class="card-title">Què observes?</h3>
+                        </div>
+                        <div id="observable-behaviors">
+                            <!-- Generat per app.js -->
+                        </div>
+                    </div>
+                    <div class="bloc-b-card ajuts-card pas1-compact">
+                        <div class="card-header">
+                            <div class="icon-box" style="background-color:var(--surface-container-lowest);"><span class="material-symbols-outlined">support</span></div>
+                            <h3 class="card-title">Ajuts
+                                <span class="card-hint">Afegeix o treu manualment</span>
+                            </h3>
+                        </div>
+                        <div id="ajuts-list">
+                            <!-- Generat per app.js -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Via diagnòstic (plegada) -->
+                <details class="via-diagnostic-toggle" id="via-diagnostic-panel">
+                    <summary>Tinc un diagnòstic clínic — via diagnòstic</summary>
+                    <div class="char-grid" id="char-grid">
+                        <!-- Generat per app.js -->
+                    </div>
+                </details>
+
+                <!-- Perfil alumne: desar / carregar -->
+                <div class="pas1-profile-bar">
+                    <select id="profile-selector">
+                        <option value="_new">— Nou perfil —</option>
+                    </select>
+                    <button class="btn btn-sm" id="btn-load-profile">Carregar</button>
+                    <button class="btn btn-sm btn-outline" id="btn-save-profile">Desar</button>
+                    <input type="text" id="profile-nom" placeholder="Nom del perfil" class="profile-nom-input">
+                </div>
+            </div><!-- /alumne-panel -->
+
+            <!-- ══ PANELL GRUP (ocult per defecte) ═══════════ -->
+            <div id="grup-panel" style="display:none;">
+
+                <!-- Nivells MECR del grup (3 versions generals) -->
+                <div class="bloc-a pas1-compact">
+                    <div class="card-header">
+                        <div class="icon-box"><span class="material-symbols-outlined">groups</span></div>
+                        <h3 class="card-title">Nivells del grup</h3>
+                    </div>
+                    <p class="pas1-hint">3 versions adaptades a diferents nivells de l'aula.</p>
+                    <div class="grup-mecr-grid">
+                        <div class="grup-mecr-card grup-mecr-low">
+                            <div class="grup-mecr-label">Accessible</div>
+                            <div class="grup-mecr-value" id="grup-mecr-low">—</div>
+                        </div>
+                        <div class="grup-mecr-card grup-mecr-mid">
+                            <div class="grup-mecr-label">Estàndard</div>
+                            <div class="grup-mecr-value" id="grup-mecr-mid">—</div>
+                        </div>
+                        <div class="grup-mecr-card grup-mecr-high">
+                            <div class="grup-mecr-label">Exigent</div>
+                            <div class="grup-mecr-value" id="grup-mecr-high">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Perfils individuals addicionals (opcional) -->
+                <div class="bloc-b-card pas1-compact">
+                    <div class="card-header">
+                        <div class="icon-box"><span class="material-symbols-outlined">person_add</span></div>
+                        <h3 class="card-title">Perfils individuals
+                            <span class="card-hint">Opcional — versions addicionals per alumnes concrets</span>
+                        </h3>
+                    </div>
+                    <p class="pas1-hint">Selecciona perfils desats per generar versions personalitzades a més de les 3 del grup.</p>
+                    <div class="grup-profiles-add">
+                        <select id="grup-profile-picker" class="grup-profile-select">
+                            <option value="">Selecciona un perfil...</option>
+                        </select>
+                        <button class="btn btn-sm" id="btn-grup-add-profile" type="button">
+                            <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">add</span> Afegir
+                        </button>
+                    </div>
+                    <div id="grup-profiles-list" class="grup-profiles-chips">
+                        <!-- Chips dels perfils afegits, generats per JS -->
+                    </div>
+                </div>
+
+                <!-- Ajuts del grup (simplificats) -->
+                <div class="bloc-b-card ajuts-card pas1-compact">
+                    <div class="card-header">
+                        <div class="icon-box" style="background-color:var(--surface-container-lowest);"><span class="material-symbols-outlined">support</span></div>
+                        <h3 class="card-title">Ajuts globals del grup
+                            <span class="card-hint">S'apliquen a les 3 versions</span>
+                        </h3>
+                    </div>
+                    <div id="ajuts-list-grup">
+                        <!-- Clonat des d'ajuts-list per app.js -->
+                    </div>
+                </div>
+            </div><!-- /grup-panel -->
+
+        </div><!-- /pas1-main -->
+
+        <!-- ── COL 3: Context docent + Perfil docent (sticky) ── -->
+        <aside class="pas1-sidebar">
+            <div class="pas1-sidebar-card">
                 <div class="card-header">
-                    <div class="icon-box" style="background-color:var(--surface-container-lowest);"><span class="material-symbols-outlined">support</span></div>
-                    <h3 class="card-title">Ajuts que s'aplicaran
-                        <span class="card-hint">Pots afegir-ne o treure'n manualment</span>
-                    </h3>
+                    <div class="icon-box"><span class="material-symbols-outlined">school</span></div>
+                    <h3 class="card-title">Context docent</h3>
                 </div>
-                <div id="ajuts-list">
-                    <!-- Generat per app.js -->
+                <div class="pas1-context-fields">
+                    <div class="context-field">
+                        <label for="ctx-etapa">Etapa</label>
+                        <select id="ctx-etapa">
+                            <option value="infantil">Infantil</option>
+                            <option value="primaria">Primària</option>
+                            <option value="ESO" selected>ESO</option>
+                            <option value="batxillerat">Batxillerat</option>
+                            <option value="FP">FP</option>
+                        </select>
+                    </div>
+                    <div class="context-field">
+                        <label for="ctx-curs">Curs</label>
+                        <select id="ctx-curs">
+                            <option value="1r">1r</option>
+                            <option value="2n">2n</option>
+                            <option value="3r" selected>3r</option>
+                            <option value="4t">4t</option>
+                            <option value="5e">5è</option>
+                            <option value="6e">6è</option>
+                        </select>
+                    </div>
+                    <div class="context-field">
+                        <label for="ctx-ambit">Àmbit</label>
+                        <select id="ctx-ambit">
+                            <option value="cientific">Científic</option>
+                            <option value="humanistic">Humanístic</option>
+                            <option value="linguistic">Lingüístic</option>
+                            <option value="artistic">Artístic</option>
+                        </select>
+                    </div>
+                    <div class="context-field">
+                        <label for="ctx-materia" id="ctx-materia-label">Tema</label>
+                        <input type="text" id="ctx-materia" placeholder="La fotosíntesi...">
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Configuració de grup (només visible en mode grup) -->
-        <div class="card" id="grup-config" style="display:none;">
-            <div class="card-header">
-                <div class="icon-box"><span class="material-symbols-outlined">groups</span></div>
-                <h3 class="card-title">Configuració del grup</h3>
+            <!-- Desar/carregar context docent -->
+            <div class="pas1-sidebar-card pas1-sidebar-card-secondary">
+                <div class="card-header">
+                    <div class="icon-box"><span class="material-symbols-outlined">bookmark</span></div>
+                    <h3 class="card-title">Contextos desats</h3>
+                </div>
+                <select id="ctx-profile-selector" class="ctx-profile-select">
+                    <option value="_new">— Nou context —</option>
+                </select>
+                <div class="pas1-ctx-actions">
+                    <button class="btn btn-sm" id="btn-load-ctx">Carregar</button>
+                    <button class="btn btn-sm btn-outline" id="btn-save-ctx">Desar</button>
+                </div>
+                <input type="text" id="ctx-profile-name" placeholder="Nom (ex: 3r ESO Ciències)" class="ctx-profile-name-input">
             </div>
-            <p style="font-size:0.875rem;color:var(--on-surface-variant);margin-bottom:1.5rem;">
-                Es generaran 3 versions del text adaptades a diferents nivells de l'aula.
-                El centre es calcula a partir de l'etapa i el curs.
-            </p>
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
-                <div style="background:var(--surface-container-low);border-radius:var(--radius-2xl);padding:1.25rem;text-align:center;">
-                    <div style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--on-surface-variant);margin-bottom:0.5rem;">Més accessible</div>
-                    <div style="font-size:1.25rem;font-weight:700;color:var(--primary);" id="grup-mecr-low">—</div>
-                </div>
-                <div style="background:var(--surface-container-high);border-radius:var(--radius-2xl);padding:1.25rem;text-align:center;">
-                    <div style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--on-surface-variant);margin-bottom:0.5rem;">Estàndard</div>
-                    <div style="font-size:1.25rem;font-weight:700;color:var(--primary);" id="grup-mecr-mid">—</div>
-                </div>
-                <div style="background:var(--surface-container-low);border-radius:var(--radius-2xl);padding:1.25rem;text-align:center;">
-                    <div style="font-size:0.625rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--on-surface-variant);margin-bottom:0.5rem;">Més exigent</div>
-                    <div style="font-size:1.25rem;font-weight:700;color:var(--primary);" id="grup-mecr-high">—</div>
-                </div>
-            </div>
-            <details class="via-diagnostic-toggle">
-                <summary>Carregar perfils desats al grup</summary>
-                <div class="profile-header-minimal">
-                    <p style="font-size:0.8125rem;color:var(--on-surface-variant);margin:0.5rem 0;">Funcionalitat disponible properament. Per ara, les 3 versions es generen amb nivells MECR automàtics.</p>
-                </div>
-            </details>
-        </div>
+        </aside>
 
-        <!-- Via diagnòstic (plegada) -->
-        <details class="via-diagnostic-toggle" id="via-diagnostic-panel">
-            <summary>Tinc un diagnòstic clínic — via diagnòstic</summary>
-            <div class="char-grid" id="char-grid">
-                <!-- Generat per app.js -->
-            </div>
-        </details>
+        </div><!-- /pas1-grid -->
 
         <!-- Camps amagats que el JS necessita -->
+        <input type="hidden" name="ctx-aula" value="ordinaria">
         <select id="profile-canal" hidden>
             <option value="mixte" selected>Mixte</option>
             <option value="visual">Visual</option>
             <option value="oral">Oral</option>
             <option value="text">Textual</option>
         </select>
-        <input type="hidden" id="profile-nom" value="">
         <textarea id="profile-obs" hidden></textarea>
-
-        <!-- Perfils desats -->
-        <details class="via-diagnostic-toggle">
-            <summary>Perfils desats</summary>
-            <div class="profile-header-minimal">
-                <select id="profile-selector">
-                    <option value="_new">— Nou perfil —</option>
-                </select>
-                <button class="btn" id="btn-load-profile">Carregar</button>
-                <button class="btn" id="btn-save-profile">Desar</button>
-            </div>
-        </details>
     </section>
 
     <!-- ── PAS 2: Entrada de Text (Stitch design) ──────────── -->
@@ -653,6 +710,10 @@
                 </details>
 
                 <div class="progress-area" id="progress-area">
+                    <div class="context-pill context-pill-progress" id="context-pill-progress">
+                        <span class="material-symbols-outlined">person_pin</span>
+                        <span id="context-pill-progress-text"></span>
+                    </div>
                     <div id="progress-steps"></div>
                 </div>
             </main>
@@ -662,6 +723,17 @@
     <!-- ── PAS 4: Resultat (single-column amb Comparar on-demand) ─── -->
     <!-- Sense workspace-header: el card editor ja porta titol "Text adaptat" i badge -->
     <section class="step-panel" id="step-4">
+        <div class="pas4-autosave-banner" id="pas4-autosave-banner" style="display:none;">
+            <span class="material-symbols-outlined">restore</span>
+            <span>Hi ha un text desat. Recuperar?</span>
+            <button class="btn btn-sm btn-primary" id="btn-autosave-recover">Recuperar</button>
+            <button class="btn btn-sm" id="btn-autosave-dismiss">Descartar</button>
+        </div>
+        <div class="context-pill context-pill-pas4" id="context-pill-pas4">
+            <span class="material-symbols-outlined">person_pin</span>
+            <span id="context-pill-pas4-text"></span>
+        </div>
+
         <div class="pas4-layout">
 
             <!-- Editor card full-width amb toggle Comparar -->
@@ -698,6 +770,28 @@
                         <span class="material-symbols-outlined">compare_arrows</span>
                         <span class="btn-compare-label">Comparar amb original</span>
                     </button>
+                </div>
+
+                <!-- Mini-toolbar d'edició per al text adaptat (Pas 4) -->
+                <div class="write-toolbar-row pas4-toolbar-row" id="pas4-toolbar">
+                    <div class="formatting-toolbar formatting-toolbar-h">
+                        <button class="toolbar-btn" type="button" title="Negreta" data-p4format="bold">
+                            <span class="material-symbols-outlined">format_bold</span>
+                        </button>
+                        <button class="toolbar-btn" type="button" title="Cursiva" data-p4format="italic">
+                            <span class="material-symbols-outlined">format_italic</span>
+                        </button>
+                        <button class="toolbar-btn" type="button" title="Llista amb vinyetes" data-p4format="bullet">
+                            <span class="material-symbols-outlined">format_list_bulleted</span>
+                        </button>
+                        <div class="toolbar-divider"></div>
+                        <button class="toolbar-btn" type="button" title="Desfer (Ctrl+Z)" id="btn-p4-undo">
+                            <span class="material-symbols-outlined">undo</span>
+                        </button>
+                        <button class="toolbar-btn" type="button" title="Refer (Ctrl+Y)" id="btn-p4-redo">
+                            <span class="material-symbols-outlined">redo</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Editor body: single (default) o split (quan compare activat) -->
@@ -780,52 +874,127 @@
             <!-- Complements generats + feedback + export (fora del card editor) -->
             <div id="result-complements"></div>
 
-            <div class="feedback-row" id="feedback-row">
-                <span class="feedback-label">Com ha anat l'adaptació?</span>
-                <div class="feedback-buttons">
-                    <button class="btn feedback-btn" data-rating="1" onclick="rateFeedback(1)" title="Dolenta">Dolenta</button>
-                    <button class="btn feedback-btn" data-rating="2" onclick="rateFeedback(2)" title="Regular">Regular</button>
-                    <button class="btn feedback-btn" data-rating="3" onclick="rateFeedback(3)" title="Bona">Bona</button>
+            <!-- ═══ Accions Pas 4 — 3 files ═══ -->
+
+            <!-- FILA 1: M'agrada — copiar / exportar / desar -->
+            <div class="pas4-actions-card">
+                <div class="pas4-actions-label">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    M'agrada — usar l'adaptació
                 </div>
-                <div class="feedback-comment" id="feedback-comment-area" style="display:none;">
-                    <textarea id="feedback-comment" rows="2" placeholder="Què canviaries?"></textarea>
-                    <button class="btn btn-sm" onclick="submitFeedback()">Enviar</button>
+                <div class="pas4-actions-row">
+                    <button type="button" class="btn pas4-action-btn" id="btn-copy-adapted" onclick="copyAdaptedText()">
+                        <span class="material-symbols-outlined">content_copy</span>
+                        <span>Copiar text</span>
+                    </button>
+                    <button class="btn pas4-action-btn" onclick="exportDoc('txt')">
+                        <span class="material-symbols-outlined">description</span>
+                        <span>TXT</span>
+                    </button>
+                    <button class="btn pas4-action-btn btn-primary" onclick="exportDoc('docx')">
+                        <span class="material-symbols-outlined">article</span>
+                        <span>DOCX</span>
+                    </button>
+                    <button class="btn pas4-action-btn" onclick="exportDoc('pdf')">
+                        <span class="material-symbols-outlined">picture_as_pdf</span>
+                        <span>PDF</span>
+                    </button>
+                    <button class="btn pas4-action-btn btn-accent" id="btn-export-all" onclick="exportAllVersions('docx')" style="display:none;">
+                        <span class="material-symbols-outlined">library_books</span>
+                        <span>Totes les versions</span>
+                    </button>
+                    <button type="button" class="btn pas4-action-btn btn-outline" id="btn-save-adaptation" onclick="saveAdaptation()">
+                        <span class="material-symbols-outlined">bookmark</span>
+                        <span>Desar</span>
+                    </button>
                 </div>
-                <div id="feedback-thanks" style="display:none;" class="feedback-thanks">Gràcies!</div>
+                <div id="save-adaptation-status" class="pas4-action-status" style="display:none;"></div>
             </div>
 
-            <!-- ═══ Pilot 1B: captures implícites + rúbrica lleugera ═══ -->
-            <div class="pilot-actions-row" id="pilot-actions-row">
-                <button type="button" class="btn pilot-copy-btn" id="btn-copy-adapted" onclick="copyAdaptedText()" title="Copiar el text al porta-retalls">
-                    <span class="material-symbols-outlined">content_copy</span>
-                    <span>Copiar text</span>
-                </button>
-                <details class="trouble-report" id="trouble-report">
-                    <summary>
-                        <span class="material-symbols-outlined">flag</span>
-                        <span>Alguna cosa no quadra</span>
-                    </summary>
-                    <div class="trouble-body">
-                        <p class="trouble-hint">Marca què no funciona. Ens ajuda a millorar el pilot.</p>
-                        <label class="trouble-check"><input type="checkbox" data-trouble="nivell_inadequat"> Nivell lingüístic massa alt o massa baix</label>
-                        <label class="trouble-check"><input type="checkbox" data-trouble="contingut_perdut"> Ha perdut contingut curricular important</label>
-                        <label class="trouble-check"><input type="checkbox" data-trouble="errors_catala"> Errors o frases estranyes en català</label>
-                        <label class="trouble-check"><input type="checkbox" data-trouble="format_inadequat"> Format o estructura no adequats</label>
-                        <label class="trouble-check"><input type="checkbox" data-trouble="complements_poc_utils"> Complements (preguntes/bastides) poc útils</label>
-                        <label class="trouble-check"><input type="checkbox" data-trouble="altres_marcat"> Altres (escriu a sota)</label>
-                        <textarea id="trouble-altres-text" rows="2" placeholder="Detall opcional..."></textarea>
-                        <button type="button" class="btn btn-primary btn-sm" onclick="submitTroubleReport()">Envia feedback</button>
-                        <div id="trouble-status" class="trouble-status"></div>
+            <!-- FILA 2: Ajustar — refinar text o complements -->
+            <div class="pas4-actions-card pas4-actions-secondary">
+                <div class="pas4-actions-label">
+                    <span class="material-symbols-outlined">tune</span>
+                    Ajustar — refinar el resultat
+                </div>
+                <div class="pas4-actions-row">
+                    <button type="button" class="btn pas4-action-btn" id="btn-refine-text-p4" onclick="showRefinePanel('text')">
+                        <span class="material-symbols-outlined">edit_note</span>
+                        <span>Refinar text</span>
+                    </button>
+                    <button type="button" class="btn pas4-action-btn" id="btn-refine-complements-p4" onclick="showRefinePanel('complements')">
+                        <span class="material-symbols-outlined">auto_fix_high</span>
+                        <span>Refinar complements</span>
+                    </button>
+                </div>
+                <!-- Panel refine (es mostra/amaga dinàmicament) -->
+                <div id="refine-panel-p4" style="display:none;">
+                    <div class="refine-panel-header">
+                        <span id="refine-panel-target-label">Refinant text...</span>
+                        <button type="button" class="btn btn-sm" onclick="hideRefinePanel()">Tancar</button>
                     </div>
-                </details>
+                    <div class="pas4-refine-chips">
+                        <button type="button" class="refine-chip refine-chip-p4" data-preset="catala" title="Correcció de català via LanguageTool">
+                            <span class="material-symbols-outlined">spellcheck</span>
+                            <span>Català</span>
+                        </button>
+                        <button type="button" class="refine-chip refine-chip-p4" data-preset="simplificar" title="Simplificar">
+                            <span class="material-symbols-outlined">compress</span>
+                            <span>Simplificar</span>
+                        </button>
+                        <button type="button" class="refine-chip refine-chip-p4" data-preset="ampliar" title="Ampliar">
+                            <span class="material-symbols-outlined">expand</span>
+                            <span>Ampliar</span>
+                        </button>
+                        <button type="button" class="refine-chip refine-chip-p4" data-preset="escurcar" title="Escurçar">
+                            <span class="material-symbols-outlined">short_text</span>
+                            <span>Escurçar</span>
+                        </button>
+                    </div>
+                    <div class="refine-custom-inline">
+                        <textarea id="refine-instruction-p4" rows="2" placeholder="Instrucció pròpia (ex: Afegeix un exemple pràctic...)"></textarea>
+                        <button type="button" class="btn btn-primary btn-sm" id="btn-refine-custom-p4">Aplicar</button>
+                    </div>
+                    <div class="refine-status" id="refine-status-p4" style="display:none;"></div>
+                </div>
             </div>
 
-            <div class="export-row">
-                <button class="btn" onclick="exportDoc('txt')">TXT</button>
-                <button class="btn btn-primary" onclick="exportDoc('docx')">DOCX</button>
-                <button class="btn" onclick="exportDoc('pdf')">PDF</button>
-                <button class="btn" onclick="goToStep(1)">Nova adaptació</button>
+            <!-- FILA 3: Refer — tornar a adaptar de zero -->
+            <div class="pas4-actions-card pas4-actions-redo">
+                <div class="pas4-actions-label">
+                    <span class="material-symbols-outlined">refresh</span>
+                    No serveix — tornar a generar
+                </div>
+                <div class="pas4-actions-row">
+                    <button type="button" class="btn pas4-action-btn pas4-redo-btn" id="btn-redo-adaptation" onclick="redoAdaptation()">
+                        <span class="material-symbols-outlined">autorenew</span>
+                        <span>Refer adaptació</span>
+                    </button>
+                    <button class="btn pas4-action-btn" onclick="goToStep(1)">
+                        <span class="material-symbols-outlined">replay</span>
+                        <span>Nova adaptació (des de zero)</span>
+                    </button>
+                </div>
+                <div id="redo-status" class="refine-status" style="display:none;"></div>
             </div>
+
+            <!-- Feedback opcional (col·lapsat) -->
+            <details class="pas4-feedback-optional">
+                <summary>
+                    <span class="material-symbols-outlined">rate_review</span>
+                    Vols valorar l'adaptació?
+                </summary>
+                <div class="feedback-stars" id="feedback-stars">
+                    <button type="button" class="star-btn" data-star="1" title="1"><span class="material-symbols-outlined">star</span></button>
+                    <button type="button" class="star-btn" data-star="2" title="2"><span class="material-symbols-outlined">star</span></button>
+                    <button type="button" class="star-btn" data-star="3" title="3"><span class="material-symbols-outlined">star</span></button>
+                    <button type="button" class="star-btn" data-star="4" title="4"><span class="material-symbols-outlined">star</span></button>
+                    <button type="button" class="star-btn" data-star="5" title="5"><span class="material-symbols-outlined">star</span></button>
+                </div>
+                <textarea id="feedback-comment" rows="2" placeholder="Comentari opcional"></textarea>
+                <button type="button" class="btn btn-sm" id="btn-feedback-send" onclick="submitFullFeedback()">Enviar</button>
+                <div id="feedback-thanks" style="display:none;" class="feedback-thanks">Gràcies!</div>
+            </details>
         </div>
     </section>
 

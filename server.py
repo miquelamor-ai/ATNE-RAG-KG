@@ -90,7 +90,10 @@ _MODEL_CONFIG: dict[str, str] = {
 _MODEL_ALIASES: dict[str, tuple[str, str]] = {
     # Aliases curts (backward compat)
     "gemma4":            ("gemma4",  "gemma-4-31b-it"),
-    "gemma3":            ("gemma4",  "gemma-3-12b-it"),
+    "gemma3":            ("gemma4",  "gemma-3-27b-it"),
+    "gemma3-27b":        ("gemma4",  "gemma-3-27b-it"),
+    "gemma3-12b":        ("gemma4",  "gemma-3-12b-it"),
+    "gemma3n":           ("gemma4",  "gemma-3n-e4b-it"),
     "gemini":            ("gemini",  "gemini-2.5-flash"),
     "mistral":           ("mistral", "mistral-small-latest"),
     "mistral-small":     ("mistral", "mistral-small-latest"),
@@ -103,6 +106,8 @@ _MODEL_ALIASES: dict[str, tuple[str, str]] = {
     # Aliases llargs que vindran de system_config i /admin
     "gemma-4-31b-it":    ("gemma4",  "gemma-4-31b-it"),
     "gemma-3-12b-it":    ("gemma4",  "gemma-3-12b-it"),
+    "gemma-3-27b-it":    ("gemma4",  "gemma-3-27b-it"),
+    "gemma-3n-e4b-it":   ("gemma4",  "gemma-3n-e4b-it"),
     "gemini-2.5-flash":  ("gemini",  "gemini-2.5-flash"),
     "mistral-small-latest": ("mistral", "mistral-small-latest"),
     "mistral-large-latest": ("mistral", "mistral-large-latest"),
@@ -197,6 +202,8 @@ def _model_for(phase: str, override: str = "") -> str:
 _MODEL_COST_EUR_PER_CALL: dict[str, float] = {
     "gemma-4-31b-it":       0.0,      # Free tier Gemma (claus Google)
     "gemma-3-12b-it":       0.0,      # Free tier Gemma (claus Google)
+    "gemma-3-27b-it":       0.0,      # Free tier Gemma (claus Google)
+    "gemma-3n-e4b-it":      0.0,      # Free tier Gemma (claus Google) — E4B nano
     "gemini-2.5-flash":     0.0,      # Free tier Gemini (claus Google)
     "gpt-4o-mini":          0.0036,   # ~2k in + 1k out
     "gpt-4o":               0.045,    # idem ~12× més car
@@ -2140,6 +2147,7 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
         "gemma-4-31b-it":       "Gemma 4 31B",
         "gemma-3-12b-it":       "Gemma 3 12B",
         "gemma-3-27b-it":       "Gemma 3 27B",
+        "gemma-3n-e4b-it":      "Gemma 3n E4B",
         "gemini-2.5-flash":     "Gemini 2.5 Flash",
         "gpt-4o-mini":          "GPT-4o mini",
         "gpt-4o":               "GPT-4o",
@@ -2363,7 +2371,9 @@ _ALLOWED_MODEL_KEYS = {
 
 _ALLOWED_MODELS = [
     "gemma-4-31b-it",
+    "gemma-3-27b-it",
     "gemma-3-12b-it",
+    "gemma-3n-e4b-it",
     "gemini-2.5-flash",
     "gpt-4o-mini",
     "gpt-4o",

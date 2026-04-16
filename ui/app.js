@@ -407,10 +407,13 @@ document.addEventListener("DOMContentLoaded", () => {
     renderCharGrid();
     renderComplementGrid();
     renderObservableBehaviors();
-    renderAjutsList();
+    renderAjutsList("ajuts-list");
+    renderAjutsList("ajuts-list-grup"); // Clonar ajuts pel panell de grup
+    ensureSampleProfiles(); // Injectar perfils de mostra
     loadContextFromStorage();
     updateEtapaSelects(); // Sincronitzar cursos/àmbits amb l'etapa carregada
     loadProfileList();
+    loadContextProfileList(); // Carregar contextos desats
     checkHealth();
     bindEvents();
     updateMecrPreview();
@@ -451,8 +454,8 @@ function renderObservableBehaviors() {
     });
 }
 
-function renderAjutsList() {
-    const container = document.getElementById("ajuts-list");
+function renderAjutsList(containerId = "ajuts-list") {
+    const container = document.getElementById(containerId);
     if (!container || !window.ObservableMapping) return;
 
     const ajuts = window.ObservableMapping.AJUTS;
@@ -472,7 +475,7 @@ function renderAjutsList() {
         html += `<div class="ajut-grup">
             <div class="ajut-grup-label">${grupLabel}</div>
             ${items.map(it => `
-                <label class="ajut-item">
+                <label class="ajut-item" data-ajut-item="${it.id}">
                     <input type="checkbox" data-ajut="${it.id}">
                     <span>${it.label}</span>
                 </label>
@@ -497,6 +500,7 @@ function renderAjutsList() {
         });
     });
 }
+
 
 function isAjutAutoActive(ajutId) {
     // Retorna true si alguna conducta marcada l'activa automàticament
@@ -527,6 +531,7 @@ function syncAjutsFromBehaviors() {
 
         cb.checked = (isAuto && !isSuppressed) || isManual;
     });
+
 }
 
 function getSelectedAjutIds() {
@@ -666,7 +671,7 @@ function goToStep(n) {
         panel.classList.toggle("active", panel.id === `step-${n}`);
     });
     if (n === 3) requestProposal();
-    if (n === 2) updateContextPill();
+    if (n >= 2) updateContextPill();
     // Pilot 1B: arrencar timer Pas 4 quan hi entrem
     if (n === 4) {
         state._step4EnterTs = Date.now();
@@ -1080,12 +1085,32 @@ function applyProfileToForm(profile) {
     document.getElementById("profile-nom").value = profile.nom || "";
     document.getElementById("profile-obs").value = profile.observacions || "";
     document.getElementById("profile-canal").value = profile.canal_preferent || "mixte";
+
+    // Si el perfil té behaviors (via observable), restaurar-los
+    if (profile._via === "observable" && profile._behaviors) {
+        document.querySelectorAll('#observable-behaviors input[type="checkbox"]').forEach(cb => {
+            cb.checked = false;
+        });
+        for (const bid of profile._behaviors) {
+            const cb = document.querySelector(`#observable-behaviors input[data-behavior="${bid}"]`);
+            if (cb) cb.checked = true;
+        }
+        syncAjutsFromBehaviors();
+        if (profile._desfase !== undefined) {
+            const r = document.querySelector(`input[name="desfase"][value="${profile._desfase}"]`);
+            if (r) r.checked = true;
+            updateMecrPreview();
+        }
+    }
+
+    // Restaurar característiques (via diagnòstic o complementar observable)
     const chars = profile.caracteristiques || {};
     for (const [key, val] of Object.entries(chars)) {
         const cb = document.querySelector(`input[type="checkbox"][data-char="${key}"]`);
         if (!cb) continue;
         cb.checked = val.actiu;
-        cb.closest(".char-item").classList.toggle("checked", val.actiu);
+        const charItem = cb.closest(".char-item");
+        if (charItem) charItem.classList.toggle("checked", val.actiu);
         if (val.actiu) {
             for (const [svKey, svVal] of Object.entries(val)) {
                 if (svKey === "actiu") continue;
@@ -1094,6 +1119,185 @@ function applyProfileToForm(profile) {
             }
         }
     }
+}
+
+
+// ── Perfils de mostra (s'injecten al primer ús) ──────────────────────────
+
+const SAMPLE_PROFILES = {
+    marc_tdah_3r_eso: {
+        nom: "Marc — TDAH inatent, 3r ESO",
+        canal_preferent: "visual",
+        observacions: "Perfil de mostra. Li costa mantenir l'atenció i seguir instruccions llargues.",
+        _via: "observable",
+        _behaviors: ["atencio", "instruccions"],
+        _ajuts: ["fragmentar", "paragrafs_curts", "una_idea_frase", "instruccions_numerades"],
+        _desfase: -1,
+        caracteristiques: {
+            tdah: { actiu: true, presentacio: "inatent", grau: "moderat", baixa_memoria_treball: true },
+        },
+    },
+    aina_dislexia_5e_pri: {
+        nom: "Aina — Dislèxia, 5è Primària",
+        canal_preferent: "visual",
+        observacions: "Perfil de mostra. Li costa llegir amb fluïdesa i amb el vocabulari.",
+        _via: "observable",
+        _behaviors: ["fluidesa", "vocabulari"],
+        _ajuts: ["una_idea_frase", "vocabulari_frequent", "tipografia_adaptada", "glossari_integrat", "definicions_linia"],
+        _desfase: -1,
+        caracteristiques: {
+            dislexia: { actiu: true, tipus_dislexia: "fonologica", grau: "moderat", tipografia_adaptada: true },
+            tdl: { actiu: true, semantica: true, grau: "moderat" },
+        },
+    },
+    liu_nouvingut_2n_eso: {
+        nom: "Liu — Nouvingut A1, 2n ESO",
+        canal_preferent: "mixte",
+        observacions: "Perfil de mostra. Li costa tot: comprensió, vocabulari, fluïdesa.",
+        _via: "observable",
+        _behaviors: ["comprensio", "vocabulari", "fluidesa"],
+        _ajuts: ["connectors_explicits", "una_idea_frase", "destacats_visuals", "vocabulari_frequent", "glossari_integrat", "definicions_linia", "tipografia_adaptada"],
+        _desfase: -2,
+        caracteristiques: {
+            tdl: { actiu: true, modalitat: "comprensiu", comprensio_lectora: true, semantica: true, grau: "sever" },
+            dislexia: { actiu: true, tipus_dislexia: "fonologica", grau: "moderat", tipografia_adaptada: true },
+        },
+    },
+    jana_ac_4t_eso: {
+        nom: "Jana — Altes capacitats, 4t ESO",
+        canal_preferent: "text",
+        observacions: "Perfil de mostra. Alumna amb altes capacitats, demanda enriquiment.",
+        _via: "observable",
+        _behaviors: [],
+        _ajuts: [],
+        _desfase: 2,
+        caracteristiques: {},
+    },
+};
+
+function ensureSampleProfiles() {
+    const local = getLocalProfiles();
+    let added = false;
+    for (const [key, profile] of Object.entries(SAMPLE_PROFILES)) {
+        if (!local[key]) {
+            local[key] = profile;
+            added = true;
+        }
+    }
+    if (added) saveLocalProfiles(local);
+}
+
+
+// ── Contextos docents desats (sidebar dreta Pas 1) ──────────────────────
+
+function getLocalContextProfiles() {
+    try {
+        return JSON.parse(localStorage.getItem("atne_ctx_profiles")) || {};
+    } catch { return {}; }
+}
+
+function saveLocalContextProfiles(profiles) {
+    localStorage.setItem("atne_ctx_profiles", JSON.stringify(profiles));
+}
+
+function loadContextProfileList() {
+    const sel = document.getElementById("ctx-profile-selector");
+    if (!sel) return;
+    sel.innerHTML = '<option value="_new">— Nou context —</option>';
+    const local = getLocalContextProfiles();
+    for (const [key, p] of Object.entries(local)) {
+        sel.innerHTML += `<option value="${key}">${p._name || key}</option>`;
+    }
+}
+
+function saveContextProfile() {
+    const nameEl = document.getElementById("ctx-profile-name");
+    const name = (nameEl && nameEl.value.trim()) || "";
+    if (!name) { alert("Escriu un nom pel context (ex: '3r ESO Ciències')"); return; }
+    const key = name.toLowerCase().replace(/[^a-z0-9àáèéíïòóúüç]+/g, "_").replace(/_+/g, "_").slice(0, 30);
+    const ctx = collectContext();
+    ctx._name = name;
+    const local = getLocalContextProfiles();
+    local[key] = ctx;
+    saveLocalContextProfiles(local);
+    loadContextProfileList();
+    document.getElementById("ctx-profile-selector").value = key;
+    if (nameEl) nameEl.value = "";
+}
+
+function loadContextProfile() {
+    const sel = document.getElementById("ctx-profile-selector");
+    if (!sel || sel.value === "_new") return;
+    const local = getLocalContextProfiles();
+    const ctx = local[sel.value];
+    if (!ctx) return;
+    if (ctx.etapa) {
+        document.getElementById("ctx-etapa").value = ctx.etapa;
+        updateEtapaSelects();
+    }
+    if (ctx.curs) document.getElementById("ctx-curs").value = ctx.curs;
+    if (ctx.ambit) document.getElementById("ctx-ambit").value = ctx.ambit;
+    if (ctx.materia) document.getElementById("ctx-materia").value = ctx.materia;
+    updateMecrPreview();
+    saveContextToStorage();
+}
+
+
+// ── Perfils individuals al mode grup (chips afegir/treure) ──────────────
+
+// Llista de claus de perfils afegits al grup
+const grupProfileKeys = [];
+
+function populateGrupProfilePicker() {
+    const sel = document.getElementById("grup-profile-picker");
+    if (!sel) return;
+    const local = getLocalProfiles();
+    sel.innerHTML = '<option value="">Selecciona un perfil...</option>';
+    for (const [key, p] of Object.entries(local)) {
+        // No mostrar els que ja estan afegits
+        if (grupProfileKeys.includes(key)) continue;
+        sel.innerHTML += `<option value="${key}">${p.nom}</option>`;
+    }
+}
+
+function addGrupProfile() {
+    const sel = document.getElementById("grup-profile-picker");
+    if (!sel || !sel.value) return;
+    const key = sel.value;
+    if (grupProfileKeys.includes(key)) return;
+    grupProfileKeys.push(key);
+    renderGrupProfileChips();
+    populateGrupProfilePicker(); // Refrescar per treure l'afegit
+}
+
+function removeGrupProfile(key) {
+    const idx = grupProfileKeys.indexOf(key);
+    if (idx >= 0) grupProfileKeys.splice(idx, 1);
+    renderGrupProfileChips();
+    populateGrupProfilePicker();
+}
+
+function renderGrupProfileChips() {
+    const container = document.getElementById("grup-profiles-list");
+    if (!container) return;
+    const local = getLocalProfiles();
+    if (grupProfileKeys.length === 0) {
+        container.innerHTML = '<span class="pas1-hint" style="margin:0;font-style:italic;">Cap perfil afegit. Les 3 versions seran per nivells MECR generals.</span>';
+        return;
+    }
+    container.innerHTML = grupProfileKeys.map(key => {
+        const p = local[key];
+        const nom = p ? p.nom : key;
+        return `<div class="grup-profile-chip">
+            <span>${nom}</span>
+            <button class="chip-remove" type="button" onclick="removeGrupProfile('${key}')" title="Treure">&times;</button>
+        </div>`;
+    }).join("");
+}
+
+function getGrupProfiles() {
+    const local = getLocalProfiles();
+    return grupProfileKeys.map(key => local[key]).filter(Boolean);
 }
 
 
@@ -1483,7 +1687,7 @@ function switchVersion(level) {
                     <span class="complement-icon">${icon}</span>
                     <span class="complement-title">${title}</span>
                 </summary>
-                <div class="complement-body">${formatMarkdown(content)}</div>
+                <div class="complement-body" contenteditable="true" spellcheck="true">${formatMarkdown(content)}</div>
             </details>
         `;
     }
@@ -1549,8 +1753,10 @@ function showResult() {
 
     // Mode grup: inicialitzar pestanyes i seleccionar la primera versió disponible
     const versionTabs = document.getElementById("version-tabs");
+    const btnExportAll = document.getElementById("btn-export-all");
     if (state.adaptMode === "grup" && state.versions && Object.keys(state.versions).length) {
         versionTabs.style.display = "flex";
+        if (btnExportAll) btnExportAll.style.display = "inline-flex";
         bindVersionTabs();
         // Triar la versió estàndard com a defecte (si hi és)
         const defaultVersion = state.versions.estandard ? "estandard"
@@ -1560,6 +1766,7 @@ function showResult() {
         updateVersionTabsUI();
     } else {
         versionTabs.style.display = "none";
+        if (btnExportAll) btnExportAll.style.display = "none";
     }
 
     // Parsejar seccions del text adaptat
@@ -1581,7 +1788,7 @@ function showResult() {
                     <span class="complement-icon">${icon}</span>
                     <span class="complement-title">${title}</span>
                 </summary>
-                <div class="complement-body">${formatMarkdown(content)}</div>
+                <div class="complement-body" contenteditable="true" spellcheck="true">${formatMarkdown(content)}</div>
             </details>
         `;
     }
@@ -1752,6 +1959,109 @@ async function copyAdaptedText() {
     }
 }
 
+// ── Accions Pas 4: refine panel + desar + captura implícita ──────────────
+
+let _refineTarget = "text"; // "text" o "complements"
+
+function showRefinePanel(target) {
+    _refineTarget = target;
+    const panel = document.getElementById("refine-panel-p4");
+    const label = document.getElementById("refine-panel-target-label");
+    if (panel) panel.style.display = "";
+    if (label) label.textContent = target === "complements"
+        ? "Refinant complements..."
+        : "Refinant text adaptat...";
+    // Captura implícita
+    trackAction("refine_started", { target });
+}
+
+function hideRefinePanel() {
+    const panel = document.getElementById("refine-panel-p4");
+    if (panel) panel.style.display = "none";
+}
+
+async function saveAdaptation() {
+    const status = document.getElementById("save-adaptation-status");
+    // Desar a localStorage
+    const adapted = document.getElementById("result-adapted");
+    const complements = document.getElementById("result-complements");
+    const key = `atne_saved_${Date.now()}`;
+    try {
+        const data = {
+            adapted: adapted ? adapted.innerHTML : "",
+            complements: complements ? complements.innerHTML : "",
+            original: state.originalText || "",
+            profile: collectProfile(),
+            context: collectContext(),
+            timestamp: Date.now(),
+            historyId: state.historyId,
+        };
+        // Guardar a localStorage
+        const saved = JSON.parse(localStorage.getItem("atne_saved_adaptations") || "[]");
+        saved.unshift(data);
+        if (saved.length > 20) saved.length = 20; // max 20
+        localStorage.setItem("atne_saved_adaptations", JSON.stringify(saved));
+
+        if (status) {
+            status.textContent = "Adaptació desada correctament";
+            status.style.display = "";
+            setTimeout(() => { status.style.display = "none"; }, 3000);
+        }
+    } catch (e) {
+        if (status) {
+            status.textContent = "Error desant: " + e.message;
+            status.style.background = "#fee2e2";
+            status.style.color = "#991b1b";
+            status.style.display = "";
+        }
+    }
+    // Captura implícita
+    trackAction("saved");
+}
+
+async function redoAdaptation() {
+    if (!state.originalText) {
+        alert("No hi ha cap text original per tornar a adaptar.");
+        return;
+    }
+    trackAction("redo");
+    // Tornar al Pas 3 que llança runAdaptation automàticament
+    // Primer, assegurem que el text original està al textarea
+    const textarea = document.getElementById("input-text");
+    if (textarea && !textarea.value && state.originalText) {
+        textarea.value = state.originalText;
+    }
+    // Anem al Pas 3 que crida requestProposal → i el docent clica Adaptar
+    // O millor: llancem l'adaptació directament des d'aquí
+    const status = document.getElementById("redo-status");
+    if (status) {
+        status.style.display = "";
+        status.textContent = "Tornant a adaptar...";
+    }
+    // Anem al pas 3 i llancem l'adaptació automàticament
+    goToStep(3);
+}
+
+async function trackAction(action, extra) {
+    if (!state.historyId) return;
+    const body = { pilot_action: action };
+    if (extra) Object.assign(body, extra);
+    try {
+        await fetch(`/api/history/${state.historyId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        });
+    } catch { /* no bloquejant */ }
+}
+
+// Exportar amb captura
+const _originalExportDoc = typeof exportDoc === "function" ? exportDoc : null;
+function exportDocTracked(format) {
+    trackAction("exported", { format });
+    if (_originalExportDoc) return _originalExportDoc(format);
+}
+
 async function submitTroubleReport() {
     const checks = document.querySelectorAll('#trouble-report input[type="checkbox"]');
     const status = document.getElementById("trouble-status");
@@ -1836,38 +2146,94 @@ window.addEventListener("beforeunload", () => {
     }
 });
 
-function rateFeedback(rating) {
-    state.feedbackRating = rating;
-    // Marcar botó seleccionat
-    document.querySelectorAll(".feedback-btn").forEach(b => {
-        b.classList.toggle("selected", parseInt(b.dataset.rating) === rating);
+// ── Feedback compacte: estrelles + micro preguntes ──────────────────────
+
+function initFeedbackStars() {
+    document.querySelectorAll(".star-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const rating = parseInt(btn.dataset.star);
+            state.feedbackRating = rating;
+            // Actualitzar estrelles (totes fins a la seleccionada = active)
+            document.querySelectorAll(".star-btn").forEach(b => {
+                b.classList.toggle("active", parseInt(b.dataset.star) <= rating);
+            });
+            // Mostrar micro preguntes
+            const micro = document.getElementById("feedback-micro");
+            if (micro) micro.style.display = "";
+            // Enviar rating immediatament
+            sendFeedbackData({ rating });
+        });
+        // Hover preview
+        btn.addEventListener("mouseenter", () => {
+            const star = parseInt(btn.dataset.star);
+            document.querySelectorAll(".star-btn").forEach(b => {
+                const s = parseInt(b.dataset.star);
+                b.querySelector(".material-symbols-outlined").style.fontVariationSettings =
+                    s <= star ? "'FILL' 1" : "'FILL' 0";
+                b.querySelector(".material-symbols-outlined").style.color =
+                    s <= star ? "#f59e0b" : "";
+            });
+        });
+        btn.addEventListener("mouseleave", () => {
+            // Restaurar a l'estat real
+            document.querySelectorAll(".star-btn").forEach(b => {
+                const active = b.classList.contains("active");
+                b.querySelector(".material-symbols-outlined").style.fontVariationSettings =
+                    active ? "'FILL' 1" : "'FILL' 0";
+                b.querySelector(".material-symbols-outlined").style.color =
+                    active ? "#f59e0b" : "";
+            });
+        });
     });
-    // Mostrar camp de comentari (especialment si dolenta/regular)
-    document.getElementById("feedback-comment-area").style.display = "flex";
-    // Enviar rating immediatament
-    sendFeedback(rating);
 }
 
-async function sendFeedback(rating, comment) {
+function initMicroButtons() {
+    document.querySelectorAll(".micro-btns").forEach(group => {
+        group.querySelectorAll(".micro-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                // Desseleccionar germans, seleccionar aquest
+                group.querySelectorAll(".micro-btn").forEach(b => b.classList.remove("selected"));
+                btn.classList.add("selected");
+            });
+        });
+    });
+}
+
+function collectMicroFeedback() {
+    const result = {};
+    document.querySelectorAll(".micro-btns").forEach(group => {
+        const key = group.dataset.micro;
+        const selected = group.querySelector(".micro-btn.selected");
+        if (selected) result[key] = selected.dataset.val;
+    });
+    return result;
+}
+
+async function sendFeedbackData(data) {
     if (!state.historyId) return;
-    const body = { rating };
-    if (comment) body.comment = comment;
     try {
         await fetch(`/api/history/${state.historyId}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
+            body: JSON.stringify(data),
         });
     } catch { /* no bloquejant */ }
 }
 
-async function submitFeedback() {
-    const comment = document.getElementById("feedback-comment").value.trim();
-    if (comment) {
-        await sendFeedback(state.feedbackRating, comment);
-    }
-    document.getElementById("feedback-comment-area").style.display = "none";
-    document.getElementById("feedback-thanks").style.display = "block";
+async function submitFullFeedback() {
+    const micro = collectMicroFeedback();
+    const comment = (document.getElementById("feedback-comment")?.value || "").trim();
+    const body = {
+        rating: state.feedbackRating,
+        review_items: micro,
+    };
+    if (comment) body.comment = comment;
+    await sendFeedbackData(body);
+
+    const btn = document.getElementById("btn-feedback-send");
+    if (btn) btn.style.display = "none";
+    const thanks = document.getElementById("feedback-thanks");
+    if (thanks) thanks.style.display = "block";
 }
 
 function parseAdaptedSections(text) {
@@ -2008,6 +2374,7 @@ function parseTableRow(line) {
 // ── Exportació ─────────────────────────────────────────────────────────────
 
 async function exportDoc(format) {
+    trackAction("exported", { format });
     const profile = collectProfile();
     // Enviar el text complet (adaptat + complements) per a l'exportació
     // state.adaptedText conté tot el markdown original de Gemini
@@ -2931,9 +3298,16 @@ function updateContextPill() {
         }
     }
 
-    pill.textContent = parts.length > 0
+    const text = parts.length > 0
         ? parts.join(" · ")
         : "Configura el Pas 1 per veure el context";
+    pill.textContent = text;
+
+    // Propagar a les pills del progrés (Pas 3) i del Pas 4
+    const pillProgress = document.getElementById("context-pill-progress-text");
+    if (pillProgress) pillProgress.textContent = text;
+    const pillPas4 = document.getElementById("context-pill-pas4-text");
+    if (pillPas4) pillPas4.textContent = text;
 }
 
 
@@ -3063,6 +3437,168 @@ function updateP4WordStats() {
 }
 
 
+// ── Pas 4: Toolbar d'edició (contenteditable) ────────────────────────────
+
+function p4ApplyFormat(format) {
+    const el = document.getElementById("result-adapted");
+    if (!el) return;
+    el.focus();
+    if (format === "bold") {
+        document.execCommand("bold", false, null);
+    } else if (format === "italic") {
+        document.execCommand("italic", false, null);
+    } else if (format === "bullet") {
+        document.execCommand("insertUnorderedList", false, null);
+    }
+}
+
+function p4Undo() {
+    const el = document.getElementById("result-adapted");
+    if (!el) return;
+    el.focus();
+    document.execCommand("undo", false, null);
+}
+
+function p4Redo() {
+    const el = document.getElementById("result-adapted");
+    if (!el) return;
+    el.focus();
+    document.execCommand("redo", false, null);
+}
+
+
+// ── Pas 4: Scroll sincronitzat en mode Comparar ─────────────────────────
+
+let _syncScrollBound = false;
+
+function initSyncScroll() {
+    if (_syncScrollBound) return;
+    _syncScrollBound = true;
+
+    const original = document.getElementById("result-original");
+    const adapted = document.getElementById("result-adapted");
+    if (!original || !adapted) return;
+
+    let syncing = false;
+
+    function syncScroll(source, target) {
+        if (syncing) return;
+        syncing = true;
+        const ratio = source.scrollHeight - source.clientHeight;
+        if (ratio > 0) {
+            const pct = source.scrollTop / ratio;
+            target.scrollTop = pct * (target.scrollHeight - target.clientHeight);
+        }
+        syncing = false;
+    }
+
+    original.addEventListener("scroll", () => {
+        if (document.querySelector(".pas4-editor-card")?.dataset.compare === "on") {
+            syncScroll(original, adapted);
+        }
+    });
+    adapted.addEventListener("scroll", () => {
+        if (document.querySelector(".pas4-editor-card")?.dataset.compare === "on") {
+            syncScroll(adapted, original);
+        }
+    });
+}
+
+
+// ── Pas 4: Autosave a localStorage ───────────────────────────────────────
+
+const AUTOSAVE_KEY = "atne_autosave_pas4";
+let _autosaveTimer = null;
+
+function scheduleAutosave() {
+    if (_autosaveTimer) clearTimeout(_autosaveTimer);
+    _autosaveTimer = setTimeout(() => {
+        const el = document.getElementById("result-adapted");
+        if (!el || !el.innerHTML.trim()) return;
+        try {
+            localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({
+                html: el.innerHTML,
+                timestamp: Date.now(),
+            }));
+        } catch (e) { /* quota exceeded, noop */ }
+    }, 3000);
+}
+
+function checkAutosaveRecovery() {
+    try {
+        const raw = localStorage.getItem(AUTOSAVE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        // Ignora si fa més de 24h
+        if (Date.now() - data.timestamp > 24 * 60 * 60 * 1000) {
+            localStorage.removeItem(AUTOSAVE_KEY);
+            return;
+        }
+        const banner = document.getElementById("pas4-autosave-banner");
+        if (banner) banner.style.display = "flex";
+    } catch (e) { /* noop */ }
+}
+
+function recoverAutosave() {
+    try {
+        const raw = localStorage.getItem(AUTOSAVE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        const el = document.getElementById("result-adapted");
+        if (el && data.html) el.innerHTML = data.html;
+        localStorage.removeItem(AUTOSAVE_KEY);
+    } catch (e) { /* noop */ }
+    const banner = document.getElementById("pas4-autosave-banner");
+    if (banner) banner.style.display = "none";
+}
+
+function dismissAutosave() {
+    localStorage.removeItem(AUTOSAVE_KEY);
+    const banner = document.getElementById("pas4-autosave-banner");
+    if (banner) banner.style.display = "none";
+}
+
+
+// ── Pas 4: Exportar totes les versions (mode grup) ──────────────────────
+
+async function exportAllVersions(format) {
+    if (!state.versions) return;
+    const profile = collectProfile();
+    const versionsPayload = {};
+    for (const [level, text] of Object.entries(state.versions)) {
+        if (text) versionsPayload[level] = text;
+    }
+    try {
+        const resp = await fetch("/api/export", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                format,
+                adapted: state.adaptedText,
+                original: state.originalText,
+                profile_name: profile.nom,
+                multi: true,
+                versions: versionsPayload,
+            }),
+        });
+        if (!resp.ok) {
+            alert("Error exportant totes les versions.");
+            return;
+        }
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = resp.headers.get("content-disposition")?.split("filename=")[1]?.replace(/"/g, "")
+            || `adaptacio_totes.${format}`;
+        a.click();
+        URL.revokeObjectURL(url);
+    } catch (e) {
+        alert("Error exportant: " + e.message);
+    }
+}
+
+
 // ── Bind events ────────────────────────────────────────────────────────────
 
 function bindEvents() {
@@ -3081,15 +3617,14 @@ function bindEvents() {
     const btnBack = document.getElementById("btn-back");
     if (btnBack) btnBack.addEventListener("click", goToPrevStep);
 
-    // Perfils
-    document.getElementById("btn-save-profile").addEventListener("click", saveProfile);
-    document.getElementById("btn-load-profile").addEventListener("click", loadProfile);
+    // Perfils (bindings amb guard al final de bindEvents, no duplicar aquí)
     loadHistoryIfNeeded(); // pre-carregar historial en obrir l'app
 
     // Adaptació (ara gestionada per sticky bar btn-next al pas 3)
 
     // Word count
-    document.getElementById("input-text").addEventListener("input", updateWordCount);
+    const inputText = document.getElementById("input-text");
+    if (inputText) inputText.addEventListener("input", updateWordCount);
 
     // Upload de fitxer
     const fileInput = document.getElementById("file-input");
@@ -3136,9 +3671,13 @@ function bindEvents() {
         btn.addEventListener("click", () => refineText(btn.dataset.preset, null, btn, "input-text", "refine-status"));
     });
 
-    // Botons refinador Pas 4 (chips al text adaptat) — targeten result-adapted
+    // Botons refinador Pas 4 — target dinàmic (text o complements)
     document.querySelectorAll("#step-4 .refine-chip-p4").forEach(btn => {
-        btn.addEventListener("click", () => refineText(btn.dataset.preset, null, btn, "result-adapted", "refine-status-p4"));
+        btn.addEventListener("click", () => {
+            const target = _refineTarget === "complements" ? "result-complements" : "result-adapted";
+            refineText(btn.dataset.preset, null, btn, target, "refine-status-p4");
+            trackAction("refined", { target: _refineTarget, preset: btn.dataset.preset });
+        });
     });
 
     // Instrucció pròpia refine Pas 4
@@ -3146,7 +3685,10 @@ function bindEvents() {
     if (btnRefineCustomP4) {
         btnRefineCustomP4.addEventListener("click", () => {
             const instr = document.getElementById("refine-instruction-p4")?.value.trim();
-            if (instr) refineText(null, instr, btnRefineCustomP4, "result-adapted", "refine-status-p4");
+            if (!instr) return;
+            const target = _refineTarget === "complements" ? "result-complements" : "result-adapted";
+            refineText(null, instr, btnRefineCustomP4, target, "refine-status-p4");
+            trackAction("refined", { target: _refineTarget, custom: true });
         });
     }
 
@@ -3161,6 +3703,33 @@ function bindEvents() {
 
     // Toggle Comparar amb original (Pas 4)
     initCompareToggle();
+
+    // Pas 4: toolbar d'edició per al text adaptat (contenteditable)
+    document.querySelectorAll("[data-p4format]").forEach(btn => {
+        btn.addEventListener("click", () => p4ApplyFormat(btn.dataset.p4format));
+    });
+    const btnP4Undo = document.getElementById("btn-p4-undo");
+    if (btnP4Undo) btnP4Undo.addEventListener("click", p4Undo);
+    const btnP4Redo = document.getElementById("btn-p4-redo");
+    if (btnP4Redo) btnP4Redo.addEventListener("click", p4Redo);
+
+    // Pas 4: scroll sincronitzat en mode Comparar
+    initSyncScroll();
+
+    // Pas 4: autosave del text editat
+    const resultAdaptedForAutosave = document.getElementById("result-adapted");
+    if (resultAdaptedForAutosave) {
+        resultAdaptedForAutosave.addEventListener("input", scheduleAutosave);
+    }
+
+    // Pas 4: autosave recovery banners
+    const btnRecover = document.getElementById("btn-autosave-recover");
+    if (btnRecover) btnRecover.addEventListener("click", recoverAutosave);
+    const btnDismiss = document.getElementById("btn-autosave-dismiss");
+    if (btnDismiss) btnDismiss.addEventListener("click", dismissAutosave);
+
+    // Comprovar si hi ha autosave pendent
+    checkAutosaveRecovery();
 
     // Mode tabs (multimode Pas 2)
     document.querySelectorAll(".mode-tab").forEach(tab => {
@@ -3206,7 +3775,8 @@ function bindEvents() {
     });
 
     // Actualitzar selects dinàmics quan canvia l'etapa
-    document.getElementById("ctx-etapa").addEventListener("change", () => {
+    const ctxEtapa = document.getElementById("ctx-etapa");
+    if (ctxEtapa) ctxEtapa.addEventListener("change", () => {
         updateEtapaSelects();
         saveContextToStorage();
         updateMecrPreview();
@@ -3214,7 +3784,8 @@ function bindEvents() {
 
     // Persistir context en canviar
     ["ctx-curs", "ctx-ambit", "ctx-materia"].forEach(id => {
-        document.getElementById(id).addEventListener("change", () => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("change", () => {
             saveContextToStorage();
             if (id === "ctx-curs") updateMecrPreview();
         });
@@ -3234,6 +3805,26 @@ function bindEvents() {
     document.querySelectorAll('input[name="adapt-mode"]').forEach(r => {
         r.addEventListener("change", updateBlocALabel);
     });
+
+    // Perfils alumne: desar / carregar (barra nova al Pas 1)
+    const btnSaveProfile = document.getElementById("btn-save-profile");
+    if (btnSaveProfile) btnSaveProfile.addEventListener("click", saveProfile);
+    const btnLoadProfile = document.getElementById("btn-load-profile");
+    if (btnLoadProfile) btnLoadProfile.addEventListener("click", loadProfile);
+
+    // Contextos docents: desar / carregar (sidebar dreta Pas 1)
+    const btnSaveCtx = document.getElementById("btn-save-ctx");
+    if (btnSaveCtx) btnSaveCtx.addEventListener("click", saveContextProfile);
+    const btnLoadCtx = document.getElementById("btn-load-ctx");
+    if (btnLoadCtx) btnLoadCtx.addEventListener("click", loadContextProfile);
+
+    // Grup: afegir perfil individual
+    const btnGrupAdd = document.getElementById("btn-grup-add-profile");
+    if (btnGrupAdd) btnGrupAdd.addEventListener("click", addGrupProfile);
+
+    // Feedback compacte (Bloc 3): estrelles + micro preguntes
+    initFeedbackStars();
+    initMicroButtons();
 }
 
 function updateBlocALabel() {
@@ -3242,18 +3833,19 @@ function updateBlocALabel() {
     if (label) {
         label.textContent = mode === "grup"
             ? "El grup globalment llegeix i comprèn..."
-            : "Aquest alumne llegeix i comprèn...";
+            : "Llegeix i comprèn...";
     }
-    // Mostrar/amagar zones segons mode
-    const alumneZones = document.querySelectorAll(".bloc-a, .bloc-b-grid, .via-diagnostic-toggle");
-    const grupZone = document.getElementById("grup-config");
+    // Toggle panells alumne/grup
+    const alumnePanel = document.getElementById("alumne-panel");
+    const grupPanel = document.getElementById("grup-panel");
+    if (alumnePanel) alumnePanel.style.display = mode === "grup" ? "none" : "";
+    if (grupPanel) grupPanel.style.display = mode === "grup" ? "" : "none";
 
+    // Actualitzar selectors de perfil al grup si canviem a grup
     if (mode === "grup") {
-        alumneZones.forEach(el => el.style.display = "none");
-        if (grupZone) grupZone.style.display = "block";
-    } else {
-        alumneZones.forEach(el => el.style.display = "");
-        if (grupZone) grupZone.style.display = "none";
+        updateMecrPreview();
+        populateGrupProfilePicker();
+        renderGrupProfileChips();
     }
 }
 
