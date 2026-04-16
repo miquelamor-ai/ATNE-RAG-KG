@@ -654,27 +654,25 @@ async function checkHealth() {
 // ── Navegació per passos ───────────────────────────────────────────────────
 
 function goToStep(n) {
-    // Pilot 1B: captura del temps al Pas 4 (entrada/sortida)
-    // Si sortim del Pas 4, enviem el temps acumulat a history.
-    if (state.step === 4 && n !== 4) {
-        sendStep4TimeOnExit();
+    // Pilot 1B: captura del temps al Pas 3/Resultats (entrada/sortida)
+    if (state.step === 3 && n !== 3) {
+        sendStep3TimeOnExit();
     }
     state.step = n;
     document.querySelectorAll(".step-tab").forEach(tab => {
         tab.classList.toggle("active", parseInt(tab.dataset.step) === n);
     });
-    // Aside steps (Stitch shell v2)
     document.querySelectorAll(".aside-step").forEach(step => {
         step.classList.toggle("active", parseInt(step.dataset.step) === n);
     });
     document.querySelectorAll(".step-panel").forEach(panel => {
         panel.classList.toggle("active", panel.id === `step-${n}`);
     });
-    if (n === 3) requestProposal();
+    if (n === 2) requestProposal();
     if (n >= 2) updateContextPill();
-    // Pilot 1B: arrencar timer Pas 4 quan hi entrem
-    if (n === 4) {
-        state._step4EnterTs = Date.now();
+    // Pilot 1B: arrencar timer Pas 3 (Resultats) quan hi entrem
+    if (n === 3) {
+        state._step3EnterTs = Date.now();
     }
     updateStickyBar();
     updateAsideProgress();
@@ -684,13 +682,12 @@ function updateAsideProgress() {
     const n = state.step;
     const fill = document.getElementById("aside-progress-fill");
     const text = document.getElementById("aside-progress-text");
-    if (fill) fill.style.width = `${n * 25}%`;
+    if (fill) fill.style.width = `${Math.round(n * 33.3)}%`;
     if (text) {
         const labels = {
-            1: "Pas 1 de 4: Context i Perfil",
-            2: "Pas 2 de 4: Entrada de Text",
-            3: "Pas 3 de 4: Adaptació",
-            4: "Pas 4 de 4: Resultats",
+            1: "Pas 1 de 3: Context i Perfil",
+            2: "Pas 2 de 3: Text i Ajuts",
+            3: "Pas 3 de 3: Resultats",
         };
         text.textContent = labels[n] || "";
     }
@@ -701,13 +698,13 @@ function goToPrevStep() {
 }
 
 function goToNextStep() {
-    if (state.step === 4) {
-        // Al pas 4, "Continuar" = "Nova adaptació" (torna al pas 1)
+    if (state.step === 3) {
+        // Al pas 3 (Resultats), "Continuar" = "Nova adaptació" (torna al pas 1)
         goToStep(1);
-    } else if (state.step === 3) {
-        // Al pas 3, "Continuar" = "Adaptar"
+    } else if (state.step === 2) {
+        // Al pas 2 (Text i Ajuts), "Continuar" = "Adaptar"
         runAdaptation();
-    } else if (state.step < 4) {
+    } else if (state.step < 3) {
         goToStep(state.step + 1);
     }
 }
@@ -720,11 +717,11 @@ function updateStickyBar() {
     const btnNext = document.getElementById("btn-next");
 
     if (label) {
-        label.textContent = `Pas ${n} de 4`;
+        label.textContent = `Pas ${n} de 3`;
         label.removeAttribute("hidden");
         label.dataset.progress = String(n);
     }
-    if (fill) fill.style.width = `${n * 25}%`;
+    if (fill) fill.style.width = `${Math.round(n * 33.3)}%`;
     if (btnBack) btnBack.style.visibility = n === 1 ? "hidden" : "visible";
 
     if (btnNext) {
@@ -733,10 +730,10 @@ function updateStickyBar() {
         const icon = btnNext.querySelector(".material-symbols-outlined");
         let text = "Continuar";
         let cls = "sticky-bar-v2-btn";
-        if (n === 3) {
+        if (n === 2) {
             text = "Adaptar";
             cls = "sticky-bar-v2-btn sticky-bar-v2-btn-ok";
-        } else if (n === 4) {
+        } else if (n === 3) {
             text = "Nova adaptació";
         }
         if (labelSpan) labelSpan.textContent = text;
@@ -1820,15 +1817,18 @@ function showResult() {
     state.feedbackRating = null;
     state.historyId = null;
     document.querySelectorAll(".feedback-btn").forEach(b => b.classList.remove("selected"));
-    document.getElementById("feedback-comment-area").style.display = "none";
-    document.getElementById("feedback-thanks").style.display = "none";
-    document.getElementById("feedback-comment").value = "";
+    const fca = document.getElementById("feedback-comment-area");
+    if (fca) fca.style.display = "none";
+    const ft = document.getElementById("feedback-thanks");
+    if (ft) ft.style.display = "none";
+    const fc = document.getElementById("feedback-comment");
+    if (fc) fc.value = "";
 
     // Desar a historial (sense rating encara)
     saveToHistory();
 
-    // Anar al pas 4
-    goToStep(4);
+    // Anar al pas 3 (Resultats)
+    goToStep(3);
 }
 
 // ── Historial i feedback ─────────────────────────────────────────────────
@@ -2025,21 +2025,18 @@ async function redoAdaptation() {
         return;
     }
     trackAction("redo");
-    // Tornar al Pas 3 que llança runAdaptation automàticament
-    // Primer, assegurem que el text original està al textarea
+    // Tornar al Pas 2 que llança runAdaptation automàticament
     const textarea = document.getElementById("input-text");
     if (textarea && !textarea.value && state.originalText) {
         textarea.value = state.originalText;
     }
-    // Anem al Pas 3 que crida requestProposal → i el docent clica Adaptar
-    // O millor: llancem l'adaptació directament des d'aquí
     const status = document.getElementById("redo-status");
     if (status) {
         status.style.display = "";
         status.textContent = "Tornant a adaptar...";
     }
-    // Anem al pas 3 i llancem l'adaptació automàticament
-    goToStep(3);
+    // Anem al pas 2 (Text i Ajuts) i rellancem l'adaptació
+    goToStep(2);
 }
 
 async function trackAction(action, extra) {
@@ -2114,13 +2111,13 @@ async function submitTroubleReport() {
     }
 }
 
-async function sendStep4TimeOnExit() {
-    if (!state._step4EnterTs || !state.historyId) {
-        state._step4EnterTs = null;
+async function sendStep3TimeOnExit() {
+    if (!state._step3EnterTs || !state.historyId) {
+        state._step3EnterTs = null;
         return;
     }
-    const ms = Date.now() - state._step4EnterTs;
-    state._step4EnterTs = null;
+    const ms = Date.now() - state._step3EnterTs;
+    state._step3EnterTs = null;
     try {
         await fetch(`/api/history/${state.historyId}`, {
             method: "PATCH",
@@ -2134,8 +2131,8 @@ async function sendStep4TimeOnExit() {
 // (supervivent al navigate away). El backend accepta PATCH JSON; per això
 // usem un endpoint dedicat dins el mateix PATCH.
 window.addEventListener("beforeunload", () => {
-    if (state._step4EnterTs && state.historyId) {
-        const ms = Date.now() - state._step4EnterTs;
+    if (state._step3EnterTs && state.historyId) {
+        const ms = Date.now() - state._step3EnterTs;
         try {
             const blob = new Blob(
                 [JSON.stringify({ time_on_step4_ms: ms })],
@@ -3303,7 +3300,7 @@ function updateContextPill() {
         : "Configura el Pas 1 per veure el context";
     pill.textContent = text;
 
-    // Propagar a les pills del progrés (Pas 3) i del Pas 4
+    // Propagar a les pills del progrés i del Pas 3 (Resultats)
     const pillProgress = document.getElementById("context-pill-progress-text");
     if (pillProgress) pillProgress.textContent = text;
     const pillPas4 = document.getElementById("context-pill-pas4-text");
@@ -3672,7 +3669,7 @@ function bindEvents() {
     });
 
     // Botons refinador Pas 4 — target dinàmic (text o complements)
-    document.querySelectorAll("#step-4 .refine-chip-p4").forEach(btn => {
+    document.querySelectorAll("#step-3 .refine-chip-p4").forEach(btn => {
         btn.addEventListener("click", () => {
             const target = _refineTarget === "complements" ? "result-complements" : "result-adapted";
             refineText(btn.dataset.preset, null, btn, target, "refine-status-p4");

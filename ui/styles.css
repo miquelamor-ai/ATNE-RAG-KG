@@ -2185,6 +2185,48 @@ body {
     }
 }
 
+/* ── Pas 2 merged: editor esquerra + sidebar ajuts dreta ── */
+.pas2-merged {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+@media (min-width: 1024px) {
+    .pas2-merged {
+        grid-template-columns: minmax(0, 1fr) 340px;
+        align-items: start;
+        gap: 1rem;
+    }
+}
+
+@media (min-width: 1400px) {
+    .pas2-merged {
+        grid-template-columns: minmax(0, 1fr) 380px;
+        gap: 1.25rem;
+    }
+}
+
+.pas2-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 0;
+    max-height: calc(100vh - 6rem);
+    overflow-y: auto;
+    position: sticky;
+    top: 4.5rem;
+}
+
+@media (max-width: 1023px) {
+    .pas2-sidebar {
+        max-height: none;
+        position: static;
+        overflow-y: visible;
+    }
+}
+
 .pas2-left {
     display: none !important;
 }
@@ -4568,14 +4610,10 @@ details.bento-card .bento-card-body {
     max-width: 100%;
 }
 
-#step-2 .pas2-grid-v3 {
+#step-2 .pas2-grid-v3,
+#step-2 .pas2-merged {
     width: 100%;
     max-width: 100%;
-}
-
-/* Reduir gap vertical entre workspace-header i el grid */
-#step-2 > .workspace-header + .pas2-grid-v3 {
-    margin-top: 0;
 }
 
 /* Mode tabs compactes — menys alçada per portar el textarea amunt */
@@ -5108,23 +5146,23 @@ details.bento-card .bento-card-body {
 /* ═══════════════════════════════════════════════════════════════
    PAS 3: layout 2 columnes (perfil esquerra fix + complements dreta)
    ═══════════════════════════════════════════════════════════════ */
-#step-3 .workspace-header {
+#step-2 .workspace-header {
     gap: 0.1875rem;
     margin-bottom: 0.75rem;
 }
 
-#step-3 .workspace-title {
+#step-2 .workspace-title {
     font-size: 1.125rem;
     font-weight: 700;
     line-height: 1.2;
 }
 
-#step-3 .workspace-subtitle {
+#step-2 .workspace-subtitle {
     font-size: 0.75rem;
     line-height: 1.4;
 }
 
-#step-3 .info-badge {
+#step-2 .info-badge {
     font-size: 0.5625rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -5135,7 +5173,7 @@ details.bento-card .bento-card-body {
     color: var(--primary);
 }
 
-#step-3 .pas3-layout {
+#step-2 .pas3-layout {
     display: grid;
     grid-template-columns: 1fr;
     gap: 1rem;
@@ -5143,33 +5181,29 @@ details.bento-card .bento-card-body {
 }
 
 @media (min-width: 1024px) {
-    #step-3 .pas3-layout {
+    #step-2 .pas3-layout {
         grid-template-columns: 260px minmax(0, 1fr);
     }
 }
 
 @media (min-width: 1400px) {
-    #step-3 .pas3-layout {
+    #step-2 .pas3-layout {
         grid-template-columns: 280px minmax(0, 1fr);
         gap: 1.25rem;
     }
 }
 
-/* Card perfil esquerra (sticky) */
-#step-3 .pas3-profile-card {
+/* Card perfil (dins .pas2-sidebar, no cal sticky propi) */
+#step-2 .pas3-profile-card {
     background: var(--surface-container-lowest);
     border-radius: var(--radius-xl);
     border: 1px solid rgba(199, 197, 213, 0.3);
     padding: 0.875rem 1rem;
     box-shadow: 0 4px 20px -4px rgba(11, 28, 48, 0.05);
-    position: sticky;
-    top: 5rem;
-    max-height: calc(100vh - 7rem);
-    overflow-y: auto;
     box-sizing: border-box;
 }
 
-#step-3 .pas3-profile-header {
+#step-2 .pas3-profile-header {
     display: flex;
     align-items: center;
     gap: 0.4375rem;
@@ -5178,13 +5212,13 @@ details.bento-card .bento-card-body {
     border-bottom: 1px solid rgba(199, 197, 213, 0.25);
 }
 
-#step-3 .pas3-profile-header .material-symbols-outlined {
+#step-2 .pas3-profile-header .material-symbols-outlined {
     color: var(--primary);
     font-size: 1rem;
     font-variation-settings: 'FILL' 1;
 }
 
-#step-3 .pas3-profile-header h3 {
+#step-2 .pas3-profile-header h3 {
     font-family: var(--font-body);
     font-size: 0.625rem;
     font-weight: 700;
@@ -5194,26 +5228,26 @@ details.bento-card .bento-card-body {
     margin: 0;
 }
 
-#step-3 .pas3-profile-body {
+#step-2 .pas3-profile-body {
     display: flex;
     flex-direction: column;
     gap: 0.625rem;
 }
 
-#step-3 .pas3-profile-empty {
+#step-2 .pas3-profile-empty {
     font-size: 0.6875rem;
     color: var(--on-surface-variant);
     font-style: italic;
     margin: 0;
 }
 
-#step-3 .pas3-profile-section {
+#step-2 .pas3-profile-section {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
 }
 
-#step-3 .pas3-profile-label {
+#step-2 .pas3-profile-label {
     font-size: 0.5rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -5221,21 +5255,21 @@ details.bento-card .bento-card-body {
     color: var(--on-surface-variant);
 }
 
-#step-3 .pas3-profile-value {
+#step-2 .pas3-profile-value {
     font-size: 0.75rem;
     color: var(--on-surface);
     font-weight: 500;
     line-height: 1.35;
 }
 
-#step-3 .pas3-profile-tags {
+#step-2 .pas3-profile-tags {
     display: flex;
     flex-wrap: wrap;
     gap: 0.25rem;
     margin-top: 0.125rem;
 }
 
-#step-3 .pas3-profile-tag {
+#step-2 .pas3-profile-tag {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
@@ -5248,18 +5282,18 @@ details.bento-card .bento-card-body {
 }
 
 /* Col dreta: complements i resta */
-#step-3 .pas3-main {
+#step-2 .pas3-main {
     display: flex;
     flex-direction: column;
     gap: 0.875rem;
     min-width: 0;
 }
 
-#step-3 .card {
+#step-2 .card {
     padding: 0.875rem 1rem 1rem;
 }
 
-#step-3 .card-header.pas3-card-header {
+#step-2 .card-header.pas3-card-header {
     margin-bottom: 0.75rem;
     gap: 0.75rem;
     display: flex;
@@ -5268,7 +5302,7 @@ details.bento-card .bento-card-body {
     flex-wrap: wrap;
 }
 
-#step-3 .card-header-left {
+#step-2 .card-header-left {
     display: flex;
     align-items: flex-start;
     gap: 0.625rem;
@@ -5276,7 +5310,7 @@ details.bento-card .bento-card-body {
     min-width: 0;
 }
 
-#step-3 .card-header-text {
+#step-2 .card-header-text {
     display: flex;
     flex-direction: column;
     gap: 0.125rem;
@@ -5284,14 +5318,14 @@ details.bento-card .bento-card-body {
     flex: 1;
 }
 
-#step-3 .card-title {
+#step-2 .card-title {
     font-size: 0.9375rem;
     font-weight: 700;
     margin: 0;
     line-height: 1.2;
 }
 
-#step-3 .card-subtitle {
+#step-2 .card-subtitle {
     font-size: 0.6875rem;
     color: var(--on-surface-variant);
     margin: 0;
@@ -5299,17 +5333,17 @@ details.bento-card .bento-card-body {
     font-weight: 400;
 }
 
-#step-3 .icon-box {
+#step-2 .icon-box {
     width: 2rem;
     height: 2rem;
     flex-shrink: 0;
 }
 
-#step-3 .icon-box .material-symbols-outlined {
+#step-2 .icon-box .material-symbols-outlined {
     font-size: 1rem;
 }
 
-#step-3 .info-badge {
+#step-2 .info-badge {
     font-size: 0.5625rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -5323,77 +5357,71 @@ details.bento-card .bento-card-body {
     align-self: center;
 }
 
-#step-3 .info-badge:empty {
+#step-2 .info-badge:empty {
     display: none;
 }
 
-/* Complement grid: 2 columnes al Pas 3 (cada categoria un card) */
-#step-3 .complement-grid {
+/* Complement grid: 1 columna dins la sidebar */
+#step-2 .complement-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 0.75rem;
+    gap: 0.625rem;
 }
 
-@media (min-width: 900px) {
-    #step-3 .complement-grid-2col {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-#step-3 .complement-group {
+#step-2 .complement-group {
     padding: 0.75rem 0.875rem;
     font-size: 0.75rem;
 }
 
-#step-3 .complement-group-label {
+#step-2 .complement-group-label {
     font-size: 0.5625rem;
 }
 
-#step-3 .complement-group-desc {
+#step-2 .complement-group-desc {
     font-size: 0.5625rem;
 }
 
-#step-3 .complement-item {
+#step-2 .complement-item {
     padding: 0.5625rem 0.75rem;
     font-size: 0.75rem;
     gap: 0.5rem;
 }
 
-#step-3 .complement-item input[type="checkbox"] {
+#step-2 .complement-item input[type="checkbox"] {
     width: 1rem;
     height: 1rem;
 }
 
-#step-3 .complement-auto-badge {
+#step-2 .complement-auto-badge {
     font-size: 0.5rem;
     padding: 0.125rem 0.4375rem;
 }
 
-#step-4 .workspace-header {
+#step-3 .workspace-header {
     gap: 0.25rem;
     margin-bottom: 1rem;
 }
 
-#step-4 .workspace-title {
+#step-3 .workspace-title {
     font-size: 1.25rem;
     font-weight: 700;
     line-height: 1.2;
 }
 
-#step-4 .workspace-subtitle {
+#step-3 .workspace-subtitle {
     font-size: 0.8125rem;
     line-height: 1.4;
 }
 
 /* Layout Pas 4: single-column (no right sidebar). El contingut queda ample. */
-#step-4 .pas4-layout {
+#step-3 .pas4-layout {
     display: flex;
     flex-direction: column;
     gap: 1rem;
     width: 100%;
 }
 
-#step-4 .editor-card-v2.pas4-editor-card {
+#step-3 .editor-card-v2.pas4-editor-card {
     padding: 1rem 1.125rem 1.125rem;
     display: flex;
     flex-direction: column;
@@ -5404,32 +5432,32 @@ details.bento-card .bento-card-body {
 }
 
 /* Version tabs al Pas 4 (multinivell) */
-#step-4 .mode-tabs {
+#step-3 .mode-tabs {
     padding: 0;
     gap: 0.25rem;
 }
 
-#step-4 .mode-tab {
+#step-3 .mode-tab {
     padding: 0.625rem 0.875rem;
     font-size: 0.8125rem;
     gap: 0.4375rem;
     font-weight: 600;
 }
 
-#step-4 .mode-tab .material-symbols-outlined {
+#step-3 .mode-tab .material-symbols-outlined {
     font-size: 1.0625rem;
 }
 
-#step-4 .mode-tab.version-active,
-#step-4 .mode-tab.active {
+#step-3 .mode-tab.version-active,
+#step-3 .mode-tab.active {
     background: var(--surface-container-lowest);
     color: var(--primary);
     border-color: rgba(199, 197, 213, 0.3);
 }
 
 /* Capçalera text adaptat (títol+hint a l'esquerra + toggle Comparar a la dreta) */
-#step-4 .adapted-header,
-#step-4 .pas4-header {
+#step-3 .adapted-header,
+#step-3 .pas4-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
@@ -5438,7 +5466,7 @@ details.bento-card .bento-card-body {
     flex-wrap: wrap;
 }
 
-#step-4 .adapted-title-group {
+#step-3 .adapted-title-group {
     display: flex;
     flex-direction: column;
     gap: 0.1875rem;
@@ -5446,7 +5474,7 @@ details.bento-card .bento-card-body {
     min-width: 0;
 }
 
-#step-4 .adapted-subtitle {
+#step-3 .adapted-subtitle {
     font-size: 0.6875rem;
     color: var(--on-surface-variant);
     margin: 0;
@@ -5455,7 +5483,7 @@ details.bento-card .bento-card-body {
     max-width: 38rem;
 }
 
-#step-4 .btn-compare-toggle {
+#step-3 .btn-compare-toggle {
     display: inline-flex;
     align-items: center;
     gap: 0.4375rem;
@@ -5473,28 +5501,28 @@ details.bento-card .bento-card-body {
     transition: all 0.15s ease;
 }
 
-#step-4 .btn-compare-toggle:hover {
+#step-3 .btn-compare-toggle:hover {
     background: rgba(51, 55, 166, 0.06);
     border-color: rgba(51, 55, 166, 0.4);
 }
 
-#step-4 .btn-compare-toggle .material-symbols-outlined {
+#step-3 .btn-compare-toggle .material-symbols-outlined {
     font-size: 1rem;
     color: var(--primary);
 }
 
 /* Quan compare està activat */
-#step-4 .pas4-editor-card[data-compare="on"] .btn-compare-toggle {
+#step-3 .pas4-editor-card[data-compare="on"] .btn-compare-toggle {
     background: var(--primary);
     color: white;
     border-color: var(--primary);
 }
 
-#step-4 .pas4-editor-card[data-compare="on"] .btn-compare-toggle .material-symbols-outlined {
+#step-3 .pas4-editor-card[data-compare="on"] .btn-compare-toggle .material-symbols-outlined {
     color: white;
 }
 
-#step-4 .adapted-title {
+#step-3 .adapted-title {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -5504,13 +5532,13 @@ details.bento-card .bento-card-body {
     color: var(--on-surface);
 }
 
-#step-4 .adapted-title .material-symbols-outlined {
+#step-3 .adapted-title .material-symbols-outlined {
     color: var(--primary);
     font-size: 1.125rem;
     font-variation-settings: 'FILL' 1;
 }
 
-#step-4 .adapted-title .edit-badge {
+#step-3 .adapted-title .edit-badge {
     font-size: 0.5625rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -5521,14 +5549,14 @@ details.bento-card .bento-card-body {
     border-radius: var(--radius-full);
 }
 
-#step-4 .adapted-title #version-label {
+#step-3 .adapted-title #version-label {
     font-size: 0.6875rem;
     color: var(--on-surface-variant);
     font-weight: 500;
 }
 
 /* ═══ Pas 4 editor body (single | split quan compare activat) ═══ */
-#step-4 .pas4-editor-body {
+#step-3 .pas4-editor-body {
     display: grid;
     grid-template-columns: 1fr;
     gap: 0.875rem;
@@ -5537,34 +5565,34 @@ details.bento-card .bento-card-body {
 }
 
 /* Per defecte: original amagat, adaptat a tot l'ample */
-#step-4 .pas4-original-col {
+#step-3 .pas4-original-col {
     display: none;
 }
 
 /* Quan el toggle Comparar està activat: 2 columnes */
-#step-4 .pas4-editor-card[data-compare="on"] .pas4-editor-body {
+#step-3 .pas4-editor-card[data-compare="on"] .pas4-editor-body {
     grid-template-columns: 1fr 1fr;
 }
 
-#step-4 .pas4-editor-card[data-compare="on"] .pas4-original-col {
+#step-3 .pas4-editor-card[data-compare="on"] .pas4-original-col {
     display: flex;
     flex-direction: column;
     gap: 0.375rem;
     min-width: 0;
 }
 
-#step-4 .pas4-editor-card[data-compare="on"] #pas4-adapted-label {
+#step-3 .pas4-editor-card[data-compare="on"] #pas4-adapted-label {
     display: flex !important;
 }
 
-#step-4 .pas4-adapted-col {
+#step-3 .pas4-adapted-col {
     display: flex;
     flex-direction: column;
     gap: 0.375rem;
     min-width: 0;
 }
 
-#step-4 .pas4-col-label {
+#step-3 .pas4-col-label {
     display: flex;
     align-items: center;
     gap: 0.4375rem;
@@ -5576,13 +5604,13 @@ details.bento-card .bento-card-body {
     padding: 0 0.25rem;
 }
 
-#step-4 .pas4-col-label .material-symbols-outlined {
+#step-3 .pas4-col-label .material-symbols-outlined {
     font-size: 0.875rem;
     color: var(--primary);
 }
 
 /* Editor adaptat (contenteditable) */
-#step-4 .editable-content {
+#step-3 .editable-content {
     width: 100%;
     min-height: 380px;
     max-height: 600px;
@@ -5599,23 +5627,23 @@ details.bento-card .bento-card-body {
     overflow: auto;
 }
 
-#step-4 .editable-content:focus {
+#step-3 .editable-content:focus {
     outline: none;
     border-color: rgba(51, 55, 166, 0.4);
     background: var(--surface-container-lowest);
     box-shadow: 0 0 0 3px rgba(76, 81, 191, 0.1);
 }
 
-#step-4 .editable-content p {
+#step-3 .editable-content p {
     margin: 0 0 0.75rem;
 }
 
-#step-4 .editable-content p:last-child {
+#step-3 .editable-content p:last-child {
     margin-bottom: 0;
 }
 
 /* Original readonly content (quan compare activat) */
-#step-4 .readonly-content {
+#step-3 .readonly-content {
     width: 100%;
     min-height: 380px;
     max-height: 600px;
@@ -5632,31 +5660,31 @@ details.bento-card .bento-card-body {
 }
 
 /* ═══ Pas 4: Toolbar d'edició sobre el text adaptat ═══ */
-#step-4 .pas4-toolbar-row {
+#step-3 .pas4-toolbar-row {
     margin-bottom: 0.25rem;
 }
 
-#step-4 .pas4-toolbar-row .formatting-toolbar-h {
+#step-3 .pas4-toolbar-row .formatting-toolbar-h {
     padding: 0.1875rem !important;
 }
 
-#step-4 .pas4-toolbar-row .toolbar-btn {
+#step-3 .pas4-toolbar-row .toolbar-btn {
     width: 26px !important;
     height: 26px !important;
 }
 
-#step-4 .pas4-toolbar-row .toolbar-btn .material-symbols-outlined {
+#step-3 .pas4-toolbar-row .toolbar-btn .material-symbols-outlined {
     font-size: 15px !important;
 }
 
 /* ═══ Pas 4: Complement editable ═══ */
-#step-4 .complement-body[contenteditable="true"] {
+#step-3 .complement-body[contenteditable="true"] {
     border: 1px solid transparent;
     border-radius: var(--radius-md);
     transition: border-color 0.15s, background 0.15s;
 }
 
-#step-4 .complement-body[contenteditable="true"]:focus {
+#step-3 .complement-body[contenteditable="true"]:focus {
     outline: none;
     border-color: rgba(51, 55, 166, 0.35);
     background: var(--surface-container-lowest);
@@ -5689,7 +5717,7 @@ details.bento-card .bento-card-body {
 }
 
 /* ═══ Pas 4: Botó exportar totes les versions ═══ */
-#step-4 .btn-accent,
+#step-3 .btn-accent,
 .export-row .btn-accent {
     background: var(--primary);
     color: white;
@@ -5702,7 +5730,7 @@ details.bento-card .bento-card-body {
 }
 
 /* Result stats compacte */
-#step-4 .result-stats {
+#step-3 .result-stats {
     font-size: 0.6875rem;
     color: var(--on-surface-variant);
     padding: 0.5rem 0.75rem;
@@ -5716,7 +5744,7 @@ details.bento-card .bento-card-body {
 }
 
 /* ═══ Refine bar horitzontal SOTA l'editor (flux natural de revisió) ═══ */
-#step-4 .refine-bar-bottom {
+#step-3 .refine-bar-bottom {
     padding: 0.75rem 0.875rem 0.875rem;
     background: var(--surface-container-low);
     border-radius: var(--radius-lg);
@@ -5726,19 +5754,19 @@ details.bento-card .bento-card-body {
     margin-top: 0.25rem;
 }
 
-#step-4 .refine-bar-header {
+#step-3 .refine-bar-header {
     display: flex;
     align-items: center;
     gap: 0.4375rem;
 }
 
-#step-4 .refine-bar-header .material-symbols-outlined {
+#step-3 .refine-bar-header .material-symbols-outlined {
     color: var(--primary);
     font-size: 0.9375rem;
     font-variation-settings: 'FILL' 1;
 }
 
-#step-4 .refine-bar-title {
+#step-3 .refine-bar-title {
     font-size: 0.5625rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -5746,13 +5774,13 @@ details.bento-card .bento-card-body {
     color: var(--on-surface-variant);
 }
 
-#step-4 .refine-bar-chips {
+#step-3 .refine-bar-chips {
     display: flex;
     flex-wrap: wrap;
     gap: 0.375rem;
 }
 
-#step-4 .refine-chip-p4 {
+#step-3 .refine-chip-p4 {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -5769,37 +5797,37 @@ details.bento-card .bento-card-body {
     transition: all 0.15s ease;
 }
 
-#step-4 .refine-chip-p4 .material-symbols-outlined {
+#step-3 .refine-chip-p4 .material-symbols-outlined {
     font-size: 0.9375rem;
     color: var(--primary);
 }
 
-#step-4 .refine-chip-p4:hover:not([disabled]) {
+#step-3 .refine-chip-p4:hover:not([disabled]) {
     background: rgba(51, 55, 166, 0.06);
     border-color: rgba(51, 55, 166, 0.35);
     transform: translateY(-1px);
 }
 
-#step-4 .refine-chip-p4[aria-busy="true"],
-#step-4 .refine-chip-p4.is-loading {
+#step-3 .refine-chip-p4[aria-busy="true"],
+#step-3 .refine-chip-p4.is-loading {
     background: var(--primary);
     border-color: var(--primary);
     color: white;
     pointer-events: none;
 }
 
-#step-4 .refine-chip-p4[aria-busy="true"] .material-symbols-outlined,
-#step-4 .refine-chip-p4.is-loading .material-symbols-outlined {
+#step-3 .refine-chip-p4[aria-busy="true"] .material-symbols-outlined,
+#step-3 .refine-chip-p4.is-loading .material-symbols-outlined {
     color: white;
     animation: spin-slow 1.2s linear infinite;
 }
 
-#step-4 .refine-chip-p4[disabled]:not([aria-busy="true"]) {
+#step-3 .refine-chip-p4[disabled]:not([aria-busy="true"]) {
     opacity: 0.35;
     cursor: not-allowed;
 }
 
-#step-4 #refine-status-p4 {
+#step-3 #refine-status-p4 {
     padding: 0.5rem 0.75rem;
     font-size: 0.75rem;
     background: var(--surface-container-low);
@@ -5808,11 +5836,11 @@ details.bento-card .bento-card-body {
     text-align: left;
 }
 
-#step-4 .refine-bar-custom {
+#step-3 .refine-bar-custom {
     margin-top: 0.125rem;
 }
 
-#step-4 .refine-bar-custom summary {
+#step-3 .refine-bar-custom summary {
     font-size: 0.5625rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -5823,28 +5851,28 @@ details.bento-card .bento-card-body {
     padding: 0.1875rem 0;
 }
 
-#step-4 .refine-bar-custom summary::-webkit-details-marker {
+#step-3 .refine-bar-custom summary::-webkit-details-marker {
     display: none;
 }
 
-#step-4 .refine-bar-custom summary::before {
+#step-3 .refine-bar-custom summary::before {
     content: "+ ";
     color: var(--primary);
     font-weight: 700;
 }
 
-#step-4 .refine-bar-custom[open] summary::before {
+#step-3 .refine-bar-custom[open] summary::before {
     content: "− ";
 }
 
-#step-4 .refine-bar-custom .refine-custom-body {
+#step-3 .refine-bar-custom .refine-custom-body {
     display: flex;
     gap: 0.5rem;
     align-items: flex-end;
     margin-top: 0.375rem;
 }
 
-#step-4 .refine-bar-custom textarea {
+#step-3 .refine-bar-custom textarea {
     flex: 1;
     padding: 0.5625rem 0.75rem;
     border-radius: var(--radius-lg);
@@ -5856,7 +5884,7 @@ details.bento-card .bento-card-body {
     resize: vertical;
 }
 
-#step-4 .refine-bar-custom .btn-sm {
+#step-3 .refine-bar-custom .btn-sm {
     padding: 0.5625rem 0.875rem;
     font-size: 0.6875rem;
     font-weight: 700;
@@ -5872,13 +5900,13 @@ details.bento-card .bento-card-body {
     flex-shrink: 0;
 }
 
-#step-4 .refine-bar-custom .btn-sm .material-symbols-outlined {
+#step-3 .refine-bar-custom .btn-sm .material-symbols-outlined {
     font-size: 0.9375rem;
 }
 
 /* Responsive: si l'amplada és estreta, refine bar wraps */
 @media (max-width: 700px) {
-    #step-4 .pas4-editor-card[data-compare="on"] .pas4-editor-body {
+    #step-3 .pas4-editor-card[data-compare="on"] .pas4-editor-body {
         grid-template-columns: 1fr;
     }
 }

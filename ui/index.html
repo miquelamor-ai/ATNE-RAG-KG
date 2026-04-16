@@ -23,9 +23,8 @@
         </div>
         <nav class="shell-tabs" id="steps-nav">
             <button class="shell-tab step-tab active" data-step="1">Context i Perfil</button>
-            <button class="shell-tab step-tab" data-step="2">Text</button>
-            <button class="shell-tab step-tab" data-step="3">Adaptació</button>
-            <button class="shell-tab step-tab" data-step="4">Resultats</button>
+            <button class="shell-tab step-tab" data-step="2">Text i Ajuts</button>
+            <button class="shell-tab step-tab" data-step="3">Resultats</button>
         </nav>
         <div class="header-status">
             <a href="/saber-ne" class="header-link" style="margin-right:0.75rem;font-size:0.875rem;color:var(--primary);text-decoration:none;font-weight:500;">Saber-ne+</a>
@@ -53,13 +52,9 @@
                     </button>
                     <button class="aside-step" data-step="2" type="button">
                         <span class="material-symbols-outlined">edit_note</span>
-                        <span>Entrada de Text</span>
+                        <span>Text i Ajuts</span>
                     </button>
                     <button class="aside-step" data-step="3" type="button">
-                        <span class="material-symbols-outlined">tune</span>
-                        <span>Adaptació</span>
-                    </button>
-                    <button class="aside-step" data-step="4" type="button">
                         <span class="material-symbols-outlined">auto_awesome</span>
                         <span>Resultats</span>
                     </button>
@@ -70,7 +65,7 @@
                 <div class="aside-progress-bar">
                     <div class="aside-progress-fill" id="aside-progress-fill" style="width:25%"></div>
                 </div>
-                <p class="aside-progress-text" id="aside-progress-text">Pas 1 de 4: Context i Perfil</p>
+                <p class="aside-progress-text" id="aside-progress-text">Pas 1 de 3: Context i Perfil</p>
             </div>
         </div>
     </aside>
@@ -82,7 +77,7 @@
     <section class="step-panel active" id="step-1">
 
         <div class="page-header">
-            <span class="step-indicator">Pas 1 de 4</span>
+            <span class="step-indicator">Pas 1 de 3</span>
             <h1 class="page-title">Configura el context d'aprenentatge</h1>
         </div>
 
@@ -318,25 +313,17 @@
         <textarea id="profile-obs" hidden></textarea>
     </section>
 
-    <!-- ── PAS 2: Entrada de Text (Stitch design) ──────────── -->
+    <!-- ── PAS 2: Text i Ajuts (editor + complements fusionats) ──────────── -->
     <section class="step-panel" id="step-2">
-        <div class="workspace-header">
-            <h1 class="workspace-title">Entrada de Text</h1>
-            <p class="workspace-subtitle">Escriu, enganxa, puja un fitxer o demana a l'IA que generi un text base. Després el podràs refinar i adaptar.</p>
-            <div class="context-pill" id="context-pill">
-                <span class="material-symbols-outlined">person_pin</span>
-                <span id="context-pill-text">Configura el Pas 1 per veure el context</span>
-            </div>
-        </div>
 
-        <!-- Layout multimode: editor gran amb 3 tabs (Escriure/Pujar/Generar) + dreta amb història -->
-        <div class="pas2-grid-v3" id="bento-have">
+        <!-- Layout 2 columnes: editor esquerra + sidebar dreta -->
+        <div class="pas2-merged" id="bento-have">
 
-            <!-- ── COL PRINCIPAL: Editor multimode ─────────────────── -->
+            <!-- ── COL ESQUERRA: Editor multimode + refine ─────────────────── -->
             <main class="pas2-center">
                 <div class="editor-card-v2 editor-multimode">
 
-                    <!-- Mode tabs (3 opcions: Escriure / Pujar / Generar) -->
+                    <!-- Mode tabs (4 opcions: Escriure / Pujar / Generar / Recuperar) -->
                     <div class="mode-tabs" role="tablist">
                         <button class="mode-tab active" type="button" role="tab" data-mode="write">
                             <span class="material-symbols-outlined">edit_note</span>
@@ -349,6 +336,10 @@
                         <button class="mode-tab" type="button" role="tab" data-mode="generate">
                             <span class="material-symbols-outlined">auto_awesome</span>
                             <span>Generar amb IA</span>
+                        </button>
+                        <button class="mode-tab" type="button" role="tab" data-mode="recover">
+                            <span class="material-symbols-outlined">history</span>
+                            <span>Recuperar</span>
                         </button>
                     </div>
 
@@ -509,7 +500,14 @@
                         </div>
                     </div>
 
-                    <!-- Textarea COMPARTIT: sempre al DOM, visible només quan hi ha text o en mode write -->
+                    <!-- Mode 4: Recuperar (historial de textos anteriors) -->
+                    <div class="mode-content" data-mode-content="recover" hidden>
+                        <div class="history-list" id="history-list">
+                            <div class="history-loading" id="history-loading">Carregant historial…</div>
+                        </div>
+                    </div>
+
+                    <!-- Textarea COMPARTIT: sempre al DOM -->
                     <div class="textarea-container shared-textarea">
                         <textarea class="editor-textarea-v2" id="input-text" placeholder="Escriu o enganxa el text aquí..."></textarea>
                         <div class="char-count-pill">
@@ -534,12 +532,8 @@
                     </div>
                     <div class="quality-report-body" id="quality-body-p2"></div>
                 </div>
-            </main>
 
-            <!-- ── COL DRETA: Refinar + Històric + Tipus + Tips ─────── -->
-            <aside class="bento-side pas2-right">
-
-                <!-- Card: Refinar el text (alineat amb l'editor) -->
+                <!-- Refinar el text (sota editor) -->
                 <div class="bento-card refine-card-v3">
                     <div class="bento-card-header">
                         <span class="material-symbols-outlined bento-card-icon">auto_fix_high</span>
@@ -587,80 +581,30 @@
                         Desar com a esborrany
                     </button>
                 </div>
+            </main>
 
-                <!-- Card: Textos anteriors -->
-                <div class="bento-card history-card-v2">
-                    <div class="bento-card-header">
-                        <span class="material-symbols-outlined bento-card-icon">history</span>
-                        <h3 class="bento-card-title">Textos anteriors</h3>
+            <!-- ── COL DRETA: Perfil + Complements + Params ─────── -->
+            <aside class="pas2-sidebar">
+
+                <!-- Card perfil al qual s'adapta -->
+                <div class="pas3-profile-card" id="pas3-profile-card">
+                    <div class="pas3-profile-header">
+                        <span class="material-symbols-outlined">person_pin</span>
+                        <h3>Adaptant per a</h3>
                     </div>
-                    <div class="history-list" id="history-list">
-                        <div class="history-loading" id="history-loading">Carregant historial…</div>
+                    <div class="pas3-profile-body" id="pas3-profile-body">
+                        <p class="pas3-profile-empty">Configura el perfil al Pas 1</p>
                     </div>
                 </div>
 
-                <!-- Tipus de text (plegable, secundari) -->
-                <details class="bento-card">
-                    <summary class="bento-card-summary">
-                        <span class="material-symbols-outlined bento-card-icon">category</span>
-                        <h3 class="bento-card-title">Tipus de text</h3>
-                    </summary>
-                    <div class="bento-card-body">
-                        <select id="input-genere-textual" class="form-select">
-                            <option value="">(detecta automàticament)</option>
-                            <option value="explicacio">Explicatiu</option>
-                            <option value="narracio">Narratiu</option>
-                            <option value="instruccio">Instructiu</option>
-                            <option value="argumentacio">Argumentatiu</option>
-                        </select>
-                    </div>
-                </details>
-
-                <!-- Consells ràpids -->
-                <div class="tips-card-v2">
-                    <div class="tips-title">
-                        <span class="material-symbols-outlined">tips_and_updates</span>
-                        Consells ràpids
-                    </div>
-                    <ul class="tips-list">
-                        <li>Comença amb qualsevol dels 3 modes: escriure a mà, pujar un fitxer o generar amb IA.</li>
-                        <li>Un cop tinguis el text, els botons de <strong>Refinar</strong> del peu l'ajustaran sense regenerar.</li>
-                        <li>Desa el text com a esborrany per recuperar-lo més tard sense perdre-ho.</li>
-                    </ul>
-                </div>
-            </aside>
-        </div>
-
-        <!-- Botó history toggle ocult per compat amb JS antic -->
-        <button id="history-toggle" type="button" hidden></button>
-    </section>
-
-    <!-- ── PAS 3: Adaptació ────────────────────────────────── -->
-    <section class="step-panel" id="step-3">
-        <!-- Sense workspace-header: el card d'"Ajuts i complements" ja porta titol -->
-
-        <div class="pas3-layout">
-
-            <!-- ── COL ESQUERRA: perfil al qual s'adapta (fix/sticky) ── -->
-            <aside class="pas3-profile-card" id="pas3-profile-card">
-                <div class="pas3-profile-header">
-                    <span class="material-symbols-outlined">person_pin</span>
-                    <h3>Adaptant per a</h3>
-                </div>
-                <div class="pas3-profile-body" id="pas3-profile-body">
-                    <p class="pas3-profile-empty">Carregant perfil…</p>
-                </div>
-            </aside>
-
-            <!-- ── COL DRETA: complements (grid 2 cols intern) + params ── -->
-            <main class="pas3-main">
+                <!-- Ajuts i complements -->
                 <div class="card">
                     <div class="card-header pas3-card-header">
                         <div class="card-header-left">
                             <div class="icon-box"><span class="material-symbols-outlined">auto_awesome</span></div>
                             <div class="card-header-text">
                                 <h3 class="card-title">Ajuts i complements</h3>
-                                <p class="card-subtitle">L'app ha triat aquests segons el perfil. Afegeix-ne o treu-ne per personalitzar.</p>
+                                <p class="card-subtitle">Segons el perfil. Afegeix-ne o treu-ne.</p>
                             </div>
                         </div>
                         <span id="proposal-basis" class="info-badge"></span>
@@ -670,6 +614,7 @@
                     </div>
                 </div>
 
+                <!-- Paràmetres avançats -->
                 <details class="via-diagnostic-toggle">
                     <summary>Paràmetres avançats</summary>
                     <div style="padding:1rem 0;">
@@ -709,6 +654,7 @@
                     </div>
                 </details>
 
+                <!-- Progrés de l'adaptació (visible durant SSE) -->
                 <div class="progress-area" id="progress-area">
                     <div class="context-pill context-pill-progress" id="context-pill-progress">
                         <span class="material-symbols-outlined">person_pin</span>
@@ -716,13 +662,20 @@
                     </div>
                     <div id="progress-steps"></div>
                 </div>
-            </main>
+            </aside>
         </div>
+
+        <!-- Selector tipus text amagat (compat JS) -->
+        <select id="input-genere-textual" hidden>
+            <option value="">(detecta automàticament)</option>
+        </select>
+        <!-- Botó history toggle ocult per compat amb JS antic -->
+        <button id="history-toggle" type="button" hidden></button>
     </section>
 
-    <!-- ── PAS 4: Resultat (single-column amb Comparar on-demand) ─── -->
+    <!-- ── PAS 3: Resultat (single-column amb Comparar on-demand) ─── -->
     <!-- Sense workspace-header: el card editor ja porta titol "Text adaptat" i badge -->
-    <section class="step-panel" id="step-4">
+    <section class="step-panel" id="step-3">
         <div class="pas4-autosave-banner" id="pas4-autosave-banner" style="display:none;">
             <span class="material-symbols-outlined">restore</span>
             <span>Hi ha un text desat. Recuperar?</span>
@@ -1004,7 +957,7 @@
 <!-- ── STICKY BAR V2 (només Continuar, com Stitch) ──────────── -->
 <footer class="sticky-bar-v2" id="sticky-bar">
     <button class="btn" id="btn-back" hidden></button>
-    <span class="sticky-bar-step" id="sticky-step-label" hidden>Pas 1 de 4</span>
+    <span class="sticky-bar-step" id="sticky-step-label" hidden>Pas 1 de 3</span>
     <div class="sticky-bar-fill" id="sticky-progress-fill" style="width:25%;display:none;"></div>
     <button class="sticky-bar-v2-btn" id="btn-next" type="button">
         <span class="btn-label">Continuar</span>
