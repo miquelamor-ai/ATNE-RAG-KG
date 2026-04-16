@@ -419,6 +419,8 @@ document.addEventListener("DOMContentLoaded", () => {
     updateMecrPreview();
     updateStickyBar();
     updateAsideProgress();
+    // Pas 1 redissenyat: memòries, mode cards, col·lumna B reactiva
+    initPas1Redesign();
     // Pilot 1B: carrega config runtime dels models (no crític si falla)
     loadRuntimeConfig();
 });
@@ -1038,6 +1040,8 @@ async function saveProfile() {
     await loadProfileList();
     // Seleccionar el perfil acabat de desar
     document.getElementById("profile-selector").value = key;
+    // Actualitzar memòries
+    renderMemoryTiles();
     alert(`Perfil "${profile.nom}" desat correctament.`);
 }
 
@@ -1218,8 +1222,12 @@ function saveContextProfile() {
     local[key] = ctx;
     saveLocalContextProfiles(local);
     loadContextProfileList();
-    document.getElementById("ctx-profile-selector").value = key;
+    const sel = document.getElementById("ctx-profile-selector");
+    if (sel) sel.value = key;
     if (nameEl) nameEl.value = "";
+    // Actualitzar chips i memòries
+    renderContextChips(key);
+    renderMemoryTiles();
 }
 
 function loadContextProfile() {
@@ -1295,6 +1303,215 @@ function renderGrupProfileChips() {
 function getGrupProfiles() {
     const local = getLocalProfiles();
     return grupProfileKeys.map(key => local[key]).filter(Boolean);
+}
+
+
+// ── Pas 1 redissenyat: memòries, mode cards, col·lumna B reactiva ────────
+
+// Mode actual seleccionat (null = cap, 'alumne', 'grup')
+let currentMode = null;
+
+function selectMode(mode) {
+    currentMode = mode;
+
+    // Actualitzar cards visuals
+    document.querySelectorAll('.mode-action-card').forEach(card => {
+        card.classList.toggle('selected', card.dataset.mode === mode);
+    });
+
+    // Activar el radio hidden (per compat amb getAdaptMode)
+    const radio = document.querySelector(`input[name="adapt-mode"][value="${mode}"]`);
+    if (radio) radio.checked = true;
+
+    // Mostrar/ocultar panells a Col B
+    const placeholder = document.getElementById("col-b-placeholder");
+    const alumnePanel = document.getElementById("alumne-panel");
+    const grupPanel = document.getElementById("grup-panel");
+    const grupSubSection = document.getElementById("grup-sub-section");
+
+    if (placeholder) placeholder.style.display = mode ? "none" : "";
+    if (alumnePanel) alumnePanel.style.display = mode === "alumne" ? "" : "none";
+    if (grupPanel) grupPanel.style.display = mode === "grup" ? "" : "none";
+    if (grupSubSection) grupSubSection.style.display = mode === "grup" ? "" : "none";
+
+    // Actualitzar label del bloc A
+    const label = document.getElementById("bloc-a-label");
+    if (label) {
+        label.textContent = mode === "grup"
+            ? "El grup globalment llegeix i comprèn..."
+            : "Llegeix i comprèn...";
+    }
+
+    // Si grup: actualitzar MECR i perfils
+    if (mode === "grup") {
+        updateMecrPreview();
+        populateGrupProfilePicker();
+        renderGrupProfileChips();
+    }
+}
+
+function renderMemoryTiles() {
+    const container = document.getElementById("memory-tiles");
+    const section = document.getElementById("memories-section");
+    const btnMore = document.getElementById("btn-show-more-memories");
+    if (!container || !section) return;
+
+    const profiles = getLocalProfiles();
+    const contexts = getLocalContextProfiles();
+    const profileEntries = Object.entries(profiles);
+    const contextEntries = Object.entries(contexts);
+
+    if (profileEntries.length === 0 && contextEntries.length === 0) {
+        section.style.display = "none";
+        return;
+    }
+
+    section.style.display = "";
+
+    // Combinar perfils i contextos en una llista unificada
+    const allTiles = [];
+
+    for (const [key, p] of profileEntries) {
+        allTiles.push({
+            key,
+            type: "alumne",
+            name: p.nom || key,
+            icon: "person",
+        });
+    }
+    for (const [key, ctx] of contextEntries) {
+        allTiles.push({
+            key,
+            type: "context",
+            name: ctx._name || key,
+            icon: "school",
+        });
+    }
+
+    const MAX_VISIBLE = 6;
+    const visibleTiles = allTiles.slice(0, MAX_VISIBLE);
+    const hasMore = allTiles.length > MAX_VISIBLE;
+
+    container.innerHTML = visibleTiles.map(tile => `
+        <div class="memory-tile" data-key="${tile.key}" data-type="${tile.type}">
+            <span class="material-symbols-outlined" style="font-size:1.25rem;color:var(--primary);opacity:0.6;">${tile.icon}</span>
+            <span class="memory-tile-name">${tile.name}</span>
+            <span class="memory-tile-badge" data-type="${tile.type}">${tile.type === "alumne" ? "Alumne" : "Context"}</span>
+        </div>
+    `).join("");
+
+    // Bind clicks
+    container.querySelectorAll(".memory-tile").forEach(tile => {
+        tile.addEventListener("click", () => handleMemoryTileClick(tile.dataset.key, tile.dataset.type));
+    });
+
+    // Mostrar/ocultar botó "Mostra'n més"
+    if (btnMore) {
+        btnMore.style.display = hasMore ? "" : "none";
+        btnMore.onclick = () => {
+            // Expandir totes
+            container.innerHTML = allTiles.map(tile => `
+                <div class="memory-tile" data-key="${tile.key}" data-type="${tile.type}">
+                    <span class="material-symbols-outlined" style="font-size:1.25rem;color:var(--primary);opacity:0.6;">${tile.icon}</span>
+                    <span class="memory-tile-name">${tile.name}</span>
+                    <span class="memory-tile-badge" data-type="${tile.type}">${tile.type === "alumne" ? "Alumne" : "Context"}</span>
+                </div>
+            `).join("");
+            container.querySelectorAll(".memory-tile").forEach(t => {
+                t.addEventListener("click", () => handleMemoryTileClick(t.dataset.key, t.dataset.type));
+            });
+            btnMore.style.display = "none";
+        };
+    }
+}
+
+function handleMemoryTileClick(key, type) {
+    // Marcar tile activa
+    document.querySelectorAll(".memory-tile").forEach(t => t.classList.remove("active"));
+    const tile = document.querySelector(`.memory-tile[data-key="${key}"][data-type="${type}"]`);
+    if (tile) tile.classList.add("active");
+
+    if (type === "alumne") {
+        // Carregar perfil d'alumne
+        const local = getLocalProfiles();
+        const profile = local[key];
+        if (profile) {
+            selectMode("alumne");
+            applyProfileToForm(profile);
+            // Seleccionar al profile-selector per coherència
+            const sel = document.getElementById("profile-selector");
+            if (sel) sel.value = key;
+        }
+    } else if (type === "context") {
+        // Carregar context
+        const local = getLocalContextProfiles();
+        const ctx = local[key];
+        if (!ctx) return;
+        if (ctx.etapa) {
+            document.getElementById("ctx-etapa").value = ctx.etapa;
+            updateEtapaSelects();
+        }
+        if (ctx.curs) document.getElementById("ctx-curs").value = ctx.curs;
+        if (ctx.ambit) document.getElementById("ctx-ambit").value = ctx.ambit;
+        if (ctx.materia) document.getElementById("ctx-materia").value = ctx.materia;
+        updateMecrPreview();
+        saveContextToStorage();
+        // Marcar chip actiu a la sidebar
+        renderContextChips(key);
+    }
+}
+
+function renderContextChips(activeKey) {
+    const container = document.getElementById("ctx-chips");
+    const section = document.getElementById("ctx-chips-section");
+    if (!container || !section) return;
+
+    const contexts = getLocalContextProfiles();
+    const entries = Object.entries(contexts);
+
+    if (entries.length === 0) {
+        section.style.display = "none";
+        return;
+    }
+
+    section.style.display = "";
+    container.innerHTML = entries.map(([key, ctx]) => `
+        <button class="ctx-chip ${key === activeKey ? 'active' : ''}" data-key="${key}" type="button">
+            ${ctx._name || key}
+        </button>
+    `).join("");
+
+    container.querySelectorAll(".ctx-chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+            handleMemoryTileClick(chip.dataset.key, "context");
+        });
+    });
+
+    // Actualitzar també el selector ocult per compat
+    loadContextProfileList();
+}
+
+function initPas1Redesign() {
+    // Renderitzar memòries
+    renderMemoryTiles();
+    renderContextChips();
+
+    // Mode cards: bind clicks
+    document.querySelectorAll('.mode-action-card').forEach(card => {
+        card.addEventListener('click', () => selectMode(card.dataset.mode));
+    });
+
+    // Per defecte: cap mode seleccionat (placeholder visible)
+    // Si hi ha un context desat, carregar-lo però no seleccionar mode
+    const hasProfiles = Object.keys(getLocalProfiles()).length > 0;
+    const hasContexts = Object.keys(getLocalContextProfiles()).length > 0;
+
+    // Si és un usuari que torna (té perfils), mostrar memòries però esperar acció
+    // Si és primera vegada, tot net — les cards són el punt d'entrada
+    if (!hasProfiles && !hasContexts) {
+        // Primera vegada: amagar secció memòries (ja ho fa renderMemoryTiles)
+        // Les cards mode són l'únic element visible a Col A
+    }
 }
 
 
@@ -1694,7 +1911,7 @@ function switchVersion(level) {
     // Actualitzar Quality Report per al nivell actiu
     const qr = state.qualityReports && state.qualityReports[level];
     if (qr) {
-        renderQualityReport("quality-report-p4", "quality-body-p4", "quality-badge-p4", qr);
+        renderQualityReport("quality-report-p4-wrapper", "quality-body-p4", "quality-badge-p4", qr);
     }
 }
 
@@ -1810,7 +2027,7 @@ function showResult() {
     if (qualityReport) {
         renderQualityReport("quality-report-p4", "quality-body-p4", "quality-badge-p4", qualityReport);
     } else {
-        document.getElementById("quality-report-p4")?.setAttribute("hidden", "hidden");
+        document.getElementById("quality-report-p4-wrapper")?.setAttribute("hidden", "hidden");
     }
 
     // Resetar feedback
@@ -3224,9 +3441,6 @@ function editorRedo() {
 // ── Pill de context (mostra etapa+curs+matèria+perfil al Pas 2) ───────────
 
 function updateContextPill() {
-    const pill = document.getElementById("context-pill-text");
-    if (!pill) return;
-
     const etapa = document.getElementById("ctx-etapa")?.value;
     const curs = document.getElementById("ctx-curs")?.value;
     const ambit = document.getElementById("ctx-ambit")?.value;
@@ -3298,13 +3512,13 @@ function updateContextPill() {
     const text = parts.length > 0
         ? parts.join(" · ")
         : "Configura el Pas 1 per veure el context";
-    pill.textContent = text;
 
-    // Propagar a les pills del progrés i del Pas 3 (Resultats)
-    const pillProgress = document.getElementById("context-pill-progress-text");
-    if (pillProgress) pillProgress.textContent = text;
-    const pillPas4 = document.getElementById("context-pill-pas4-text");
-    if (pillPas4) pillPas4.textContent = text;
+    // Propagar a totes les pills de context (Pas 2 progrés + Pas 3 resultats)
+    const targets = ["context-pill-text", "context-pill-progress-text", "context-pill-pas4-text"];
+    for (const id of targets) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+    }
 }
 
 
@@ -3798,10 +4012,7 @@ function bindEvents() {
         r.addEventListener("change", updateMecrPreview);
     });
 
-    // Mode alumne/grup: actualitza etiqueta del Bloc A
-    document.querySelectorAll('input[name="adapt-mode"]').forEach(r => {
-        r.addEventListener("change", updateBlocALabel);
-    });
+    // Mode alumne/grup: ja gestionat per initPas1Redesign (mode cards)
 
     // Perfils alumne: desar / carregar (barra nova al Pas 1)
     const btnSaveProfile = document.getElementById("btn-save-profile");
@@ -3825,25 +4036,9 @@ function bindEvents() {
 }
 
 function updateBlocALabel() {
+    // Delegat a selectMode() per coherència amb el nou disseny
     const mode = document.querySelector('input[name="adapt-mode"]:checked')?.value || "alumne";
-    const label = document.getElementById("bloc-a-label");
-    if (label) {
-        label.textContent = mode === "grup"
-            ? "El grup globalment llegeix i comprèn..."
-            : "Llegeix i comprèn...";
-    }
-    // Toggle panells alumne/grup
-    const alumnePanel = document.getElementById("alumne-panel");
-    const grupPanel = document.getElementById("grup-panel");
-    if (alumnePanel) alumnePanel.style.display = mode === "grup" ? "none" : "";
-    if (grupPanel) grupPanel.style.display = mode === "grup" ? "" : "none";
-
-    // Actualitzar selectors de perfil al grup si canviem a grup
-    if (mode === "grup") {
-        updateMecrPreview();
-        populateGrupProfilePicker();
-        renderGrupProfileChips();
-    }
+    selectMode(mode);
 }
 
 function getAdaptMode() {
