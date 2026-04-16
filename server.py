@@ -2166,11 +2166,24 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
     best_score = -1
     verify_info = None
 
+    # Correccions de la rúbrica del docent (regeneració amb feedback)
+    corrections = params.get("corrections") or []
+    user_text = text
+    if corrections:
+        corrections_block = "\n".join(f"- {c}" for c in corrections)
+        user_text = (
+            f"{text}\n\n"
+            f"IMPORTANT — CORRECCIONS DEL DOCENT (prioritat màxima):\n"
+            f"L'adaptació anterior no era satisfactòria. Aplica aquestes correccions:\n"
+            f"{corrections_block}"
+        )
+        cb({"type": "step", "step": "corrections", "msg": f"Aplicant {len(corrections)} correcció(ns) del docent..."})
+
     for attempt in range(1, max_attempts + 1):
         label_attempt = f" (intent {attempt}/{max_attempts})" if verify_enabled else ""
         cb({"type": "step", "step": "adapting", "msg": f"Generant adaptació amb {model_label}{label_attempt}..."})
         try:
-            adapted = _call_llm(active_model, system_prompt, text)
+            adapted = _call_llm(active_model, system_prompt, user_text)
             adapted = clean_gemini_output(adapted)
             adapted = _post_process_llm_output(adapted)
         except Exception as e:

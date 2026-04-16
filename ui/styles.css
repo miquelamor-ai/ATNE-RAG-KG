@@ -1575,6 +1575,48 @@ body {
     font-weight: 600 !important;
 }
 
+.pas4-actions-hint {
+    font-size: 0.75rem;
+    color: var(--on-surface-variant);
+    margin: 0.25rem 0 0.5rem;
+    line-height: 1.4;
+}
+
+.redo-rubric {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.redo-rubric-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.5rem 0.625rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    transition: background 0.15s;
+}
+
+.redo-rubric-item:hover {
+    background: rgba(51, 55, 166, 0.04);
+}
+
+.redo-rubric-item input[type="checkbox"] {
+    margin-top: 0.125rem;
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    accent-color: var(--primary);
+}
+
+.redo-rubric-item input[type="checkbox"]:checked + span {
+    color: var(--primary);
+    font-weight: 500;
+}
+
 /* Refine panel inline */
 .refine-panel-header {
     display: flex;

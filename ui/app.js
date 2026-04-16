@@ -1560,6 +1560,11 @@ async function runAdaptation() {
         state.doneLevels = new Set();
 
         const paramsWithVerify = { ...params, verify_retry, levels };
+        // Si hi ha correccions de la rúbrica, afegir-les al payload
+        if (state._redoCorrections && state._redoCorrections.length > 0) {
+            paramsWithVerify.corrections = state._redoCorrections;
+            state._redoCorrections = null;
+        }
         const resp = await fetch("/api/adapt", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -2025,7 +2030,6 @@ async function redoAdaptation() {
         return;
     }
     trackAction("redo");
-    // Tornar al Pas 2 que llança runAdaptation automàticament
     const textarea = document.getElementById("input-text");
     if (textarea && !textarea.value && state.originalText) {
         textarea.value = state.originalText;
@@ -2035,8 +2039,43 @@ async function redoAdaptation() {
         status.style.display = "";
         status.textContent = "Tornant a adaptar...";
     }
-    // Anem al pas 2 (Text i Ajuts) i rellancem l'adaptació
+    // Regenerar sense correccions (comportament antic)
+    state._redoCorrections = null;
     goToStep(2);
+}
+
+// Rúbrica booleana: recull correccions i regenera in-place (sense tornar enrere)
+async function redoWithRubric() {
+    const checks = document.querySelectorAll("#redo-rubric input[data-rubric]:checked");
+    const corrections = [];
+    const RUBRIC_LABELS = {
+        catala: "Millora la qualitat del català: corregeix errors ortogràfics, calcs del castellà i expressions poc naturals",
+        contingut: "Preserva tot el contingut de l'original sense perdre conceptes ni detalls importants",
+        nivell: "Ajusta millor el nivell lingüístic al perfil de l'alumne (MECR i desfase curricular)",
+        ajuts: "Afegeix més ajuts de comprensió: glossari, definicions integrades, esquema visual o pictogrames",
+        comprensio: "Simplifica més perquè l'alumne pugui entendre el text de forma autònoma",
+    };
+    checks.forEach(cb => {
+        const key = cb.dataset.rubric;
+        if (RUBRIC_LABELS[key]) corrections.push(RUBRIC_LABELS[key]);
+    });
+
+    if (corrections.length === 0) {
+        // Cap correcció marcada → regenerar igual (com redoAdaptation)
+        return redoAdaptation();
+    }
+
+    trackAction("redo_rubric", { corrections: corrections.map((_, i) => [...checks][i].dataset.rubric) });
+
+    const status = document.getElementById("redo-status");
+    if (status) {
+        status.style.display = "";
+        status.textContent = "Regenerant amb correccions...";
+    }
+
+    // Guardar correccions i llançar adaptació in-place
+    state._redoCorrections = corrections;
+    runAdaptation();
 }
 
 async function trackAction(action, extra) {

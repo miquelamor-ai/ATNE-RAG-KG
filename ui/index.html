@@ -912,23 +912,56 @@
                 </div>
             </div>
 
-            <!-- FILA 3: Refer — tornar a adaptar de zero -->
+            <!-- Tornar a generar — rúbrica booleana + regeneració amb correccions -->
             <div class="pas4-actions-card pas4-actions-redo">
                 <div class="pas4-actions-label">
-                    <span class="material-symbols-outlined">refresh</span>
-                    No serveix — tornar a generar
+                    <span class="material-symbols-outlined">autorenew</span>
+                    Tornar a generar
                 </div>
-                <div class="pas4-actions-row">
-                    <button type="button" class="btn pas4-action-btn pas4-redo-btn" id="btn-redo-adaptation" onclick="redoAdaptation()">
+                <p class="pas4-actions-hint">Marca què cal millorar. El sistema regenerarà el text tenint-ho en compte.</p>
+                <div class="redo-rubric" id="redo-rubric">
+                    <label class="redo-rubric-item">
+                        <input type="checkbox" data-rubric="catala">
+                        <span>El text té errors de català o no sona natural</span>
+                    </label>
+                    <label class="redo-rubric-item">
+                        <input type="checkbox" data-rubric="contingut">
+                        <span>Ha perdut contingut important de l'original</span>
+                    </label>
+                    <label class="redo-rubric-item">
+                        <input type="checkbox" data-rubric="nivell">
+                        <span>No s'adequa al nivell de l'alumne (massa fàcil o difícil)</span>
+                    </label>
+                    <label class="redo-rubric-item">
+                        <input type="checkbox" data-rubric="ajuts">
+                        <span>Falten ajuts: glossari, definicions, esquema o pictogrames</span>
+                    </label>
+                    <label class="redo-rubric-item">
+                        <input type="checkbox" data-rubric="comprensio">
+                        <span>L'alumne no ho entendria tal com està</span>
+                    </label>
+                </div>
+                <div class="pas4-actions-row" style="margin-top:0.5rem;">
+                    <button type="button" class="btn pas4-action-btn pas4-redo-btn" id="btn-redo-adaptation" onclick="redoWithRubric()">
                         <span class="material-symbols-outlined">autorenew</span>
-                        <span>Refer adaptació</span>
-                    </button>
-                    <button class="btn pas4-action-btn" onclick="goToStep(1)">
-                        <span class="material-symbols-outlined">replay</span>
-                        <span>Nova adaptació (des de zero)</span>
+                        <span>Regenerar amb correccions</span>
                     </button>
                 </div>
                 <div id="redo-status" class="refine-status" style="display:none;"></div>
+            </div>
+
+            <!-- Començar de nou (canviar context/perfil) -->
+            <div class="pas4-actions-card">
+                <div class="pas4-actions-label">
+                    <span class="material-symbols-outlined">restart_alt</span>
+                    Començar de nou
+                </div>
+                <div class="pas4-actions-row">
+                    <button class="btn pas4-action-btn" onclick="goToStep(1)">
+                        <span class="material-symbols-outlined">replay</span>
+                        <span>Nova adaptació amb un altre context o perfil</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Feedback opcional (col·lapsat) -->
