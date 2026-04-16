@@ -3263,9 +3263,6 @@ function editorRedo() {
 // ── Pill de context (mostra etapa+curs+matèria+perfil al Pas 2) ───────────
 
 function updateContextPill() {
-    const pill = document.getElementById("context-pill-text");
-    if (!pill) return;
-
     const etapa = document.getElementById("ctx-etapa")?.value;
     const curs = document.getElementById("ctx-curs")?.value;
     const ambit = document.getElementById("ctx-ambit")?.value;
@@ -3337,13 +3334,12 @@ function updateContextPill() {
     const text = parts.length > 0
         ? parts.join(" · ")
         : "Configura el Pas 1 per veure el context";
-    pill.textContent = text;
 
-    // Propagar a les pills del progrés i del Pas 3 (Resultats)
-    const pillProgress = document.getElementById("context-pill-progress-text");
-    if (pillProgress) pillProgress.textContent = text;
-    const pillPas4 = document.getElementById("context-pill-pas4-text");
-    if (pillPas4) pillPas4.textContent = text;
+    // Propagar a totes les pills de context
+    for (const id of ["context-pill-text", "context-pill-progress-text", "context-pill-pas4-text"]) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+    }
 }
 
 
