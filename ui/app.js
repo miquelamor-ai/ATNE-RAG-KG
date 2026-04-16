@@ -391,6 +391,11 @@ const state = {
     originalText: "",
     historyId: null,       // ID de l'entrada a Supabase history
     feedbackRating: null,  // 1=dolenta, 2=regular, 3=bona
+    // Sprint B (2026-04-16): origen del text per a la memòria pilot anònima.
+    // Valors: 'paste' (default) | 'upload' | 'generated'
+    // S'actualitza a handleFileUpload (upload), generateDraftText (generated)
+    // i al input event del textarea (paste). S'envia al POST /api/history.
+    textSource: "paste",
 };
 
 let _historyLoaded = false; // cache flag historial
@@ -411,6 +416,8 @@ document.addEventListener("DOMContentLoaded", () => {
     updateMecrPreview();
     updateStickyBar();
     updateAsideProgress();
+    // Pilot 1B: carrega config runtime dels models (no crític si falla)
+    loadRuntimeConfig();
 });
 
 
@@ -642,6 +649,11 @@ async function checkHealth() {
 // ── Navegació per passos ───────────────────────────────────────────────────
 
 function goToStep(n) {
+    // Pilot 1B: captura del temps al Pas 4 (entrada/sortida)
+    // Si sortim del Pas 4, enviem el temps acumulat a history.
+    if (state.step === 4 && n !== 4) {
+        sendStep4TimeOnExit();
+    }
     state.step = n;
     document.querySelectorAll(".step-tab").forEach(tab => {
         tab.classList.toggle("active", parseInt(tab.dataset.step) === n);
@@ -655,6 +667,10 @@ function goToStep(n) {
     });
     if (n === 3) requestProposal();
     if (n === 2) updateContextPill();
+    // Pilot 1B: arrencar timer Pas 4 quan hi entrem
+    if (n === 4) {
+        state._step4EnterTs = Date.now();
+    }
     updateStickyBar();
     updateAsideProgress();
 }
@@ -1311,6 +1327,8 @@ async function runAdaptation() {
     const params = collectParams();
 
     state.originalText = text;
+    // Pilot 1B: captura del temps de l'adaptació per al tracking.
+    state._adaptStartTs = Date.now();
 
     // Mostrar progress
     state._doneHandled = false;
@@ -1323,8 +1341,10 @@ async function runAdaptation() {
     if (btn) { btn.disabled = true; btn.textContent = "Adaptant..."; }
 
     try {
-        const modelSel = document.getElementById("model-selector");
-        const model = modelSel ? modelSel.value : "mistral";
+        // El model de l'adaptació el decideix /admin via _MODEL_CONFIG["adapt"]
+        // (mode fix o rotació silenciosa). Al pilot (2026-04-16) el frontend
+        // NO envia `model` per no anul·lar l'admin — el backend cau a
+        // _model_for("adapt") quan l'override és buit.
         const verifyToggle = document.getElementById("verify-toggle");
         const verify_retry = verifyToggle ? verifyToggle.checked : true;
 
@@ -1342,7 +1362,7 @@ async function runAdaptation() {
         const resp = await fetch("/api/adapt", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text, profile, context, params: paramsWithVerify, model }),
+            body: JSON.stringify({ text, profile, context, params: paramsWithVerify }),
         });
 
         const reader = resp.body.getReader();
@@ -1566,24 +1586,17 @@ function showResult() {
         `;
     }
 
-    // Stats de paraules separades
-    const origWords = state.originalText.trim().split(/\s+/).length;
-    const mainWords = (sections.main || "").trim().split(/\s+/).length;
-    const compWords = Object.values(sections.complements).reduce((sum, c) => sum + c.trim().split(/\s+/).length, 0);
-    const totalWords = mainWords + compWords;
-    const statsDiv = document.getElementById("result-word-stats");
-    if (statsDiv) {
-        statsDiv.innerHTML = `
-            <span><strong>Original:</strong> ${origWords} par</span>
-            <span style="color:#6b7280">|</span>
-            <span><strong>Text adaptat:</strong> ${mainWords} par</span>
-            <span style="color:#6b7280">|</span>
-            <span><strong>Complements:</strong> ${compWords} par</span>
-            <span style="color:#6b7280">|</span>
-            <span><strong>Total:</strong> ${totalWords} par</span>
-            <span style="color:#6b7280">|</span>
-            <span style="color:${mainWords <= origWords ? '#059669' : '#d97706'}">${mainWords <= origWords ? '↓' : '↑'} ${Math.abs(Math.round((mainWords/origWords-1)*100))}% vs original</span>
-        `;
+    // Stats de paraules separades (Pas 4)
+    // Els complements no són editables inline → el seu recompte queda fix per al dibuix actual.
+    // El text adaptat (#result-adapted) sí és editable → es recalcula dinàmicament via updateP4WordStats().
+    state.p4CompWords = Object.values(sections.complements).reduce((sum, c) => sum + c.trim().split(/\s+/).length, 0);
+    updateP4WordStats();
+
+    // Bind de l'event d'edició dinàmica (una sola vegada)
+    const resultAdapted = document.getElementById("result-adapted");
+    if (resultAdapted && !resultAdapted.dataset.wordStatsBound) {
+        resultAdapted.addEventListener("input", updateP4WordStats);
+        resultAdapted.dataset.wordStatsBound = "1";
     }
 
     // Quality Report al Pas 4 (si disponible)
@@ -1613,22 +1626,75 @@ function showResult() {
 
 // ── Historial i feedback ─────────────────────────────────────────────────
 
+// Sprint B fix (2026-04-16): normalitza una entrada de _MODEL_CONFIG que pot
+// ser string (legacy) o dict (nou format fix/rotate). Retorna sempre una
+// string amb el model_id per a loguejar-lo al history. En mode rotate
+// retorna un marcador 'rotate:<n>' perquè en sabem l'origen però no el
+// model concret (que ja només sap el backend en cada crida).
+function normalizeModelForLog(configEntry) {
+    if (!configEntry) return null;
+    if (typeof configEntry === "string") return configEntry;
+    if (typeof configEntry === "object") {
+        if (configEntry.mode === "fixed") return configEntry.model || null;
+        if (configEntry.mode === "rotate") {
+            const n = (configEntry.models || []).length;
+            return `rotate:${n}`;
+        }
+        return configEntry.model || null;
+    }
+    return null;
+}
+
 async function saveToHistory() {
     const profile = collectProfile();
     const context = collectContext();
     const params = collectParams();
+    // Pilot 1B: camps ampliats (Sprint 1A + 1B)
+    const origWords = (state.originalText || "").split(/\s+/).filter(Boolean).length;
+    const adaptedWords = (state.adaptedText || "").split(/\s+/).filter(Boolean).length;
+    const durationMs = state._adaptStartTs ? (Date.now() - state._adaptStartTs) : null;
+    // Model per fase: llegit de runtimeConfig si disponible; fallback string buit.
+    // Sprint B fix: runtimeConfig.model_config pot contenir dicts (fix/rotate)
+    // en comptes de strings. Normalitzem perquè el history guardi sempre
+    // un model_id llegible o un marcador 'rotate:N'.
+    const mpp = {};
+    if (runtimeConfig && runtimeConfig.model_config) {
+        mpp.adapt = normalizeModelForLog(runtimeConfig.model_config.adapt);
+    }
+    // Cost estimat (client-side) — només per fase adapt en mode fix
+    let costEstimat = 0;
+    if (runtimeConfig && runtimeConfig.model_costs_eur_per_call && mpp.adapt) {
+        costEstimat = runtimeConfig.model_costs_eur_per_call[mpp.adapt] || 0;
+    }
+    const payload = {
+        profile_name: profile.nom,
+        profile: profile,
+        context: context,
+        params: params,
+        original: state.originalText,
+        adapted: state.adaptedText,
+        // Sprint 1A
+        endpoint: "/api/adapt",
+        etapa: context.etapa || null,
+        curs: context.curs || null,
+        perfil_kind: profile.kind || null,
+        via: context.via || null,
+        n_words_in: origWords,
+        n_words_out: adaptedWords,
+        duration_ms: durationMs,
+        model_used: mpp.adapt || null,
+        // Sprint 1B
+        models_per_phase: mpp,
+        cost_estimat_eur: costEstimat,
+        // Sprint B (2026-04-16): origen del text original
+        // paste | upload | generated (s'actualitza a handleFileUpload i generateDraftText)
+        source: state.textSource || "paste",
+    };
     try {
         const resp = await fetch("/api/history", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                profile_name: profile.nom,
-                profile: profile,
-                context: context,
-                params: params,
-                original: state.originalText,
-                adapted: state.adaptedText,
-            }),
+            body: JSON.stringify(payload),
         });
         const data = await resp.json();
         if (data.ok && data.id) {
@@ -1638,6 +1704,137 @@ async function saveToHistory() {
         }
     } catch { /* no bloquejant */ }
 }
+
+// ── Pilot 1B: captures implícites al Pas 4 ─────────────────────────────────
+
+let runtimeConfig = null;  // {model_config, model_costs_eur_per_call, pilot_active}
+
+async function loadRuntimeConfig() {
+    try {
+        const r = await fetch("/api/runtime-config");
+        if (r.ok) {
+            runtimeConfig = await r.json();
+        }
+    } catch { /* no crític, només per al tracking */ }
+}
+
+async function copyAdaptedText() {
+    const el = document.getElementById("result-adapted");
+    if (!el) return;
+    const text = el.innerText || el.textContent || "";
+    try {
+        await navigator.clipboard.writeText(text);
+    } catch (e) {
+        alert("No s'ha pogut copiar: " + e.message);
+        return;
+    }
+    // Feedback visual
+    const btn = document.getElementById("btn-copy-adapted");
+    if (btn) {
+        btn.classList.add("copied");
+        const label = btn.querySelector("span:last-child");
+        const prev = label ? label.textContent : null;
+        if (label) label.textContent = "Copiat ✓";
+        setTimeout(() => {
+            btn.classList.remove("copied");
+            if (label && prev) label.textContent = prev;
+        }, 2000);
+    }
+    // PATCH a history (si tenim id)
+    if (state.historyId) {
+        try {
+            await fetch(`/api/history/${state.historyId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ copied: true }),
+            });
+        } catch { /* no bloquejant */ }
+    }
+}
+
+async function submitTroubleReport() {
+    const checks = document.querySelectorAll('#trouble-report input[type="checkbox"]');
+    const status = document.getElementById("trouble-status");
+    const altresText = (document.getElementById("trouble-altres-text").value || "").trim();
+    const reviewItems = {};
+    let anyChecked = false;
+    checks.forEach(c => {
+        const key = c.dataset.trouble;
+        if (key === "altres_marcat") return;  // aquest és només un trigger per al textarea
+        reviewItems[key] = !!c.checked;
+        if (c.checked) anyChecked = true;
+    });
+    if (altresText) {
+        reviewItems.altres_text = altresText;
+    }
+    if (!anyChecked && !altresText) {
+        status.className = "trouble-status error";
+        status.textContent = "Marca almenys un problema o escriu un comentari.";
+        return;
+    }
+    if (!state.historyId) {
+        status.className = "trouble-status error";
+        status.textContent = "No hi ha cap adaptació activa per associar el feedback.";
+        return;
+    }
+    status.className = "trouble-status info";
+    status.textContent = "Enviant…";
+    try {
+        const r = await fetch(`/api/history/${state.historyId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ review_items: reviewItems }),
+        });
+        if (r.ok) {
+            status.className = "trouble-status ok";
+            status.textContent = "Gràcies! Feedback desat.";
+            setTimeout(() => {
+                const det = document.getElementById("trouble-report");
+                if (det) det.open = false;
+                status.textContent = "";
+                status.className = "trouble-status";
+            }, 2500);
+        } else {
+            status.className = "trouble-status error";
+            status.textContent = "No s'ha pogut enviar.";
+        }
+    } catch (e) {
+        status.className = "trouble-status error";
+        status.textContent = "Error de xarxa: " + e.message;
+    }
+}
+
+async function sendStep4TimeOnExit() {
+    if (!state._step4EnterTs || !state.historyId) {
+        state._step4EnterTs = null;
+        return;
+    }
+    const ms = Date.now() - state._step4EnterTs;
+    state._step4EnterTs = null;
+    try {
+        await fetch(`/api/history/${state.historyId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ time_on_step4_ms: ms }),
+        });
+    } catch { /* no bloquejant */ }
+}
+
+// En tancar la pàgina/pestanya, enviem el temps final via sendBeacon
+// (supervivent al navigate away). El backend accepta PATCH JSON; per això
+// usem un endpoint dedicat dins el mateix PATCH.
+window.addEventListener("beforeunload", () => {
+    if (state._step4EnterTs && state.historyId) {
+        const ms = Date.now() - state._step4EnterTs;
+        try {
+            const blob = new Blob(
+                [JSON.stringify({ time_on_step4_ms: ms })],
+                { type: "application/json" },
+            );
+            navigator.sendBeacon(`/api/history/${state.historyId}/beacon`, blob);
+        } catch { /* best effort */ }
+    }
+});
 
 function rateFeedback(rating) {
     state.feedbackRating = rating;
@@ -1875,6 +2072,7 @@ async function handleFileUpload(ev) {
 
         editorPushUndo();
         textarea.value = data.text;
+        state.textSource = "upload";  // Sprint B: marca origen
         updateWordCount();
         status.textContent = `${file.name} — ${data.paraules} paraules extretes (${data.format_detectat.toUpperCase()})`;
         status.style.color = "#15803d";
@@ -1920,6 +2118,10 @@ async function generateDraftText() {
         _lastTextBeforeGeneration = textarea.value;
     }
 
+    // Payload del Pas 2 — el model i l'auditor NO s'envien des del frontend.
+    // Des del pilot (2026-04-16) el model el decideix /admin via _MODEL_CONFIG
+    // (mode fix o rotació silenciosa). Si el frontend enviés `model`, tindria
+    // prioritat sobre l'admin a _model_for() i anul·laria la rotació.
     const payload = {
         tema,
         genere: document.getElementById("gen-genere").value,
@@ -1928,8 +2130,6 @@ async function generateDraftText() {
         extensio: document.getElementById("gen-extensio").value,
         notes: document.getElementById("gen-notes").value.trim(),
         context: collectContext(),
-        model: getSelectedGenModel(),
-        auditor: getAuditorEnabled(),
     };
 
     btn.disabled = true;
@@ -1938,52 +2138,116 @@ async function generateDraftText() {
     btn.innerHTML = '<span class="material-symbols-outlined">autorenew</span> <span>Generant...</span>';
     status.style.display = "block";
     status.style.color = "var(--on-surface-variant)";
-    status.textContent = "Generant amb Gemma 4... pot trigar 15-30 segons.";
+    status.textContent = "Generant el text… veuràs les paraules apareixent a mesura que el model les produeix.";
+
+    // Preparar el textarea per rebre streaming:
+    // - buidar-lo
+    // - bloquejar l'edició fins que acabi el stream
+    // - preservar l'empenta de undo
+    if (textarea) {
+        editorPushUndo();
+        textarea.value = "";
+        textarea.readOnly = true;
+        textarea.style.opacity = "0.92";
+    }
+    // Auto-switch al mode "write" perquè es vegi el textarea mentre streaming
+    if (typeof switchMode === "function") switchMode("write");
+
+    let accumulated = "";
+    let modelUsat = "";
+    let paraulesFinal = 0;
+    let streamError = null;
 
     try {
-        const resp = await fetch("/api/generate-text", {
+        const resp = await fetch("/api/generate-text-stream", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
         });
-        const data = await resp.json();
-
-        if (!resp.ok) {
-            status.textContent = `Error: ${data.error || resp.statusText}`;
-            status.style.color = "#b91c1c";
-            return;
+        if (!resp.ok || !resp.body) {
+            throw new Error("HTTP " + resp.status);
         }
+        const reader = resp.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let buffer = "";
 
-        if (textarea) {
-            editorPushUndo();
-            textarea.value = data.text;
+        // Parser SSE manual: busquem delimitadors "\n\n" que separen events.
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            let idx;
+            while ((idx = buffer.indexOf("\n\n")) !== -1) {
+                const rawEvent = buffer.slice(0, idx);
+                buffer = buffer.slice(idx + 2);
+                if (!rawEvent.startsWith("data: ")) continue;
+                const jsonStr = rawEvent.slice(6).trim();
+                if (!jsonStr) continue;
+                let ev;
+                try { ev = JSON.parse(jsonStr); }
+                catch (e) { continue; }
+
+                if (ev.type === "start") {
+                    modelUsat = ev.model || "";
+                    status.textContent = `Generant amb ${modelUsat}… paraules apareixeran en directe.`;
+                } else if (ev.type === "chunk") {
+                    accumulated += ev.text || "";
+                    if (textarea) {
+                        textarea.value = accumulated;
+                        // autoscroll fins al final del textarea mentre creix
+                        textarea.scrollTop = textarea.scrollHeight;
+                    }
+                    updateWordCount();
+                } else if (ev.type === "done") {
+                    // Servidor pot haver enviat text final ja consolidat
+                    if (ev.text) {
+                        accumulated = ev.text;
+                        if (textarea) textarea.value = accumulated;
+                    }
+                    modelUsat = ev.model || modelUsat;
+                    paraulesFinal = ev.paraules || accumulated.trim().split(/\s+/).length;
+                } else if (ev.type === "error") {
+                    streamError = ev.message || "Error desconegut del servidor";
+                }
+            }
         }
-        updateWordCount();
-        updateGenerateButtonLabel();
-
-        // Quality Report (si disponible)
-        if (data.quality_report) {
-            renderQualityReport("quality-report-p2", "quality-body-p2", "quality-badge-p2", data.quality_report);
-        }
-
-        status.textContent = `Text generat (${data.paraules} paraules${data.model ? " · " + data.model : ""}). Modifica paràmetres i regenera, refina'l, o continua.`;
-        status.style.color = "#15803d";
-
-        // Auto-switch a mode "write" perquè es vegi el text generat
-        if (typeof switchMode === "function") setTimeout(() => switchMode("write"), 500);
-
-        // Mostrar botó de "Desfer regeneració" si teníem text previ
-        const btnUndo = document.getElementById("btn-undo-generate");
-        if (btnUndo && _lastTextBeforeGeneration) btnUndo.style.display = "flex";
     } catch (e) {
-        status.textContent = `Error de xarxa: ${e.message}`;
-        status.style.color = "#b91c1c";
+        streamError = e.message || String(e);
     } finally {
+        if (textarea) {
+            textarea.readOnly = false;
+            textarea.style.opacity = "";
+        }
         btn.disabled = false;
         btn.classList.remove("is-loading");
         btn.innerHTML = oldHTML;
         updateGenerateButtonLabel();
     }
+
+    if (streamError) {
+        status.textContent = `Error: ${streamError}`;
+        status.style.color = "#b91c1c";
+        return;
+    }
+
+    if (!accumulated.trim()) {
+        status.textContent = "El model no ha retornat cap text. Torna-ho a provar.";
+        status.style.color = "#b91c1c";
+        return;
+    }
+
+    paraulesFinal = paraulesFinal || accumulated.trim().split(/\s+/).length;
+    state.textSource = "generated";  // Sprint B: marca origen LLM
+    // Guardem també el model que ha generat per mostrar-lo al badge de la card
+    state.generatedByModel = modelUsat || null;
+    status.textContent = `Text generat (${paraulesFinal} paraules${modelUsat ? " · " + modelUsat : ""}). Modifica paràmetres i regenera, refina'l, o continua.`;
+    status.style.color = "#15803d";
+    updateWordCount();
+    updateGenerateButtonLabel();
+
+    // Mostrar botó de "Desfer regeneració" si teníem text previ
+    const btnUndo = document.getElementById("btn-undo-generate");
+    if (btnUndo && _lastTextBeforeGeneration) btnUndo.style.display = "flex";
 }
 
 function undoLastGeneration() {
@@ -2086,6 +2350,8 @@ async function refineText(preset, customInstruction, triggerBtn, targetId, statu
         if (!isContentEditable && targetId === "input-text") editorPushUndo();
         setNewText(data.text);
         if (!isContentEditable) updateWordCount();
+        // Comptador dinàmic del Pas 4: setNewText no dispara event input
+        if (isContentEditable && targetId === "result-adapted") updateP4WordStats();
         if (status) {
             // Si és LanguageTool (preset català) → mostrar n canvis
             if (data.mode === "languagetool") {
@@ -2616,12 +2882,49 @@ function updateContextPill() {
     } else {
         const behaviorIds = typeof getActiveBehaviorIds === "function" ? getActiveBehaviorIds() : [];
         if (behaviorIds.length > 0) {
-            parts.push(`Alumne · ${behaviorIds.length} ${behaviorIds.length === 1 ? 'observació' : 'observacions'}`);
+            // Sprint B fix bis (2026-04-16): mostrem les etiquetes de les
+            // observacions concretes, no només el nombre. Mateixa estratègia
+            // que fem per a les condicions NESE a sota.
+            const BEH = (window.ObservableMapping && window.ObservableMapping.BEHAVIORS) || {};
+            const labels = behaviorIds.map(bid => (BEH[bid] && BEH[bid].label) || bid).filter(Boolean);
+            let resum;
+            if (labels.length === 1) {
+                resum = labels[0];
+            } else if (labels.length <= 3) {
+                resum = labels.join(" + ");
+            } else {
+                resum = `${labels.slice(0, 2).join(" + ")} +${labels.length - 2} més`;
+            }
+            parts.push(`Alumne · ${resum}`);
         } else {
             // Mirar si hi ha característiques NESE actives
-            const charsActive = document.querySelectorAll('input[type="checkbox"][data-char]:checked');
+            // Sprint B fix (2026-04-16): si n'hi ha 1 mostrem l'etiqueta;
+            // si n'hi ha fins a 3 les concatenem; si n'hi ha més les retallem.
+            const charsActive = Array.from(
+                document.querySelectorAll('input[type="checkbox"][data-char]:checked')
+            );
             if (charsActive.length > 0) {
-                parts.push(`Alumne · ${charsActive.length} ${charsActive.length === 1 ? 'condició' : 'condicions'}`);
+                // Extreu l'etiqueta llegible del checkbox. Preferim l'atribut
+                // data-label si hi és, sinó el text del <label> associat, sinó
+                // l'id amb guions→espais com a fallback.
+                const labels = charsActive.map(cb => {
+                    const dl = cb.dataset.label;
+                    if (dl) return dl;
+                    const lbl = cb.closest("label")
+                        || document.querySelector(`label[for="${cb.id}"]`);
+                    if (lbl) return lbl.innerText.trim().split("\n")[0];
+                    return (cb.dataset.char || cb.value || "").replace(/[-_]/g, " ");
+                }).filter(Boolean);
+
+                let resum;
+                if (labels.length === 1) {
+                    resum = labels[0];
+                } else if (labels.length <= 3) {
+                    resum = labels.join(" + ");
+                } else {
+                    resum = `${labels.slice(0, 2).join(" + ")} +${labels.length - 2} més`;
+                }
+                parts.push(`Alumne · ${resum}`);
             } else {
                 parts.push("Alumne genèric");
             }
@@ -2727,6 +3030,36 @@ function updateWordCount() {
     if (wc) wc.textContent = `${words} paraules`;
     toggleRefinePanel();
     updateGenerateButtonLabel();
+}
+
+// Recalcula els stats de paraules del Pas 4 llegint el text actual del
+// contenteditable #result-adapted. Es crida al dibuix inicial, a cada edició
+// manual del docent (event input) i després d'un refine.
+function updateP4WordStats() {
+    const statsDiv = document.getElementById("result-word-stats");
+    if (!statsDiv) return;
+    const mainEl = document.getElementById("result-adapted");
+    const mainText = mainEl ? (mainEl.innerText || "").trim() : "";
+    const mainWords = mainText ? mainText.split(/\s+/).length : 0;
+    const origWords = state.originalText
+        ? state.originalText.trim().split(/\s+/).filter(Boolean).length
+        : 0;
+    const compWords = state.p4CompWords || 0;
+    const totalWords = mainWords + compWords;
+    const deltaPct = origWords > 0 ? Math.round((mainWords / origWords - 1) * 100) : 0;
+    const deltaArrow = mainWords <= origWords ? "↓" : "↑";
+    const deltaColor = mainWords <= origWords ? "#059669" : "#d97706";
+    statsDiv.innerHTML = `
+        <span><strong>Original:</strong> ${origWords} par</span>
+        <span style="color:#6b7280">|</span>
+        <span><strong>Text adaptat:</strong> ${mainWords} par</span>
+        <span style="color:#6b7280">|</span>
+        <span><strong>Complements:</strong> ${compWords} par</span>
+        <span style="color:#6b7280">|</span>
+        <span><strong>Total:</strong> ${totalWords} par</span>
+        <span style="color:#6b7280">|</span>
+        <span style="color:${deltaColor}">${deltaArrow} ${Math.abs(deltaPct)}% vs original</span>
+    `;
 }
 
 
@@ -2936,6 +3269,53 @@ async function loadHistoryIfNeeded() {
     await refreshHistory();
 }
 
+// Sprint B (2026-04-16): badges visuals d'origen + model per a cada card.
+// Els labels s\u00f3n visibles per al docent ("enganxat" \u00e9s m\u00e9s clar que "paste").
+const _SOURCE_BADGE_LABELS = {
+    paste:     { label: "Enganxat",  emoji: "\u270d\ufe0f",  color: "#475569" },
+    upload:    { label: "Pujat",     emoji: "\ud83d\udcce",  color: "#0369a1" },
+    generated: { label: "Generat",   emoji: "\u2728",        color: "#7c3aed" },
+};
+
+function renderSourceBadge(source) {
+    const meta = _SOURCE_BADGE_LABELS[source] || _SOURCE_BADGE_LABELS.paste;
+    return `<span class="history-source-badge" style="background:${meta.color}1a;color:${meta.color};">${meta.emoji} ${meta.label}</span>`;
+}
+
+function renderModelBadge(model) {
+    if (!model) return "";
+    let raw = model;
+    // Registres llegats poden contenir un dict JSON serialitzat en comptes d'una
+    // string neta. Detectem i extreiem el model_id real.
+    if (typeof raw === "string" && raw.startsWith("{")) {
+        try {
+            const obj = JSON.parse(raw);
+            if (obj && obj.mode === "fixed") raw = obj.model;
+            else if (obj && obj.mode === "rotate") raw = `rotate:${(obj.models || []).length}`;
+            else raw = obj.model || "model desconegut";
+        } catch { /* deixem el raw string */ }
+    }
+    // Format rotate:N (Sprint B): mostrem el nombre de models sense saber quin.
+    if (typeof raw === "string" && raw.startsWith("rotate:")) {
+        const n = raw.split(":")[1] || "?";
+        return `<span class="history-model-badge rotate">\ud83c\udfb2 Rotaci\u00f3 (${n})</span>`;
+    }
+    // Mapping d'alias llegibles
+    const nice = String(raw)
+        .replace(/^gemma-4-31b-it$/, "Gemma 4 31B")
+        .replace(/^gemma-3-12b-it$/, "Gemma 3 12B")
+        .replace(/^gemma-3-27b-it$/, "Gemma 3 27B")
+        .replace(/^gemini-2\.5-flash$/, "Gemini 2.5 Flash")
+        .replace(/^gpt-4o-mini$/, "GPT-4o mini")
+        .replace(/^gpt-4o$/, "GPT-4o")
+        .replace(/^gpt-4\.1-mini$/, "GPT-4.1 mini")
+        .replace(/^mistral-small-latest$/, "Mistral Small")
+        .replace(/^mistral-large-latest$/, "Mistral Large")
+        .replace(/^qwen\/qwen3\.5-27b$/, "Qwen 3.5 27B")
+        .replace(/^qwen\/qwen3\.5-9b$/, "Qwen 3.5 9B");
+    return `<span class="history-model-badge">\ud83e\udd16 ${nice}</span>`;
+}
+
 async function refreshHistory() {
     const list = document.getElementById("history-list");
     if (!list) return;
@@ -2959,11 +3339,17 @@ async function refreshHistory() {
             const preview = (item.original_text || "").slice(0, 200).replace(/</g, "&lt;").replace(/>/g, "&gt;");
             const profileName = item.profile_name || "Sense nom";
             const hasProfile = item.profile_json && Object.keys(item.profile_json).length > 0;
+            const source = item.source || "paste";
+            const modelUsed = item.model_used || null;
+            const etapaCurs = [item.curs, item.etapa].filter(Boolean).join(" · ");
 
             return `<div class="history-item">
                 <div class="history-item-meta">
                     <span class="history-item-badge">${profileName}</span>
-                    <span>${date}</span>
+                    ${renderSourceBadge(source)}
+                    ${renderModelBadge(modelUsed)}
+                    ${etapaCurs ? `<span class="history-ctx-badge">${etapaCurs}</span>` : ""}
+                    <span class="history-date">${date}</span>
                 </div>
                 <div class="history-item-preview">${preview}…</div>
                 <div class="history-item-actions">

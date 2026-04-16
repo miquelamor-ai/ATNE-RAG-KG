@@ -417,31 +417,24 @@
                                 <textarea id="gen-notes" rows="2" placeholder="Ex: Inclou exemples de Catalunya..."></textarea>
                             </details>
 
-                            <!-- Selector de model (només per generació de textos) -->
-                            <div class="gen-model-selector">
-                                <label class="gen-model-label">Model de generació</label>
-                                <div class="gen-model-chips" role="radiogroup" aria-label="Model LLM">
-                                    <button type="button" class="gen-model-chip selected" data-model="gemma4" title="Gemma 4 31B (defecte)">
-                                        <span class="gen-model-dot" style="background:#3337a6"></span>
-                                        Gemma 4
-                                    </button>
-                                    <button type="button" class="gen-model-chip" data-model="mistral" title="Mistral Small (free tier)">
-                                        <span class="gen-model-dot" style="background:#f97316"></span>
-                                        Mistral
-                                    </button>
-                                    <button type="button" class="gen-model-chip" data-model="gpt" title="GPT-4o-mini (OpenAI)">
-                                        <span class="gen-model-dot" style="background:#10b981"></span>
-                                        GPT-4o-mini
-                                    </button>
+                            <!--
+                              Selector de model i toggle d'auditor: AMAGATS al pilot
+                              (2026-04-16). El model real el controla /admin via
+                              _MODEL_CONFIG (fix o rotació silenciosa). L'auditor es
+                              controla només per env `ATNE_AUDITOR_ENABLED` ara mateix.
+                              Els elements continuen al DOM (display:none) perquè les
+                              funcions JS que els llegeixen no crashegin; el payload
+                              els ignora a POST /api/generate-text.
+                            -->
+                            <div class="gen-model-selector" style="display:none;">
+                                <div class="gen-model-chips" role="radiogroup" aria-label="Model LLM (amagat)">
+                                    <button type="button" class="gen-model-chip selected" data-model="gemma4"></button>
                                 </div>
                             </div>
 
-                            <!-- Toggle auditoria LLM experimental (opt-in) -->
-                            <div class="gen-auditor-toggle">
-                                <label class="gen-auditor-switch" title="Afegeix una auditoria pedagògica amb un segon LLM (GPT-4o-mini). Genera avisos qualitatius però amb molts falsos positius — ús experimental.">
+                            <div class="gen-auditor-toggle" style="display:none;">
+                                <label class="gen-auditor-switch">
                                     <input type="checkbox" id="gen-auditor-enabled">
-                                    <span class="gen-auditor-slider"></span>
-                                    <span class="gen-auditor-label-text">Auditoria LLM <em>(experimental)</em></span>
                                 </label>
                             </div>
 
@@ -799,6 +792,32 @@
                     <button class="btn btn-sm" onclick="submitFeedback()">Enviar</button>
                 </div>
                 <div id="feedback-thanks" style="display:none;" class="feedback-thanks">Gràcies!</div>
+            </div>
+
+            <!-- ═══ Pilot 1B: captures implícites + rúbrica lleugera ═══ -->
+            <div class="pilot-actions-row" id="pilot-actions-row">
+                <button type="button" class="btn pilot-copy-btn" id="btn-copy-adapted" onclick="copyAdaptedText()" title="Copiar el text al porta-retalls">
+                    <span class="material-symbols-outlined">content_copy</span>
+                    <span>Copiar text</span>
+                </button>
+                <details class="trouble-report" id="trouble-report">
+                    <summary>
+                        <span class="material-symbols-outlined">flag</span>
+                        <span>Alguna cosa no quadra</span>
+                    </summary>
+                    <div class="trouble-body">
+                        <p class="trouble-hint">Marca què no funciona. Ens ajuda a millorar el pilot.</p>
+                        <label class="trouble-check"><input type="checkbox" data-trouble="nivell_inadequat"> Nivell lingüístic massa alt o massa baix</label>
+                        <label class="trouble-check"><input type="checkbox" data-trouble="contingut_perdut"> Ha perdut contingut curricular important</label>
+                        <label class="trouble-check"><input type="checkbox" data-trouble="errors_catala"> Errors o frases estranyes en català</label>
+                        <label class="trouble-check"><input type="checkbox" data-trouble="format_inadequat"> Format o estructura no adequats</label>
+                        <label class="trouble-check"><input type="checkbox" data-trouble="complements_poc_utils"> Complements (preguntes/bastides) poc útils</label>
+                        <label class="trouble-check"><input type="checkbox" data-trouble="altres_marcat"> Altres (escriu a sota)</label>
+                        <textarea id="trouble-altres-text" rows="2" placeholder="Detall opcional..."></textarea>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="submitTroubleReport()">Envia feedback</button>
+                        <div id="trouble-status" class="trouble-status"></div>
+                    </div>
+                </details>
             </div>
 
             <div class="export-row">

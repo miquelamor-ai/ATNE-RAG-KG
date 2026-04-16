@@ -8,19 +8,39 @@ Obre:     http://localhost:8000
 
 import asyncio
 import concurrent.futures
+import hashlib
+import hmac
 import json
 import os
+import random
 import re
+import secrets
 import sys
 import time
 from pathlib import Path
+
+# ── BUG FIX Sprint B (2026-04-16) ───────────────────────────────────────────
+# Quan arrenquem amb `python server.py`, aquest mòdul s'executa com a
+# `__main__`, no com a `server`. Quan `generador_lliure/orquestrador.py` fa
+# `from server import _model_for`, Python no troba `server` a sys.modules i
+# re-carrega el fitxer des de zero, creant una **segona instància del mòdul**
+# amb `_MODEL_CONFIG` reiniciat als defaults (sense cridar _load_system_config).
+# Conseqüència: el mode rotate/fixed de /admin no s'aplicava a les crides que
+# passessin per imports lazy del mòdul `server` (ex: generar_stream).
+#
+# Fix: alias-em el mòdul `__main__` com a `server` a sys.modules perquè els
+# imports posteriors retornin la MATEIXA instància (amb el _MODEL_CONFIG ja
+# carregat per l'event startup). Una sola línia, zero refactor.
+if __name__ == "__main__" or __name__ == "__mp_main__":
+    sys.modules["server"] = sys.modules[__name__]
+# ────────────────────────────────────────────────────────────────────────────
 
 import corpus_reader
 import instruction_filter
 import requests
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI, Body, HTTPException, Request, UploadFile, File
+from fastapi import FastAPI, Body, Depends, HTTPException, Request, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse, FileResponse
 
@@ -36,11 +56,185 @@ GEMMA4_API_KEYS = [k for k in [os.getenv(f"GEMMA4_API_KEY{s}", "")
                                 for s in ["", "_2", "_3", "_4", "_5", "_6", "_7"]] if k]
 GEMMA4_API_KEY = GEMMA4_API_KEYS[0] if GEMMA4_API_KEYS else ""
 _gemma4_key_idx = 0  # índex actual de rotació
+OPENROUTER_API_KEYS = [k for k in [os.getenv(f"OPENROUTER_API_KEY{s}", "")
+                                    for s in ["", "_2", "_3", "_4", "_5"]] if k]
+OPENROUTER_API_KEY = OPENROUTER_API_KEYS[0] if OPENROUTER_API_KEYS else ""
+_openrouter_key_idx = 0  # índex actual de rotació
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "")
-# ATNE_MODEL: gemini | gemma4 | mistral
+# ATNE_MODEL: gemini | gemma4 | mistral | gpt | gpt-4o | mistral-large
 # Per defecte gemma4 (decidit pel pilot 2026-04-12). Mistral disponible al codi
 # però amagat de la UI; s'activarà al pilot HITL cec a partir del 20/04.
 ATNE_MODEL = os.getenv("ATNE_MODEL", "gemma4").lower()
+
+# ── Sprint 1B — selector de model per fase ─────────────────────────────────
+#
+# _MODEL_CONFIG mapeja cada fase del pipeline (generate/adapt/refine/
+# complements/auditor) al model a usar. Es carrega al startup des de la
+# taula system_config de Supabase i es pot sobreescriure en calent des de
+# /api/admin/config (PUT). Si la DB no respon al startup, cau a ATNE_MODEL
+# com a fallback segur. El dict és read-only per als workers: només el
+# startup i el PUT d'admin l'escriuen, i el PUT només muta claus atòmiques
+# → segur per accés concurrent des dels SSE workers sense lock.
+_MODEL_CONFIG: dict[str, str] = {
+    "generate": ATNE_MODEL,
+    "adapt": ATNE_MODEL,
+    "refine": ATNE_MODEL,
+    "complements": ATNE_MODEL,
+    "auditor": "gpt-4o-mini",
+}
+
+# Alies compatibles amb l'API antiga (labels curts) i model_id llargs que
+# arriben via /admin. _resolve_model() retorna (provider, model_específic)
+# on provider és la branca de _call_llm() i model_específic és el nom real
+# del model enviat al proveïdor.
+_MODEL_ALIASES: dict[str, tuple[str, str]] = {
+    # Aliases curts (backward compat)
+    "gemma4":            ("gemma4",  "gemma-4-31b-it"),
+    "gemma3":            ("gemma4",  "gemma-3-12b-it"),
+    "gemini":            ("gemini",  "gemini-2.5-flash"),
+    "mistral":           ("mistral", "mistral-small-latest"),
+    "mistral-small":     ("mistral", "mistral-small-latest"),
+    "mistral-large":     ("mistral", "mistral-large-latest"),
+    "gpt":               ("gpt",     "gpt-4o-mini"),
+    "gpt-4o-mini":       ("gpt",     "gpt-4o-mini"),
+    "gpt-4o":            ("gpt",     "gpt-4o"),
+    "gpt-4.1-mini":      ("gpt",     "gpt-4.1-mini"),
+    "qwen":              ("openrouter", "qwen/qwen3.5-27b"),
+    # Aliases llargs que vindran de system_config i /admin
+    "gemma-4-31b-it":    ("gemma4",  "gemma-4-31b-it"),
+    "gemma-3-12b-it":    ("gemma4",  "gemma-3-12b-it"),
+    "gemini-2.5-flash":  ("gemini",  "gemini-2.5-flash"),
+    "mistral-small-latest": ("mistral", "mistral-small-latest"),
+    "mistral-large-latest": ("mistral", "mistral-large-latest"),
+    "gpt-4.1-mini-latest": ("gpt",    "gpt-4.1-mini"),
+    "qwen/qwen3.5-27b":  ("openrouter", "qwen/qwen3.5-27b"),
+    "qwen/qwen3.5-9b":   ("openrouter", "qwen/qwen3.5-9b"),
+}
+
+
+def _resolve_model(model_id: str) -> tuple[str, str]:
+    """Resol un model_id (curt o llarg) a (provider, model_específic).
+
+    Si el model_id no es troba al mapa, cau a l'ATNE_MODEL per defecte.
+    El retorn sempre és un tuple vàlid per a les branques de _call_llm().
+    """
+    if not model_id:
+        return _MODEL_ALIASES.get(ATNE_MODEL, ("gemma4", "gemma-4-31b-it"))
+    key = model_id.strip().lower()
+    if key in _MODEL_ALIASES:
+        return _MODEL_ALIASES[key]
+    # Fallback: mirem si és un model_id llarg que comenci amb un prefix conegut
+    if key.startswith("qwen/"):
+        return ("openrouter", model_id.strip())
+    if key.startswith("qwen"):
+        return ("openrouter", "qwen/qwen3.5-27b")
+    if key.startswith("gemma-3"):
+        return ("gemma4", "gemma-3-12b-it")
+    if key.startswith("gemma"):
+        return ("gemma4", "gemma-4-31b-it")
+    if key.startswith("gemini"):
+        return ("gemini", "gemini-2.5-flash")
+    if key.startswith("gpt-4.1-mini"):
+        return ("gpt", "gpt-4.1-mini")
+    if key.startswith("gpt-4o-mini"):
+        return ("gpt", "gpt-4o-mini")
+    if key.startswith("gpt-4o"):
+        return ("gpt", "gpt-4o")
+    if key.startswith("gpt"):
+        return ("gpt", "gpt-4o-mini")
+    if key.startswith("mistral-large"):
+        return ("mistral", "mistral-large-latest")
+    if key.startswith("mistral"):
+        return ("mistral", "mistral-small-latest")
+    # Últim fallback: ATNE_MODEL
+    return _MODEL_ALIASES.get(ATNE_MODEL, ("gemma4", "gemma-4-31b-it"))
+
+
+def _model_for(phase: str, override: str = "") -> str:
+    """Retorna el model_id a usar per a una fase donada.
+
+    Prioritat:
+    1. override explícit (ex: payload.model del frontend)
+    2. _MODEL_CONFIG[phase], que pot ser:
+       - str: mode fix (comportament històric, retrocompatible)
+       - dict amb {"mode": "fixed", "model": "..."}: mode fix explícit
+       - dict amb {"mode": "rotate", "models": [...], "strategy": "random"}:
+         rotació silenciosa, cada crida tria aleatòriament un dels models
+    3. ATNE_MODEL (fallback final)
+
+    La rotació és per a validació cega en el pilot (2026-04-20..05-08):
+    el docent no veu quin model ha disparat, però el model_id retornat
+    es pot registrar a logs per a anàlisi estadística posterior.
+    """
+    if override:
+        return override.strip()
+    config = _MODEL_CONFIG.get(phase, ATNE_MODEL)
+    if isinstance(config, str):
+        return config
+    if isinstance(config, dict):
+        mode = config.get("mode", "fixed")
+        if mode == "fixed":
+            return config.get("model") or ATNE_MODEL
+        if mode == "rotate":
+            models = config.get("models") or []
+            if not models:
+                return ATNE_MODEL
+            if len(models) == 1:
+                return models[0]
+            # Estratègia random: cada crida tria un model independent.
+            # No fem round-robin per evitar persistència d'estat; random
+            # sobre un nombre suficient de crides és estadísticament equivalent.
+            return random.choice(models)
+    return ATNE_MODEL
+
+
+# Estimació de cost per crida (mitjana per a text educatiu ~1k-2k paraules
+# input + ~600-1200 output). Serveix per alimentar el budget tracker del
+# pilot i el dashboard /admin. No és facturació real — és una aproximació
+# suficient per detectar drifts d'ús i avisar el docent abans de saturar
+# el budget_eur_max. Fonts: preus públics proveïdors 2026-04, memòria
+# project_llicons_costos_api.md i project_estrategia_escalat.md.
+_MODEL_COST_EUR_PER_CALL: dict[str, float] = {
+    "gemma-4-31b-it":       0.0,      # Free tier Gemma (claus Google)
+    "gemma-3-12b-it":       0.0,      # Free tier Gemma (claus Google)
+    "gemini-2.5-flash":     0.0,      # Free tier Gemini (claus Google)
+    "gpt-4o-mini":          0.0036,   # ~2k in + 1k out
+    "gpt-4o":               0.045,    # idem ~12× més car
+    "gpt-4.1-mini":         0.006,    # high-tier OpenAI preu contingut
+    "mistral-small-latest": 0.012,
+    "mistral-large-latest": 0.048,
+    "qwen/qwen3.5-27b":     0.0003,   # OpenRouter pay-per-use ultra-baix
+    "qwen/qwen3.5-9b":      0.0001,   # idem, més petit i barat
+}
+
+
+def _estimate_cost_eur(models_per_phase: dict) -> float:
+    """Suma estimada de cost per a una adaptació multi-fase.
+
+    `models_per_phase` admet valors string (una crida) o llista (múltiples
+    crides en la mateixa fase, ex: retries d'adapt o refines successius).
+    Models desconeguts s'aproximen a 0.002€/crida (conservador).
+    """
+    total = 0.0
+    for _phase, entry in models_per_phase.items():
+        if entry is None:
+            continue
+        items = entry if isinstance(entry, list) else [entry]
+        for m in items:
+            if not isinstance(m, str) or not m:
+                continue
+            _prov, spec = _resolve_model(m)
+            total += _MODEL_COST_EUR_PER_CALL.get(spec, 0.002)
+    return round(total, 6)
+
+
+# Flags runtime carregades també de system_config al startup. Els defaults
+# són els valors inicials del SQL 1B; si la DB falla, aquests valen.
+_AUDITOR_ENABLED_RUNTIME: bool = False
+_ADMIN_BUDGET_EUR_MAX: float = 30.0
+_PILOT_ACTIVE: bool = True
+
+
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
 
@@ -50,10 +244,132 @@ SUPABASE_HEADERS = {
     "Content-Type": "application/json",
 }
 
+
+def _load_system_config() -> dict:
+    """Llegeix la taula system_config de Supabase i actualitza l'estat runtime.
+
+    Crida al startup FastAPI i a cada PUT /api/admin/config. Tolerant a
+    errors: si la DB no respon, deixa els valors inicials de _MODEL_CONFIG
+    i dels flags globals (fallback segur per a l'arrencada offline).
+    Retorna un dict amb l'estat actual per a debugging/GET d'admin.
+    """
+    global _AUDITOR_ENABLED_RUNTIME, _ADMIN_BUDGET_EUR_MAX, _PILOT_ACTIVE
+    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+        print("[ATNE] Sense SUPABASE_URL/KEY — _MODEL_CONFIG manté defaults")
+        return {"model_config": dict(_MODEL_CONFIG), "source": "defaults"}
+    try:
+        r = requests.get(
+            f"{SUPABASE_URL}/rest/v1/system_config?select=key,value",
+            headers=SUPABASE_HEADERS,
+            timeout=5,
+        )
+        r.raise_for_status()
+        rows = r.json()
+    except Exception as e:
+        print(f"[ATNE] ERROR carregant system_config: {e} — manté defaults")
+        return {"model_config": dict(_MODEL_CONFIG), "source": "error", "error": str(e)}
+
+    # Mapa: clau de DB → clau de _MODEL_CONFIG
+    model_key_map = {
+        "atne_model_generate":    "generate",
+        "atne_model_adapt":       "adapt",
+        "atne_model_refine":      "refine",
+        "atne_model_complements": "complements",
+        "atne_model_auditor":     "auditor",
+    }
+    for row in rows:
+        key = row.get("key")
+        val = row.get("value")
+        if key in model_key_map and isinstance(val, dict):
+            # Format nou amb rotació silenciosa:
+            # {"mode": "fixed", "model": "..."} o
+            # {"mode": "rotate", "models": [...], "strategy": "random"}
+            if "mode" in val:
+                _MODEL_CONFIG[model_key_map[key]] = val
+            else:
+                # Format legacy: {"model_id": "...", ...}
+                model_id = val.get("model_id")
+                if model_id:
+                    _MODEL_CONFIG[model_key_map[key]] = model_id
+        elif key == "atne_auditor_enabled":
+            _AUDITOR_ENABLED_RUNTIME = bool(val)
+        elif key == "admin_budget_eur_max":
+            try:
+                _ADMIN_BUDGET_EUR_MAX = float(val) if val is not None else 30.0
+            except (TypeError, ValueError):
+                _ADMIN_BUDGET_EUR_MAX = 30.0
+        elif key == "pilot_active":
+            _PILOT_ACTIVE = bool(val)
+
+    print(f"[ATNE] _MODEL_CONFIG carregat de system_config: {_MODEL_CONFIG}")
+    print(f"[ATNE] auditor_enabled={_AUDITOR_ENABLED_RUNTIME} budget={_ADMIN_BUDGET_EUR_MAX}€ pilot_active={_PILOT_ACTIVE}")
+    return {
+        "model_config": dict(_MODEL_CONFIG),
+        "auditor_enabled": _AUDITOR_ENABLED_RUNTIME,
+        "admin_budget_eur_max": _ADMIN_BUDGET_EUR_MAX,
+        "pilot_active": _PILOT_ACTIVE,
+        "source": "supabase",
+    }
+
+
 PROFILES_DIR = Path(__file__).parent / "profiles"
 PROFILES_DIR.mkdir(exist_ok=True)
 
 UI_DIR = Path(__file__).parent / "ui"
+
+
+# ── Sprint 1B — auth admin (simple cookie signada) ─────────────────────────
+#
+# El /admin està protegit per password. Un sol rol "admin" (el Miquel).
+# Flux: POST /api/admin/login amb {password} → si OK, seta cookie signada
+# amb HMAC(secret, "admin:<ts>"). _require_admin() verifica signatura i
+# expiració (8h). Per a producció (Cloud Run) cal fixar ADMIN_PASSWORD i
+# ADMIN_SESSION_SECRET via env vars; si no, les cookies moriran a cada
+# restart del pod (que és OK per al MVP del pilot).
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
+ADMIN_SESSION_SECRET = os.getenv("ADMIN_SESSION_SECRET") or secrets.token_hex(32)
+ADMIN_SESSION_TTL_SEC = 8 * 3600  # 8h
+
+
+def _admin_sign(payload: str) -> str:
+    sig = hmac.new(
+        ADMIN_SESSION_SECRET.encode(),
+        payload.encode(),
+        hashlib.sha256,
+    ).hexdigest()
+    return f"{payload}.{sig}"
+
+
+def _admin_verify(token: str) -> bool:
+    """True si el token és signat correctament i no ha expirat."""
+    if not token or "." not in token:
+        return False
+    try:
+        payload, sig = token.rsplit(".", 1)
+        expected = hmac.new(
+            ADMIN_SESSION_SECRET.encode(),
+            payload.encode(),
+            hashlib.sha256,
+        ).hexdigest()
+        if not hmac.compare_digest(sig, expected):
+            return False
+        parts = payload.split(":")
+        if len(parts) != 2 or parts[0] != "admin":
+            return False
+        ts = int(parts[1])
+        if time.time() - ts > ADMIN_SESSION_TTL_SEC:
+            return False
+        return True
+    except Exception:
+        return False
+
+
+def _require_admin(request: Request) -> bool:
+    """Dependency FastAPI. 401 si no hi ha cookie vàlida."""
+    token = request.cookies.get("atne_admin", "")
+    if not _admin_verify(token):
+        raise HTTPException(status_code=401, detail="Admin auth required")
+    return True
 
 # Client Gemini (SDK google-genai) — serveix per Gemini i Gemma 4
 from google import genai
@@ -77,6 +393,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.on_event("startup")
+async def _atne_startup():
+    """Càrrega de la configuració runtime des de Supabase.
+
+    Sprint 1B: el selector de model per fase viu a system_config. Carreguem
+    els valors un cop al boot i els refrescarem via PUT /api/admin/config.
+    Si la càrrega falla, els defaults de _MODEL_CONFIG fan de fallback.
+    """
+    _load_system_config()
 
 
 # ── Pàgines HTML ────────────────────────────────────────────────────────────
@@ -1283,15 +1610,21 @@ def _post_process_llm_output(text: str) -> str:
     return text
 
 
-def _call_llm(active_model: str, system_prompt: str, text: str) -> str:
-    """Wrapper unificat de crida al LLM (Mistral o Gemma 4)."""
+def _call_llm(model_id: str, system_prompt: str, text: str) -> str:
+    """Wrapper unificat de crida al LLM.
+
+    `model_id` pot ser un àlies curt (`gemma4`, `gpt`, `mistral`, ...) o un
+    model_id llarg (`gemma-4-31b-it`, `gpt-4o`, `mistral-large-latest`, ...).
+    _resolve_model() el tradueix a (provider, specific_model).
+    """
     global _gemma4_key_idx, _gemini_key_idx
-    if active_model == "mistral":
+    provider, specific_model = _resolve_model(model_id)
+    if provider == "mistral":
         r = requests.post(
             "https://api.mistral.ai/v1/chat/completions",
             headers={"Authorization": f"Bearer {MISTRAL_API_KEY}", "Content-Type": "application/json"},
             json={
-                "model": "mistral-small-latest",
+                "model": specific_model,
                 "messages": [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": f"TEXT ORIGINAL A ADAPTAR:\n\n{text}"},
@@ -1304,7 +1637,7 @@ def _call_llm(active_model: str, system_prompt: str, text: str) -> str:
         if r.status_code != 200:
             raise RuntimeError(f"HTTP {r.status_code}: {r.text[:200]}")
         return r.json()["choices"][0]["message"]["content"] or ""
-    elif active_model == "gemma4":
+    elif provider == "gemma4":
         errors = []
         for attempt in range(len(GEMMA4_API_KEYS)):
             idx = (_gemma4_key_idx + attempt) % len(GEMMA4_API_KEYS)
@@ -1314,7 +1647,7 @@ def _call_llm(active_model: str, system_prompt: str, text: str) -> str:
             )
             try:
                 response = client.models.generate_content(
-                    model="gemma-4-31b-it",
+                    model=specific_model,
                     contents=[types.Content(role="user", parts=[types.Part(text=f"{system_prompt}\n\n---\n\nTEXT ORIGINAL A ADAPTAR:\n\n{text}")])],
                     config=types.GenerateContentConfig(temperature=0.4, max_output_tokens=8192),
                 )
@@ -1324,7 +1657,7 @@ def _call_llm(active_model: str, system_prompt: str, text: str) -> str:
                 errors.append(f"clau {idx+1}: {e}")
                 continue
         raise RuntimeError(f"Totes les claus Gemma4 han fallat: {'; '.join(errors)}")
-    elif active_model == "gemini":
+    elif provider == "gemini":
         errors = []
         for attempt in range(len(GEMINI_API_KEYS)):
             idx = (_gemini_key_idx + attempt) % len(GEMINI_API_KEYS)
@@ -1334,7 +1667,7 @@ def _call_llm(active_model: str, system_prompt: str, text: str) -> str:
             )
             try:
                 response = client.models.generate_content(
-                    model="gemini-2.5-flash",
+                    model=specific_model,
                     contents=[types.Content(role="user", parts=[types.Part(text=text)])],
                     config=types.GenerateContentConfig(
                         system_instruction=system_prompt,
@@ -1348,11 +1681,11 @@ def _call_llm(active_model: str, system_prompt: str, text: str) -> str:
                 errors.append(f"clau {idx+1}: {e}")
                 continue
         raise RuntimeError(f"Totes les claus Gemini han fallat: {'; '.join(errors)}")
-    elif active_model == "gpt":
+    elif provider == "gpt":
         from openai import OpenAI
         client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         resp = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model=specific_model,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": f"TEXT ORIGINAL A ADAPTAR:\n\n{text}"},
@@ -1360,8 +1693,388 @@ def _call_llm(active_model: str, system_prompt: str, text: str) -> str:
             max_tokens=8192, temperature=0.4,
         )
         return resp.choices[0].message.content or ""
+    elif provider == "openrouter":
+        global _openrouter_key_idx
+        if not OPENROUTER_API_KEYS:
+            raise RuntimeError("OPENROUTER_API_KEY no configurada al .env")
+        from openai import OpenAI
+        errors = []
+        for attempt in range(len(OPENROUTER_API_KEYS)):
+            idx = (_openrouter_key_idx + attempt) % len(OPENROUTER_API_KEYS)
+            client = OpenAI(
+                api_key=OPENROUTER_API_KEYS[idx],
+                base_url="https://openrouter.ai/api/v1",
+            )
+            try:
+                resp = client.chat.completions.create(
+                    model=specific_model,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": f"TEXT ORIGINAL A ADAPTAR:\n\n{text}"},
+                    ],
+                    max_tokens=2048, temperature=0.4,
+                    extra_headers={
+                        "HTTP-Referer": "https://atne.fje.cat",
+                        "X-Title": "ATNE",
+                    },
+                )
+                _openrouter_key_idx = (idx + 1) % len(OPENROUTER_API_KEYS)
+                return resp.choices[0].message.content or ""
+            except Exception as e:
+                errors.append(f"clau {idx+1}: {str(e)[:200]}")
+                continue
+        raise RuntimeError(f"Totes les claus OpenRouter han fallat: {'; '.join(errors)}")
     else:
-        raise RuntimeError(f"Model desconegut: {active_model}. Opcions: gemini, gpt, mistral, gemma4")
+        raise RuntimeError(f"Model desconegut: {model_id}. Opcions: gemini, gemma4, gemma3, gpt, gpt-4o, gpt-4.1-mini, mistral, mistral-large, qwen")
+
+
+def _call_llm_raw(
+    model_id: str,
+    system_prompt: str,
+    user_text: str,
+    temperature: float = 1.0,
+    top_p: float = 0.95,
+    max_tokens: int = 2048,
+) -> str:
+    """Wrapper unificat de crida al LLM **per a generació pura**.
+
+    Diferències clau amb `_call_llm()`:
+    - NO prepend "TEXT ORIGINAL A ADAPTAR:" al missatge d'usuari.
+    - Paràmetres de sampling per defecte segons AI Studio (temp 1.0, top_p 0.95),
+      no 0.4 com a adaptació.
+    - max_tokens per defecte més baix (2048 vs 8192), adequat per a textos
+      generats de 100-1000 paraules.
+    - Exposa `temperature`, `top_p` i `max_tokens` com a paràmetres opcionals
+      per si el mòdul generador_lliure vol afinar-los.
+
+    Aquesta funció existeix perquè el pipeline d'adaptació injecta la frase
+    "TEXT ORIGINAL A ADAPTAR" que contamina el registre quan la tasca és
+    generar des de zero. Veure l'anàlisi del castell medieval (Fase 0-0.7).
+
+    `model_id` pot ser un àlies curt o un model_id llarg; `_resolve_model()`
+    el tradueix a (provider, specific_model). Rotació de claus igual que
+    `_call_llm()`.
+    """
+    global _gemma4_key_idx, _gemini_key_idx, _openrouter_key_idx
+    provider, specific_model = _resolve_model(model_id)
+    if provider == "mistral":
+        r = requests.post(
+            "https://api.mistral.ai/v1/chat/completions",
+            headers={"Authorization": f"Bearer {MISTRAL_API_KEY}", "Content-Type": "application/json"},
+            json={
+                "model": specific_model,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_text},
+                ],
+                "max_tokens": max_tokens,
+                "temperature": temperature,
+                "top_p": top_p,
+            },
+            timeout=180,
+        )
+        if r.status_code != 200:
+            raise RuntimeError(f"HTTP {r.status_code}: {r.text[:200]}")
+        return r.json()["choices"][0]["message"]["content"] or ""
+    elif provider == "gemma4":
+        # Nota: Gemma via google.genai no suporta system_instruction separat
+        # ni thinking_config (confirmat empíricament a Fase 0.5). Concatenem
+        # system + user en un sol missatge amb separador i no passem thinking.
+        errors = []
+        for attempt in range(len(GEMMA4_API_KEYS)):
+            idx = (_gemma4_key_idx + attempt) % len(GEMMA4_API_KEYS)
+            client = genai.Client(
+                api_key=GEMMA4_API_KEYS[idx],
+                http_options=types.HttpOptions(timeout=180_000),
+            )
+            try:
+                full = f"{system_prompt}\n\n---\n\n{user_text}" if system_prompt else user_text
+                response = client.models.generate_content(
+                    model=specific_model,
+                    contents=[types.Content(role="user", parts=[types.Part(text=full)])],
+                    config=types.GenerateContentConfig(
+                        temperature=temperature,
+                        top_p=top_p,
+                        max_output_tokens=max_tokens,
+                    ),
+                )
+                _gemma4_key_idx = (idx + 1) % len(GEMMA4_API_KEYS)
+                return response.text or ""
+            except Exception as e:
+                errors.append(f"clau {idx+1}: {str(e)[:200]}")
+                continue
+        raise RuntimeError(f"Totes les claus Gemma han fallat: {'; '.join(errors)}")
+    elif provider == "gemini":
+        errors = []
+        for attempt in range(len(GEMINI_API_KEYS)):
+            idx = (_gemini_key_idx + attempt) % len(GEMINI_API_KEYS)
+            client = genai.Client(
+                api_key=GEMINI_API_KEYS[idx],
+                http_options=types.HttpOptions(timeout=180_000),
+            )
+            try:
+                response = client.models.generate_content(
+                    model=specific_model,
+                    contents=[types.Content(role="user", parts=[types.Part(text=user_text)])],
+                    config=types.GenerateContentConfig(
+                        system_instruction=system_prompt if system_prompt else None,
+                        temperature=temperature,
+                        top_p=top_p,
+                        max_output_tokens=max_tokens,
+                        thinking_config=types.ThinkingConfig(thinking_budget=0),
+                    ),
+                )
+                _gemini_key_idx = (idx + 1) % len(GEMINI_API_KEYS)
+                return response.text or ""
+            except Exception as e:
+                errors.append(f"clau {idx+1}: {str(e)[:200]}")
+                continue
+        raise RuntimeError(f"Totes les claus Gemini han fallat: {'; '.join(errors)}")
+    elif provider == "gpt":
+        from openai import OpenAI
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": user_text})
+        resp = client.chat.completions.create(
+            model=specific_model,
+            messages=messages,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            top_p=top_p,
+        )
+        return resp.choices[0].message.content or ""
+    elif provider == "openrouter":
+        if not OPENROUTER_API_KEYS:
+            raise RuntimeError("OPENROUTER_API_KEY no configurada al .env")
+        from openai import OpenAI
+        errors = []
+        for attempt in range(len(OPENROUTER_API_KEYS)):
+            idx = (_openrouter_key_idx + attempt) % len(OPENROUTER_API_KEYS)
+            client = OpenAI(
+                api_key=OPENROUTER_API_KEYS[idx],
+                base_url="https://openrouter.ai/api/v1",
+            )
+            try:
+                messages = []
+                if system_prompt:
+                    messages.append({"role": "system", "content": system_prompt})
+                messages.append({"role": "user", "content": user_text})
+                resp = client.chat.completions.create(
+                    model=specific_model,
+                    messages=messages,
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                    top_p=top_p,
+                    extra_headers={
+                        "HTTP-Referer": "https://atne.fje.cat",
+                        "X-Title": "ATNE",
+                    },
+                )
+                _openrouter_key_idx = (idx + 1) % len(OPENROUTER_API_KEYS)
+                return resp.choices[0].message.content or ""
+            except Exception as e:
+                errors.append(f"clau {idx+1}: {str(e)[:200]}")
+                continue
+        raise RuntimeError(f"Totes les claus OpenRouter han fallat: {'; '.join(errors)}")
+    else:
+        raise RuntimeError(
+            f"Model desconegut: {model_id}. Opcions: gemini, gemma4, gemma3, "
+            f"gpt, gpt-4o, gpt-4.1-mini, mistral, mistral-large, qwen"
+        )
+
+
+def _call_llm_stream(
+    model_id: str,
+    system_prompt: str,
+    user_text: str,
+    temperature: float = 1.0,
+    top_p: float = 0.95,
+    max_tokens: int = 2048,
+):
+    """Variant streaming de `_call_llm_raw`.
+
+    Retorna un generador síncron que produeix strings (chunks de text) a
+    mesura que el model els genera. El consumidor els pot re-emetre com
+    a events SSE al frontend.
+
+    Motivat pel pilot 2026-04-16: amb textos de 300-700 paraules i models
+    com Gemma/Qwen que triguen 60-90s, veure pantalla buida és insostenible
+    per a la UX. Amb streaming, l'usuari veu paraules apareixent des del
+    segon 1-2. Cost i temps total idèntics a `_call_llm_raw`.
+
+    Tots els providers suporten streaming via els seus SDK:
+    - Google genai: `generate_content_stream(...)` retorna iterador de chunks
+    - OpenAI (+ OpenRouter compat): `stream=True` retorna iterador de deltes
+    - Mistral: HTTP `"stream": true` + parseig SSE
+    """
+    global _gemma4_key_idx, _gemini_key_idx, _openrouter_key_idx
+    provider, specific_model = _resolve_model(model_id)
+    if provider in ("gemma4", "gemini"):
+        keys = GEMMA4_API_KEYS if provider == "gemma4" else GEMINI_API_KEYS
+        if not keys:
+            raise RuntimeError(f"No hi ha claus per al provider {provider}")
+        errors = []
+        for attempt in range(len(keys)):
+            if provider == "gemma4":
+                idx = (_gemma4_key_idx + attempt) % len(keys)
+            else:
+                idx = (_gemini_key_idx + attempt) % len(keys)
+            client = genai.Client(
+                api_key=keys[idx],
+                http_options=types.HttpOptions(timeout=180_000),
+            )
+            try:
+                # Gemma concatena system+user en un sol missatge; Gemini
+                # passa el system via system_instruction (separat).
+                if provider == "gemma4":
+                    full = f"{system_prompt}\n\n---\n\n{user_text}" if system_prompt else user_text
+                    stream = client.models.generate_content_stream(
+                        model=specific_model,
+                        contents=[types.Content(role="user", parts=[types.Part(text=full)])],
+                        config=types.GenerateContentConfig(
+                            temperature=temperature,
+                            top_p=top_p,
+                            max_output_tokens=max_tokens,
+                        ),
+                    )
+                else:
+                    stream = client.models.generate_content_stream(
+                        model=specific_model,
+                        contents=[types.Content(role="user", parts=[types.Part(text=user_text)])],
+                        config=types.GenerateContentConfig(
+                            system_instruction=system_prompt if system_prompt else None,
+                            temperature=temperature,
+                            top_p=top_p,
+                            max_output_tokens=max_tokens,
+                            thinking_config=types.ThinkingConfig(thinking_budget=0),
+                        ),
+                    )
+                # Itera chunks. El primer chunk pot fallar (key quota), però si
+                # arribem a iterar, ja està enganxat. Rotaci\u00f3 de clau només
+                # al pre-stream.
+                if provider == "gemma4":
+                    _gemma4_key_idx = (idx + 1) % len(keys)
+                else:
+                    _gemini_key_idx = (idx + 1) % len(keys)
+                for chunk in stream:
+                    # google-genai: chunk.text pot ser None en heartbeats
+                    txt = getattr(chunk, "text", None) or ""
+                    if txt:
+                        yield txt
+                return  # stream consumit OK
+            except Exception as e:
+                errors.append(f"clau {idx+1}: {str(e)[:200]}")
+                continue
+        raise RuntimeError(f"Totes les claus {provider} han fallat (stream): {'; '.join(errors)}")
+    elif provider in ("gpt", "openrouter"):
+        from openai import OpenAI
+        if provider == "openrouter":
+            if not OPENROUTER_API_KEYS:
+                raise RuntimeError("OPENROUTER_API_KEY no configurada")
+            # Rotem entre claus d'OpenRouter fins que una accepti
+            errors = []
+            for attempt in range(len(OPENROUTER_API_KEYS)):
+                idx = (_openrouter_key_idx + attempt) % len(OPENROUTER_API_KEYS)
+                client = OpenAI(
+                    api_key=OPENROUTER_API_KEYS[idx],
+                    base_url="https://openrouter.ai/api/v1",
+                )
+                try:
+                    messages = []
+                    if system_prompt:
+                        messages.append({"role": "system", "content": system_prompt})
+                    messages.append({"role": "user", "content": user_text})
+                    stream = client.chat.completions.create(
+                        model=specific_model,
+                        messages=messages,
+                        max_tokens=max_tokens,
+                        temperature=temperature,
+                        top_p=top_p,
+                        stream=True,
+                        extra_headers={
+                            "HTTP-Referer": "https://atne.fje.cat",
+                            "X-Title": "ATNE",
+                        },
+                    )
+                    _openrouter_key_idx = (idx + 1) % len(OPENROUTER_API_KEYS)
+                    for chunk in stream:
+                        delta = chunk.choices[0].delta if chunk.choices else None
+                        piece = getattr(delta, "content", None) if delta else None
+                        if piece:
+                            yield piece
+                    return
+                except Exception as e:
+                    errors.append(f"clau {idx+1}: {str(e)[:200]}")
+                    continue
+            raise RuntimeError(f"Totes les claus OpenRouter han fallat (stream): {'; '.join(errors)}")
+        else:
+            # OpenAI directe (una sola clau)
+            client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+            messages = []
+            if system_prompt:
+                messages.append({"role": "system", "content": system_prompt})
+            messages.append({"role": "user", "content": user_text})
+            stream = client.chat.completions.create(
+                model=specific_model,
+                messages=messages,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                top_p=top_p,
+                stream=True,
+            )
+            for chunk in stream:
+                delta = chunk.choices[0].delta if chunk.choices else None
+                piece = getattr(delta, "content", None) if delta else None
+                if piece:
+                    yield piece
+            return
+    elif provider == "mistral":
+        # Mistral via HTTP directe amb stream=true retorna SSE chunks
+        r = requests.post(
+            "https://api.mistral.ai/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {MISTRAL_API_KEY}",
+                "Content-Type": "application/json",
+                "Accept": "text/event-stream",
+            },
+            json={
+                "model": specific_model,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_text},
+                ],
+                "max_tokens": max_tokens,
+                "temperature": temperature,
+                "top_p": top_p,
+                "stream": True,
+            },
+            stream=True,
+            timeout=180,
+        )
+        if r.status_code != 200:
+            raise RuntimeError(f"Mistral HTTP {r.status_code}: {r.text[:200]}")
+        for line in r.iter_lines():
+            if not line:
+                continue
+            if not line.startswith(b"data: "):
+                continue
+            data_str = line[6:].decode("utf-8", errors="ignore").strip()
+            if data_str == "[DONE]":
+                break
+            try:
+                obj = json.loads(data_str)
+                piece = obj.get("choices", [{}])[0].get("delta", {}).get("content", "")
+                if piece:
+                    yield piece
+            except Exception:
+                continue
+    else:
+        raise RuntimeError(
+            f"Model desconegut per a streaming: {model_id}. "
+            f"Opcions: gemma4, gemma3, gemini, gpt, gpt-4o, qwen, mistral, mistral-large"
+        )
 
 
 VERIFY_SYSTEM = """Ets un avaluador pedagògic ràpid. Avalua una adaptació de text educatiu amb 3 criteris breus (1-5 cadascun):
@@ -1410,14 +2123,33 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
     (diagnòstic, generació de material, recerca).
     """
     cb = progress_callback or (lambda ev: None)
-    active_model = (model_override or ATNE_MODEL).lower()
+    # Sprint 1B: el model de l'adapt es resol via _MODEL_CONFIG["adapt"]
+    # (configurable des de /admin) amb override puntual via payload.model.
+    # _model_for() retorna alias curt o model_id llarg; _call_llm() sap
+    # resoldre tots dos via _resolve_model().
+    active_model = _model_for("adapt", override=model_override or "")
 
     # System prompt — sense RAG, les instruccions graduades són el motor
     cb({"type": "step", "step": "search", "msg": "Preparant instruccions d'adaptació..."})
     system_prompt = build_system_prompt(profile, context, params, rag_context="")
 
     # 5. Cridar LLM segons active_model (amb Generate+Verify+Retry)
-    model_label = {"gemma4": "Gemma 4 31B", "mistral": "Mistral Small"}.get(active_model, active_model)
+    # Label UI derivat del (provider, specific_model) — compat amb alias curts i model_id llargs.
+    _prov, _spec = _resolve_model(active_model)
+    _labels = {
+        "gemma-4-31b-it":       "Gemma 4 31B",
+        "gemma-3-12b-it":       "Gemma 3 12B",
+        "gemma-3-27b-it":       "Gemma 3 27B",
+        "gemini-2.5-flash":     "Gemini 2.5 Flash",
+        "gpt-4o-mini":          "GPT-4o mini",
+        "gpt-4o":               "GPT-4o",
+        "gpt-4.1-mini":         "GPT-4.1 mini",
+        "mistral-small-latest": "Mistral Small",
+        "mistral-large-latest": "Mistral Large",
+        "qwen/qwen3.5-27b":     "Qwen 3.5 27B",
+        "qwen/qwen3.5-9b":      "Qwen 3.5 9B",
+    }
+    model_label = _labels.get(_spec, _spec)
     adapted = ""
     verify_enabled = params.get("verify_retry", True)  # per defecte ON
     min_score = 4.0
@@ -1616,6 +2348,298 @@ async def health():
     return JSONResponse({"ok": ok, **checks}, status_code=200 if ok else 503)
 
 
+# ── Admin API (Sprint 1B) ───────────────────────────────────────────────────
+#
+# Endpoints per gestionar la configuració runtime del pilot des del
+# dashboard /admin. Protegits per password via cookie signada.
+
+_ALLOWED_MODEL_KEYS = {
+    "atne_model_generate":    "generate",
+    "atne_model_adapt":       "adapt",
+    "atne_model_refine":      "refine",
+    "atne_model_complements": "complements",
+    "atne_model_auditor":     "auditor",
+}
+
+_ALLOWED_MODELS = [
+    "gemma-4-31b-it",
+    "gemma-3-12b-it",
+    "gemini-2.5-flash",
+    "gpt-4o-mini",
+    "gpt-4o",
+    "gpt-4.1-mini",
+    "mistral-small-latest",
+    "mistral-large-latest",
+    "qwen/qwen3.5-27b",
+    "qwen/qwen3.5-9b",
+]
+
+
+@app.post("/api/admin/login")
+async def admin_login(payload: dict = Body(...)):
+    password = (payload.get("password") or "").strip()
+    if not ADMIN_PASSWORD:
+        raise HTTPException(500, "ADMIN_PASSWORD no configurat al servidor")
+    if not secrets.compare_digest(password, ADMIN_PASSWORD):
+        raise HTTPException(401, "Password incorrecte")
+    token = _admin_sign(f"admin:{int(time.time())}")
+    resp = JSONResponse({"ok": True, "ttl_seconds": ADMIN_SESSION_TTL_SEC})
+    resp.set_cookie(
+        "atne_admin",
+        token,
+        httponly=True,
+        samesite="strict",
+        max_age=ADMIN_SESSION_TTL_SEC,
+        # secure=False a local, True a Cloud Run darrere HTTPS. El flag
+        # s'activa quan FORCE_HTTPS_COOKIE és "1" (env var de producció).
+        secure=os.getenv("FORCE_HTTPS_COOKIE", "").strip() == "1",
+    )
+    return resp
+
+
+@app.post("/api/admin/logout")
+async def admin_logout():
+    resp = JSONResponse({"ok": True})
+    resp.delete_cookie("atne_admin")
+    return resp
+
+
+@app.get("/api/admin/whoami")
+async def admin_whoami(request: Request):
+    """Check lleuger per al frontend: retorna si hi ha sessió activa (200) o no (401).
+    Útil per saber si cal mostrar pantalla de login.
+    """
+    token = request.cookies.get("atne_admin", "")
+    if not _admin_verify(token):
+        raise HTTPException(401, "No autenticat")
+    return {"ok": True}
+
+
+@app.get("/api/runtime-config")
+async def runtime_config():
+    """Endpoint lleuger (no requereix auth) per al frontend docent.
+
+    Exposa només els model_id actuals per fase i els costos aproximats.
+    Serveix perquè el frontend pugui saber quin model s'està fent servir a
+    cada fase i desar-ho a history.models_per_phase. NO retorna passwords
+    ni claus API ni flags administratius.
+    """
+    return {
+        "model_config": dict(_MODEL_CONFIG),
+        "model_costs_eur_per_call": dict(_MODEL_COST_EUR_PER_CALL),
+        "pilot_active": _PILOT_ACTIVE,
+    }
+
+
+@app.get("/api/admin/config")
+async def admin_get_config(_: bool = Depends(_require_admin)):
+    return {
+        "model_config": dict(_MODEL_CONFIG),
+        "auditor_enabled": _AUDITOR_ENABLED_RUNTIME,
+        "admin_budget_eur_max": _ADMIN_BUDGET_EUR_MAX,
+        "pilot_active": _PILOT_ACTIVE,
+        "models_available": list(_ALLOWED_MODELS),
+        "model_key_map": dict(_ALLOWED_MODEL_KEYS),
+        "model_costs_eur_per_call": dict(_MODEL_COST_EUR_PER_CALL),
+        "atne_model_default": ATNE_MODEL,
+    }
+
+
+@app.put("/api/admin/config")
+async def admin_put_config(payload: dict = Body(...), _: bool = Depends(_require_admin)):
+    """Actualitza una o més claus de system_config a Supabase i refresca
+    _MODEL_CONFIG in-memory.
+
+    Payload exemple:
+    {
+      "atne_model_adapt": "gpt-4o-mini",
+      "atne_model_refine": "gemma-4-31b-it",
+      "atne_auditor_enabled": false,
+      "admin_budget_eur_max": 50,
+      "pilot_active": true
+    }
+    """
+    if not payload or not isinstance(payload, dict):
+        raise HTTPException(400, "Cal proporcionar claus a actualitzar")
+    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+        raise HTTPException(500, "Supabase no configurat al servidor")
+
+    updates: list[dict] = []
+    for key, value in payload.items():
+        if key in _ALLOWED_MODEL_KEYS:
+            # Admetem dues formes:
+            # 1) str: "gemma-4-31b-it" → mode fix (retrocompat)
+            # 2) dict: {"mode":"fixed","model":"..."} o
+            #         {"mode":"rotate","models":[...],"strategy":"random"}
+            if isinstance(value, str):
+                if not value.strip():
+                    raise HTTPException(400, f"{key} no pot ser una string buida")
+                if value not in _ALLOWED_MODELS:
+                    raise HTTPException(
+                        400,
+                        f"{key}={value} no és a _ALLOWED_MODELS: {_ALLOWED_MODELS}",
+                    )
+                stored_value = {
+                    "mode": "fixed",
+                    "model": value,
+                    "set_by": "admin",
+                }
+            elif isinstance(value, dict):
+                mode = value.get("mode", "fixed")
+                if mode == "fixed":
+                    m = value.get("model", "").strip()
+                    if not m:
+                        raise HTTPException(400, f"{key}: mode fixed requereix 'model'")
+                    if m not in _ALLOWED_MODELS:
+                        raise HTTPException(
+                            400,
+                            f"{key}={m} no és a _ALLOWED_MODELS: {_ALLOWED_MODELS}",
+                        )
+                    stored_value = {"mode": "fixed", "model": m, "set_by": "admin"}
+                elif mode == "rotate":
+                    models_list = value.get("models") or []
+                    if not isinstance(models_list, list) or not models_list:
+                        raise HTTPException(
+                            400,
+                            f"{key}: mode rotate requereix 'models' com a llista no buida",
+                        )
+                    for m in models_list:
+                        if m not in _ALLOWED_MODELS:
+                            raise HTTPException(
+                                400,
+                                f"{key}: model {m} no és a _ALLOWED_MODELS",
+                            )
+                    # Si només hi ha 1 model, reduim a mode fix (simplificació)
+                    if len(models_list) == 1:
+                        stored_value = {
+                            "mode": "fixed",
+                            "model": models_list[0],
+                            "set_by": "admin",
+                        }
+                    else:
+                        strategy = value.get("strategy", "random")
+                        if strategy not in ("random",):
+                            raise HTTPException(
+                                400,
+                                f"{key}: estrategia '{strategy}' no suportada (només 'random')",
+                            )
+                        stored_value = {
+                            "mode": "rotate",
+                            "models": list(models_list),
+                            "strategy": strategy,
+                            "set_by": "admin",
+                        }
+                else:
+                    raise HTTPException(
+                        400,
+                        f"{key}: mode '{mode}' desconegut (esperava 'fixed' o 'rotate')",
+                    )
+            else:
+                raise HTTPException(
+                    400,
+                    f"{key} ha de ser str (model_id) o dict (config rotate)",
+                )
+            updates.append({
+                "key": key,
+                "value": stored_value,
+                "updated_by": "admin",
+            })
+        elif key == "atne_auditor_enabled":
+            updates.append({"key": key, "value": bool(value), "updated_by": "admin"})
+        elif key == "pilot_active":
+            updates.append({"key": key, "value": bool(value), "updated_by": "admin"})
+        elif key == "admin_budget_eur_max":
+            try:
+                v = float(value)
+            except (TypeError, ValueError):
+                raise HTTPException(400, f"{key} ha de ser numèric")
+            if v < 0 or v > 10000:
+                raise HTTPException(400, f"{key}={v} fora de rang raonable")
+            updates.append({"key": key, "value": v, "updated_by": "admin"})
+        else:
+            raise HTTPException(400, f"Clau desconeguda: {key}")
+
+    if not updates:
+        raise HTTPException(400, "Cap clau vàlida per actualitzar")
+
+    # UPSERT batch al Supabase. La PK és `key`, per tant on_conflict=key
+    # fusiona els rows existents. Prefer: resolution=merge-duplicates és
+    # la sintaxi de PostgREST per al comportament UPSERT.
+    try:
+        r = requests.post(
+            f"{SUPABASE_URL}/rest/v1/system_config?on_conflict=key",
+            headers={
+                **SUPABASE_HEADERS,
+                "Prefer": "resolution=merge-duplicates,return=minimal",
+            },
+            json=updates,
+            timeout=10,
+        )
+        if r.status_code not in (200, 201, 204):
+            raise RuntimeError(f"HTTP {r.status_code}: {r.text[:300]}")
+    except Exception as e:
+        raise HTTPException(500, f"Error escrivint a Supabase system_config: {e}")
+
+    # Refrescar estat in-memory (re-llegeix TOT, no només les claus actualitzades)
+    state = _load_system_config()
+    return {"ok": True, "updated": len(updates), "state": state}
+
+
+@app.delete("/api/admin/history")
+async def admin_wipe_history(payload: dict = Body(default={}), _: bool = Depends(_require_admin)):
+    """Esborra registres de l'historial. **Acció destructiva.**
+
+    Payload opcional:
+        confirm (str, obligatori): ha de ser exactament "FULL_WIPE" per esborrar
+            TOTS els registres. Requisit de seguretat per evitar wipes accidentals.
+        docent_hash (str, opcional): si s'especifica, només esborra els registres
+            amb aquest docent_hash. Ignora confirm en aquest cas.
+
+    Afegit al Sprint B (2026-04-16) per netejar la taula abans del pilot
+    20/04-08/05 i començar amb mem\u00f2ria neta + 2-3 exemples de mostra.
+
+    Retorna {ok, deleted_count}.
+    """
+    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+        raise HTTPException(500, "Supabase no configurat al servidor")
+
+    docent_hash = (payload.get("docent_hash") or "").strip()
+    confirm = (payload.get("confirm") or "").strip()
+
+    if docent_hash:
+        # Wipe per docent — no requereix confirm
+        filter_clause = f"docent_hash=eq.{docent_hash}"
+    else:
+        # Full wipe — requereix confirm explícit
+        if confirm != "FULL_WIPE":
+            raise HTTPException(
+                400,
+                "Full wipe requereix payload {\"confirm\":\"FULL_WIPE\"}. "
+                "Si vols netejar només els teus registres, passa docent_hash."
+            )
+        # PostgREST requereix un filtre per a DELETE; usem id=gt.0 com a
+        # "tots els registres amb id > 0" (tots, perqu\u00e8 id \u00e9s serial).
+        filter_clause = "id=gt.0"
+
+    try:
+        resp = requests.delete(
+            f"{SUPABASE_URL}/rest/v1/history?{filter_clause}",
+            headers={**SUPABASE_HEADERS, "Prefer": "return=representation"},
+            timeout=15,
+        )
+        if resp.status_code not in (200, 204):
+            raise RuntimeError(f"HTTP {resp.status_code}: {resp.text[:300]}")
+        # Amb return=representation retorna l'array de rows esborrats
+        deleted = 0
+        try:
+            deleted = len(resp.json()) if resp.text else 0
+        except Exception:
+            deleted = 0
+        return {"ok": True, "deleted_count": deleted, "filter": filter_clause}
+    except Exception as e:
+        raise HTTPException(500, f"Error esborrant history: {e}")
+
+
 # ── Perfils CRUD ────────────────────────────────────────────────────────────
 
 @app.get("/api/profiles")
@@ -1662,11 +2686,22 @@ async def delete_profile(nom: str):
 
 @app.get("/api/history")
 async def list_history(limit: int = 30):
-    """Llista les últimes adaptacions de l'historial."""
+    """Llista les últimes adaptacions de l'historial.
+
+    Camps retornats (Sprint B 2026-04-16):
+    - id, created_at, profile_name, original_text, adapted_text (preview)
+    - profile_json, context_json, params_json (per "carregar text + perfil")
+    - rating (feedback del docent)
+    - source (paste|upload|generated) — pilot anònima, Sprint B
+    - model_used (quin LLM va adaptar) — Sprint 1A
+
+    Ordenat per created_at desc, limitat a `limit` (default 30).
+    """
     try:
         resp = requests.get(
             f"{SUPABASE_URL}/rest/v1/history"
-            f"?select=id,created_at,profile_name,original_text,profile_json,context_json,params_json,rating"
+            f"?select=id,created_at,profile_name,original_text,adapted_text,"
+            f"profile_json,context_json,params_json,rating,source,model_used,etapa,curs"
             f"&order=created_at.desc&limit={limit}",
             headers=SUPABASE_HEADERS,
             timeout=10,
@@ -1678,17 +2713,77 @@ async def list_history(limit: int = 30):
         return {"ok": False, "items": [], "error": str(e)}
 
 
+# Sprint 1A+1B: columnes ampliades de history acceptades per POST i PATCH
+# (veure docs/sql/sprint1a_alter_history.sql i sprint1b_admin_config.sql)
+_HISTORY_INSERTABLE_FIELDS = {
+    # Legacy
+    "profile_name", "profile_json", "context_json", "params_json",
+    "original_text", "adapted_text",
+    # Sprint 1A — instrumentació
+    "model_used", "endpoint", "duration_ms", "refine_count", "edit_manual",
+    "exported", "etapa", "curs", "perfil_kind", "via",
+    "n_words_in", "n_words_out", "docent_hash", "quality_summary",
+    "auditor_used",
+    # Sprint 1B — selector model per fase + captures pilot
+    "models_per_phase", "cost_estimat_eur", "copied",
+    "time_on_step4_ms", "review_items",
+    # Sprint B (2026-04-16) — memòria pilot anònima
+    "source",  # 'paste' | 'upload' | 'generated'
+}
+
+_HISTORY_UPDATABLE_FIELDS = {
+    # Feedback Sprint 0
+    "rating", "comment",
+    # Sprint 1A — feedback ampliat
+    "fb_used_in_class", "fb_needs_redo", "fb_level_ok",
+    # Sprint 1A — instrumentació post-generació
+    "refine_count", "edit_manual", "exported", "duration_ms",
+    "adapted_text", "quality_summary",
+    # Sprint 1B — captures pilot
+    "copied", "time_on_step4_ms", "review_items", "cost_estimat_eur",
+    "models_per_phase",
+}
+
+
+def _get_current_docent_hash() -> str:
+    """Retorna un hash del docent actual per distingir-lo al dashboard sense
+    revelar la identitat. Al pilot inicial ve d'env var; a Cloud Run amb
+    IAP vindrà del header X-Forwarded-User-Email (TODO pilot 2)."""
+    email = os.getenv("ATNE_DOCENT_EMAIL", "anonim@fje.edu").strip().lower()
+    salt = os.getenv("ATNE_DOCENT_SALT", "atne-pilot-2026")
+    h = hashlib.sha256(f"{email}:{salt}".encode()).hexdigest()
+    return h[:16]
+
+
 @app.post("/api/history")
 async def save_history(payload: dict = Body(...)):
-    """Desa una adaptació a l'historial de Supabase."""
-    row = {
+    """Desa una adaptació a l'historial de Supabase.
+
+    Accepta camps legacy (profile, context, params, original, adapted) i els
+    camps nous Sprint 1A+1B (model_used, models_per_phase, duration_ms,
+    cost_estimat_eur, copied, time_on_step4_ms, review_items, etc.). Els
+    camps no reconeguts es descarten silenciosament (additive compat).
+    """
+    row: dict = {
+        # Compat: els camps del frontend actual porten alies diferents
         "profile_name": payload.get("profile_name", ""),
-        "profile_json": payload.get("profile", {}),
-        "context_json": payload.get("context", {}),
-        "params_json": payload.get("params", {}),
-        "original_text": payload.get("original", ""),
-        "adapted_text": payload.get("adapted", ""),
+        "profile_json": payload.get("profile", payload.get("profile_json", {})),
+        "context_json": payload.get("context", payload.get("context_json", {})),
+        "params_json": payload.get("params", payload.get("params_json", {})),
+        "original_text": payload.get("original", payload.get("original_text", "")),
+        "adapted_text": payload.get("adapted", payload.get("adapted_text", "")),
     }
+    # Camps nous Sprint 1A+1B: només els que arriben explícitament
+    for field in _HISTORY_INSERTABLE_FIELDS:
+        if field in payload and field not in row:
+            row[field] = payload[field]
+    # Omplir docent_hash si el frontend no l'ha enviat (backend-side)
+    if "docent_hash" not in row:
+        row["docent_hash"] = _get_current_docent_hash()
+    # Default endpoint
+    if "endpoint" not in row:
+        row["endpoint"] = payload.get("endpoint") or "/api/adapt"
+
     try:
         resp = requests.post(
             f"{SUPABASE_URL}/rest/v1/history",
@@ -1704,15 +2799,53 @@ async def save_history(payload: dict = Body(...)):
         return {"ok": False, "error": str(e)}
 
 
+@app.post("/api/history/{history_id}/beacon")
+async def history_beacon(history_id: int, payload: dict = Body(...)):
+    """Endpoint POST equivalent al PATCH per a navigator.sendBeacon().
+
+    sendBeacon() només fa POST i serveix per enviar dades en moments de
+    teardown de la pàgina (beforeunload). Al pilot, el fem servir per
+    capturar el `time_on_step4_ms` quan el docent tanca la pestanya sense
+    passar pel botó "Nova adaptació".
+    """
+    # Reutilitza la whitelist de l'update tradicional
+    update: dict = {}
+    for field in _HISTORY_UPDATABLE_FIELDS:
+        if field in payload:
+            update[field] = payload[field]
+    if not update:
+        return {"ok": False, "error": "Cap camp conegut al payload"}
+    try:
+        resp = requests.patch(
+            f"{SUPABASE_URL}/rest/v1/history?id=eq.{history_id}",
+            headers={**SUPABASE_HEADERS, "Prefer": "return=minimal"},
+            json=update,
+            timeout=5,
+        )
+        return {"ok": resp.status_code in (200, 204)}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
 @app.patch("/api/history/{history_id}")
 async def update_history_feedback(history_id: int, payload: dict = Body(...)):
-    """Actualitza el rating i comentari d'una entrada de l'historial."""
-    update = {}
-    if "rating" in payload:
-        update["rating"] = payload["rating"]
-    if "comment" in payload:
-        update["comment"] = payload["comment"]
-    update["rated_at"] = "now()"
+    """Actualitza camps d'una entrada de l'historial.
+
+    Whitelist: només camps a _HISTORY_UPDATABLE_FIELDS + rating+comment
+    legacy. Si el payload porta `rating` o `comment`, també seta `rated_at`
+    a now() perquè el dashboard pugui filtrar per feedback rebut.
+    """
+    update: dict = {}
+    has_feedback = False
+    for field in _HISTORY_UPDATABLE_FIELDS:
+        if field in payload:
+            update[field] = payload[field]
+            if field in ("rating", "comment"):
+                has_feedback = True
+    if not update:
+        return {"ok": False, "error": "Cap camp conegut al payload"}
+    if has_feedback:
+        update["rated_at"] = "now()"
     try:
         resp = requests.patch(
             f"{SUPABASE_URL}/rest/v1/history?id=eq.{history_id}",
@@ -1890,184 +3023,95 @@ async def generate_text(payload: dict = Body(...)):
     Genera un text base segons context i paràmetres.
     Per a docents que no disposen del text que volen adaptar.
 
+    Des del sprint 2026-04-15 delega al mòdul `generador_lliure` que usa
+    un prompt mínim (~110 paraules) i `_call_llm_raw` sense el prefix
+    "TEXT ORIGINAL A ADAPTAR". Zero pipeline de qualitat: el text del
+    model va directe a la resposta. Motivat pel cas del castell medieval
+    on el pipeline antic contaminava el registre. Veure pla a
+    `.claude/plans/sorted-juggling-locket.md`.
+
     Payload:
         tema: str (required)
         genere: str (gènere discursiu, ex: "Article divulgatiu")
         tipologia: str (expositiva | narrativa | descriptiva | argumentativa | instructiva | dialogada)
-        to: str (clau de GENERATE_TONS)
-        extensio: str (clau de GENERATE_EXTENSIONS)
+        to: str (neutre | proper | formal | divulgatiu | ...)
+        extensio: str (curt | estandard | extens)
         notes: str (instruccions addicionals, opcional)
-        context: dict amb etapa, curs, ambit (opcional, per ajustar nivell)
+        context: dict amb etapa, curs, ambit, materia (opcional)
+        saber_curricular: str (opcional, Sprint C — stub curriculum KG)
+        model: str (opcional, override del model admin)
     """
-    tema = (payload.get("tema") or "").strip()
-    if not tema:
-        return JSONResponse({"error": "Cal especificar un tema."}, status_code=400)
-
-    genere = (payload.get("genere") or "Article divulgatiu").strip()
-    tipologia = (payload.get("tipologia") or "expositiva").strip().lower()
-    to = (payload.get("to") or "neutre").strip().lower()
-    extensio = (payload.get("extensio") or "estandard").strip().lower()
-    notes = (payload.get("notes") or "").strip()
-    ctx = payload.get("context") or {}
-
-    etapa = ctx.get("etapa", "ESO")
-    curs = ctx.get("curs", "3r")
-    ambit = ctx.get("ambit", "")
-    materia = ctx.get("materia", "")
-
-    extensio_instr = GENERATE_EXTENSIONS.get(extensio, GENERATE_EXTENSIONS["estandard"])
-    to_instr = GENERATE_TONS.get(to, GENERATE_TONS["neutre"])
-
-    notes_block = f"\n## INSTRUCCIONS ADDICIONALS DEL DOCENT (prioritàries)\n{notes}\n" if notes else ""
-
-    prompt = f"""# ROL
-Ets un expert en lingüística catalana i comunicació educativa. La teva
-tasca és generar textos basant-te estrictament en tres eixos: GÈNERE
-DISCURSIU (el motlle social), TIPOLOGIA TEXTUAL (l'esquelet intern) i
-TO (la veu). Has de respectar les convencions del currículum escolar
-català (Decret 175/2022) i l'estàndard de l'IEC.
-
-# CONTEXT EDUCATIU
-- Etapa: {etapa}
-- Curs: {curs}
-- Àmbit: {ambit}
-- Matèria: {materia}
-
-# COMANDA DEL DOCENT
-- TEMA / TÒPIC: {tema}
-- GÈNERE DISCURSIU: {genere}
-- TIPOLOGIA TEXTUAL: {tipologia}
-- TO: {to_instr}
-- EXTENSIÓ: {extensio_instr}
-{notes_block}
-# REGLES OBLIGATÒRIES
-
-## 1. Eix Gènere (mana sobre el FORMAT)
-El gènere "{genere}" determina l'estructura social del text. Has d'incloure
-els elements estructurals propis del gènere (per exemple: titular i lead
-en una notícia; salutació i comiat en un correu; passos numerats en un
-procediment; referent i valoració en una ressenya).
-
-## 2. Eix Tipologia (mana sobre l'ESTRUCTURA INTERNA)
-La tipologia "{tipologia}" determina la intenció comunicativa.
-- Expositiva: presentar informació de forma clara i objectiva.
-- Narrativa: relatar fets ordenats temporalment, amb personatges i acció.
-- Descriptiva: detallar com és un objecte, lloc o persona amb adjectius i precisió sensorial.
-- Argumentativa: defensar una tesi amb arguments connectats per connectors causals.
-- Instructiva: donar passes en ordre, amb verbs en imperatiu o infinitiu.
-- Dialogada: alternança de veus amb marques tipogràfiques.
-
-EXEMPLES DE COMBINACIÓ:
-- Gènere "Notícia" + Tipologia "Argumentativa" → article d'opinió periodístic.
-- Gènere "Correu" + Tipologia "Instructiva" → e-mail tutorial pas a pas.
-- Gènere "Conte" + Tipologia "Descriptiva" → conte amb passatges descriptius rics.
-
-## 3. Eix To (mana sobre la VEU)
-Mantén el to "{to}" de manera consistent al llarg de TOT el text. El to
-afecta la tria lèxica i la proximitat amb el lector, però NO altera els
-fets ni la rigor del contingut.
-
-## 4. Centralitat del tema
-El text ha de girar EXCLUSIVAMENT al voltant del tema indicat:
-"{tema}". Evita divagacions, exemples genèrics o continguts tangencials.
-Cada paràgraf ha de servir el tema central.
-
-## 5. Rigor factual (zero al·lucinacions)
-Si el tema implica fets científics, històrics, geogràfics o tècnics,
-mantén la PRECISIÓ. NO inventis dades, dates, noms o xifres. Si no
-estàs segur d'un fet, expressa-ho amb construccions com "es considera
-que", "habitualment", o omet la dada concreta. El to canvia COM expliques
-els fets, no QUINS fets són certs.
-
-## 6. Adequació al curs
-Adequa el vocabulari, la complexitat sintàctica i el grau d'abstracció
-al nivell del curs ({curs} de {etapa}). NO simplifiquis més del necessari:
-és un text ESTÀNDARD per al curs, no una adaptació. L'adaptació al
-perfil de l'alumne es farà en una segona fase amb un altre pipeline.
-
-## 7. Format de sortida
-- Genera NOMÉS el text demanat. Sense títols administratius, sense
-  "Aquí tens el text:", sense explicacions meta, sense disclaimers.
-- Comença directament amb el contingut.
-- Si el gènere ho exigeix (notícia, correu, recepta), inclou els elements
-  estructurals propis al començament.
-- Usa salts de paràgraf normals. Per a extensions "Extens", usa
-  subtítols H2 o H3 amb format markdown (## o ###).
-
-## 8. Català normatiu (IEC) — REGLA CRÍTICA
-- TOT el text ha de ser en català estàndard normatiu de l'Institut
-  d'Estudis Catalans (IEC). Cap paraula en cap altra llengua.
-- ATENCIÓ a les paraules conflictives: usa "èssers vius" (mai "ser vius"),
-  "conjunt" (mai "ensemble"), "obstant" (mai "obstant això" si no cal),
-  "tanmateix", "no obstant això".
-- Vigila les interferències del castellà ("haver-hi" no "haver", "moltes
-  vegades" no "moltíssim", "anar-se'n" no "marxar-se").
-- Vigila les interferències del francès o l'anglès: cap paraula com
-  "ensemble", "rendezvous", "feedback", "skill", "background". Tradueix-ho
-  sempre al català.
-- Apostrofa correctament: "l'arbre", "d'aquest", "n'hi ha".
-- Pluralització: "èssers" (no "essers"), "homes" (no "homens"), "joves"
-  (no "jóvens").
-- Si dubtes d'una paraula, prefereix sinònims segurs ("conjunt", "grup",
-  "unitat") en lloc d'arriscar-te amb termes possiblement mal tokenitzats.
-
-# GENERA EL TEXT ARA"""
-
-    # Selecció de model via payload (fallback a ATNE_MODEL)
-    model_payload = (payload.get("model") or "").strip().lower()
-    model_usat = model_payload if model_payload in ("gemma4", "mistral", "gpt", "gemini") else ATNE_MODEL
+    from generador_lliure import generar as generar_text_lliure
 
     try:
-        text = _call_llm(model_usat, prompt, "")
-        text = clean_gemini_output(text).strip()
-        text = _post_process_llm_output(text)
+        result = generar_text_lliure(payload)
+    except ValueError as e:
+        return JSONResponse({"error": str(e)}, status_code=400)
     except Exception as e:
         return JSONResponse(
             {"error": f"Error generant el text: {type(e).__name__}: {e}"},
             status_code=500,
         )
 
-    if not text:
-        return JSONResponse({"error": "L'LLM ha retornat un text buit."}, status_code=500)
+    return result
 
-    # ═══ Pipeline de qualitat post-generació ═══
-    # Deduir MECR objectiu del context educatiu
-    target_mecr = payload.get("target_mecr") or _mecr_from_etapa_curs(etapa, curs)
-    verify = payload.get("verify") if payload.get("verify") is not None else True
-    use_auditor = payload.get("auditor")
-    if use_auditor is None:
-        use_auditor = ATNE_AUDITOR_ENABLED
-    quality = post_process_catalan(
-        text,
-        target_mecr=target_mecr,
-        enable_lt=bool(verify),
-        enable_auditor=bool(use_auditor),
-        etapa=etapa,
-    )
 
-    paraules = len(quality["text"].split())
-    return {
-        "text": quality["text"],
-        "paraules": paraules,
-        "tema": tema,
-        "genere": genere,
-        "tipologia": tipologia,
-        "to": to,
-        "extensio": extensio,
-        "model": model_usat,
-        "quality_report": {
-            "n_correccions": quality["n_correccions"],
-            "correccions": quality["correccions"][:20],
-            "paraules_sospitoses": quality["paraules_sospitoses"][:20],
-            "avisos_estil": quality["avisos_estil"][:10],
-            "llegibilitat": quality["llegibilitat"],
-            "avisos_auditor": quality["avisos_auditor"],
-            "caracters_exotics": quality.get("caracters_exotics", []),
-            "lt_disponible": quality["lt_disponible"],
-            "auditor_disponible": quality["auditor_disponible"],
-            "auditor_model": quality["auditor_model"],
+@app.post("/api/generate-text-stream")
+async def generate_text_stream(payload: dict = Body(...)):
+    """Variant streaming (SSE) de `/api/generate-text`.
+
+    Emet events Server-Sent Events a mesura que el LLM produeix tokens.
+    Afegit 2026-04-16 per a la UX del pilot: amb Gemma/Qwen generant 60-90s,
+    veure pantalla buida és insostenible. El cost i els tokens totals són
+    idèntics a la versió no streaming; només canvia el transport.
+
+    Events:
+        data: {"type":"start","model":"...","target_words":N}
+        data: {"type":"chunk","text":"..."}   (N repeticions)
+        data: {"type":"done","text":"...","paraules":N,"duration_ms":M,"model":"..."}
+        data: {"type":"error","message":"..."}
+
+    Payload idèntic a /api/generate-text.
+    """
+    from generador_lliure import generar_stream as generar_text_stream_lliure
+
+    async def gen():
+        # Els chunks del LLM arriben sync; els emetem com events SSE.
+        # Fem servir un ThreadPoolExecutor perquè l'iterador s\u00edncron
+        # del SDK (google-genai / openai) no bloquegi l'event loop.
+        loop = asyncio.get_event_loop()
+        queue: asyncio.Queue = asyncio.Queue()
+
+        def worker():
+            try:
+                for event in generar_text_stream_lliure(payload):
+                    loop.call_soon_threadsafe(queue.put_nowait, event)
+            except Exception as e:
+                loop.call_soon_threadsafe(
+                    queue.put_nowait,
+                    {"type": "error", "message": f"{type(e).__name__}: {str(e)[:300]}"},
+                )
+            finally:
+                loop.call_soon_threadsafe(queue.put_nowait, None)  # sentinella fi
+
+        loop.run_in_executor(None, worker)
+
+        while True:
+            event = await queue.get()
+            if event is None:
+                break
+            yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+            if event.get("type") in ("done", "error"):
+                break
+
+    return StreamingResponse(
+        gen(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",  # desactiva buffering de nginx si hi \u00e9s
         },
-    }
+    )
 
 
 # ── Refinament de text (sense regenerar) ──────────────────────────────────
@@ -2349,6 +3393,14 @@ _LT_UNKNOWN_WORD_RULES = {
     "MORFOLOGIK_RULE_CA_ES_VALENCIA",
 }
 
+# Mots catalans legítims que el diccionari de LanguageTool marca erròniament.
+# Comparació case-insensitive (lower) sobre el fragment exacte del match.
+# Afegir només mots verificats; cada entrada evita un fals positiu al Quality Report.
+_LOCAL_WORD_WHITELIST = frozenset({
+    "rails",   # via fèrria, mot català legítim (glossari FJE 15/04)
+    "raïls",   # variant amb dièresi, també correcte
+})
+
 # Llindars de llegibilitat per MECR (mitjana paraules/frase i % paraules llargues >7 caràcters)
 _READABILITY_TARGETS = {
     "pre-A1": {"max_wps": 8, "max_long_pct": 12},
@@ -2416,6 +3468,12 @@ def _languagetool_full_analysis(text: str) -> dict:
         rule_cat = m.get("rule", {}).get("category", {}).get("id", "")
         old_value = text[offset:offset + length] if offset >= 0 else ""
         missatge = m.get("shortMessage") or m.get("message", "")
+
+        # Whitelist local: mots catalans legítims que LT marca erròniament.
+        # Es comprova abans de qualsevol classificació — si hi és, s'ignora
+        # el match sencer (ni correcció, ni avís, ni paraula sospitosa).
+        if old_value and old_value.strip(".,;:!?'\"()[]{}").lower() in _LOCAL_WORD_WHITELIST:
+            continue
 
         # Estil explícit → warning, MAI auto-aplicar
         if rule_cat in _STYLE_WARNING_CATEGORIES:
@@ -2865,6 +3923,7 @@ async def refine_text(payload: dict = Body(...)):
 
     preset = (payload.get("preset") or "").strip().lower()
     instruccio_lliure = (payload.get("instruccio") or "").strip()
+    model_override = (payload.get("model") or "").strip()
 
     # Preset "catala" → LanguageTool (determinista, no LLM)
     if preset == "catala" and not instruccio_lliure:
@@ -2939,8 +3998,11 @@ zero — modifica'l mantenint l'estructura general i el contingut.
 
 # RETORNA EL TEXT REFINAT (NOMÉS EL TEXT, RES MÉS)"""
 
+    # Sprint 1B: el model del refine es resol via _MODEL_CONFIG["refine"]
+    # (configurable des de /admin) amb override puntual via payload.model.
+    refine_model = _model_for("refine", override=model_override)
     try:
-        result = _call_llm("gemma4", prompt, "")
+        result = _call_llm(refine_model, prompt, "")
         result = clean_gemini_output(result).strip()
         result = _post_process_llm_output(result)
     except Exception as e:
@@ -2956,6 +4018,7 @@ zero — modifica'l mantenint l'estructura general i el contingut.
         "text": result,
         "paraules": len(result.split()),
         "preset_aplicat": preset or None,
+        "model_used": refine_model,
     }
 
 
@@ -3262,6 +4325,22 @@ async def export_doc(payload: dict = Body(...)):
         return FileResponse(tmp, filename=f"{base_name}.pdf", media_type="application/pdf")
 
     return JSONResponse({"error": f"Format '{fmt}' no suportat"}, status_code=400)
+
+
+# ── Admin (configuració runtime del pilot) ─────────────────────────────────
+
+@app.get("/admin", response_class=HTMLResponse)
+async def admin_page():
+    """Serveix el dashboard /admin. L'auth es gestiona via JS al navegador
+    contra /api/admin/whoami (no bloquegem la pàgina aquí perquè el flow
+    de login viu dins la mateixa HTML)."""
+    html_path = UI_DIR / "admin.html"
+    if html_path.exists():
+        return HTMLResponse(
+            html_path.read_text(encoding="utf-8"),
+            headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
+        )
+    return HTMLResponse("<h1>Admin no disponible</h1>", status_code=404)
 
 
 # ── Cuina (dashboard intern) ───────────────────────────────────────────────

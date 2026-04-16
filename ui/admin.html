@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ATNE · Admin</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #f5f7fa; margin: 0; padding: 0; color: #1a202c; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+  header.page { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 32px 24px; border-radius: 16px; margin-bottom: 24px; }
+  header.page h1 { margin: 0 0 4px 0; font-size: 28px; }
+  header.page .subtitle { opacity: 0.9; font-size: 14px; }
+  nav { background: #1e293b; padding: 10px 24px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  nav a { color: #d1d5db; text-decoration: none; padding: .4rem .8rem; font-size: .85rem; border-radius: 4px; }
+  nav a:hover { background: #334155; color: white; }
+  nav .spacer { margin-left: auto; }
+  nav .logout-btn { background: #ef4444; color: white; border: none; padding: .4rem .8rem; font-size: .85rem; cursor: pointer; border-radius: 4px; }
+  nav .logout-btn:hover { background: #dc2626; }
+  section.card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); margin-bottom: 20px; }
+  section.card h2 { margin: 0 0 6px 0; color: #1e293b; font-size: 20px; }
+  section.card .hint { color: #64748b; font-style: italic; margin-bottom: 16px; font-size: 13px; }
+  .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; margin: 16px 0; }
+  @media (max-width: 800px) { .config-grid { grid-template-columns: 1fr; } }
+  .phase-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; background: #fafbfc; }
+  .phase-card h3 { margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: #1e293b; }
+  .phase-card .desc { font-size: 11px; color: #94a3b8; margin-bottom: 10px; }
+  .phase-mode-tabs { display: flex; gap: 6px; margin-bottom: 10px; background: #f1f5f9; padding: 3px; border-radius: 6px; }
+  .phase-mode-tabs label { flex: 1; font-size: 12px; font-weight: 600; color: #64748b; text-align: center; padding: 5px 8px; border-radius: 4px; cursor: pointer; }
+  .phase-mode-tabs label:has(input:checked) { background: white; color: #1e40af; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+  .phase-mode-tabs input { display: none; }
+  .phase-fix-select, .phase-rotate-list { transition: opacity 0.15s; }
+  .phase-fix-select select { width: 100%; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; background: white; }
+  .phase-rotate-list { display: flex; flex-direction: column; gap: 4px; max-height: 180px; overflow-y: auto; padding-right: 4px; }
+  .phase-rotate-list label { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #475569; padding: 3px 6px; border-radius: 4px; cursor: pointer; }
+  .phase-rotate-list label:hover { background: #e0e7ff; }
+  .phase-rotate-list input[type="checkbox"] { margin: 0; }
+  .phase-rotate-hint { font-size: 10px; color: #64748b; font-style: italic; margin-top: 4px; }
+  .phase-cost-preview { font-size: 11px; color: #64748b; margin-top: 8px; padding-top: 6px; border-top: 1px dashed #e2e8f0; }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field label { font-size: 13px; font-weight: 600; color: #475569; }
+  .field .desc { font-size: 12px; color: #94a3b8; margin-bottom: 4px; }
+  .field select, .field input[type="number"], .field input[type="text"], .field input[type="password"] { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background: white; }
+  .field select:focus, .field input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+  .cost-tag { display: inline-block; padding: 2px 6px; font-size: 11px; border-radius: 4px; background: #f1f5f9; color: #64748b; margin-left: 6px; }
+  .cost-tag.free { background: #d1fae5; color: #065f46; }
+  .cost-tag.cheap { background: #dbeafe; color: #1e40af; }
+  .cost-tag.pricey { background: #fef3c7; color: #92400e; }
+  .cost-tag.expensive { background: #fee2e2; color: #991b1b; }
+  .toggles { display: flex; gap: 24px; flex-wrap: wrap; margin: 16px 0; }
+  .toggles label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #475569; }
+  .actions { display: flex; gap: 12px; margin-top: 16px; }
+  button.primary { background: #3b82f6; color: white; border: none; padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 6px; }
+  button.primary:hover { background: #2563eb; }
+  button.primary:disabled { background: #94a3b8; cursor: not-allowed; }
+  button.ghost { background: white; color: #475569; border: 1px solid #cbd5e1; padding: 10px 20px; font-size: 14px; cursor: pointer; border-radius: 6px; }
+  button.ghost:hover { background: #f1f5f9; }
+  .status { padding: 12px; border-radius: 6px; font-size: 13px; margin-top: 12px; }
+  .status.ok { background: #d1fae5; color: #065f46; border-left: 4px solid #10b981; }
+  .status.error { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+  .status.info { background: #dbeafe; color: #1e40af; border-left: 4px solid #3b82f6; }
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+  th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
+  th { background: #f1f5f9; font-weight: 600; color: #475569; position: sticky; top: 0; }
+  tbody tr:hover { background: #f8fafc; }
+  .badge { display: inline-block; padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+  .badge-gemma { background: #dbeafe; color: #1e40af; }
+  .badge-gpt { background: #fef3c7; color: #92400e; }
+  .badge-mistral { background: #fce7f3; color: #9d174d; }
+  .badge-gemini { background: #e0e7ff; color: #3730a3; }
+  .login-card { max-width: 400px; margin: 80px auto; }
+  .login-card .field { margin-bottom: 16px; }
+  .hidden { display: none !important; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 12px 0; }
+  .kpi { background: #f8fafc; padding: 16px; border-radius: 8px; border-left: 4px solid #3b82f6; }
+  .kpi-label { font-size: 11px; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em; }
+  .kpi-value { font-size: 22px; font-weight: bold; margin: 4px 0; color: #1e293b; }
+  .kpi-sub { font-size: 12px; color: #94a3b8; }
+</style>
+</head>
+<body>
+
+<!-- NAV (només visible autenticat) -->
+<nav id="nav-bar" class="hidden">
+  <a href="/">← Adaptador</a>
+  <a href="/cuina">Cuina</a>
+  <a href="/dashboard">Xat 9</a>
+  <a href="/saber-ne">Saber-ne+</a>
+  <span class="spacer"></span>
+  <span id="session-info" style="color:#94a3b8;font-size:.8rem;margin-right:12px;"></span>
+  <button class="logout-btn" onclick="doLogout()">Tanca sessió</button>
+</nav>
+
+<!-- ══════════ LOGIN VIEW ══════════ -->
+<div id="login-view" class="container hidden">
+  <section class="card login-card">
+    <h2>ATNE · Admin</h2>
+    <p class="hint">Gestiona el selector de motors LLM per fase durant el pilot. Cal contrasenya d'administrador.</p>
+    <form onsubmit="doLogin(event)">
+      <div class="field">
+        <label for="password">Contrasenya</label>
+        <input type="password" id="password" required autocomplete="current-password">
+      </div>
+      <div class="actions">
+        <button type="submit" class="primary">Entra</button>
+      </div>
+      <div id="login-status"></div>
+    </form>
+  </section>
+</div>
+
+<!-- ══════════ DASHBOARD VIEW ══════════ -->
+<div id="dashboard-view" class="container hidden">
+  <header class="page">
+    <h1>ATNE · Admin</h1>
+    <div class="subtitle">Configuració runtime dels motors LLM i captura del pilot</div>
+  </header>
+
+  <!-- Resum ràpid -->
+  <section class="card">
+    <h2>Estat del pilot</h2>
+    <div class="kpi-grid" id="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">Pilot actiu</div>
+        <div class="kpi-value" id="kpi-pilot">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Auditor LLM</div>
+        <div class="kpi-value" id="kpi-auditor">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Budget màxim</div>
+        <div class="kpi-value" id="kpi-budget">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Model per defecte</div>
+        <div class="kpi-value" id="kpi-default" style="font-size:16px;">—</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Configuració de motors -->
+  <section class="card">
+    <h2>Selector de model per fase</h2>
+    <p class="hint">Cada fase del pipeline pot fer servir un model diferent. Els canvis s'apliquen en calent a totes les peticions noves (les en curs acaben amb el model anterior).</p>
+
+    <div class="config-grid" id="phase-config-grid">
+      <!-- Cada fase genera un .phase-card dinàmicament via JS amb:
+           - radio Fix / Rotació (silenciosa)
+           - select si fix, checkboxes si rotació -->
+    </div>
+
+    <p class="hint" style="margin-top:0;">
+      <strong>Fix</strong>: una sola crida sempre amb el mateix model.
+      <strong>Rotació silenciosa</strong>: cada crida tria aleatòriament un dels
+      models seleccionats. Serveix per A/B cec al pilot i recollir estadístiques
+      de quin model funciona millor. El docent no veu quin model s'ha usat.
+    </p>
+
+    <div class="toggles">
+      <label><input type="checkbox" id="auditor-enabled"> Auditor LLM actiu</label>
+      <label><input type="checkbox" id="pilot-active"> Pilot actiu</label>
+      <div class="field" style="flex-direction:row;align-items:center;gap:8px;">
+        <label style="margin:0;">Budget màxim (€)</label>
+        <input type="number" id="budget-max" min="0" max="10000" step="1" style="width:100px;">
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="primary" id="save-btn" onclick="saveConfig()">Desa canvis</button>
+      <button class="ghost" onclick="loadConfig()">Reverteix</button>
+    </div>
+    <div id="save-status"></div>
+  </section>
+
+  <!-- Activitat recent -->
+  <section class="card">
+    <h2>Activitat recent</h2>
+    <p class="hint">Últimes 20 adaptacions registrades a history. S'actualitza cada vegada que recarregues la pàgina.</p>
+    <div id="events-status"></div>
+    <div style="max-height:400px;overflow:auto;">
+      <table id="events-table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Perfil</th>
+            <th>Etapa</th>
+            <th>Model adapt</th>
+            <th>Paraules in/out</th>
+            <th>Rating</th>
+          </tr>
+        </thead>
+        <tbody id="events-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+// ── Estat global ────────────────────────────────────────────────
+let configCache = null;  // últim GET /api/admin/config
+
+// ── Util: classificar cost per al badge ─────────────────────────
+function costClass(eur) {
+  if (!eur || eur === 0) return "free";
+  if (eur < 0.01) return "cheap";
+  if (eur < 0.03) return "pricey";
+  return "expensive";
+}
+function formatCost(eur) {
+  if (!eur || eur === 0) return "gratis";
+  if (eur < 0.001) return "< 0.001€";
+  return eur.toFixed(4) + "€";
+}
+
+// ── Auth ────────────────────────────────────────────────────────
+async function checkAuth() {
+  try {
+    const r = await fetch("/api/admin/whoami", { credentials: "same-origin" });
+    return r.ok;
+  } catch { return false; }
+}
+
+async function doLogin(ev) {
+  ev.preventDefault();
+  const pwd = document.getElementById("password").value;
+  const status = document.getElementById("login-status");
+  status.innerHTML = '<div class="status info">Comprovant…</div>';
+  try {
+    const r = await fetch("/api/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ password: pwd }),
+    });
+    if (r.ok) {
+      status.innerHTML = '<div class="status ok">OK · entrant…</div>';
+      setTimeout(showDashboard, 300);
+    } else {
+      const data = await r.json().catch(() => ({}));
+      status.innerHTML = '<div class="status error">' + (data.detail || "Password incorrecte") + '</div>';
+    }
+  } catch (e) {
+    status.innerHTML = '<div class="status error">Error de connexió: ' + e.message + '</div>';
+  }
+}
+
+async function doLogout() {
+  await fetch("/api/admin/logout", { method: "POST", credentials: "same-origin" });
+  showLogin();
+}
+
+// ── Views ───────────────────────────────────────────────────────
+function showLogin() {
+  document.getElementById("nav-bar").classList.add("hidden");
+  document.getElementById("dashboard-view").classList.add("hidden");
+  document.getElementById("login-view").classList.remove("hidden");
+  document.getElementById("password").focus();
+}
+
+function showDashboard() {
+  document.getElementById("login-view").classList.add("hidden");
+  document.getElementById("nav-bar").classList.remove("hidden");
+  document.getElementById("dashboard-view").classList.remove("hidden");
+  loadConfig();
+  loadEvents();
+}
+
+// ── Config ──────────────────────────────────────────────────────
+
+// Descripcions de cada fase (per a les capçaleres dels phase-cards)
+const PHASE_META = {
+  generate:    { title: "Generació de text (Pas 2)",    desc: "POST /api/generate-text · generar text nou des de zero" },
+  adapt:       { title: "Adaptació (Pas 3)",            desc: "POST /api/adapt · el motor principal del pilot" },
+  refine:      { title: "Refinament (Pas 4)",           desc: "POST /api/refine-text · correccions post-adaptació" },
+  complements: { title: "Complements",                   desc: "Preguntes de comprensió, glossari, bastides" },
+  auditor:     { title: "Auditor LLM (opt-in)",         desc: "Quality Report post-generació" },
+};
+
+/** Genera el HTML d'un phase-card amb tabs Fix/Rotació i els models available. */
+function renderPhaseCard(phase, modelsAvailable, costs, currentConfig) {
+  const meta = PHASE_META[phase];
+  // currentConfig pot ser string (legacy) o dict (nou format)
+  let mode = "fixed";
+  let fixedModel = "";
+  let rotateModels = [];
+  if (typeof currentConfig === "string") {
+    mode = "fixed";
+    fixedModel = currentConfig;
+  } else if (currentConfig && typeof currentConfig === "object") {
+    mode = currentConfig.mode || "fixed";
+    fixedModel = currentConfig.model || "";
+    rotateModels = currentConfig.models || [];
+  }
+
+  // Dropdown per mode Fix
+  let fixedOptions = "";
+  for (const m of modelsAvailable) {
+    const cost = costs[m] || 0;
+    const sel = (m === fixedModel) ? "selected" : "";
+    fixedOptions += `<option value="${m}" ${sel}>${m} · ${formatCost(cost)}/crida</option>`;
+  }
+
+  // Checkboxes per mode Rotate
+  let rotateCheckboxes = "";
+  for (const m of modelsAvailable) {
+    const cost = costs[m] || 0;
+    const chk = rotateModels.includes(m) ? "checked" : "";
+    rotateCheckboxes += `
+      <label>
+        <input type="checkbox" value="${m}" ${chk}>
+        <span>${m}</span>
+        <span class="cost-tag ${costClass(cost)}" style="font-size:10px;margin-left:auto;">${formatCost(cost)}</span>
+      </label>`;
+  }
+
+  const fixActive = (mode === "fixed");
+  return `
+    <div class="phase-card" data-phase="${phase}">
+      <h3>${meta.title}</h3>
+      <div class="desc">${meta.desc}</div>
+      <div class="phase-mode-tabs">
+        <label>
+          <input type="radio" name="mode-${phase}" value="fixed" ${fixActive ? "checked" : ""}>
+          <span>Fix</span>
+        </label>
+        <label>
+          <input type="radio" name="mode-${phase}" value="rotate" ${!fixActive ? "checked" : ""}>
+          <span>Rotació silenciosa</span>
+        </label>
+      </div>
+      <div class="phase-fix-select" style="display:${fixActive ? "block" : "none"}">
+        <select data-role="fix-select">
+          ${fixedOptions}
+        </select>
+      </div>
+      <div class="phase-rotate-list" style="display:${fixActive ? "none" : "flex"}">
+        ${rotateCheckboxes}
+      </div>
+      <div class="phase-rotate-hint" style="display:${fixActive ? "none" : "block"}">
+        Random: cada crida trie aleatòriament. Cal triar 2 o més models.
+      </div>
+      <div class="phase-cost-preview" data-role="cost-preview"></div>
+    </div>`;
+}
+
+/** Actualitza el preview de cost per un phase-card segons la seva selecció actual. */
+function updatePhaseCostPreview(card) {
+  if (!card || !configCache) return;
+  const costs = configCache.model_costs_eur_per_call || {};
+  const mode = card.querySelector('input[type="radio"]:checked')?.value || "fixed";
+  const preview = card.querySelector('[data-role="cost-preview"]');
+  if (!preview) return;
+  if (mode === "fixed") {
+    const m = card.querySelector('[data-role="fix-select"]')?.value;
+    const cost = costs[m] || 0;
+    preview.textContent = "Cost per crida: " + formatCost(cost);
+  } else {
+    const chosen = Array.from(card.querySelectorAll('.phase-rotate-list input[type="checkbox"]:checked'))
+      .map(cb => cb.value);
+    if (chosen.length === 0) {
+      preview.textContent = "Cap model seleccionat (rotació no pot ser buida).";
+      preview.style.color = "#b91c1c";
+      return;
+    }
+    preview.style.color = "";
+    const sum = chosen.reduce((acc, m) => acc + (costs[m] || 0), 0);
+    const avg = sum / chosen.length;
+    preview.textContent = `Rotació entre ${chosen.length} models · cost mitjà: ${formatCost(avg)}/crida`;
+  }
+}
+
+/** Lliga els canvis dels controls d'un phase-card perquè es refresquin les vistes. */
+function wirePhaseCard(card) {
+  const fixBox = card.querySelector('.phase-fix-select');
+  const rotateBox = card.querySelector('.phase-rotate-list');
+  const rotateHint = card.querySelector('.phase-rotate-hint');
+
+  card.querySelectorAll('input[type="radio"]').forEach(r => {
+    r.addEventListener('change', () => {
+      const mode = r.value;
+      if (r.checked) {
+        fixBox.style.display = (mode === "fixed") ? "block" : "none";
+        rotateBox.style.display = (mode === "fixed") ? "none" : "flex";
+        rotateHint.style.display = (mode === "fixed") ? "none" : "block";
+        updatePhaseCostPreview(card);
+      }
+    });
+  });
+  card.querySelector('[data-role="fix-select"]').addEventListener("change", () => updatePhaseCostPreview(card));
+  card.querySelectorAll('.phase-rotate-list input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener("change", () => updatePhaseCostPreview(card));
+  });
+  updatePhaseCostPreview(card);
+}
+
+async function loadConfig() {
+  const status = document.getElementById("save-status");
+  status.innerHTML = '<div class="status info">Carregant configuració…</div>';
+  try {
+    const r = await fetch("/api/admin/config", { credentials: "same-origin" });
+    if (r.status === 401) { showLogin(); return; }
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const data = await r.json();
+    configCache = data;
+
+    // Generar phase-cards dinàmicament
+    const phases = ["generate", "adapt", "refine", "complements", "auditor"];
+    const grid = document.getElementById("phase-config-grid");
+    grid.innerHTML = phases.map(p =>
+      renderPhaseCard(p, data.models_available, data.model_costs_eur_per_call, data.model_config[p])
+    ).join("");
+
+    // Lligar listeners a cada card
+    grid.querySelectorAll('.phase-card').forEach(wirePhaseCard);
+
+    // Toggles globals
+    document.getElementById("auditor-enabled").checked = data.auditor_enabled;
+    document.getElementById("pilot-active").checked = data.pilot_active;
+    document.getElementById("budget-max").value = data.admin_budget_eur_max;
+
+    // KPIs
+    document.getElementById("kpi-pilot").textContent = data.pilot_active ? "sí" : "NO";
+    document.getElementById("kpi-pilot").style.color = data.pilot_active ? "#065f46" : "#991b1b";
+    document.getElementById("kpi-auditor").textContent = data.auditor_enabled ? "actiu" : "off";
+    document.getElementById("kpi-budget").textContent = data.admin_budget_eur_max + " €";
+    document.getElementById("kpi-default").textContent = data.atne_model_default;
+
+    status.innerHTML = '<div class="status ok">Configuració carregada · font: ' + (data.source || "supabase") + '</div>';
+    setTimeout(() => { status.innerHTML = ""; }, 2500);
+  } catch (e) {
+    status.innerHTML = '<div class="status error">Error: ' + e.message + '</div>';
+  }
+}
+
+/** Extreu la config {mode, model|models} d'un phase-card per enviar al PUT. */
+function collectPhaseConfig(phase) {
+  const card = document.querySelector(`.phase-card[data-phase="${phase}"]`);
+  if (!card) return null;
+  const mode = card.querySelector('input[type="radio"]:checked')?.value || "fixed";
+  if (mode === "fixed") {
+    return { mode: "fixed", model: card.querySelector('[data-role="fix-select"]').value };
+  }
+  const models = Array.from(card.querySelectorAll('.phase-rotate-list input[type="checkbox"]:checked'))
+    .map(cb => cb.value);
+  return { mode: "rotate", models, strategy: "random" };
+}
+
+async function saveConfig() {
+  const btn = document.getElementById("save-btn");
+  const status = document.getElementById("save-status");
+  btn.disabled = true;
+  status.innerHTML = '<div class="status info">Guardant…</div>';
+
+  // Validació client: cap fase en mode rotate pot estar buida
+  const phases = ["generate", "adapt", "refine", "complements", "auditor"];
+  for (const p of phases) {
+    const cfg = collectPhaseConfig(p);
+    if (cfg && cfg.mode === "rotate" && (!cfg.models || cfg.models.length === 0)) {
+      status.innerHTML = '<div class="status error">Fase <strong>' + p + '</strong>: cal triar almenys un model per al mode Rotació.</div>';
+      btn.disabled = false;
+      return;
+    }
+  }
+
+  const payload = {
+    atne_model_generate: collectPhaseConfig("generate"),
+    atne_model_adapt: collectPhaseConfig("adapt"),
+    atne_model_refine: collectPhaseConfig("refine"),
+    atne_model_complements: collectPhaseConfig("complements"),
+    atne_model_auditor: collectPhaseConfig("auditor"),
+    atne_auditor_enabled: document.getElementById("auditor-enabled").checked,
+    pilot_active: document.getElementById("pilot-active").checked,
+    admin_budget_eur_max: parseFloat(document.getElementById("budget-max").value) || 30,
+  };
+
+  try {
+    const r = await fetch("/api/admin/config", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify(payload),
+    });
+    if (r.status === 401) { showLogin(); return; }
+    const data = await r.json();
+    if (r.ok && data.ok) {
+      status.innerHTML = '<div class="status ok">Desat · ' + data.updated + ' claus actualitzades</div>';
+      // Refresc KPIs
+      loadConfig();
+    } else {
+      status.innerHTML = '<div class="status error">Error: ' + (data.detail || JSON.stringify(data)) + '</div>';
+    }
+  } catch (e) {
+    status.innerHTML = '<div class="status error">Error de xarxa: ' + e.message + '</div>';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── Events recent ──────────────────────────────────────────────
+function modelBadgeClass(model) {
+  if (!model) return "";
+  const m = model.toLowerCase();
+  if (m.includes("gemma")) return "badge-gemma";
+  if (m.includes("gpt")) return "badge-gpt";
+  if (m.includes("mistral")) return "badge-mistral";
+  if (m.includes("gemini")) return "badge-gemini";
+  return "";
+}
+
+async function loadEvents() {
+  const status = document.getElementById("events-status");
+  status.innerHTML = '<div class="status info">Carregant activitat…</div>';
+  try {
+    const r = await fetch("/api/history?limit=20", { credentials: "same-origin" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const data = await r.json();
+    const tbody = document.getElementById("events-tbody");
+    tbody.innerHTML = "";
+    for (const row of (data.items || [])) {
+      const tr = document.createElement("tr");
+      const ctx = row.context_json || {};
+      const params = row.params_json || {};
+      const mpp = row.models_per_phase || {};
+      const adaptModel = mpp.adapt || row.model_used || "—";
+      const date = row.created_at ? new Date(row.created_at).toLocaleString("ca-ES", { dateStyle: "short", timeStyle: "short" }) : "—";
+      const wordsIn = row.n_words_in || (row.original_text ? row.original_text.split(/\s+/).length : "—");
+      const wordsOut = row.n_words_out || (row.adapted_text ? row.adapted_text.split(/\s+/).length : "—");
+      const rating = row.rating != null ? ("⭐".repeat(row.rating) || "—") : "—";
+      tr.innerHTML =
+        '<td>' + date + '</td>' +
+        '<td>' + (row.profile_name || "—") + '</td>' +
+        '<td>' + (ctx.etapa || "—") + '</td>' +
+        '<td><span class="badge ' + modelBadgeClass(adaptModel) + '">' + adaptModel + '</span></td>' +
+        '<td>' + wordsIn + ' → ' + wordsOut + '</td>' +
+        '<td>' + rating + '</td>';
+      tbody.appendChild(tr);
+    }
+    if (!data.items || data.items.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:24px;">Cap activitat recent</td></tr>';
+    }
+    status.innerHTML = "";
+  } catch (e) {
+    status.innerHTML = '<div class="status error">Error carregant activitat: ' + e.message + '</div>';
+  }
+}
+
+// ── Boot ───────────────────────────────────────────────────────
+(async function init() {
+  const authed = await checkAuth();
+  if (authed) showDashboard();
+  else showLogin();
+})();
+</script>
+</body>
+</html>
