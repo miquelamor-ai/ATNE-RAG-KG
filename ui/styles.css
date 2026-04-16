@@ -4663,7 +4663,6 @@ details.bento-card .bento-card-body {
    Gap reduït per minimitzar distància entre tabs/contingut/textarea. */
 #step-2 .editor-card-v2 {
     padding: 0.75rem 0.875rem 0.875rem;
-    width: 100%;
     overflow: hidden;
     box-sizing: border-box;
     display: flex;
@@ -4673,8 +4672,8 @@ details.bento-card .bento-card-body {
 }
 
 #step-2 .pas2-center {
-    width: 100%;
     min-width: 0;
+    max-width: 100%;
     margin: 0;
     padding: 0;
 }
