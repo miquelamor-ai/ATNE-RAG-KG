@@ -181,9 +181,9 @@ body {
 
 .page-title {
     font-family: var(--font-headline);
-    font-size: 2.25rem;
-    font-weight: 800;
-    line-height: 1.1;
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.15;
     color: var(--on-surface);
 }
 
@@ -397,7 +397,7 @@ body {
     font-weight: 600;
 }
 
-/* ── Pas 1: Layout 3 columnes ────────────────────────────── */
+/* ── Pas 1: Layout principal + sidebar ────────────────────── */
 .pas1-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -406,7 +406,7 @@ body {
 
 @media (min-width: 1024px) {
     .pas1-grid {
-        grid-template-columns: 2fr 1fr;
+        grid-template-columns: 3fr 1fr;
         gap: 1.5rem;
         align-items: start;
     }
@@ -414,7 +414,7 @@ body {
 
 @media (min-width: 1280px) {
     .pas1-grid {
-        grid-template-columns: 5fr 2fr;
+        grid-template-columns: 4fr 1.5fr;
     }
 }
 
@@ -422,6 +422,217 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+}
+
+/* ── Secció perfils desats (estil V7) ─────────────────────── */
+.pas1-profiles-section {
+    background-color: var(--surface-container-lowest);
+    border-radius: var(--radius-2xl);
+    padding: 0.875rem 1rem;
+    border: 1px solid rgba(199, 197, 213, 0.1);
+}
+
+.pas1-profiles-section .card-header {
+    margin-bottom: 0.75rem;
+}
+
+.pas1-profiles-section .card-title {
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--outline);
+}
+
+.pas1-profiles-section .icon-box {
+    display: none;
+}
+
+.mode-cards-section .card-header {
+    margin-bottom: 0.75rem;
+}
+
+.mode-cards-section .card-title {
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--outline);
+}
+
+.mode-cards-section .icon-box {
+    display: none;
+}
+
+.profile-tiles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.profile-tile {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--surface-container-low);
+    border-radius: var(--radius-xl);
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: var(--font-body);
+}
+
+.profile-tile:hover {
+    border-color: var(--outline);
+    background: var(--surface-container);
+}
+
+.profile-tile.active {
+    border-color: var(--primary);
+    background: var(--primary-container);
+}
+
+.profile-tile-icon {
+    font-size: 1rem;
+    color: var(--primary);
+    opacity: 0.6;
+}
+
+.profile-tile-name {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--on-surface);
+}
+
+.profile-tile-hint {
+    font-size: 0.6875rem;
+    color: var(--on-surface-variant);
+}
+
+/* ── Botons crear de nou ─────────────────────────────────── */
+.create-buttons {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.create-card {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background: var(--surface-container-lowest);
+    border: 1.5px dashed var(--outline);
+    border-radius: var(--radius-2xl);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: var(--font-body);
+    color: var(--on-surface);
+    text-align: left;
+}
+
+.create-card:hover {
+    border-color: var(--primary);
+    border-style: solid;
+    background: var(--surface-container);
+}
+
+.create-card.active {
+    border-color: var(--primary);
+    border-style: solid;
+    background: var(--primary-container);
+}
+
+.create-card-icon {
+    font-size: 1.25rem;
+    color: var(--primary);
+    opacity: 0.7;
+    flex-shrink: 0;
+}
+
+.create-card-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.create-card-text strong {
+    font-size: 0.8125rem;
+}
+
+.create-card-desc {
+    font-size: 0.6875rem;
+    color: var(--on-surface-variant);
+}
+
+/* ── Grup details toggle ─────────────────────────────────── */
+.grup-add-profiles-toggle {
+    background-color: var(--surface-container-lowest);
+    border-radius: var(--radius-2xl);
+    padding: 0.875rem 1rem;
+    border: 1px solid rgba(199, 197, 213, 0.1);
+}
+
+.grup-add-profiles-toggle summary {
+    cursor: pointer;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--on-surface);
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+}
+
+.grup-add-profiles-toggle[open] summary {
+    margin-bottom: 0.75rem;
+}
+
+/* ── Context chips (sidebar) ─────────────────────────────── */
+.ctx-chips-section {
+    margin-bottom: 0.5rem;
+}
+
+.ctx-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+
+.ctx-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.625rem;
+    background: var(--surface-container-low);
+    border: 1px solid transparent;
+    border-radius: var(--radius-xl);
+    font-size: 0.6875rem;
+    color: var(--on-surface);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: var(--font-body);
+}
+
+.ctx-chip:hover {
+    border-color: var(--primary);
+}
+
+.ctx-chip.active {
+    border-color: var(--primary);
+    background: var(--primary-container);
+    color: var(--on-primary-container);
+}
+
+/* Context save inline */
+.ctx-save-inline {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(199, 197, 213, 0.15);
+}
+
+.ctx-save-row {
+    display: flex;
+    gap: 0.5rem;
 }
 
 .pas1-compact {
@@ -436,13 +647,29 @@ body {
     font-size: 1.125rem;
 }
 
-/* Sidebar dreta (context docent) */
+/* Sidebar dreta (context docent) — estil V7 */
 .pas1-sidebar {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.875rem;
     position: sticky;
     top: 1rem;
+}
+
+.pas1-sidebar-card .card-header {
+    margin-bottom: 0.625rem;
+}
+
+.pas1-sidebar-card .card-title {
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--outline);
+}
+
+.pas1-sidebar-card .icon-box {
+    display: none;
 }
 
 .pas1-sidebar-card {

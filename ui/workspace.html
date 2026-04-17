@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATNE Workspace — Prototip V7</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --surface: #f8f9ff;
+  --surface-low: #eff4ff;
+  --surface-lowest: #ffffff;
+  --surface-high: #dce9ff;
+  --surface-highest: #d3e4fe;
+  --on-surface: #0b1c30;
+  --on-surface-variant: #464653;
+  --primary: #3337a6;
+  --primary-container: #4c51bf;
+  --on-primary: #ffffff;
+  --on-primary-container: #d4d5ff;
+  --outline: #767684;
+  --outline-variant: #c7c5d5;
+  --inverse-surface: #213145;
+  --inverse-on-surface: #eaf1ff;
+  --error: #ba1a1a;
+  --error-container: #ffdad6;
+  --font-body: 'Inter', sans-serif;
+  --font-head: 'Plus Jakarta Sans', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-body); background: var(--surface); color: var(--on-surface); overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+.material-symbols-outlined { font-size: inherit; vertical-align: middle; }
+
+/* Header mínim */
+.ws-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.5rem 1.25rem;
+  border-bottom: 1px solid rgba(199,197,213,0.15);
+  background: var(--surface-lowest);
+  flex-shrink: 0;
+}
+.ws-logo { font-family: var(--font-head); font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 0.5rem; }
+.ws-step-tabs { display: flex; gap: 0.25rem; }
+.ws-step-tab { background: transparent; border: 0; padding: 0.375rem 0.75rem; font: 500 0.8125rem var(--font-body); color: var(--on-surface-variant); cursor: pointer; border-radius: 0.5rem; }
+.ws-step-tab.active { background: var(--surface-low); color: var(--primary); font-weight: 600; }
+.ws-header-right { display: flex; gap: 0.5rem; color: var(--on-surface-variant); }
+.ws-header-right button { background: transparent; border: 0; padding: 0.375rem; cursor: pointer; color: inherit; border-radius: 0.5rem; display: flex; }
+.ws-header-right button:hover { background: var(--surface-low); }
+
+/* Main layout */
+.ws-main { display: flex; flex: 1; overflow: hidden; }
+
+/* Icon rail esquerra (opcional) */
+.ws-rail {
+  width: 64px; flex-shrink: 0; display: flex; flex-direction: column; gap: 0.25rem;
+  padding: 0.75rem 0.5rem; background: var(--surface-lowest);
+  border-right: 1px solid rgba(199,197,213,0.1);
+}
+.ws-rail button {
+  display: flex; flex-direction: column; align-items: center; gap: 0.125rem;
+  padding: 0.625rem 0.25rem; border: 0; border-radius: 0.75rem;
+  background: transparent; color: var(--on-surface-variant); cursor: pointer;
+  font: 500 0.625rem var(--font-body); letter-spacing: 0.02em;
+  transition: all 0.15s;
+}
+.ws-rail button span.material-symbols-outlined { font-size: 1.25rem; }
+.ws-rail button.active { background: var(--surface-low); color: var(--primary); }
+.ws-rail button:hover:not(.active) { background: var(--surface-low); color: var(--on-surface); }
+
+/* Sidebar esquerra (perfil actiu) */
+.ws-sidebar-left {
+  width: 180px; flex-shrink: 0;
+  background: var(--surface-low);
+  display: flex; flex-direction: column;
+  padding: 1rem 0.75rem; gap: 1.25rem;
+  overflow-y: auto;
+}
+.ws-side-label {
+  font: 600 0.625rem var(--font-body);
+  color: var(--outline);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+.perfil-card {
+  background: var(--surface-lowest);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  display: flex; flex-direction: column; gap: 0.5rem;
+  border: 1px solid rgba(199,197,213,0.1);
+}
+.perfil-head { display: flex; gap: 0.5rem; align-items: center; }
+.perfil-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-container));
+  color: var(--on-primary); display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 0.75rem;
+}
+.perfil-info { flex: 1; min-width: 0; }
+.perfil-name { font: 600 0.8125rem var(--font-body); }
+.perfil-meta { font: 500 0.6875rem var(--font-body); color: var(--on-surface-variant); }
+.perfil-badge {
+  display: inline-flex; padding: 0.125rem 0.5rem;
+  font: 700 0.5625rem var(--font-body); letter-spacing: 0.05em;
+  background: var(--primary-container); color: var(--on-primary-container);
+  border-radius: 0.75rem; text-transform: uppercase;
+  margin-top: 0.25rem;
+}
+.perfil-metrics { display: flex; gap: 0.5rem; font: 500 0.6875rem var(--font-body); color: var(--on-surface-variant); }
+.perfil-metric { display: flex; gap: 0.25rem; }
+.perfil-metric strong { color: var(--on-surface); font-weight: 700; }
+
+.ajuts-list {
+  display: flex; flex-direction: column; gap: 0.375rem;
+}
+.ajut-chk {
+  display: flex; gap: 0.5rem; align-items: center; cursor: pointer;
+  font: 500 0.75rem var(--font-body);
+}
+.ajut-chk input { width: 14px; height: 14px; accent-color: var(--primary); }
+
+.side-details {
+  background: var(--surface-lowest);
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  font: 500 0.75rem var(--font-body);
+  border: 1px solid rgba(199,197,213,0.1);
+}
+.side-details summary { cursor: pointer; color: var(--on-surface-variant); list-style: none; }
+.side-details summary::-webkit-details-marker { display: none; }
+
+.btn-change-profile {
+  margin-top: auto;
+  background: transparent; border: 0; padding: 0.5rem;
+  font: 500 0.75rem var(--font-body); color: var(--primary);
+  cursor: pointer; display: flex; align-items: center; gap: 0.375rem;
+  justify-content: center;
+}
+
+/* Center — text protagonista */
+.ws-center {
+  flex: 1; display: flex; flex-direction: column;
+  padding: 0.75rem; overflow: hidden;
+}
+.editor-card {
+  flex: 1;
+  background: var(--surface-lowest);
+  border-radius: 1rem;
+  box-shadow: 0 8px 30px rgba(11,28,48,0.04);
+  border: 1px solid rgba(199,197,213,0.1);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+.editor-tabs {
+  display: flex; gap: 1.25rem; padding: 0.75rem 2rem 0;
+  border-bottom: 1px solid rgba(199,197,213,0.15);
+}
+.editor-tab {
+  background: transparent; border: 0; padding: 0.5rem 0 0.625rem;
+  font: 500 0.8125rem var(--font-body); color: var(--on-surface-variant);
+  cursor: pointer; display: flex; align-items: center; gap: 0.375rem;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.editor-tab .dot {
+  display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--primary); margin-left: 0.25rem;
+}
+.editor-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+.editor-tab:hover:not(.active) { color: var(--on-surface); }
+.editor-compare {
+  margin-left: auto; display: flex; align-items: center; gap: 0.5rem;
+  font: 500 0.75rem var(--font-body); color: var(--on-surface-variant);
+}
+.editor-compare input { accent-color: var(--primary); }
+
+.editor-content {
+  flex: 1; overflow-y: auto; padding: 2.5rem 3.5rem 4rem; outline: none;
+}
+.editor-content h1 {
+  font-family: var(--font-head); font-weight: 700; font-size: 1.75rem;
+  color: var(--on-surface); margin-bottom: 1.5rem;
+}
+.editor-content p {
+  font: 400 0.9375rem/1.7 var(--font-body); color: var(--on-surface-variant);
+  margin-bottom: 1rem;
+}
+.editor-content em.term {
+  color: var(--primary); font-style: normal; font-weight: 500;
+  border-bottom: 1px dashed var(--primary); cursor: pointer;
+}
+
+/* Callout dins del text (per a complements inline) */
+.editor-callout {
+  background: var(--surface-low);
+  border-left: 3px solid var(--primary);
+  border-radius: 0.5rem;
+  padding: 1rem 1.25rem;
+  margin: 1rem 0;
+  font: 400 0.875rem/1.6 var(--font-body);
+}
+.editor-callout h3 {
+  font: 600 0.875rem var(--font-body); color: var(--primary);
+  margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.375rem;
+}
+.editor-callout ul { margin-left: 1.25rem; color: var(--on-surface-variant); }
+.editor-callout ul li { margin-bottom: 0.375rem; }
+
+.footer-pill {
+  position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%);
+  background: var(--inverse-surface); color: var(--inverse-on-surface);
+  border-radius: 999px; padding: 0.375rem 1rem;
+  font: 500 0.6875rem var(--font-body);
+  display: flex; align-items: center; gap: 0.375rem;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* Sidebar dreta — Eines + Accions */
+.ws-sidebar-right {
+  width: 200px; flex-shrink: 0;
+  background: var(--surface-low);
+  display: flex; flex-direction: column;
+  padding: 1rem 0.75rem; gap: 1.25rem;
+  overflow-y: auto;
+  border-left: 1px solid rgba(199,197,213,0.1);
+}
+
+/* Mode entrada (4 icones) */
+.mode-icons {
+  display: flex; gap: 0.25rem;
+  background: var(--surface-highest); padding: 0.25rem;
+  border-radius: 0.5rem;
+}
+.mode-icons button {
+  flex: 1; padding: 0.375rem; border: 0; background: transparent;
+  color: var(--on-surface-variant); border-radius: 0.375rem; cursor: pointer;
+  display: flex; justify-content: center; align-items: center;
+}
+.mode-icons button span { font-size: 1.125rem; }
+.mode-icons button.active { background: var(--surface-lowest); color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.mode-icons button:hover:not(.active) { background: rgba(255,255,255,0.5); color: var(--on-surface); }
+
+/* Edició grid */
+.edit-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.25rem;
+  background: var(--surface-highest); padding: 0.375rem; border-radius: 0.5rem;
+}
+.edit-grid button {
+  padding: 0.5rem 0; border: 0; background: transparent;
+  color: var(--on-surface-variant); border-radius: 0.375rem; cursor: pointer;
+  display: flex; justify-content: center; align-items: center;
+}
+.edit-grid button span { font-size: 1.125rem; }
+.edit-grid button:hover { background: var(--surface-lowest); color: var(--on-surface); }
+.edit-grid button.danger { color: var(--error); }
+.edit-grid button.danger:hover { background: rgba(186,26,26,0.08); }
+
+/* Refinar buttons */
+.refine-list { display: flex; flex-direction: column; gap: 0.375rem; }
+.refine-btn, .refine-select {
+  width: 100%; padding: 0.5rem 0.75rem;
+  background: var(--surface-lowest);
+  border: 1px solid rgba(199,197,213,0.3);
+  border-radius: 0.5rem;
+  font: 500 0.75rem var(--font-body);
+  color: var(--on-surface);
+  cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+  font-family: var(--font-body);
+}
+.refine-btn:hover, .refine-select:hover { border-color: rgba(199,197,213,0.6); }
+.refine-btn span.material-symbols-outlined { font-size: 1rem; color: var(--primary); }
+.refine-select { appearance: none; background-image: none; position: relative; }
+
+/* Complements toggles */
+.comps-box {
+  background: var(--surface-lowest);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  display: flex; flex-direction: column; gap: 0.75rem;
+  border: 1px solid rgba(199,197,213,0.15);
+}
+.comp-row {
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer;
+}
+.comp-label { font: 500 0.75rem var(--font-body); color: var(--on-surface-variant); }
+.switch {
+  position: relative; width: 32px; height: 16px;
+  background: rgba(199,197,213,0.5); border-radius: 999px;
+  transition: background 0.2s;
+}
+.switch::after {
+  content: ''; position: absolute; left: 2px; top: 2px;
+  width: 12px; height: 12px; background: #fff; border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+.comp-row input { display: none; }
+.comp-row input:checked + .switch { background: var(--primary); }
+.comp-row input:checked + .switch::after { transform: translateX(16px); }
+
+/* CTA adaptar */
+.cta-adapt {
+  margin-top: auto;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, var(--primary), var(--primary-container));
+  color: var(--on-primary); border: 0; border-radius: 0.75rem;
+  font: 600 0.875rem var(--font-body); cursor: pointer;
+  display: flex; justify-content: center; align-items: center; gap: 0.5rem;
+  box-shadow: 0 8px 16px -4px rgba(51,55,166,0.3);
+  transition: all 0.2s;
+}
+.cta-adapt:hover { transform: translateY(-1px); box-shadow: 0 12px 20px -4px rgba(51,55,166,0.4); }
+
+/* Amagar secció mode entrada al Pas 3 */
+.pas3 .mode-section { display: none; }
+.pas3 .cta-adapt { display: none; }
+
+/* Versions list (Pas 3) */
+.ws-versions {
+  display: flex; flex-direction: column; gap: 0.25rem;
+  padding: 0.25rem 0;
+}
+.ws-versions-label {
+  font: 600 0.625rem var(--font-body);
+  color: var(--outline);
+  text-transform: uppercase; letter-spacing: 0.1em;
+  margin: 0.5rem 0 0.25rem;
+}
+.ver-item {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.5rem 0.625rem; cursor: pointer;
+  border-radius: 0.5rem; border: 1px solid transparent;
+  font: 500 0.75rem var(--font-body); color: var(--on-surface);
+}
+.ver-item:hover { background: var(--surface-lowest); }
+.ver-item.active { background: var(--surface-lowest); border-color: var(--primary); }
+.ver-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  border: 2px solid var(--outline-variant);
+}
+.ver-item.active .ver-dot { border-color: var(--primary); background: var(--primary); }
+
+/* Acció principal Pas 3 */
+.actions-p3 {
+  display: flex; flex-direction: column; gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.action-btn {
+  padding: 0.625rem 0.75rem;
+  background: var(--surface-lowest);
+  border: 1px solid rgba(199,197,213,0.3);
+  border-radius: 0.5rem;
+  font: 500 0.8125rem var(--font-body);
+  color: var(--on-surface); cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--font-body);
+}
+.action-btn:hover { border-color: var(--primary); }
+.action-btn.primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-container));
+  color: var(--on-primary); border: 0;
+}
+.action-btn span.material-symbols-outlined { font-size: 1rem; }
+</style>
+</head>
+<body>
+
+<!-- Header mínim -->
+<header class="ws-header">
+  <div class="ws-logo">
+    <span class="material-symbols-outlined">auto_stories</span>
+    ATNE
+  </div>
+  <nav class="ws-step-tabs">
+    <button class="ws-step-tab" onclick="gotoStep(1)">Pas 1 · Per a qui</button>
+    <button class="ws-step-tab active" id="tab-step-2" onclick="gotoStep(2)">Pas 2 · Text</button>
+    <button class="ws-step-tab" id="tab-step-3" onclick="gotoStep(3)">Pas 3 · Adaptacions</button>
+  </nav>
+  <div class="ws-header-right">
+    <button title="Ajuda"><span class="material-symbols-outlined">help</span></button>
+    <button title="Configuració"><span class="material-symbols-outlined">settings</span></button>
+    <button title="Compte"><span class="material-symbols-outlined">account_circle</span></button>
+  </div>
+</header>
+
+<div class="ws-main">
+
+  <!-- Sidebar esquerra (perfil actiu a Pas 2, llista versions a Pas 3) -->
+  <aside class="ws-sidebar-left" id="sidebar-left">
+
+    <!-- Pas 2: perfil actiu -->
+    <div id="sl-pas2">
+      <span class="ws-side-label">Per a qui</span>
+      <div class="perfil-card" style="margin-top:0.5rem;">
+        <div class="perfil-head">
+          <div class="perfil-avatar">M</div>
+          <div class="perfil-info">
+            <div class="perfil-name">Marc</div>
+            <div class="perfil-meta">TDAH, 3r ESO</div>
+          </div>
+        </div>
+        <span class="perfil-badge">Alumne</span>
+        <div class="perfil-metrics">
+          <span class="perfil-metric"><strong>2</strong> conductes</span>
+          <span class="perfil-metric"><strong>4</strong> ajuts</span>
+        </div>
+      </div>
+
+      <div style="margin-top:1.25rem;">
+        <span class="ws-side-label">Ajuts actius</span>
+        <div class="ajuts-list" style="margin-top:0.5rem;">
+          <label class="ajut-chk"><input type="checkbox" checked> Fragmentar</label>
+          <label class="ajut-chk"><input type="checkbox" checked> Una idea/frase</label>
+          <label class="ajut-chk"><input type="checkbox" checked> Instruccions num.</label>
+          <label class="ajut-chk"><input type="checkbox" checked> Vocabulari frequent</label>
+        </div>
+      </div>
+
+      <details class="side-details" style="margin-top:1rem;">
+        <summary>▸ Condicions o situacions</summary>
+      </details>
+    </div>
+
+    <!-- Pas 3: llista de versions (ocult per defecte) -->
+    <div id="sl-pas3" hidden>
+      <span class="ws-side-label">Grup 3r ESO Ciències</span>
+
+      <div class="ws-versions-label">Nivells base</div>
+      <div class="ws-versions">
+        <div class="ver-item" onclick="selectVersion(this,'access')"><span class="ver-dot"></span>Accessible</div>
+        <div class="ver-item active" onclick="selectVersion(this,'std')"><span class="ver-dot"></span>Estàndard</div>
+        <div class="ver-item" onclick="selectVersion(this,'enr')"><span class="ver-dot"></span>Exigent</div>
+      </div>
+
+      <div class="ws-versions-label">Perfils individuals</div>
+      <div class="ws-versions">
+        <div class="ver-item" onclick="selectVersion(this,'mireia')"><span class="ver-dot"></span>Mireia (TEA)</div>
+        <div class="ver-item" onclick="selectVersion(this,'liu')"><span class="ver-dot"></span>Liu (A1)</div>
+        <div class="ver-item" onclick="selectVersion(this,'amina')"><span class="ver-dot"></span>Amina (A2)</div>
+        <div class="ver-item" onclick="selectVersion(this,'pau')"><span class="ver-dot"></span>Pau (TDAH)</div>
+        <div class="ver-item" onclick="selectVersion(this,'jana')"><span class="ver-dot"></span>Jana (AC)</div>
+      </div>
+    </div>
+
+    <button class="btn-change-profile" onclick="gotoStep(1)">
+      <span class="material-symbols-outlined" style="font-size:1rem;">sync</span>
+      Canviar perfil
+    </button>
+  </aside>
+
+  <!-- Centre: editor amb pestanyes -->
+  <section class="ws-center">
+    <div class="editor-card">
+      <div class="editor-tabs" id="editor-tabs">
+        <button class="editor-tab active" data-tab="text" onclick="selectTab(this,'text')">
+          <span class="material-symbols-outlined" style="font-size:1rem;">article</span>
+          Text
+        </button>
+        <button class="editor-tab" data-tab="glossari" onclick="selectTab(this,'glossari')" hidden>
+          <span class="material-symbols-outlined" style="font-size:1rem;">menu_book</span>
+          Glossari <span class="dot"></span>
+        </button>
+        <button class="editor-tab" data-tab="esquema" onclick="selectTab(this,'esquema')" hidden>
+          <span class="material-symbols-outlined" style="font-size:1rem;">account_tree</span>
+          Esquema <span class="dot"></span>
+        </button>
+        <button class="editor-tab" data-tab="preguntes" onclick="selectTab(this,'preguntes')" hidden>
+          <span class="material-symbols-outlined" style="font-size:1rem;">help</span>
+          Preguntes
+        </button>
+        <button class="editor-tab" data-tab="bastides" onclick="selectTab(this,'bastides')" hidden>
+          <span class="material-symbols-outlined" style="font-size:1rem;">stairs</span>
+          Bastides
+        </button>
+        <label class="editor-compare" id="compare-toggle" hidden>
+          <input type="checkbox"> Comparar original
+        </label>
+      </div>
+
+      <div class="editor-content" contenteditable="true" id="editor-content">
+        <h1>La fotosíntesi</h1>
+        <p>La <em class="term">fotosíntesi</em> és el procés mitjançant el qual les plantes, les algues i alguns bacteris converteixen l'energia de la llum solar en energia química, emmagatzemada en forma de sucres. Aquest procés és fonamental per a la vida a la Terra, ja que és la principal font de matèria orgànica per a gairebé tots els ecosistemes i allibera oxigen a l'atmosfera com a subproducte.</p>
+        <p>El procés té lloc principalment a les fulles de les plantes, dins d'uns orgànuls cel·lulars anomenats <em class="term">cloroplasts</em>. Aquests contenen <em class="term">clorofil·la</em>, un pigment verd que absorbeix la llum solar. La fotosíntesi es divideix en dues fases principals: la fase lluminosa, que requereix llum directa per produir ATP i NADPH, i la fase fosca (o cicle de Calvin), que utilitza aquestes molècules per fixar el diòxid de carboni i produir <em class="term">glucosa</em>.</p>
+        <p>A més de proporcionar aliment per a la planta, la glucosa produïda s'utilitza per construir altres molècules estructurals, com la cel·lulosa, o s'emmagatzema com a midó per a un ús futur. L'impacte de la fotosíntesi a nivell global és immens, regulant els nivells de diòxid de carboni a l'atmosfera i mitigant així els efectes del canvi climàtic.</p>
+      </div>
+
+      <div class="footer-pill">
+        <span class="material-symbols-outlined" style="font-size:0.9375rem;">segment</span>
+        342 paraules
+      </div>
+    </div>
+  </section>
+
+  <!-- Sidebar dreta: eines + accions -->
+  <aside class="ws-sidebar-right" id="sidebar-right">
+
+    <!-- Pas 2: mode entrada -->
+    <div class="mode-section" id="mode-section">
+      <span class="ws-side-label">Mode d'entrada</span>
+      <div class="mode-icons" style="margin-top:0.5rem;">
+        <button class="active" title="Escriure"><span class="material-symbols-outlined">keyboard</span></button>
+        <button title="Pujar"><span class="material-symbols-outlined">upload_file</span></button>
+        <button title="Generar"><span class="material-symbols-outlined">smart_toy</span></button>
+        <button title="Recuperar"><span class="material-symbols-outlined">history</span></button>
+      </div>
+    </div>
+
+    <!-- Edició bàsica -->
+    <div>
+      <span class="ws-side-label">Edició</span>
+      <div class="edit-grid" style="margin-top:0.5rem;">
+        <button title="Negreta"><span class="material-symbols-outlined">format_bold</span></button>
+        <button title="Cursiva"><span class="material-symbols-outlined">format_italic</span></button>
+        <button title="Ressaltar"><span class="material-symbols-outlined">format_ink_highlighter</span></button>
+        <button title="Desfer"><span class="material-symbols-outlined">undo</span></button>
+        <button title="Refer"><span class="material-symbols-outlined">redo</span></button>
+        <button class="danger" title="Esborrar tot"><span class="material-symbols-outlined">delete</span></button>
+      </div>
+    </div>
+
+    <!-- Refinar -->
+    <div>
+      <span class="ws-side-label">Refinar</span>
+      <div class="refine-list" style="margin-top:0.5rem;">
+        <button class="refine-btn" type="button">Refinar text
+          <span class="material-symbols-outlined">auto_fix</span>
+        </button>
+        <select class="refine-select">
+          <option>Longitud: Mantenir</option>
+          <option>Longitud: Més curt</option>
+          <option>Longitud: Més llarg</option>
+        </select>
+        <button class="refine-btn" type="button">Simplificar
+          <span class="material-symbols-outlined">compress</span>
+        </button>
+        <select class="refine-select">
+          <option>To: Acadèmic</option>
+          <option>To: Planer</option>
+          <option>To: Narratiu</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Complements (Pas 2) o Accions (Pas 3) -->
+    <div id="comps-section">
+      <span class="ws-side-label">Complements</span>
+      <div class="comps-box" style="margin-top:0.5rem;">
+        <label class="comp-row">
+          <span class="comp-label">Glossari</span>
+          <input type="checkbox" checked> <span class="switch"></span>
+        </label>
+        <label class="comp-row">
+          <span class="comp-label">Esquema visual</span>
+          <input type="checkbox" checked> <span class="switch"></span>
+        </label>
+        <label class="comp-row">
+          <span class="comp-label">Preguntes</span>
+          <input type="checkbox"> <span class="switch"></span>
+        </label>
+        <label class="comp-row">
+          <span class="comp-label">Bastides</span>
+          <input type="checkbox"> <span class="switch"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Accions Pas 3 (ocult per defecte) -->
+    <div id="actions-p3-section" hidden>
+      <span class="ws-side-label">Accions</span>
+      <div class="actions-p3" style="margin-top:0.5rem;">
+        <button class="action-btn">Refer amb rúbrica
+          <span class="material-symbols-outlined">auto_awesome</span>
+        </button>
+        <button class="action-btn primary">Exportar
+          <span class="material-symbols-outlined">arrow_drop_down</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- CTA adaptar -->
+    <button class="cta-adapt" id="cta-adapt" onclick="gotoStep(3)">
+      Adaptar
+      <span class="material-symbols-outlined">arrow_forward</span>
+    </button>
+  </aside>
+
+</div>
+
+<script>
+// Dades mock del glossari
+const GLOSSARI_HTML = `
+<h1>Glossari</h1>
+<p style="color:var(--on-surface-variant);margin-bottom:1.5rem;">Termes clau del text sobre la fotosíntesi.</p>
+<div style="display:flex;flex-direction:column;gap:1rem;">
+  <div><strong style="color:var(--primary);">fotosíntesi</strong><br>Procés pel qual les plantes utilitzen la llum del sol per fabricar el seu propi aliment a partir de diòxid de carboni i aigua.</div>
+  <div><strong style="color:var(--primary);">clorofil·la</strong><br>Substància de color verd present a les fulles que capta la llum solar necessària per a la fotosíntesi.</div>
+  <div><strong style="color:var(--primary);">cloroplast</strong><br>Part de la cèl·lula vegetal on es troba la clorofil·la i on té lloc la fotosíntesi.</div>
+  <div><strong style="color:var(--primary);">glucosa</strong><br>Tipus de sucre que la planta produeix com a aliment durant la fotosíntesi.</div>
+  <div><strong style="color:var(--primary);">oxigen</strong><br>Gas essencial per a la respiració que les plantes alliberen a l'aire com a resultat de la fotosíntesi.</div>
+</div>`;
+
+const TEXT_HTML = document.getElementById('editor-content').innerHTML;
+
+const ESQUEMA_HTML = `
+<h1>Esquema visual</h1>
+<div style="padding:1rem;background:var(--surface-low);border-radius:0.75rem;">
+  <strong>La fotosíntesi</strong>
+  <ul style="margin-top:1rem;list-style:none;">
+    <li>• <strong>Entrada</strong>: llum solar + aigua + CO₂
+      <ul style="margin-left:1.5rem;margin-top:0.5rem;list-style:disc;">
+        <li>Capta al cloroplast (clorofil·la)</li>
+      </ul>
+    </li>
+    <li style="margin-top:0.75rem;">• <strong>Procés</strong>: fase lluminosa + fase fosca</li>
+    <li style="margin-top:0.75rem;">• <strong>Sortida</strong>: glucosa (aliment) + oxigen</li>
+  </ul>
+</div>`;
+
+const PREGUNTES_HTML = `
+<h1>Preguntes de comprensió</h1>
+<ol style="margin-left:1.25rem;display:flex;flex-direction:column;gap:0.75rem;">
+  <li>Què és la fotosíntesi?</li>
+  <li>On té lloc la fotosíntesi dins de la cèl·lula vegetal?</li>
+  <li>Quins elements necessita la planta per fer la fotosíntesi?</li>
+  <li>Què produeix la planta gràcies a la fotosíntesi?</li>
+  <li>Per què és important la fotosíntesi per a tots els éssers vius?</li>
+</ol>`;
+
+const BASTIDES_HTML = `
+<h1>Bastides lingüístiques</h1>
+<p style="color:var(--on-surface-variant);">Estructures per ajudar a parlar i escriure sobre la fotosíntesi.</p>
+<div style="margin-top:1rem;display:flex;flex-direction:column;gap:0.75rem;">
+  <div style="padding:0.75rem 1rem;background:var(--surface-low);border-radius:0.5rem;"><strong>Definir:</strong> La fotosíntesi és un procés que...</div>
+  <div style="padding:0.75rem 1rem;background:var(--surface-low);border-radius:0.5rem;"><strong>Explicar:</strong> Això passa perquè...</div>
+  <div style="padding:0.75rem 1rem;background:var(--surface-low);border-radius:0.5rem;"><strong>Comparar:</strong> A diferència de... la fotosíntesi...</div>
+</div>`;
+
+function selectTab(el, tab) {
+  document.querySelectorAll('.editor-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const content = document.getElementById('editor-content');
+  const map = { text: TEXT_HTML, glossari: GLOSSARI_HTML, esquema: ESQUEMA_HTML, preguntes: PREGUNTES_HTML, bastides: BASTIDES_HTML };
+  content.innerHTML = map[tab] || TEXT_HTML;
+}
+
+function selectVersion(el, key) {
+  document.querySelectorAll('.ver-item').forEach(v => v.classList.remove('active'));
+  el.classList.add('active');
+  // Aquí es carregaria el text adaptat de cada versió (mock: deixem el mateix)
+}
+
+function gotoStep(n) {
+  if (n === 1) {
+    // Al projecte real redirigiria al Pas 1
+    window.location.href = '/';
+    return;
+  }
+  // Actualitzar tabs header
+  document.getElementById('tab-step-2').classList.toggle('active', n === 2);
+  document.getElementById('tab-step-3').classList.toggle('active', n === 3);
+
+  const isPas3 = n === 3;
+  document.body.classList.toggle('pas3', isPas3);
+
+  // Sidebar esquerra
+  document.getElementById('sl-pas2').hidden = isPas3;
+  document.getElementById('sl-pas3').hidden = !isPas3;
+
+  // Pestanyes complements (només Pas 3)
+  document.querySelectorAll('.editor-tab[data-tab]').forEach(t => {
+    if (t.dataset.tab !== 'text') t.hidden = !isPas3;
+  });
+  document.getElementById('compare-toggle').hidden = !isPas3;
+
+  // Seleccionar text tab per defecte
+  document.querySelectorAll('.editor-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('.editor-tab[data-tab="text"]').classList.add('active');
+  document.getElementById('editor-content').innerHTML = TEXT_HTML;
+
+  // Sidebar dreta: Pas 2 = complements toggles, Pas 3 = accions
+  document.getElementById('mode-section').hidden = isPas3;
+  document.getElementById('comps-section').hidden = isPas3;
+  document.getElementById('actions-p3-section').hidden = !isPas3;
+  document.getElementById('cta-adapt').hidden = isPas3;
+}
+
+// Estat inicial: Pas 2
+gotoStep(2);
+</script>
+</body>
+</html>

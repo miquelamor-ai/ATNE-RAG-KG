@@ -419,6 +419,8 @@ document.addEventListener("DOMContentLoaded", () => {
     updateMecrPreview();
     updateStickyBar();
     updateAsideProgress();
+    // Pas 1 redissenyat: perfils desats, crear nou, context chips
+    initPas1Redesign();
     // Pilot 1B: carrega config runtime dels models (no crític si falla)
     loadRuntimeConfig();
 });
@@ -1038,6 +1040,7 @@ async function saveProfile() {
     await loadProfileList();
     // Seleccionar el perfil acabat de desar
     document.getElementById("profile-selector").value = key;
+    renderProfileTiles(); // Actualitzar tiles
     alert(`Perfil "${profile.nom}" desat correctament.`);
 }
 
@@ -1218,8 +1221,10 @@ function saveContextProfile() {
     local[key] = ctx;
     saveLocalContextProfiles(local);
     loadContextProfileList();
-    document.getElementById("ctx-profile-selector").value = key;
+    const sel = document.getElementById("ctx-profile-selector");
+    if (sel) sel.value = key;
     if (nameEl) nameEl.value = "";
+    renderContextChips(key); // Actualitzar chips
 }
 
 function loadContextProfile() {
@@ -1295,6 +1300,163 @@ function renderGrupProfileChips() {
 function getGrupProfiles() {
     const local = getLocalProfiles();
     return grupProfileKeys.map(key => local[key]).filter(Boolean);
+}
+
+
+// ── Pas 1 redissenyat: perfils desats + crear nou + panell expandible ────
+
+let currentMode = null; // null | 'alumne' | 'grup'
+
+function selectMode(mode) {
+    currentMode = mode;
+
+    // Marcar botons crear
+    document.querySelectorAll('.create-card').forEach(c => {
+        c.classList.toggle('active', c.dataset.mode === mode);
+    });
+
+    // Activar radio hidden per compat getAdaptMode()
+    const radio = document.querySelector(`input[name="adapt-mode"][value="${mode}"]`);
+    if (radio) radio.checked = true;
+
+    // Mostrar/ocultar panells
+    const alumnePanel = document.getElementById("alumne-panel");
+    const grupPanel = document.getElementById("grup-panel");
+    if (alumnePanel) alumnePanel.style.display = mode === "alumne" ? "" : "none";
+    if (grupPanel) grupPanel.style.display = mode === "grup" ? "" : "none";
+
+    // Label desfase
+    const label = document.getElementById("bloc-a-label");
+    if (label) {
+        label.textContent = mode === "grup"
+            ? "El grup globalment llegeix i comprèn..."
+            : "Llegeix i comprèn...";
+    }
+
+    if (mode === "grup") {
+        updateMecrPreview();
+        populateGrupProfilePicker();
+        renderGrupProfileChips();
+    }
+
+    // Desmarcar profile tiles
+    document.querySelectorAll('.profile-tile').forEach(t => t.classList.remove('active'));
+}
+
+function renderProfileTiles() {
+    const section = document.getElementById("profiles-section");
+    const containerAlumne = document.getElementById("profile-tiles-alumne");
+    const containerGrup = document.getElementById("profile-tiles-grup");
+    if (!section || !containerAlumne) return;
+
+    const profiles = getLocalProfiles();
+    const entries = Object.entries(profiles);
+
+    if (entries.length === 0) {
+        section.style.display = "none";
+        return;
+    }
+
+    section.style.display = "";
+
+    // Renderitzar tiles d'alumnes
+    containerAlumne.innerHTML = entries.map(([key, p]) => {
+        const nBehaviors = (p._behaviors || []).length;
+        const nAjuts = (p._ajuts || []).length;
+        const hint = nBehaviors > 0 ? `${nBehaviors} conductes, ${nAjuts} ajuts` : "";
+        return `<div class="profile-tile" data-key="${key}" data-type="alumne">
+            <span class="material-symbols-outlined profile-tile-icon">person</span>
+            <span class="profile-tile-name">${p.nom || key}</span>
+            ${hint ? `<span class="profile-tile-hint">${hint}</span>` : ""}
+        </div>`;
+    }).join("");
+
+    // Bind clicks
+    containerAlumne.querySelectorAll(".profile-tile").forEach(tile => {
+        tile.addEventListener("click", () => handleProfileTileClick(tile.dataset.key));
+    });
+}
+
+function handleProfileTileClick(key) {
+    const local = getLocalProfiles();
+    const profile = local[key];
+    if (!profile) return;
+
+    // Marcar tile actiu
+    document.querySelectorAll('.profile-tile').forEach(t => t.classList.remove('active'));
+    const tile = document.querySelector(`.profile-tile[data-key="${key}"]`);
+    if (tile) tile.classList.add('active');
+
+    // Desmarcar botons crear
+    document.querySelectorAll('.create-card').forEach(c => c.classList.remove('active'));
+
+    // Activar mode alumne i mostrar panell
+    currentMode = "alumne";
+    const radio = document.querySelector('input[name="adapt-mode"][value="alumne"]');
+    if (radio) radio.checked = true;
+    const alumnePanel = document.getElementById("alumne-panel");
+    const grupPanel = document.getElementById("grup-panel");
+    if (alumnePanel) alumnePanel.style.display = "";
+    if (grupPanel) grupPanel.style.display = "none";
+
+    // Carregar perfil
+    applyProfileToForm(profile);
+    const sel = document.getElementById("profile-selector");
+    if (sel) sel.value = key;
+}
+
+function renderContextChips(activeKey) {
+    const container = document.getElementById("ctx-chips");
+    const section = document.getElementById("ctx-chips-section");
+    if (!container || !section) return;
+
+    const contexts = getLocalContextProfiles();
+    const entries = Object.entries(contexts);
+
+    if (entries.length === 0) {
+        section.style.display = "none";
+        return;
+    }
+
+    section.style.display = "";
+    container.innerHTML = entries.map(([key, ctx]) => `
+        <button class="ctx-chip ${key === activeKey ? 'active' : ''}" data-key="${key}" type="button">
+            ${ctx._name || key}
+        </button>
+    `).join("");
+
+    container.querySelectorAll(".ctx-chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+            const local = getLocalContextProfiles();
+            const ctx = local[chip.dataset.key];
+            if (!ctx) return;
+            if (ctx.etapa) {
+                document.getElementById("ctx-etapa").value = ctx.etapa;
+                updateEtapaSelects();
+            }
+            if (ctx.curs) document.getElementById("ctx-curs").value = ctx.curs;
+            if (ctx.ambit) document.getElementById("ctx-ambit").value = ctx.ambit;
+            if (ctx.materia) document.getElementById("ctx-materia").value = ctx.materia;
+            updateMecrPreview();
+            saveContextToStorage();
+            renderContextChips(chip.dataset.key);
+        });
+    });
+
+    loadContextProfileList();
+}
+
+function initPas1Redesign() {
+    renderProfileTiles();
+    renderContextChips();
+
+    // Botons crear
+    document.querySelectorAll('.create-card').forEach(card => {
+        card.addEventListener('click', () => selectMode(card.dataset.mode));
+    });
+
+    // Per defecte: cap mode seleccionat, panells ocults
+    // (l'HTML ja els té display:none)
 }
 
 
@@ -3833,10 +3995,7 @@ function bindEvents() {
         r.addEventListener("change", updateMecrPreview);
     });
 
-    // Mode alumne/grup: actualitza etiqueta del Bloc A
-    document.querySelectorAll('input[name="adapt-mode"]').forEach(r => {
-        r.addEventListener("change", updateBlocALabel);
-    });
+    // Mode alumne/grup: gestionat per initPas1Redesign (create cards)
 
     // Perfils alumne: desar / carregar (barra nova al Pas 1)
     const btnSaveProfile = document.getElementById("btn-save-profile");
@@ -3860,25 +4019,9 @@ function bindEvents() {
 }
 
 function updateBlocALabel() {
+    // Delegat a selectMode() pel nou disseny
     const mode = document.querySelector('input[name="adapt-mode"]:checked')?.value || "alumne";
-    const label = document.getElementById("bloc-a-label");
-    if (label) {
-        label.textContent = mode === "grup"
-            ? "El grup globalment llegeix i comprèn..."
-            : "Llegeix i comprèn...";
-    }
-    // Toggle panells alumne/grup
-    const alumnePanel = document.getElementById("alumne-panel");
-    const grupPanel = document.getElementById("grup-panel");
-    if (alumnePanel) alumnePanel.style.display = mode === "grup" ? "none" : "";
-    if (grupPanel) grupPanel.style.display = mode === "grup" ? "" : "none";
-
-    // Actualitzar selectors de perfil al grup si canviem a grup
-    if (mode === "grup") {
-        updateMecrPreview();
-        populateGrupProfilePicker();
-        renderGrupProfileChips();
-    }
+    selectMode(mode);
 }
 
 function getAdaptMode() {
