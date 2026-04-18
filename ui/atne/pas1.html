@@ -339,22 +339,23 @@
 <div class="wrap">
   <nav class="rail">
     <div class="logo">A</div>
-    <button class="rb on" title="Perfils"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></button>
-    <button class="rb" title="Textos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16M4 12h10M4 19h16"/></svg></button>
-    <button class="rb" title="Biblioteca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h7v12H4zM13 6h7v5h-7zM13 14h7v4h-7z"/></svg></button>
+    <button class="rb" title="Inici" onclick="location.href='/ui/atne/pas1.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 12 9-9 9 9"/><path d="M5 10v10h14V10"/></svg></button>
+    <button class="rb on" title="Perfils" onclick="location.href='/ui/atne/pas1.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></button>
+    <button class="rb" title="Textos" onclick="location.href='/ui/atne/pas2.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16M4 12h10M4 19h16"/></svg></button>
+    <button class="rb" title="Biblioteca" onclick="alert('Biblioteca: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h7v12H4zM13 6h7v5h-7zM13 14h7v4h-7z"/></svg></button>
     <div class="rb sep"></div>
-    <button class="rb" title="Preferències"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg></button>
+    <button class="rb" title="Preferències" onclick="alert('Preferències: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg></button>
   </nav>
 
   <main class="canvas">
     <div class="topbar">
       <button class="hamb" id="hamb" title="Menú"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
-      <div class="steps">
+      <div class="tb-title">Per a qui adaptem avui?</div>
+      <div class="steps" style="margin:0 auto">
         <button class="step on" data-step="1"><span class="step-num">1</span>Perfil</button>
         <button class="step" data-step="2" onclick="location.href='/ui/atne/pas2.html'"><span class="step-num">2</span>Entrada</button>
         <button class="step" data-step="3" onclick="location.href='/ui/atne/pas3.html'"><span class="step-num">3</span>Resultat</button>
       </div>
-      <div class="tb-title">Per a qui adaptem avui?</div>
       <div class="role"><div class="role-av">E</div><span><b>Especialista</b> · 32 perfils</span></div>
       <button class="icon-btn" title="Pantalla completa" id="fsBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
     </div>
@@ -404,7 +405,7 @@
               <div class="row-chips"><span class="chip tdah">TDAH</span><span class="chip lv">Comp. moderada</span></div>
               <div class="row-course">3r ESO A</div>
               <div class="row-use">ús avui</div>
-              <div class="row-acts"><button title="Veure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
+              <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
             </div>
             <div class="row person">
               <div class="row-av grp">3A</div>
@@ -412,7 +413,7 @@
               <div class="row-chips"><span class="chip lv">3 nivells</span><span class="chip tdah">1 TDAH</span><span class="chip cat">2 L2</span></div>
               <div class="row-course">24 alumnes</div>
               <div class="row-use">fa 2d</div>
-              <div class="row-acts"><button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
+              <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
             </div>
             <div class="row person">
               <div class="row-av av-disl">Mi</div>
@@ -420,7 +421,7 @@
               <div class="row-chips"><span class="chip disl">Dislèxia</span><span class="chip lv">Decodificació</span></div>
               <div class="row-course">1r ESO B</div>
               <div class="row-use">fa 1d</div>
-              <div class="row-acts"><button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
+              <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
             </div>
             <div class="row person">
               <div class="row-av av-cat">L</div>
@@ -428,7 +429,7 @@
               <div class="row-chips"><span class="chip cat">Català L2</span><span class="chip lv">Vocab. bàsic</span></div>
               <div class="row-course">2n ESO C</div>
               <div class="row-use">fa 3d</div>
-              <div class="row-acts"><button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
+              <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
             </div>
             <div class="row person">
               <div class="row-av grp grp-ac">DR</div>
@@ -436,7 +437,7 @@
               <div class="row-chips"><span class="chip lv">2 nivells</span><span class="chip ac">3 AACC</span></div>
               <div class="row-course">12 alumnes</div>
               <div class="row-use">fa 5d</div>
-              <div class="row-acts"><button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
+              <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
             </div>
             <div class="row person">
               <div class="row-av av-tdah">A</div>
@@ -444,7 +445,7 @@
               <div class="row-chips"><span class="chip tdah">TDAH</span><span class="chip disl">Dislèxia</span></div>
               <div class="row-course">3r ESO A</div>
               <div class="row-use">fa 6d</div>
-              <div class="row-acts"><button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
+              <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
             </div>
           </div>
 
@@ -456,7 +457,7 @@
               <div class="row-chips"><span class="chip ac">Altes capac.</span></div>
               <div class="row-course">4t ESO A</div>
               <div class="row-use">fa 1w</div>
-              <div class="row-acts"><button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
+              <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
             </div>
             <div class="row person">
               <div class="row-av grp grp-cat">L2</div>
@@ -464,7 +465,7 @@
               <div class="row-chips"><span class="chip lv">4 nivells</span><span class="chip cat">Tots L2</span></div>
               <div class="row-course">8 alumnes</div>
               <div class="row-use">fa 2w</div>
-              <div class="row-acts"><button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
+              <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
             </div>
           </div>
         </div>
