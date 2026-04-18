@@ -731,7 +731,7 @@ body {
   .cdlg-f{display:flex;gap:8px;justify-content:flex-end}
 
   /* Selection toolbar (floating) */
-  .sel-tb{position:fixed;z-index:100;background:var(--ink-900);color:#fff;border-radius:9px;box-shadow:0 8px 24px -6px rgba(16,24,40,.25),0 3px 10px -3px rgba(16,24,40,.18);padding:4px;display:none;align-items:center;gap:2px;font-family:var(--sans);animation:seltb-in .14s ease-out}
+  .sel-tb{position:fixed;z-index:100;background:var(--ink-900);color:#fff;border-radius:9px;box-shadow:0 8px 24px -6px rgba(16,24,40,.25),0 3px 10px -3px rgba(16,24,40,.18);padding:4px;display:none;align-items:center;gap:2px;font-family:var(--ui);animation:seltb-in .14s ease-out}
   .sel-tb.on{display:flex}
   @keyframes seltb-in{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
   .sel-tb button{background:transparent;border:0;color:#fff;padding:6px 9px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap}
@@ -1886,13 +1886,20 @@ body {
     selTb.style.top = top+'px';
     selTb.style.left = left+'px';
   }
-  document.addEventListener('selectionchange', () => {
+  // Funció única que decideix si mostrar o amagar la selection toolbar.
+  // A més de selectionchange (que no sempre dispara a tauleta/mòbil amb selecció
+  // tàctil), escoltem mouseup, touchend i keyup per cobrir tots els casos.
+  function maybeShowSelTb() {
     if(!selTb || !adapted) return;
     const sel = window.getSelection();
     if(!sel || sel.isCollapsed){ selTb.classList.remove('on'); return; }
     if(!sel.anchorNode || !adapted.contains(sel.anchorNode)) { selTb.classList.remove('on'); return; }
     requestAnimationFrame(showSelTb);
-  });
+  }
+  document.addEventListener('selectionchange', maybeShowSelTb);
+  adapted.addEventListener('mouseup', () => setTimeout(maybeShowSelTb, 10));
+  adapted.addEventListener('touchend', () => setTimeout(maybeShowSelTb, 50));
+  adapted.addEventListener('keyup', e => { if (e.shiftKey || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'ArrowDown') maybeShowSelTb(); });
   window.addEventListener('scroll', () => selTb.classList.remove('on'), true);
 
   function wrapSelection(tag, cls){
