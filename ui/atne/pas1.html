@@ -333,9 +333,9 @@
   <main class="canvas">
     <div class="topbar">
       <div class="steps">
-        <button class="step on"><span class="step-num">1</span>Perfil</button>
-        <button class="step"><span class="step-num">2</span>Entrada</button>
-        <button class="step"><span class="step-num">3</span>Resultat</button>
+        <button class="step on" data-step="1"><span class="step-num">1</span>Perfil</button>
+        <button class="step" data-step="2" onclick="location.href='/ui/atne/pas2.html'"><span class="step-num">2</span>Entrada</button>
+        <button class="step" data-step="3" onclick="location.href='/ui/atne/pas3.html'"><span class="step-num">3</span>Resultat</button>
       </div>
       <div class="tb-title">Per a qui adaptem avui?</div>
       <div class="role"><div class="role-av">E</div><span><b>Especialista</b> · 32 perfils</span></div>
@@ -642,6 +642,15 @@
 </div>
 
 <script>
+  // Navegació entre passos: clicar "Seleccionar" a una fila → Pas 2
+  document.querySelectorAll('.row-acts .sel').forEach(b => {
+    b.addEventListener('click', e => { e.stopPropagation(); location.href = '/ui/atne/pas2.html'; });
+  });
+  // Tota la fila també és clickable
+  document.querySelectorAll('.row').forEach(r => {
+    r.addEventListener('click', () => { location.href = '/ui/atne/pas2.html'; });
+  });
+
   const actBtns = document.querySelectorAll('[data-mode]');
   const modes = document.querySelectorAll('.mode');
 
