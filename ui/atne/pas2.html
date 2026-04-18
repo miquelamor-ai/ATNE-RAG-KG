@@ -462,6 +462,42 @@
   .fr-b.primary:hover { background: var(--primary-600); color: #fff; }
   .fr-b.disabled { opacity: .4; pointer-events: none; }
 
+  /* Popover Refinar del Pas 2 (ancorat al frail) */
+  .fr-pop {
+    position: absolute;
+    right: 76px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #fff;
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-xl);
+    box-shadow: var(--sh-lg);
+    padding: 12px;
+    width: 260px;
+    z-index: 35;
+    display: none;
+  }
+  .fr-pop.on { display: block; }
+  .fr-pop-t { font-family: var(--serif); font-size: 14px; font-weight: 700; color: var(--ink-900); margin-bottom: 4px; }
+  .fr-pop-s { font-size: 11.5px; color: var(--ink-600); margin-bottom: 10px; line-height: 1.4; }
+  .fr-pop-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .fr-pop-b {
+    padding: 8px 10px;
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-md);
+    background: #fff;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--ink-700);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background var(--trans-fast);
+  }
+  .fr-pop-b:hover { background: var(--cream-2); border-color: var(--primary-100); color: var(--primary); }
+  .fr-pop-b svg { width: 13px; height: 13px; }
+
   /* ─── Bottom tab bar (només mòbil/tauleta) ───────────── */
   .bottom-bar {
     display: none;
@@ -812,14 +848,25 @@
 
         <!-- Frail dret (tauleta+desktop) -->
         <div class="frail">
-          <button class="fr-b" data-tip="Edició"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h10M4 12h10M4 17h6M17 4l3 3-9 9-4 1 1-4z"/></svg></button>
-          <button class="fr-b" data-tip="Refinar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-7M4 7h4M20 17h-4M4 17h9M13 12h7M4 12h5"/><circle cx="10" cy="7" r="2"/><circle cx="14" cy="17" r="2"/><circle cx="11" cy="12" r="2"/></svg></button>
-          <button class="fr-b" data-tip="Complements"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
-          <button class="fr-b" data-tip="Accions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></button>
+          <button class="fr-b" data-tip="Edició" id="fr-edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h10M4 12h10M4 17h6M17 4l3 3-9 9-4 1 1-4z"/></svg></button>
+          <button class="fr-b" data-tip="Refinar" id="fr-refine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-7M4 7h4M20 17h-4M4 17h9M13 12h7M4 12h5"/><circle cx="10" cy="7" r="2"/><circle cx="14" cy="17" r="2"/><circle cx="11" cy="12" r="2"/></svg></button>
+          <button class="fr-b" data-tip="Complements" id="fr-compl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+          <button class="fr-b" data-tip="Accions" id="fr-actions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></button>
           <div class="fr-sep"></div>
           <button class="fr-b primary" data-tip="Adaptar → Pas 3" id="adapt-frail">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
           </button>
+        </div>
+        <!-- Popover Refinar (ancorat al frail) -->
+        <div class="fr-pop" id="fr-pop-refine">
+          <div class="fr-pop-t">Refinar text original</div>
+          <div class="fr-pop-s">Modifica el text abans d'adaptar-lo.</div>
+          <div class="fr-pop-opts">
+            <button class="fr-pop-b" data-preset="simplificar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h10"/><circle cx="18" cy="12" r="2"/></svg>Simplificar</button>
+            <button class="fr-pop-b" data-preset="ampliar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Ampliar</button>
+            <button class="fr-pop-b" data-preset="escurcar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg>Escurçar</button>
+            <button class="fr-pop-b" data-preset="catala"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 13 4 4L19 7"/></svg>Revisar català</button>
+          </div>
         </div>
       </section>
     </div>
@@ -1003,19 +1050,13 @@
   // Els botons són: #adapt-btn (bottom bar) i #adapt-frail (frail dret)
   // ──────────────────────────────────────────────────────
   function onAdaptClick() {
-    const mode = document.querySelector('.mode-tab.on')?.dataset.mode || 'write';
-    let text = '';
+    // Sempre llegim del textarea d'Escriure: Pujar/Generar/Recuperar hi aboquen el text,
+    // i Escriure hi és el contingut directament. Així Adaptar funciona des de qualsevol mode.
+    const text = (document.getElementById('write-ta')?.value || '').trim();
     const title = document.getElementById('doc-title')?.value?.trim() || 'Sense títol';
 
-    if (mode === 'write') {
-      text = (document.getElementById('write-ta')?.value || '').trim();
-    } else {
-      window.atneToast && window.atneToast('El mode "' + mode + '" encara no està connectat. Fes servir Escriure.','info');
-      return;
-    }
-
     if (!text) {
-      window.atneToast && window.atneToast('Cal escriure text abans d\'adaptar-lo', 'error');
+      window.atneToast && window.atneToast('Cal tenir text abans d\'adaptar. Escriu-lo, puja\'l o genera\'l.', 'error');
       return;
     }
 
@@ -1167,6 +1208,74 @@
   }
   // Quan es clica el tab 'Recuperar', carrega (una sola vegada)
   document.querySelector('.mode-tab[data-mode="recent"]')?.addEventListener('click', loadHistory);
+
+  // ──────────────────────────────────────────────────────
+  // Fase 5 c5 — handlers del frail del Pas 2 (Edició/Refinar/Complements/Accions)
+  // ──────────────────────────────────────────────────────
+
+  // Popover Refinar del Pas 2
+  const frRefineBtn = document.getElementById('fr-refine');
+  const frPopRefine = document.getElementById('fr-pop-refine');
+  frRefineBtn?.addEventListener('click', e => {
+    e.stopPropagation();
+    const currentMode = document.querySelector('.mode-tab.on')?.dataset.mode || 'write';
+    if (currentMode !== 'write') {
+      window.atneToast?.('Canvia al mode Escriure per refinar text', 'info');
+      return;
+    }
+    const txt = (document.getElementById('write-ta')?.value || '').trim();
+    if (!txt) {
+      window.atneToast?.('Cal text per refinar', 'info');
+      return;
+    }
+    frPopRefine?.classList.toggle('on');
+  });
+  // Tancar en clicar fora
+  document.addEventListener('click', e => {
+    if (frPopRefine && !frPopRefine.contains(e.target) && e.target !== frRefineBtn && !frRefineBtn?.contains(e.target)) {
+      frPopRefine.classList.remove('on');
+    }
+  });
+  // Opcions del popover
+  frPopRefine?.querySelectorAll('.fr-pop-b').forEach(b => {
+    b.addEventListener('click', async () => {
+      const preset = b.dataset.preset;
+      frPopRefine.classList.remove('on');
+      const writeTa = document.getElementById('write-ta');
+      if (!writeTa || !window.ATNE_LLM) return;
+      const text = writeTa.value.trim();
+      if (!text) return;
+      window.atneToast?.('Refinant text…', 'info');
+      try {
+        const result = await window.ATNE_LLM.refineText({ text, preset });
+        if (result?.text) {
+          writeTa.value = result.text;
+          updateWC();
+          window.atneToast?.('Text refinat', 'success');
+        }
+      } catch (err) {
+        window.atneToast?.('Error refinant: ' + err.message, 'error');
+      }
+    });
+  });
+
+  // Edició del frail: al Pas 2 el textarea no suporta formats rics
+  document.getElementById('fr-edit')?.addEventListener('click', () => {
+    window.atneToast?.('L\'edició rica és al Pas 3 (seleccionar text i usar la toolbar)', 'info');
+  });
+  // Complements del frail: la configuració real (quins complements generar) es
+  // fa al Pas 3. Aquí mostrem info.
+  document.getElementById('fr-compl')?.addEventListener('click', () => {
+    window.atneToast?.('Els complements es configuren al Pas 3 quan tens el text adaptat', 'info');
+  });
+  // Accions del frail: menú d'accions auxiliars
+  document.getElementById('fr-actions')?.addEventListener('click', () => {
+    if (confirm('Vols netejar el text del mode Escriure?')) {
+      const writeTa = document.getElementById('write-ta');
+      if (writeTa) { writeTa.value = ''; updateWC(); }
+      window.atneToast?.('Text buidat', 'info');
+    }
+  });
 </script>
 </body>
 </html>
