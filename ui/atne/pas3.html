@@ -1592,11 +1592,17 @@
       },
       onResult: (ev) => {
         if (adaptedEl && ev.adapted) {
-          adaptedEl.innerHTML = ev.adapted;
+          // Detectar si el LLM ha tornat HTML o markdown i renderitzar segons
+          const looksLikeHtml = /<(p|h[1-6]|ul|ol|li|strong|em)[\s>]/i.test(ev.adapted);
+          adaptedEl.innerHTML = looksLikeHtml
+            ? ev.adapted
+            : (window.ATNE_LLM?.markdownToHtml ? window.ATNE_LLM.markdownToHtml(ev.adapted) : ev.adapted);
           attachParaHandles();
           pushHistory();
+          localStorage.setItem('atne.adapted_text', adaptedEl.innerHTML);
+        } else {
+          localStorage.setItem('atne.adapted_text', ev.adapted || '');
         }
-        localStorage.setItem('atne.adapted_text', ev.adapted || '');
         localStorage.setItem('atne.adapted_cache_key', cacheKey);
       },
       onError: (err) => {
@@ -1617,13 +1623,17 @@
   // Fase 5 c2 — refine real dels popovers Refinar / Rúbrica / Nova adaptació
   // ──────────────────────────────────────────────────────
 
-  // Helper: refina tot el text adaptat i substitueix el HTML + pushHistory
+  // Helper: refina tot el text adaptat preservant format (negretes, títols,
+  // llistes, definicions entre parèntesis). Convertim HTML→Markdown a l'enviar
+  // i Markdown→HTML al rebre, instruint el LLM que mantingui les marques.
   async function refineAdaptedText({ preset, instruccio, overlayMsg }) {
     if (!window.ATNE_LLM || !window.ATNE_LLM.refineText) return;
     const adaptedEl = document.getElementById('adapted-text');
     if (!adaptedEl) return;
-    const currentText = adaptedEl.innerText || adaptedEl.textContent || '';
-    if (!currentText.trim()) return;
+
+    // Convertim l'HTML actual a markdown per preservar negretes/títols/llistes
+    const currentMd = window.ATNE_LLM.htmlToMarkdown(adaptedEl.innerHTML);
+    if (!currentMd.trim()) return;
 
     closePops();
     const regenEl = document.getElementById('regen');
@@ -1632,14 +1642,15 @@
     if (regenEl) regenEl.classList.add('on');
 
     try {
-      const result = await window.ATNE_LLM.refineText({ text: currentText, preset, instruccio });
+      const result = await window.ATNE_LLM.refineText({ text: currentMd, preset, instruccio });
       if (result && result.text) {
-        // Preserva l'estructura mínima: posem el resultat com a paràgrafs simples.
-        // Si el resultat ja té marcatge HTML (el LLM pot tornar <h2>, <p>...), l'usem tal qual.
+        // El LLM hauria de retornar markdown (o text pla si ha ignorat la instrucció).
+        // markdownToHtml fa el render: si el text ja és HTML (el LLM el va retornar),
+        // igualment funciona perquè els tags queden preservats.
         const looksLikeHtml = /<(p|h[1-6]|ul|ol|li|strong|em)[\s>]/i.test(result.text);
         adaptedEl.innerHTML = looksLikeHtml
           ? result.text
-          : result.text.split(/\n{2,}/).map(p => '<p>' + p.replace(/\n/g, '<br>') + '</p>').join('');
+          : window.ATNE_LLM.markdownToHtml(result.text);
         attachParaHandles();
         pushHistory();
         localStorage.setItem('atne.adapted_text', adaptedEl.innerHTML);

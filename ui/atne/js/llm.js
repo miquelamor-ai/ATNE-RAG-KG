@@ -144,6 +144,82 @@
     return { versions, done: false };
   }
 
+  // ──────────────────────────────────────────────────────
+  // Conversió HTML ↔ Markdown per preservar format als refinaments
+  // (negretes, cursives, títols, llistes). Les marques de diff
+  // (.ins / .sub) es perden en refinar — comportament esperat: un
+  // refine és un retoc, no un re-adapt.
+  // ──────────────────────────────────────────────────────
+  function htmlToMarkdown(html) {
+    if (!html) return '';
+    let md = html;
+    md = md.replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, '\n# $1\n');
+    md = md.replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, '\n## $1\n');
+    md = md.replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, '\n### $1\n');
+    md = md.replace(/<strong[^>]*>([\s\S]*?)<\/strong>/gi, '**$1**');
+    md = md.replace(/<b[^>]*>([\s\S]*?)<\/b>/gi, '**$1**');
+    md = md.replace(/<em[^>]*>([\s\S]*?)<\/em>/gi, '_$1_');
+    md = md.replace(/<i[^>]*>([\s\S]*?)<\/i>/gi, '_$1_');
+    md = md.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (m, c) => '\n' + c.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, '- $1\n') + '\n');
+    md = md.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (m, c) => {
+      let n = 0;
+      return '\n' + c.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_, x) => { n++; return n + '. ' + x + '\n'; }) + '\n';
+    });
+    md = md.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, '$1\n\n');
+    md = md.replace(/<br\s*\/?>/gi, '\n');
+    // Spans (ins/sub, marques de diff i altres): mantenim el contingut pla
+    md = md.replace(/<span[^>]*>([\s\S]*?)<\/span>/gi, '$1');
+    // Treure qualsevol tag restant
+    md = md.replace(/<\/?[a-z][^>]*>/gi, '');
+    md = md.replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+    md = md.replace(/\n{3,}/g, '\n\n');
+    return md.trim();
+  }
+
+  function markdownToHtml(md) {
+    if (!md) return '';
+    const lines = md.split('\n');
+    const out = [];
+    let inList = false;
+    let listTag = 'ul';
+    const inline = s => s
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/(^|[\s(])_([^_]+)_/g, '$1<em>$2</em>');
+    for (let line of lines) {
+      line = line.trim();
+      const h1 = line.match(/^#\s+(.+)$/);
+      const h2 = line.match(/^##\s+(.+)$/);
+      const h3 = line.match(/^###\s+(.+)$/);
+      if (h1) { if (inList) { out.push('</' + listTag + '>'); inList = false; } out.push('<h1>' + inline(h1[1]) + '</h1>'); continue; }
+      if (h2) { if (inList) { out.push('</' + listTag + '>'); inList = false; } out.push('<h2>' + inline(h2[1]) + '</h2>'); continue; }
+      if (h3) { if (inList) { out.push('</' + listTag + '>'); inList = false; } out.push('<h3>' + inline(h3[1]) + '</h3>'); continue; }
+      const liUl = line.match(/^-\s+(.+)$/);
+      const liOl = line.match(/^(\d+)\.\s+(.+)$/);
+      if (liUl) {
+        if (!inList || listTag === 'ol') { if (inList) out.push('</' + listTag + '>'); out.push('<ul>'); listTag = 'ul'; inList = true; }
+        out.push('<li>' + inline(liUl[1]) + '</li>');
+        continue;
+      }
+      if (liOl) {
+        if (!inList || listTag === 'ul') { if (inList) out.push('</' + listTag + '>'); out.push('<ol>'); listTag = 'ol'; inList = true; }
+        out.push('<li>' + inline(liOl[2]) + '</li>');
+        continue;
+      }
+      if (inList) { out.push('</' + listTag + '>'); inList = false; }
+      if (!line) continue;
+      out.push('<p>' + inline(line) + '</p>');
+    }
+    if (inList) out.push('</' + listTag + '>');
+    return out.join('\n');
+  }
+
+  // Instrucció sistemàtica que s'afegeix a tots els refinaments per preservar format
+  const PRESERVE_FORMAT_INSTRUCTION =
+    'IMPORTANT — conserva les marques de format del text original: ' +
+    'negretes amb **...**, títols amb # o ##, cursives amb _..._, llistes amb - o 1. 2.. ' +
+    'Mantén els termes tècnics en **negreta**, les definicions entre parèntesis, ' +
+    'i les traduccions [entre claudators] si n\'hi ha. No eliminis aquestes marques.';
+
   /**
    * Crida /api/refine-text (síncron, sense SSE) — modifica un text existent.
    *
@@ -164,7 +240,16 @@
     if (!text || !text.trim()) throw new Error('Text buit');
     const body = { text };
     if (preset) body.preset = preset;
-    if (instruccio) body.instruccio = instruccio;
+    // Afegim sempre la instrucció de preservar format (a més de la del docent),
+    // excepte per al preset 'catala' que és LanguageTool determinista (no passa pel LLM)
+    if (preset !== 'catala') {
+      const combined = instruccio
+        ? instruccio + ' ' + PRESERVE_FORMAT_INSTRUCTION
+        : PRESERVE_FORMAT_INSTRUCTION;
+      body.instruccio = combined;
+    } else if (instruccio) {
+      body.instruccio = instruccio;
+    }
     const resp = await fetch('/api/refine-text', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -319,6 +404,8 @@
     listHistory,
     exportDoc,
     buildBackendProfile,
-    buildBackendContext
+    buildBackendContext,
+    htmlToMarkdown,
+    markdownToHtml
   };
 })();
