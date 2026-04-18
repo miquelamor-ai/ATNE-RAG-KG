@@ -1093,9 +1093,9 @@
                     chips:[{label:'3 nivells',cat:'lv'},{label:'1 TDAH',cat:'tdah'},{label:'2 L2',cat:'cat'}],
                     behaviors:[], aids:[],
                     versions:[
-                      {id:'v-b1', type:'level', label:'Nivell B1', sub:'Intermedi · 12 alumnes'},
-                      {id:'v-a2', type:'level', label:'Nivell A2', sub:'Bàsic · 4 alumnes'},
-                      {id:'v-estandard', type:'level', label:'Estàndard', sub:'Nivell del curs · 8 alumnes'},
+                      {id:'v-b1', type:'level', avatar:'B1', label:'Nivell B1', sub:'Intermedi · 12 alumnes'},
+                      {id:'v-a2', type:'level', avatar:'A2', label:'Nivell A2', sub:'Bàsic · 4 alumnes'},
+                      {id:'v-estandard', type:'level', avatar:'Est', label:'Estàndard', sub:'Nivell del curs · 8 alumnes'},
                       {id:'v-marc', type:'person', avatar:'M', cat:'tdah', label:'Marc R.', sub:'B1 · TDAH'},
                       {id:'v-liu', type:'person', avatar:'L', cat:'cat', label:'Liu C.', sub:'A2 · Català L2'},
                       {id:'v-mireia', type:'person', avatar:'Mi', cat:'disl', label:'Mireia S.', sub:'B1 · Dislèxia'}
@@ -1104,8 +1104,8 @@
                     chips:[{label:'2 nivells',cat:'lv'},{label:'3 AACC',cat:'ac'}],
                     behaviors:[], aids:[],
                     versions:[
-                      {id:'v-estandard', type:'level', label:'Estàndard', sub:'Nivell del curs · 9 alumnes'},
-                      {id:'v-ampliat', type:'level', label:'Ampliació', sub:'Repte + investigació · 3 alumnes'},
+                      {id:'v-estandard', type:'level', avatar:'Est', label:'Estàndard', sub:'Nivell del curs · 9 alumnes'},
+                      {id:'v-ampliat', type:'level', avatar:'Amp', label:'Ampliació', sub:'Repte + investigació · 3 alumnes'},
                       {id:'v-pol', type:'person', avatar:'P', cat:'ac', label:'Pol Vidal', sub:'4t · AACC'},
                       {id:'v-an', type:'person', avatar:'An', cat:'ac', label:'Anna M.', sub:'4t · AACC'},
                       {id:'v-sa', type:'person', avatar:'Sa', cat:'ac', label:'Sara G.', sub:'4t · AACC'}
@@ -1114,10 +1114,10 @@
                     chips:[{label:'4 nivells',cat:'lv'},{label:'Tots L2',cat:'cat'}],
                     behaviors:[], aids:[],
                     versions:[
-                      {id:'v-a1', type:'level', label:'Nivell A1', sub:'Inicial · 2 alumnes'},
-                      {id:'v-a2', type:'level', label:'Nivell A2', sub:'Bàsic · 3 alumnes'},
-                      {id:'v-b1', type:'level', label:'Nivell B1', sub:'Intermedi · 2 alumnes'},
-                      {id:'v-b2', type:'level', label:'Nivell B2', sub:'Avançat · 1 alumne'},
+                      {id:'v-a1', type:'level', avatar:'A1', label:'Nivell A1', sub:'Inicial · 2 alumnes'},
+                      {id:'v-a2', type:'level', avatar:'A2', label:'Nivell A2', sub:'Bàsic · 3 alumnes'},
+                      {id:'v-b1', type:'level', avatar:'B1', label:'Nivell B1', sub:'Intermedi · 2 alumnes'},
+                      {id:'v-b2', type:'level', avatar:'B2', label:'Nivell B2', sub:'Avançat · 1 alumne'},
                       {id:'v-you', type:'person', avatar:'Y', cat:'cat', label:'Youssef E.', sub:'A1 · Àrab L1'},
                       {id:'v-liu2', type:'person', avatar:'L', cat:'cat', label:'Liu Z.', sub:'A2 · Xinès L1'},
                       {id:'v-am', type:'person', avatar:'Am', cat:'cat', label:'Amina K.', sub:'B1 · Àrab L1'}
@@ -1168,8 +1168,9 @@
     };
     const [bg, fg] = palette[g.cat] || palette.group;
     const versionsHtml = (g.versions || []).map((v, i) => {
+      const levelShort = v.avatar || v.label.replace(/^Nivell /, '').slice(0, 3);
       const avatarHtml = v.type === 'level'
-        ? `<div class="v-av level">${v.label.replace(/^Nivell /, '')}</div>`
+        ? `<div class="v-av level">${levelShort}</div>`
         : `<div class="v-av ${v.cat || ''}">${v.avatar || v.label.charAt(0)}</div>`;
       return `<button class="vcard ${i === 0 ? 'active' : ''}" data-vid="${v.id}">
         ${avatarHtml}
