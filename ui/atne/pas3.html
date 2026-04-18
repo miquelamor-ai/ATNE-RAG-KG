@@ -1541,6 +1541,52 @@
   attachParaHandles();
 
   // ──────────────────────────────────────────────────────
+  // Distribueix les seccions parsejades del resultat de /api/adapt a les
+  // vistes de complements (Glossari/Esquema/Preguntes). Actualitza també
+  // els dots dels xips (.cmp-chip) per indicar estat generat/pendent.
+  // MVP: render amb markdownToHtml dins del .comp-card, substituint el
+  // contingut mock. Renderer custom (taula gl-item, sc-node, q-item)
+  // queda al parking lot.
+  // ──────────────────────────────────────────────────────
+  function applyComplementsToViews(complements) {
+    if (!complements || !window.ATNE_LLM?.markdownToHtml) return;
+    const md2html = window.ATNE_LLM.markdownToHtml;
+
+    // Glossari
+    if (complements.glossari) {
+      const cont = document.querySelector('#view-glossari .gl-list');
+      if (cont) cont.innerHTML = md2html(complements.glossari);
+      updateChipDot('glossari', 'ok');
+    }
+    // Esquema visual
+    if (complements.esquema_visual) {
+      const cont = document.querySelector('#view-esquema .schema');
+      if (cont) {
+        // L'esquema sovint ve dins de ``` ``` (bloc de codi). El mantenim com a <pre>.
+        const raw = complements.esquema_visual.replace(/^```[^\n]*\n/, '').replace(/\n```$/, '');
+        cont.innerHTML = '<pre style="font-family:var(--ui);font-size:13px;line-height:1.6;white-space:pre-wrap;color:var(--ink-700);margin:0">' + escapeHtml(raw) + '</pre>';
+      }
+      updateChipDot('esquema', 'ok');
+    }
+    // Preguntes de comprensió
+    if (complements.preguntes_comprensio) {
+      const cont = document.querySelector('#view-preguntes .q-list');
+      if (cont) cont.innerHTML = md2html(complements.preguntes_comprensio);
+      updateChipDot('preguntes', 'ok');
+    }
+  }
+  function updateChipDot(comp, state) {
+    const chip = document.querySelector('.cmp-chip[data-comp="' + comp + '"]');
+    if (!chip) return;
+    const dot = chip.querySelector('.dot-ok, .dot-pending');
+    if (!dot) return;
+    dot.className = state === 'pending' ? 'dot-pending' : 'dot-ok';
+  }
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+
+  // ──────────────────────────────────────────────────────
   // Fase 5 — connexió real al backend LLM
   // Si venim del Pas 2 amb text nou (hi ha 'atne.doc_original' i encara no
   // tenim 'atne.adapted_text' per aquesta combinació perfil+text), cridem
@@ -1571,6 +1617,12 @@
 
     if (cachedKey === cacheKey && cachedText) {
       if (adaptedEl) { adaptedEl.innerHTML = cachedText; attachParaHandles(); pushHistory(); }
+      // Restaurem complements cached si n'hi ha
+      const cachedRaw = localStorage.getItem('atne.adapted_raw');
+      if (cachedRaw && window.ATNE_LLM?.parseAdaptedSections) {
+        const parsed = window.ATNE_LLM.parseAdaptedSections(cachedRaw);
+        applyComplementsToViews(parsed.complements);
+      }
       return;
     }
 
@@ -1582,27 +1634,36 @@
     if (regenT) regenT.textContent = 'Adaptant el text…';
     if (regenS) regenS.textContent = 'El LLM està personalitzant el text per a ' + profile.name;
 
+    // Llegeix complements a activar (per defecte: glossari + esquema + preguntes)
+    let complements = { glossari: true, esquema_visual: true, preguntes_comprensio: true };
+    try { complements = { ...complements, ...JSON.parse(localStorage.getItem('atne.complements') || '{}') }; } catch {}
+
     window.ATNE_LLM.adaptText({
       text: docOriginal,
       profile: profile,
       context: { materia, titol: title, nivell_curs: nivell },
-      params: { levels: ['single'] },
+      params: { levels: ['single'], complements },
       onStep: (ev) => {
         if (regenT && ev.msg) regenT.textContent = ev.msg;
       },
       onResult: (ev) => {
-        if (adaptedEl && ev.adapted) {
-          // Detectar si el LLM ha tornat HTML o markdown i renderitzar segons
-          const looksLikeHtml = /<(p|h[1-6]|ul|ol|li|strong|em)[\s>]/i.test(ev.adapted);
-          adaptedEl.innerHTML = looksLikeHtml
-            ? ev.adapted
-            : (window.ATNE_LLM?.markdownToHtml ? window.ATNE_LLM.markdownToHtml(ev.adapted) : ev.adapted);
+        // Parse de les seccions del resultat (Text adaptat + Glossari + Esquema + Preguntes)
+        const parsed = window.ATNE_LLM.parseAdaptedSections(ev.adapted || '');
+        const md2html = window.ATNE_LLM.markdownToHtml;
+
+        if (adaptedEl) {
+          const mainText = parsed.main || ev.adapted || '';
+          const looksLikeHtml = /<(p|h[1-6]|ul|ol|li|strong|em)[\s>]/i.test(mainText);
+          adaptedEl.innerHTML = looksLikeHtml ? mainText : md2html(mainText);
           attachParaHandles();
           pushHistory();
-          localStorage.setItem('atne.adapted_text', adaptedEl.innerHTML);
-        } else {
-          localStorage.setItem('atne.adapted_text', ev.adapted || '');
         }
+
+        // Distribueix els complements a les seves vistes
+        applyComplementsToViews(parsed.complements);
+
+        localStorage.setItem('atne.adapted_text', adaptedEl?.innerHTML || '');
+        localStorage.setItem('atne.adapted_raw', ev.adapted || '');
         localStorage.setItem('atne.adapted_cache_key', cacheKey);
       },
       onError: (err) => {

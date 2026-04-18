@@ -1069,6 +1069,10 @@
     localStorage.setItem('atne.doc_title', title);
     localStorage.setItem('atne.doc_materia', materia);
     localStorage.setItem('atne.doc_nivell', nivell);
+    // Complements per defecte (el Pas 2 encara no té UI per triar-los; configurable més endavant)
+    localStorage.setItem('atne.complements', JSON.stringify({
+      glossari: true, esquema_visual: true, preguntes_comprensio: true
+    }));
     localStorage.removeItem('atne.adapted_text');
     localStorage.removeItem('atne.adapted_cache_key');
 

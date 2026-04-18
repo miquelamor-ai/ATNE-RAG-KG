@@ -396,6 +396,52 @@
   }
   window.atneToast = atneToast;
 
+  /**
+   * Parseja el text retornat per /api/adapt per separar-lo en seccions
+   * (## Text adaptat, ## Glossari, ## Esquema visual, ## Preguntes, ...).
+   *
+   * Retorna un objecte amb:
+   *   main: string — contingut de "## Text adaptat" (o el text sencer si no hi
+   *                  ha encapçalaments).
+   *   complements: { glossari, esquema_visual, mapa_conceptual, preguntes_comprensio, ... }
+   *                els valors són strings markdown de cada secció.
+   */
+  function parseAdaptedSections(text) {
+    const result = { main: '', complements: {} };
+    if (!text) return result;
+    const parts = text.split(/^## /m);
+    if (parts.length <= 1) { result.main = text; return result; }
+    // Map de títols del backend → key interna (sense accents, lowercase)
+    const TITLE_MAP = {
+      'text adaptat': '_main',
+      'glossari': 'glossari',
+      'esquema visual': 'esquema_visual',
+      'esquema': 'esquema_visual',
+      'mapa conceptual': 'mapa_conceptual',
+      'preguntes de comprensio': 'preguntes_comprensio',
+      'preguntes de comprensió': 'preguntes_comprensio',
+      'preguntes': 'preguntes_comprensio',
+      'bastides': 'bastides',
+      'pictogrames': 'pictogrames',
+      'traduccio l1': 'traduccio_l1',
+      'traducció l1': 'traduccio_l1',
+      'auditoria': 'auditoria',
+      'notes d\'auditoria': 'auditoria'
+    };
+    const norm = s => s.toLowerCase().trim().replace(/[^\w\s']/g, '');
+    for (const part of parts) {
+      if (!part.trim()) continue;
+      const nlIdx = part.indexOf('\n');
+      const title = nlIdx > -1 ? part.slice(0, nlIdx).trim() : part.trim();
+      const body = nlIdx > -1 ? part.slice(nlIdx + 1).trim() : '';
+      const key = TITLE_MAP[norm(title)] || norm(title).replace(/\s+/g, '_');
+      if (key === '_main') result.main = body;
+      else result.complements[key] = body;
+    }
+    if (!result.main) result.main = text;
+    return result;
+  }
+
   window.ATNE_LLM = {
     adaptText,
     refineText,
@@ -406,6 +452,7 @@
     buildBackendProfile,
     buildBackendContext,
     htmlToMarkdown,
-    markdownToHtml
+    markdownToHtml,
+    parseAdaptedSections
   };
 })();
