@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>ATNE · Pas 1 · Per a qui</title>
-<meta name="viewport" content="width=1440">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
 <!-- Tipografia -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -245,6 +245,76 @@
   .foot .btn-p:hover{background:var(--primary-600)}
   .foot .btn-g{color:var(--ink-700);background:#fff;border:1px solid var(--ink-200)}
   .foot .btn-g:hover{background:var(--ink-75)}
+
+  /* =========================================================
+     RESPONSIVE
+     Breakpoints: mòbil ≤640px, tauleta 641-1024px, escriptori >1024px.
+     Seguim els mocks de Stitch aprovats (Pas 1 mòbil 7cdd79bd, tauleta c6dbc40a).
+     ========================================================= */
+
+  /* Tauleta: rail roman visible, llista més compacta */
+  @media (max-width: 1024px) {
+    .search-top { flex-wrap: wrap; gap: 10px; }
+    .search-input { max-width: none; flex-basis: 100%; order: 1; }
+    .fchips { order: 2; }
+    .sort { order: 3; margin-left: auto; }
+    .row { grid-template-columns: 40px 1fr 140px 80px; gap: 10px; }
+    .row-course { display: none; }
+  }
+
+  /* Mòbil: rail amagat (hamburguesa a topbar — JS pendent), llista apilada */
+  @media (max-width: 640px) {
+    .wrap { grid-template-columns: 1fr; }
+    .rail { display: none; }
+
+    /* Topbar compacta */
+    .topbar { padding: 10px 14px; gap: 10px; flex-wrap: wrap; }
+    .steps { order: 3; flex-basis: 100%; overflow-x: auto; padding: 3px; }
+    .step { padding: 5px 10px; font-size: 10.5px; white-space: nowrap; }
+    .tb-title { font-size: 14px; flex: 1; min-width: 0; }
+    .role span { display: none; }
+    .role .role-av { width: 28px; height: 28px; }
+    .icon-btn { display: none; }
+
+    /* Mode search */
+    .mode { padding: 14px 12px 120px; }
+    .search-wrap { max-width: none; }
+    .search-top { flex-direction: column; gap: 10px; align-items: stretch; }
+    .search-input { max-width: none; }
+    .fchips { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 4px; margin: 0 -12px; padding: 0 12px 4px; }
+    .fchip { flex-shrink: 0; }
+    .sort { display: none; }
+
+    /* Cards perfils: només avatar + nom + sub; ocultem columnes extres */
+    .list { border-radius: 10px; box-shadow: var(--sh-xs); }
+    .row { grid-template-columns: 34px 1fr auto; gap: 10px; padding: 12px 14px; border-left: 0; }
+    .row.group { border-left: 3px solid var(--primary); }
+    .row-chips { display: flex; gap: 3px; flex-wrap: wrap; grid-column: 2 / -1; grid-row: 2; margin-top: 4px; }
+    .row .chip { font-size: 9.5px; padding: 2px 6px; }
+    .row-course, .row-use { display: none; }
+    .row-acts { opacity: 1; justify-content: flex-end; align-self: center; }
+    .row-acts button:not(.sel) { display: none; }
+    .row-acts .sel { padding: 0 8px; font-size: 11px; }
+    .row-acts .sel svg { width: 10px; height: 10px; }
+
+    /* FABs: al mòbil de Stitch només "+ Nou perfil".
+       Provisional: amaguem "Cercar" (redundant amb el search) i compactem els altres. */
+    .fabs { right: 14px; bottom: 14px; gap: 6px; }
+    .fab { padding: 10px 14px; font-size: 12.5px; box-shadow: var(--sh-md); }
+    .fab svg { width: 14px; height: 14px; }
+    .fab-search { display: none; }
+    .fab-person span, .fab-group span { display: inline; }
+
+    /* Formularis (modes nova persona / nou grup): més estrets */
+    .form { padding: 0 4px; }
+    .card { padding: 14px 16px; }
+    .two { grid-template-columns: 1fr; gap: 10px; }
+    .levels { grid-template-columns: repeat(2, 1fr); }
+    .levels.mecr { grid-template-columns: repeat(2, 1fr); }
+    .two-col { grid-template-columns: 1fr; gap: 14px; }
+    .sub-grid { grid-template-columns: 1fr; }
+    .add-picker { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 
