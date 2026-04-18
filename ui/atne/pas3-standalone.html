@@ -518,6 +518,26 @@ body {
   .p-back:hover{background:var(--cream-2);color:var(--primary)}
   .p-back svg{width:12px;height:12px}
 
+  /* Sidebar per a GRUPS (tipus de perfil = group) */
+  .grp-head{background:#fff;border:1px solid var(--paper-line);border-radius:var(--r-xl);padding:13px 14px;display:flex;align-items:center;gap:10px;box-shadow:var(--sh-sm)}
+  .grp-head .g-av{width:44px;height:44px;border-radius:10px;background:var(--primary-50);color:var(--primary);display:grid;place-items:center;font-family:var(--serif);font-weight:700;font-size:14px;flex-shrink:0}
+  .grp-head .g-nm{font-family:var(--serif);font-weight:700;font-size:14px;line-height:1.2}
+  .grp-head .g-sub{font-size:11px;color:var(--ink-500);font-family:var(--mono);margin-top:2px}
+  .versions{display:flex;flex-direction:column;gap:6px}
+  .vcard{background:#fff;border:1px solid var(--paper-line);border-radius:var(--r-md);padding:9px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background var(--trans-fast),border-color var(--trans-fast);position:relative;text-align:left;width:100%}
+  .vcard:hover{background:var(--cream-2)}
+  .vcard.active{border-color:var(--primary);background:var(--primary-50)}
+  .vcard .v-av{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-family:var(--serif);font-weight:700;font-size:12px;flex-shrink:0}
+  .vcard .v-av.level{border-radius:7px;background:var(--ink-100);color:var(--ink-700);font-size:11px;font-family:var(--mono);letter-spacing:.02em}
+  .vcard .v-av.tdah{background:var(--tdah-bg);color:var(--tdah)}
+  .vcard .v-av.disl{background:var(--disl-bg);color:var(--disl)}
+  .vcard .v-av.cat{background:var(--cat-bg);color:var(--cat)}
+  .vcard .v-av.ac{background:var(--ac-bg);color:var(--ac)}
+  .vcard .v-body{flex:1;min-width:0}
+  .vcard .v-nm{font-family:var(--serif);font-weight:700;font-size:13px;line-height:1.2}
+  .vcard .v-sub{font-size:10.5px;color:var(--ink-500);font-family:var(--mono);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .vcard .v-dot{width:6px;height:6px;border-radius:50%;background:var(--ok);flex-shrink:0}
+
   /* Col·lapsar detalls del perfil (només fletxeta, sense text) */
   .p-sect{font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-500);font-weight:500;margin-top:4px}
   .p-list{display:flex;flex-direction:column;gap:2px}
@@ -1540,15 +1560,39 @@ body {
                     chips:[{label:'TDAH',cat:'tdah'},{label:'Dislèxia',cat:'disl'}],
                     behaviors:['Dificultats atencionals i lectora','Fatiga ràpida','Necessita textos curts'],
                     aids:['Fragmentar el text','Tipografia accessible','Una idea per frase','Marques visuals'] },
-    grup3a:       { id:'grup3a', type:'group', name:'3r ESO A · Grup classe', age:null, course:'24 alumnes', avatar:'3A', cat:'group',
+    grup3a:       { id:'grup3a', type:'group', name:'3r ESO A · Grup classe', age:null, course:'24 alumnes · 3 nivells', avatar:'3A', cat:'group',
                     chips:[{label:'3 nivells',cat:'lv'},{label:'1 TDAH',cat:'tdah'},{label:'2 L2',cat:'cat'}],
-                    behaviors:[], aids:[] },
-    desdoblament: { id:'desdoblament', type:'group', name:'Desdoblament R · Ciències 3r', age:null, course:'12 alumnes', avatar:'DR', cat:'group-ac',
+                    behaviors:[], aids:[],
+                    versions:[
+                      {id:'v-b1', type:'level', label:'Nivell B1', sub:'Intermedi · 12 alumnes'},
+                      {id:'v-a2', type:'level', label:'Nivell A2', sub:'Bàsic · 4 alumnes'},
+                      {id:'v-estandard', type:'level', label:'Estàndard', sub:'Nivell del curs · 8 alumnes'},
+                      {id:'v-marc', type:'person', avatar:'M', cat:'tdah', label:'Marc R.', sub:'B1 · TDAH'},
+                      {id:'v-liu', type:'person', avatar:'L', cat:'cat', label:'Liu C.', sub:'A2 · Català L2'},
+                      {id:'v-mireia', type:'person', avatar:'Mi', cat:'disl', label:'Mireia S.', sub:'B1 · Dislèxia'}
+                    ] },
+    desdoblament: { id:'desdoblament', type:'group', name:'Desdoblament R · Ciències 3r', age:null, course:'12 alumnes · 2 nivells', avatar:'DR', cat:'group-ac',
                     chips:[{label:'2 nivells',cat:'lv'},{label:'3 AACC',cat:'ac'}],
-                    behaviors:[], aids:[] },
-    acollida:     { id:'acollida', type:'group', name:"Aula d'acollida · Cicle sup.", age:null, course:'8 alumnes', avatar:'L2', cat:'group-cat',
+                    behaviors:[], aids:[],
+                    versions:[
+                      {id:'v-estandard', type:'level', label:'Estàndard', sub:'Nivell del curs · 9 alumnes'},
+                      {id:'v-ampliat', type:'level', label:'Ampliació', sub:'Repte + investigació · 3 alumnes'},
+                      {id:'v-pol', type:'person', avatar:'P', cat:'ac', label:'Pol Vidal', sub:'4t · AACC'},
+                      {id:'v-an', type:'person', avatar:'An', cat:'ac', label:'Anna M.', sub:'4t · AACC'},
+                      {id:'v-sa', type:'person', avatar:'Sa', cat:'ac', label:'Sara G.', sub:'4t · AACC'}
+                    ] },
+    acollida:     { id:'acollida', type:'group', name:"Aula d'acollida · Cicle sup.", age:null, course:'8 alumnes · 4 nivells', avatar:'L2', cat:'group-cat',
                     chips:[{label:'4 nivells',cat:'lv'},{label:'Tots L2',cat:'cat'}],
-                    behaviors:[], aids:[] }
+                    behaviors:[], aids:[],
+                    versions:[
+                      {id:'v-a1', type:'level', label:'Nivell A1', sub:'Inicial · 2 alumnes'},
+                      {id:'v-a2', type:'level', label:'Nivell A2', sub:'Bàsic · 3 alumnes'},
+                      {id:'v-b1', type:'level', label:'Nivell B1', sub:'Intermedi · 2 alumnes'},
+                      {id:'v-b2', type:'level', label:'Nivell B2', sub:'Avançat · 1 alumne'},
+                      {id:'v-you', type:'person', avatar:'Y', cat:'cat', label:'Youssef E.', sub:'A1 · Àrab L1'},
+                      {id:'v-liu2', type:'person', avatar:'L', cat:'cat', label:'Liu Z.', sub:'A2 · Xinès L1'},
+                      {id:'v-am', type:'person', avatar:'Am', cat:'cat', label:'Amina K.', sub:'B1 · Àrab L1'}
+                    ] }
   };
 
   // ──────────────────────────────────────────────────────
@@ -1585,9 +1629,64 @@ body {
     if (sel && !sel.contains(e.target)) sel.classList.remove('open');
   });
 
+  function renderGroupSidebar(g) {
+    const lside = document.querySelector('.lside');
+    if (!lside) return;
+    const palette = {
+      'group': ['var(--primary-50)', 'var(--primary)'],
+      'group-ac': ['var(--ac-bg)', 'var(--ac)'],
+      'group-cat': ['var(--cat-bg)', 'var(--cat)']
+    };
+    const [bg, fg] = palette[g.cat] || palette.group;
+    const versionsHtml = (g.versions || []).map((v, i) => {
+      const avatarHtml = v.type === 'level'
+        ? `<div class="v-av level">${v.label.replace(/^Nivell /, '')}</div>`
+        : `<div class="v-av ${v.cat || ''}">${v.avatar || v.label.charAt(0)}</div>`;
+      return `<button class="vcard ${i === 0 ? 'active' : ''}" data-vid="${v.id}">
+        ${avatarHtml}
+        <div class="v-body">
+          <div class="v-nm">${v.label}</div>
+          <div class="v-sub">${v.sub}</div>
+        </div>
+        <span class="v-dot"></span>
+      </button>`;
+    }).join('');
+    lside.innerHTML = `
+      <div class="l-label">Grup</div>
+      <div class="grp-head">
+        <div class="g-av" style="background:${bg};color:${fg}">${g.avatar}</div>
+        <div style="flex:1;min-width:0">
+          <div class="g-nm">${g.name}</div>
+          <div class="g-sub">${g.course}</div>
+        </div>
+      </div>
+      <div class="l-label" style="margin-top:8px">Versions</div>
+      <div class="versions">${versionsHtml}</div>
+      <button class="p-back" onclick="location.href='/ui/atne/pas2.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 19 8 12l7-7"/></svg>
+        Tornar al text
+      </button>
+    `;
+    // Click a una versió → activa-la (només visual per ara; canvi de contingut pendent)
+    lside.querySelectorAll('.vcard').forEach(c => c.addEventListener('click', () => {
+      lside.querySelectorAll('.vcard').forEach(x => x.classList.remove('active'));
+      c.classList.add('active');
+    }));
+  }
+
   (function populateProfile() {
     const pid = localStorage.getItem('atne.profile_id') || 'marc';
     const p = window.ATNE_PROFILES[pid] || window.ATNE_PROFILES.marc;
+
+    // Grups → sidebar amb capçalera de grup + llista VERSIONS
+    if (p.type === 'group') {
+      renderGroupSidebar(p);
+      // Aplicar tipografia per defecte (sense perfil NEE individual, usem Atkinson)
+      const storedFont = localStorage.getItem('atne.doc_font');
+      applyDocFont(storedFont || 'atkinson');
+      return;
+    }
+
     const pcard = document.querySelector('.pcard');
     if (!pcard) return;
     const av = pcard.querySelector('.p-av');
