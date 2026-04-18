@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+
+<html lang="ca"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ATNE Workspace - Pas 2</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface": "#f8f9ff",
+                      "on-background": "#0b1c30",
+                      "surface-dim": "#cbdbf5",
+                      "secondary": "#4953bc",
+                      "on-secondary-fixed": "#000767",
+                      "inverse-on-surface": "#eaf1ff",
+                      "primary-container": "#4c51bf",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-tint": "#4c51bf",
+                      "secondary-container": "#8792fe",
+                      "on-tertiary": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "tertiary": "#2b38a9",
+                      "surface-variant": "#d3e4fe",
+                      "surface-container-low": "#eff4ff",
+                      "primary-fixed-dim": "#bfc1ff",
+                      "on-surface": "#0b1c30",
+                      "surface-bright": "#f8f9ff",
+                      "primary-fixed": "#e1e0ff",
+                      "tertiary-container": "#4552c2",
+                      "on-tertiary-container": "#d3d5ff",
+                      "on-secondary-fixed-variant": "#2f3aa3",
+                      "tertiary-fixed-dim": "#bdc2ff",
+                      "outline": "#767684",
+                      "inverse-primary": "#bfc1ff",
+                      "inverse-surface": "#213145",
+                      "on-error": "#ffffff",
+                      "on-primary-fixed-variant": "#3337a6",
+                      "on-secondary": "#ffffff",
+                      "background": "#f8f9ff",
+                      "on-tertiary-fixed-variant": "#2b38aa",
+                      "surface-container-highest": "#d3e4fe",
+                      "on-tertiary-fixed": "#000965",
+                      "surface-container": "#e5eeff",
+                      "primary": "#3337a6",
+                      "on-surface-variant": "#464653",
+                      "outline-variant": "#c7c5d5",
+                      "surface-container-high": "#dce9ff",
+                      "on-secondary-container": "#17228f",
+                      "secondary-fixed-dim": "#bdc2ff",
+                      "on-primary-container": "#d4d5ff",
+                      "error": "#ba1a1a",
+                      "on-primary-fixed": "#03006d",
+                      "on-error-container": "#93000a",
+                      "secondary-fixed": "#e0e0ff",
+                      "tertiary-fixed": "#dfe0ff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {},
+              "fontFamily": {
+                      "headline": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body": [
+                              "Inter"
+                      ],
+                      "label": [
+                              "Inter"
+                      ]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9ff; }
+        h1, h2, h3, h4, h5, h6, .font-headline { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        /* Custom Scrollbar for compact panels */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #c7c5d5; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #767684; }
+      </style>
+</head>
+<body class="text-on-surface h-screen flex flex-col overflow-hidden selection:bg-primary-container selection:text-white">
+<!-- TopAppBar -->
+<header class="bg-[#f8f9ff] dark:bg-slate-950 flex justify-between items-center w-full px-6 py-3 docked full-width top-0 z-50 flex-shrink-0">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#3337a6] text-2xl" style="font-variation-settings: 'FILL' 1;">neurology</span>
+<span class="text-xl font-bold text-[#3337a6] dark:text-[#eff4ff] font-['Plus_Jakarta_Sans'] font-semibold tracking-tight">ATNE Workspace</span>
+</div>
+<div class="flex items-center gap-4 text-[#3337a6] dark:text-[#4c51bf]">
+<button class="hover:bg-[#eff4ff] dark:hover:bg-slate-800 rounded-lg p-2 transition-colors active:scale-95 duration-150 flex items-center justify-center">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="hover:bg-[#eff4ff] dark:hover:bg-slate-800 rounded-lg p-2 transition-colors active:scale-95 duration-150 flex items-center justify-center">
+<span class="material-symbols-outlined">help</span>
+</button>
+<button class="hover:bg-[#eff4ff] dark:hover:bg-slate-800 rounded-lg p-2 transition-colors active:scale-95 duration-150 flex items-center justify-center">
+<span class="material-symbols-outlined text-3xl">account_circle</span>
+</button>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden h-full">
+<!-- SideNavBar (Compact Rail Mode to allow room for workspace) -->
+<nav class="bg-[#ffffff] dark:bg-slate-900 flex flex-col h-screen p-4 gap-4 docked left-0 h-full w-20 border-r-0 shadow-[10px_0_40px_-10px_rgba(11,28,48,0.06)] z-40 flex-shrink-0 items-center">
+<button class="flex flex-col items-center justify-center p-3 gap-1 w-full text-slate-500 hover:bg-[#f8f9ff] dark:hover:bg-slate-800 rounded-xl hover:translate-x-1 transition-transform duration-200">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Inter'] text-[10px] font-medium">Perfil</span>
+</button>
+<!-- ACTIVE TAB: Editor (Intent: Workspace/Text Editing) -->
+<button class="flex flex-col items-center justify-center p-3 gap-1 w-full bg-[#eff4ff] dark:bg-[#4c51bf]/20 text-[#3337a6] dark:text-[#eff4ff] rounded-xl font-semibold hover:translate-x-1 transition-transform duration-200 active:opacity-80">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">edit_note</span>
+<span class="font-['Inter'] text-[10px] font-medium">Editor</span>
+</button>
+<button class="flex flex-col items-center justify-center p-3 gap-1 w-full text-slate-500 hover:bg-[#f8f9ff] dark:hover:bg-slate-800 rounded-xl hover:translate-x-1 transition-transform duration-200">
+<span class="material-symbols-outlined">handyman</span>
+<span class="font-['Inter'] text-[10px] font-medium">Eines</span>
+</button>
+<button class="flex flex-col items-center justify-center p-3 gap-1 w-full text-slate-500 hover:bg-[#f8f9ff] dark:hover:bg-slate-800 rounded-xl hover:translate-x-1 transition-transform duration-200">
+<span class="material-symbols-outlined">auto_fix_high</span>
+<span class="font-['Inter'] text-[10px] font-medium">Refinament</span>
+</button>
+<button class="flex flex-col items-center justify-center p-3 gap-1 w-full text-slate-500 hover:bg-[#f8f9ff] dark:hover:bg-slate-800 rounded-xl hover:translate-x-1 transition-transform duration-200">
+<span class="material-symbols-outlined">extension</span>
+<span class="font-['Inter'] text-[10px] font-medium">Complements</span>
+</button>
+</nav>
+<!-- Main Workspace Area -->
+<main class="flex flex-1 overflow-hidden bg-surface">
+<!-- LEFT COLUMN: Per a qui (160px) -->
+<aside class="w-[160px] flex-shrink-0 bg-surface-container-low flex flex-col pt-6 pb-4 px-3 gap-6 overflow-y-auto">
+<h2 class="text-xs font-semibold text-outline tracking-wider uppercase">Per a qui</h2>
+<!-- Student Card -->
+<div class="bg-surface-container-lowest rounded-xl p-3 flex flex-col gap-3 shadow-[0_4px_12px_rgba(11,28,48,0.02)]">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden flex-shrink-0">
+<img alt="Student profile picture" class="w-full h-full object-cover" data-alt="Close up portrait of a young male student looking directly at camera, soft natural lighting, neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTZJHRyGXEVpqZd06P4iK4FKCSoR3JPPIOCSNfVfEdUBDzdZ8QBn6MzJpSNJtvjH6wZnbGNvMDnmeFEXGfDNW99oB0T3K1th1e7GP5pNTh505nponSdbtxZG2s_anKMSJlPVQiUpEXBNLzYHwWtFqLRpZm1Ib_XcjW_JweEfgAMeR5cLFDp9v9LRrRN0_pvtpaWi_7GYaJFQ9nVeCGtmc5r5zhjrDI8tskl5YZs9TscU9dl-fApDS_VFNvzzfufslGy4QKEmWx7uE"/>
+</div>
+<div class="min-w-0">
+<div class="text-sm font-semibold text-on-surface truncate">Marc</div>
+<div class="text-[10px] text-on-surface-variant font-medium truncate">TDAH 3r ESO</div>
+</div>
+</div>
+<!-- Metrics -->
+<div class="flex flex-col gap-1.5">
+<div class="bg-surface text-[10px] font-medium text-on-surface-variant px-2 py-1 rounded-md flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px] text-primary">psychology</span>
+                            Conductes 2
+                        </div>
+<div class="bg-surface text-[10px] font-medium text-on-surface-variant px-2 py-1 rounded-md flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px] text-primary">support</span>
+                            Ajuts 4 actius
+                        </div>
+</div>
+</div>
+<!-- Strategy Checklist -->
+<div class="flex flex-col gap-3 flex-1">
+<h3 class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider">Estratègies</h3>
+<label class="flex items-start gap-2 cursor-pointer group">
+<div class="relative flex items-center mt-0.5">
+<input checked="" class="peer sr-only" type="checkbox"/>
+<div class="w-4 h-4 rounded-sm border border-outline-variant peer-checked:bg-primary peer-checked:border-primary transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[12px] opacity-0 peer-checked:opacity-100 font-bold">check</span>
+</div>
+</div>
+<span class="text-xs text-on-surface-variant group-hover:text-on-surface transition-colors leading-tight">Fragmentar</span>
+</label>
+<label class="flex items-start gap-2 cursor-pointer group">
+<div class="relative flex items-center mt-0.5">
+<input checked="" class="peer sr-only" type="checkbox"/>
+<div class="w-4 h-4 rounded-sm border border-outline-variant peer-checked:bg-primary peer-checked:border-primary transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[12px] opacity-0 peer-checked:opacity-100 font-bold">check</span>
+</div>
+</div>
+<span class="text-xs text-on-surface-variant group-hover:text-on-surface transition-colors leading-tight">Una idea/frase</span>
+</label>
+<label class="flex items-start gap-2 cursor-pointer group">
+<div class="relative flex items-center mt-0.5">
+<input class="peer sr-only" type="checkbox"/>
+<div class="w-4 h-4 rounded-sm border border-outline-variant peer-checked:bg-primary peer-checked:border-primary transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[12px] opacity-0 peer-checked:opacity-100 font-bold">check</span>
+</div>
+</div>
+<span class="text-xs text-on-surface-variant group-hover:text-on-surface transition-colors leading-tight">Instruccions numerades</span>
+</label>
+<label class="flex items-start gap-2 cursor-pointer group">
+<div class="relative flex items-center mt-0.5">
+<input class="peer sr-only" type="checkbox"/>
+<div class="w-4 h-4 rounded-sm border border-outline-variant peer-checked:bg-primary peer-checked:border-primary transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[12px] opacity-0 peer-checked:opacity-100 font-bold">check</span>
+</div>
+</div>
+<span class="text-xs text-on-surface-variant group-hover:text-on-surface transition-colors leading-tight">Vocabulari freqüent</span>
+</label>
+</div>
+<button class="text-xs font-medium text-primary hover:text-primary-container transition-colors text-left flex items-center gap-1 mt-auto">
+<span class="material-symbols-outlined text-[16px]">swap_horiz</span>
+                    Canviar perfil
+                </button>
+</aside>
+<!-- CENTER COLUMN: Editor (Max Width) -->
+<section class="flex-1 bg-surface-container-lowest my-4 mx-2 rounded-xl shadow-[0_8px_30px_rgba(11,28,48,0.04)] flex flex-col relative overflow-hidden ring-1 ring-outline-variant/10">
+<div class="flex-1 overflow-y-auto px-12 py-16 scroll-smooth focus:outline-none" contenteditable="true">
+<h1 class="font-headline text-3xl font-bold text-on-surface mb-8">La fotosíntesi</h1>
+<div class="space-y-6 text-on-surface-variant leading-relaxed text-[15px]">
+<p>La fotosíntesi és el procés mitjançant el qual les plantes, les algues i alguns bacteris converteixen l'energia de la llum solar en energia química, emmagatzemada en forma de sucres. Aquest procés és fonamental per a la vida a la Terra, ja que és la principal font de matèria orgànica per a gairebé tots els ecosistemes i allibera oxigen a l'atmosfera com a subproducte.</p>
+<p>El procés té lloc principalment a les fulles de les plantes, dins d'uns orgànuls cel·lulars anomenats cloroplasts. Aquests contenen clorofil·la, un pigment verd que absorbeix la llum solar. La fotosíntesi es divideix en dues fases principals: la fase lluminosa, que requereix llum directa per produir ATP i NADPH, i la fase fosca (o cicle de Calvin), que utilitza aquestes molècules per fixar el diòxid de carboni i produir glucosa.</p>
+<p>A més de proporcionar aliment per a la planta, la glucosa produïda s'utilitza per construir altres molècules estructurals, com la cel·lulosa, o s'emmagatzema com a midó per a un ús futur. L'impacte de la fotosíntesi a nivell global és immens, regulant els nivells de diòxid de carboni a l'atmosfera i mitigant així els efectes del canvi climàtic.</p>
+</div>
+</div>
+<!-- Floating Footer Pill -->
+<div class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface rounded-full px-5 py-1.5 text-xs font-medium shadow-[0_10px_20px_rgba(0,0,0,0.1)] flex items-center gap-2 pointer-events-none">
+<span class="material-symbols-outlined text-[16px]">segment</span>
+                    342 paraules
+                </div>
+</section>
+<!-- RIGHT COLUMN: Eines + Accions (200px) -->
+<aside class="w-[200px] flex-shrink-0 bg-surface-container-low flex flex-col p-4 gap-6 overflow-y-auto border-l border-surface-container-high">
+<!-- Section: MODE D'ENTRADA -->
+<div class="flex flex-col gap-2">
+<h3 class="text-[10px] font-semibold text-outline uppercase tracking-widest">Mode d'entrada</h3>
+<div class="flex bg-surface-container-highest p-1 rounded-lg gap-1">
+<button class="flex-1 flex flex-col items-center justify-center p-1.5 bg-surface-container-lowest text-primary rounded shadow-sm" title="Escriure">
+<span class="material-symbols-outlined text-[18px]">keyboard</span>
+</button>
+<button class="flex-1 flex flex-col items-center justify-center p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest/50 rounded transition-colors" title="Pujar">
+<span class="material-symbols-outlined text-[18px]">upload_file</span>
+</button>
+<button class="flex-1 flex flex-col items-center justify-center p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest/50 rounded transition-colors" title="Generar">
+<span class="material-symbols-outlined text-[18px]">smart_toy</span>
+</button>
+<button class="flex-1 flex flex-col items-center justify-center p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest/50 rounded transition-colors" title="Recuperar">
+<span class="material-symbols-outlined text-[18px]">history</span>
+</button>
+</div>
+</div>
+<!-- Section: EDICIÓ -->
+<div class="flex flex-col gap-2">
+<h3 class="text-[10px] font-semibold text-outline uppercase tracking-widest">Edició</h3>
+<div class="grid grid-cols-3 gap-1 bg-surface-container-highest p-1.5 rounded-lg">
+<button class="flex items-center justify-center p-1.5 text-on-surface-variant hover:bg-surface-container-lowest rounded transition-colors" title="Negreta">
+<span class="material-symbols-outlined text-[18px]">format_bold</span>
+</button>
+<button class="flex items-center justify-center p-1.5 text-on-surface-variant hover:bg-surface-container-lowest rounded transition-colors" title="Cursiva">
+<span class="material-symbols-outlined text-[18px]">format_italic</span>
+</button>
+<button class="flex items-center justify-center p-1.5 text-on-surface-variant hover:bg-surface-container-lowest rounded transition-colors" title="Ressaltar">
+<span class="material-symbols-outlined text-[18px]">format_ink_highlighter</span>
+</button>
+<button class="flex items-center justify-center p-1.5 text-on-surface-variant hover:bg-surface-container-lowest rounded transition-colors" title="Desfer">
+<span class="material-symbols-outlined text-[18px]">undo</span>
+</button>
+<button class="flex items-center justify-center p-1.5 text-on-surface-variant hover:bg-surface-container-lowest rounded transition-colors" title="Refer">
+<span class="material-symbols-outlined text-[18px]">redo</span>
+</button>
+<button class="flex items-center justify-center p-1.5 text-error hover:bg-error-container/50 rounded transition-colors" title="Esborrar tot">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+<!-- Section: REFINAR -->
+<div class="flex flex-col gap-2">
+<h3 class="text-[10px] font-semibold text-outline uppercase tracking-widest">Refinar</h3>
+<div class="flex flex-col gap-1.5">
+<button class="w-full text-left text-xs font-medium text-on-surface bg-surface-container-lowest px-3 py-2 rounded border border-outline-variant/30 hover:border-outline-variant/60 transition-colors flex items-center justify-between">
+                            Refinar text
+                            <span class="material-symbols-outlined text-[16px] text-primary">auto_fix</span>
+</button>
+<div class="relative">
+<select class="w-full appearance-none text-xs font-medium text-on-surface bg-surface-container-lowest px-3 py-2 rounded border border-outline-variant/30 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors cursor-pointer pr-8">
+<option>Longitud: Mantindre</option>
+<option>Longitud: Més curt</option>
+<option>Longitud: Més llarg</option>
+</select>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">expand_more</span>
+</div>
+<button class="w-full text-left text-xs font-medium text-on-surface bg-surface-container-lowest px-3 py-2 rounded border border-outline-variant/30 hover:border-outline-variant/60 transition-colors flex items-center justify-between">
+                            Simplificar
+                            <span class="material-symbols-outlined text-[16px]">compress</span>
+</button>
+<div class="relative">
+<select class="w-full appearance-none text-xs font-medium text-on-surface bg-surface-container-lowest px-3 py-2 rounded border border-outline-variant/30 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors cursor-pointer pr-8">
+<option>To: Acadèmic</option>
+<option>To: Simple</option>
+<option>To: Narratiu</option>
+</select>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Section: COMPLEMENTS -->
+<div class="flex flex-col gap-2">
+<h3 class="text-[10px] font-semibold text-outline uppercase tracking-widest">Complements</h3>
+<div class="flex flex-col gap-3 bg-surface-container-lowest p-3 rounded-lg shadow-sm border border-outline-variant/15">
+<label class="flex items-center justify-between cursor-pointer group">
+<span class="text-xs font-medium text-on-surface-variant group-hover:text-on-surface transition-colors">Glossari</span>
+<div class="relative">
+<input class="peer sr-only" type="checkbox"/>
+<div class="w-8 h-4 bg-outline-variant/50 rounded-full peer-checked:bg-primary transition-colors"></div>
+<div class="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full transition-transform peer-checked:translate-x-4 shadow-sm"></div>
+</div>
+</label>
+<label class="flex items-center justify-between cursor-pointer group">
+<span class="text-xs font-medium text-on-surface-variant group-hover:text-on-surface transition-colors">Esquema</span>
+<div class="relative">
+<input checked="" class="peer sr-only" type="checkbox"/>
+<div class="w-8 h-4 bg-outline-variant/50 rounded-full peer-checked:bg-primary transition-colors"></div>
+<div class="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full transition-transform peer-checked:translate-x-4 shadow-sm"></div>
+</div>
+</label>
+<label class="flex items-center justify-between cursor-pointer group">
+<span class="text-xs font-medium text-on-surface-variant group-hover:text-on-surface transition-colors">Preguntes</span>
+<div class="relative">
+<input class="peer sr-only" type="checkbox"/>
+<div class="w-8 h-4 bg-outline-variant/50 rounded-full peer-checked:bg-primary transition-colors"></div>
+<div class="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full transition-transform peer-checked:translate-x-4 shadow-sm"></div>
+</div>
+</label>
+<label class="flex items-center justify-between cursor-pointer group">
+<span class="text-xs font-medium text-on-surface-variant group-hover:text-on-surface transition-colors">Bastides</span>
+<div class="relative">
+<input checked="" class="peer sr-only" type="checkbox"/>
+<div class="w-8 h-4 bg-outline-variant/50 rounded-full peer-checked:bg-primary transition-colors"></div>
+<div class="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full transition-transform peer-checked:translate-x-4 shadow-sm"></div>
+</div>
+</label>
+</div>
+</div>
+<div class="flex-1"></div> <!-- Spacer -->
+<!-- Primary CTA -->
+<button class="w-full mt-4 bg-gradient-to-br from-primary to-primary-container text-white font-semibold text-sm py-3 px-4 rounded-xl shadow-[0_8px_16px_-4px_rgba(51,55,166,0.3)] hover:shadow-[0_12px_20px_-4px_rgba(51,55,166,0.4)] hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 group">
+                    Adaptar
+                    <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</aside>
+</main>
+</div>
+</body></html>

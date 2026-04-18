@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+
+<html lang="ca"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ATNE Pas 3 - Adaptacions</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#bfc1ff",
+                        "secondary-container": "#8792fe",
+                        "surface-container-low": "#eff4ff",
+                        "surface-tint": "#4c51bf",
+                        "outline-variant": "#c7c5d5",
+                        "tertiary-container": "#4552c2",
+                        "on-tertiary-container": "#d3d5ff",
+                        "on-error-container": "#93000a",
+                        "error": "#ba1a1a",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-dim": "#cbdbf5",
+                        "surface-container-high": "#dce9ff",
+                        "inverse-surface": "#213145",
+                        "surface-container": "#e5eeff",
+                        "on-tertiary-fixed": "#000965",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#d3e4fe",
+                        "secondary-fixed-dim": "#bdc2ff",
+                        "on-surface-variant": "#464653",
+                        "on-secondary-container": "#17228f",
+                        "outline": "#767684",
+                        "on-secondary": "#ffffff",
+                        "tertiary": "#2b38a9",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#e0e0ff",
+                        "primary-container": "#4c51bf",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-secondary-fixed": "#000767",
+                        "on-primary-fixed-variant": "#3337a6",
+                        "error-container": "#ffdad6",
+                        "primary": "#3337a6",
+                        "on-surface": "#0b1c30",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-container": "#d4d5ff",
+                        "inverse-primary": "#bfc1ff",
+                        "tertiary-fixed-dim": "#bdc2ff",
+                        "surface-bright": "#f8f9ff",
+                        "tertiary-fixed": "#dfe0ff",
+                        "secondary": "#4953bc",
+                        "primary-fixed": "#e1e0ff",
+                        "on-primary": "#ffffff",
+                        "surface": "#f8f9ff",
+                        "on-tertiary-fixed-variant": "#2b38aa",
+                        "on-primary-fixed": "#03006d",
+                        "on-secondary-fixed-variant": "#2f3aa3",
+                        "on-background": "#0b1c30",
+                        "background": "#f8f9ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .ghost-border {
+                @apply ring-1 ring-outline-variant/15;
+            }
+            .primary-gradient {
+                @apply bg-gradient-to-br from-primary to-primary-container;
+            }
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body h-screen flex flex-col overflow-hidden selection:bg-surface-variant">
+<!-- TopNavBar (Shared Component JSON) -->
+<header class="flex justify-between items-center w-full px-8 py-4 bg-[#f8f9ff] flex-shrink-0 z-20 shadow-[0_4px_20px_-10px_rgba(11,28,48,0.03)]">
+<div class="flex items-center gap-8">
+<h1 class="text-xl font-bold text-[#3337a6] tracking-tight font-headline">ATNE Pas 3</h1>
+<nav class="hidden md:flex gap-6 items-center">
+<a class="text-[#3337a6] font-semibold border-b-2 border-[#3337a6] pb-1" href="#">Versions</a>
+<a class="text-slate-500 font-medium hover:text-[#4c51bf] transition-colors duration-200 pb-1 border-b-2 border-transparent" href="#">Configuració</a>
+<a class="text-slate-500 font-medium hover:text-[#4c51bf] transition-colors duration-200 pb-1 border-b-2 border-transparent" href="#">Exportar</a>
+</nav>
+</div>
+<div class="flex items-center gap-4 text-[#3337a6]">
+<button class="hover:bg-surface-container-low p-2 rounded-full transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+<button class="hover:bg-surface-container-low p-2 rounded-full transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</header>
+<!-- Main Workspace: 3 Columns -->
+<main class="flex-1 flex overflow-hidden">
+<!-- LEFT COLUMN: SideNavBar / Group Config (190px) -->
+<aside class="w-[190px] flex-shrink-0 bg-[#eff4ff] flex flex-col py-6 pr-4 border-r-0 relative z-10">
+<!-- Header section mapping to JSON SideNavBar definitions -->
+<div class="mb-8 pl-6">
+<h2 class="font-body text-[1.125rem] font-semibold text-[#3337a6]">Adaptacions</h2>
+<p class="font-body text-xs font-medium text-slate-500 uppercase tracking-wider mt-1">Configuració de grup</p>
+<!-- Contextual addition based on prompt -->
+<p class="font-body text-sm text-on-surface-variant mt-3 font-medium">Grup 3r ESO Ciències</p>
+</div>
+<div class="flex-1 overflow-y-auto">
+<!-- Nivells Base -->
+<div class="mb-8">
+<h3 class="font-label text-xs uppercase text-slate-500 tracking-wider pl-6 mb-3">Nivells base</h3>
+<nav class="flex flex-col gap-1">
+<button class="flex items-center gap-3 w-full text-left py-2.5 pl-6 pr-3 text-slate-600 hover:bg-white/50 hover:translate-x-1 transition-all duration-200 group">
+<span class="material-symbols-outlined text-[18px] group-hover:text-primary transition-colors">universal_currency_alt</span>
+<span class="font-body text-sm font-medium">Accessible</span>
+<span class="ml-auto w-3 h-3 rounded-full border border-outline-variant group-hover:border-primary"></span>
+</button>
+<!-- Active Item -->
+<button class="flex items-center gap-3 w-full text-left py-2.5 pl-6 pr-3 bg-white text-[#3337a6] rounded-r-full shadow-[0_2px_8px_-2px_rgba(11,28,48,0.05)] transition-all duration-200">
+<span class="material-symbols-outlined text-[18px]">article</span>
+<span class="font-body text-sm font-semibold">Estàndard</span>
+<span class="ml-auto w-3 h-3 rounded-full border-[3px] border-primary bg-white"></span>
+</button>
+<button class="flex items-center gap-3 w-full text-left py-2.5 pl-6 pr-3 text-slate-600 hover:bg-white/50 hover:translate-x-1 transition-all duration-200 group">
+<span class="material-symbols-outlined text-[18px] group-hover:text-primary transition-colors">rocket_launch</span>
+<span class="font-body text-sm font-medium">Desafiament</span>
+<span class="ml-auto w-3 h-3 rounded-full border border-outline-variant group-hover:border-primary"></span>
+</button>
+</nav>
+</div>
+<!-- Perfils Individuals -->
+<div>
+<h3 class="font-label text-xs uppercase text-slate-500 tracking-wider pl-6 mb-3">Perfils individuals</h3>
+<nav class="flex flex-col gap-1">
+<button class="flex items-center gap-3 w-full text-left py-2.5 pl-6 pr-3 text-slate-600 hover:bg-white/50 hover:translate-x-1 transition-all duration-200 group">
+<span class="material-symbols-outlined text-[18px] group-hover:text-primary transition-colors">person</span>
+<span class="font-body text-sm font-medium">Mireia <span class="text-xs text-outline ml-1 font-normal">(TEA)</span></span>
+<span class="ml-auto w-3 h-3 rounded-full border border-outline-variant group-hover:border-primary"></span>
+</button>
+<button class="flex items-center gap-3 w-full text-left py-2.5 pl-6 pr-3 text-slate-600 hover:bg-white/50 hover:translate-x-1 transition-all duration-200 group">
+<span class="material-symbols-outlined text-[18px] group-hover:text-primary transition-colors">person</span>
+<span class="font-body text-sm font-medium">Liu <span class="text-xs text-outline ml-1 font-normal">(A1)</span></span>
+<span class="ml-auto w-3 h-3 rounded-full border border-outline-variant group-hover:border-primary"></span>
+</button>
+<button class="flex items-center gap-3 w-full text-left py-2.5 pl-6 pr-3 text-slate-600 hover:bg-white/50 hover:translate-x-1 transition-all duration-200 group">
+<span class="material-symbols-outlined text-[18px] group-hover:text-primary transition-colors">person</span>
+<span class="font-body text-sm font-medium">Amina <span class="text-xs text-outline ml-1 font-normal">(A2)</span></span>
+<span class="ml-auto w-3 h-3 rounded-full border border-outline-variant group-hover:border-primary"></span>
+</button>
+<button class="flex items-center gap-3 w-full text-left py-2.5 pl-6 pr-3 text-slate-600 hover:bg-white/50 hover:translate-x-1 transition-all duration-200 group">
+<span class="material-symbols-outlined text-[18px] group-hover:text-primary transition-colors">person</span>
+<span class="font-body text-sm font-medium">Pau <span class="text-xs text-outline ml-1 font-normal">(TDAH)</span></span>
+<span class="ml-auto w-3 h-3 rounded-full border border-outline-variant group-hover:border-primary"></span>
+</button>
+<button class="flex items-center gap-3 w-full text-left py-2.5 pl-6 pr-3 text-slate-600 hover:bg-white/50 hover:translate-x-1 transition-all duration-200 group">
+<span class="material-symbols-outlined text-[18px] group-hover:text-primary transition-colors">person</span>
+<span class="font-body text-sm font-medium">Jana <span class="text-xs text-outline ml-1 font-normal">(AC)</span></span>
+<span class="ml-auto w-3 h-3 rounded-full border border-outline-variant group-hover:border-primary"></span>
+</button>
+</nav>
+</div>
+</div>
+<!-- Bottom Menu -->
+<div class="mt-auto pl-6 pt-6 flex items-center gap-3 text-slate-600 hover:text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined">menu</span>
+<span class="font-body text-sm font-medium">Canviar grup</span>
+</div>
+</aside>
+<!-- CENTER COLUMN: Main Content Canvas (Max Width) -->
+<section class="flex-1 min-w-0 p-4 lg:p-6 bg-surface flex flex-col h-full overflow-hidden">
+<!-- Tonal Layering Canvas -->
+<div class="bg-surface-container-lowest flex-1 rounded-xl shadow-[0_10px_40px_-10px_rgba(11,28,48,0.06)] flex flex-col overflow-hidden relative">
+<!-- Compact Tabs & Toggle Header -->
+<div class="flex justify-between items-end px-8 pt-6 pb-0 border-b border-surface-container-low bg-white/80 backdrop-blur-md z-10">
+<div class="flex gap-6">
+<button class="flex items-center gap-2 pb-3 border-b-2 border-primary text-primary font-semibold transition-colors">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">book</span>
+<span class="font-body text-sm">Text</span>
+</button>
+<button class="flex items-center gap-2 pb-3 border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors group">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary">menu_book</span>
+<span class="font-body text-sm">Glossari</span>
+<span class="w-1.5 h-1.5 rounded-full bg-surface-container-highest group-hover:bg-primary-fixed-dim transition-colors"></span>
+</button>
+<button class="flex items-center gap-2 pb-3 border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors group">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary">account_tree</span>
+<span class="font-body text-sm">Esquema</span>
+<span class="w-1.5 h-1.5 rounded-full bg-surface-container-highest group-hover:bg-primary-fixed-dim transition-colors"></span>
+</button>
+<button class="flex items-center gap-2 pb-3 border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">help_outline</span>
+<span class="font-body text-sm">Preguntes</span>
+</button>
+<button class="flex items-center gap-2 pb-3 border-b-2 border-transparent text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">format_list_numbered</span>
+<span class="font-body text-sm">Bastides</span>
+</button>
+</div>
+<div class="flex items-center gap-3 pb-3">
+<span class="font-body text-sm text-on-surface-variant">Comparar original</span>
+<!-- Custom Toggle -->
+<div class="w-10 h-5 bg-surface-container-high rounded-full relative cursor-pointer shadow-inner">
+<div class="w-4 h-4 bg-white rounded-full absolute top-0.5 left-0.5 shadow-sm transition-transform"></div>
+</div>
+</div>
+</div>
+<!-- Scrollable Content Area -->
+<div class="flex-1 overflow-y-auto px-10 py-10">
+<h1 class="font-headline text-[1.5rem] font-semibold text-primary mb-6">La fotosíntesi</h1>
+<div class="prose max-w-3xl font-body text-base text-on-surface leading-relaxed space-y-6">
+<p>
+                            La fotosíntesi és el procés mitjançant el qual les plantes, les algues i alguns bacteris transformen la llum del sol en energia química. Aquest procés és fonamental per a la vida a la Terra, ja que és la principal font d'oxigen a l'atmosfera.
+                        </p>
+<div class="bg-surface-container-low p-6 rounded-lg ghost-border mt-8 mb-8">
+<h4 class="font-body font-semibold text-primary mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]">eco</span>
+                                Elements clau del procés
+                            </h4>
+<ul class="space-y-3 text-on-surface-variant">
+<li class="flex items-start gap-3">
+<span class="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0"></span>
+<span><strong>Llum solar:</strong> L'energia que inicia la reacció. Les fulles capten aquesta llum gràcies a un pigment verd anomenat clorofil·la.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0"></span>
+<span><strong>Aigua (H₂O):</strong> Absorbida per les arrels i transportada fins a les fulles per les tiges.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0"></span>
+<span><strong>Diòxid de carboni (CO₂):</strong> Un gas present a l'aire que entra a la planta a través d'uns petits porus anomenats estomes.</span>
+</li>
+</ul>
+</div>
+<p>
+                            Durant la reacció, aquests elements es combinen dins dels cloroplasts de les cèl·lules vegetals. El resultat d'aquesta unió és la creació de <strong>glucosa</strong> (un tipus de sucre que serveix d'aliment per a la planta) i l'alliberament d'<strong>oxigen</strong> (O₂) a l'aire com a subproducte.
+                        </p>
+</div>
+</div>
+</div>
+</section>
+<!-- RIGHT COLUMN: Tools & Actions (180px) -->
+<aside class="w-[180px] flex-shrink-0 bg-surface flex flex-col py-6 px-4 overflow-y-auto z-10 border-l border-surface-container-high/50">
+<!-- Edició -->
+<div class="mb-10">
+<h3 class="font-label text-[0.65rem] uppercase text-outline tracking-widest mb-4">Edició</h3>
+<div class="flex flex-wrap gap-2">
+<button class="w-8 h-8 rounded-md bg-surface-container-lowest ghost-border flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]">format_bold</span>
+</button>
+<button class="w-8 h-8 rounded-md bg-surface-container-lowest ghost-border flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]">format_italic</span>
+</button>
+<button class="w-8 h-8 rounded-md bg-surface-container-lowest ghost-border flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]">format_ink_highlighter</span>
+</button>
+<button class="w-8 h-8 rounded-md bg-surface-container-lowest ghost-border flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors shadow-sm mt-1">
+<span class="material-symbols-outlined text-[18px]">undo</span>
+</button>
+<button class="w-8 h-8 rounded-md bg-surface-container-lowest ghost-border flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors shadow-sm mt-1">
+<span class="material-symbols-outlined text-[18px]">redo</span>
+</button>
+<button class="w-8 h-8 rounded-md bg-surface-container-lowest ghost-border flex items-center justify-center text-error hover:bg-error-container/30 transition-colors shadow-sm mt-1">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+<!-- Refinar -->
+<div class="mb-10">
+<h3 class="font-label text-[0.65rem] uppercase text-outline tracking-widest mb-4">Refinar</h3>
+<div class="flex flex-col gap-3">
+<button class="w-full py-2 px-3 bg-surface-container-lowest rounded-lg ghost-border text-primary font-body text-sm font-medium hover:bg-surface-container-low transition-colors text-left flex justify-between items-center shadow-sm">
+                        Refinar LT
+                        <span class="material-symbols-outlined text-[16px]">auto_awesome</span>
+</button>
+<div class="relative w-full">
+<button class="w-full py-2 px-3 bg-surface-container-lowest rounded-lg ghost-border text-on-surface-variant font-body text-sm hover:bg-surface-container-low transition-colors text-left flex justify-between items-center shadow-sm">
+                            Longitud
+                            <span class="material-symbols-outlined text-[16px]">expand_more</span>
+</button>
+</div>
+<button class="w-full py-2 px-3 bg-surface-container-lowest rounded-lg ghost-border text-on-surface-variant font-body text-sm hover:bg-surface-container-low transition-colors text-left flex justify-between items-center shadow-sm">
+                        Simplificar
+                        <span class="material-symbols-outlined text-[16px]">compress</span>
+</button>
+<div class="relative w-full">
+<button class="w-full py-2 px-3 bg-surface-container-lowest rounded-lg ghost-border text-on-surface-variant font-body text-sm hover:bg-surface-container-low transition-colors text-left flex justify-between items-center shadow-sm">
+                            To
+                            <span class="material-symbols-outlined text-[16px]">expand_more</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Accions -->
+<div class="mt-auto">
+<h3 class="font-label text-[0.65rem] uppercase text-outline tracking-widest mb-4">Accions</h3>
+<div class="flex flex-col gap-3">
+<button class="w-full py-2.5 px-3 primary-gradient rounded-lg text-white font-body text-sm font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-sm">
+                        Refer amb rúbrica
+                        <span class="material-symbols-outlined text-[16px]">rule</span>
+</button>
+<div class="relative w-full group">
+<button class="w-full py-2 px-3 bg-surface-container-highest rounded-lg text-primary font-body text-sm font-medium hover:bg-surface-container-high transition-colors text-left flex justify-between items-center">
+                            Exportar
+                            <span class="material-symbols-outlined text-[16px]">expand_more</span>
+</button>
+<!-- Fake Dropdown for visual -->
+<div class="absolute bottom-full left-0 w-full mb-1 bg-surface-container-lowest rounded-lg shadow-lg border border-outline-variant/10 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity flex flex-col p-1 z-20">
+<div class="px-3 py-2 text-xs font-body hover:bg-surface-container-low rounded-md text-on-surface cursor-pointer">Aquesta versió</div>
+<div class="px-3 py-2 text-xs font-body hover:bg-surface-container-low rounded-md text-on-surface cursor-pointer">Totes</div>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</main>
+</body></html>
