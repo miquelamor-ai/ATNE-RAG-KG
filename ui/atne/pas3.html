@@ -935,7 +935,7 @@
           </div>
           <div class="pop-foot">
             <button class="btn btn-g">Cancel·lar</button>
-            <button class="btn btn-p" onclick="regen('Refinant el text…')">Aplicar i regenerar
+            <button class="btn btn-p" id="btn-refine-apply">Aplicar i regenerar
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3.5-7.1L21 8"/></svg>
             </button>
           </div>
@@ -958,7 +958,7 @@
           </div>
           <div class="pop-foot">
             <button class="btn btn-g">Cancel·lar</button>
-            <button class="btn btn-p" onclick="regen('Regenerant amb correccions…')">Regenerar
+            <button class="btn btn-p" id="btn-rubric-apply">Regenerar
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
             </button>
           </div>
@@ -970,7 +970,7 @@
           <div class="pop-s">Descarta aquesta adaptació i comença de nou des del text original. Els complements es tornaran a generar.</div>
           <div class="pop-foot">
             <button class="btn btn-g">Cancel·lar</button>
-            <button class="btn btn-p" onclick="regen('Generant nova adaptació…')">Nova adaptació</button>
+            <button class="btn btn-p" id="btn-new-adapt">Nova adaptació</button>
           </div>
         </div>
 
@@ -1443,18 +1443,56 @@
     sel.removeAllRanges();
     selTb.classList.remove('on');
   }
-  selTb.querySelectorAll('[data-ai]').forEach(b => b.addEventListener('click', () => {
+  selTb.querySelectorAll('[data-ai]').forEach(b => b.addEventListener('click', async () => {
     const action = b.dataset.ai;
-    const msgs = {simplificar:'Simplificant fragment…', explicar:'Afegint explicació…', sinonim:'Buscant sinònim més planer…', glossari:'Afegint al glossari…'};
+    if (!lastRange) return;
+    const fragmentText = lastRange.toString();
+    if (!fragmentText.trim()) return;
+
     selTb.classList.remove('on');
-    if(lastRange){
-      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(lastRange);
-      const span = document.createElement('span'); span.className = 'ins';
-      try{ span.appendChild(lastRange.extractContents()); lastRange.insertNode(span); }catch(e){}
-      sel.removeAllRanges();
+
+    // Glossari: per ara no connectat (caldrà un endpoint propi); mantinc mock
+    if (action === 'glossari') {
+      window.regen && window.regen('Afegint al glossari…');
+      setTimeout(pushHistory, 100);
+      return;
     }
-    window.regen && window.regen(msgs[action] || 'Processant…');
-    setTimeout(pushHistory, 100);
+
+    // Si no tenim mòdul LLM (cas standalone), caigui en mock
+    if (!window.ATNE_LLM || !window.ATNE_LLM.refineText) {
+      window.regen && window.regen('Processant…');
+      setTimeout(pushHistory, 100);
+      return;
+    }
+
+    const msgs = { simplificar: 'Simplificant fragment…', explicar: 'Afegint explicació…', sinonim: 'Buscant sinònim…' };
+    const regenEl = document.getElementById('regen');
+    const regenT = document.getElementById('regen-t');
+    if (regenT) regenT.textContent = msgs[action] || 'Processant…';
+    if (regenEl) regenEl.classList.add('on');
+
+    // Map acció → preset/instruccio al backend
+    let preset = null, instruccio = null;
+    if (action === 'simplificar') preset = 'simplificar';
+    else if (action === 'explicar') instruccio = 'Afegeix una breu explicació entre parèntesis per aclarir el significat. Mantén el sentit original.';
+    else if (action === 'sinonim') instruccio = 'Substitueix aquesta expressió per un sinònim més planer i de vocabulari freqüent. Retorna només la nova expressió equivalent.';
+
+    try {
+      const result = await window.ATNE_LLM.refineText({ text: fragmentText, preset, instruccio });
+      // Substitueix la selecció pel fragment refinat, amb marca .ins
+      const range = lastRange.cloneRange();
+      const span = document.createElement('span');
+      span.className = 'ins';
+      span.textContent = (result && result.text) ? result.text : fragmentText;
+      range.deleteContents();
+      range.insertNode(span);
+      pushHistory();
+    } catch (err) {
+      if (regenT) regenT.textContent = 'Error: ' + err.message;
+      setTimeout(() => { if (regenEl) regenEl.classList.remove('on'); }, 2500);
+      return;
+    }
+    if (regenEl) regenEl.classList.remove('on');
   }));
   selTb.querySelectorAll('[data-fmt]').forEach(b => b.addEventListener('click', () => {
     const f = b.dataset.fmt;
@@ -1578,5 +1616,110 @@
       setTimeout(() => { if (regenEl) regenEl.classList.remove('on'); }, 3000);
     });
   })();
+
+  // ──────────────────────────────────────────────────────
+  // Fase 5 c2 — refine real dels popovers Refinar / Rúbrica / Nova adaptació
+  // ──────────────────────────────────────────────────────
+
+  // Helper: refina tot el text adaptat i substitueix el HTML + pushHistory
+  async function refineAdaptedText({ preset, instruccio, overlayMsg }) {
+    if (!window.ATNE_LLM || !window.ATNE_LLM.refineText) return;
+    const adaptedEl = document.getElementById('adapted-text');
+    if (!adaptedEl) return;
+    const currentText = adaptedEl.innerText || adaptedEl.textContent || '';
+    if (!currentText.trim()) return;
+
+    closePops();
+    const regenEl = document.getElementById('regen');
+    const regenT = document.getElementById('regen-t');
+    if (regenT) regenT.textContent = overlayMsg || 'Refinant el text…';
+    if (regenEl) regenEl.classList.add('on');
+
+    try {
+      const result = await window.ATNE_LLM.refineText({ text: currentText, preset, instruccio });
+      if (result && result.text) {
+        // Preserva l'estructura mínima: posem el resultat com a paràgrafs simples.
+        // Si el resultat ja té marcatge HTML (el LLM pot tornar <h2>, <p>...), l'usem tal qual.
+        const looksLikeHtml = /<(p|h[1-6]|ul|ol|li|strong|em)[\s>]/i.test(result.text);
+        adaptedEl.innerHTML = looksLikeHtml
+          ? result.text
+          : result.text.split(/\n{2,}/).map(p => '<p>' + p.replace(/\n/g, '<br>') + '</p>').join('');
+        attachParaHandles();
+        pushHistory();
+        localStorage.setItem('atne.adapted_text', adaptedEl.innerHTML);
+      }
+    } catch (err) {
+      if (regenT) regenT.textContent = 'Error: ' + (err.message || 'desconegut');
+      setTimeout(() => { if (regenEl) regenEl.classList.remove('on'); }, 2500);
+      return;
+    }
+    if (regenEl) regenEl.classList.remove('on');
+  }
+
+  // Popover "Refinar" — llegeix els steppers (longitud/simplificar/to) + textarea d'instrucció
+  document.getElementById('btn-refine-apply')?.addEventListener('click', () => {
+    const pop = document.getElementById('pop-refine');
+    if (!pop) return;
+    // Llegeix l'estepper actiu per cada param
+    const getActive = (paramName) => {
+      const group = pop.querySelector(`[data-param="${paramName}"] button.on`);
+      return group ? group.textContent.trim().toLowerCase() : null;
+    };
+    const len = getActive('len');          // escurçar | mantenir | allargar
+    const simp = getActive('simp');        // −− | − | mitjà | + | ++
+    const tone = getActive('tone');        // formal | neutre | proper
+    const userInstr = (pop.querySelector('textarea')?.value || '').trim();
+    const revCatala = pop.querySelector('.ref-check.on') !== null;
+
+    // Mapa de longitud → preset
+    let preset = null;
+    if (len === 'escurçar') preset = 'escurcar';
+    else if (len === 'allargar') preset = 'ampliar';
+
+    // Construïm la instrucció lliure a partir dels altres eixos
+    const parts = [];
+    if (simp === '+' || simp === '++') parts.push('Simplifica el vocabulari' + (simp === '++' ? ' al màxim' : ''));
+    else if (simp === '−' || simp === '−−') parts.push('Augmenta el nivell de vocabulari' + (simp === '−−' ? ' considerablement' : ''));
+    if (tone && tone !== 'neutre') parts.push('Adopta un to ' + tone);
+    if (revCatala) parts.push('Revisa el català (ortografia, diacrítics, concordances)');
+    if (userInstr) parts.push(userInstr);
+
+    const instruccio = parts.length ? parts.join('. ') + '.' : null;
+
+    if (!preset && !instruccio) {
+      // No hi ha res per fer
+      closePops();
+      return;
+    }
+
+    refineAdaptedText({ preset, instruccio, overlayMsg: 'Refinant el text…' });
+  });
+
+  // Popover "Refer amb rúbrica" — construeix instrucció amb els problemes marcats
+  document.getElementById('btn-rubric-apply')?.addEventListener('click', () => {
+    const pop = document.getElementById('pop-rubric');
+    if (!pop) return;
+    const problems = Array.from(pop.querySelectorAll('.rub-item.on'))
+      .map(r => (r.querySelector('span:last-child')?.textContent || '').trim())
+      .filter(Boolean);
+    const userObs = (pop.querySelector('textarea')?.value || '').trim();
+
+    if (!problems.length && !userObs) { closePops(); return; }
+    const parts = [];
+    if (problems.length) {
+      parts.push('Revisa el text tenint en compte aquests problemes detectats: ' + problems.join('; '));
+    }
+    if (userObs) parts.push('Observació del docent: ' + userObs);
+    const instruccio = parts.join('. ') + '.';
+
+    refineAdaptedText({ instruccio, overlayMsg: 'Regenerant amb correccions…' });
+  });
+
+  // Popover "Nova adaptació" — invalida cache i recarrega (dispararà maybeAdaptOnLoad)
+  document.getElementById('btn-new-adapt')?.addEventListener('click', () => {
+    localStorage.removeItem('atne.adapted_text');
+    localStorage.removeItem('atne.adapted_cache_key');
+    location.reload();
+  });
 </script>
 </body></html>

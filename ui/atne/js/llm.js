@@ -144,8 +144,45 @@
     return { versions, done: false };
   }
 
+  /**
+   * Crida /api/refine-text (síncron, sense SSE) — modifica un text existent.
+   *
+   * El backend accepta un 'preset' de la llista fixa (catala | simplificar |
+   * ampliar | escurcar) i/o una 'instruccio' lliure. Si s'envien tots dos,
+   * el preset s'aplica primer i la instruccio s'hi afegeix.
+   *
+   * 'catala' aplica LanguageTool (determinista, no LLM); la resta passen
+   * pel LLM fix configurat a /admin (actualment Gemma 3 27B).
+   *
+   * @param {Object} args
+   * @param {string} args.text  Text a refinar.
+   * @param {string} [args.preset]  'catala' | 'simplificar' | 'ampliar' | 'escurcar'
+   * @param {string} [args.instruccio]  Instrucció lliure del docent.
+   * @returns {Promise<{text: string, paraules: number, ...}>}
+   */
+  async function refineText({ text, preset, instruccio, onError }) {
+    if (!text || !text.trim()) throw new Error('Text buit');
+    const body = { text };
+    if (preset) body.preset = preset;
+    if (instruccio) body.instruccio = instruccio;
+    const resp = await fetch('/api/refine-text', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!resp.ok) {
+      let errMsg = 'HTTP ' + resp.status;
+      try { const e = await resp.json(); if (e.error) errMsg = e.error; } catch {}
+      const err = new Error(errMsg);
+      if (onError) onError(err);
+      throw err;
+    }
+    return resp.json();
+  }
+
   window.ATNE_LLM = {
     adaptText,
+    refineText,
     buildBackendProfile,
     buildBackendContext
   };
