@@ -1,0 +1,14 @@
+/* =========================================================
+   ATNE · Pas 3 (Adaptació)
+   Importa després de tokens.css, base.css i shell.css.
+
+   Conté els estils específics del Pas 3:
+   - Layout de .main (rail 240px + àrea central)
+   - .doc-pane, .lside, .pcard (perfils/versions)
+   - .sel-tb (selection toolbar flotant)
+   - .paramenu (popover de paràmetres per versió)
+   - .regen (overlay de regeneració)
+
+   ACTUALMENT BUIT. S'omplirà a la Fase 4 seguint spec-pas3.md
+   i els prototips ATNE Pas3 V1.html + ATNE Pas3 Grup.html.
+   ========================================================= */

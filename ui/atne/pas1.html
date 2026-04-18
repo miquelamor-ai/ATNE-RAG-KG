@@ -1,0 +1,764 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<title>ATNE · Pas 1 · Per a qui</title>
+<meta name="viewport" content="width=1440">
+
+<!-- Tipografia -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- ATNE base global (ordre obligatori: tokens → base → shell) -->
+<link rel="stylesheet" href="/ui/styles/tokens.css">
+<link rel="stylesheet" href="/ui/styles/base.css">
+<link rel="stylesheet" href="/ui/styles/shell.css">
+
+<style>
+  /* =========================================================
+     Pas 1 · overrides específics de la pàgina
+     Aquests valors vénen del prototip ATNE Pas1 V3.html:
+     - El Pas 1 té rail blanc i topbar blanca (a diferència
+       del Pas 2/3, que usen cream-2 / transparent).
+     - Body usa un cream lleugerament diferent al token; aquí
+       mantenim --cream per respectar la paleta.
+     ========================================================= */
+  .rail        { background: #fff; border-right-color: var(--ink-150); }
+  .rb:hover    { background: var(--ink-100); }
+  .topbar      { background: #fff; border-bottom-color: var(--ink-150); }
+  .icon-btn    { background: #fff; border-color: var(--ink-150); }
+  .icon-btn:hover { background: var(--ink-75); }
+
+  /* Role al capdamunt dreta */
+  .role{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-600)}
+  .role .role-av{width:24px;height:24px;border-radius:50%;background:var(--ac-bg);color:var(--ac);display:grid;place-items:center;font-weight:600;font-size:11px}
+  .role b{color:var(--ink-900);font-weight:600}
+
+  /* Floating action selectors (fabs) */
+  .fabs{position:absolute;right:22px;bottom:22px;display:flex;flex-direction:column;gap:8px;z-index:30}
+  .fab{background:#fff;border:1px solid var(--ink-200);border-radius:99px;padding:10px 16px 10px 12px;display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink-800);box-shadow:var(--sh-md);transition:.15s;white-space:nowrap}
+  .fab:hover{transform:translateY(-1px);box-shadow:var(--sh-lg)}
+  .fab svg{width:16px;height:16px;flex:none}
+  .fab.on{background:var(--ink-900);color:#fff;border-color:var(--ink-900)}
+  .fab-person{color:#7a4a00;border-color:#ecd9b4;background:#fefaf3}
+  .fab-person:hover{background:#fdf1df;border-color:var(--disl)}
+  .fab-person.on{background:var(--disl);color:#fff;border-color:var(--disl)}
+  .fab-group{color:var(--ac);border-color:#d9cbf0;background:#f7f3ff}
+  .fab-group:hover{background:#efe5fb;border-color:var(--ac)}
+  .fab-group.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+
+  /* Body modes (switcher sense navegació real) */
+  .body{flex:1;overflow:hidden;position:relative}
+  .mode{position:absolute;inset:0;overflow-y:auto;padding:22px 28px 40px;opacity:0;pointer-events:none;transition:.2s}
+  .mode.on{opacity:1;pointer-events:auto}
+
+  /* ─── Mode: cerca / llista ─────────────────────────── */
+  .search-wrap{max-width:1040px;margin:0 auto}
+  .search-top{display:flex;gap:10px;align-items:center;margin-bottom:14px}
+  .search-input{flex:1;position:relative;max-width:460px}
+  .search-input svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--ink-400)}
+  .search-input input{width:100%;padding:9px 12px 9px 36px;border:1px solid var(--ink-200);border-radius:9px;font-size:13px;background:#fff;font-family:inherit;outline:0}
+  .search-input input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-50)}
+  .fchips{display:flex;gap:5px;flex-wrap:wrap;flex:1}
+  .fchip{font-size:11.5px;padding:6px 11px;border-radius:99px;background:var(--ink-75);border:1px solid var(--ink-150);color:var(--ink-600);font-weight:500;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;cursor:pointer}
+  .fchip:hover{background:var(--ink-100)}
+  .fchip.on{background:var(--ink-900);color:#fff;border-color:var(--ink-900)}
+  .fchip .dot{width:6px;height:6px;border-radius:50%}
+  .fchip .num{font-family:var(--mono);font-size:10px;color:var(--ink-400)}
+  .fchip.on .num{color:#b5bdd4}
+
+  .sort{font-size:11.5px;color:var(--ink-500);display:flex;align-items:center;gap:4px}
+  .sort b{color:var(--ink-800);font-weight:500}
+  .sort svg{width:10px;height:10px}
+
+  .subhead{display:flex;align-items:baseline;gap:10px;padding:14px 0 8px}
+  .subhead-t{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-500);font-weight:500}
+  .subhead-c{font-family:var(--mono);font-size:10.5px;color:var(--ink-400)}
+
+  .list{background:#fff;border:1px solid var(--ink-150);border-radius:12px;overflow:hidden;box-shadow:var(--sh-xs)}
+  .row{display:grid;grid-template-columns:40px 1fr 200px 160px 90px 110px;gap:14px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--ink-100);cursor:pointer;transition:.1s;position:relative;border-left:3px solid transparent}
+  .row:last-child{border-bottom:0}
+  .row:hover{background:var(--ink-75)}
+  .row.person{background:#fff}
+  .row.group{background:#faf7ff;border-left-color:var(--primary)}
+  .row.group:hover{background:#f3eeff}
+  .row.group .row-name::before{content:"GRUP · ";font-family:var(--mono);font-size:9.5px;font-weight:600;letter-spacing:.08em;color:var(--primary);background:var(--primary-50);padding:2px 6px;border-radius:4px;margin-right:6px;vertical-align:2px}
+  .row-av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:12.5px;font-family:var(--serif)}
+  .row-av.grp{border-radius:9px;background:repeating-linear-gradient(135deg,var(--primary-50) 0 5px,var(--primary-100) 5px 10px);color:var(--primary);border:1px solid var(--primary-100);font-size:11px}
+  .row-av.grp-ac{background:repeating-linear-gradient(135deg,var(--ac-bg) 0 5px,#dcc7f0 5px 10px);color:var(--ac);border-color:#dcc7f0}
+  .row-av.grp-cat{background:repeating-linear-gradient(135deg,var(--cat-bg) 0 5px,#b9dcd7 5px 10px);color:var(--cat);border-color:#b9dcd7}
+  .av-tdah{background:var(--tdah-bg);color:#8a4617}
+  .av-disl{background:var(--disl-bg);color:#7a4a00}
+  .av-cat{background:var(--cat-bg);color:#0a4f4f}
+  .av-ac{background:var(--ac-bg);color:#4a1e7a}
+  .av-neu{background:var(--ink-100);color:var(--ink-600)}
+  .row-name{font-family:var(--serif);font-weight:700;font-size:14px;letter-spacing:-0.01em;line-height:1.2}
+  .row-sub{font-size:11px;color:var(--ink-500);font-family:var(--mono);margin-top:2px}
+  .row-chips{display:flex;gap:4px;flex-wrap:wrap}
+  /* La chip al Pas 1 és més compacta que la de base.css — override local */
+  .row .chip{font-size:10px;padding:2px 7px;border-radius:99px;font-weight:500;white-space:nowrap;font-family:var(--ui);letter-spacing:0}
+  .row .chip.tdah{background:var(--tdah-bg);color:#8a4617}
+  .row .chip.disl{background:var(--disl-bg);color:#7a4a00}
+  .row .chip.cat{background:var(--cat-bg);color:#0a4f4f}
+  .row .chip.ac{background:var(--ac-bg);color:#4a1e7a}
+  .row .chip.lv{background:var(--ink-100);color:var(--ink-700)}
+  .row-course{font-size:12px;color:var(--ink-600)}
+  .row-use{font-family:var(--mono);font-size:11px;color:var(--ink-500)}
+  .row-acts{display:flex;gap:4px;justify-content:flex-end;opacity:0;transition:.1s}
+  .row:hover .row-acts{opacity:1}
+  .row-acts button{width:28px;height:28px;border-radius:7px;color:var(--ink-500);display:grid;place-items:center}
+  .row-acts button:hover{background:var(--ink-100);color:var(--ink-900)}
+  .row-acts button svg{width:13px;height:13px}
+  .row-acts .sel{background:var(--primary);color:#fff;width:auto;padding:0 10px;font-size:11.5px;font-weight:600;height:28px;display:inline-flex;align-items:center;gap:5px}
+  .row-acts .sel svg{width:11px;height:11px}
+  .row-acts .sel:hover{background:var(--primary-600);color:#fff}
+  .mini-row{display:flex;margin-top:3px}
+  .mini-row .mini{width:18px;height:18px;border-radius:50%;border:2px solid #fff;margin-left:-6px;font-size:9px;font-weight:600;display:grid;place-items:center;font-family:var(--ui)}
+  .mini-row .mini:first-child{margin-left:0}
+
+  /* ─── Mode: nou perfil / nou grup (formulari) ─────── */
+  .form{max-width:900px;margin:0 auto;display:grid;grid-template-columns:1fr;gap:18px}
+  .form-h{text-align:center;padding-bottom:10px}
+  .form-h h2{font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-0.015em;margin-bottom:4px}
+  .form-h p{font-size:13px;color:var(--ink-500)}
+  .card{background:#fff;border:1px solid var(--ink-150);border-radius:12px;padding:18px 22px;box-shadow:var(--sh-xs)}
+  .card-t{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-500);margin-bottom:12px;font-weight:500}
+  .f{margin-bottom:14px}
+  .f:last-child{margin-bottom:0}
+  .f-l{font-size:12px;color:var(--ink-700);margin-bottom:6px;font-weight:500;display:flex;gap:6px;align-items:center}
+  .f-l .req{color:var(--tdah);font-size:10px}
+  .f-l .hint{font-size:10.5px;color:var(--ink-400);font-weight:400;margin-left:auto;font-family:var(--mono)}
+  .inp,.txt{width:100%;padding:9px 12px;border:1px solid var(--ink-200);border-radius:8px;font-size:13.5px;background:#fff;font-family:inherit;outline:0}
+  .inp:focus,.txt:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-50)}
+  .txt{min-height:70px;resize:vertical;line-height:1.5}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+  .tags{display:flex;gap:6px;flex-wrap:wrap}
+  .tag{font-size:12px;padding:6px 11px;border-radius:99px;background:var(--ink-75);border:1px solid var(--ink-150);color:var(--ink-700);cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:5px}
+  .tag:hover{background:var(--ink-100)}
+  .tag.on{background:var(--primary-50);border-color:var(--primary);color:var(--primary)}
+
+  .levels{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .lvl{padding:9px 10px;border:1px solid var(--ink-200);border-radius:8px;text-align:center;cursor:pointer;font-size:12.5px;transition:.1s;position:relative;background:#fff}
+  .lvl:hover{border-color:var(--primary-100)}
+  .lvl.on{border-color:var(--primary);background:var(--primary-50);color:var(--primary);font-weight:600}
+  .lvl b{display:block;font-family:var(--serif);font-size:16px;font-weight:700;margin-bottom:2px}
+  .lvl small{font-size:10.5px;color:var(--ink-500);font-family:var(--mono)}
+  .lvl.on small{color:var(--primary)}
+  .lv-code{position:absolute;top:6px;right:8px;font-family:var(--mono);font-size:10px;color:var(--ink-400);font-weight:600;letter-spacing:.03em}
+  .lvl.on .lv-code{color:var(--primary)}
+  .levels.mecr{grid-template-columns:repeat(5,1fr)}
+  .levels.mecr .lvl{padding:18px 8px 9px;text-align:left}
+  .levels.mecr .lvl small{font-size:10px;line-height:1.35;display:block;margin-top:2px}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .col-t{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-500);margin-bottom:10px;font-weight:500;display:flex;align-items:center;gap:8px}
+  .col-h{font-family:var(--mono);font-size:10px;color:var(--primary);margin-left:auto;font-weight:500}
+  .col-sub{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-400);margin:14px 0 8px;font-weight:500}
+  .checks{display:flex;flex-direction:column;gap:2px}
+  .ck{display:flex;align-items:center;gap:10px;padding:7px 9px;border-radius:7px;font-size:13px;color:var(--ink-800);cursor:pointer}
+  .ck:hover{background:var(--ink-75)}
+  .ck input{accent-color:var(--primary);flex:none}
+  .ck-add{margin-top:6px;padding:8px;border:1px dashed var(--ink-200);border-radius:7px;font-size:12px;color:var(--ink-500);background:#fff;text-align:center;cursor:pointer}
+  .ck-add:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-50)}
+  .aids-list{display:flex;flex-direction:column;gap:2px}
+  .aid-row{display:grid;grid-template-columns:16px 8px 1fr auto;align-items:center;gap:10px;padding:7px 9px;border-radius:7px;font-size:13px;color:var(--ink-800);cursor:pointer;transition:.1s;border:1px solid transparent}
+  .aid-row:hover{background:var(--ink-75)}
+  .aid-row.suggested{background:var(--primary-50);border-color:var(--primary-100)}
+  .aid-row input{accent-color:var(--primary);margin:0}
+  .aid-dot{width:8px;height:8px;border-radius:2px}
+  .aid-n{font-weight:500}
+  .aid-w{font-family:var(--mono);font-size:10px;color:var(--ink-400)}
+
+  .disc{border:1px solid var(--ink-150);border-radius:10px;margin-bottom:8px;background:#fff;overflow:hidden}
+  .disc:last-of-type{margin-bottom:0}
+  .disc[open]{border-color:var(--ink-200)}
+  .disc summary{list-style:none;padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px}
+  .disc summary::-webkit-details-marker{display:none}
+  .disc summary:hover{background:var(--ink-75)}
+  .disc-n{font-weight:600;color:var(--ink-800)}
+  .disc-v{color:var(--ink-400);font-size:11.5px;font-family:var(--mono);margin-left:auto}
+  .disc .chev{width:12px;height:12px;color:var(--ink-400);transition:.15s}
+  .disc[open] .chev{transform:rotate(180deg)}
+  .disc-body{padding:0 14px 14px 14px;border-top:1px solid var(--ink-100);padding-top:12px}
+  .sub{margin-top:12px;padding:10px 12px;background:var(--ink-75);border-radius:8px;border:1px solid var(--ink-150)}
+  .sub-t{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-500);margin-bottom:8px;font-weight:500}
+
+  .sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .sub-f{display:flex;flex-direction:column;gap:5px}
+  .sub-l{font-size:11px;color:var(--ink-600);font-weight:500}
+  .sub-f select.inp{padding:7px 10px;font-size:12.5px}
+  .toggle{display:inline-flex;background:#fff;border:1px solid var(--ink-200);border-radius:7px;padding:2px;width:fit-content}
+  .tg{padding:5px 12px;font-size:12px;border-radius:5px;color:var(--ink-600);font-weight:500;background:transparent;border:0;cursor:pointer}
+  .tg.on{background:var(--primary);color:#fff}
+  .l2-meta{display:inline-block;margin-top:4px;font-size:11px;color:var(--ink-500);font-style:italic}
+
+  .members{display:flex;flex-direction:column;gap:6px}
+  .member{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--ink-150);border-radius:9px;background:#fff;cursor:pointer}
+  .member:hover{background:var(--ink-75)}
+  .member input{accent-color:var(--primary)}
+  .member .m-av{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-family:var(--serif);font-weight:700;font-size:11.5px}
+  .member .m-n{font-family:var(--serif);font-weight:700;font-size:13px}
+  .member .m-s{font-size:11px;color:var(--ink-500);font-family:var(--mono)}
+  .member .m-chips{margin-left:auto;display:flex;gap:4px}
+
+  .add-profiles{display:flex;flex-direction:column;gap:10px}
+  .add-search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--ink-200);border-radius:9px;padding:0 10px}
+  .add-search svg{color:var(--ink-400);flex-shrink:0}
+  .add-search input{flex:1;border:0;background:transparent;font:inherit;font-size:13px;padding:10px 0;outline:none;color:var(--ink-900)}
+  .add-search input::placeholder{color:var(--ink-400)}
+  .btn-add-open{display:inline-flex;align-items:center;gap:5px;background:var(--primary);color:#fff;border:0;border-radius:6px;padding:6px 10px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+  .btn-add-open:hover{background:var(--primary-600)}
+  .add-picker{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:220px;overflow-y:auto;padding:8px;background:var(--ink-50);border:1px solid var(--ink-150);border-radius:9px}
+  .pick{display:flex;align-items:center;gap:8px;padding:7px 9px;background:#fff;border:1px solid var(--ink-150);border-radius:7px;cursor:pointer;font-size:12px}
+  .pick:hover{border-color:var(--primary);background:var(--primary-50)}
+  .pick.added{opacity:.4;pointer-events:none}
+  .pick .m-av{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-family:var(--serif);font-weight:700;font-size:10px;flex-shrink:0}
+  .pick .m-n{font-family:var(--serif);font-weight:700;font-size:12px}
+  .pick .m-s{font-size:10px;color:var(--ink-500);font-family:var(--mono)}
+  .pick .chip{margin-left:auto;flex-shrink:0;font-size:10px;padding:2px 7px;font-family:var(--ui);letter-spacing:0}
+  .added-list{display:flex;flex-direction:column;gap:5px}
+  .added-list .empty-add{font-size:11.5px;color:var(--ink-400);font-style:italic;text-align:center;padding:12px;border:1px dashed var(--ink-200);border-radius:8px}
+  .added-row{display:flex;align-items:center;gap:10px;padding:7px 10px;background:#fff;border:1px solid var(--ink-150);border-radius:8px}
+  .added-row .m-av{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-family:var(--serif);font-weight:700;font-size:11px}
+  .added-row .m-n{font-family:var(--serif);font-weight:700;font-size:12.5px}
+  .added-row .m-s{font-size:10.5px;color:var(--ink-500);font-family:var(--mono)}
+  .added-row .chip{margin-left:auto;font-size:10px;padding:2px 7px;font-family:var(--ui);letter-spacing:0}
+  .added-row .remove{width:22px;height:22px;display:grid;place-items:center;color:var(--ink-400);background:transparent;border:0;border-radius:5px;cursor:pointer}
+  .added-row .remove:hover{color:var(--tdah);background:var(--ink-75)}
+
+  .lvlcount{display:grid;grid-template-columns:1fr 120px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--ink-100)}
+  .lvlcount:last-child{border-bottom:0}
+  .lvlcount-n{font-size:13px}
+  .stepper{display:flex;align-items:center;gap:0;background:var(--ink-75);border:1px solid var(--ink-150);border-radius:7px;width:fit-content;margin-left:auto}
+  .stepper button{width:28px;height:28px;display:grid;place-items:center;color:var(--ink-600)}
+  .stepper button:hover{color:var(--ink-900)}
+  .stepper button svg{width:12px;height:12px}
+  .stepper input{width:36px;text-align:center;border:0;background:0;padding:0;font:600 13px var(--mono);outline:0;color:var(--ink-900)}
+
+  /* Footer (btn mida Pas 1 és més gran que la primitive de base.css) */
+  .foot{display:flex;gap:8px;justify-content:flex-end;padding-top:4px}
+  .foot .btn{padding:10px 16px;border-radius:9px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+  .foot .btn svg{width:13px;height:13px}
+  .foot .btn-p{background:var(--primary);color:#fff}
+  .foot .btn-p:hover{background:var(--primary-600)}
+  .foot .btn-g{color:var(--ink-700);background:#fff;border:1px solid var(--ink-200)}
+  .foot .btn-g:hover{background:var(--ink-75)}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+  <nav class="rail">
+    <div class="logo">A</div>
+    <button class="rb on" title="Perfils"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></button>
+    <button class="rb" title="Textos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16M4 12h10M4 19h16"/></svg></button>
+    <button class="rb" title="Biblioteca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h7v12H4zM13 6h7v5h-7zM13 14h7v4h-7z"/></svg></button>
+    <div class="rb sep"></div>
+    <button class="rb" title="Preferències"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg></button>
+  </nav>
+
+  <main class="canvas">
+    <div class="topbar">
+      <div class="steps">
+        <button class="step on"><span class="step-num">1</span>Perfil</button>
+        <button class="step"><span class="step-num">2</span>Entrada</button>
+        <button class="step"><span class="step-num">3</span>Resultat</button>
+      </div>
+      <div class="tb-title">Per a qui adaptem avui?</div>
+      <div class="role"><div class="role-av">E</div><span><b>Especialista</b> · 32 perfils</span></div>
+      <button class="icon-btn" title="Pantalla completa" id="fsBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+    </div>
+
+    <div class="fabs">
+      <button class="fab fab-search on" data-mode="search" title="Cercar perfil">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <span>Cercar perfil</span>
+      </button>
+      <button class="fab fab-person" data-mode="person" title="Nova persona">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/><path d="M19 3v4M17 5h4"/></svg>
+        <span>Nova persona</span>
+      </button>
+      <button class="fab fab-group" data-mode="group" title="Nou grup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><circle cx="16" cy="9" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 14c2.8 0 5 2.2 5 5"/></svg>
+        <span>Nou grup</span>
+      </button>
+    </div>
+
+    <div class="body">
+
+      <!-- MODE: SEARCH -->
+      <div class="mode on" data-m="search">
+        <div class="search-wrap">
+          <div class="search-top">
+            <div class="search-input">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" placeholder="Cerca per nom, curs, condició…" autofocus>
+            </div>
+            <div class="fchips">
+              <button class="fchip on">Tots <span class="num">32</span></button>
+              <button class="fchip"><span class="dot" style="background:var(--ink-400)"></span>Persones <span class="num">28</span></button>
+              <button class="fchip"><span class="dot" style="background:var(--primary)"></span>Grups <span class="num">4</span></button>
+              <button class="fchip"><span class="dot" style="background:var(--tdah)"></span>TDAH <span class="num">6</span></button>
+              <button class="fchip"><span class="dot" style="background:var(--disl)"></span>Dislèxia <span class="num">4</span></button>
+              <button class="fchip"><span class="dot" style="background:var(--cat)"></span>Català L2 <span class="num">5</span></button>
+              <button class="fchip"><span class="dot" style="background:var(--ac)"></span>AACC <span class="num">3</span></button>
+            </div>
+            <div class="sort">Ordre: <b>Últim ús</b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></div>
+          </div>
+
+          <div class="subhead"><span class="subhead-t">Recents</span><span class="subhead-c">6</span></div>
+          <div class="list">
+            <div class="row person">
+              <div class="row-av av-tdah">M</div>
+              <div><div class="row-name">Marc Ribera</div><div class="row-sub">3r ESO A · 14 anys</div></div>
+              <div class="row-chips"><span class="chip tdah">TDAH</span><span class="chip lv">Comp. moderada</span></div>
+              <div class="row-course">3r ESO A</div>
+              <div class="row-use">ús avui</div>
+              <div class="row-acts"><button title="Veure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
+            </div>
+            <div class="row person">
+              <div class="row-av grp">3A</div>
+              <div><div class="row-name">3r ESO A · Grup classe</div><div class="mini-row"><span class="mini av-tdah">M</span><span class="mini av-cat">L</span><span class="mini av-disl">Mi</span><span class="mini av-neu">+21</span></div></div>
+              <div class="row-chips"><span class="chip lv">3 nivells</span><span class="chip tdah">1 TDAH</span><span class="chip cat">2 L2</span></div>
+              <div class="row-course">24 alumnes</div>
+              <div class="row-use">fa 2d</div>
+              <div class="row-acts"><button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
+            </div>
+            <div class="row person">
+              <div class="row-av av-disl">Mi</div>
+              <div><div class="row-name">Mireia Solà</div><div class="row-sub">1r ESO B · 12 anys</div></div>
+              <div class="row-chips"><span class="chip disl">Dislèxia</span><span class="chip lv">Decodificació</span></div>
+              <div class="row-course">1r ESO B</div>
+              <div class="row-use">fa 1d</div>
+              <div class="row-acts"><button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
+            </div>
+            <div class="row person">
+              <div class="row-av av-cat">L</div>
+              <div><div class="row-name">Liu Chen</div><div class="row-sub">2n ESO C · 13 anys</div></div>
+              <div class="row-chips"><span class="chip cat">Català L2</span><span class="chip lv">Vocab. bàsic</span></div>
+              <div class="row-course">2n ESO C</div>
+              <div class="row-use">fa 3d</div>
+              <div class="row-acts"><button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
+            </div>
+            <div class="row person">
+              <div class="row-av grp grp-ac">DR</div>
+              <div><div class="row-name">Desdoblament R · Ciències 3r</div><div class="mini-row"><span class="mini av-ac">P</span><span class="mini av-ac">An</span><span class="mini av-ac">Sa</span><span class="mini av-neu">+9</span></div></div>
+              <div class="row-chips"><span class="chip lv">2 nivells</span><span class="chip ac">3 AACC</span></div>
+              <div class="row-course">12 alumnes</div>
+              <div class="row-use">fa 5d</div>
+              <div class="row-acts"><button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
+            </div>
+            <div class="row person">
+              <div class="row-av av-tdah">A</div>
+              <div><div class="row-name">Anna Puig</div><div class="row-sub">3r ESO A · 14 anys</div></div>
+              <div class="row-chips"><span class="chip tdah">TDAH</span><span class="chip disl">Dislèxia</span></div>
+              <div class="row-course">3r ESO A</div>
+              <div class="row-use">fa 6d</div>
+              <div class="row-acts"><button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
+            </div>
+          </div>
+
+          <div class="subhead"><span class="subhead-t">Tots els altres</span><span class="subhead-c">26</span></div>
+          <div class="list">
+            <div class="row person">
+              <div class="row-av av-ac">P</div>
+              <div><div class="row-name">Pol Vidal</div><div class="row-sub">4t ESO A · 15 anys</div></div>
+              <div class="row-chips"><span class="chip ac">Altes capac.</span></div>
+              <div class="row-course">4t ESO A</div>
+              <div class="row-use">fa 1w</div>
+              <div class="row-acts"><button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
+            </div>
+            <div class="row person">
+              <div class="row-av grp grp-cat">L2</div>
+              <div><div class="row-name">Aula d'acollida · Cicle sup.</div><div class="mini-row"><span class="mini av-cat">Y</span><span class="mini av-cat">L</span><span class="mini av-cat">Am</span><span class="mini av-neu">+5</span></div></div>
+              <div class="row-chips"><span class="chip lv">4 nivells</span><span class="chip cat">Tots L2</span></div>
+              <div class="row-course">8 alumnes</div>
+              <div class="row-use">fa 2w</div>
+              <div class="row-acts"><button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODE: NEW PERSON -->
+      <div class="mode" data-m="person">
+        <div class="form">
+          <div class="form-h">
+            <h2>Nou perfil de persona</h2>
+            <p>Com més aportis, millor seran les adaptacions.</p>
+          </div>
+          <div class="card">
+            <div class="card-t">Identificació</div>
+            <div class="two">
+              <div class="f"><div class="f-l">Nom <span class="req">*</span></div><input class="inp" placeholder="Ex: Marc Ribera"></div>
+              <div class="f"><div class="f-l">Curs / Edat</div><input class="inp" placeholder="3r ESO A · 14"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-t">Nivell lector <span class="req" style="color:var(--tdah);margin-left:4px">*</span></div>
+            <div style="font-size:12px;color:var(--ink-500);margin-bottom:10px;line-height:1.5">Nivell de referència de la persona segons el Marc Europeu Comú de Referència (MECR).</div>
+            <div class="levels mecr">
+              <button class="lvl"><span class="lv-code">A1</span><b>Inicial</b><small>primeres paraules, imatges i suport visual</small></button>
+              <button class="lvl"><span class="lv-code">A2</span><b>Bàsic</b><small>frases curtes, vocabulari quotidià</small></button>
+              <button class="lvl on"><span class="lv-code">B1</span><b>Intermedi</b><small>textos adaptats, idees principals</small></button>
+              <button class="lvl"><span class="lv-code">B2</span><b>Avançat</b><small>textos autèntics amb suport puntual</small></button>
+              <button class="lvl"><span class="lv-code">C1</span><b>Competent</b><small>textos complexos i abstractes</small></button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-t">Què observes i què l'ajudarà <span class="hint" style="margin-left:8px;font-family:var(--mono);font-size:10.5px;color:var(--ink-400)">comença pel que veus · els ajuts s'activen sols</span></div>
+
+            <div class="two-col">
+              <div>
+                <div class="col-t">Conductes observades</div>
+                <div class="checks">
+                  <label class="ck"><input type="checkbox" data-beh="dist" checked><span>Es distreu amb textos llargs</span></label>
+                  <label class="ck"><input type="checkbox" data-beh="imp" checked><span>Respon abans de llegir la consigna</span></label>
+                  <label class="ck"><input type="checkbox" data-beh="dec"><span>Confon paraules o salta línies</span></label>
+                  <label class="ck"><input type="checkbox" data-beh="l2"><span>Dificultats amb la llengua vehicular</span></label>
+                  <label class="ck"><input type="checkbox" data-beh="fat"><span>Mostra fatiga o rebuig davant la lectura</span></label>
+                  <label class="ck"><input type="checkbox" data-beh="fast"><span>Acaba molt ràpid i es desmotiva</span></label>
+                  <label class="ck"><input type="checkbox" data-beh="abs"><span>Li costen conceptes abstractes</span></label>
+                  <label class="ck"><input type="checkbox" data-beh="neg"><span>Es bloqueja amb consignes complexes</span></label>
+                  <button class="ck-add" type="button">+ Afegir conducta pròpia</button>
+                </div>
+              </div>
+
+              <div>
+                <div class="col-t">Ajuts suggerits <span class="col-h" id="aid-count">0 activats</span></div>
+                <div class="aids-list">
+                  <label class="aid-row" data-aid="frag"><input type="checkbox"><span class="aid-dot" style="background:var(--tdah)"></span><span class="aid-n">Fragmentar</span><span class="aid-w">alt</span></label>
+                  <label class="aid-row" data-aid="idea"><input type="checkbox"><span class="aid-dot" style="background:var(--primary)"></span><span class="aid-n">Una idea per frase</span><span class="aid-w">alt</span></label>
+                  <label class="aid-row" data-aid="num"><input type="checkbox"><span class="aid-dot" style="background:#6b7a1a"></span><span class="aid-n">Instruccions numerades</span><span class="aid-w">mig</span></label>
+                  <label class="aid-row" data-aid="voc"><input type="checkbox"><span class="aid-dot" style="background:var(--cat)"></span><span class="aid-n">Vocabulari freqüent</span><span class="aid-w">mig</span></label>
+                  <label class="aid-row" data-aid="neg"><input type="checkbox"><span class="aid-dot" style="background:#a33377"></span><span class="aid-n">Evitar doble negació</span><span class="aid-w">alt</span></label>
+                  <label class="aid-row" data-aid="typo"><input type="checkbox"><span class="aid-dot" style="background:var(--disl)"></span><span class="aid-n">Tipografia accessible</span><span class="aid-w">mig</span></label>
+                </div>
+                <div class="col-sub">Complements generats</div>
+                <div class="aids-list">
+                  <label class="aid-row" data-aid="gloss"><input type="checkbox"><span class="aid-dot" style="background:var(--cat)"></span><span class="aid-n">Glossari</span><span class="aid-w">aut.</span></label>
+                  <label class="aid-row" data-aid="esq"><input type="checkbox"><span class="aid-dot" style="background:#6b7a1a"></span><span class="aid-n">Esquema visual</span><span class="aid-w">aut.</span></label>
+                  <label class="aid-row" data-aid="pre"><input type="checkbox"><span class="aid-dot" style="background:var(--primary)"></span><span class="aid-n">Preguntes</span><span class="aid-w">aut.</span></label>
+                  <label class="aid-row" data-aid="bas"><input type="checkbox"><span class="aid-dot" style="background:var(--tdah)"></span><span class="aid-n">Bastides</span><span class="aid-w">aut.</span></label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-t">Informació complementària <span class="hint" style="margin-left:8px;font-family:var(--mono);font-size:10.5px;color:var(--ink-400)">opcional · pots triar-ne més d'una</span></div>
+            <div style="font-size:12px;color:var(--ink-500);margin-bottom:10px;line-height:1.5">Si tens informació d'un informe o PI, pots afegir-la. Diverses condicions poden coexistir.</div>
+
+            <details class="disc">
+              <summary>
+                <span class="disc-n">Condicions o diagnòstics</span>
+                <span class="disc-v" id="dx-v">Cap seleccionat</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chev"><path d="m6 9 6 6 6-6"/></svg>
+              </summary>
+              <div class="disc-body">
+                <div class="tags dx-list">
+                  <button class="tag" data-dx="tdah">TDAH</button>
+                  <button class="tag" data-dx="disl">Dislèxia / DEA</button>
+                  <button class="tag" data-dx="l2">Català com a L2</button>
+                  <button class="tag" data-dx="ac">Altes capacitats</button>
+                  <button class="tag" data-dx="tea">TEA</button>
+                  <button class="tag" data-dx="di">Discapacitat intel·lectual</button>
+                  <button class="tag" data-dx="au">Discapacitat auditiva</button>
+                  <button class="tag" data-dx="vi">Discapacitat visual</button>
+                </div>
+                <div id="dx-subs"></div>
+              </div>
+            </details>
+
+            <details class="disc">
+              <summary>
+                <span class="disc-n">Context de la situació</span>
+                <span class="disc-v">Cap seleccionat</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chev"><path d="m6 9 6 6 6-6"/></svg>
+              </summary>
+              <div class="disc-body">
+                <div class="tags">
+                  <button class="tag">Incorporació tardana</button>
+                  <button class="tag">Absentisme</button>
+                  <button class="tag">Entorn socioeconòmic vulnerable</button>
+                  <button class="tag">Pla individualitzat (PI) actiu</button>
+                  <button class="tag">Seguiment EAP / CREDA / CRETDIC</button>
+                </div>
+              </div>
+            </details>
+          </div>
+
+          <div class="card">
+            <div class="card-t">Notes del docent <span class="hint" style="margin-left:8px;font-family:var(--mono);font-size:10.5px;color:var(--ink-400)">opcional</span></div>
+            <div class="two">
+              <div class="f"><div class="f-l">El que saps que li funciona</div><textarea class="txt" placeholder="Ex: respon bé si la consigna està a la pissarra…"></textarea></div>
+              <div class="f"><div class="f-l">Interessos, cultura, detonants</div><textarea class="txt" placeholder="Qualsevol cosa que ens ajudi a adaptar millor…"></textarea></div>
+            </div>
+          </div>
+
+          <div class="foot">
+            <button class="btn btn-g" data-mode="search">Cancel·lar</button>
+            <button class="btn btn-p"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Crear i seleccionar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODE: NEW GROUP -->
+      <div class="mode" data-m="group">
+        <div class="form">
+          <div class="form-h">
+            <h2>Nou perfil de grup</h2>
+            <p>Defineix els nivells lectors i afegeix perfils ja desats.</p>
+          </div>
+
+          <div class="card">
+            <div class="card-t">Identificació</div>
+            <div class="two">
+              <div class="f"><div class="f-l">Nom del grup <span class="req">*</span></div><input class="inp" placeholder="Ex: 3r ESO A · Grup classe"></div>
+              <div class="f"><div class="f-l">Context</div><input class="inp" placeholder="Matèria, desdoblament, aula…"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-t">Composició de nivells lectors</div>
+            <div style="font-size:11.5px;color:var(--ink-500);margin-bottom:10px">Quins nivells hi ha al grup? ATNE adaptarà el text per a cada nivell. Els ajuts concrets (glossari, preguntes guia…) es decideixen al Pas 2. Els alumnes amb perfil personal sumaran els seus ajuts específics.</div>
+            <div class="levels" style="grid-template-columns:repeat(3,1fr)">
+              <button class="lvl on"><b>Bàsic</b><small>fragments curts + bastides</small></button>
+              <button class="lvl on"><b>Estàndard</b><small>nivell del curs</small></button>
+              <button class="lvl"><b>Avançat</b><small>amb ampliació i repte</small></button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-t">Perfils individuals amb seguiment <span class="hint" style="margin-left:8px;color:var(--ink-400);font-size:10.5px;font-family:var(--mono)">(afegeix només els que tinguin perfil propi)</span></div>
+            <div style="font-size:11.5px;color:var(--ink-500);margin-bottom:10px;line-height:1.5">Pot ser qualsevol perfil del catàleg — els grups poden ser puntuals, interclasse o de desdoblament.</div>
+            <div class="add-profiles">
+              <div class="add-search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+                <input type="text" placeholder="Cerca un perfil per nom, curs o condició…" id="add-prof-q">
+                <button class="btn-add-open" id="add-prof-btn" type="button">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M12 5v14M5 12h14"/></svg>
+                  Afegir perfil
+                </button>
+              </div>
+              <div class="add-picker" id="add-picker" hidden>
+                <label class="pick" data-pid="m"><div class="m-av av-tdah">M</div><div><div class="m-n">Marc Ribera</div><div class="m-s">14 anys · 3r ESO A</div></div><span class="chip tdah">TDAH</span></label>
+                <label class="pick" data-pid="mi"><div class="m-av av-disl">Mi</div><div><div class="m-n">Mireia Solà</div><div class="m-s">12 anys · 2n ESO B</div></div><span class="chip disl">Dislèxia</span></label>
+                <label class="pick" data-pid="l"><div class="m-av av-cat">L</div><div><div class="m-n">Liu Chen</div><div class="m-s">13 anys · 2n ESO C</div></div><span class="chip cat">Català L2</span></label>
+                <label class="pick" data-pid="p"><div class="m-av av-ac">P</div><div><div class="m-n">Pol Vidal</div><div class="m-s">15 anys · 4t ESO A</div></div><span class="chip ac">AACC</span></label>
+                <label class="pick" data-pid="a"><div class="m-av av-tdah">A</div><div><div class="m-n">Anna Puig</div><div class="m-s">14 anys · 3r ESO A</div></div><span class="chip tdah">TDAH</span><span class="chip disl">Disl.</span></label>
+                <label class="pick" data-pid="y"><div class="m-av av-cat">Y</div><div><div class="m-n">Youssef El Ameri</div><div class="m-s">11 anys · 6è prim.</div></div><span class="chip cat">Català L2</span></label>
+              </div>
+              <div class="added-list" id="added-list">
+                <div class="empty-add">Cap perfil afegit encara.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="foot">
+            <button class="btn btn-g" data-mode="search">Cancel·lar</button>
+            <button class="btn btn-p"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Crear i seleccionar</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  const actBtns = document.querySelectorAll('[data-mode]');
+  const modes = document.querySelectorAll('.mode');
+
+  function setMode(m){
+    document.querySelectorAll('.fab').forEach(a => a.classList.toggle('on', a.dataset.mode === m));
+    modes.forEach(x => x.classList.toggle('on', x.dataset.m === m));
+  }
+  actBtns.forEach(b => b.addEventListener('click', () => {
+    if(b.dataset.mode) setMode(b.dataset.mode);
+  }));
+
+  document.getElementById('fsBtn')?.addEventListener('click', () => {
+    if(!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  });
+
+  document.querySelectorAll('.fchip').forEach(c => c.addEventListener('click', () => {
+    document.querySelectorAll('.fchip').forEach(x => x.classList.remove('on'));
+    c.classList.add('on');
+  }));
+  document.querySelectorAll('.lvl').forEach(l => l.addEventListener('click', () => {
+    // MECR (persona) = single-select; group levels = multi-select
+    if(l.parentElement.classList.contains('mecr')){
+      l.parentElement.querySelectorAll('.lvl').forEach(x => x.classList.remove('on'));
+      l.classList.add('on');
+    } else {
+      l.classList.toggle('on');
+    }
+  }));
+
+  // Afegir perfils al grup
+  const addBtn = document.getElementById('add-prof-btn');
+  const picker = document.getElementById('add-picker');
+  const addedList = document.getElementById('added-list');
+  const searchInp = document.getElementById('add-prof-q');
+  const added = new Set();
+
+  addBtn?.addEventListener('click', () => {
+    picker.hidden = !picker.hidden;
+    if(!picker.hidden) searchInp?.focus();
+  });
+  searchInp?.addEventListener('focus', () => { picker.hidden = false; });
+  searchInp?.addEventListener('input', () => {
+    const q = searchInp.value.toLowerCase().trim();
+    picker.hidden = false;
+    picker.querySelectorAll('.pick').forEach(p => {
+      const txt = p.textContent.toLowerCase();
+      p.style.display = !q || txt.includes(q) ? '' : 'none';
+    });
+  });
+  picker?.querySelectorAll('.pick').forEach(p => {
+    p.addEventListener('click', () => {
+      const pid = p.dataset.pid;
+      if(added.has(pid)) return;
+      added.add(pid);
+      p.classList.add('added');
+      const av = p.querySelector('.m-av').cloneNode(true);
+      const name = p.querySelector('.m-n').textContent;
+      const sub = p.querySelector('.m-s').textContent;
+      const chips = [...p.querySelectorAll('.chip')].map(c => c.outerHTML).join('');
+      const row = document.createElement('div');
+      row.className = 'added-row';
+      row.innerHTML = `${av.outerHTML}<div><div class="m-n">${name}</div><div class="m-s">${sub}</div></div>${chips}<button class="remove" type="button" aria-label="Treure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M18 6 6 18M6 6l12 12"/></svg></button>`;
+      row.querySelector('.remove').addEventListener('click', () => {
+        added.delete(pid);
+        p.classList.remove('added');
+        row.remove();
+        if(added.size === 0) addedList.innerHTML = '<div class="empty-add">Cap perfil afegit encara.</div>';
+      });
+      const empty = addedList.querySelector('.empty-add');
+      if(empty) empty.remove();
+      addedList.appendChild(row);
+    });
+  });
+  document.querySelectorAll('.tag').forEach(t => t.addEventListener('click', () => t.classList.toggle('on')));
+
+  // Mapeig conductes → ajuts suggerits
+  const BEH_AIDS = {
+    dist:['frag','idea','typo'],
+    imp:['num','idea'],
+    dec:['typo','voc','idea'],
+    l2:['voc','gloss','idea'],
+    fat:['frag','typo','esq'],
+    fast:['pre'],
+    abs:['esq','gloss'],
+    neg:['neg','idea','num']
+  };
+  function updateAids(){
+    const on = new Set();
+    document.querySelectorAll('[data-beh]:checked').forEach(cb => (BEH_AIDS[cb.dataset.beh]||[]).forEach(a => on.add(a)));
+    document.querySelectorAll('.aid-row').forEach(r => {
+      const sug = on.has(r.dataset.aid);
+      r.classList.toggle('suggested', sug);
+      const cb = r.querySelector('input');
+      if(!r.dataset.touched) cb.checked = sug;
+    });
+    const checked = document.querySelectorAll('.aid-row input:checked').length;
+    document.getElementById('aid-count').textContent = checked + ' activats';
+  }
+  document.querySelectorAll('[data-beh]').forEach(cb => cb.addEventListener('change', updateAids));
+  document.querySelectorAll('.aid-row input').forEach(cb => cb.addEventListener('change', () => {
+    cb.closest('.aid-row').dataset.touched = '1';
+    const n = document.querySelectorAll('.aid-row input:checked').length;
+    document.getElementById('aid-count').textContent = n + ' activats';
+  }));
+  updateAids();
+
+  // Multi-selecció de diagnòstics amb subvariables
+  const DX_NAMES = {tdah:'TDAH',disl:'Dislèxia',l2:'Català L2',ac:'AACC',tea:'TEA',di:'DI',au:'Aud.',vi:'Vis.'};
+  const L1_META = {
+    'Àrab':['semítica','àrab'],
+    'Amazic':['amaziga','tifinag / llatí'],
+    'Urdú':['indoirania','àrab (nasta‘liq)'],
+    'Xinès mandarí':['sinotibetana','xinès'],
+    'Wolof':['níger-congolesa','llatí'],
+    'Mandinka':['níger-congolesa','llatí'],
+    'Ucraïnès':['eslava','ciríl·lic'],
+    'Rus':['eslava','ciríl·lic'],
+    'Romanes':['romance','llatí'],
+    'Panjabi':['indoirania','gurmukhi / shahmukhi'],
+    'Bengalí':['indoirania','bengalí'],
+    'Tagalog':['austronèsia','llatí'],
+    'Portuguès':['romance','llatí'],
+    'Espanyol':['romance','llatí'],
+    'Anglès':['germànica','llatí'],
+    'Francès':['romance','llatí']
+  };
+  const L1_OPTS = Object.keys(L1_META).concat(['Altra…']);
+  const DX_SUBS = {
+    tdah:{type:'tags',items:['Predomini d\'atenció','Predomini d\'hiperactivitat','Combinat','Amb medicació']},
+    disl:{type:'tags',items:['Fonològica','Superficial','Mixta','Disgrafia associada']},
+    l2:{type:'l2'},
+    ac:{type:'tags',items:['Creativa','Acadèmica','Doble excepcionalitat']},
+    tea:{type:'tags',items:['Suport nivell 1','Nivell 2','Nivell 3','Sensibilitat sensorial']},
+    di:{type:'tags',items:['Lleu','Moderada','Significativa']},
+    au:{type:'tags',items:['Lleu','Moderada','Severa','LSC']},
+    vi:{type:'tags',items:['Baixa visió','Ceguesa','Braille']}
+  };
+  const dxSel = new Set();
+  function renderDx(){
+    document.querySelectorAll('[data-dx]').forEach(b => b.classList.toggle('on', dxSel.has(b.dataset.dx)));
+    document.getElementById('dx-v').textContent = dxSel.size ? [...dxSel].map(k=>DX_NAMES[k]).join(', ') : 'Cap seleccionat';
+    const host = document.getElementById('dx-subs');
+    host.innerHTML = [...dxSel].map(k => {
+      const sub = DX_SUBS[k]; if(!sub) return '';
+      let body = '';
+      if(sub.type === 'tags'){
+        body = `<div class="tags">${sub.items.map(s=>`<button class="tag" type="button">${s}</button>`).join('')}</div>`;
+      } else if(sub.type === 'l2'){
+        const cOpts = ['Marroc','Pakistan','Xina','Senegal','Hondures','Colòmbia','Bolívia','Equador','Romania','Ucraïna','Filipines','Bangla Desh','Algèria','Nigèria','Sahara Occidental','Altre…'];
+        const tOpts = ['Menys de 6 mesos','6-12 mesos','1-2 anys','Més de 2 anys'];
+        body = `<div class="sub-grid">
+          <label class="sub-f l2-l1" style="grid-column:1/-1">
+            <span class="sub-l">Llengua familiar (L1)</span>
+            <select class="inp" data-l2="l1"><option value="">— Tria —</option>${L1_OPTS.map(o=>`<option>${o}</option>`).join('')}</select>
+            <span class="l2-meta" data-l2-meta hidden></span>
+          </label>
+          <label class="sub-f"><span class="sub-l">País d'origen</span><select class="inp"><option value="">— Tria —</option>${cOpts.map(o=>`<option>${o}</option>`).join('')}</select></label>
+          <label class="sub-f"><span class="sub-l">Temps a Catalunya</span><select class="inp"><option value="">— Tria —</option>${tOpts.map(o=>`<option>${o}</option>`).join('')}</select></label>
+          <div class="sub-f"><span class="sub-l">Coneix l'alfabet llatí</span><div class="toggle"><button class="tg" type="button">Sí</button><button class="tg" type="button">No</button></div></div>
+          <div class="sub-f"><span class="sub-l">Alfabetització en L1</span><div class="toggle"><button class="tg" type="button">Sí</button><button class="tg" type="button">No</button></div></div>
+          <div class="sub-f"><span class="sub-l">Escolarització prèvia</span><div class="toggle"><button class="tg" type="button">Regular</button><button class="tg" type="button">Interrompuda</button></div></div>
+        </div>`;
+      }
+      return `<div class="sub"><div class="sub-t">${DX_NAMES[k]} · subvariables</div>${body}</div>`;
+    }).join('');
+    host.querySelectorAll('.tag').forEach(t => t.addEventListener('click', e => { e.preventDefault(); t.classList.toggle('on'); }));
+    host.querySelectorAll('.toggle').forEach(tg => {
+      tg.querySelectorAll('.tg').forEach(b => b.addEventListener('click', e => {
+        e.preventDefault();
+        tg.querySelectorAll('.tg').forEach(x => x.classList.remove('on'));
+        b.classList.add('on');
+      }));
+    });
+    host.querySelectorAll('[data-l2="l1"]').forEach(sel => sel.addEventListener('change', () => {
+      const meta = sel.closest('.sub-f').querySelector('[data-l2-meta]');
+      const m = L1_META[sel.value];
+      if(m){ meta.textContent = `família ${m[0]} · alfabet ${m[1]}`; meta.hidden = false; }
+      else { meta.hidden = true; }
+    }));
+  }
+  document.querySelectorAll('[data-dx]').forEach(b => b.addEventListener('click', e => {
+    e.preventDefault();
+    const k = b.dataset.dx;
+    if(dxSel.has(k)) dxSel.delete(k); else dxSel.add(k);
+    renderDx();
+  }));
+</script>
+</body>
+</html>

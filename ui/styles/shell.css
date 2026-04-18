@@ -1,0 +1,124 @@
+/* =========================================================
+   ATNE · Shell comú (4 passos)
+   Importa després de tokens.css + base.css.
+
+   Conté només el que és realment compartit entre passos:
+   estructura del layout (wrap/rail/canvas/topbar), stepper,
+   icon-button genèric. Els colors de fons de rail/topbar
+   poden variar per pas (el Pas 1 usa rail blanc, Pas 2/3
+   usen cream-2); es deixen als estils específics.
+   ========================================================= */
+
+/* ─── Layout de pantalla ─────────────────────────────────── */
+.wrap {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  height: 100vh;
+  background: var(--cream);
+}
+
+/* ─── Rail esquerre (navegació vertical d'app) ──────────── */
+.rail {
+  border-right: 1px solid var(--paper-line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0;
+  gap: 4px;
+}
+
+.logo {
+  width: 28px; height: 28px;
+  border-radius: var(--r-md);
+  background: var(--primary);
+  display: grid; place-items: center;
+  color: #fff;
+  font-weight: 800;
+  font-size: 12px;
+  font-family: var(--serif);
+  margin-bottom: 12px;
+}
+
+.rb {
+  width: 36px; height: 36px;
+  border-radius: 9px;
+  display: grid; place-items: center;
+  color: var(--ink-500);
+  transition: background var(--trans-fast), color var(--trans-fast);
+}
+.rb:hover { color: var(--ink-900); }
+.rb.on { background: var(--primary-50); color: var(--primary); }
+.rb svg { width: 17px; height: 17px; }
+.rb.sep { flex: 1; pointer-events: none; }
+
+/* ─── Canvas (columna principal) ─────────────────────────── */
+.canvas {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ─── Topbar ─────────────────────────────────────────────── */
+.topbar {
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid var(--paper-line);
+  flex: none;
+}
+
+.tb-title {
+  font-family: var(--serif);
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-med);
+  letter-spacing: -0.01em;
+  color: var(--ink-800);
+}
+
+/* ─── Stepper (passos 1-2-3-4) ───────────────────────────── */
+.steps {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--ink-75);
+  border: 1px solid var(--paper-line);
+  border-radius: var(--r-pill);
+  padding: 3px;
+}
+
+.step {
+  padding: 6px 14px;
+  font-family: var(--mono);
+  font-size: var(--fs-xs);
+  color: var(--ink-500);
+  border-radius: var(--r-pill);
+  font-weight: var(--fw-med);
+  cursor: pointer;
+  transition: color var(--trans-fast);
+}
+.step:hover { color: var(--ink-800); }
+.step.on { background: var(--ink-900); color: #fff; }
+.step.done { color: var(--primary); }
+.step.done::before { content: '✓ '; opacity: .7; }
+
+.step-num {
+  font-weight: var(--fw-semi);
+  margin-right: 5px;
+  opacity: .7;
+}
+.step.on .step-num { opacity: 1; }
+.step.done .step-num { display: none; }
+
+/* ─── Icon button genèric (topbar, toolbars secundàries) ── */
+.icon-btn {
+  width: 32px; height: 32px;
+  border-radius: var(--r-md);
+  color: var(--ink-500);
+  display: grid; place-items: center;
+  border: 1px solid var(--paper-line);
+  background: rgba(255, 255, 255, .5);
+  transition: background var(--trans-fast), color var(--trans-fast);
+}
+.icon-btn:hover { background: #fff; color: var(--ink-900); }
+.icon-btn svg { width: 14px; height: 14px; }

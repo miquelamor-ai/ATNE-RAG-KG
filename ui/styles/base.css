@@ -1,0 +1,142 @@
+/* =========================================================
+   ATNE · Base + primitives
+   Importa després de tokens.css.
+   Defineix reset, tipografia per defecte i algunes primitives
+   compartides (botons genèrics, inputs, etc.).
+   ========================================================= */
+
+/* ─── Reset mínim ─────────────────────────────────────── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+img, svg { display: block; max-width: 100%; }
+button { font: inherit; color: inherit; background: 0; border: 0; cursor: pointer; }
+input, textarea, select { font: inherit; color: inherit; outline: none; }
+a { color: inherit; text-decoration: none; }
+ul, ol { list-style: none; }
+
+/* ─── Body ───────────────────────────────────────────── */
+body {
+  font-family: var(--ui);
+  font-size: var(--fs-base);
+  line-height: var(--lh-body);
+  color: var(--ink-900);
+  background: var(--cream);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ─── Tipografia per a documents (text adaptat) ──────── */
+.doc-read {
+  font-family: var(--ui);
+  font-size: 15px;
+  line-height: var(--lh-read);
+  color: var(--ink-800);
+}
+.doc-read h1 {
+  font-family: var(--serif);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-3xl);
+  line-height: var(--lh-tight);
+  color: var(--ink-900);
+  margin-bottom: var(--sp-5);
+}
+.doc-read h2 {
+  font-family: var(--serif);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-2xl);
+  line-height: var(--lh-tight);
+  color: var(--ink-900);
+  margin: var(--sp-7) 0 var(--sp-3);
+}
+.doc-read p { margin-bottom: var(--sp-4); }
+.doc-read ul { margin: var(--sp-3) 0 var(--sp-4) var(--sp-5); list-style: disc; }
+.doc-read li { margin-bottom: var(--sp-2); }
+.doc-read strong { font-weight: var(--fw-semi); color: var(--ink-900); }
+
+/* Marques d'adaptació (diff-style) */
+.doc-read .ins {
+  background: var(--primary-50);
+  color: var(--primary);
+  padding: 1px 3px;
+  border-radius: var(--r-xs);
+  font-weight: var(--fw-med);
+}
+.doc-read .sub {
+  background: var(--warn-50);
+  padding: 1px 3px;
+  border-radius: var(--r-xs);
+}
+
+/* Variants tipogràfiques per a versions específiques */
+.doc-read.v-a2    { font-size: 16px; line-height: 1.85; }
+.doc-read.v-a2 p  { margin-bottom: var(--sp-3); }
+
+.doc-read.v-tdah p   { margin-bottom: 14px; }
+.doc-read.v-tdah .key{
+  background: linear-gradient(transparent 58%, #FFE8B8 58%);
+  padding: 0 2px; font-weight: var(--fw-med);
+}
+.doc-read.v-tdah .pause {
+  display: flex; align-items: center; gap: 6px;
+  color: var(--tdah); font-family: var(--mono);
+  font-size: 10.5px; text-transform: uppercase;
+  letter-spacing: .08em; font-weight: var(--fw-semi);
+  margin: 18px 0 6px;
+}
+.doc-read.v-tdah .pause::before {
+  content: ''; width: 14px; height: 2px;
+  background: var(--tdah); border-radius: 2px;
+}
+
+.doc-read.v-disl    { font-size: 17px; line-height: var(--lh-disl); letter-spacing: .01em; }
+.doc-read.v-disl p  { margin-bottom: 18px; }
+.doc-read.v-disl h1 { font-size: 32px; }
+.doc-read.v-disl h2 { font-size: 22px; margin-top: 24px; }
+.doc-read.v-disl .key {
+  font-weight: var(--fw-semi);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--disl);
+}
+
+/* ─── Primitives compartides ─────────────────────────── */
+
+/* Botó genèric (no assumeix mida) — sobreescriu amb variants */
+.btn {
+  display: inline-flex; align-items: center; gap: var(--sp-2);
+  padding: 7px var(--sp-3);
+  font-size: var(--fs-md); font-weight: var(--fw-med);
+  border-radius: var(--r-md);
+  transition: background var(--trans-fast), color var(--trans-fast);
+}
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-600); }
+.btn-ghost { color: var(--ink-700); }
+.btn-ghost:hover { background: var(--cream-2); }
+.btn svg { width: 14px; height: 14px; }
+
+/* Xip genèric */
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px var(--sp-2);
+  font-size: var(--fs-xs); font-family: var(--mono); font-weight: var(--fw-semi);
+  border-radius: var(--r-pill);
+  background: var(--ink-100); color: var(--ink-700);
+}
+.chip.tdah { background: var(--tdah-bg); color: var(--tdah); }
+.chip.disl { background: var(--disl-bg); color: var(--disl); }
+.chip.cat  { background: var(--cat-bg);  color: var(--cat);  }
+.chip.ac   { background: var(--ac-bg);   color: var(--ac);   }
+
+/* Badge de nivell (A1-C2) */
+.chip.lv {
+  background: var(--ink-100); color: var(--ink-700);
+  font-family: var(--mono);
+}
+
+/* Scrollbar discreta */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--ink-200); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-300); }
+::-webkit-scrollbar-track { background: transparent; }

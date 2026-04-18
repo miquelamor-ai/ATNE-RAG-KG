@@ -1,0 +1,119 @@
+/* =========================================================
+   ATNE · Design Tokens
+   Copia aquest fitxer a /src/styles/tokens.css
+   i importa'l com a primera hoja de l'app.
+   ========================================================= */
+
+:root {
+  /* ─── Marca (primari) ────────────────────────────────── */
+  --primary:        #3337a6;
+  --primary-600:    #3f45c4;   /* hover / estat pressionat */
+  --primary-100:    #e1e4ff;   /* fons subtil (xip actiu) */
+  --primary-50:     #eef0ff;   /* fons molt subtil */
+
+  /* ─── Escala de gris (ink) ───────────────────────────── */
+  --ink-900: #121a2b;  /* text principal, overlays foscos */
+  --ink-800: #1b2440;  /* títols */
+  --ink-700: #2d3655;  /* text secundari */
+  --ink-600: #464f6d;
+  --ink-500: #6a7392;  /* meta, captions */
+  --ink-400: #8a93b0;  /* placeholders */
+  --ink-300: #b5bdd4;  /* icones desactivades */
+  --ink-200: #d7dce9;
+  --ink-150: #e4e8f2;
+  --ink-100: #eef1f8;
+  --ink-75:  #f4f6fb;
+  --ink-50:  #f9fafd;
+
+  /* ─── Estats semàntics ───────────────────────────────── */
+  --ok:      #188a5a;
+  --ok-50:   #e6f5ee;
+  --ok-100:  #d1ecde;
+
+  --warn:    #a16207;
+  --warn-50: #fcf4dc;
+  --warn-100:#f6e2a5;
+
+  --err:     #b43d3d;   /* alias: --danger */
+  --danger:  #b43d3d;
+  --danger-50: #fce9e9;
+
+  /* ─── Categories de perfil (NEE) ─────────────────────── */
+  --tdah:    #c64a4a;   --tdah-bg: #fce7d5;
+  --disl:    #b77400;   --disl-bg: #fbe9c2;
+  --cat:     #0f7a7a;   --cat-bg:  #d3ece9;   /* català/idioma */
+  --ac:      #6d3aa3;   --ac-bg:   #e7dcf4;   /* altes capacitats */
+
+  /* ─── Fons "paper" (editorial) ───────────────────────── */
+  --cream:      #f4f1e8;   /* fons principal de l'app */
+  --cream-2:    #ece8db;   /* fons secundari (rail) */
+  --cream-3:    #e6e2d3;   /* hover sobre cream-2 */
+  --paper-line: rgba(0, 0, 0, .06);   /* línies divisòries */
+
+  /* ─── Tipografia ─────────────────────────────────────── */
+  --ui:     'Inter', system-ui, -apple-system, Segoe UI, sans-serif;
+  --serif:  'Fraunces', Georgia, 'Times New Roman', serif;
+  --mono:   'JetBrains Mono', ui-monospace, Menlo, Monaco, monospace;
+
+  /* Escala (ús típic) */
+  --fs-xs:  11px;   /* meta, captions (mono) */
+  --fs-sm:  12px;   /* labels, xips */
+  --fs-md:  13px;
+  --fs-base:14px;   /* body */
+  --fs-lg:  16px;
+  --fs-xl:  18px;   /* títols de document */
+  --fs-2xl: 22px;
+  --fs-3xl: 28px;
+
+  /* Pes */
+  --fw-reg: 400;
+  --fw-med: 500;
+  --fw-semi:600;
+  --fw-bold:700;
+
+  /* Line-height */
+  --lh-tight:  1.2;
+  --lh-body:   1.5;
+  --lh-read:   1.7;   /* lectura còmoda */
+  --lh-disl:   2.0;   /* dislèxia */
+
+  /* ─── Radis ──────────────────────────────────────────── */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 10px;
+  --r-xl: 12px;
+  --r-2xl: 16px;
+  --r-pill: 9999px;
+
+  /* ─── Ombres ─────────────────────────────────────────── */
+  --sh-xs: 0 1px 2px rgba(16, 24, 40, .04);
+  --sh-sm: 0 2px 8px -4px rgba(16, 24, 40, .08);
+  --sh-md: 0 4px 12px -4px rgba(16, 24, 40, .10);
+  --sh-lg: 0 10px 30px -8px rgba(16, 24, 40, .18),
+           0 3px 10px -3px rgba(16, 24, 40, .08);
+  --sh-xl: 0 20px 40px -12px rgba(16, 24, 40, .22),
+           0 6px 18px -4px rgba(16, 24, 40, .10);
+
+  /* ─── Espaiat (múltiples de 4) ───────────────────────── */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-7: 32px;
+  --sp-8: 40px;
+  --sp-9: 48px;
+
+  /* ─── Transicions ────────────────────────────────────── */
+  --trans-fast: .12s ease;
+  --trans-med:  .18s ease;
+  --trans-slow: .28s ease;
+
+  /* ─── Z-index ────────────────────────────────────────── */
+  --z-popover:    50;
+  --z-overlay:    100;   /* sel-tb, paramenu */
+  --z-modal:      200;
+  --z-regenerate: 15;    /* overlay "regenerant" dins d'un contenidor */
+}
