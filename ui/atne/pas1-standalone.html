@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-/* ─── tokens.css ─────────────────────────────────────────── */
+/* tokens */
 /* =========================================================
    ATNE · Design Tokens
    Copia aquest fitxer a /src/styles/tokens.css
@@ -129,7 +129,7 @@
   --z-regenerate: 15;    /* overlay "regenerant" dins d'un contenidor */
 }
 
-/* ─── base.css ───────────────────────────────────────────── */
+/* base */
 /* =========================================================
    ATNE · Base + primitives
    Importa després de tokens.css.
@@ -273,7 +273,7 @@ body {
 ::-webkit-scrollbar-thumb:hover { background: var(--ink-300); }
 ::-webkit-scrollbar-track { background: transparent; }
 
-/* ─── shell.css ──────────────────────────────────────────── */
+/* shell */
 /* =========================================================
    ATNE · Shell comú (4 passos)
    Importa després de tokens.css + base.css.
@@ -490,7 +490,7 @@ body {
   .hamb { display: grid; }
 }
 
-/* ─── Pas 1 · específic + responsive ─── */
+/* Pas 1 specific */
   /* =========================================================
      Pas 1 · overrides específics de la pàgina
      Aquests valors vénen del prototip ATNE Pas1 V3.html:
@@ -525,7 +525,9 @@ body {
 
   /* Body modes (switcher sense navegació real) */
   .body{flex:1;overflow:hidden;position:relative}
-  .mode{position:absolute;inset:0;overflow-y:auto;padding:22px 28px 40px;opacity:0;pointer-events:none;transition:.2s}
+  /* Padding-bottom gros perquè els FABs flotants (right/bottom 22px, 3 apilats ~150px d'alçada)
+     no tapin l'ultim botó "Seleccionar" de la llista */
+  .mode{position:absolute;inset:0;overflow-y:auto;padding:22px 28px 200px;opacity:0;pointer-events:none;transition:.2s}
   .mode.on{opacity:1;pointer-events:auto}
 
   /* ─── Mode: cerca / llista ─────────────────────────── */
@@ -873,7 +875,7 @@ body {
 
           <div class="subhead"><span class="subhead-t">Recents</span><span class="subhead-c">6</span></div>
           <div class="list">
-            <div class="row person">
+            <div class="row person" data-pid="marc">
               <div class="row-av av-tdah">M</div>
               <div><div class="row-name">Marc Ribera</div><div class="row-sub">3r ESO A · 14 anys</div></div>
               <div class="row-chips"><span class="chip tdah">TDAH</span><span class="chip lv">Comp. moderada</span></div>
@@ -881,7 +883,7 @@ body {
               <div class="row-use">ús avui</div>
               <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
             </div>
-            <div class="row person">
+            <div class="row person" data-pid="grup3a">
               <div class="row-av grp">3A</div>
               <div><div class="row-name">3r ESO A · Grup classe</div><div class="mini-row"><span class="mini av-tdah">M</span><span class="mini av-cat">L</span><span class="mini av-disl">Mi</span><span class="mini av-neu">+21</span></div></div>
               <div class="row-chips"><span class="chip lv">3 nivells</span><span class="chip tdah">1 TDAH</span><span class="chip cat">2 L2</span></div>
@@ -889,7 +891,7 @@ body {
               <div class="row-use">fa 2d</div>
               <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
             </div>
-            <div class="row person">
+            <div class="row person" data-pid="mireia">
               <div class="row-av av-disl">Mi</div>
               <div><div class="row-name">Mireia Solà</div><div class="row-sub">1r ESO B · 12 anys</div></div>
               <div class="row-chips"><span class="chip disl">Dislèxia</span><span class="chip lv">Decodificació</span></div>
@@ -897,7 +899,7 @@ body {
               <div class="row-use">fa 1d</div>
               <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
             </div>
-            <div class="row person">
+            <div class="row person" data-pid="liu">
               <div class="row-av av-cat">L</div>
               <div><div class="row-name">Liu Chen</div><div class="row-sub">2n ESO C · 13 anys</div></div>
               <div class="row-chips"><span class="chip cat">Català L2</span><span class="chip lv">Vocab. bàsic</span></div>
@@ -905,7 +907,7 @@ body {
               <div class="row-use">fa 3d</div>
               <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
             </div>
-            <div class="row person">
+            <div class="row person" data-pid="desdoblament">
               <div class="row-av grp grp-ac">DR</div>
               <div><div class="row-name">Desdoblament R · Ciències 3r</div><div class="mini-row"><span class="mini av-ac">P</span><span class="mini av-ac">An</span><span class="mini av-ac">Sa</span><span class="mini av-neu">+9</span></div></div>
               <div class="row-chips"><span class="chip lv">2 nivells</span><span class="chip ac">3 AACC</span></div>
@@ -913,7 +915,7 @@ body {
               <div class="row-use">fa 5d</div>
               <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
             </div>
-            <div class="row person">
+            <div class="row person" data-pid="anna">
               <div class="row-av av-tdah">A</div>
               <div><div class="row-name">Anna Puig</div><div class="row-sub">3r ESO A · 14 anys</div></div>
               <div class="row-chips"><span class="chip tdah">TDAH</span><span class="chip disl">Dislèxia</span></div>
@@ -925,7 +927,7 @@ body {
 
           <div class="subhead"><span class="subhead-t">Tots els altres</span><span class="subhead-c">26</span></div>
           <div class="list">
-            <div class="row person">
+            <div class="row person" data-pid="pol">
               <div class="row-av av-ac">P</div>
               <div><div class="row-name">Pol Vidal</div><div class="row-sub">4t ESO A · 15 anys</div></div>
               <div class="row-chips"><span class="chip ac">Altes capac.</span></div>
@@ -933,7 +935,7 @@ body {
               <div class="row-use">fa 1w</div>
               <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
             </div>
-            <div class="row person">
+            <div class="row person" data-pid="acollida">
               <div class="row-av grp grp-cat">L2</div>
               <div><div class="row-name">Aula d'acollida · Cicle sup.</div><div class="mini-row"><span class="mini av-cat">Y</span><span class="mini av-cat">L</span><span class="mini av-cat">Am</span><span class="mini av-neu">+5</span></div></div>
               <div class="row-chips"><span class="chip lv">4 nivells</span><span class="chip cat">Tots L2</span></div>
@@ -1146,13 +1148,49 @@ body {
   document.getElementById('drawer-close')?.addEventListener('click', closeDrawer);
   document.addEventListener('keydown', e => { if(e.key === 'Escape') closeDrawer(); });
 
-  // Navegació entre passos: clicar "Seleccionar" a una fila → Pas 2
+  // Model de dades dels 8 perfils (duplicat a Pas 2 i Pas 3)
+  window.ATNE_PROFILES = {
+    marc:         { id:'marc', type:'person', name:'Marc Ribera', age:'14', course:'3r ESO A', avatar:'M', cat:'tdah',
+                    chips:[{label:'TDAH',cat:'tdah'},{label:'B1 · Intermedi',cat:'lv'}],
+                    behaviors:['Es distreu amb textos llargs','Respon sense llegir tot','Fatiga lectora al final'],
+                    aids:['Fragmentar el text','Una idea per frase','Instruccions numerades','Vocabulari freqüent'] },
+    mireia:       { id:'mireia', type:'person', name:'Mireia Solà', age:'12', course:'1r ESO B', avatar:'Mi', cat:'disl',
+                    chips:[{label:'Dislèxia',cat:'disl'},{label:'Decodificació',cat:'lv'}],
+                    behaviors:['Confon lletres similars (b/d, p/q)','Lectura lenta','Es cansa al cap d\'un paràgraf'],
+                    aids:['Tipografia accessible','Interlineat ampli','Fragmentar el text','Marcar paraules clau'] },
+    liu:          { id:'liu', type:'person', name:'Liu Chen', age:'13', course:'2n ESO C', avatar:'L', cat:'cat',
+                    chips:[{label:'Català L2',cat:'cat'},{label:'Vocab. bàsic',cat:'lv'}],
+                    behaviors:['Vocabulari escàs','Dificultats amb connectors','Necessita suport visual'],
+                    aids:['Glossari integrat','Vocabulari freqüent','Definicions al marge','Pictogrames'] },
+    pol:          { id:'pol', type:'person', name:'Pol Vidal', age:'15', course:'4t ESO A', avatar:'P', cat:'ac',
+                    chips:[{label:'Altes capacitats',cat:'ac'}],
+                    behaviors:['Acaba molt ràpid i es desmotiva','Busca reptes','Pregunta coses complexes'],
+                    aids:['Profunditzacio','Referències externes','Preguntes obertes','Recerca autònoma'] },
+    anna:         { id:'anna', type:'person', name:'Anna Puig', age:'14', course:'3r ESO A', avatar:'A', cat:'tdah',
+                    chips:[{label:'TDAH',cat:'tdah'},{label:'Dislèxia',cat:'disl'}],
+                    behaviors:['Dificultats atencionals i lectora','Fatiga ràpida','Necessita textos curts'],
+                    aids:['Fragmentar el text','Tipografia accessible','Una idea per frase','Marques visuals'] },
+    grup3a:       { id:'grup3a', type:'group', name:'3r ESO A · Grup classe', age:null, course:'24 alumnes', avatar:'3A', cat:'group',
+                    chips:[{label:'3 nivells',cat:'lv'},{label:'1 TDAH',cat:'tdah'},{label:'2 L2',cat:'cat'}],
+                    behaviors:[], aids:[] },
+    desdoblament: { id:'desdoblament', type:'group', name:'Desdoblament R · Ciències 3r', age:null, course:'12 alumnes', avatar:'DR', cat:'group-ac',
+                    chips:[{label:'2 nivells',cat:'lv'},{label:'3 AACC',cat:'ac'}],
+                    behaviors:[], aids:[] },
+    acollida:     { id:'acollida', type:'group', name:"Aula d'acollida · Cicle sup.", age:null, course:'8 alumnes', avatar:'L2', cat:'group-cat',
+                    chips:[{label:'4 nivells',cat:'lv'},{label:'Tots L2',cat:'cat'}],
+                    behaviors:[], aids:[] }
+  };
+
+  // Navegació: clicar fila o "Seleccionar" → desa perfil a localStorage i navega a Pas 2
+  function selectProfile(pid) {
+    if (pid && window.ATNE_PROFILES[pid]) localStorage.setItem('atne.profile_id', pid);
+    location.href = '/ui/atne/pas2.html';
+  }
   document.querySelectorAll('.row-acts .sel').forEach(b => {
-    b.addEventListener('click', e => { e.stopPropagation(); location.href = '/ui/atne/pas2.html'; });
+    b.addEventListener('click', e => { e.stopPropagation(); selectProfile(b.closest('.row')?.dataset.pid); });
   });
-  // Tota la fila també és clickable
   document.querySelectorAll('.row').forEach(r => {
-    r.addEventListener('click', () => { location.href = '/ui/atne/pas2.html'; });
+    r.addEventListener('click', () => selectProfile(r.dataset.pid));
   });
 
   const actBtns = document.querySelectorAll('[data-mode]');

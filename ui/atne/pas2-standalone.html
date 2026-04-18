@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-/* ─── tokens.css ─────────────────────────────────────────── */
+/* tokens */
 /* =========================================================
    ATNE · Design Tokens
    Copia aquest fitxer a /src/styles/tokens.css
@@ -129,7 +129,7 @@
   --z-regenerate: 15;    /* overlay "regenerant" dins d'un contenidor */
 }
 
-/* ─── base.css ───────────────────────────────────────────── */
+/* base */
 /* =========================================================
    ATNE · Base + primitives
    Importa després de tokens.css.
@@ -273,7 +273,7 @@ body {
 ::-webkit-scrollbar-thumb:hover { background: var(--ink-300); }
 ::-webkit-scrollbar-track { background: transparent; }
 
-/* ─── shell.css ──────────────────────────────────────────── */
+/* shell */
 /* =========================================================
    ATNE · Shell comú (4 passos)
    Importa després de tokens.css + base.css.
@@ -490,7 +490,7 @@ body {
   .hamb { display: grid; }
 }
 
-/* ─── Pas 2 · específic + responsive ─── */
+/* Pas 2 specific */
   /* =========================================================
      Pas 2 · El text original
      Referent visual: Stitch Pas 2 mòbil b8a07952, Pujar cfd76971,
@@ -599,28 +599,22 @@ body {
   .p-switch:hover { background: var(--cream-2); color: var(--primary); }
   .p-switch svg { width: 13px; height: 13px; }
 
-  /* Col·lapsar detalls del perfil */
+  /* Col·lapsar detalls del perfil (només fletxeta, sense text) */
   .p-detail { display: flex; flex-direction: column; gap: 8px; }
   .pcard.collapsed .p-detail { display: none; }
   .p-expand {
-    align-self: flex-start;
+    align-self: center;
+    width: 28px; height: 22px;
     background: transparent;
     border: 0;
-    color: var(--ink-500);
-    font-size: 11.5px;
-    padding: 6px 8px;
-    border-radius: var(--r-md);
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+    color: var(--ink-400);
+    border-radius: var(--r-sm);
+    display: grid; place-items: center;
     cursor: pointer;
-    font-weight: 500;
   }
   .p-expand:hover { background: var(--cream-2); color: var(--ink-800); }
-  .p-expand svg { width: 12px; height: 12px; transition: transform var(--trans-fast); }
+  .p-expand svg { width: 14px; height: 14px; transition: transform var(--trans-fast); }
   .pcard.collapsed .p-expand svg { transform: rotate(-90deg); }
-  .pcard.collapsed .p-expand .p-expand-t::after { content: 'Veure detall'; }
-  .p-expand-t::after { content: 'Amagar detall'; }
 
   /* ─── Center: títol + tab bar modes + card + opcions ────── */
   .center {
@@ -1114,8 +1108,7 @@ body {
               <div class="p-item">Vocabulari freqüent</div>
             </div>
           </div>
-          <button class="p-expand" onclick="this.closest('.pcard').classList.toggle('collapsed')">
-            <span class="p-expand-t"></span>
+          <button class="p-expand" onclick="this.closest('.pcard').classList.toggle('collapsed')" title="Mostrar / amagar detall">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
           </button>
         </div>
@@ -1296,6 +1289,91 @@ body {
 </div>
 
 <script>
+  // ──────────────────────────────────────────────────────
+  // Model de perfils (duplicat sincronitzat amb pas1/pas3)
+  // ──────────────────────────────────────────────────────
+  window.ATNE_PROFILES = {
+    marc:         { id:'marc', type:'person', name:'Marc Ribera', age:'14', course:'3r ESO A', avatar:'M', cat:'tdah',
+                    chips:[{label:'TDAH',cat:'tdah'},{label:'B1 · Intermedi',cat:'lv'}],
+                    behaviors:['Es distreu amb textos llargs','Respon sense llegir tot','Fatiga lectora al final'],
+                    aids:['Fragmentar el text','Una idea per frase','Instruccions numerades','Vocabulari freqüent'] },
+    mireia:       { id:'mireia', type:'person', name:'Mireia Solà', age:'12', course:'1r ESO B', avatar:'Mi', cat:'disl',
+                    chips:[{label:'Dislèxia',cat:'disl'},{label:'Decodificació',cat:'lv'}],
+                    behaviors:['Confon lletres similars (b/d, p/q)','Lectura lenta','Es cansa al cap d\'un paràgraf'],
+                    aids:['Tipografia accessible','Interlineat ampli','Fragmentar el text','Marcar paraules clau'] },
+    liu:          { id:'liu', type:'person', name:'Liu Chen', age:'13', course:'2n ESO C', avatar:'L', cat:'cat',
+                    chips:[{label:'Català L2',cat:'cat'},{label:'Vocab. bàsic',cat:'lv'}],
+                    behaviors:['Vocabulari escàs','Dificultats amb connectors','Necessita suport visual'],
+                    aids:['Glossari integrat','Vocabulari freqüent','Definicions al marge','Pictogrames'] },
+    pol:          { id:'pol', type:'person', name:'Pol Vidal', age:'15', course:'4t ESO A', avatar:'P', cat:'ac',
+                    chips:[{label:'Altes capacitats',cat:'ac'}],
+                    behaviors:['Acaba molt ràpid i es desmotiva','Busca reptes','Pregunta coses complexes'],
+                    aids:['Profunditzacio','Referències externes','Preguntes obertes','Recerca autònoma'] },
+    anna:         { id:'anna', type:'person', name:'Anna Puig', age:'14', course:'3r ESO A', avatar:'A', cat:'tdah',
+                    chips:[{label:'TDAH',cat:'tdah'},{label:'Dislèxia',cat:'disl'}],
+                    behaviors:['Dificultats atencionals i lectora','Fatiga ràpida','Necessita textos curts'],
+                    aids:['Fragmentar el text','Tipografia accessible','Una idea per frase','Marques visuals'] },
+    grup3a:       { id:'grup3a', type:'group', name:'3r ESO A · Grup classe', age:null, course:'24 alumnes', avatar:'3A', cat:'group',
+                    chips:[{label:'3 nivells',cat:'lv'},{label:'1 TDAH',cat:'tdah'},{label:'2 L2',cat:'cat'}],
+                    behaviors:[], aids:[] },
+    desdoblament: { id:'desdoblament', type:'group', name:'Desdoblament R · Ciències 3r', age:null, course:'12 alumnes', avatar:'DR', cat:'group-ac',
+                    chips:[{label:'2 nivells',cat:'lv'},{label:'3 AACC',cat:'ac'}],
+                    behaviors:[], aids:[] },
+    acollida:     { id:'acollida', type:'group', name:"Aula d'acollida · Cicle sup.", age:null, course:'8 alumnes', avatar:'L2', cat:'group-cat',
+                    chips:[{label:'4 nivells',cat:'lv'},{label:'Tots L2',cat:'cat'}],
+                    behaviors:[], aids:[] }
+  };
+
+  // Carrega el perfil seleccionat (localStorage) i pobla la card lateral
+  (function populateProfile() {
+    const pid = localStorage.getItem('atne.profile_id') || 'marc';
+    const p = window.ATNE_PROFILES[pid] || window.ATNE_PROFILES.marc;
+    const pcard = document.querySelector('.pcard');
+    if (!pcard) return;
+
+    const av = pcard.querySelector('.p-av');
+    if (av) {
+      av.textContent = p.avatar;
+      const palette = {
+        tdah:        ['var(--tdah-bg)', 'var(--tdah)', '50%'],
+        disl:        ['var(--disl-bg)', 'var(--disl)', '50%'],
+        cat:         ['var(--cat-bg)',  'var(--cat)',  '50%'],
+        ac:          ['var(--ac-bg)',   'var(--ac)',   '50%'],
+        group:       ['var(--primary-50)', 'var(--primary)', '9px'],
+        'group-ac':  ['var(--ac-bg)',   'var(--ac)',   '9px'],
+        'group-cat': ['var(--cat-bg)',  'var(--cat)',  '9px']
+      };
+      const [bg, fg, rad] = palette[p.cat] || palette.tdah;
+      av.style.background = bg;
+      av.style.color = fg;
+      av.style.borderRadius = rad;
+      av.style.fontSize = p.avatar.length > 1 ? '12px' : '14px';
+    }
+    pcard.querySelector('.p-nm').textContent = p.name;
+    pcard.querySelector('.p-sub').textContent = p.age ? (p.age + ' anys · ' + p.course) : p.course;
+
+    const chipsEl = pcard.querySelector('.p-chips');
+    if (chipsEl) chipsEl.innerHTML = p.chips.map(c => `<span class="chip ${c.cat}">${c.label}</span>`).join('');
+
+    const detail = pcard.querySelector('.p-detail');
+    const expandBtn = pcard.querySelector('.p-expand');
+    if (detail) {
+      if (p.behaviors.length || p.aids.length) {
+        detail.innerHTML = `
+          <div class="p-sect">Conductes observades</div>
+          <div class="p-list">${p.behaviors.map(b => `<div class="p-item">${b}</div>`).join('')}</div>
+          <div class="p-sect">Ajuts que activa el perfil</div>
+          <div class="p-list">${p.aids.map(a => `<div class="p-item">${a}</div>`).join('')}</div>
+        `;
+        if (expandBtn) expandBtn.style.display = '';
+      } else {
+        detail.innerHTML = '';
+        if (expandBtn) expandBtn.style.display = 'none';
+        pcard.classList.remove('collapsed');
+      }
+    }
+  })();
+
   // Drawer mòbil (obrir/tancar)
   const drawerEl = document.getElementById('drawer');
   const backdropEl = document.getElementById('drawer-backdrop');
