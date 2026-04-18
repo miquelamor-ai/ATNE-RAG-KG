@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="/ui/styles/tokens.css">
 <link rel="stylesheet" href="/ui/styles/base.css">
 <link rel="stylesheet" href="/ui/styles/shell.css">
+<script src="/ui/atne/js/llm.js" defer></script>
 
 <style>
   /* =========================================================
@@ -815,7 +816,7 @@
           <button class="fr-b" data-tip="Complements"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
           <button class="fr-b" data-tip="Accions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></button>
           <div class="fr-sep"></div>
-          <button class="fr-b primary" data-tip="Adaptar → Pas 3" onclick="location.href='/ui/atne/pas3.html'">
+          <button class="fr-b primary" data-tip="Adaptar → Pas 3" id="adapt-frail">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
           </button>
         </div>
@@ -833,7 +834,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-7M4 7h4M20 17h-4M4 17h9"/><circle cx="10" cy="7" r="2"/><circle cx="14" cy="17" r="2"/></svg>
           <span>Refinar</span>
         </button>
-        <button class="bb-item primary" data-act="adapt" id="adapt-btn" onclick="location.href='/ui/atne/pas3.html'">
+        <button class="bb-item primary" data-act="adapt" id="adapt-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
           <span>Adaptar</span>
         </button>
@@ -995,6 +996,44 @@
     });
   }
   updateWC();
+
+  // ──────────────────────────────────────────────────────
+  // Handler "Adaptar" — desa text + opcions a localStorage i navega a Pas 3
+  // Els botons són: #adapt-btn (bottom bar) i #adapt-frail (frail dret)
+  // ──────────────────────────────────────────────────────
+  function onAdaptClick() {
+    const mode = document.querySelector('.mode-tab.on')?.dataset.mode || 'write';
+    let text = '';
+    const title = document.getElementById('doc-title')?.value?.trim() || 'Sense títol';
+
+    if (mode === 'write') {
+      text = (document.getElementById('write-ta')?.value || '').trim();
+    } else {
+      alert('El mode "' + mode + '" encara no està connectat al LLM. Fes servir "Escriure" de moment.');
+      return;
+    }
+
+    if (!text) {
+      alert('Cal escriure text abans d\'adaptar-lo.');
+      return;
+    }
+
+    // Opcions (per ara hardcodejades; al següent commit les farem editables)
+    const materia = 'Història';
+    const nivell = 'ESO 4';
+
+    // Desa a localStorage; esborra l'adaptat anterior perquè es regeneri al Pas 3
+    localStorage.setItem('atne.doc_original', text);
+    localStorage.setItem('atne.doc_title', title);
+    localStorage.setItem('atne.doc_materia', materia);
+    localStorage.setItem('atne.doc_nivell', nivell);
+    localStorage.removeItem('atne.adapted_text');
+    localStorage.removeItem('atne.adapted_cache_key');
+
+    location.href = '/ui/atne/pas3.html';
+  }
+  document.getElementById('adapt-btn')?.addEventListener('click', onAdaptClick);
+  document.getElementById('adapt-frail')?.addEventListener('click', onAdaptClick);
 </script>
 </body>
 </html>

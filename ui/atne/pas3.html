@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="/ui/styles/tokens.css">
 <link rel="stylesheet" href="/ui/styles/base.css">
 <link rel="stylesheet" href="/ui/styles/shell.css">
+<script src="/ui/atne/js/llm.js" defer></script>
 
 <style>
   /* =========================================================
@@ -1504,5 +1505,78 @@
     setTimeout(pushHistory, 100);
   }));
   attachParaHandles();
+
+  // ──────────────────────────────────────────────────────
+  // Fase 5 — connexió real al backend LLM
+  // Si venim del Pas 2 amb text nou (hi ha 'atne.doc_original' i encara no
+  // tenim 'atne.adapted_text' per aquesta combinació perfil+text), cridem
+  // /api/adapt via el mòdul window.ATNE_LLM i mostrem l'overlay de regen.
+  // ──────────────────────────────────────────────────────
+  (function maybeAdaptOnLoad() {
+    if (!window.ATNE_LLM) return;  // mòdul llm.js no carregat (cas standalone)
+
+    const docOriginal = localStorage.getItem('atne.doc_original');
+    if (!docOriginal || !docOriginal.trim()) return;  // cap text per adaptar → demo
+
+    const pid = localStorage.getItem('atne.profile_id') || 'marc';
+    const profile = window.ATNE_PROFILES[pid] || window.ATNE_PROFILES.marc;
+    const title = localStorage.getItem('atne.doc_title') || 'Sense títol';
+    const materia = localStorage.getItem('atne.doc_materia') || 'Història';
+    const nivell = localStorage.getItem('atne.doc_nivell') || 'ESO';
+
+    // Clau de cache (perfil + títol + primers 40 chars del text) — si coincideix
+    // amb l'adaptat desat, ho reutilitzem sense regenerar.
+    const cacheKey = pid + '::' + title + '::' + docOriginal.slice(0, 40);
+    const cachedKey = localStorage.getItem('atne.adapted_cache_key');
+    const cachedText = localStorage.getItem('atne.adapted_text');
+
+    const adaptedEl = document.getElementById('adapted-text');
+    const docTitleEl = document.querySelector('.doc-title');
+
+    if (docTitleEl) docTitleEl.value = title;
+
+    if (cachedKey === cacheKey && cachedText) {
+      if (adaptedEl) { adaptedEl.innerHTML = cachedText; attachParaHandles(); pushHistory(); }
+      return;
+    }
+
+    // Cal generar — mostra overlay i crida LLM
+    const regenEl = document.getElementById('regen');
+    const regenT = document.getElementById('regen-t');
+    const regenS = document.querySelector('.regen-s');
+    if (regenEl) regenEl.classList.add('on');
+    if (regenT) regenT.textContent = 'Adaptant el text…';
+    if (regenS) regenS.textContent = 'El LLM està personalitzant el text per a ' + profile.name;
+
+    window.ATNE_LLM.adaptText({
+      text: docOriginal,
+      profile: profile,
+      context: { materia, titol: title, nivell_curs: nivell },
+      params: { levels: ['single'] },
+      onStep: (ev) => {
+        if (regenT && ev.msg) regenT.textContent = ev.msg;
+      },
+      onResult: (ev) => {
+        if (adaptedEl && ev.adapted) {
+          adaptedEl.innerHTML = ev.adapted;
+          attachParaHandles();
+          pushHistory();
+        }
+        localStorage.setItem('atne.adapted_text', ev.adapted || '');
+        localStorage.setItem('atne.adapted_cache_key', cacheKey);
+      },
+      onError: (err) => {
+        if (regenT) regenT.textContent = 'Error del LLM';
+        if (regenS) regenS.textContent = err.message;
+      }
+    }).then(() => {
+      if (regenEl) regenEl.classList.remove('on');
+    }).catch(err => {
+      if (regenT) regenT.textContent = 'Error del LLM';
+      if (regenS) regenS.textContent = err.message || 'No s\'ha pogut adaptar el text';
+      // Mantenim l'overlay 3s amb el missatge d'error perquè el docent el llegeixi
+      setTimeout(() => { if (regenEl) regenEl.classList.remove('on'); }, 3000);
+    });
+  })();
 </script>
 </body></html>
