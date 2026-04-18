@@ -689,10 +689,11 @@
 
           <!-- Mode: Pujar fitxer -->
           <div class="mode-panel" data-p="upload">
-            <div class="drop">
+            <input type="file" id="upload-file" accept=".pdf,.docx,.md,.txt" style="display:none">
+            <div class="drop" id="drop-zone">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 14l3-3 3 3M12 11v6"/></svg>
               <div class="drop-t">Arrossega un fitxer o fes clic per triar</div>
-              <div class="drop-s">PDF · DOCX · TXT · Pàgines web · Màx 10 MB</div>
+              <div class="drop-s">PDF · DOCX · MD · TXT · Màx 5 MB</div>
             </div>
             <div class="opts">
               <span class="opt"><span class="opt-k">Matèria</span><span class="opt-v">Història</span></span>
@@ -750,7 +751,7 @@
                   <option value="extens">Extens (+600)</option>
                 </select></div>
               </div>
-              <button class="gen-go">
+              <button class="gen-go" id="gen-go">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3 1.9 4.6L18.5 9l-4.6 1.9L12 15l-1.9-4.6L5.5 9l4.6-1.4z"/></svg>
                 Generar text
               </button>
@@ -776,7 +777,7 @@
               <button class="rec-f">Última setmana</button>
             </div>
             <div class="rec-count">Resultats · 4</div>
-            <div class="rec-list">
+            <div class="rec-list" id="rec-list">
               <div class="rec-item">
                 <div class="rec-body">
                   <div class="rec-t">La Revolució Industrial</div>
@@ -1034,6 +1035,138 @@
   }
   document.getElementById('adapt-btn')?.addEventListener('click', onAdaptClick);
   document.getElementById('adapt-frail')?.addEventListener('click', onAdaptClick);
+
+  // ──────────────────────────────────────────────────────
+  // Fase 5 c3 — modes Pujar / Generar / Recuperar connectats al backend
+  // ──────────────────────────────────────────────────────
+
+  // Helper: omple el textarea d'Escriure i canvia al mode 'write'
+  function loadTextIntoEditor(text, title) {
+    const writeTa = document.getElementById('write-ta');
+    const docTitle = document.getElementById('doc-title');
+    if (writeTa) writeTa.value = text;
+    if (title && docTitle) docTitle.value = title;
+    // Canvia al tab Escriure
+    tabs.forEach(x => x.classList.remove('on'));
+    document.querySelector('.mode-tab[data-mode="write"]')?.classList.add('on');
+    panels.forEach(p => p.classList.toggle('on', p.dataset.p === 'write'));
+    updateWC();
+  }
+
+  // ──── Mode Pujar fitxer ────
+  const uploadInput = document.getElementById('upload-file');
+  const dropZone = document.getElementById('drop-zone');
+  dropZone?.addEventListener('click', () => uploadInput?.click());
+  dropZone?.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = 'var(--primary)'; });
+  dropZone?.addEventListener('dragleave', () => { dropZone.style.borderColor = ''; });
+  dropZone?.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.style.borderColor = '';
+    const file = e.dataTransfer?.files?.[0];
+    if (file) handleFileUpload(file);
+  });
+  uploadInput?.addEventListener('change', () => {
+    const file = uploadInput.files?.[0];
+    if (file) handleFileUpload(file);
+  });
+  async function handleFileUpload(file) {
+    if (!window.ATNE_LLM) { alert('Mòdul LLM no carregat'); return; }
+    const dropT = dropZone?.querySelector('.drop-t');
+    if (dropT) dropT.textContent = 'Processant ' + file.name + '…';
+    try {
+      const result = await window.ATNE_LLM.extractFile(file);
+      if (result.text) {
+        const title = file.name.replace(/\.(pdf|docx|md|txt)$/i, '');
+        loadTextIntoEditor(result.text, title);
+      } else {
+        alert('No s\'ha pogut extreure text del fitxer.');
+      }
+    } catch (err) {
+      alert('Error pujant el fitxer: ' + err.message);
+    } finally {
+      if (dropT) dropT.textContent = 'Arrossega un fitxer o fes clic per triar';
+      if (uploadInput) uploadInput.value = '';
+    }
+  }
+
+  // ──── Mode Generar ────
+  document.getElementById('gen-go')?.addEventListener('click', async () => {
+    if (!window.ATNE_LLM) return;
+    const aiPanel = document.querySelector('.mode-panel[data-p="ai"]');
+    if (!aiPanel) return;
+    const topicTa = aiPanel.querySelector('textarea');
+    const selects = aiPanel.querySelectorAll('select');
+    const tema = topicTa?.value?.trim();
+    if (!tema) { alert('Cal escriure un tema o tòpic.'); return; }
+    const [genere, tipologia, to, extensio] = Array.from(selects).map(s => s.value);
+
+    const btn = document.getElementById('gen-go');
+    btn.disabled = true; btn.textContent = 'Generant…';
+    try {
+      const result = await window.ATNE_LLM.generateText({
+        tema, genere, tipologia, to, extensio,
+        context: { etapa: 'ESO', curs: '3r ESO' }
+      });
+      if (result.text) {
+        // Títol heurístic: primera línia del resultat o primera frase curta
+        const firstLine = result.text.split('\n').find(l => l.trim()) || '';
+        const title = firstLine.length < 80 ? firstLine.trim() : tema.slice(0, 60);
+        loadTextIntoEditor(result.text, title);
+      }
+    } catch (err) {
+      alert('Error generant text: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3 1.9 4.6L18.5 9l-4.6 1.9L12 15l-1.9-4.6L5.5 9l4.6-1.4z"/></svg> Generar text';
+    }
+  });
+
+  // ──── Mode Recuperar ────
+  // Carrega l'historial la primera vegada que es clica el tab 'Recuperar'
+  let historyLoaded = false;
+  async function loadHistory() {
+    if (historyLoaded || !window.ATNE_LLM) return;
+    historyLoaded = true;
+    const recList = document.getElementById('rec-list');
+    if (!recList) return;
+    recList.innerHTML = '<div class="rec-item" style="color:var(--ink-500)"><div class="rec-body"><div class="rec-t">Carregant…</div></div></div>';
+    try {
+      const data = await window.ATNE_LLM.listHistory(20);
+      if (!data.ok || !data.items?.length) {
+        recList.innerHTML = '<div class="rec-item" style="color:var(--ink-500)"><div class="rec-body"><div class="rec-t">Cap document recent</div><div class="rec-m">Adapta un text per veure\'l aquí</div></div></div>';
+        return;
+      }
+      recList.innerHTML = data.items.map(it => {
+        const titol = (it.original_text || '').split('\n')[0].slice(0, 60) || it.profile_name || 'Sense títol';
+        const meta = [it.etapa, it.curs, it.profile_name].filter(Boolean).join(' · ');
+        return `<div class="rec-item" data-hid="${it.id}">
+          <div class="rec-body">
+            <div class="rec-t">${escapeHtml(titol)}</div>
+            <div class="rec-m">${escapeHtml(meta)}</div>
+          </div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>
+        </div>`;
+      }).join('');
+      // Guardem els items per recuperar-los en el clic
+      window.__ATNE_HISTORY_CACHE = Object.fromEntries(data.items.map(it => [it.id, it]));
+      recList.querySelectorAll('.rec-item[data-hid]').forEach(el => {
+        el.addEventListener('click', () => {
+          const it = window.__ATNE_HISTORY_CACHE[el.dataset.hid];
+          if (it?.original_text) {
+            const title = it.original_text.split('\n')[0].slice(0, 60) || it.profile_name || 'Sense títol';
+            loadTextIntoEditor(it.original_text, title);
+          }
+        });
+      });
+    } catch (err) {
+      recList.innerHTML = '<div class="rec-item" style="color:var(--err)"><div class="rec-body"><div class="rec-t">Error</div><div class="rec-m">' + escapeHtml(err.message) + '</div></div></div>';
+    }
+  }
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+  // Quan es clica el tab 'Recuperar', carrega (una sola vegada)
+  document.querySelector('.mode-tab[data-mode="recent"]')?.addEventListener('click', loadHistory);
 </script>
 </body>
 </html>

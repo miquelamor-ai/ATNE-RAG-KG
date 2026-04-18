@@ -180,9 +180,72 @@
     return resp.json();
   }
 
+  /**
+   * Crida /api/generate-text — genera un text base segons context.
+   *
+   * Payload backend: { tema, genere, tipologia, to, extensio, notes?, context? }.
+   * El backend delega al mòdul generador_lliure.py i aplica la rotació de
+   * models configurada a /admin (Gemma 3 27B + GPT-4o + GPT-4.1-mini).
+   *
+   * @returns {Promise<{text: string, ...}>}
+   */
+  async function generateText({ tema, genere, tipologia, to, extensio, notes, context }) {
+    if (!tema || !tema.trim()) throw new Error('Cal un tema per generar el text');
+    const body = { tema, genere, tipologia, to, extensio };
+    if (notes) body.notes = notes;
+    if (context) body.context = context;
+    const resp = await fetch('/api/generate-text', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!resp.ok) {
+      let errMsg = 'HTTP ' + resp.status;
+      try { const e = await resp.json(); if (e.error) errMsg = e.error; } catch {}
+      throw new Error(errMsg);
+    }
+    return resp.json();
+  }
+
+  /**
+   * Crida /api/extract-text — pujada d'un fitxer (PDF/DOCX/MD/TXT, màx 5 MB)
+   * i retorna el text pla extret.
+   *
+   * @param {File} file  Objecte File del <input type="file">
+   * @returns {Promise<{text: string, paraules?: number, ...}>}
+   */
+  async function extractFile(file) {
+    if (!file) throw new Error('Cap fitxer');
+    const form = new FormData();
+    form.append('file', file);
+    const resp = await fetch('/api/extract-text', { method: 'POST', body: form });
+    if (!resp.ok) {
+      let errMsg = 'HTTP ' + resp.status;
+      try { const e = await resp.json(); if (e.error) errMsg = e.error; } catch {}
+      throw new Error(errMsg);
+    }
+    return resp.json();
+  }
+
+  /**
+   * Crida /api/history — llista les últimes adaptacions desades.
+   *
+   * @param {number} [limit=30]
+   * @returns {Promise<{ok: boolean, items: Array<{id, created_at, profile_name,
+   *   original_text, adapted_text, ...}>}>}
+   */
+  async function listHistory(limit = 30) {
+    const resp = await fetch('/api/history?limit=' + encodeURIComponent(limit));
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    return resp.json();
+  }
+
   window.ATNE_LLM = {
     adaptText,
     refineText,
+    generateText,
+    extractFile,
+    listHistory,
     buildBackendProfile,
     buildBackendContext
   };
