@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-/* tokens */
 /* =========================================================
    ATNE · Design Tokens
    Copia aquest fitxer a /src/styles/tokens.css
@@ -129,7 +128,6 @@
   --z-regenerate: 15;    /* overlay "regenerant" dins d'un contenidor */
 }
 
-/* base */
 /* =========================================================
    ATNE · Base + primitives
    Importa després de tokens.css.
@@ -273,7 +271,6 @@ body {
 ::-webkit-scrollbar-thumb:hover { background: var(--ink-300); }
 ::-webkit-scrollbar-track { background: transparent; }
 
-/* shell */
 /* =========================================================
    ATNE · Shell comú (4 passos)
    Importa després de tokens.css + base.css.
@@ -490,7 +487,6 @@ body {
   .hamb { display: grid; }
 }
 
-/* Pas 3 specific */
   /* =========================================================
      Pas 3 · estils específics de la pàgina
      Tokens, reset i shell comú vénen dels <link> globals.
@@ -760,12 +756,25 @@ body {
     font-weight: 700; font-style: normal; font-display: swap;
   }
 
-  /* Classes aplicables al .doc-read per canviar la tipografia del document adaptat */
-  .doc-read.font-atkinson { font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; }
-  .doc-read.font-lexend   { font-family: 'Lexend', system-ui, sans-serif; }
-  .doc-read.font-inter    { font-family: var(--ui); }
-  .doc-read.font-fraunces { font-family: var(--serif); }
-  .doc-read.font-opendyslexic { font-family: 'OpenDyslexic', system-ui, sans-serif; letter-spacing: .02em; }
+  /* Classes aplicables al .doc-read (text adaptat) i al .center-body (abasta els
+     complements Glossari/Esquema/Preguntes). Alfabets no-llatins cauen al fallback
+     system-ui del SO, que ja té Noto/Arial-equivalent amb suport multilingüe. */
+  .doc-read.font-atkinson,  .center-body.font-atkinson  { font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; }
+  .doc-read.font-lexend,    .center-body.font-lexend    { font-family: 'Lexend', system-ui, sans-serif; }
+  .doc-read.font-inter,     .center-body.font-inter     { font-family: var(--ui); }
+  .doc-read.font-fraunces,  .center-body.font-fraunces  { font-family: var(--serif); }
+  .doc-read.font-opendyslexic, .center-body.font-opendyslexic { font-family: 'OpenDyslexic', system-ui, sans-serif; letter-spacing: .02em; }
+
+  /* Elements dins de complements que tenen font-family propi: forcem heretar
+     del .center-body perquè també agafin la font triada. */
+  .center-body[class*=" font-"] .comp-title,
+  .center-body[class^="font-"] .comp-title,
+  .center-body[class*=" font-"] .gl-term,
+  .center-body[class^="font-"] .gl-term,
+  .center-body[class*=" font-"] .sc-node h4,
+  .center-body[class^="font-"] .sc-node h4,
+  .center-body[class*=" font-"] .q-text,
+  .center-body[class^="font-"] .q-text { font-family: inherit; }
 
   /* Selector visible al center-head (segona fila) */
   .font-selector { position: relative; display: inline-flex; }
@@ -1551,8 +1560,10 @@ body {
   const FONT_LABELS = { atkinson:'Atkinson', lexend:'Lexend', inter:'Inter', fraunces:'Fraunces', opendyslexic:'OpenDyslexic' };
   function applyDocFont(name) {
     if (!FONT_LABELS[name]) name = 'atkinson';
-    const docReads = document.querySelectorAll('.doc-read');
-    docReads.forEach(d => {
+    // Aplicar tant al text adaptat (.doc-read) com al contenidor dels complements (.center-body)
+    // perquè glossari/esquema/preguntes també heretin la font triada.
+    const scopes = document.querySelectorAll('.doc-read, .center-body');
+    scopes.forEach(d => {
       d.classList.remove('font-atkinson','font-lexend','font-inter','font-fraunces','font-opendyslexic');
       d.classList.add('font-' + name);
     });

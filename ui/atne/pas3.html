@@ -285,12 +285,25 @@
     font-weight: 700; font-style: normal; font-display: swap;
   }
 
-  /* Classes aplicables al .doc-read per canviar la tipografia del document adaptat */
-  .doc-read.font-atkinson { font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; }
-  .doc-read.font-lexend   { font-family: 'Lexend', system-ui, sans-serif; }
-  .doc-read.font-inter    { font-family: var(--ui); }
-  .doc-read.font-fraunces { font-family: var(--serif); }
-  .doc-read.font-opendyslexic { font-family: 'OpenDyslexic', system-ui, sans-serif; letter-spacing: .02em; }
+  /* Classes aplicables al .doc-read (text adaptat) i al .center-body (abasta els
+     complements Glossari/Esquema/Preguntes). Alfabets no-llatins cauen al fallback
+     system-ui del SO, que ja té Noto/Arial-equivalent amb suport multilingüe. */
+  .doc-read.font-atkinson,  .center-body.font-atkinson  { font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; }
+  .doc-read.font-lexend,    .center-body.font-lexend    { font-family: 'Lexend', system-ui, sans-serif; }
+  .doc-read.font-inter,     .center-body.font-inter     { font-family: var(--ui); }
+  .doc-read.font-fraunces,  .center-body.font-fraunces  { font-family: var(--serif); }
+  .doc-read.font-opendyslexic, .center-body.font-opendyslexic { font-family: 'OpenDyslexic', system-ui, sans-serif; letter-spacing: .02em; }
+
+  /* Elements dins de complements que tenen font-family propi: forcem heretar
+     del .center-body perquè també agafin la font triada. */
+  .center-body[class*=" font-"] .comp-title,
+  .center-body[class^="font-"] .comp-title,
+  .center-body[class*=" font-"] .gl-term,
+  .center-body[class^="font-"] .gl-term,
+  .center-body[class*=" font-"] .sc-node h4,
+  .center-body[class^="font-"] .sc-node h4,
+  .center-body[class*=" font-"] .q-text,
+  .center-body[class^="font-"] .q-text { font-family: inherit; }
 
   /* Selector visible al center-head (segona fila) */
   .font-selector { position: relative; display: inline-flex; }
@@ -1076,8 +1089,10 @@
   const FONT_LABELS = { atkinson:'Atkinson', lexend:'Lexend', inter:'Inter', fraunces:'Fraunces', opendyslexic:'OpenDyslexic' };
   function applyDocFont(name) {
     if (!FONT_LABELS[name]) name = 'atkinson';
-    const docReads = document.querySelectorAll('.doc-read');
-    docReads.forEach(d => {
+    // Aplicar tant al text adaptat (.doc-read) com al contenidor dels complements (.center-body)
+    // perquè glossari/esquema/preguntes també heretin la font triada.
+    const scopes = document.querySelectorAll('.doc-read, .center-body');
+    scopes.forEach(d => {
       d.classList.remove('font-atkinson','font-lexend','font-inter','font-fraunces','font-opendyslexic');
       d.classList.add('font-' + name);
     });
