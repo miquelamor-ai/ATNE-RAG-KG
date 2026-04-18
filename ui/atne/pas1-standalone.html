@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-/* tokens */
 /* =========================================================
    ATNE · Design Tokens
    Copia aquest fitxer a /src/styles/tokens.css
@@ -129,7 +128,6 @@
   --z-regenerate: 15;    /* overlay "regenerant" dins d'un contenidor */
 }
 
-/* base */
 /* =========================================================
    ATNE · Base + primitives
    Importa després de tokens.css.
@@ -273,7 +271,6 @@ body {
 ::-webkit-scrollbar-thumb:hover { background: var(--ink-300); }
 ::-webkit-scrollbar-track { background: transparent; }
 
-/* shell */
 /* =========================================================
    ATNE · Shell comú (4 passos)
    Importa després de tokens.css + base.css.
@@ -490,7 +487,6 @@ body {
   .hamb { display: grid; }
 }
 
-/* Pas 1 specific */
   /* =========================================================
      Pas 1 · overrides
      Harmonitzat amb Pas 2 i Pas 3: rail cream-2, topbar i icon-btn
@@ -1100,10 +1096,6 @@ body {
               <div class="add-search">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
                 <input type="text" placeholder="Cerca un perfil per nom, curs o condició…" id="add-prof-q">
-                <button class="btn-add-open" id="add-prof-btn" type="button">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M12 5v14M5 12h14"/></svg>
-                  Afegir perfil
-                </button>
               </div>
               <div class="add-picker" id="add-picker" hidden>
                 <label class="pick" data-pid="m"><div class="m-av av-tdah">M</div><div><div class="m-n">Marc Ribera</div><div class="m-s">14 anys · 3r ESO A</div></div><span class="chip tdah">TDAH</span></label>
@@ -1191,7 +1183,20 @@ body {
   const actBtns = document.querySelectorAll('[data-mode]');
   const modes = document.querySelectorAll('.mode');
 
+  // Tracking de canvis als formularis per evitar pèrdua accidental de dades
+  const pristineState = { search: true, person: true, group: true };
+  ['person', 'group'].forEach(m => {
+    document.querySelectorAll('.mode[data-m="' + m + '"] input, .mode[data-m="' + m + '"] textarea').forEach(el => {
+      el.addEventListener('input', () => { pristineState[m] = false; });
+    });
+  });
+
   function setMode(m){
+    const currentMode = document.querySelector('.mode.on')?.dataset.m;
+    if (currentMode && currentMode !== m && !pristineState[currentMode]) {
+      if (!confirm('Descartaràs els canvis del formulari. Vols continuar?')) return;
+      pristineState[currentMode] = true;  // després d'acceptar, mode actual torna net
+    }
     document.querySelectorAll('.fab').forEach(a => a.classList.toggle('on', a.dataset.mode === m));
     modes.forEach(x => x.classList.toggle('on', x.dataset.m === m));
   }
@@ -1218,17 +1223,12 @@ body {
     }
   }));
 
-  // Afegir perfils al grup
-  const addBtn = document.getElementById('add-prof-btn');
+  // Afegir perfils al grup (el picker s'obre automàticament en focus del search)
   const picker = document.getElementById('add-picker');
   const addedList = document.getElementById('added-list');
   const searchInp = document.getElementById('add-prof-q');
   const added = new Set();
 
-  addBtn?.addEventListener('click', () => {
-    picker.hidden = !picker.hidden;
-    if(!picker.hidden) searchInp?.focus();
-  });
   searchInp?.addEventListener('focus', () => { picker.hidden = false; });
   searchInp?.addEventListener('input', () => {
     const q = searchInp.value.toLowerCase().trim();
