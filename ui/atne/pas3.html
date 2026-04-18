@@ -979,25 +979,21 @@
           <div class="pop-t">Exportar</div>
           <div class="pop-s">Tria un format. El fitxer inclourà text adaptat i complements actius.</div>
           <div class="exp-list">
-            <button class="exp-item">
+            <button class="exp-item" data-fmt="pdf">
               <div class="exp-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v4h4"/></svg></div>
               <div class="exp-nm">PDF<div class="exp-s">imprimible · pàgina A4</div></div>
             </button>
-            <button class="exp-item">
+            <button class="exp-item" data-fmt="docx">
               <div class="exp-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l4 4v14H6z"/><path d="M9 13h6M9 17h6M9 9h3"/></svg></div>
               <div class="exp-nm">Word (DOCX)<div class="exp-s">editable</div></div>
             </button>
-            <button class="exp-item">
-              <div class="exp-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg></div>
-              <div class="exp-nm">Google Docs<div class="exp-s">obre al navegador</div></div>
+            <button class="exp-item" data-fmt="txt">
+              <div class="exp-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16M4 12h10M4 19h16"/></svg></div>
+              <div class="exp-nm">Text pla (TXT)<div class="exp-s">sense format</div></div>
             </button>
-            <button class="exp-item">
-              <div class="exp-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m4 16 5-5 11 11"/></svg></div>
-              <div class="exp-nm">Imatge (PNG)<div class="exp-s">per compartir</div></div>
-            </button>
-            <button class="exp-item">
+            <button class="exp-item" data-fmt="print">
               <div class="exp-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V4h12v5M6 14h12v7H6zM6 9h12l2 5H4z"/></svg></div>
-              <div class="exp-nm">Imprimir<div class="exp-s">directament</div></div>
+              <div class="exp-nm">Imprimir<div class="exp-s">directament al navegador</div></div>
             </button>
           </div>
         </div>
@@ -1720,6 +1716,48 @@
     localStorage.removeItem('atne.adapted_text');
     localStorage.removeItem('atne.adapted_cache_key');
     location.reload();
+  });
+
+  // ──────────────────────────────────────────────────────
+  // Fase 5 c4 — Exportar real + polit errors
+  // ──────────────────────────────────────────────────────
+  document.querySelectorAll('.exp-item[data-fmt]').forEach(b => {
+    b.addEventListener('click', async () => {
+      const fmt = b.dataset.fmt;
+      closePops();
+
+      // Imprimir: window.print() — no necessita backend
+      if (fmt === 'print') {
+        window.print();
+        return;
+      }
+
+      if (!window.ATNE_LLM || !window.ATNE_LLM.exportDoc) {
+        window.atneToast?.('Mòdul d\'exportació no disponible', 'error');
+        return;
+      }
+
+      const adaptedEl = document.getElementById('adapted-text');
+      if (!adaptedEl) return;
+      const adapted = adaptedEl.innerText || adaptedEl.textContent || '';
+      if (!adapted.trim()) {
+        window.atneToast?.('No hi ha text per exportar', 'error');
+        return;
+      }
+
+      const original = localStorage.getItem('atne.doc_original') || '';
+      const pid = localStorage.getItem('atne.profile_id') || 'marc';
+      const profile = window.ATNE_PROFILES?.[pid];
+      const profile_name = profile?.name || 'adaptacio';
+
+      window.atneToast?.('Preparant ' + fmt.toUpperCase() + '…', 'info');
+      try {
+        await window.ATNE_LLM.exportDoc({ format: fmt, adapted, original, profile_name });
+        window.atneToast?.('Descàrrega iniciada', 'success');
+      } catch (err) {
+        window.atneToast?.('Error exportant: ' + err.message, 'error');
+      }
+    });
   });
 </script>
 </body></html>

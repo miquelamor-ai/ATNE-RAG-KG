@@ -1010,12 +1010,12 @@
     if (mode === 'write') {
       text = (document.getElementById('write-ta')?.value || '').trim();
     } else {
-      alert('El mode "' + mode + '" encara no està connectat al LLM. Fes servir "Escriure" de moment.');
+      window.atneToast && window.atneToast('El mode "' + mode + '" encara no està connectat. Fes servir Escriure.','info');
       return;
     }
 
     if (!text) {
-      alert('Cal escriure text abans d\'adaptar-lo.');
+      window.atneToast && window.atneToast('Cal escriure text abans d\'adaptar-lo', 'error');
       return;
     }
 
@@ -1070,7 +1070,7 @@
     if (file) handleFileUpload(file);
   });
   async function handleFileUpload(file) {
-    if (!window.ATNE_LLM) { alert('Mòdul LLM no carregat'); return; }
+    if (!window.ATNE_LLM) { window.atneToast && window.atneToast('Mòdul LLM no carregat','error'); return; }
     const dropT = dropZone?.querySelector('.drop-t');
     if (dropT) dropT.textContent = 'Processant ' + file.name + '…';
     try {
@@ -1079,10 +1079,10 @@
         const title = file.name.replace(/\.(pdf|docx|md|txt)$/i, '');
         loadTextIntoEditor(result.text, title);
       } else {
-        alert('No s\'ha pogut extreure text del fitxer.');
+        window.atneToast && window.atneToast('No s\'ha pogut extreure text del fitxer', 'error');
       }
     } catch (err) {
-      alert('Error pujant el fitxer: ' + err.message);
+      window.atneToast && window.atneToast('Error pujant: ' + err.message,'error');
     } finally {
       if (dropT) dropT.textContent = 'Arrossega un fitxer o fes clic per triar';
       if (uploadInput) uploadInput.value = '';
@@ -1097,7 +1097,7 @@
     const topicTa = aiPanel.querySelector('textarea');
     const selects = aiPanel.querySelectorAll('select');
     const tema = topicTa?.value?.trim();
-    if (!tema) { alert('Cal escriure un tema o tòpic.'); return; }
+    if (!tema) { window.atneToast && window.atneToast('Cal escriure un tema o tòpic','error'); return; }
     const [genere, tipologia, to, extensio] = Array.from(selects).map(s => s.value);
 
     const btn = document.getElementById('gen-go');
@@ -1114,7 +1114,7 @@
         loadTextIntoEditor(result.text, title);
       }
     } catch (err) {
-      alert('Error generant text: ' + err.message);
+      window.atneToast && window.atneToast('Error generant: ' + err.message,'error');
     } finally {
       btn.disabled = false;
       btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3 1.9 4.6L18.5 9l-4.6 1.9L12 15l-1.9-4.6L5.5 9l4.6-1.4z"/></svg> Generar text';

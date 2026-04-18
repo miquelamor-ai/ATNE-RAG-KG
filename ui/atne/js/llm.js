@@ -240,12 +240,84 @@
     return resp.json();
   }
 
+  /**
+   * Crida /api/export — genera un fitxer del text adaptat i el descarrega.
+   *
+   * Formats suportats al backend: 'pdf', 'docx', 'txt'. Google Docs i imatge
+   * no estan implementats (el backend retornarà error).
+   *
+   * @param {Object} args
+   * @param {string} args.format  'pdf' | 'docx' | 'txt'
+   * @param {string} args.adapted  HTML o text pla del document adaptat.
+   * @param {string} [args.original]  Text original (opcional, per adjuntar).
+   * @param {string} [args.profile_name]  Nom del perfil (per al nom del fitxer).
+   * @returns {Promise<void>}  Dispara la descàrrega al navegador.
+   */
+  async function exportDoc({ format, adapted, original = '', profile_name = 'adaptacio' }) {
+    if (!adapted || !adapted.trim()) throw new Error('No hi ha text per exportar');
+    if (!['pdf', 'docx', 'txt'].includes(format)) throw new Error('Format no suportat: ' + format);
+    const resp = await fetch('/api/export', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ format, adapted, original, profile_name })
+    });
+    if (!resp.ok) {
+      let errMsg = 'HTTP ' + resp.status;
+      try { const e = await resp.json(); if (e.error) errMsg = e.error; } catch {}
+      throw new Error(errMsg);
+    }
+    // El backend retorna el fitxer com a attachment; llegim el blob i disparem descàrrega
+    const blob = await resp.blob();
+    const cd = resp.headers.get('Content-Disposition') || '';
+    const match = cd.match(/filename="?([^"]+)"?/);
+    const fname = match ? match[1] : 'ATNE_' + format + '.' + format;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = fname;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // ──────────────────────────────────────────────────────
+  // Toast compartit — notificacions no bloquejants
+  // ──────────────────────────────────────────────────────
+  let toastEl = null;
+  function ensureToastEl() {
+    if (toastEl) return toastEl;
+    toastEl = document.createElement('div');
+    toastEl.id = 'atne-toast';
+    toastEl.style.cssText = [
+      'position:fixed', 'bottom:24px', 'left:50%', 'transform:translateX(-50%)',
+      'background:var(--ink-900)', 'color:#fff', 'padding:10px 18px',
+      'border-radius:var(--r-md)', 'box-shadow:var(--sh-lg)', 'font-size:13px',
+      'font-family:var(--ui)', 'font-weight:500', 'z-index:9999',
+      'opacity:0', 'pointer-events:none', 'transition:opacity .2s',
+      'max-width:calc(100vw - 32px)', 'text-align:center'
+    ].join(';');
+    document.body.appendChild(toastEl);
+    return toastEl;
+  }
+  function atneToast(msg, type = 'info') {
+    const el = ensureToastEl();
+    el.textContent = msg;
+    if (type === 'error') el.style.background = 'var(--danger)';
+    else if (type === 'success') el.style.background = 'var(--ok)';
+    else el.style.background = 'var(--ink-900)';
+    el.style.opacity = '1';
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.style.opacity = '0'; }, 3500);
+  }
+  window.atneToast = atneToast;
+
   window.ATNE_LLM = {
     adaptText,
     refineText,
     generateText,
     extractFile,
     listHistory,
+    exportDoc,
     buildBackendProfile,
     buildBackendContext
   };
