@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="/ui/styles/tokens.css">
 <link rel="stylesheet" href="/ui/styles/base.css">
 <link rel="stylesheet" href="/ui/styles/shell.css">
-<script src="/ui/atne/js/llm.js?v=20260419d" defer></script>
+<script src="/ui/atne/js/llm.js?v=20260419e" defer></script>
 
 <style>
   /* =========================================================
@@ -190,6 +190,29 @@
   }
   .doc-title::placeholder { color: var(--ink-400); font-style: italic; font-weight: 500; }
 
+  /* Mini-grup undo/redo integrat al center-head (prop del text) */
+  .urd {
+    display: inline-flex;
+    gap: 1px;
+    background: var(--cream-2);
+    border: 1px solid var(--paper-line);
+    border-radius: 6px;
+    padding: 2px;
+    flex-shrink: 0;
+  }
+  .urd button {
+    width: 24px; height: 24px;
+    display: grid; place-items: center;
+    border-radius: 4px;
+    color: var(--ink-500);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+  }
+  .urd button:hover:not(:disabled) { background: #fff; color: var(--ink-800); }
+  .urd button:disabled { opacity: .35; cursor: not-allowed; }
+  .urd button svg { width: 13px; height: 13px; }
+
   /* Pills compactes a la dreta del títol */
   .saved-pill {
     font-family: var(--mono);
@@ -203,6 +226,8 @@
     flex-shrink: 0;
   }
   .saved-pill .dot-ok { width: 6px; height: 6px; border-radius: 50%; background: var(--ok); }
+  .saved-pill.draft .dot-ok { background: #e6a23c; }  /* taronja si només és esborrany local */
+  .saved-pill.draft { color: #a06420; }
   .wc-top {
     font-family: var(--mono);
     font-size: 9.5px;
@@ -812,10 +837,8 @@
       <div class="steps">
         <button class="step done" data-step="1" onclick="location.href='/ui/atne/pas1.html'"><span class="step-num">1</span>Per a qui</button>
         <button class="step on" data-step="2"><span class="step-num">2</span>Text</button>
-        <button class="step" data-step="3" onclick="location.href='/ui/atne/pas3.html'"><span class="step-num">3</span>Adaptacions</button>
+        <button class="step" data-step="3" id="step-to-pas3"><span class="step-num">3</span>Adaptacions</button>
       </div>
-      <button class="icon-btn" id="p2-undo" title="Desfer (Ctrl+Z)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-6.7L3 10"/></svg></button>
-      <button class="icon-btn" id="p2-redo" title="Refer (Ctrl+Shift+Z)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M21 13a9 9 0 1 1-3-6.7L21 10"/></svg></button>
       <button class="icon-btn" title="Ajuda" onclick="alert('Ajuda: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg></button>
       <button class="icon-btn" title="Compartir" onclick="alert('Compartir: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></button>
       <button class="docent-av" title="Docent · claudeai.je@fje.edu" onclick="alert('Perfil del docent: pendent d\u0027implementar')">E</button>
@@ -866,8 +889,12 @@
       <section class="center">
         <div class="center-head">
           <input class="doc-title" id="doc-title" placeholder="Sense títol" value="La Revolució Industrial">
-          <span class="saved-pill" id="saved-pill" title="Desat automàticament">
-            <span class="dot-ok"></span>Desat
+          <div class="urd" title="Desfer / Refer">
+            <button id="p2-undo" title="Desfer (Ctrl+Z)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-6.7L3 10"/></svg></button>
+            <button id="p2-redo" title="Refer (Ctrl+Shift+Z)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M21 13a9 9 0 1 1-3-6.7L21 10"/></svg></button>
+          </div>
+          <span class="saved-pill" id="saved-pill" title="Esborrany al navegador. Es desa al servidor (i surt a 'Recuperar') només quan l'adaptes.">
+            <span class="dot-ok"></span><span id="saved-label">Esborrany</span>
           </span>
           <span id="wc-top" class="wc-top">52 paraules</span>
         </div>
@@ -1518,6 +1545,50 @@
   }
   document.getElementById('adapt-btn')?.addEventListener('click', onAdaptClick);
   document.getElementById('adapt-frail')?.addEventListener('click', onAdaptClick);
+  // El stepper "3 Adaptacions" també dispara Adaptar (no navega directe). Així
+  // el Pas 3 sempre rep el text actualitzat del Pas 2, no un d'antic.
+  document.getElementById('step-to-pas3')?.addEventListener('click', onAdaptClick);
+
+  // Badge "Esborrany / Adaptat": reflecteix si el text ja s'ha enviat al
+  // servidor (i per tant surt al llistat Recuperar) o només viu al navegador.
+  //   - "Adaptat" (verd): hi ha atne.adapted_text I el doc_original coincideix
+  //     amb el text actual del textarea (és a dir, el que es veu ha estat
+  //     adaptat i persistit a Supabase history).
+  //   - "Esborrany" (taronja): el text encara no ha passat per /api/adapt,
+  //     només viu al localStorage del navegador.
+  const savedPill = document.getElementById('saved-pill');
+  const savedLabel = document.getElementById('saved-label');
+  function updateSavedBadge() {
+    if (!savedPill || !savedLabel) return;
+    const current = ta.value.trim();
+    const original = (localStorage.getItem('atne.doc_original') || '').trim();
+    const adapted = localStorage.getItem('atne.adapted_text');
+    const isAdapted = !!adapted && current && current === original;
+    if (isAdapted) {
+      savedPill.classList.remove('draft');
+      savedLabel.textContent = 'Adaptat';
+      savedPill.title = 'Aquest text ja està adaptat i desat al servidor. Apareixerà a Recuperar.';
+    } else {
+      savedPill.classList.add('draft');
+      savedLabel.textContent = 'Esborrany';
+      savedPill.title = "Esborrany al navegador. Es desa al servidor (i surt a 'Recuperar') només quan l'adaptes.";
+    }
+  }
+  updateSavedBadge();
+
+  // Auto-invalidar cache del Pas 3 quan el text canvia. Sense això, si el
+  // docent modifica el text i navega al Pas 3 per una via que no passa per
+  // onAdaptClick (drawer, hamburger, navegació manual), el Pas 3 veuria
+  // l'adaptació antiga cachejada.
+  ta.addEventListener('input', () => {
+    const current = ta.value.trim();
+    const stored = localStorage.getItem('atne.doc_original') || '';
+    if (current !== stored) {
+      localStorage.removeItem('atne.adapted_text');
+      localStorage.removeItem('atne.adapted_cache_key');
+    }
+    updateSavedBadge();
+  });
 
   // ──────────────────────────────────────────────────────
   // Fase 5 c3 — modes Pujar / Generar / Recuperar connectats al backend
@@ -2028,6 +2099,9 @@
         const id = cb.dataset.compl;
         if (cb.checked) { if (!complSelected.includes(id)) complSelected.push(id); }
         else { complSelected = complSelected.filter(x => x !== id); }
+        // Actualització en temps real: el xip inferior i el localStorage es
+        // refresquen a cada toggle (no només al clicar "Aplicar").
+        saveComplementsState();
       });
     });
     // Hint amb nom del perfil
