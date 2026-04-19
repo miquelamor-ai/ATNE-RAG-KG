@@ -1213,6 +1213,12 @@
                     ] }
   };
 
+  // Injecta perfil custom des de localStorage
+  try {
+    const _cp = localStorage.getItem('atne.custom_profile');
+    if (_cp) { const _p = JSON.parse(_cp); if (_p?.id) window.ATNE_PROFILES[_p.id] = _p; }
+  } catch(e) {}
+
   // ──────────────────────────────────────────────────────
   // Selector de tipografia del text adaptat (doc-read)
   // Guarda 'atne.doc_font' a localStorage. Default segons perfil:

@@ -857,6 +857,17 @@
          'atne.doc_materia'].forEach(k => localStorage.removeItem(k));
       }
       localStorage.setItem('atne.profile_id', pid);
+      // Desa el perfil complet si és custom (pas2/pas3 no el tindran a ATNE_PROFILES)
+      const prof = window.ATNE_PROFILES[pid];
+      if (prof?.custom) {
+        localStorage.setItem('atne.custom_profile', JSON.stringify(prof));
+      } else {
+        localStorage.removeItem('atne.custom_profile');
+      }
+      // Actualitza recents
+      const recents = JSON.parse(localStorage.getItem('atne.recent_pids') || '[]').filter(x => x !== pid);
+      recents.unshift(pid);
+      localStorage.setItem('atne.recent_pids', JSON.stringify(recents.slice(0, 10)));
     }
     location.href = '/ui/atne/pas2.html';
   }
@@ -1331,13 +1342,16 @@
       const r = await fetch(`/api/docent/profiles?docent_id=${did}`);
       const d = await r.json();
       if (!d.ok || !d.profiles?.length) return;
-      const listRest = document.getElementById('list-rest');
+      const listRecent = document.getElementById('list-recent');
+      const listRest   = document.getElementById('list-rest');
+      const recentPids = JSON.parse(localStorage.getItem('atne.recent_pids') || '[]');
       d.profiles.forEach(p => {
         if (!p.id) return;
         window.ATNE_PROFILES[p.id] = p;
-        // Afegeix fila DOM si no existeix ja
         if (!document.querySelector(`.row[data-pid="${p.id}"]`)) {
-          listRest?.appendChild(_buildProfileRow(p));
+          const row = _buildProfileRow(p);
+          if (recentPids.includes(p.id)) listRecent?.prepend(row);
+          else listRest?.appendChild(row);
         }
       });
       applyFilters(); updateFchipCounts();
@@ -1537,12 +1551,12 @@
         // Restaura el botó
         personCreateBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Crear i seleccionar';
       } else {
-        // Creació nova
+        // Creació nova → apareix a Recents (dalt de tot)
         const dbId = await _saveCustomProfile(profile);
         if (dbId) profile._db_id = dbId;
         window.ATNE_PROFILES[profile.id] = profile;
-        const listRest = document.getElementById('list-rest');
-        listRest?.appendChild(_buildProfileRow(profile));
+        const listRecent = document.getElementById('list-recent');
+        listRecent?.prepend(_buildProfileRow(profile));
       }
 
       applyFilters(); updateFchipCounts();

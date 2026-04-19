@@ -1253,6 +1253,12 @@
                     aids:['Pictogrames i suport visual','Glossari amb traducció a la L1','Bastides lingüístiques per escriure','Vocabulari bàsic freqüent'] }
   };
 
+  // Injecta perfil custom des de localStorage (si ve d'un perfil creat al Pas 1)
+  try {
+    const _cp = localStorage.getItem('atne.custom_profile');
+    if (_cp) { const _p = JSON.parse(_cp); if (_p?.id) window.ATNE_PROFILES[_p.id] = _p; }
+  } catch(e) {}
+
   // Perfil actiu (accessible des de tot el script: complements, adapt, etc.)
   const currentPid = localStorage.getItem('atne.profile_id') || 'marc';
   const profile = window.ATNE_PROFILES[currentPid] || window.ATNE_PROFILES.marc;
