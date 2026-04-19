@@ -5797,6 +5797,37 @@ async def delete_docent_profile(profile_id: str, docent_id: str = ""):
     return {"ok": resp.status_code in (200, 204)}
 
 
+@app.get("/api/docent/is-admin")
+async def check_is_admin(docent_id: str = ""):
+    """Comprova si el docent té rol admin (camp is_admin a atne_docents)."""
+    docent_id = docent_id.strip()
+    if not docent_id or not SUPABASE_URL:
+        return {"ok": True, "is_admin": False}
+    resp = requests.get(
+        f"{SUPABASE_URL}/rest/v1/atne_docents?id=eq.{docent_id}&select=is_admin",
+        headers=SUPABASE_HEADERS, timeout=5,
+    )
+    if resp.status_code == 200 and resp.json():
+        return {"ok": True, "is_admin": bool(resp.json()[0].get("is_admin", False))}
+    return {"ok": True, "is_admin": False}
+
+
+@app.post("/api/docent/set-admin")
+async def set_admin(payload: dict = Body(...), _: bool = Depends(_require_admin)):
+    """Concedeix o revoca rol admin a un docent (requereix sessió admin)."""
+    docent_id = (payload.get("docent_id") or "").strip()
+    is_admin = bool(payload.get("is_admin", False))
+    if not docent_id:
+        return JSONResponse({"ok": False, "error": "docent_id buit"}, status_code=400)
+    resp = requests.patch(
+        f"{SUPABASE_URL}/rest/v1/atne_docents?id=eq.{docent_id}",
+        headers={**SUPABASE_HEADERS, "Prefer": "return=minimal"},
+        json={"is_admin": is_admin},
+        timeout=5,
+    )
+    return {"ok": resp.status_code in (200, 204)}
+
+
 # ── Main ────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":

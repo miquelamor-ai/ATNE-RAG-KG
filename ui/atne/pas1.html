@@ -34,6 +34,14 @@
   .role .role-av{width:24px;height:24px;border-radius:50%;background:var(--ac-bg);color:var(--ac);display:grid;place-items:center;font-weight:600;font-size:11px}
   .role b{color:var(--ink-900);font-weight:600}
 
+  /* Menú admin (dropdown de l'avatar) */
+  .admin-menu{position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid var(--paper-line);border-radius:var(--r-md);box-shadow:var(--sh-lg);padding:6px;min-width:180px;z-index:200;display:none}
+  .admin-menu.on{display:block}
+  .admin-menu a,.admin-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;font-size:13px;color:var(--ink-800);text-decoration:none;background:none;border:none;border-radius:var(--r-sm);cursor:pointer;font-family:inherit;text-align:left}
+  .admin-menu a:hover,.admin-menu button:hover{background:var(--cream-2);color:var(--primary)}
+  .admin-menu .sep{height:1px;background:var(--paper-line);margin:4px 0}
+  .admin-badge{font-size:9px;font-weight:700;background:var(--primary);color:#fff;border-radius:3px;padding:1px 4px;margin-left:auto}
+
   /* Modal d'identificació */
   .id-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
   .id-overlay.hidden{display:none}
@@ -402,7 +410,20 @@
       <button class="icon-btn" id="fullscreen-btn" title="Pantalla completa (F11)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V3h4M17 3h4v4M21 17v4h-4M7 21H3v-4"/></svg></button>
       <button class="icon-btn" id="help-btn" title="Visita guiada"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg></button>
       <button class="icon-btn" title="Compartir" onclick="alert('Compartir: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></button>
-      <button class="docent-av" id="docent-av" title="Docent · claudeai.je@fje.edu" onclick="alert('Perfil del docent: pendent d\u0027implementar')">E</button>
+      <div style="position:relative">
+        <button class="docent-av" id="docent-av" title="El teu compte">E</button>
+        <div class="admin-menu" id="admin-menu">
+          <div id="admin-menu-top" style="padding:6px 10px 4px;font-size:11px;color:var(--ink-500);border-bottom:1px solid var(--paper-line);margin-bottom:4px"></div>
+          <div id="admin-links" style="display:none">
+            <a href="/admin"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Admin <span class="admin-badge">ADMIN</span></a>
+            <a href="/ui/cuina.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 21V9M3 3h18v18H3z"/></svg>Cuina (dev)</a>
+            <div class="sep"></div>
+          </div>
+          <a href="/ui/saber-ne.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Saber-ne+</a>
+          <div class="sep"></div>
+          <button id="admin-logout-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Canviar d'usuari</button>
+        </div>
+      </div>
     </div>
 
     <!-- Modal identificació docent -->
@@ -1209,18 +1230,40 @@
   function _docentId()  { return localStorage.getItem('atne.docent_id') || ''; }
   function _docentAlias(){ return localStorage.getItem('atne.docent_alias') || ''; }
 
-  function _updateDocentBtn() {
+  async function _updateDocentBtn() {
     const alias = _docentAlias();
-    const btn = document.getElementById('docent-av');
-    if (!btn) return;
-    if (alias) {
-      btn.textContent = alias[0].toUpperCase();
-      btn.title = alias;
-      btn.onclick = () => {
+    const did   = _docentId();
+    const btn   = document.getElementById('docent-av');
+    const menu  = document.getElementById('admin-menu');
+    const top   = document.getElementById('admin-menu-top');
+    const adminLinks = document.getElementById('admin-links');
+    const logoutBtn  = document.getElementById('admin-logout-btn');
+    if (!btn || !alias) return;
+
+    btn.textContent = alias[0].toUpperCase();
+    btn.title = alias;
+
+    // Comprova rol admin
+    try {
+      const r = await fetch(`/api/docent/is-admin?docent_id=${did}`);
+      const d = await r.json();
+      if (d.is_admin && adminLinks) adminLinks.style.display = '';
+    } catch {}
+
+    if (top) top.textContent = alias;
+
+    // Toggle menú
+    btn.onclick = (e) => { e.stopPropagation(); menu?.classList.toggle('on'); };
+    document.addEventListener('click', () => menu?.classList.remove('on'), { once: false });
+
+    // Canviar d'usuari
+    if (logoutBtn) {
+      logoutBtn.onclick = () => {
         if (confirm(`Estàs identificat/da com a ${alias}.\nVols canviar d'usuari?`)) {
           localStorage.removeItem('atne.docent_id');
           localStorage.removeItem('atne.docent_alias');
-          document.getElementById('id-overlay').classList.remove('hidden');
+          menu?.classList.remove('on');
+          document.getElementById('id-overlay')?.classList.remove('hidden');
         }
       };
     }
