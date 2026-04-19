@@ -1388,60 +1388,74 @@
 
   function startTour() {
     if (typeof driver === 'undefined' || !driver.js?.driver) return;
-    const d = driver.js.driver({
+    const cfg = {
       showProgress: true,
       nextBtnText: 'Següent →',
       prevBtnText: '← Anterior',
       doneBtnText: 'Entès!',
       progressText: '{{current}} de {{total}}',
-      steps: [
-        {
-          element: '.steps',
-          popover: {
-            title: 'El flux de 3 passos',
-            description: 'ATNE té 3 passos: <b>Per a qui</b> (perfil de l\'alumne), <b>El text</b> (configuració i text a adaptar) i <b>Adaptacions</b> (resultat). Ara ets al Pas 1.',
-            side: 'bottom', align: 'center'
-          }
-        },
-        {
-          element: '#p1-search',
-          popover: {
-            title: '1. Cerca un perfil existent',
-            description: 'Escriu el nom, curs o condició de l\'alumne. Hi ha perfils de demostració (Marc TDAH, Yassin nouvingut, Clara AACC…) i els que tu mateix crees.',
-            side: 'bottom', align: 'start'
-          }
-        },
-        {
-          element: '#p1-fchips',
-          popover: {
-            title: 'Filtra per condició',
-            description: 'Clica qualsevol chip per veure només els perfils d\'aquella condició: TDAH, Dislèxia, Català L2, Altes capacitats.',
-            side: 'bottom', align: 'start'
-          }
-        },
-        {
-          element: '.fab-person',
-          popover: {
-            title: '2. Crea un perfil nou',
-            description: 'Si l\'alumne no existeix, clica <b>Nova persona</b>. Ompliràs un formulari breu: nom, nivell MECR, conductes observades i condicions. Es desa al teu compte i el recuperaràs sempre.',
-          }
-        },
-        {
-          element: '.fab-group',
-          popover: {
-            title: 'O crea un perfil de grup',
-            description: 'Per adaptar un text per a tota la classe a la vegada (nivell Bàsic + Estàndard + Avançat), usa <b>Nou grup</b>.',
-          }
-        },
-        {
-          element: '#docent-av',
-          popover: {
-            title: 'El teu compte',
-            description: 'Els perfils que crees es desen associats al teu email. Des de qualsevol dispositiu, tornaran a aparèixer quan et tornis a identificar.',
-          }
-        },
-      ]
-    });
+      onDestroyed: () => setMode('search'),
+    };
+    const d = driver.js.driver({ ...cfg, steps: [
+      // ── Secció: Cercar ──
+      { element: '.steps', popover: { title: 'El flux de 3 passos', description: 'ATNE té 3 passos: <b>Per a qui</b> → <b>El text</b> → <b>Adaptacions</b>. Ara ets al Pas 1.', side:'bottom' } },
+      { element: '#p1-search', popover: { title: 'Cerca un perfil', description: 'Escriu nom, curs o condició. Hi ha perfils de demostració i els que tu crees.', side:'bottom' } },
+      { element: '#p1-fchips', popover: { title: 'Filtra per condició', description: 'TDAH, Dislèxia, Català L2, Altes capacitats — un clic per filtrar la llista.', side:'bottom' } },
+
+      // ── Secció: Nova persona ──
+      { element: '.fab-person',
+        popover: { title: 'Nova persona', description: 'Clica aquí per crear un perfil d\'alumne personalitzat. Es desa al teu compte i el recuperes sempre.' },
+        onHighlightStarted: () => setMode('person')
+      },
+      { element: '.mode[data-m="person"] .card:nth-child(1)',
+        popover: { title: 'Identificació', description: '<b>Nom</b> i <b>curs/edat</b> de l\'alumne. Serveixen per identificar el perfil a la llista.' },
+        onHighlightStarted: () => setMode('person')
+      },
+      { element: '.mode[data-m="person"] .levels.mecr',
+        popover: { title: 'Nivell MECR', description: 'Nivell lingüístic de referència: <b>A1</b> (inicial) fins <b>C1</b> (competent). Defineix com de complexa serà l\'adaptació.' },
+        onHighlightStarted: () => setMode('person')
+      },
+      { element: '.mode[data-m="person"] .checks',
+        popover: { title: 'Conductes observades', description: 'Marca el que veus a l\'aula: distracció, fatiga lectora, dificultats amb la llengua… L\'ATNE activa els ajuts adequats automàticament.' },
+        onHighlightStarted: () => setMode('person')
+      },
+      { element: '.mode[data-m="person"] .aids-list',
+        popover: { title: 'Ajuts suggerits', description: 'En funció de les conductes marcades, l\'ATNE suggereix ajuts: fragmentar text, una idea per frase, glossari integrat, tipografia accessible…' },
+        onHighlightStarted: () => setMode('person')
+      },
+      { element: '.mode[data-m="person"] details.disc',
+        popover: { title: 'Condicions i diagnòstics', description: 'Opcional. Si tens informe o PI, afegeix la condició (TDAH, dislèxia, L2, AACC, TEA…). Diverses condicions poden coexistir.' },
+        onHighlightStarted: () => setMode('person')
+      },
+      { element: '.mode[data-m="person"] .foot',
+        popover: { title: 'Crear i seleccionar', description: 'Un cop omplit, clica <b>Crear i seleccionar</b>. El perfil es desa a Supabase vinculat al teu email i passes directament al Pas 2.' },
+        onHighlightStarted: () => setMode('person')
+      },
+
+      // ── Secció: Nou grup ──
+      { element: '.fab-group',
+        popover: { title: 'Nou grup', description: 'Per adaptar un text per a tota la classe. Defineix els nivells presents i opcionalment afegeix perfils individuals.' },
+        onHighlightStarted: () => setMode('search')
+      },
+      { element: '.mode[data-m="group"] .levels',
+        popover: { title: 'Nivells del grup', description: '<b>Bàsic</b> (fragments curts + bastides), <b>Estàndard</b> (nivell del curs) i <b>Avançat</b> (ampliació i repte). ATNE genera una versió per cada nivell activat.' },
+        onHighlightStarted: () => setMode('group')
+      },
+      { element: '.mode[data-m="group"] .add-profiles',
+        popover: { title: 'Perfils individuals', description: 'Opcionalment, afegeix alumnes amb perfil propi. Rebran els ajuts específics del seu perfil a sobre del nivell del grup.' },
+        onHighlightStarted: () => setMode('group')
+      },
+      { element: '.mode[data-m="group"] .foot',
+        popover: { title: 'Crear el grup', description: 'Clica <b>Crear i seleccionar</b> per desar el grup i continuar al Pas 2.' },
+        onHighlightStarted: () => setMode('group')
+      },
+
+      // ── Secció: Compte ──
+      { element: '#docent-av',
+        popover: { title: 'El teu compte', description: 'Els teus perfils es desen associats al teu email @fje.edu. Des de qualsevol dispositiu, tornaran a aparèixer en iniciar sessió.' },
+        onHighlightStarted: () => setMode('search')
+      },
+    ]});
     d.drive();
   }
 

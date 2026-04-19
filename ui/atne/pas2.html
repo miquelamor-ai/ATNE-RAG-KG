@@ -2477,68 +2477,75 @@
   // ── Visita guiada Pas 2 (Driver.js) ──────────────────────────────────────
   function startTourP2() {
     if (typeof driver === 'undefined' || !driver.js?.driver) return;
+    function _switchTab(mode) {
+      document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('on', t.dataset.mode === mode));
+      document.querySelectorAll('.mode-panel').forEach(p => p.classList.toggle('on', p.dataset.p === mode));
+    }
     const d = driver.js.driver({
       showProgress: true,
       nextBtnText: 'Següent →',
       prevBtnText: '← Anterior',
       doneBtnText: 'Entès!',
       progressText: '{{current}} de {{total}}',
+      onDestroyed: () => _switchTab('write'),
       steps: [
-        {
-          element: '.pcard',
-          popover: {
-            title: 'El perfil seleccionat',
-            description: 'Aquí veus el perfil de l\'alumne o grup que has triat. Defineix com s\'adaptarà el text: MECR, condicions, ajuts activats.',
-            side: 'right', align: 'start'
-          }
+        // ── Perfil ──
+        { element: '.pcard', popover: { title: 'El perfil seleccionat', description: 'Resum de l\'alumne o grup escollit al Pas 1: MECR, condicions i ajuts que s\'aplicaran a l\'adaptació.', side:'right' } },
+
+        // ── Vies d'entrada ──
+        { element: '.mode-tab[data-mode="write"]',
+          popover: { title: 'Via 1 · Enganxar text', description: 'La via més ràpida. Enganxa o escriu directament el text del teu material curricular.', side:'bottom' },
+          onHighlightStarted: () => _switchTab('write')
         },
-        {
-          element: '.mode-tab[data-mode="write"]',
-          popover: {
-            title: 'Via 1 · Enganxar text',
-            description: 'La via més ràpida: enganxa directament el text del teu material (llibre, apunt, presentació…).',
-            side: 'bottom', align: 'start'
-          }
+        { element: '#write-ta',
+          popover: { title: 'Àrea de text', description: 'Enganxa aquí el fragment que vols adaptar. No cal que sigui tot el document — millor un fragment de 200-400 paraules per obtenir el millor resultat.', side:'top' },
+          onHighlightStarted: () => _switchTab('write')
         },
-        {
-          element: '.mode-tab[data-mode="upload"]',
-          popover: {
-            title: 'Via 2 · Pujar fitxer',
-            description: 'Puja un PDF, Word o Markdown. ATNE extreu el text automàticament.',
-            side: 'bottom', align: 'start'
-          }
+        { element: '.mode-tab[data-mode="upload"]',
+          popover: { title: 'Via 2 · Pujar fitxer', description: 'Puja un <b>PDF, Word (.docx) o Markdown</b>. ATNE extreu el text automàticament i el posa a l\'àrea d\'edició.', side:'bottom' },
+          onHighlightStarted: () => _switchTab('write')
         },
-        {
-          element: '.mode-tab[data-mode="ai"]',
-          popover: {
-            title: 'Via 3 · Generar amb IA',
-            description: 'Descriu el tema i ATNE genera un text de partida. Útil si no tens material propi.',
-            side: 'bottom', align: 'start'
-          }
+        { element: '#drop-zone',
+          popover: { title: 'Zona d\'arrossegar', description: 'Arrossega el fitxer aquí o clica per seleccionar-lo. Formats acceptats: PDF, DOCX, MD, TXT.', side:'top' },
+          onHighlightStarted: () => _switchTab('upload')
         },
-        {
-          element: '.mode-tab[data-mode="recent"]',
-          popover: {
-            title: 'Via 4 · Recuperar recent',
-            description: 'Recupera un text que ja havies adaptat. Els esborranys es desen automàticament.',
-            side: 'bottom', align: 'start'
-          }
+        { element: '.mode-tab[data-mode="ai"]',
+          popover: { title: 'Via 3 · Generar amb IA', description: 'Descriu el tema i l\'IA genera un text de partida adaptat al nivell. Útil si no tens material propi o vols partir de zero.', side:'bottom' },
+          onHighlightStarted: () => _switchTab('upload')
         },
-        {
-          element: '#fr-compl',
-          popover: {
-            title: 'Complements',
-            description: 'Activa complements opcionals: glossari de termes, preguntes de comprensió, esquema visual o bastides lingüístiques. S\'afegiran a l\'adaptació.',
-            side: 'left', align: 'center'
-          }
+        { element: '.mode-panel[data-p="ai"]',
+          popover: { title: 'Generador de text', description: 'Especifica el tema, el curs i el tipus de text. L\'IA crearà un text adequat que podràs adaptar tot seguit.', side:'top' },
+          onHighlightStarted: () => _switchTab('ai')
         },
-        {
-          element: '#adapt-btn',
-          popover: {
-            title: 'Adaptar!',
-            description: 'Quan tens el text i la configuració a punt, clica aquí. L\'IA adaptarà el text al perfil de l\'alumne en 15-30 segons.',
-            side: 'top', align: 'center'
-          }
+        { element: '.mode-tab[data-mode="recent"]',
+          popover: { title: 'Via 4 · Recuperar esborranys', description: 'Recupera un text que ja havies treballat. Els esborranys es desen automàticament cada cop que aranques una adaptació.', side:'bottom' },
+          onHighlightStarted: () => _switchTab('ai')
+        },
+        { element: '.mode-panel[data-p="recent"]',
+          popover: { title: 'Historial d\'esborranys', description: 'Llista els darrers textos treballats amb la data i el perfil associat. Clica qualsevol per recuperar-lo.', side:'top' },
+          onHighlightStarted: () => _switchTab('recent')
+        },
+
+        // ── Configuració i rail ──
+        { element: '.opt[data-opt="materia"]',
+          popover: { title: 'Matèria', description: 'Científica, humanística o lingüística. Ajusta el registre i el vocabulari de l\'adaptació.', side:'top' },
+          onHighlightStarted: () => _switchTab('write')
+        },
+        { element: '.opt[data-opt="nivell"]',
+          popover: { title: 'Nivell educatiu', description: 'El curs o etapa del text original. Orienta l\'LLM sobre la complexitat curricular esperada.', side:'top' },
+          onHighlightStarted: () => _switchTab('write')
+        },
+        { element: '#fr-refine',
+          popover: { title: 'Refinar', description: 'Opcions avançades per ajustar el to, la llargada o la formalitat de l\'adaptació.', side:'left' }
+        },
+        { element: '#fr-compl',
+          popover: { title: 'Complements', description: 'Afegeix a l\'adaptació: <b>glossari</b> de termes, <b>preguntes</b> de comprensió graduades, <b>esquema visual</b> o <b>bastides</b> lingüístiques.', side:'left' }
+        },
+        { element: '#fr-save-draft',
+          popover: { title: 'Desar esborrany', description: 'Guarda el text actual al servidor. El recuperaràs des de qualsevol dispositiu amb el teu compte @fje.edu.', side:'left' }
+        },
+        { element: '#adapt-btn',
+          popover: { title: '¡Adaptar!', description: 'Quan tot estigui a punt, clica aquí. L\'IA processarà el text en 15-30 segons i passaràs al Pas 3 amb l\'adaptació llesta.', side:'top' }
         },
       ]
     });

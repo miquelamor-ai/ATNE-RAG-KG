@@ -14,6 +14,8 @@
 <link rel="stylesheet" href="/ui/styles/tokens.css">
 <link rel="stylesheet" href="/ui/styles/base.css">
 <link rel="stylesheet" href="/ui/styles/shell.css">
+<link rel="stylesheet" href="/ui/driver.css"/>
+<script src="/ui/driver.iife.js"></script>
 <script src="/ui/atne/js/llm.js?v=20260419m" defer></script>
 
 <style>
@@ -630,7 +632,7 @@
       <button id="zoom-label" title="Restablir mida (Ctrl 0)" style="font-size:11px;font-weight:600;color:var(--ink-500);background:none;border:none;cursor:pointer;padding:0 2px;min-width:34px;text-align:center;font-family:var(--mono)">100%</button>
       <button class="icon-btn" id="zoom-in" title="Augmentar mida (Ctrl +)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M8 11h6M11 8v6"/></svg></button>
       <button class="icon-btn" id="fullscreen-btn" title="Pantalla completa (F11)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V3h4M17 3h4v4M21 17v4h-4M7 21H3v-4"/></svg></button>
-      <button class="icon-btn" title="Ajuda" onclick="alert('Ajuda: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg></button>
+      <button class="icon-btn" id="help-btn" title="Visita guiada"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg></button>
       <button class="icon-btn" title="Compartir" onclick="alert('Compartir: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></button>
       <button class="docent-av" title="Docent · claudeai.je@fje.edu" onclick="alert('Perfil del docent: pendent d\u0027implementar')">E</button>
     </div>
@@ -2713,5 +2715,35 @@
       else if (e.key === '0') { e.preventDefault(); zoom = 1; apply(); }
     });
   })();
+
+  // ── Visita guiada Pas 3 (Driver.js) ──────────────────────────────────────
+  function startTourP3() {
+    if (typeof driver === 'undefined' || !driver.js?.driver) return;
+    driver.js.driver({
+      showProgress: true,
+      nextBtnText: 'Següent →',
+      prevBtnText: '← Anterior',
+      doneBtnText: 'Entès!',
+      progressText: '{{current}} de {{total}}',
+      steps: [
+        { element: '#adapted-text',
+          popover: { title: 'Text adaptat', description: 'Aquí veus el resultat de l\'adaptació. Pots llegir-lo directament, copiar-lo o exportar-lo.', side:'top' } },
+        { element: '#cmp-toggle',
+          popover: { title: 'Comparar original i adaptat', description: 'Activa la vista comparativa per veure el text original i l\'adaptat costat a costat. Molt útil per verificar que no s\'ha perdut contingut important.', side:'bottom' } },
+        { element: '#view-glossari',
+          popover: { title: 'Glossari', description: 'Si vas activar el complement de glossari, aquí trobaràs els termes clau definits en un llenguatge accessible.', side:'top' } },
+        { element: '#fr-lt',
+          popover: { title: 'Revisar català (LanguageTool)', description: 'Passa el corrector ortogràfic i gramatical de LanguageTool sobre el text adaptat. Les correccions s\'apliquen automàticament.', side:'left' } },
+        { element: '.fr-b[data-pop="refine"]',
+          popover: { title: 'Refinar', description: 'No estàs satisfet amb el resultat? Escriu instruccions específiques ("simplifica més el paràgraf 2", "afegeix un exemple") i l\'IA reescriurà el text.', side:'left' } },
+        { element: '.fr-b[data-pop="rubric"]',
+          popover: { title: 'Refer amb rúbrica', description: 'Avalua l\'adaptació amb una rúbrica pedagògica i demana a l\'IA que millori els aspectes amb puntuació baixa.', side:'left' } },
+        { element: '.fr-b[data-pop="export"]',
+          popover: { title: 'Exportar', description: 'Descàrrega el text adaptat en <b>PDF</b>, <b>Word (.docx)</b> o <b>text pla</b>. El PDF inclou el disseny formatat llest per imprimir.', side:'left' } },
+      ]
+    }).drive();
+  }
+
+  document.getElementById('help-btn')?.addEventListener('click', startTourP3);
 </script>
 </body></html>
