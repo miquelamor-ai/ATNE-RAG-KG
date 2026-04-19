@@ -1598,6 +1598,9 @@
     localStorage.removeItem('atne.adapted_text');
     localStorage.removeItem('atne.adapted_cache_key');
 
+    // Desa l'estat fullscreen perquè el Pas 3 el pugui restaurar
+    localStorage.setItem('atne.restore_fullscreen', document.fullscreenElement ? '1' : '0');
+
     location.href = '/ui/atne/pas3.html';
   }
   document.getElementById('adapt-btn')?.addEventListener('click', onAdaptClick);

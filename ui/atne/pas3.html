@@ -2700,6 +2700,12 @@
       if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
       else document.exitFullscreen?.();
     });
+
+    // Restaura fullscreen si venia del Pas 2 amb fullscreen actiu
+    if (localStorage.getItem('atne.restore_fullscreen') === '1') {
+      localStorage.removeItem('atne.restore_fullscreen');
+      setTimeout(() => document.documentElement.requestFullscreen?.().catch(() => {}), 300);
+    }
     document.addEventListener('keydown', e => {
       if (!(e.ctrlKey || e.metaKey)) return;
       if (e.key === '+' || e.key === '=') { e.preventDefault(); document.getElementById('zoom-in')?.click(); }
