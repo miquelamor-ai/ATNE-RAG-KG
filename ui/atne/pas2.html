@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="/ui/styles/tokens.css">
 <link rel="stylesheet" href="/ui/styles/base.css">
 <link rel="stylesheet" href="/ui/styles/shell.css">
-<script src="/ui/atne/js/llm.js?v=20260419g" defer></script>
+<script src="/ui/atne/js/llm.js?v=20260419i" defer></script>
 
 <style>
   /* =========================================================
@@ -190,28 +190,9 @@
   }
   .doc-title::placeholder { color: var(--ink-400); font-style: italic; font-weight: 500; }
 
-  /* Mini-grup undo/redo integrat al center-head (prop del text) */
-  .urd {
-    display: inline-flex;
-    gap: 1px;
-    background: var(--cream-2);
-    border: 1px solid var(--paper-line);
-    border-radius: 6px;
-    padding: 2px;
-    flex-shrink: 0;
-  }
-  .urd button {
-    width: 24px; height: 24px;
-    display: grid; place-items: center;
-    border-radius: 4px;
-    color: var(--ink-500);
-    background: transparent;
-    border: 0;
-    cursor: pointer;
-  }
-  .urd button:hover:not(:disabled) { background: #fff; color: var(--ink-800); }
-  .urd button:disabled { opacity: .35; cursor: not-allowed; }
-  .urd button svg { width: 13px; height: 13px; }
+  /* .dt-btn[disabled] → undo/redo disabled quan la pila no té estat */
+  .doc-toolbar .dt-btn:disabled { opacity: .35; cursor: not-allowed; }
+  .doc-toolbar .dt-btn:disabled:hover { background: transparent; color: var(--ink-700); }
 
   /* Pills compactes a la dreta del títol */
   .saved-pill {
@@ -228,6 +209,10 @@
   .saved-pill .dot-ok { width: 6px; height: 6px; border-radius: 50%; background: var(--ok); }
   .saved-pill.draft .dot-ok { background: #e6a23c; }  /* taronja si només és esborrany local */
   .saved-pill.draft { color: #a06420; }
+  /* Teal: esborrany ja desat al servidor (pre-adaptació). Veure /api/drafts */
+  .saved-pill.saved .dot-ok { background: #0ea5a4; }
+  .saved-pill.saved { color: #0b7a76; }
+  .saved-pill .saved-sub { opacity: .7; margin-left: 4px; font-size: 9px; text-transform: none; letter-spacing: 0; }
   .wc-top {
     font-family: var(--mono);
     font-size: 9.5px;
@@ -479,6 +464,13 @@
   .rec-t { font-family: var(--serif); font-weight: 700; font-size: 14.5px; color: var(--ink-900); }
   .rec-m { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-500); margin-top: 2px; }
   .rec-item > svg { width: 14px; height: 14px; color: var(--ink-400); flex-shrink: 0; }
+  /* Botó paperera per esborrar drafts (dins d'un rec-item del llistat d'esborranys). */
+  .rec-item .rec-del {
+    background: transparent; border: 0; padding: 4px; border-radius: 4px;
+    color: var(--ink-400); cursor: pointer; flex-shrink: 0;
+  }
+  .rec-item .rec-del:hover { background: var(--cream-2); color: var(--danger, #c53030); }
+  .rec-item .rec-del svg { width: 14px; height: 14px; }
 
   /* Avatar docent (topbar) */
   .docent-av {
@@ -924,12 +916,8 @@
       <section class="center">
         <div class="center-head">
           <input class="doc-title" id="doc-title" placeholder="Sense títol" value="La Revolució Industrial">
-          <div class="urd" title="Desfer / Refer">
-            <button id="p2-undo" title="Desfer (Ctrl+Z)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-6.7L3 10"/></svg></button>
-            <button id="p2-redo" title="Refer (Ctrl+Shift+Z)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M21 13a9 9 0 1 1-3-6.7L21 10"/></svg></button>
-          </div>
-          <span class="saved-pill" id="saved-pill" title="Esborrany al navegador. Es desa al servidor (i surt a 'Recuperar') només quan l'adaptes.">
-            <span class="dot-ok"></span><span id="saved-label">Esborrany</span>
+          <span class="saved-pill" id="saved-pill" title="Esborrany al navegador. Clica el botó 'Desar' per desar-lo al servidor i poder recuperar-lo des de qualsevol dispositiu.">
+            <span class="dot-ok"></span><span id="saved-label">Esborrany local</span><span class="saved-sub" id="saved-sub"></span>
           </span>
           <span id="wc-top" class="wc-top">52 paraules</span>
         </div>
@@ -958,8 +946,13 @@
           <!-- Mode: Escriure (actiu) -->
           <div class="mode-panel on" data-p="write">
             <div class="doc-card">
-              <!-- Toolbar de format in-card: B/I/H1/H2/UL/OL apliquen markdown a la selecció -->
-              <div class="doc-toolbar" role="toolbar" aria-label="Format del text">
+              <!-- Toolbar de format in-card: Undo/Redo + B/I/H1/H2/UL/OL.
+                   L'undo/redo afecta només el text i el títol (pila p2Hist),
+                   per això viuen amb les altres eines d'edició del text. -->
+              <div class="doc-toolbar" role="toolbar" aria-label="Eines d'edició del text">
+                <button type="button" class="dt-btn" id="p2-undo" title="Desfer (Ctrl+Z)" aria-label="Desfer" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-6.7L3 10"/></svg></button>
+                <button type="button" class="dt-btn" id="p2-redo" title="Refer (Ctrl+Shift+Z)" aria-label="Refer" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M21 13a9 9 0 1 1-3-6.7L21 10"/></svg></button>
+                <span class="dt-sep"></span>
                 <button type="button" class="dt-btn" data-md="bold" title="Negreta" aria-label="Negreta"><b style="font-family:var(--serif)">B</b></button>
                 <button type="button" class="dt-btn" data-md="italic" title="Cursiva" aria-label="Cursiva"><i style="font-family:var(--serif)">I</i></button>
                 <span class="dt-sep"></span>
@@ -1078,6 +1071,13 @@
               <button class="rec-f" data-filter="llengua">Llengua</button>
               <button class="rec-f" data-filter="last-week">Última setmana</button>
             </div>
+            <!-- Esborranys desats al servidor (pre-adaptació). Veure /api/drafts.
+                 La secció s'amaga si no hi ha esborranys. -->
+            <div class="rec-section" id="drafts-section" style="display:none">
+              <div class="rec-subtitle" style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-500);margin:12px 0 6px;padding:0 2px;">Esborranys</div>
+              <div class="rec-list" id="drafts-list"></div>
+            </div>
+            <div class="rec-subtitle" id="history-subtitle" style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-500);margin:12px 0 6px;padding:0 2px;">Documents adaptats</div>
             <div class="rec-count" id="rec-count">Resultats · 4</div>
             <div class="rec-list" id="rec-list">
               <div class="rec-item">
@@ -1117,6 +1117,7 @@
         <div class="frail">
           <button class="fr-b" data-tip="Refinar" id="fr-refine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-7M4 7h4M20 17h-4M4 17h9M13 12h7M4 12h5"/><circle cx="10" cy="7" r="2"/><circle cx="14" cy="17" r="2"/><circle cx="11" cy="12" r="2"/></svg></button>
           <button class="fr-b" data-tip="Complements" id="fr-compl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+          <button class="fr-b" data-tip="Desar al servidor" id="fr-save-draft"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg></button>
           <button class="fr-b" data-tip="Accions" id="fr-actions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></button>
           <div class="fr-sep"></div>
           <button class="fr-b primary" data-tip="Adaptar → Pas 3" id="adapt-frail">
@@ -1162,6 +1163,10 @@
         <button class="bb-item" data-act="complements">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
           <span>Complements</span>
+        </button>
+        <button class="bb-item" data-act="save-draft">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+          <span>Desar</span>
         </button>
         <button class="bb-item" data-act="actions">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
@@ -1578,32 +1583,59 @@
   // el Pas 3 sempre rep el text actualitzat del Pas 2, no un d'antic.
   document.getElementById('step-to-pas3')?.addEventListener('click', onAdaptClick);
 
-  // Badge "Esborrany / Adaptat": reflecteix si el text ja s'ha enviat al
-  // servidor (i per tant surt al llistat Recuperar) o només viu al navegador.
-  //   - "Adaptat" (verd): hi ha atne.adapted_text I el doc_original coincideix
-  //     amb el text actual del textarea (és a dir, el que es veu ha estat
-  //     adaptat i persistit a Supabase history).
-  //   - "Esborrany" (taronja): el text encara no ha passat per /api/adapt,
-  //     només viu al localStorage del navegador.
+  // Badge de 3 estats: reflecteix on viu el text actual.
+  //   - "Adaptat" (verd): hi ha atne.adapted_text I doc_original coincideix
+  //     amb el textarea (és a dir, el que es veu està adaptat i persistit a
+  //     la taula history).
+  //   - "Desat al servidor" (teal): hi ha un draft_id vinculat a aquest text,
+  //     per tant l'esborrany viu a la taula drafts de Supabase (recuperable
+  //     des de qualsevol dispositiu).
+  //   - "Esborrany local" (taronja): només viu al localStorage del navegador.
   const savedPill = document.getElementById('saved-pill');
   const savedLabel = document.getElementById('saved-label');
+  const savedSub = document.getElementById('saved-sub');
+
+  // Format "fa Xs / Xm / Xh" — útil per al subtítol "Desat al servidor fa Xs"
+  function formatAgo(tsIso) {
+    if (!tsIso) return '';
+    const ts = Date.parse(tsIso);
+    if (!ts || isNaN(ts)) return '';
+    const s = Math.max(0, Math.floor((Date.now() - ts) / 1000));
+    if (s < 60)    return 'fa ' + s + 's';
+    if (s < 3600)  return 'fa ' + Math.floor(s / 60) + 'm';
+    if (s < 86400) return 'fa ' + Math.floor(s / 3600) + 'h';
+    return 'fa ' + Math.floor(s / 86400) + 'd';
+  }
+
   function updateSavedBadge() {
     if (!savedPill || !savedLabel) return;
     const current = ta.value.trim();
     const original = (localStorage.getItem('atne.doc_original') || '').trim();
     const adapted = localStorage.getItem('atne.adapted_text');
     const isAdapted = !!adapted && current && current === original;
+    const draftId = localStorage.getItem('atne.draft_id');
+    const draftSavedAt = localStorage.getItem('atne.draft_saved_at');
+    if (savedSub) savedSub.textContent = '';
     if (isAdapted) {
-      savedPill.classList.remove('draft');
+      savedPill.classList.remove('draft', 'saved');
       savedLabel.textContent = 'Adaptat';
       savedPill.title = 'Aquest text ja està adaptat i desat al servidor. Apareixerà a Recuperar.';
+    } else if (draftId) {
+      savedPill.classList.remove('draft');
+      savedPill.classList.add('saved');
+      savedLabel.textContent = 'Desat al servidor';
+      savedPill.title = "Esborrany desat a la taula `drafts`. Recuperable des de qualsevol dispositiu.";
+      if (savedSub && draftSavedAt) savedSub.textContent = formatAgo(draftSavedAt);
     } else {
       savedPill.classList.add('draft');
-      savedLabel.textContent = 'Esborrany';
-      savedPill.title = "Esborrany al navegador. Es desa al servidor (i surt a 'Recuperar') només quan l'adaptes.";
+      savedPill.classList.remove('saved');
+      savedLabel.textContent = 'Esborrany local';
+      savedPill.title = "Esborrany al navegador. Clica 'Desar' per desar-lo al servidor i recuperar-lo des de qualsevol dispositiu.";
     }
   }
   updateSavedBadge();
+  // Refresquem periòdicament el "fa Xs" del subtítol quan hi ha draft_id.
+  setInterval(updateSavedBadge, 10000);
 
   // Auto-invalidar cache del Pas 3 quan el text canvia. Sense això, si el
   // docent modifica el text i navega al Pas 3 per una via que no passa per
@@ -1639,6 +1671,13 @@
     // Auto-save: si Pujar/Generar/Recuperar aboquen text, el persistim també
     if (text != null) localStorage.setItem('atne.doc_draft', text);
     if (title) localStorage.setItem('atne.doc_title', title);
+    // Desvincula qualsevol draft_id previ: aquest text ve de fora i no té
+    // encara correspondència al servidor. El callsite que vulgui preservar
+    // el draft_id (p.ex. obrir un draft des de Recuperar) el restaura just
+    // després de cridar loadTextIntoEditor.
+    localStorage.removeItem('atne.draft_id');
+    localStorage.removeItem('atne.draft_saved_at');
+    if (typeof updateSavedBadge === 'function') updateSavedBadge();
     if (typeof p2Snapshot === 'function') p2Snapshot();
   }
 
@@ -1840,6 +1879,146 @@
     });
   }
 
+  // ──────────────────────────────────────────────────────
+  // Esborranys desats al servidor (taula `drafts` de Supabase)
+  //
+  // Cicle: Desar manual (fr-save-draft) / Auto-save (cada 30 s si hi ha
+  // draft_id) / Llistat a Recuperar amb Obrir+Esborrar.
+  // ──────────────────────────────────────────────────────
+  async function loadDrafts() {
+    const host = document.getElementById('drafts-list');
+    const section = document.getElementById('drafts-section');
+    if (!host || !section || !window.ATNE_LLM) return;
+    try {
+      const data = await window.ATNE_LLM.listDrafts(20);
+      if (!data.ok || !data.items?.length) {
+        section.style.display = 'none';
+        host.innerHTML = '';
+        return;
+      }
+      section.style.display = '';
+      host.innerHTML = data.items.map(it => {
+        const titol = (it.title || (it.text_preview || '').split('\n')[0].slice(0, 60) || 'Sense títol');
+        const meta = [it.materia, it.nivell, formatAgo(it.updated_at) || 'recentment']
+          .filter(Boolean).join(' · ');
+        return `<div class="rec-item" data-did="${it.id}">
+          <div class="rec-body">
+            <div class="rec-t">${escapeHtml(titol)}</div>
+            <div class="rec-m">${escapeHtml(meta)}</div>
+          </div>
+          <button class="rec-del" data-del-id="${it.id}" title="Esborrar esborrany" aria-label="Esborrar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6M14 11v6"/></svg>
+          </button>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>
+        </div>`;
+      }).join('');
+      // Handlers: Obrir (clic al body) i Esborrar (clic al botó paperera)
+      host.querySelectorAll('.rec-item[data-did]').forEach(el => {
+        el.addEventListener('click', async (e) => {
+          // Si el clic és al botó d'esborrar, no obrim
+          if (e.target.closest('.rec-del')) return;
+          const id = el.dataset.did;
+          try {
+            const r = await window.ATNE_LLM.getDraft(id);
+            if (r.ok && r.item) {
+              const it = r.item;
+              loadTextIntoEditor(it.text || '', it.title || '');
+              if (it.materia) localStorage.setItem('atne.doc_materia', it.materia);
+              if (it.nivell)  localStorage.setItem('atne.doc_nivell', it.nivell);
+              localStorage.setItem('atne.draft_id', String(it.id));
+              localStorage.setItem('atne.draft_saved_at', it.updated_at || new Date().toISOString());
+              // Refresquem els valors visibles (opts de Matèria/Nivell) i el badge
+              if (typeof paintOptPills === 'function') paintOptPills();
+              updateSavedBadge();
+              window.atneToast?.('Esborrany carregat al editor', 'success');
+            }
+          } catch (err) {
+            window.atneToast?.('Error carregant esborrany: ' + err.message, 'error');
+          }
+        });
+      });
+      host.querySelectorAll('.rec-del[data-del-id]').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.delId;
+          if (!confirm('Segur que vols esborrar aquest esborrany?')) return;
+          try {
+            const r = await window.ATNE_LLM.deleteDraft(id);
+            if (r.ok) {
+              // Si esborrem el draft actiu, desvinculem-lo
+              if (localStorage.getItem('atne.draft_id') === String(id)) {
+                localStorage.removeItem('atne.draft_id');
+                localStorage.removeItem('atne.draft_saved_at');
+                updateSavedBadge();
+              }
+              window.atneToast?.('Esborrany eliminat', 'success');
+              await loadDrafts();
+            }
+          } catch (err) {
+            window.atneToast?.('Error esborrant: ' + err.message, 'error');
+          }
+        });
+      });
+    } catch (err) {
+      // Silent fail: no tombem la secció, només l'amaguem
+      console.warn('loadDrafts:', err);
+      section.style.display = 'none';
+    }
+  }
+
+  // Botó "Desar al servidor" (frail + bottom bar mòbil)
+  async function saveCurrentDraft({ silent = false } = {}) {
+    if (!window.ATNE_LLM) return;
+    const writeTa = document.getElementById('write-ta');
+    const docTitle = document.getElementById('doc-title');
+    const text = (writeTa?.value || '').trim();
+    if (!text) {
+      if (!silent) window.atneToast?.('Cal text per desar', 'info');
+      return;
+    }
+    const title   = (docTitle?.value || '').trim() || null;
+    const materia = localStorage.getItem('atne.doc_materia') || null;
+    const nivell  = localStorage.getItem('atne.doc_nivell')  || null;
+    const pid     = localStorage.getItem('atne.profile_id') || null;
+    const existingId = localStorage.getItem('atne.draft_id');
+    try {
+      const payload = { profile_id: pid, title, text, materia, nivell };
+      if (existingId) payload.id = Number(existingId);
+      const r = await window.ATNE_LLM.saveDraft(payload);
+      if (r.ok && r.id) {
+        localStorage.setItem('atne.draft_id', String(r.id));
+        localStorage.setItem('atne.draft_saved_at', r.updated_at || new Date().toISOString());
+        updateSavedBadge();
+        if (!silent) window.atneToast?.('Esborrany desat al servidor', 'success');
+      }
+    } catch (err) {
+      // Els errors sempre es veuen, fins i tot als auto-save, perquè el
+      // docent sàpiga que el seu text NO està al servidor (no el perdem, el
+      // tenim al localStorage, però l'avisem per si insisteix).
+      window.atneToast?.('No s\'ha pogut desar: ' + err.message, 'error');
+    }
+  }
+
+  document.getElementById('fr-save-draft')?.addEventListener('click', () => saveCurrentDraft());
+  document.querySelector('.bb-item[data-act="save-draft"]')?.addEventListener('click', e => {
+    e.stopPropagation();
+    saveCurrentDraft();
+  });
+
+  // Auto-save cada 30 s (debounced): només si ja hi ha un draft_id associat.
+  // No volem crear drafts automàticament sense acció explícita del docent —
+  // però un cop desat, mantenim actualitzada la versió del servidor.
+  let autosaveTimer = null;
+  function scheduleAutosave() {
+    if (!localStorage.getItem('atne.draft_id')) return;
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(() => {
+      saveCurrentDraft({ silent: true });
+    }, 30000);
+  }
+  ta.addEventListener('input', scheduleAutosave);
+  document.getElementById('doc-title')?.addEventListener('input', scheduleAutosave);
+
   async function loadHistory() {
     if (historyLoaded || !window.ATNE_LLM) return;
     historyLoaded = true;
@@ -1878,7 +2057,11 @@
     return String(s || '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
   }
   // Quan es clica el tab 'Recuperar', carrega (una sola vegada)
-  document.querySelector('.mode-tab[data-mode="recent"]')?.addEventListener('click', loadHistory);
+  document.querySelector('.mode-tab[data-mode="recent"]')?.addEventListener('click', () => {
+    loadHistory();
+    // Drafts: recarreguem sempre que es mostra el mode (per reflectir auto-save recents)
+    loadDrafts();
+  });
 
   // ──────────────────────────────────────────────────────
   // Fase 5 c5 — handlers del frail del Pas 2 (Edició/Refinar/Complements/Accions)

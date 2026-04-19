@@ -482,6 +482,120 @@
     return resp.json();
   }
 
+  // ──────────────────────────────────────────────────────
+  // Esborranys desats al servidor (taula `drafts` de Supabase)
+  //
+  // Permet desar el text del Pas 2 abans d'adaptar-lo, de manera que no
+  // es perdi si el docent tanca el navegador o canvia de dispositiu. El
+  // docent s'identifica amb un UUID anònim (`atne.docent_id`) persistit
+  // al localStorage — no és auth real, però evita barrejar drafts entre
+  // dispositius i dóna una primera capa d'aïllament fins que tinguem IAP.
+  // ──────────────────────────────────────────────────────
+
+  /**
+   * Retorna l'identificador anònim del docent (per desar/recuperar drafts).
+   * El genera la primera vegada i el persisteix a localStorage.
+   */
+  function getDocentId() {
+    let id = localStorage.getItem('atne.docent_id');
+    if (!id) {
+      id = 'doc_' + (crypto.randomUUID
+        ? crypto.randomUUID()
+        : Math.random().toString(36).slice(2) + Date.now());
+      localStorage.setItem('atne.docent_id', id);
+    }
+    return id;
+  }
+
+  /**
+   * Crida POST /api/drafts — desa un esborrany (crea o actualitza).
+   * Si es passa `id`, fa UPDATE; altrament INSERT.
+   *
+   * @param {Object} args  { id?, profile_id?, title?, text, materia?, nivell? }
+   * @returns {Promise<{ok: boolean, id: number, updated_at: string}>}
+   */
+  async function saveDraft({ id, profile_id, title, text, materia, nivell } = {}) {
+    if (!text || !text.trim()) throw new Error('Text buit');
+    const body = {
+      docent_id: getDocentId(),
+      text,
+      profile_id: profile_id || null,
+      title: title || null,
+      materia: materia || null,
+      nivell: nivell || null
+    };
+    if (id) body.id = id;
+    const resp = await fetch('/api/drafts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!resp.ok) {
+      let errMsg = 'HTTP ' + resp.status;
+      try { const e = await resp.json(); if (e && e.error) errMsg = e.error; } catch {}
+      throw new Error(errMsg);
+    }
+    return resp.json();
+  }
+
+  /**
+   * Crida GET /api/drafts — llista els esborranys del docent actual.
+   *
+   * @param {number} [limit=20]
+   * @returns {Promise<{ok: boolean, items: Array<{id, profile_id, title,
+   *   text_preview, materia, nivell, created_at, updated_at}>}>}
+   */
+  async function listDrafts(limit = 20) {
+    const qs = 'docent_id=' + encodeURIComponent(getDocentId())
+             + '&limit=' + encodeURIComponent(limit);
+    const resp = await fetch('/api/drafts?' + qs);
+    if (!resp.ok) {
+      let errMsg = 'HTTP ' + resp.status;
+      try { const e = await resp.json(); if (e && e.error) errMsg = e.error; } catch {}
+      throw new Error(errMsg);
+    }
+    return resp.json();
+  }
+
+  /**
+   * Crida GET /api/drafts/{id} — recupera un draft complet.
+   *
+   * @param {number} id
+   * @returns {Promise<{ok: boolean, item: {id, profile_id, title, text,
+   *   materia, nivell, created_at, updated_at}}>}
+   */
+  async function getDraft(id) {
+    if (!id) throw new Error('Cal id');
+    const qs = 'docent_id=' + encodeURIComponent(getDocentId());
+    const resp = await fetch('/api/drafts/' + encodeURIComponent(id) + '?' + qs);
+    if (!resp.ok) {
+      let errMsg = 'HTTP ' + resp.status;
+      try { const e = await resp.json(); if (e && e.error) errMsg = e.error; } catch {}
+      throw new Error(errMsg);
+    }
+    return resp.json();
+  }
+
+  /**
+   * Crida DELETE /api/drafts/{id} — esborra un draft.
+   *
+   * @param {number} id
+   * @returns {Promise<{ok: boolean}>}
+   */
+  async function deleteDraft(id) {
+    if (!id) throw new Error('Cal id');
+    const qs = 'docent_id=' + encodeURIComponent(getDocentId());
+    const resp = await fetch('/api/drafts/' + encodeURIComponent(id) + '?' + qs, {
+      method: 'DELETE'
+    });
+    if (!resp.ok) {
+      let errMsg = 'HTTP ' + resp.status;
+      try { const e = await resp.json(); if (e && e.error) errMsg = e.error; } catch {}
+      throw new Error(errMsg);
+    }
+    return resp.json();
+  }
+
   /**
    * Crida /api/export — genera un fitxer del text adaptat i el descarrega.
    *
@@ -627,6 +741,12 @@
     buildBackendContext,
     htmlToMarkdown,
     markdownToHtml,
-    parseAdaptedSections
+    parseAdaptedSections,
+    // Drafts (esborranys al servidor)
+    getDocentId,
+    saveDraft,
+    listDrafts,
+    getDraft,
+    deleteDraft
   };
 })();
