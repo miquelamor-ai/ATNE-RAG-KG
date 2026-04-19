@@ -1274,6 +1274,7 @@ Genera NOMÉS les seccions indicades com ACTIVADES.
 
 ## Text adaptat
 El text complet adaptat segons tots els paràmetres indicats.
+- **Conserva el títol** del text original com a primera línia (en **negreta** o com a `# Títol`). Si el text original no en té, no n'inventis cap.
 - Estructura clara amb salts de línia entre idees
 - Termes tècnics en **negreta** amb definició entre parèntesis la primera vegada
 - Una idea per frase
