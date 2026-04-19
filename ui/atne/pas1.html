@@ -1228,7 +1228,7 @@
       d.profiles.forEach(p => {
         if (p.id) window.ATNE_PROFILES[p.id] = p;
       });
-      renderProfiles();
+      applyFilters(); updateFchipCounts();
     } catch(e) { console.warn('[ATNE] custom profiles:', e); }
   }
 
@@ -1356,7 +1356,7 @@
       const profile = _buildPersonProfile();
       await _saveCustomProfile(profile);
       window.ATNE_PROFILES[profile.id] = profile;
-      renderProfiles();
+      applyFilters(); updateFchipCounts();
       selectProfile(profile.id);
     });
   }

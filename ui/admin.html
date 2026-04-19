@@ -172,6 +172,41 @@
     <div id="save-status"></div>
   </section>
 
+  <!-- Analytics pilot -->
+  <section class="card" id="analytics-card">
+    <h2>📊 Analytics del pilot <span id="analytics-ts" style="font-size:12px;font-weight:400;color:#64748b;margin-left:8px"></span></h2>
+    <p class="hint">Dades de <code>atne_sessions</code> (Supabase). <button onclick="loadAnalytics()" style="font-size:12px;padding:2px 8px;cursor:pointer">↻ Actualitzar</button></p>
+    <div id="analytics-status"></div>
+    <div id="analytics-body" style="display:none">
+      <!-- KPIs -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px" id="kpi-grid"></div>
+      <!-- Per model / etapa / perfil / condicions -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+        <div><div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px">Per model</div><div id="by-model"></div></div>
+        <div><div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px">Per etapa</div><div id="by-etapa"></div></div>
+        <div><div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px">Per perfil</div><div id="by-profile"></div></div>
+        <div><div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px">Per condicions (top 10)</div><div id="by-conditions"></div></div>
+      </div>
+      <!-- Sessions recents -->
+      <div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px">Últimes 20 sessions</div>
+      <div style="max-height:320px;overflow:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr style="background:#f8fafc;position:sticky;top:0">
+            <th style="padding:6px 8px;text-align:left;border-bottom:1px solid #e2e8f0">Data</th>
+            <th style="padding:6px 8px;text-align:left;border-bottom:1px solid #e2e8f0">Model</th>
+            <th style="padding:6px 8px;text-align:left;border-bottom:1px solid #e2e8f0">Perfil</th>
+            <th style="padding:6px 8px;text-align:left;border-bottom:1px solid #e2e8f0">Etapa</th>
+            <th style="padding:6px 8px;text-align:left;border-bottom:1px solid #e2e8f0">MECR</th>
+            <th style="padding:6px 8px;text-align:right;border-bottom:1px solid #e2e8f0">ms</th>
+            <th style="padding:6px 8px;text-align:right;border-bottom:1px solid #e2e8f0">Instr.</th>
+            <th style="padding:6px 8px;text-align:right;border-bottom:1px solid #e2e8f0">Score</th>
+          </tr></thead>
+          <tbody id="analytics-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
   <!-- Activitat recent -->
   <section class="card">
     <h2>Activitat recent</h2>
@@ -544,10 +579,95 @@ async function loadEvents() {
   }
 }
 
+// ── Analytics ──────────────────────────────────────────────────
+function _bar(label, count, total, color) {
+  const pct = total ? Math.round(count / total * 100) : 0;
+  return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:12px">
+    <div style="width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#334155">${label}</div>
+    <div style="flex:1;background:#f1f5f9;border-radius:4px;height:12px;overflow:hidden">
+      <div style="width:${pct}%;background:${color};height:100%;border-radius:4px;transition:.3s"></div>
+    </div>
+    <div style="width:32px;text-align:right;color:#64748b">${count}</div>
+  </div>`;
+}
+
+function _kpi(label, value, sub) {
+  return `<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px">
+    <div style="font-size:22px;font-weight:700;color:#1e293b">${value ?? '—'}</div>
+    <div style="font-size:11px;font-weight:600;color:#64748b;margin-top:2px">${label}</div>
+    ${sub ? `<div style="font-size:10px;color:#94a3b8;margin-top:1px">${sub}</div>` : ''}
+  </div>`;
+}
+
+function _modelColor(model) {
+  if (!model) return '#94a3b8';
+  if (model.includes('gemma')) return '#4f46e5';
+  if (model.includes('gpt') || model.includes('openai')) return '#16a34a';
+  if (model.includes('mistral')) return '#ea580c';
+  if (model.includes('gemini')) return '#0284c7';
+  return '#8b5cf6';
+}
+
+async function loadAnalytics() {
+  const st = document.getElementById('analytics-status');
+  const body = document.getElementById('analytics-body');
+  st.textContent = 'Carregant…';
+  body.style.display = 'none';
+  try {
+    const r = await fetch('/api/admin/analytics');
+    if (r.status === 401) { st.textContent = 'Cal estar autenticat.'; return; }
+    const d = await r.json();
+    if (!d.ok) { st.textContent = d.error || 'Error'; return; }
+    st.textContent = '';
+    body.style.display = '';
+    document.getElementById('analytics-ts').textContent = new Date().toLocaleTimeString('ca');
+
+    // KPIs
+    const latMs = d.latency_avg_ms;
+    const latStr = latMs ? `${(latMs/1000).toFixed(1)}s` : '—';
+    const p90Str = d.latency_p90_ms ? `p90: ${(d.latency_p90_ms/1000).toFixed(1)}s` : '';
+    document.getElementById('kpi-grid').innerHTML =
+      _kpi('Sessions totals', d.total) +
+      _kpi('Avui', d.sessions_avui) +
+      _kpi('Docents actius', d.docents_actius) +
+      _kpi('Latència mitja', latStr, p90Str) +
+      _kpi('Score verify avg', d.verify_avg ?? '—');
+
+    // Barres per model
+    const total = d.total || 1;
+    document.getElementById('by-model').innerHTML =
+      Object.entries(d.by_model).map(([m, n]) => _bar(m, n, total, _modelColor(m))).join('') || '<i style="color:#94a3b8;font-size:12px">Sense dades</i>';
+
+    document.getElementById('by-etapa').innerHTML =
+      Object.entries(d.by_etapa).map(([e, n]) => _bar(e, n, total, '#0284c7')).join('') || '<i style="color:#94a3b8;font-size:12px">Sense dades</i>';
+
+    document.getElementById('by-profile').innerHTML =
+      Object.entries(d.by_profile).map(([p, n]) => _bar(p, n, total, '#8b5cf6')).join('') || '<i style="color:#94a3b8;font-size:12px">Sense dades</i>';
+
+    document.getElementById('by-conditions').innerHTML =
+      Object.entries(d.by_conditions).map(([c, n]) => _bar(c, n, total, '#ea580c')).join('') || '<i style="color:#94a3b8;font-size:12px">Sense dades</i>';
+
+    // Taula sessions recents
+    document.getElementById('analytics-tbody').innerHTML = d.recent.map(r => `
+      <tr style="border-bottom:1px solid #f1f5f9">
+        <td style="padding:5px 8px;color:#64748b">${r.ts}</td>
+        <td style="padding:5px 8px"><span style="background:#f1f5f9;border-radius:4px;padding:2px 6px;font-size:11px">${r.model || '?'}</span></td>
+        <td style="padding:5px 8px">${r.profile_type || '?'}</td>
+        <td style="padding:5px 8px">${r.etapa || ''}</td>
+        <td style="padding:5px 8px">${r.mecr || ''}</td>
+        <td style="padding:5px 8px;text-align:right">${r.latency_ms ?? ''}</td>
+        <td style="padding:5px 8px;text-align:right">${r.n_instr ?? ''}</td>
+        <td style="padding:5px 8px;text-align:right">${r.score != null ? r.score.toFixed(1) : ''}</td>
+      </tr>`).join('') || '<tr><td colspan="8" style="padding:12px;text-align:center;color:#94a3b8">Sense sessions registrades</td></tr>';
+  } catch(e) {
+    st.textContent = 'Error de connexió: ' + e.message;
+  }
+}
+
 // ── Boot ───────────────────────────────────────────────────────
 (async function init() {
   const authed = await checkAuth();
-  if (authed) showDashboard();
+  if (authed) { showDashboard(); loadAnalytics(); }
   else showLogin();
 })();
 </script>

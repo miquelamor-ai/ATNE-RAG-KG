@@ -3047,6 +3047,85 @@ async def list_profiles():
     return profiles
 
 
+@app.get("/api/admin/analytics")
+async def admin_analytics(_: bool = Depends(_require_admin)):
+    """Retorna mètriques agregades de atne_sessions per al dashboard del pilot."""
+    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+        return {"ok": False, "error": "Supabase no configurat"}
+
+    def _get(url):
+        r = requests.get(url, headers=SUPABASE_HEADERS, timeout=10)
+        return r.json() if r.status_code == 200 else []
+
+    base = f"{SUPABASE_URL}/rest/v1/atne_sessions"
+
+    # Totes les sessions
+    rows = _get(f"{base}?select=ts,model,profile_type,conditions,etapa,mecr_sortida,latency_ms,n_instructions,verify_score,docent_id&order=ts.desc&limit=500")
+
+    if not rows:
+        return {"ok": True, "total": 0, "by_model": {}, "by_etapa": {}, "by_profile": {},
+                "docents_actius": 0, "latency_avg_ms": None, "sessions_avui": 0,
+                "recent": []}
+
+    from collections import Counter
+    import datetime
+
+    total = len(rows)
+    avui = datetime.date.today().isoformat()
+    sessions_avui = sum(1 for r in rows if (r.get("ts") or "").startswith(avui))
+
+    by_model   = dict(Counter(r.get("model", "?") for r in rows).most_common())
+    by_etapa   = dict(Counter(r.get("etapa", "?") for r in rows if r.get("etapa")).most_common())
+    by_profile = dict(Counter(r.get("profile_type", "?") for r in rows).most_common())
+
+    # Condicions (pot ser array)
+    cond_counter: Counter = Counter()
+    for r in rows:
+        conds = r.get("conditions") or []
+        for c in conds:
+            if c and c != "desconegut":
+                cond_counter[c] += 1
+    by_conditions = dict(cond_counter.most_common(10))
+
+    latencies = [r["latency_ms"] for r in rows if r.get("latency_ms")]
+    latency_avg = int(sum(latencies) / len(latencies)) if latencies else None
+    latency_p90 = int(sorted(latencies)[int(len(latencies) * 0.9)]) if len(latencies) >= 5 else None
+
+    scores = [r["verify_score"] for r in rows if r.get("verify_score") is not None]
+    verify_avg = round(sum(scores) / len(scores), 2) if scores else None
+
+    docents = {r["docent_id"] for r in rows if r.get("docent_id")}
+
+    recent = []
+    for r in rows[:20]:
+        ts = (r.get("ts") or "")[:16].replace("T", " ")
+        recent.append({
+            "ts": ts,
+            "model": r.get("model", "?"),
+            "profile_type": r.get("profile_type", "?"),
+            "etapa": r.get("etapa", ""),
+            "mecr": r.get("mecr_sortida", ""),
+            "latency_ms": r.get("latency_ms"),
+            "n_instr": r.get("n_instructions"),
+            "score": r.get("verify_score"),
+        })
+
+    return {
+        "ok": True,
+        "total": total,
+        "sessions_avui": sessions_avui,
+        "docents_actius": len(docents),
+        "by_model": by_model,
+        "by_etapa": by_etapa,
+        "by_profile": by_profile,
+        "by_conditions": by_conditions,
+        "latency_avg_ms": latency_avg,
+        "latency_p90_ms": latency_p90,
+        "verify_avg": verify_avg,
+        "recent": recent,
+    }
+
+
 @app.post("/api/profiles")
 async def save_profile(payload: dict = Body(...)):
     nom = payload.get("nom", "sense_nom")
