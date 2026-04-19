@@ -2473,6 +2473,7 @@
     if (!(zoom > 0.5 && zoom < 2.1)) zoom = 1;
     function apply() {
       document.documentElement.style.zoom = zoom;
+      document.documentElement.style.minHeight = (100 / zoom) + 'vh';
       localStorage.setItem(KEY, String(zoom));
       const lbl = document.getElementById('zoom-label');
       if (lbl) lbl.textContent = Math.round(zoom * 100) + '%';
