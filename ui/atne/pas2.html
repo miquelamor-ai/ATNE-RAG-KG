@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="/ui/styles/tokens.css">
 <link rel="stylesheet" href="/ui/styles/base.css">
 <link rel="stylesheet" href="/ui/styles/shell.css">
-<script src="/ui/atne/js/llm.js?v=20260419a" defer></script>
+<script src="/ui/atne/js/llm.js?v=20260419b" defer></script>
 
 <style>
   /* =========================================================
@@ -556,8 +556,19 @@
   .fr-pop-b:hover { background: var(--cream-2); border-color: var(--primary-100); color: var(--primary); }
   .fr-pop-b svg { width: 13px; height: 13px; }
 
-  /* Popover Complements — llista de checkboxes */
-  .fr-pop.wide { width: 320px; max-height: 70vh; overflow-y: auto; }
+  /* Popover Complements — llista de checkboxes.
+     position:fixed per no ser tallat per overflow:hidden del .center. */
+  .fr-pop.wide {
+    position: fixed;
+    right: 104px;            /* frail width (~72) + gap */
+    top: 50%;
+    left: auto;
+    transform: translateY(-50%);
+    width: 340px;
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 100;
+  }
   .compl-list { display: flex; flex-direction: column; gap: 4px; }
   .compl-item {
     display: flex;
@@ -599,7 +610,7 @@
   }
   .fr-pop-btn:hover { background: var(--primary-600); }
   @media (max-width: 900px) {
-    .fr-pop.wide { width: calc(100vw - 32px); right: 16px; left: 16px; top: auto; bottom: 80px; transform: none; }
+    .fr-pop.wide { width: calc(100vw - 32px); right: 16px; left: 16px; top: auto; bottom: 80px; transform: none; max-height: 70vh; }
   }
 
   /* ─── Bottom tab bar (només mòbil/tauleta) ───────────── */
@@ -1071,13 +1082,16 @@
                     aids:['Fragmentar el text','Tipografia accessible','Una idea per frase','Marques visuals'] },
     grup3a:       { id:'grup3a', type:'group', name:'3r ESO A · Grup classe', age:null, course:'24 alumnes', avatar:'3A', cat:'group',
                     chips:[{label:'3 nivells',cat:'lv'},{label:'1 TDAH',cat:'tdah'},{label:'2 L2',cat:'cat'}],
-                    behaviors:[], aids:[] },
+                    behaviors:['Ritmes diversos: 3 MECR diferents','Fatiga lectora del TDAH a mitja classe','L2: dificultats amb connectors i vocabulari'],
+                    aids:['Fragmentar el text en seccions','Glossari amb termes clau','Instruccions numerades','Opcions de profunditat segons ritme'] },
     desdoblament: { id:'desdoblament', type:'group', name:'Desdoblament R · Ciències 3r', age:null, course:'12 alumnes', avatar:'DR', cat:'group-ac',
                     chips:[{label:'2 nivells',cat:'lv'},{label:'3 AACC',cat:'ac'}],
-                    behaviors:[], aids:[] },
+                    behaviors:['3 alumnes d\'altes capacitats busquen repte','La resta necessita nivell curricular estàndard','Ritme de treball alt'],
+                    aids:['Activitats d\'aprofundiment optatives','Preguntes obertes i recerca','Mapa mental per al pensament divergent','Referències externes per ampliar'] },
     acollida:     { id:'acollida', type:'group', name:"Aula d'acollida · Cicle sup.", age:null, course:'8 alumnes', avatar:'L2', cat:'group-cat',
                     chips:[{label:'4 nivells',cat:'lv'},{label:'Tots L2',cat:'cat'}],
-                    behaviors:[], aids:[] }
+                    behaviors:['Tots en immersió lingüística (L2)','4 nivells MECR diferents (pre-A1 a B1)','Vocabulari acadèmic escàs'],
+                    aids:['Pictogrames i suport visual','Glossari amb traducció a la L1','Bastides lingüístiques per escriure','Vocabulari bàsic freqüent'] }
   };
 
   // Perfil actiu (accessible des de tot el script: complements, adapt, etc.)
@@ -1580,28 +1594,46 @@
     return Array.from(set);
   }
 
-  // Estat actual dels complements seleccionats (persistit a localStorage)
+  // Estat actual dels complements seleccionats (persistit a localStorage).
+  // Si el perfil ha canviat des de l'últim desament, invalidem i recalculem
+  // els defaults (si no, un docent que passés de Marc a Desdoblament veuria
+  // els complements d'un TDAH en un grup AACC).
   function loadComplementsState() {
     try {
+      const storedPid = localStorage.getItem('atne.complements_for_pid');
       const raw = localStorage.getItem('atne.complements');
-      if (raw) {
-        const obj = JSON.parse(raw);
-        // Format antic { glossari:true, ... } → array d'ids
-        if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
-          return Object.keys(obj).filter(k => obj[k]);
-        }
-        if (Array.isArray(obj)) return obj;
+      // Cap dada: defaults per al perfil actual
+      if (!raw) return defaultComplementsForProfile(profile);
+      // Hi ha complements desats però sense pid conegut → no sabem de quin
+      // perfil venen. Invalidar per seguretat (cas típic: estat pre-fix).
+      if (!storedPid) {
+        localStorage.removeItem('atne.complements');
+        return defaultComplementsForProfile(profile);
       }
+      // Pid diferent → invalidem
+      if (storedPid !== currentPid) {
+        localStorage.removeItem('atne.complements');
+        localStorage.removeItem('atne.complements_for_pid');
+        return defaultComplementsForProfile(profile);
+      }
+      // Mateix pid: carreguem l'estat previ
+      const obj = JSON.parse(raw);
+      if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+        return Object.keys(obj).filter(k => obj[k]);
+      }
+      if (Array.isArray(obj)) return obj;
     } catch {}
     return defaultComplementsForProfile(profile);
   }
   let complSelected = loadComplementsState();
 
   function saveComplementsState() {
-    // Desem com a objecte {id:true} pel format que consumeix el Pas 3/backend
+    // Desem com a objecte {id:true} pel format que consumeix el Pas 3/backend.
+    // Recordem el pid per detectar canvis de perfil a la propera càrrega.
     const obj = {};
     complSelected.forEach(id => obj[id] = true);
     localStorage.setItem('atne.complements', JSON.stringify(obj));
+    localStorage.setItem('atne.complements_for_pid', currentPid);
     updateComplementsLabel();
   }
   function updateComplementsLabel() {
