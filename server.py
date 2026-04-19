@@ -1275,6 +1275,8 @@ Genera NOMÉS les seccions indicades com ACTIVADES.
 ## Text adaptat
 El text complet adaptat segons tots els paràmetres indicats.
 - **Conserva el títol** del text original com a primera línia (en **negreta** o com a `# Títol`). Si el text original no en té, no n'inventis cap.
+- **Conserva l'estructura original**: els subtítols d'apartat (`## Apartat`), les llistes numerades (`1.` `2.` `3.`) i les llistes amb bullets (`- item`). **No les converteixis a prosa** ni les reformulis amb connectors ("Primer... Segon... Tercer...").
+- **Textos llargs** (més de 150 paraules sense apartats): organitza'ls en 2-4 seccions amb `## Apartat` descriptius seguint l'estructura canònica del gènere indicat. No inventis subtítols per a textos curts.
 - Estructura clara amb salts de línia entre idees
 - Termes tècnics en **negreta** amb definició entre parèntesis la primera vegada
 - Una idea per frase
