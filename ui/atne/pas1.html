@@ -872,7 +872,7 @@
     let zoom = parseFloat(localStorage.getItem(KEY) || '1');
     if (!(zoom > 0.5 && zoom < 2.1)) zoom = 1;
     function apply() {
-      document.body.style.zoom = zoom;
+      document.documentElement.style.zoom = zoom;
       localStorage.setItem(KEY, String(zoom));
       const lbl = document.getElementById('zoom-label');
       if (lbl) lbl.textContent = Math.round(zoom * 100) + '%';
