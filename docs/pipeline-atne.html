@@ -1,0 +1,2182 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<title>ATNE — Pipeline complet (documentació)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream:      #f4f1e8;
+  --cream-2:    #ece8db;
+  --cream-3:    #e6e2d3;
+  --paper-line: rgba(0,0,0,.07);
+  --ink-900:    #121a2b;
+  --ink-700:    #2d3655;
+  --ink-500:    #6a7392;
+  --ink-300:    #b5bdd4;
+  --primary:    #3337a6;
+  --ac:         #6d3aa3;
+  --tdah:       #c64a4a;
+  --err:        #b43d3d;
+  --ok:         #188a5a;
+  --serif:      Georgia, 'Times New Roman', 'Fraunces', serif;
+  --mono:       'JetBrains Mono', ui-monospace, Menlo, Monaco, monospace;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--cream); color: var(--ink-900); margin: 0; }
+body { font-family: var(--serif); line-height: 1.6; font-size: 16px; }
+
+.layout { display: grid; grid-template-columns: 250px 1fr; gap: 0; min-height: 100vh; }
+.toc {
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  background: var(--cream-2); border-right: 1px solid var(--paper-line);
+  padding: 22px 18px; font-size: 13px;
+}
+.toc h2 { margin: 0 0 8px; font-size: 12px; letter-spacing: .12em;
+          text-transform: uppercase; color: var(--ink-500); font-family: var(--mono); font-weight: 500; }
+.toc a { display: block; padding: 4px 0; color: var(--ink-700); text-decoration: none; border-left: 2px solid transparent; padding-left: 8px; }
+.toc a:hover { color: var(--primary); border-left-color: var(--primary); }
+.toc a.sub { padding-left: 18px; font-size: 12px; color: var(--ink-500); }
+
+main { padding: 30px 56px 100px; max-width: 1080px; }
+h1 { font-size: 32px; margin: 0 0 4px; letter-spacing: -.01em; }
+h2 { font-size: 22px; margin: 36px 0 8px; padding-top: 8px; border-top: 1px solid var(--paper-line); }
+h3 { font-size: 17px; margin: 24px 0 8px; color: var(--primary); }
+.lede { color: var(--ink-700); font-size: 14px; margin: 0 0 4px; font-family: var(--mono); }
+
+p { margin: 8px 0; }
+code, pre, .mono { font-family: var(--mono); }
+code { background: rgba(0,0,0,.045); padding: 1px 5px; border-radius: 3px; font-size: .9em; }
+a { color: var(--primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+a code { background: transparent; color: var(--primary); }
+
+pre { background: #fbf8ee; border: 1px solid var(--paper-line); border-radius: 6px;
+      padding: 12px 14px; overflow-x: auto; font-size: 12.5px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+pre.prompt { max-height: 480px; overflow-y: auto; }
+pre.json   { max-height: 280px; overflow-y: auto; }
+
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 13px; }
+th, td { text-align: left; padding: 6px 9px; border-bottom: 1px solid var(--paper-line); vertical-align: top; }
+th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-500); font-weight: 500; }
+td.mono { font-family: var(--mono); font-size: 12px; }
+
+.callout { background: #fff; border-left: 3px solid var(--primary); padding: 10px 14px; margin: 12px 0; border-radius: 0 6px 6px 0; font-size: 14px; }
+.callout.warn { border-left-color: var(--err); background: #fcf2f2; }
+.callout.ok { border-left-color: var(--ok); background: #f1f9f4; }
+
+.case { background: #fff; border: 1px solid var(--paper-line); border-radius: 8px; padding: 16px 22px; margin: 14px 0 22px; }
+.case-meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 12px; }
+.pill { background: var(--cream-2); padding: 4px 10px; border-radius: 12px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-700); }
+.pill b { color: var(--ink-900); font-weight: 600; }
+details { margin: 8px 0; padding: 8px 14px; background: var(--cream-2); border-radius: 6px; border: 1px solid var(--paper-line); }
+details[open] { background: #fff; }
+details summary { cursor: pointer; font-size: 13px; padding: 4px 0; color: var(--ink-800); }
+details summary b { font-weight: 600; }
+
+.layer { margin: 6px 0; padding: 6px 12px; background: var(--cream-2); border-left: 3px solid var(--primary); border-radius: 0 6px 6px 0; }
+.layer.empty { border-left-color: var(--ink-300); opacity: .7; }
+.layer summary { font-family: var(--mono); font-size: 11.5px; }
+.layer-body { font-family: var(--mono); font-size: 11.5px; line-height: 1.55; padding: 8px; max-height: 240px; overflow-y: auto; background: #fff; margin-top: 6px; border-radius: 4px; white-space: pre-wrap; word-break: break-word; }
+
+.audit tr.suppr td { color: var(--err); text-decoration: line-through; }
+.audit tr.incl td:nth-child(1) { color: var(--ink-900); }
+
+.mermaid-wrap { background: #fff; border: 1px solid var(--paper-line); border-radius: 8px; padding: 14px; margin: 12px 0; overflow-x: auto; }
+
+.note { font-size: 12px; color: var(--ink-500); font-family: var(--mono); }
+.flag { display: inline-block; padding: 1px 7px; border-radius: 3px; background: var(--cream-3); font-size: 11px; font-family: var(--mono); }
+.flag.todo { background: #fcf4dc; color: #7a4a00; }
+.flag.bug  { background: #fce9e9; color: var(--err); }
+.flag.ok   { background: #e6f5ee; color: var(--ok); }
+
+ul, ol { padding-left: 22px; }
+li { margin: 3px 0; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>document.addEventListener('DOMContentLoaded',()=>mermaid.initialize({ startOnLoad: true, theme: 'neutral' }));</script>
+</head>
+<body>
+<div class="layout">
+<nav class="toc">
+  <h2>Índex</h2>
+  <a href="#flux">1 · Flux general</a>
+  <a href="#anatomia">2 · Anatomia del system prompt</a>
+  <a href="#capa-identitat" class="sub">2.1 Identitat</a>
+  <a href="#capa-instruccions" class="sub">2.2 Instruccions filtrades</a>
+  <a href="#macrodirectives" class="sub">2.2b 10 macrodirectives</a>
+  <a href="#cataleg-complet" class="sub">2.2c Catàleg complet (annex)</a>
+  <a href="#capa-dua" class="sub">2.3 DUA</a>
+  <a href="#capa-genere" class="sub">2.4 Gènere</a>
+  <a href="#capa-persona" class="sub">2.5 Persona-audience</a>
+  <a href="#capa-fewshot" class="sub">2.6 Few-shot (RAG)</a>
+  <a href="#capa-format" class="sub">2.7 FORMAT DE SORTIDA + complements</a>
+  <a href="#impacte">3 · UI → impacte al prompt</a>
+  <a href="#fases">4 · Fases del LLM</a>
+  <a href="#fase-adapt" class="sub">4.1 adapt</a>
+  <a href="#fase-verify" class="sub">4.2 verify</a>
+  <a href="#fase-quality" class="sub">4.3 quality</a>
+  <a href="#fase-parse" class="sub">4.4 parseAdaptedSections</a>
+  <a href="#fase-refine" class="sub">4.5 refine-text</a>
+  <a href="#exemples">5 · Exemples reals (traces)</a>
+  <a href="#cas-tdah" class="sub">5.1 Cas A · TDAH</a>
+  <a href="#cas-aacc" class="sub">5.2 Cas B · AACC</a>
+  <a href="#cas-nouvingut" class="sub">5.3 Cas C · Nouvingut A2</a>
+  <a href="#prompts-inventari">6 · Prompts del sistema (inventari)</a>
+  <a href="#tracabilitat">7 · Traçabilitat de variables</a>
+  <a href="#flux-to">8 · Flux del <i>to</i></a>
+  <a href="#dua-solapament">9 · DUA i instruccions — solapament</a>
+  <a href="#persona-valor">10 · Persona-audience — aporta valor?</a>
+  <a href="#localstorage">11 · Mapa localStorage</a>
+  <a href="#limitacions">Apèndix C · Limitacions conegudes</a>
+</nav>
+
+<main>
+<p class="lede">Documentació tècnica autocontiguda · 2026-04-19</p>
+<h1>Pipeline ATNE — del clic del docent al prompt LLM</h1>
+<p>Aquesta pàgina explica, peça per peça, com es construeix el system prompt que ATNE envia al LLM. Tots els <em>file:line</em> apunten al codi real del repo (<code>server.py</code>, <code>instruction_filter.py</code>, <code>corpus_reader.py</code>, <code>ui/atne/</code>). Els dos exemples de la secció 5 contenen el prompt <strong>real</strong> generat pel codi (cridant les mateixes funcions que <a href="server.py#L4977"><code>/api/prompt-preview</code></a>) — no són simulacions reescrites a mà.</p>
+
+<div class="callout">
+  <b>Visió ràpida:</b> el docent omple 3 passos (perfil, text+complements, adapta/refina). Quan prem «Adapta», el frontend envia <code>POST /api/adapt</code>; el backend construeix el prompt en 7 capes, el dispara contra el LLM, l'autoavalua, l'audita amb LanguageTool i el retorna parsed pel frontend.
+</div>
+
+<!-- ════════════════ 1 · FLUX ════════════════ -->
+<h2 id="flux">1 · Flux general</h2>
+<p>3 passos UI → 4 fases backend. La rotació de model es resol al backend via <code>_MODEL_CONFIG</code> (<a href="server.py#L78"><code>server.py:78</code></a>) i és invisible per al docent.</p>
+
+<div class="mermaid-wrap">
+<div class="mermaid">
+
+flowchart TB
+  classDef ui      fill:#e1e4ff,stroke:#3337a6,color:#121a2b;
+  classDef phase   fill:#fff,stroke:#6a7392,color:#121a2b;
+  classDef llm     fill:#e7dcf4,stroke:#6d3aa3,color:#121a2b;
+  classDef store   fill:#ece8db,stroke:#6a7392,color:#2d3655;
+
+  P1["<b>Pas 1</b><br>pas1.html<br>Triar perfil (alumne/grup)"]:::ui
+  LS1[("localStorage<br>atne.profile_id")]:::store
+  P2["<b>Pas 2</b><br>pas2.html<br>Pujar/escriure text · matèria · curs · complements"]:::ui
+  LS2[("localStorage<br>atne.doc_*<br>atne.complements")]:::store
+  P3["<b>Pas 3</b><br>pas3.html<br>Adaptar · refinar · descarregar"]:::ui
+
+  P1 --> LS1 --> P2 --> LS2 --> P3
+
+  subgraph Pipeline_LLM ["Pipeline LLM (server.py)"]
+    direction TB
+    PHASE1["<b>Phase 1 · adapt</b><br>build_system_prompt() · _call_llm()<br>SSE /api/adapt"]:::llm
+    PHASE2["<b>Phase 2 · verify</b><br>_verify_adaptation()<br>jutge 0-5"]:::llm
+    PHASE3["<b>Phase 3 · quality</b><br>post_process_catalan()<br>LanguageTool + auditor LLM (OFF) + llegibilitat"]:::llm
+    PHASE4["<b>Phase 4 · parse</b><br>parseAdaptedSections (frontend)<br>distribueix complements als panels"]:::phase
+
+    PHASE1 -->|score < 4.0?| PHASE2 --> PHASE1
+    PHASE2 -->|score >= 4.0| PHASE3 --> PHASE4
+  end
+
+  P3 -->|POST /api/adapt| PHASE1
+  PHASE4 --> P3
+
+</div>
+</div>
+
+<p>Subdiagrama: composició del prompt (què entra a <code>build_system_prompt</code>):</p>
+<div class="mermaid-wrap">
+<div class="mermaid">
+
+flowchart LR
+  classDef src fill:#fff,stroke:#6a7392,color:#121a2b;
+  classDef out fill:#e1e4ff,stroke:#3337a6,color:#121a2b;
+
+  CR1["corpus/M0_*<br>identitat"]:::src
+  IC["instruction_catalog.py<br>CATALOG (xifra viva: /api/stats-instruccions)"]:::src
+  IF["instruction_filter.py<br>get_instructions()"]:::src
+  CR2["corpus/M2_DUA-*"]:::src
+  CR3["corpus/M3_generes-*"]:::src
+  PA["server.py:1032<br>build_persona_audience"]:::src
+  COMP["params.complements<br>(blocs FORMAT DE SORTIDA)"]:::src
+
+  CR1 --> P
+  IC --> IF --> P
+  CR2 --> P
+  CR3 --> P
+  PA --> P
+  COMP --> P
+
+  P[/<b>build_system_prompt()</b><br>server.py:1202/]:::out
+  P --> LLM[(LLM · Gemma 4 31B / GPT-4o / Mistral)]:::out
+
+</div>
+</div>
+
+<!-- ════════════════ 2 · ANATOMIA ════════════════ -->
+<h2 id="anatomia">2 · Anatomia del system prompt</h2>
+<p>El prompt es munta a <a href="server.py#L1202"><code>server.py:1202 build_system_prompt()</code></a>. L'ordre real dels blocs és:</p>
+<ol>
+  <li><b>Identitat</b> (capa 1, fixa)</li>
+  <li><b>Instruccions filtrades</b> (capes 2-3, dinàmiques per perfil/MECR/DUA/complements)</li>
+  <li><b>Bloc DUA</b> (corpus M2)</li>
+  <li><b>Bloc gènere discursiu</b> (si especificat)</li>
+  <li><b>Creuaments</b> (si 2+ perfils actius)</li>
+  <li><b>PERSONA-AUDIENCE</b> (narrativa concreta de l'alumne)</li>
+  <li><b>Context RAG</b> (actualment buit — RAG-KG desactivat el 2026-04-09, veure <code>server.py:2349</code>)</li>
+  <li><b>FORMAT DE SORTIDA + complements</b> (instruccions detallades per a Glossari, Preguntes MALL/TILC, Bastides, etc.)</li>
+</ol>
+
+<h3 id="capa-identitat">2.1 IDENTITAT</h3>
+<p><b>Activa-se sempre.</b> És un string fix definit a <a href="corpus_reader.py#L61"><code>corpus_reader.py:61</code></a> dins de <code>load_corpus()</code> (no es llegeix de cap fitxer markdown).</p>
+<details open>
+  <summary>Codi real (<code>corpus_reader.py:60-80</code>)</summary>
+<pre>Ets l'assistent ATNE (Adaptador de Textos a Necessitats Educatives) de Jesuïtes Educació.
+
+OBJECTIU: Transformar textos educatius perquè siguin accessibles a l'alumnat descrit, seguint principis de DUA, Lectura Fàcil i MECR.
+
+TO: Acadèmic neutre. Respecta el registre del text original quan sigui identificable.
+
+FIDELITAT:
+- En adaptació: cada element ha de tenir correspondència amb l'original (Mayer). No inventis dades, exemples ni fets.
+- En complements (glossari, preguntes, esquemes): crea contingut nou derivat del text adaptat.
+
+RIGOR TERMINOLÒGIC: Conserva sempre els termes curriculars. Defineix-los, no els eliminis. MAI substitueixis per parafrasis buides ("la cosa verda", "el que fa que", "un tipus de").
+
+FORMAT: Comença DIRECTAMENT amb "## Text adaptat". Zero meta-text ("Here is...", "Let me...", "Okay...").
+
+LLENGUA: Català (o la llengua vehicular indicada).
+
+SEGURETAT:
+- No reprodueixis dades personals de l'alumne al text adaptat.
+- Evita exemples potencialment traumàtics amb perfils vulnerables.
+- No inventis estadístiques, dates ni fets no presents al text original.</pre>
+</details>
+
+<h3 id="capa-instruccions">2.2 INSTRUCCIONS FILTRADES</h3>
+<p>Vet aquí el cor de l'arquitectura. Les instruccions del catàleg (<a href="instruction_catalog.py#L11"><code>instruction_catalog.py:11-20</code></a>) es filtren per <a href="instruction_filter.py#L235"><code>get_instructions()</code></a> segons quatre senyals. La xifra exacta és viva — consultar <a href="/api/stats-instruccions"><code>GET /api/stats-instruccions</code></a> o <code>instruction_catalog.get_catalog_stats()</code> per evitar desfasaments.</p>
+<table>
+  <thead><tr><th>Tipus d'activació</th><th>Què la dispara</th><th>Núm. típic</th></tr></thead>
+  <tbody>
+    <tr><td><code>SEMPRE</code></td><td>Tota adaptació (instruccions nucli)</td><td>viu a <code>/api/stats-instruccions</code></td></tr>
+    <tr><td><code>NIVELL</code></td><td>MECR de sortida (mapeig <code>mecr_detail</code>)</td><td>viu a <code>/api/stats-instruccions</code></td></tr>
+    <tr><td><code>PERFIL</code></td><td>Perfil actiu + sub-variables (TDAH grau, dislèxia tipus...)</td><td>viu a <code>/api/stats-instruccions</code></td></tr>
+    <tr><td><code>COMPLEMENT</code></td><td>Complements activats al Pas 2</td><td>viu a <code>/api/stats-instruccions</code></td></tr>
+  </tbody>
+</table>
+<p>Es <b>suprimeixen</b> instruccions amb <code>suppress_if</code> (ex: tot el bloc de simplificació es desactiva si <code>altes_capacitats</code> + DUA Enriquiment) o <code>suppress_if_profile</code> (instrucció redundant per a un perfil concret).</p>
+<p>El text de cada instrucció es pot <b>intensificar</b> per sub-variables: ex. <code>C-01</code> per <code>baixa_memoria_treball</code>, <code>H-04</code> per <code>tdah.grau="sever"</code>, etc. (Veure <a href="instruction_filter.py#L173"><code>_get_intensified_text()</code></a>.)</p>
+<p>Finalment, <a href="instruction_filter.py#L354"><code>format_instructions_for_prompt()</code></a> les agrupa per <b>macrodirectiva</b> (LÈXIC, SINTAXI, ESTRUCTURA, COGNITIU, QUALITAT, MULTIMODAL, AVALUACIÓ, PERSONALITZACIÓ, PERFIL, ENRIQUIMENT) i les escriu com a bullets sota cada bloc temàtic. <b>Els IDs no es mostren al LLM</b>: queden a logs/audit per a traçabilitat.</p>
+<details>
+  <summary>Exemple real — bloc «LÈXIC» del cas TDAH (10 primeres línies)</summary>
+<pre>**LÈXIC**:
+- Usa vocabulari freqüent. Substitueix termes poc habituals per equivalents d'alta freqüència lèxica.
+- Termes tècnics en **negreta** amb definició entre parèntesis la primera vegada.
+- Repetició lèxica coherent: un terme = un concepte. NO variïs per elegància (no sinònims).
+- Referents pronominals explícits: si ambigu, repeteix el nom complet.
+- Elimina expressions idiomàtiques, metàfores i sentit figurat. Tot literal.
+- Controla polisèmia: evita usos figurats o poc habituals d'un mot. Permet sentits habituals.
+- Connectors explícits entre frases: per tant, a més, en canvi, primer, després.
+- Scaffolding lleuger: defineix un terme la 1a vegada; després usa'l sense definició.
+- Desnominalitza: noms abstractes → verbs. Exemple: 'l'evaporació' → 'quan s'evapora'.
+- Evita doble negació. Permet negació simple i natural.
+- Dates en format complet (12 de març de 2026, no 12/03/26). Xifres amb context.
+- Sigles i abreviatures: escriu la forma completa la primera vegada. Ex: ONU (Organització de les Nacions Unides).
+
+**SINTAXI**:
+- Una idea per frase. Divideix frases llargues en unitats simples.
+- Prefereix veu activa. Permet passiva quan sigui natural i clara.
+- Subjecte explícit quan hi hagi risc d'ambigüitat. Permet elisió en contextos clars.
+- Ordre SVO per defecte. Permet inversions estilístiques si no generen ambigüitat.
+- Puntuació estàndard simplificada. Permet punt i coma ocasional. Evita parèntesis llargs.
+- Màxim 12-18 paraules per frase.
+- Es permeten subordinades simples (que, quan, si).
+- Permet incisos breus i parèntesis explicatius. Evita incisos de &gt;8 mots.
+
+**ESTRUCTURA**:
+- Paràgrafs curts: 3-5 frases màxim. Un tema per paràgraf.
+- Blocs temàtics amb títol descriptiu. Format pregunta quan sigui possible.
+- Frase tòpic al principi de cada paràgraf: anticipa el contingut.
+- Llista si 4+ elements o si l'enumeració és complexa.
+- Estructura deductiva: general → particular. Primer la idea, després els detalls.</pre>
+</details>
+
+<h3 id="macrodirectives">2.2b Les 10 macrodirectives</h3>
+<p>El catàleg agrupa les instruccions en <b>10 macrodirectives</b> (l'LLM rep blocs temàtics nets, sense IDs). La definició canònica és a <a href="instruction_catalog.py#L26"><code>instruction_catalog.py:26-108</code></a>. <b>Macrodirectiva</b> i <b>família d'instruccions</b> són el mateix concepte en aquest repo: el camp <code>macro</code> de cada entrada del <code>CATALOG</code> és la família a què pertany. El recompte viu per macrodirectiva és a <a href="/api/stats-instruccions"><code>GET /api/stats-instruccions</code></a>.</p>
+<p>L'ordre d'aparició al prompt és el que marca el camp <code>ordre</code> de cada macro. Fonts pedagògiques: <a href="docs/decisions/arquitectura_prompt_v2.md#L850"><code>docs/decisions/arquitectura_prompt_v2.md:850-950</code></a> (secció 10 de l'arquitectura de prompts v2) i <a href="export_fje/docs/mapa_variables_instruccions.md"><code>export_fje/docs/mapa_variables_instruccions.md</code></a>.</p>
+
+<table>
+  <thead><tr><th>Ordre</th><th>Macro</th><th>Label al prompt</th><th>Instruccions possibles</th><th>Què agrupa</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>0</code> <span class="flag">especial</span></td>
+      <td><code>ENRIQUIMENT</code></td>
+      <td><b>⚠️ ENRIQUIMENT — NO SIMPLIFIQUIS</b></td>
+      <td><code>H-12</code>, <code>H-14</code>, <code>H-15</code></td>
+      <td>Cas especial: apareix <b>primer</b> (ordre 0) per avisar l'LLM que aquest text és per a altes capacitats / 2e i que NO ha d'aplicar les regles universals de simplificació. Només s'activa si hi ha perfil AACC o 2e actiu.</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td><code>LEXIC</code></td>
+      <td>LÈXIC</td>
+      <td>18 instruccions (A-01 a A-06, A-14 a A-23, A-29, A-30)</td>
+      <td>Vocabulari freqüent, negreta + definició, referents pronominals, polisèmia, densitat lèxica, sigles, cultismes, adverbis en -ment, anglicismes.</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td><code>SINTAXI</code></td>
+      <td>SINTAXI</td>
+      <td>11 instruccions (A-07 a A-13, A-24 a A-26, A-28)</td>
+      <td>Una idea per frase, veu activa, subjecte explícit, ordre SVO, longitud màxima, subordinades, temps verbals, incisos, impersonalitat.</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td><code>ESTRUCTURA</code></td>
+      <td>ESTRUCTURA</td>
+      <td>13 instruccions (B-01 a B-14)</td>
+      <td>Paràgrafs curts, títols temàtics, frase tòpic, llistes, estructura deductiva, ordre cronològic, resums, numeració, transicions, taules, indicadors de progrés TDAH.</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td><code>COGNITIU</code></td>
+      <td>SUPORT COGNITIU</td>
+      <td>8 instruccions (C-01 a C-08 + A-27)</td>
+      <td>Conceptes nous per paràgraf, reforç, chunking, glossari previ (pre-training Sweller), analogies, anticipació de vocabulari. Inclou A-27 (retall 60-70% per fatiga).</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td><code>QUALITAT</code></td>
+      <td>RIGOR CURRICULAR</td>
+      <td>10 instruccions (E-01 a E-02, E-05 a E-12)</td>
+      <td>Nucli terminològic intocable, exactitud científica, causalitat, definició graduada, exemples concrets, referents culturalment diversos, pistes etimològiques, contra-exemples.</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td><code>MULTIMODAL</code></td>
+      <td>MULTIMODALITAT</td>
+      <td>6 instruccions (D-01 a D-06b + H-21)</td>
+      <td>Emojis/icones, esquema de procés, mapa conceptual, lectura en veu alta (DI/disc. visual, dislèxia moderada/severa), descripció textual per ceguesa.</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td><code>AVALUACIO</code></td>
+      <td>AVALUACIÓ I COMPRENSIÓ</td>
+      <td>3 instruccions (F-06, F-09, F-10)</td>
+      <td>Preguntes intercalades (TDAH), pensament crític (AACC), connexions interdisciplinars (AACC).</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td><code>PERSONALITZACIO</code></td>
+      <td>PERSONALITZACIÓ LINGÜÍSTICA</td>
+      <td>5 instruccions (G-01, G-02, G-03, G-06, G-07)</td>
+      <td>Glossari bilingüe, traducció de consignes L1, transliteració fonètica, to graduat per MECR, estructura explícita per nouvingut sense CALP.</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td><code>PERFIL</code></td>
+      <td>ADAPTACIONS PER PERFIL</td>
+      <td>~22 instruccions (H-01 a H-03, H-04 a H-06, H-07 a H-08, H-22, H-09 a H-11, H-16 a H-17, H-23 a H-26, H-19, H-20, H-20b, H-21)</td>
+      <td>Regles específiques per TEA, TDAH, dislèxia, DI, TDL, disc. visual/auditiva. Diferenciat d'<code>ENRIQUIMENT</code> perquè aquestes <b>sí</b> que simplifiquen.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout warn">
+  <b>Cas especial — <code>ENRIQUIMENT</code> (ordre 0):</b> no és una família "com les altres". Quan s'activa (perfil <code>altes_capacitats</code> o <code>2e</code>), entra <b>al principi</b> del prompt amb el text <code>⚠️ ENRIQUIMENT — NO SIMPLIFIQUIS</code> i, en paral·lel, el filtre suprimeix les instruccions amb <code>suppress_if: ["altes_capacitats"]</code> (veure <a href="instruction_filter.py#L149"><code>instruction_filter.py:149</code></a>). L'LLM rep, doncs, dos senyals coherents: l'avís explícit i l'absència de les regles de simplificació (A-01, A-03, A-05, A-07, A-16). Al final del bloc d'instruccions s'afegeix un recordatori: <code>⚠️ IMPORTANT: N regles de simplificació DESACTIVADES per aquest perfil. NO simplifiquis el text. Enriqueix-lo.</code> (<a href="instruction_filter.py#L381">instruction_filter.py:381-386</a>).
+</div>
+
+<h3 id="cataleg-complet">2.2c Annex — Catàleg complet del <code>CATALOG</code></h3>
+<p>Taula desplegable amb totes les entrades del <code>CATALOG</code> a <a href="instruction_catalog.py#L115"><code>instruction_catalog.py:115-870</code></a>. Per al recompte actual en viu, consultar <a href="/api/stats-instruccions"><code>GET /api/stats-instruccions</code></a> (font única de veritat). Algunes entrades són variants internes com <code>C-04b</code>, <code>H-04b</code>, <code>H-14b</code>, <code>D-06b</code>, <code>H-20b</code>, absorbides via intensificació a <a href="instruction_filter.py#L173"><code>_get_intensified_text()</code></a>.</p>
+<details>
+  <summary><b>Mostra la taula completa (98 files)</b></summary>
+  <table>
+    <thead><tr><th>ID</th><th>Text (80 c)</th><th>Macro</th><th>Activació</th><th>Graduada</th><th>Sub-var</th><th>Suppress</th></tr></thead>
+    <tbody>
+<tr><td><code>A-01</code></td><td>Usa vocabulari freqüent. Substitueix termes poc habituals per equivalents d&#x27;alta...</td><td><code>LEXIC</code></td><td>SEMPRE</td><td></td><td></td><td>suppress_if=altes_capacitats | suppress_if_profile=dislexia</td></tr>
+<tr><td><code>A-02</code></td><td>Termes tècnics en **negreta** amb definició entre parèntesis la primera vegada.</td><td><code>LEXIC</code></td><td>SEMPRE</td><td></td><td></td><td></td></tr>
+<tr><td><code>A-03</code></td><td>Repetició lèxica coherent: un terme = un concepte. NO variïs per elegància (no s...</td><td><code>LEXIC</code></td><td>SEMPRE</td><td></td><td></td><td>suppress_if=altes_capacitats | suppress_if_profile=dislexia</td></tr>
+<tr><td><code>A-04</code></td><td>Referents pronominals explícits: si ambigu, repeteix el nom complet.</td><td><code>LEXIC</code></td><td>SEMPRE</td><td></td><td></td><td></td></tr>
+<tr><td><code>A-05</code></td><td>Elimina expressions idiomàtiques, metàfores i sentit figurat. Tot literal.</td><td><code>LEXIC</code></td><td>SEMPRE</td><td></td><td></td><td>suppress_if=altes_capacitats | suppress_if_profile=tea</td></tr>
+<tr><td><code>A-06</code></td><td>Elimina polisèmia: cada paraula en un sol sentit. Si cal, substitueix.</td><td><code>LEXIC</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>A-07</code></td><td>Una idea per frase. Divideix frases llargues en unitats simples.</td><td><code>SINTAXI</code></td><td>SEMPRE</td><td></td><td></td><td>suppress_if=altes_capacitats</td></tr>
+<tr><td><code>A-08</code></td><td>Veu activa obligatòria. Transforma passives en actives.</td><td><code>SINTAXI</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>A-09</code></td><td>Subjecte explícit a cada frase. No l&#x27;elideixis.</td><td><code>SINTAXI</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>A-10</code></td><td>Ordre canònic: Subjecte + Verb + Complement. Evita inversions.</td><td><code>SINTAXI</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>A-11</code></td><td>Puntuació simplificada: punts i dos punts. Evita punt i coma, parèntesis llargs,...</td><td><code>SINTAXI</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>A-12</code></td><td>Limita la longitud de frase al màxim del nivell MECR de sortida.</td><td><code>SINTAXI</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>A-13</code></td><td>Redueix subordinades.</td><td><code>SINTAXI</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>A-14</code></td><td>Connectors explícits entre frases: per tant, a més, en canvi, primer, després.</td><td><code>LEXIC</code></td><td>SEMPRE</td><td></td><td></td><td></td></tr>
+<tr><td><code>A-15</code></td><td>Scaffolding decreixent (Vygotsky): 1a aparició = terme + definició completa; 2a ...</td><td><code>LEXIC</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>A-16</code></td><td>Desnominalitza: noms abstractes → verbs. Exemple: &#x27;l&#x27;evaporació&#x27; → &#x27;quan s&#x27;evapo...</td><td><code>LEXIC</code></td><td>SEMPRE</td><td></td><td></td><td>suppress_if=altes_capacitats</td></tr>
+<tr><td><code>A-17</code></td><td>Evita negacions múltiples. Reformula en positiu.</td><td><code>LEXIC</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>A-18</code></td><td>Dates en format complet (12 de març de 2026, no 12/03/26). Xifres amb context.</td><td><code>LEXIC</code></td><td>SEMPRE</td><td></td><td></td><td></td></tr>
+<tr><td><code>A-19</code></td><td>Sigles i abreviatures: escriu la forma completa la primera vegada. Ex: ONU (Orga...</td><td><code>LEXIC</code></td><td>SEMPRE</td><td></td><td></td><td></td></tr>
+<tr><td><code>A-20</code></td><td>Controla la densitat lèxica: redueix la proporció de paraules de contingut per f...</td><td><code>LEXIC</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td>suppress_if_profile=tdl</td></tr>
+<tr><td><code>A-21</code></td><td>Descompón paraules compostes llargues: divideix o reformula en paraules simples.</td><td><code>LEXIC</code></td><td>PERFIL dislexia,nouvingut</td><td></td><td></td><td></td></tr>
+<tr><td><code>A-22</code></td><td>Concreta quantificadors abstractes: &#x27;molts&#x27; → &#x27;més de 50&#x27;, &#x27;de vegades&#x27; → &#x27;2-3 c...</td><td><code>LEXIC</code></td><td>NIVELL pre-A1,A1,A2</td><td></td><td></td><td></td></tr>
+<tr><td><code>A-23</code></td><td>Evita cultismes i llatinismes. Substitueix per equivalents patrimonials.</td><td><code>LEXIC</code></td><td>NIVELL pre-A1,A1,A2</td><td></td><td></td><td></td></tr>
+<tr><td><code>A-24</code></td><td>Present d&#x27;indicatiu preferent. Evita subjuntiu, condicional i temps composts.</td><td><code>SINTAXI</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>A-25</code></td><td>Formes verbals simples. Evita perífrasis verbals i construccions complexes.</td><td><code>SINTAXI</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>A-26</code></td><td>Evita incisos parentètics llargs. Si la definició allarga la frase, posa-la en f...</td><td><code>SINTAXI</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>A-27</code></td><td>Retalla el text al 60-70% de l&#x27;extensió original, prioritzant el nucli curricula...</td><td><code>COGNITIU</code></td><td>PERFIL tdah,di</td><td></td><td>fatiga_o_sever</td><td></td></tr>
+<tr><td><code>A-28</code></td><td>Evita oracions impersonals (cal, convé, s&#x27;ha de). Dirigeix-te directament al lec...</td><td><code>SINTAXI</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>A-29</code></td><td>Evita adverbis acabats en -ment. Reformula amb verbs o frases curtes.</td><td><code>LEXIC</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>A-30</code></td><td>Evita anglicismes i paraules d&#x27;altres idiomes. Busca equivalents habituals en ca...</td><td><code>LEXIC</code></td><td>PERFIL nouvingut,tdl</td><td></td><td></td><td></td></tr>
+<tr><td><code>B-01</code></td><td>Paràgrafs curts: 3-5 frases màxim. Un tema per paràgraf.</td><td><code>ESTRUCTURA</code></td><td>SEMPRE</td><td></td><td></td><td></td></tr>
+<tr><td><code>B-02</code></td><td>Blocs temàtics amb títol descriptiu. Format pregunta quan sigui possible.</td><td><code>ESTRUCTURA</code></td><td>SEMPRE</td><td></td><td></td><td></td></tr>
+<tr><td><code>B-03</code></td><td>Frase tòpic al principi de cada paràgraf: anticipa el contingut.</td><td><code>ESTRUCTURA</code></td><td>SEMPRE</td><td></td><td></td><td></td></tr>
+<tr><td><code>B-04</code></td><td>Llistes en lloc d&#x27;enumeracions dins del text.</td><td><code>ESTRUCTURA</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>B-05</code></td><td>Estructura deductiva: general → particular. Primer la idea, després els detalls.</td><td><code>ESTRUCTURA</code></td><td>NIVELL pre-A1,A1,A2,B1</td><td></td><td></td><td></td></tr>
+<tr><td><code>B-06</code></td><td>Ordre cronològic per a processos i seqüències.</td><td><code>ESTRUCTURA</code></td><td>NIVELL pre-A1,A1,A2,B1</td><td></td><td></td><td></td></tr>
+<tr><td><code>B-07</code></td><td>Resum anticipatiu (advance organizer): comença cada secció amb una frase que ant...</td><td><code>ESTRUCTURA</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>B-08</code></td><td>Resum final recapitulatiu: tanca cada secció llarga amb un resum de les idees pr...</td><td><code>ESTRUCTURA</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>B-09</code></td><td>Numera els passos i seqüències. Cada pas en línia separada.</td><td><code>ESTRUCTURA</code></td><td>NIVELL pre-A1,A1,A2,B1</td><td></td><td></td><td></td></tr>
+<tr><td><code>B-10</code></td><td>Transicions entre seccions: &#x27;Ja hem vist X. Ara veurem Y.&#x27;</td><td><code>ESTRUCTURA</code></td><td>SEMPRE</td><td></td><td></td><td></td></tr>
+<tr><td><code>B-11</code></td><td>Salt de línia entre idees. Cada idea en paràgraf o línia independent.</td><td><code>ESTRUCTURA</code></td><td>NIVELL pre-A1,A1,A2</td><td></td><td></td><td></td></tr>
+<tr><td><code>B-13</code></td><td>Indicadors de progrés: [Secció X de Y] al principi de cada bloc.</td><td><code>ESTRUCTURA</code></td><td>PERFIL tdah</td><td></td><td></td><td></td></tr>
+<tr><td><code>B-14</code></td><td>Taules per informació comparativa. Usa markdown: | Col1 | Col2 |</td><td><code>ESTRUCTURA</code></td><td>NIVELL pre-A1,A1,A2,B1</td><td></td><td></td><td></td></tr>
+<tr><td><code>C-01</code></td><td>Limita conceptes nous per paràgraf.</td><td><code>COGNITIU</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>C-02</code></td><td>Reforç immediat de cada concepte nou: exemple concret, suport visual o connexió ...</td><td><code>COGNITIU</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>C-03</code></td><td>Eliminació de redundància decorativa (principi de coherència, Mayer): cada eleme...</td><td><code>QUALITAT</code></td><td>SEMPRE</td><td></td><td></td><td></td></tr>
+<tr><td><code>C-04</code></td><td>Chunking: agrupa informació en blocs de 3-5 elements (límit memòria de treball).</td><td><code>COGNITIU</code></td><td>SEMPRE</td><td></td><td></td><td></td></tr>
+<tr><td><code>C-05</code></td><td>Glossari previ (pre-training, Sweller): comença amb &#x27;## Paraules clau&#x27; amb els t...</td><td><code>COGNITIU</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>C-06</code></td><td>Analogies amb experiències quotidianes: cada concepte abstracte amb un exemple d...</td><td><code>COGNITIU</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>C-08</code></td><td>Anticipació de vocabulari: els termes clau apareixen primer al glossari, després...</td><td><code>COGNITIU</code></td><td>NIVELL pre-A1,A1,A2</td><td></td><td></td><td></td></tr>
+<tr><td><code>D-01</code></td><td>Emojis/icones de suport al costat dels conceptes clau (☀️ llum, 💧 aigua, 🌱 plant...</td><td><code>MULTIMODAL</code></td><td>COMPLEMENT pictogrames</td><td></td><td></td><td></td></tr>
+<tr><td><code>D-02</code></td><td>Esquema de procés en format text (fletxes, símbols) per mostrar relacions causa-...</td><td><code>MULTIMODAL</code></td><td>COMPLEMENT esquema_visual</td><td></td><td></td><td></td></tr>
+<tr><td><code>D-03</code></td><td>Mapa conceptual jeràrquic en format text (arbre amb branques).</td><td><code>MULTIMODAL</code></td><td>COMPLEMENT mapa_conceptual</td><td></td><td></td><td></td></tr>
+<tr><td><code>D-06</code></td><td>Prepara el text per a lectura en veu alta: frases amb ritme natural, pauses clar...</td><td><code>MULTIMODAL</code></td><td>PERFIL discapacitat_intellectual,di,discapacitat_visual,disc_visual</td><td></td><td></td><td></td></tr>
+<tr><td><code>D-06b</code></td><td>Dislèxia moderada/severa: prepara el text per a lectura en veu alta com a canal ...</td><td><code>MULTIMODAL</code></td><td>PERFIL dislexia</td><td></td><td>dislexia_moderat_sever</td><td></td></tr>
+<tr><td><code>E-01</code></td><td>Nucli terminològic intocable: MAI substitueixis un terme tècnic curricular per u...</td><td><code>QUALITAT</code></td><td>SEMPRE</td><td></td><td></td><td></td></tr>
+<tr><td><code>E-02</code></td><td>Gradua la definició tècnica segons MECR.</td><td><code>QUALITAT</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>E-05</code></td><td>Mantén l&#x27;exactitud científica: les simplificacions lingüístiques NO poden introd...</td><td><code>QUALITAT</code></td><td>SEMPRE</td><td></td><td></td><td></td></tr>
+<tr><td><code>E-06</code></td><td>Simplifica processos mantenint la causalitat: la cadena causa→efecte ha de ser c...</td><td><code>QUALITAT</code></td><td>SEMPRE</td><td></td><td></td><td></td></tr>
+<tr><td><code>E-07</code></td><td>Un exemple concret per cada concepte abstracte.</td><td><code>QUALITAT</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>E-08</code></td><td>Referents culturalment diversos: substitueix referents locals per universals o e...</td><td><code>QUALITAT</code></td><td>PERFIL nouvingut,vulnerabilitat</td><td></td><td></td><td></td></tr>
+<tr><td><code>E-09</code></td><td>Evita supòsits culturals implícits: no pressuposar coneixement de festes, tradic...</td><td><code>QUALITAT</code></td><td>PERFIL nouvingut</td><td></td><td></td><td></td></tr>
+<tr><td><code>E-10</code></td><td>Sensibilitat a temes traumàtics: evita o contextualitza temes de violència, guer...</td><td><code>QUALITAT</code></td><td>PERFIL trastorn_emocional,vulnerabilitat</td><td></td><td>sensibilitat_tematica</td><td></td></tr>
+<tr><td><code>E-11</code></td><td>Pistes etimològiques translingües: aprofita arrels llatines/gregues compartides ...</td><td><code>QUALITAT</code></td><td>PERFIL nouvingut</td><td></td><td>L1_romanica</td><td></td></tr>
+<tr><td><code>E-12</code></td><td>Contra-exemples per delimitar conceptes: &#x27;Això SÍ és X, però això NO és X perquè...</td><td><code>QUALITAT</code></td><td>NIVELL B1,B2</td><td></td><td></td><td></td></tr>
+<tr><td><code>F-06</code></td><td>Preguntes de comprensió intercalades dins del text: cada 2-3 paràgrafs, una preg...</td><td><code>AVALUACIO</code></td><td>PERFIL tdah</td><td></td><td></td><td></td></tr>
+<tr><td><code>F-09</code></td><td>Preguntes de pensament crític: per què? i si...? quines alternatives? quines lim...</td><td><code>AVALUACIO</code></td><td>PERFIL altes_capacitats</td><td></td><td></td><td></td></tr>
+<tr><td><code>F-10</code></td><td>Connexions interdisciplinars: relaciona el contingut amb altres matèries i àmbit...</td><td><code>AVALUACIO</code></td><td>PERFIL altes_capacitats</td><td></td><td></td><td></td></tr>
+<tr><td><code>G-01</code></td><td>Glossari bilingüe complet: cada terme tècnic amb traducció a L1 (en alfabet orig...</td><td><code>PERSONALITZACIO</code></td><td>PERFIL nouvingut</td><td></td><td></td><td></td></tr>
+<tr><td><code>G-02</code></td><td>Traducció parcial de consignes bàsiques a L1: &#x27;Llegeix&#x27; / اقرأ, &#x27;Respon&#x27; / أجب, ...</td><td><code>PERSONALITZACIO</code></td><td>PERFIL nouvingut</td><td></td><td>mecr_low</td><td></td></tr>
+<tr><td><code>G-03</code></td><td>Transliteració fonètica OBLIGATÒRIA al glossari: cada terme català ha d&#x27;aparèixe...</td><td><code>PERSONALITZACIO</code></td><td>PERFIL nouvingut</td><td></td><td>alfabet_llati</td><td></td></tr>
+<tr><td><code>G-06</code></td><td>Ajusta el to segons MECR.</td><td><code>PERSONALITZACIO</code></td><td>NIVELL (graduada)</td><td>&#10003;</td><td></td><td></td></tr>
+<tr><td><code>G-07</code></td><td>Nouvingut sense CALP: estructura discursiva molt explícita. Marca clarament què ...</td><td><code>PERSONALITZACIO</code></td><td>PERFIL nouvingut</td><td></td><td>calp_inicial</td><td></td></tr>
+<tr><td><code>H-01</code></td><td>TEA: estructura predictible i fixa — sempre: títol → definició → exemple → activ...</td><td><code>PERFIL</code></td><td>PERFIL tea</td><td></td><td></td><td></td></tr>
+<tr><td><code>H-02</code></td><td>TEA: zero implicitura — tota metàfora, ironia o sentit figurat → literal explíci...</td><td><code>PERFIL</code></td><td>PERFIL tea</td><td></td><td></td><td></td></tr>
+<tr><td><code>H-03</code></td><td>TEA: anticipació de canvis — avisa sempre: &#x27;Ara canviem de tema.&#x27;, &#x27;A continuaci...</td><td><code>PERFIL</code></td><td>PERFIL tea</td><td></td><td></td><td></td></tr>
+<tr><td><code>H-04</code></td><td>Micro-blocs de 3-5 frases amb objectiu explícit per bloc (&#x27;En aquest bloc aprend...</td><td><code>PERFIL</code></td><td>PERFIL tdah,trastorn_emocional</td><td></td><td></td><td></td></tr>
+<tr><td><code>H-05</code></td><td>TDAH: retroalimentació visual de progrés — barres, percentatges, indicadors visu...</td><td><code>PERFIL</code></td><td>PERFIL tdah</td><td></td><td></td><td></td></tr>
+<tr><td><code>H-06</code></td><td>TDAH: variació dins el text — alterna lectura, esquema, pregunta per mantenir l&#x27;...</td><td><code>PERFIL</code></td><td>PERFIL tdah</td><td></td><td></td><td></td></tr>
+<tr><td><code>H-07</code></td><td>Dislèxia (Dehaene/Wolf): evita paraules compostes llargues. Divideix o reformula...</td><td><code>PERFIL</code></td><td>PERFIL dislexia</td><td></td><td></td><td></td></tr>
+<tr><td><code>H-08</code></td><td>Dislèxia: paraules d&#x27;alta freqüència. Repeteix termes clau en lloc d&#x27;usar sinòni...</td><td><code>PERFIL</code></td><td>PERFIL dislexia</td><td></td><td></td><td></td></tr>
+<tr><td><code>H-09</code></td><td>Discapacitat intel·lectual: UN sol concepte nou per bloc. No barrejar idees.</td><td><code>PERFIL</code></td><td>PERFIL discapacitat_intellectual,di</td><td></td><td></td><td></td></tr>
+<tr><td><code>H-10</code></td><td>Discapacitat intel·lectual: concreció radical — cada concepte abstracte amb exem...</td><td><code>PERFIL</code></td><td>PERFIL discapacitat_intellectual,di</td><td></td><td></td><td></td></tr>
+<tr><td><code>H-11</code></td><td>Discapacitat intel·lectual: repetició sistemàtica en formats diversos (text, esq...</td><td><code>PERFIL</code></td><td>PERFIL discapacitat_intellectual,di</td><td></td><td></td><td></td></tr>
+<tr><td><code>H-12</code></td><td>Altes capacitats: profundització conceptual — excepcions, fronteres del coneixem...</td><td><code>ENRIQUIMENT</code></td><td>PERFIL altes_capacitats</td><td></td><td></td><td></td></tr>
+<tr><td><code>H-14</code></td><td>Altes capacitats: PROHIBIT SIMPLIFICAR. Mantén la complexitat lingüística i conc...</td><td><code>ENRIQUIMENT</code></td><td>PERFIL altes_capacitats</td><td></td><td></td><td></td></tr>
+<tr><td><code>H-15</code></td><td>Doble excepcionalitat (2e): EQUILIBRI — mantén repte cognitiu ALT amb suports d&#x27;...</td><td><code>ENRIQUIMENT</code></td><td>PERFIL 2e</td><td></td><td></td><td></td></tr>
+<tr><td><code>H-16</code></td><td>TDL: reducció màxima de densitat lèxica. Cada frase amb el mínim de paraules de ...</td><td><code>PERFIL</code></td><td>PERFIL tdl</td><td></td><td></td><td></td></tr>
+<tr><td><code>H-17</code></td><td>TDL: modelatge d&#x27;ús en context — cada terme tècnic apareix en 2-3 contextos dife...</td><td><code>PERFIL</code></td><td>PERFIL tdl</td><td></td><td></td><td></td></tr>
+<tr><td><code>H-19</code></td><td>Discapacitat visual: estructura semàntica amb encapçalaments (H1-H3) per lector ...</td><td><code>PERFIL</code></td><td>PERFIL discapacitat_visual,disc_visual</td><td></td><td></td><td></td></tr>
+<tr><td><code>H-20</code></td><td>Discapacitat auditiva: simplificació com L2 en sordesa prelocutiva signant.</td><td><code>PERFIL</code></td><td>PERFIL discapacitat_auditiva,disc_auditiva</td><td></td><td></td><td></td></tr>
+<tr><td><code>H-20b</code></td><td>Disc. auditiva LSC: el català escrit és una L2. Simplificació sintàctica reforça...</td><td><code>PERFIL</code></td><td>PERFIL disc_auditiva,discapacitat_auditiva</td><td></td><td>comunicacio_lsc</td><td></td></tr>
+<tr><td><code>H-21</code></td><td>Discapacitat visual (ceguesa): descriu textualment qualsevol element visual del ...</td><td><code>PERFIL</code></td><td>PERFIL discapacitat_visual,disc_visual</td><td></td><td>grau_ceguesa</td><td></td></tr>
+<tr><td><code>H-22</code></td><td>Dislèxia fonològica: evita encadenar prefixos i sufixos en una mateixa paraula. ...</td><td><code>PERFIL</code></td><td>PERFIL dislexia</td><td></td><td>tipus_fonologica</td><td></td></tr>
+<tr><td><code>H-23</code></td><td>TDL receptiu: simplificació lingüística reforçada en TOT el text. L&#x27;alumne té di...</td><td><code>PERFIL</code></td><td>PERFIL tdl</td><td></td><td>tdl_receptiu</td><td></td></tr>
+<tr><td><code>H-24</code></td><td>TDL amb semàntica afectada: redueix vocabulari al mínim funcional. Cada paraula ...</td><td><code>PERFIL</code></td><td>PERFIL tdl</td><td></td><td>tdl_semantica</td><td></td></tr>
+<tr><td><code>H-25</code></td><td>TDL amb morfosintaxi afectada: estructura SVO estricta. Evita passives, subordin...</td><td><code>PERFIL</code></td><td>PERFIL tdl</td><td></td><td>tdl_morfosintaxi</td><td></td></tr>
+<tr><td><code>H-26</code></td><td>TDL amb pragmàtica afectada: fes explícita tota intenció comunicativa. No pressu...</td><td><code>PERFIL</code></td><td>PERFIL tdl</td><td></td><td>tdl_pragmatica</td><td></td></tr>
+    </tbody>
+  </table>
+</details>
+
+<h3 id="capa-dua">2.3 DUA</h3>
+<p><b>Activa-se sempre.</b> Recupera el bloc del nivell DUA (<code>Acces</code>/<code>Core</code>/<code>Enriquiment</code>) llegit des de <code>corpus/M2_DUA-principis-pautes.md</code> via <a href="corpus_reader.py#L227"><code>get_dua_block()</code></a>.</p>
+<details>
+  <summary>Exemple real — DUA Core (cas TDAH)</summary>
+<pre>NIVELL DUA: Core — Llenguatge Clar (ISO 24495) dins del límit MECR
+- Adaptació estàndard mantenint rigor curricular
+- Frases curtes, vocabulari freqüent
+- Definicions per termes tècnics (la primera vegada)
+- Estructura clara amb connectors</pre>
+</details>
+
+<h3 id="capa-genere">2.4 GÈNERE DISCURSIU</h3>
+<p>Només s'activa si <code>params.genere_discursiu</code> arriba amb valor (<code>explicacio</code>, <code>narracio</code>, <code>instruccio</code>, <code>argumentacio</code>). Es llegeix des de <code>corpus/M3_generes-discursius.md</code> via <a href="corpus_reader.py#L233"><code>get_genre_block()</code></a>.</p>
+<p class="note">Nota: l'LLM només rep aquest bloc quan <code>params.genere_discursiu</code> arriba amb valor. Els formularis actuals del Pas 2 i Pas 3 no l'envien (el payload de <a href="ui/atne/pas3.html#L1915"><code>pas3.html:1915</code></a> no el conté i <a href="ui/atne/js/llm.js#L125">llm.js:125-129</a> tampoc l'afegeix per defecte), per això aquest bloc no apareix al flux Pas 1→2→3 en producció. La pàgina <code>/pipeline</code> (viva) permet provar-lo. Veure l'apèndix final de limitacions.</p>
+<details>
+  <summary>Exemple real — bloc gènere «explicació» (cas TDAH)</summary>
+<pre>GÈNERE DISCURSIU: Explicació
+- Progressió del simple al complex
+- Causa → efecte explícita (connector "perquè", "per tant")
+- Desnominalitza processos ("l'oxidació" → "quan s'oxida")
+- Estructura: què és → com funciona → per què importa</pre>
+</details>
+
+<h3 id="capa-persona">2.5 PERSONA-AUDIENCE</h3>
+<p>El cor de la <em>personalització narrativa</em>. La funció <a href="server.py#L1032"><code>build_persona_audience()</code></a> recorre cada característica activa i emet línies en català natural que descriuen l'alumne (no etiquetes abstractes).</p>
+<p>Suporta 12+ perfils: <code>nouvingut</code>, <code>tea</code>, <code>tdah</code>, <code>dislexia</code>, <code>altes_capacitats</code>, <code>discapacitat_intellectual</code>, <code>tdl</code>, <code>discapacitat_visual</code>, <code>discapacitat_auditiva</code>, <code>trastorn_emocional</code>, <code>vulnerabilitat</code>, <code>tdc</code>, <code>2e</code>. Cada un mira sub-variables (presentació, grau, fatiga cognitiva, baixa memòria de treball, comunicació LSC, alfabet llatí, CALP, etc.).</p>
+<p>Sempre afegeix la línia final amb <code>Nivell MECR de sortida: {mecr}</code> i, opcionalment, l'observació del docent.</p>
+<details open>
+  <summary>Exemple real — persona TDAH (cas 5.1)</summary>
+<pre>Escrius per a un alumne de ESO (3r).
+TDAH, presentació combinat (grau moderat).
+Memòria de treball baixa: limitar elements simultanis, repetir informació clau.
+Fatiga cognitiva: es cansa ràpid amb textos llargs, necessita text reduït i pauses visuals.
+Nivell MECR de sortida: B1.
+Observació del docent: Es distreu amb textos llargs i te fatiga al final.</pre>
+</details>
+
+<h3 id="capa-fewshot">2.6 FEW-SHOT i context RAG</h3>
+<p><span class="flag bug">Eliminat 2026-04-09.</span> El bloc few-shot s'ha tret del prompt (un sol domini, risc sobreajust — comentari a <code>server.py:1236</code>). La cache <code>_cache["fewshot"]</code> es manté carregada al lector de corpus però <code>build_system_prompt()</code> no la inclou.</p>
+<p>El context RAG/KG (cerca vectorial Supabase + grafs) també està <b>desactivat</b> per a <code>/api/adapt</code>: <a href="server.py#L2364"><code>run_adaptation()</code></a> passa <code>rag_context=""</code>. La justificació és al comentari <a href="server.py#L2349"><code>server.py:2349</code></a>: les instruccions graduades del catàleg cobreixen el "què fer" i el RAG retornava documents irrellevants. La infraestructura es manté per a futur ús (diagnòstic, generació, recerca).</p>
+<p>L'endpoint <code>/api/prompt-preview</code> sí que injecta un placeholder (<code>"[Aquí anirien 8-12 fragments...]"</code>) per fer la mida visible.</p>
+
+<h3 id="capa-format">2.7 FORMAT DE SORTIDA + complements</h3>
+<p>L'última secció del prompt ordena al LLM com estructurar la resposta amb encapçalaments <code>##</code>. <b>Cada complement activat afegeix un bloc detallat</b>:</p>
+<table>
+  <thead><tr><th>Complement</th><th>Bloc afegit (línies de codi)</th><th>Highlights</th></tr></thead>
+  <tbody>
+    <tr><td><code>glossari</code></td><td><a href="server.py#L1282">server.py:1282-1300</a></td><td>Taula 2 columnes (3 si nouvingut amb L1: afegeix traducció a la L1 en alfabet original)</td></tr>
+    <tr><td><code>negretes</code></td><td><a href="server.py#L1302">server.py:1302</a></td><td>Sense secció separada — integrat al text adaptat</td></tr>
+    <tr><td><code>definicions_integrades</code></td><td><a href="server.py#L1308">server.py:1308</a></td><td>Definicions entre parèntesis al text</td></tr>
+    <tr><td><code>traduccio_l1</code></td><td><a href="server.py#L1314">server.py:1314</a></td><td>Integrat al glossari</td></tr>
+    <tr><td><code>pictogrames</code></td><td><a href="server.py#L1320">server.py:1320</a></td><td>Emojis al text</td></tr>
+    <tr><td><code>esquema_visual</code></td><td><a href="server.py#L1328">server.py:1328</a></td><td>Diagrama text amb fletxes</td></tr>
+    <tr><td><code>mapa_conceptual</code></td><td><a href="server.py#L1344">server.py:1344</a></td><td>Arbre jeràrquic</td></tr>
+    <tr><td><code>preguntes_comprensio</code></td><td><a href="server.py#L1376">server.py:1376</a></td><td>Model MALL/TILC: 3 moments × 3 nivells, formats variats, distinció literari/informatiu</td></tr>
+    <tr><td><code>activitats_aprofundiment</code></td><td><a href="server.py#L1449">server.py:1449</a></td><td>Repte cognitiu, interdisciplinaritat</td></tr>
+    <tr><td><code>bastides</code></td><td><a href="server.py#L1460">server.py:1460</a></td><td>6 sub-blocs: connectors, frases model, banc paraules, suport visual, crosses, suport L1</td></tr>
+    <tr><td><code>mapa_mental</code></td><td><a href="server.py#L1516">server.py:1516</a></td><td>Radial divergent</td></tr>
+  </tbody>
+</table>
+<p><b>Sempre s'afegeixen</b> dues seccions finals: <code>## Argumentació pedagògica</code> i <code>## Notes d'auditoria</code> (<a href="server.py#L1525">server.py:1525</a>).</p>
+
+<!-- ════════════════ 3 · UI→PROMPT ════════════════ -->
+<h2 id="impacte">3 · UI → impacte al prompt</h2>
+
+<h3>3.1 Característiques del perfil</h3>
+<p>Cada característica activa al perfil (<code>profile.caracteristiques.{key}.actiu = true</code>) dispara dues coses:</p>
+<ol>
+  <li>Línies a <b>persona-audience</b> (codi a <a href="server.py#L1049">server.py:1049-1192</a>)</li>
+  <li>Instruccions del catàleg amb <code>activation: "PERFIL"</code> i <code>profiles: ["{key}"]</code> (catàleg a <code>instruction_catalog.py</code>; mapeig sintètic a <a href="instruction_catalog.py#L877">PROFILE_INSTRUCTION_MAP:877</a>)</li>
+</ol>
+<p>Mapatge ràpid (font: <code>PROFILE_INSTRUCTION_MAP</code>):</p>
+<table>
+  <thead><tr><th>Perfil</th><th>Famílies d'instrucció</th><th>IDs típics</th></tr></thead>
+  <tbody>
+    <tr><td><code>nouvingut</code></td><td>lèxica · cultural · sintàctica · estructura</td><td>A-01, A-20, E-08, A-12, B-01, ...</td></tr>
+    <tr><td><code>tea</code></td><td>inferència · estructura · lèxica · discursiva</td><td>H-01, H-02, H-03, B-02, B-09</td></tr>
+    <tr><td><code>tdah</code></td><td>atenció · memòria · motivació</td><td>H-04, B-13, H-06, C-04, C-01</td></tr>
+    <tr><td><code>dislexia</code></td><td>decodificació · compensació</td><td>H-07, H-08, A-21, D-06</td></tr>
+    <tr><td><code>tdl</code></td><td>lèxica · sintàctica · memòria</td><td>H-16, H-17, A-26, C-04</td></tr>
+    <tr><td><code>discapacitat_intellectual</code></td><td>discursiva · inferència · lèxica · visual</td><td>H-09, H-10, H-11, C-01, A-22</td></tr>
+    <tr><td><code>discapacitat_visual</code></td><td>percepció · estructura</td><td>H-19, B-02, B-14</td></tr>
+    <tr><td><code>discapacitat_auditiva</code></td><td>lèxica · visual</td><td>H-20, A-07, D-01, D-02</td></tr>
+    <tr><td><code>altes_capacitats</code></td><td>motivació · repte (+ <b>suprimeix</b> tots els <code>suppress_if</code>)</td><td>H-12, H-14, F-09, F-10</td></tr>
+    <tr><td><code>2e</code></td><td>equilibri (manté repte ALT amb suport format)</td><td>H-15</td></tr>
+    <tr><td><code>vulnerabilitat</code></td><td>motivació · cultural · estructura</td><td>E-10, A-01, B-01</td></tr>
+    <tr><td><code>trastorn_emocional</code></td><td>emocional · atenció · seguretat</td><td>E-10, H-04, B-07</td></tr>
+    <tr><td><code>tdc</code></td><td>estructura · compensació</td><td>B-02, B-09, H-19, B-04</td></tr>
+  </tbody>
+</table>
+
+<h3>3.2 Sub-variables (intensificació)</h3>
+<p>Sub-variables verificades dins de cada característica (<a href="instruction_filter.py#L21"><code>_check_subvar_conditions()</code></a>):</p>
+<ul>
+  <li><code>tdah.baixa_memoria_treball</code> → intensifica C-01 i C-04 (chunking 2-3 elements)</li>
+  <li><code>tdah.fatiga_cognitiva</code> + <code>tdah.grau="sever"</code> → activa <code>fatiga_o_sever</code></li>
+  <li><code>tdah.grau="sever"</code> → intensifica H-04 (micro-blocs 2-3 frases)</li>
+  <li><code>dislexia.tipus_dislexia in ("fonologica","mixta")</code> → activa <code>tipus_fonologica</code></li>
+  <li><code>dislexia.grau in ("moderat","sever")</code> → activa <code>dislexia_moderat_sever</code></li>
+  <li><code>tdl.modalitat in ("comprensiu","mixt")</code> → activa <code>tdl_receptiu</code></li>
+  <li><code>tdl.semantica</code>, <code>tdl.morfosintaxi</code>, <code>tdl.pragmatica</code> → activadors granulars</li>
+  <li><code>discapacitat_visual.grau="ceguesa"</code> → activa <code>grau_ceguesa</code></li>
+  <li><code>discapacitat_auditiva.comunicacio="LSC"</code> → activa <code>comunicacio_lsc</code> + intensifica H-20</li>
+  <li><code>nouvingut.calp="inicial"</code> → activa <code>calp_inicial</code></li>
+  <li><code>nouvingut.alfabet_llati=false</code> → activa transliteració</li>
+  <li><code>nouvingut.L1</code> ∈ romàniques → activa E-11 (pistes etimològiques) — llista a <a href="instruction_catalog.py#L949">LLENGUES_ROMANIQUES:949</a></li>
+</ul>
+
+<h3>3.3 Etapa, Curs, Matèria, MECR</h3>
+<ul>
+  <li><b>Etapa/Curs</b>: <span class="flag">No s'envien al LLM com a línies pròpies</span> (eliminat 2026-04-09, comentari <code>server.py:1240</code>). S'usen al Python per calcular <code>MECR</code> via <a href="server.py#L3565"><code>_mecr_from_etapa_curs()</code></a> i per als blocs MALL/TILC dels complements (<code>preguntes_comprensio</code>, <code>bastides</code>) on apareixen com a context.</li>
+  <li><b>MECR sortida</b>: cada instrucció <code>activation: "NIVELL"</code> consulta el seu <code>mecr_detail[mecr]</code> i emet la versió graduada. També modula la majoria d'instruccions amb fallback genèric.</li>
+  <li><b>Matèria</b>: passa als blocs MALL/TILC de <code>preguntes_comprensio</code> i <code>bastides</code> (variable <code>materia_complement</code>, <a href="server.py#L1367">server.py:1367</a>).</li>
+</ul>
+
+<h3>3.4 Refinar (Pas 3) — presets</h3>
+<p>Els presets del popover Refinar al Pas 3 mapejen a les claus de <a href="server.py#L3417"><code>REFINE_PRESETS</code></a>:</p>
+<table>
+  <thead><tr><th>Acció UI</th><th>Preset</th><th>Comportament</th></tr></thead>
+  <tbody>
+    <tr><td>Botó "Català"</td><td><code>catala</code></td><td>NO crida LLM. Va directe a <a href="server.py#L3501"><code>_languagetool_correct()</code></a></td></tr>
+    <tr><td>Botó "Simplificar"</td><td><code>simplificar</code></td><td>LLM amb instruccions de mateix contingut, vocabulari més senzill</td></tr>
+    <tr><td>Slider "Allargar"</td><td><code>ampliar</code></td><td>+30-50% paraules; injecta target numèric explícit</td></tr>
+    <tr><td>Slider "Escurçar"</td><td><code>escurcar</code></td><td>-25-40% paraules; injecta target numèric</td></tr>
+    <tr><td>"To més proper"</td><td><code>to_mes_proper</code></td><td>Tu, informal</td></tr>
+    <tr><td>"To més formal"</td><td><code>to_mes_formal</code></td><td>Acadèmic</td></tr>
+    <tr><td>Camp lliure</td><td><code>instruccio</code></td><td>String del docent — pot combinar-se amb un preset</td></tr>
+  </tbody>
+</table>
+<p>El prompt resultant es construeix a <a href="server.py#L4275">server.py:4275</a> (template ROL + REGLES + INSTRUCCIONS + TEXT). NO inclou les 84 instruccions del catàleg — és un prompt molt més curt, dedicat a transformar un text ja existent.</p>
+
+<!-- ════════════════ 4 · FASES ════════════════ -->
+<h2 id="fases">4 · Fases del LLM (seqüencials)</h2>
+<p>Quan el frontend crida <code>POST /api/adapt</code>, el handler (<a href="server.py#L4346"><code>server.py:4346</code></a>) llança <a href="server.py#L2345"><code>run_adaptation()</code></a> en un ThreadPoolExecutor i emet events SSE. Aquesta és la seqüència real:</p>
+
+<h3 id="fase-adapt">4.1 Phase 1 — <code>adapt</code></h3>
+<ul>
+  <li>Resol model: <code>_model_for("adapt", override)</code> (<a href="server.py#L158">server.py:158</a>) — pot ser fix o rotate.</li>
+  <li>Construeix system prompt: <code>build_system_prompt(profile, context, params, rag_context="")</code> a <a href="server.py#L2364">server.py:2364</a>.</li>
+  <li>Crida LLM via <a href="server.py#L1843"><code>_call_llm()</code></a> (provider-specific: gemma4/gemini/mistral/gpt/openrouter).</li>
+  <li>Neteja: <a href="server.py#L1600"><code>clean_gemini_output()</code></a> + <a href="server.py#L1823"><code>_post_process_llm_output()</code></a> (LaTeX strip, anglès→català, typos, concatenacions).</li>
+  <li>SSE event tipus <code>step</code> a cada subpas (<code>"Generant adaptació amb {model}..."</code>).</li>
+</ul>
+
+<h3 id="fase-verify">4.2 Phase 2 — <code>verify</code></h3>
+<ul>
+  <li>Activa-se per defecte (<code>params.verify_retry = true</code>). Es pot desactivar.</li>
+  <li>Crida <a href="server.py#L2319"><code>_verify_adaptation()</code></a>: prompt minimal (<code>VERIFY_SYSTEM</code>) que demana JSON <code>{Q,P,C,j}</code> (Qualitat, Pedagogia, Coherència 0-5).</li>
+  <li>Si <code>avg < 4.0</code>, dispara <b>retry</b>: torna a Phase 1 (màx 2 intents). Es queda amb la millor versió.</li>
+</ul>
+
+<h3 id="fase-quality">4.3 Phase 3 — <code>quality</code></h3>
+<p>Pipeline determinista de qualitat català (<a href="server.py#L4112"><code>post_process_catalan()</code></a>). 4 capes + 1 opt-in:</p>
+<ol>
+  <li><b>Caràcters exòtics</b> — <a href="server.py#L3644"><code>_exotic_char_scan()</code></a></li>
+  <li><b>LanguageTool</b> — <a href="server.py#L3713"><code>_languagetool_full_analysis()</code></a> (API pública, determinista)</li>
+  <li><b>Diccionari + paraules sospitoses</b></li>
+  <li><b>Llegibilitat</b> — <a href="server.py#L3942"><code>_readability_score()</code></a> per MECR target</li>
+  <li><b>Auditor LLM</b> (opt-in, <span class="flag bug">DESACTIVAT per defecte des del 14/04</span>) — <a href="server.py#L4023"><code>_llm_audit()</code></a>. Falsos positius ~85% en proves.</li>
+</ol>
+
+<h3 id="fase-parse">4.4 Phase 4 — <code>parseAdaptedSections</code> (frontend)</h3>
+<p>El text retornat per Phase 1 té la forma <code>## Text adaptat
+...
+## Glossari
+...</code>. La funció <a href="ui/atne/js/llm.js#L683"><code>parseAdaptedSections()</code></a> separa el text per <code>##</code>, normalitza els títols (sense accents, lowercase, sense puntuació) i els mapeja a claus internes (<code>_main</code>, <code>glossari</code>, <code>esquema_visual</code>, <code>mapa_conceptual</code>, <code>preguntes_comprensio</code>, <code>bastides</code>, ...). El Pas 3 distribueix cada secció al panel corresponent (<code>applyComplementsToViews()</code>).</p>
+
+<h3 id="fase-refine">4.5 Refine — <code>POST /api/refine-text</code></h3>
+<p>Endpoint independent (<a href="server.py#L4207">server.py:4207</a>) que NO regenera des de zero — modifica el text adaptat seguint un preset o instrucció lliure. Veure detall a la secció 3.4.</p>
+
+<!-- ════════════════ 5 · EXEMPLES ════════════════ -->
+<h2 id="exemples">5 · Exemples reals (traces)</h2>
+<p>Els dos casos següents són <b>generats pel codi real</b> del repo (mateixes funcions que <code>/api/prompt-preview</code>): <code>build_system_prompt()</code> + <code>build_persona_audience()</code> + <code>instruction_filter.get_instructions()</code>. El servidor estava engegat localment quan es va construir aquest document, però la trace concreta es va generar via import directe del mòdul (sense passar per l'HTTP) per evitar dependre del bug que tenia <code>/api/prompt-preview</code> i que <strong>s'ha corregit en aquesta entrega</strong> (veure secció 7).</p>
+
+
+<section class="case" id="cas-tdah">
+  <h3>5.1 Cas A — Marc Ribera (TDAH moderat) · text Revolució Industrial · 3r ESO B1</h3>
+  <div class="case-meta">
+    <span class="pill"><b>Caràcters:</b> 14788</span>
+    <span class="pill"><b>Paraules:</b> 2247</span>
+    <span class="pill"><b>Instruccions actives:</b> 49</span>
+    <span class="pill"><b>Suprimides:</b> 0</span>
+  </div>
+
+  <details>
+    <summary><b>Body enviat a <code>/api/prompt-preview</code></b></summary>
+    <pre class="json">{
+  "profile": {
+    "nom": "Marc Ribera (TDAH)",
+    "caracteristiques": {
+      "tdah": {
+        "actiu": true,
+        "presentacio": "combinat",
+        "grau": "moderat",
+        "baixa_memoria_treball": true,
+        "fatiga_cognitiva": true
+      }
+    },
+    "observacions": "Es distreu amb textos llargs i te fatiga al final."
+  },
+  "context": {
+    "etapa": "ESO",
+    "curs": "3r",
+    "materia": "Ciencies socials"
+  },
+  "params": {
+    "mecr_sortida": "B1",
+    "dua": "Core",
+    "etapa": "ESO",
+    "materia": "Ciencies socials",
+    "genere_discursiu": "explicacio",
+    "complements": {
+      "glossari": true,
+      "preguntes_comprensio": true,
+      "esquema_visual": true,
+      "bastides": true
+    }
+  }
+}</pre>
+  </details>
+
+  <details>
+    <summary><b>Capes separades del prompt</b></summary>
+    <div class="layers">
+      <details class="layer"><summary>1 · IDENTITAT (corpus_reader.get_identity) — <em>1093 car · 152 mots</em></summary><pre class="layer-body">Ets l'assistent ATNE (Adaptador de Textos a Necessitats Educatives) de Jesuïtes Educació.
+
+OBJECTIU: Transformar textos educatius perquè siguin accessibles a l'alumnat descrit, seguint principis de DUA, Lectura Fàcil i MECR.
+
+TO: Acadèmic neutre. Respecta el registre del text original quan sigui identificable.
+
+FIDELITAT:
+- En adaptació: cada element ha de tenir correspondència amb l'original (Mayer). No inventis dades, exemples ni fets.
+- En complements (glossari, preguntes, esquemes): crea contingut nou derivat del text adaptat.
+
+RIGOR TERMINOLÒGIC: Conserva sempre els termes curriculars. Defineix-los, no els eliminis. MAI substitueixis per parafrasis buides ("la cosa verda", "el que fa que", "un tipus de").
+
+FORMAT: Comença DIRECTAMENT amb "## Text adaptat". Zero meta-text ("Here is...", "Let me...", "Okay...").
+
+LLENGUA: Català (o la llengua vehicular indicada).
+
+SEGURETAT:
+- No reprodueixis dades personals de l'alumne al text adaptat.
+- Evita exemples potencialment traumàtics amb perfils vulnerables.
+- No inventis estadístiques, dates ni fets no presents al text original.</pre></details>
+<details class="layer"><summary>2 · INSTRUCCIONS FILTRADES (instruction_filter.format_instructions_for_prompt) — <em>4084 car · 612 mots</em></summary><pre class="layer-body">**LÈXIC**:
+- Usa vocabulari freqüent. Substitueix termes poc habituals per equivalents d'alta freqüència lèxica.
+- Termes tècnics en **negreta** amb definició entre parèntesis la primera vegada.
+- Repetició lèxica coherent: un terme = un concepte. NO variïs per elegància (no sinònims).
+- Referents pronominals explícits: si ambigu, repeteix el nom complet.
+- Elimina expressions idiomàtiques, metàfores i sentit figurat. Tot literal.
+- Controla polisèmia: evita usos figurats o poc habituals d'un mot. Permet sentits habituals.
+- Connectors explícits entre frases: per tant, a més, en canvi, primer, després.
+- Scaffolding lleuger: defineix un terme la 1a vegada; després usa'l sense definició.
+- Desnominalitza: noms abstractes → verbs. Exemple: 'l'evaporació' → 'quan s'evapora'.
+- Evita doble negació. Permet negació simple i natural.
+- Dates en format complet (12 de març de 2026, no 12/03/26). Xifres amb context.
+- Sigles i abreviatures: escriu la forma completa la primera vegada. Ex: ONU (Organització de les Nacions Unides).
+
+**SINTAXI**:
+- Una idea per frase. Divideix frases llargues en unitats simples.
+- Prefereix veu activa. Permet passiva quan sigui natural i clara.
+- Subjecte explícit quan hi hagi risc d'ambigüitat. Permet elisió en contextos clars.
+- Ordre SVO per defecte. Permet inversions estilístiques si no generen ambigüitat.
+- Puntuació estàndard simplificada. Permet punt i coma ocasional. Evita parèntesis llargs.
+- Màxim 12-18 paraules per frase.
+- Es permeten subordinades simples (que, quan, si).
+- Permet incisos breus i parèntesis explicatius. Evita incisos de &gt;8 mots.
+
+**ESTRUCTURA**:
+- Paràgrafs curts: 3-5 frases màxim. Un tema per paràgraf.
+- Blocs temàtics amb títol descriptiu. Format pregunta quan sigui possible.
+- Frase tòpic al principi de cada paràgraf: anticipa el contingut.
+- Llista si 4+ elements o si l'enumeració és complexa.
+- Estructura deductiva: general → particular. Primer la idea, després els detalls.
+- Ordre cronològic per a processos i seqüències.
+- Resum recapitulatiu d'un paràgraf breu amb les idees clau i connexions.
+- Numera els passos i seqüències. Cada pas en línia separada.
+- Transicions entre seccions: 'Ja hem vist X. Ara veurem Y.'
+- Indicadors de progrés: [Secció X de Y] al principi de cada bloc.
+- Taules per informació comparativa. Usa markdown: | Col1 | Col2 |
+
+**SUPORT COGNITIU**:
+- Retalla el text al 60-70% de l'extensió original, prioritzant el nucli curricular. Elimina exemples secundaris i detalls no essencials.
+- Màxim 2 conceptes nous per paràgraf.
+- Reforç dels conceptes més abstractes: exemple o analogia quan la definició sola no basti.
+- Chunking estricte: blocs de MÀXIM 2-3 elements (memòria de treball limitada). Repeteix informació clau a cada bloc. Afegeix resums parcials cada 2-3 paràgrafs.
+- Analogia o comparació per als conceptes nous o complexos.
+
+**RIGOR CURRICULAR**:
+- Eliminació de redundància decorativa (principi de coherència, Mayer): cada element ha de tenir funció pedagògica clara.
+- Nucli terminològic intocable: MAI substitueixis un terme tècnic curricular per un de col·loquial.
+- Definició estàndard amb context.
+- Mantén l'exactitud científica: les simplificacions lingüístiques NO poden introduir errors conceptuals.
+- Simplifica processos mantenint la causalitat: la cadena causa→efecte ha de ser completa.
+- Exemple concret o cas real per als conceptes més complexos o nous.
+- Contra-exemples per delimitar conceptes: 'Això SÍ és X, però això NO és X perquè...'
+
+**MULTIMODALITAT**:
+- Esquema de procés en format text (fletxes, símbols) per mostrar relacions causa-efecte.
+
+**AVALUACIÓ I COMPRENSIÓ**:
+- Preguntes de comprensió intercalades dins del text: cada 2-3 paràgrafs, una pregunta ràpida.
+
+**PERSONALITZACIÓ LINGÜÍSTICA**:
+- To proper i acadèmic bàsic.
+
+**ADAPTACIONS PER PERFIL**:
+- Micro-blocs de 3-5 frases amb objectiu explícit per bloc ('En aquest bloc aprendràs...').
+- TDAH: retroalimentació visual de progrés — barres, percentatges, indicadors visuals.
+- TDAH: variació dins el text — alterna lectura, esquema, pregunta per mantenir l'atenció.</pre></details>
+<details class="layer"><summary>3 · DUA (corpus_reader.get_dua_block) — <em>239 car · 36 mots</em></summary><pre class="layer-body">NIVELL DUA: Core — Llenguatge Clar (ISO 24495) dins del límit MECR
+- Adaptació estàndard mantenint rigor curricular
+- Frases curtes, vocabulari freqüent
+- Definicions per termes tècnics (la primera vegada)
+- Estructura clara amb connectors</pre></details>
+<details class="layer"><summary>4 · GÈNERE (corpus_reader.get_genre_block) — <em>236 car · 36 mots</em></summary><pre class="layer-body">GÈNERE DISCURSIU: Explicació
+- Progressió del simple al complex
+- Causa → efecte explícita (connector "perquè", "per tant")
+- Desnominalitza processos ("l'oxidació" → "quan s'oxida")
+- Estructura: què és → com funciona → per què importa</pre></details>
+<details class="layer"><summary>5 · PERSONA-AUDIENCE (server.py:1032 build_persona_audience) — <em>353 car · 55 mots</em></summary><pre class="layer-body">Escrius per a un alumne de ESO (3r).
+TDAH, presentació combinat (grau moderat).
+Memòria de treball baixa: limitar elements simultanis, repetir informació clau.
+Fatiga cognitiva: es cansa ràpid amb textos llargs, necessita text reduït i pauses visuals.
+Nivell MECR de sortida: B1.
+Observació del docent: Es distreu amb textos llargs i te fatiga al final.</pre></details>
+<details class="layer"><summary>6 · FEW-SHOT (eliminat 2026-04-09 — sempre buit) — <em>268 car · 39 mots</em></summary><pre class="layer-body">**Original:** (mateix text)
+**Adaptat:**
+#### Text adaptat
+La **fotosíntesi** (procés bioquímic de les plantes per produir aliment) és fonamental per a la vida.
+En aquest procés, les plantes absorbeixen llum solar i la converteixen en energia química que emmagatzemen.</pre></details>
+    </div>
+  </details>
+
+  <details open>
+    <summary><b>Prompt complet (real, generat amb el codi del repo)</b></summary>
+    <pre class="prompt">Ets l'assistent ATNE (Adaptador de Textos a Necessitats Educatives) de Jesuïtes Educació.
+
+OBJECTIU: Transformar textos educatius perquè siguin accessibles a l'alumnat descrit, seguint principis de DUA, Lectura Fàcil i MECR.
+
+TO: Acadèmic neutre. Respecta el registre del text original quan sigui identificable.
+
+FIDELITAT:
+- En adaptació: cada element ha de tenir correspondència amb l'original (Mayer). No inventis dades, exemples ni fets.
+- En complements (glossari, preguntes, esquemes): crea contingut nou derivat del text adaptat.
+
+RIGOR TERMINOLÒGIC: Conserva sempre els termes curriculars. Defineix-los, no els eliminis. MAI substitueixis per parafrasis buides ("la cosa verda", "el que fa que", "un tipus de").
+
+FORMAT: Comença DIRECTAMENT amb "## Text adaptat". Zero meta-text ("Here is...", "Let me...", "Okay...").
+
+LLENGUA: Català (o la llengua vehicular indicada).
+
+SEGURETAT:
+- No reprodueixis dades personals de l'alumne al text adaptat.
+- Evita exemples potencialment traumàtics amb perfils vulnerables.
+- No inventis estadístiques, dates ni fets no presents al text original.
+**LÈXIC**:
+- Usa vocabulari freqüent. Substitueix termes poc habituals per equivalents d'alta freqüència lèxica.
+- Termes tècnics en **negreta** amb definició entre parèntesis la primera vegada.
+- Repetició lèxica coherent: un terme = un concepte. NO variïs per elegància (no sinònims).
+- Referents pronominals explícits: si ambigu, repeteix el nom complet.
+- Elimina expressions idiomàtiques, metàfores i sentit figurat. Tot literal.
+- Controla polisèmia: evita usos figurats o poc habituals d'un mot. Permet sentits habituals.
+- Connectors explícits entre frases: per tant, a més, en canvi, primer, després.
+- Scaffolding lleuger: defineix un terme la 1a vegada; després usa'l sense definició.
+- Desnominalitza: noms abstractes → verbs. Exemple: 'l'evaporació' → 'quan s'evapora'.
+- Evita doble negació. Permet negació simple i natural.
+- Dates en format complet (12 de març de 2026, no 12/03/26). Xifres amb context.
+- Sigles i abreviatures: escriu la forma completa la primera vegada. Ex: ONU (Organització de les Nacions Unides).
+
+**SINTAXI**:
+- Una idea per frase. Divideix frases llargues en unitats simples.
+- Prefereix veu activa. Permet passiva quan sigui natural i clara.
+- Subjecte explícit quan hi hagi risc d'ambigüitat. Permet elisió en contextos clars.
+- Ordre SVO per defecte. Permet inversions estilístiques si no generen ambigüitat.
+- Puntuació estàndard simplificada. Permet punt i coma ocasional. Evita parèntesis llargs.
+- Màxim 12-18 paraules per frase.
+- Es permeten subordinades simples (que, quan, si).
+- Permet incisos breus i parèntesis explicatius. Evita incisos de &gt;8 mots.
+
+**ESTRUCTURA**:
+- Paràgrafs curts: 3-5 frases màxim. Un tema per paràgraf.
+- Blocs temàtics amb títol descriptiu. Format pregunta quan sigui possible.
+- Frase tòpic al principi de cada paràgraf: anticipa el contingut.
+- Llista si 4+ elements o si l'enumeració és complexa.
+- Estructura deductiva: general → particular. Primer la idea, després els detalls.
+- Ordre cronològic per a processos i seqüències.
+- Resum recapitulatiu d'un paràgraf breu amb les idees clau i connexions.
+- Numera els passos i seqüències. Cada pas en línia separada.
+- Transicions entre seccions: 'Ja hem vist X. Ara veurem Y.'
+- Indicadors de progrés: [Secció X de Y] al principi de cada bloc.
+- Taules per informació comparativa. Usa markdown: | Col1 | Col2 |
+
+**SUPORT COGNITIU**:
+- Retalla el text al 60-70% de l'extensió original, prioritzant el nucli curricular. Elimina exemples secundaris i detalls no essencials.
+- Màxim 2 conceptes nous per paràgraf.
+- Reforç dels conceptes més abstractes: exemple o analogia quan la definició sola no basti.
+- Chunking estricte: blocs de MÀXIM 2-3 elements (memòria de treball limitada). Repeteix informació clau a cada bloc. Afegeix resums parcials cada 2-3 paràgrafs.
+- Analogia o comparació per als conceptes nous o complexos.
+
+**RIGOR CURRICULAR**:
+- Eliminació de redundància decorativa (principi de coherència, Mayer): cada element ha de tenir funció pedagògica clara.
+- Nucli terminològic intocable: MAI substitueixis un terme tècnic curricular per un de col·loquial.
+- Definició estàndard amb context.
+- Mantén l'exactitud científica: les simplificacions lingüístiques NO poden introduir errors conceptuals.
+- Simplifica processos mantenint la causalitat: la cadena causa→efecte ha de ser completa.
+- Exemple concret o cas real per als conceptes més complexos o nous.
+- Contra-exemples per delimitar conceptes: 'Això SÍ és X, però això NO és X perquè...'
+
+**MULTIMODALITAT**:
+- Esquema de procés en format text (fletxes, símbols) per mostrar relacions causa-efecte.
+
+**AVALUACIÓ I COMPRENSIÓ**:
+- Preguntes de comprensió intercalades dins del text: cada 2-3 paràgrafs, una pregunta ràpida.
+
+**PERSONALITZACIÓ LINGÜÍSTICA**:
+- To proper i acadèmic bàsic.
+
+**ADAPTACIONS PER PERFIL**:
+- Micro-blocs de 3-5 frases amb objectiu explícit per bloc ('En aquest bloc aprendràs...').
+- TDAH: retroalimentació visual de progrés — barres, percentatges, indicadors visuals.
+- TDAH: variació dins el text — alterna lectura, esquema, pregunta per mantenir l'atenció.
+NIVELL DUA: Core — Llenguatge Clar (ISO 24495) dins del límit MECR
+- Adaptació estàndard mantenint rigor curricular
+- Frases curtes, vocabulari freqüent
+- Definicions per termes tècnics (la primera vegada)
+- Estructura clara amb connectors
+GÈNERE DISCURSIU: Explicació
+- Progressió del simple al complex
+- Causa → efecte explícita (connector "perquè", "per tant")
+- Desnominalitza processos ("l'oxidació" → "quan s'oxida")
+- Estructura: què és → com funciona → per què importa
+PERSONA-AUDIENCE:
+Escrius per a un alumne de ESO (3r).
+TDAH, presentació combinat (grau moderat).
+Memòria de treball baixa: limitar elements simultanis, repetir informació clau.
+Fatiga cognitiva: es cansa ràpid amb textos llargs, necessita text reduït i pauses visuals.
+Nivell MECR de sortida: B1.
+Observació del docent: Es distreu amb textos llargs i te fatiga al final.
+CONEIXEMENT PEDAGÒGIC DE REFERÈNCIA (corpus FJE):
+[CONTEXT RAG SIMULAT — 8-12 fragments del corpus FJE recuperats per similitud vectorial]
+
+COMPLEMENTS A GENERAR (a més del text adaptat):
+- Glossari
+- Preguntes Comprensio
+- Esquema Visual
+- Bastides
+
+
+FORMAT DE SORTIDA:
+Respon EXACTAMENT amb les seccions següents, separades per encapçalaments ## .
+Genera NOMÉS les seccions indicades com ACTIVADES.
+
+## Text adaptat
+El text complet adaptat segons tots els paràmetres indicats.
+- Estructura clara amb salts de línia entre idees
+- Termes tècnics en **negreta** amb definició entre parèntesis la primera vegada
+- Una idea per frase
+- Si el nivell és A1 o inferior: frases molt curtes, vocabulari quotidià, sense subordinades
+
+
+## Glossari
+ACTIVAT — Genera una TAULA MARKDOWN amb 2 columnes:
+| Terme | Explicació simple |
+Inclou tots els termes tècnics o difícils del text adaptat (mínim 8-12 termes).
+L'explicació ha de ser en català molt senzill.
+
+
+## Esquema visual
+ACTIVAT — Genera un esquema/diagrama en format text que mostri el procés o les relacions del contingut.
+Format: usa fletxes (→, ↓), símbols (+, =) i emojis per fer-lo visual i intuïtiu.
+Exemple de format:
+```
+ELEMENT A ☀️
+  ↓
++ ELEMENT B 💧
+  ↓
+RESULTAT → PRODUCTE 1 + PRODUCTE 2
+```
+Ha de ser senzill, visual i comprensible per a l'alumne.
+
+
+## Preguntes de comprensió
+ACTIVAT — Genera un guió de comprensió lectora segons el model MALL/TILC
+(3 moments × 3 nivells de lectura amb formats variats).
+
+### CONTEXT PEDAGÒGIC (l'has d'usar per modular les preguntes)
+- Matèria/àmbit: Ciencies socials
+- Etapa: ESO · Nivell MECR: el nivell MECR indicat
+- Gènere discursiu: explicacio
+- Modalitat del text: INFORMATIU (precisió conceptual, dades, relacions causa-efecte)
+
+### MOMENT 1 — Abans de llegir (activació) · 3 preguntes
+Objectiu: activar coneixements previs, formular hipòtesis i fixar propòsit.
+Genera:
+- **[Hipòtesi]** 1 pregunta sobre el títol o imatges ("De què creus que parlarà…?")
+- **[Activació]** 1 pregunta per connectar amb el que l'alumne ja sap
+- **[Propòsit]** 1 pregunta sobre què volem aprendre amb aquest text
+
+### MOMENT 2 — Durant la lectura (processament actiu) · 3 preguntes
+Objectiu: fer l'alumne lector actiu, que verifiqui hipòtesis i treballi el lèxic.
+Genera:
+- **[Inferència en curs]** 1 pregunta del tipus "Per què creus que diu…?" o "Què vol dir quan afirma…?"
+- **[Visualització]** 1 pregunta per crear imatge mental ("Imagina't…", "Quins sons…", "Com el dibuixaries?")
+- **[Lèxic en context]** 1 pregunta per deduir el significat d'una paraula difícil del text a partir del context (no donar la resposta)
+
+### MOMENT 3 — Després de llegir · distribuïdes en 3 nivells de comprensió
+Genera **7-8 preguntes en TOTAL**, distribuïdes així i amb FORMATS DIFERENTS
+(alterna obertes, verdader/fals, opció múltiple, omplir buits, relaciona amb fletxes):
+
+**Nivell LITERAL** — "Llegir les línies" · 2-3 preguntes
+Informació explícita. Exemples de format a alternar:
+- **[Literal · oberta curta]** "On vivia…?" / "Què servia per…?"
+- **[Literal · V/F amb justificació]** 3 afirmacions on l'alumne marca ✓/✗ i cita la frase que ho demostra
+- **[Literal · opció múltiple]** 1 pregunta amb 3-4 opcions (1 correcta)
+- **[Literal · omplir buits]** "El ______ es feia servir per ______." (amb o sense banc de paraules)
+- **[Literal · relaciona]** 2 columnes (concepte ↔ definició del text)
+
+**Nivell INFERENCIAL** — "Llegir entre línies" · 2-3 preguntes
+Deducció, causa-efecte, intencions no explícites:
+- **[Inferencial · per què]** "Per què creus que …?"
+- **[Inferencial · i si…]** "Què passaria si …?" (contrafactual)
+- **[Inferencial · relaciona causa-efecte]** 2 columnes (causa ↔ conseqüència)
+
+**Nivell CRÍTIC/PROFUND** — "Llegir rere les línies" · 2 preguntes
+Judici, transferència, connexió amb l'experiència pròpia:
+- **[Crític · argumentativa]** Pregunta oberta que demana posició argumentada amb dades del text
+  (la bastida al complement Bastides ajudarà a respondre-la)
+- **[Crític · jo / transferència]** "Què faries tu si…?" o "Com connecta això amb…?"
+  (També vàlid: lectura crítica de biaixos si el text n'ha)
+
+### ADEQUACIÓ PER ETAPA (imprescindible)
+- **Infantil / Cicle Inicial (A1)**: predomina predicció visual, connexió amb el jo,
+  dibuix. EVITA mots com "justifica" o "argumenta". Preguntes molt curtes i concretes.
+- **Cicle Mitjà / Superior primària (A2-B1)**: idea principal, relacions entre idees,
+  verificació d'hipòtesis, comparacions.
+- **Secundària (B1-B2)**: arguments de l'autor, connectors lògics, contrast de fonts,
+  explicar vs justificar (connectar amb el model teòric de la matèria).
+- **Batxillerat/FP (C1)**: anàlisi crítica, intertextualitat, biaixos, multiplicitat de fonts.
+
+### DISTINCIÓ LITERARI vs INFORMATIU
+- Si és LITERARI: deixa "buits" interpretatius — preguntes afectives, d'identificació,
+  d'imatges mentals, de reescriptura creativa.
+- Si és INFORMATIU: precisió conceptual — dades, definicions, relacions causa-efecte,
+  connexió amb el model teòric de Ciencies socials.
+
+### FORMAT DE SORTIDA
+- Cada moment amb encapçalament ### i les preguntes numerades.
+- Davant de cada pregunta posa entre claudàtors la ETIQUETA del tipus
+  (ex: [Literal · V/F], [Inferencial · per què], [Crític · argumentativa]).
+- Si és omplir buits o relacionar, presenta-ho visualment (amb fletxes, guions, etc.).
+
+
+## Bastides (scaffolding)
+ACTIVAT — Suports didàctics reals per AJUDAR L'ALUMNE A PRODUIR les respostes
+(model MALL/TILC: patró lingüístic de la matèria + connectors + lèxic temàtic).
+
+### CONTEXT
+- Matèria: Ciencies socials
+- Etapa: ESO · MECR: el nivell MECR indicat
+- Si l'alumne és nouvingut, L1: la llengua materna de l'alumne
+
+### 1. Taula de connectors lògics
+Taula amb els connectors del tipus de raonament que demanen les preguntes:
+| Funció | Connectors (adequats al MECR el nivell MECR indicat) |
+|---|---|
+| Causa | perquè, com que, ja que, a causa de |
+| Conseqüència | per tant, així doncs, en conseqüència, per això |
+| Oposició / contrast | però, en canvi, tanmateix, malgrat que |
+| Exemplificació | per exemple, com ara, en concret |
+| Conclusió | en resum, per acabar, en definitiva |
+Adapta la quantitat i complexitat al nivell.
+
+### 2. Frases model per argumentar amb el text
+4-6 bastides d'inici de frase perquè l'alumne escrigui respostes ben formulades:
+- "Segons el text, ______ perquè ______."
+- "Podem deduir que ______ ja que el text diu que ______."
+- "A diferència de ______, ______ s'assembla a ______ perquè ______."
+- "Un exemple d'això és ______."
+- "Jo crec que ______, i ho justifico perquè ______."
+Adapta la complexitat al MECR: més simples a A1-A2, més sofisticades a B1-C1.
+
+### 3. Banc de paraules (lèxic temàtic de Ciencies socials)
+8-12 paraules del patró lingüístic de la matèria, extretes del text o complementàries,
+que l'alumne pot usar per respondre. Si escau, agrupa-les per camp semàntic.
+Format: paraula1 – paraula2 – paraula3 – …
+
+### 4. Suport visual recomanat
+Indica 2-3 suports visuals concrets que afegirien valor (icones, colors destacats,
+esquemes, línies de temps, mapes, gràfiques, fotografies…) i on ubicar-los al text.
+
+### 5. Crosses de lectura (abans d'engegar)
+2-3 pistes concretes perquè l'alumne enfoqui bé la lectura:
+- Què ha de buscar mentre llegeix (1-2 elements clau)?
+- Com marcar el que és important (subratllar, prendre nota, fletxes)?
+- Quin és el propòsit d'aquesta lectura?
+
+### 6. Suport L1
+Si l'alumne és nouvingut, tradueix 5-8 conceptes més abstractes a la llengua materna de l'alumne
+(en l'alfabet original si escau: àrab, xinès, urdú, etc.).
+
+### ADEQUACIÓ PER ETAPA
+- Infantil / Cicle Inicial: crosses FÍSIQUES i VISUALS (imatges, colors, referents sonors).
+- Cicle Mitjà / Superior / ESO: crosses PROCEDIMENTALS (estratègies, plantilles, taules).
+- Batxillerat / FP: estratègies de SÍNTESI i anàlisi crítica de múltiples fonts.
+
+
+## Argumentació pedagògica
+SEMPRE GENERAR — Explica les decisions pedagògiques preses, organitzades per àrees:
+1. **Adaptació lingüística**: què s'ha simplificat i per què (nivell MECR, tipus de frases, vocabulari)
+2. **Atenció a la diversitat**: com s'han tingut en compte les necessitats específiques (dislèxia, TEA, nouvingut, etc.)
+3. **Suport multimodal**: quins canals s'han activat (visual, lingüístic, cognitiu) i per què
+4. **Gradació cognitiva**: com s'ha organitzat la progressió (de reconeixement a producció)
+5. **Rigor curricular**: quins continguts s'han mantingut íntegres i per què
+Breu, 3-5 punts amb explicació de 1-2 frases cadascun.
+
+## Notes d'auditoria
+SEMPRE GENERAR — Taula comparativa breu dels canvis principals:
+| Aspecte | Original | Adaptat | Motiu |
+Màxim 5-6 files amb els canvis més significatius.
+
+
+Omès les seccions marcades com NO ACTIVADES. No generis seccions buides.
+</pre>
+  </details>
+
+  <details>
+    <summary><b>Audit (IDs incloses + suprimides)</b></summary>
+    <table class="audit">
+      <thead><tr><th>ID</th><th>Macro</th><th>Motiu</th></tr></thead>
+      <tbody>
+        <tr class="incl"><td>A-01</td><td>LEXIC</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>A-02</td><td>LEXIC</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>A-03</td><td>LEXIC</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>A-04</td><td>LEXIC</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>A-05</td><td>LEXIC</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>A-06</td><td>LEXIC</td><td>NIVELL B1</td></tr>
+<tr class="incl"><td>A-07</td><td>SINTAXI</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>A-08</td><td>SINTAXI</td><td>NIVELL B1</td></tr>
+<tr class="incl"><td>A-09</td><td>SINTAXI</td><td>NIVELL B1</td></tr>
+<tr class="incl"><td>A-10</td><td>SINTAXI</td><td>NIVELL B1</td></tr>
+<tr class="incl"><td>A-11</td><td>SINTAXI</td><td>NIVELL B1</td></tr>
+<tr class="incl"><td>A-12</td><td>SINTAXI</td><td>NIVELL B1</td></tr>
+<tr class="incl"><td>A-13</td><td>SINTAXI</td><td>NIVELL B1</td></tr>
+<tr class="incl"><td>A-14</td><td>LEXIC</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>A-15</td><td>LEXIC</td><td>NIVELL B1</td></tr>
+<tr class="incl"><td>A-16</td><td>LEXIC</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>A-17</td><td>LEXIC</td><td>NIVELL B1</td></tr>
+<tr class="incl"><td>A-18</td><td>LEXIC</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>A-19</td><td>LEXIC</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>A-26</td><td>SINTAXI</td><td>NIVELL B1</td></tr>
+<tr class="incl"><td>A-27</td><td>COGNITIU</td><td>PERFIL tdah + subvar</td></tr>
+<tr class="incl"><td>B-01</td><td>ESTRUCTURA</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>B-02</td><td>ESTRUCTURA</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>B-03</td><td>ESTRUCTURA</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>B-04</td><td>ESTRUCTURA</td><td>NIVELL B1</td></tr>
+<tr class="incl"><td>B-05</td><td>ESTRUCTURA</td><td>NIVELL B1</td></tr>
+<tr class="incl"><td>B-06</td><td>ESTRUCTURA</td><td>NIVELL B1</td></tr>
+<tr class="incl"><td>B-08</td><td>ESTRUCTURA</td><td>NIVELL B1</td></tr>
+<tr class="incl"><td>B-09</td><td>ESTRUCTURA</td><td>NIVELL B1</td></tr>
+<tr class="incl"><td>B-10</td><td>ESTRUCTURA</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>B-13</td><td>ESTRUCTURA</td><td>PERFIL tdah</td></tr>
+<tr class="incl"><td>B-14</td><td>ESTRUCTURA</td><td>NIVELL B1</td></tr>
+<tr class="incl"><td>C-01</td><td>COGNITIU</td><td>NIVELL B1</td></tr>
+<tr class="incl"><td>C-02</td><td>COGNITIU</td><td>NIVELL B1</td></tr>
+<tr class="incl"><td>C-03</td><td>QUALITAT</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>C-04</td><td>COGNITIU</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>C-06</td><td>COGNITIU</td><td>NIVELL B1</td></tr>
+<tr class="incl"><td>D-02</td><td>MULTIMODAL</td><td>COMPLEMENT esquema_visual</td></tr>
+<tr class="incl"><td>E-01</td><td>QUALITAT</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>E-02</td><td>QUALITAT</td><td>NIVELL B1</td></tr>
+<tr class="incl"><td>E-05</td><td>QUALITAT</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>E-06</td><td>QUALITAT</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>E-07</td><td>QUALITAT</td><td>NIVELL B1</td></tr>
+<tr class="incl"><td>E-12</td><td>QUALITAT</td><td>NIVELL B1</td></tr>
+<tr class="incl"><td>F-06</td><td>AVALUACIO</td><td>PERFIL tdah</td></tr>
+<tr class="incl"><td>G-06</td><td>PERSONALITZACIO</td><td>NIVELL B1</td></tr>
+<tr class="incl"><td>H-04</td><td>PERFIL</td><td>PERFIL tdah</td></tr>
+<tr class="incl"><td>H-05</td><td>PERFIL</td><td>PERFIL tdah</td></tr>
+<tr class="incl"><td>H-06</td><td>PERFIL</td><td>PERFIL tdah</td></tr>
+      </tbody>
+    </table>
+  </details>
+</section>
+
+
+
+<section class="case" id="cas-aacc">
+  <h3>5.2 Cas B — Pol Vidal (AACC global) · text Bosc mediterrani · 4t ESO B2 Enriquiment</h3>
+  <div class="case-meta">
+    <span class="pill"><b>Caràcters:</b> 10453</span>
+    <span class="pill"><b>Paraules:</b> 1519</span>
+    <span class="pill"><b>Instruccions actives:</b> 24</span>
+    <span class="pill"><b>Suprimides:</b> 5</span>
+  </div>
+
+  <details>
+    <summary><b>Body enviat a <code>/api/prompt-preview</code></b></summary>
+    <pre class="json">{
+  "profile": {
+    "nom": "Pol Vidal (Altes Capacitats)",
+    "caracteristiques": {
+      "altes_capacitats": {
+        "actiu": true,
+        "tipus_capacitat": "global"
+      }
+    },
+    "observacions": "Acaba molt rapid i es desmotiva. Busca reptes."
+  },
+  "context": {
+    "etapa": "ESO",
+    "curs": "4t",
+    "materia": "Biologia"
+  },
+  "params": {
+    "mecr_sortida": "B2",
+    "dua": "Enriquiment",
+    "etapa": "ESO",
+    "materia": "Biologia",
+    "genere_discursiu": "explicacio",
+    "complements": {
+      "activitats_aprofundiment": true,
+      "mapa_mental": true,
+      "preguntes_comprensio": true
+    }
+  }
+}</pre>
+  </details>
+
+  <details>
+    <summary><b>Capes separades del prompt</b></summary>
+    <div class="layers">
+      <details class="layer"><summary>1 · IDENTITAT (corpus_reader.get_identity) — <em>1093 car · 152 mots</em></summary><pre class="layer-body">Ets l'assistent ATNE (Adaptador de Textos a Necessitats Educatives) de Jesuïtes Educació.
+
+OBJECTIU: Transformar textos educatius perquè siguin accessibles a l'alumnat descrit, seguint principis de DUA, Lectura Fàcil i MECR.
+
+TO: Acadèmic neutre. Respecta el registre del text original quan sigui identificable.
+
+FIDELITAT:
+- En adaptació: cada element ha de tenir correspondència amb l'original (Mayer). No inventis dades, exemples ni fets.
+- En complements (glossari, preguntes, esquemes): crea contingut nou derivat del text adaptat.
+
+RIGOR TERMINOLÒGIC: Conserva sempre els termes curriculars. Defineix-los, no els eliminis. MAI substitueixis per parafrasis buides ("la cosa verda", "el que fa que", "un tipus de").
+
+FORMAT: Comença DIRECTAMENT amb "## Text adaptat". Zero meta-text ("Here is...", "Let me...", "Okay...").
+
+LLENGUA: Català (o la llengua vehicular indicada).
+
+SEGURETAT:
+- No reprodueixis dades personals de l'alumne al text adaptat.
+- Evita exemples potencialment traumàtics amb perfils vulnerables.
+- No inventis estadístiques, dates ni fets no presents al text original.</pre></details>
+<details class="layer"><summary>2 · INSTRUCCIONS FILTRADES (instruction_filter.format_instructions_for_prompt) — <em>2343 car · 328 mots</em></summary><pre class="layer-body">**⚠️ ENRIQUIMENT — NO SIMPLIFIQUIS**:
+- Altes capacitats: profundització conceptual — excepcions, fronteres del coneixement, debats oberts.
+- Altes capacitats: PROHIBIT SIMPLIFICAR. Mantén la complexitat lingüística i conceptual original o augmenta-la. NO facis servir vocabulari freqüent, NO eliminis subordinades, NO escurcis frases, NO desnominalitzis, NO eliminis sentit figurat. Les regles universals de simplificació NO s'apliquen a aquest perfil.
+
+**LÈXIC**:
+- Termes tècnics en **negreta** amb definició entre parèntesis la primera vegada.
+- Referents pronominals explícits: si ambigu, repeteix el nom complet.
+- Connectors explícits entre frases: per tant, a més, en canvi, primer, després.
+- Dates en format complet (12 de març de 2026, no 12/03/26). Xifres amb context.
+- Sigles i abreviatures: escriu la forma completa la primera vegada. Ex: ONU (Organització de les Nacions Unides).
+
+**SINTAXI**:
+- Màxim 25 paraules per frase.
+- Estructures complexes permeses.
+
+**ESTRUCTURA**:
+- Paràgrafs curts: 3-5 frases màxim. Un tema per paràgraf.
+- Blocs temàtics amb títol descriptiu. Format pregunta quan sigui possible.
+- Frase tòpic al principi de cada paràgraf: anticipa el contingut.
+- Transicions entre seccions: 'Ja hem vist X. Ara veurem Y.'
+
+**SUPORT COGNITIU**:
+- Densitat conceptual estàndard.
+- Chunking: agrupa informació en blocs de 3-5 elements (límit memòria de treball).
+
+**RIGOR CURRICULAR**:
+- Eliminació de redundància decorativa (principi de coherència, Mayer): cada element ha de tenir funció pedagògica clara.
+- Nucli terminològic intocable: MAI substitueixis un terme tècnic curricular per un de col·loquial.
+- Definició acadèmica completa.
+- Mantén l'exactitud científica: les simplificacions lingüístiques NO poden introduir errors conceptuals.
+- Simplifica processos mantenint la causalitat: la cadena causa→efecte ha de ser completa.
+- Contra-exemples per delimitar conceptes: 'Això SÍ és X, però això NO és X perquè...'
+
+**AVALUACIÓ I COMPRENSIÓ**:
+- Preguntes de pensament crític: per què? i si...? quines alternatives? quines limitacions?
+- Connexions interdisciplinars: relaciona el contingut amb altres matèries i àmbits de coneixement.
+
+**PERSONALITZACIÓ LINGÜÍSTICA**:
+- To acadèmic complet.
+
+⚠️ IMPORTANT: 5 regles de simplificació DESACTIVADES per aquest perfil. NO simplifiquis el text. Enriqueix-lo.</pre></details>
+<details class="layer"><summary>3 · DUA (corpus_reader.get_dua_block) — <em>288 car · 37 mots</em></summary><pre class="layer-body">NIVELL DUA: Enriquiment — Màxima complexitat dins del MECR
+- NO simplifiquis: mantén complexitat lingüística i conceptual
+- Afegeix profunditat: excepcions, fronteres del coneixement, debats oberts
+- Connexions interdisciplinars
+- Preguntes de pensament crític (analitzar, avaluar, crear)</pre></details>
+<details class="layer"><summary>4 · GÈNERE (corpus_reader.get_genre_block) — <em>236 car · 36 mots</em></summary><pre class="layer-body">GÈNERE DISCURSIU: Explicació
+- Progressió del simple al complex
+- Causa → efecte explícita (connector "perquè", "per tant")
+- Desnominalitza processos ("l'oxidació" → "quan s'oxida")
+- Estructura: què és → com funciona → per què importa</pre></details>
+<details class="layer"><summary>5 · PERSONA-AUDIENCE (server.py:1032 build_persona_audience) — <em>233 car · 35 mots</em></summary><pre class="layer-body">Escrius per a un alumne de ESO (4t).
+Altes capacitats globals. NO simplificar. Enriquir amb profunditat i connexions interdisciplinars.
+Nivell MECR de sortida: B2.
+Observació del docent: Acaba molt rapid i es desmotiva. Busca reptes.</pre></details>
+<details class="layer"><summary>6 · FEW-SHOT (eliminat 2026-04-09 — sempre buit) — <em>251 car · 31 mots</em></summary><pre class="layer-body">**Original:** (mateix text)
+**Adaptat:**
+#### Text adaptat
+La **fotosíntesi** és el procés bioquímic mitjançant el qual els organismes fotosintetitzadors transformen l'energia lluminosa en energia química, emmagatzemada en forma de compostos orgànics.</pre></details>
+    </div>
+  </details>
+
+  <details open>
+    <summary><b>Prompt complet (real, generat amb el codi del repo)</b></summary>
+    <pre class="prompt">Ets l'assistent ATNE (Adaptador de Textos a Necessitats Educatives) de Jesuïtes Educació.
+
+OBJECTIU: Transformar textos educatius perquè siguin accessibles a l'alumnat descrit, seguint principis de DUA, Lectura Fàcil i MECR.
+
+TO: Acadèmic neutre. Respecta el registre del text original quan sigui identificable.
+
+FIDELITAT:
+- En adaptació: cada element ha de tenir correspondència amb l'original (Mayer). No inventis dades, exemples ni fets.
+- En complements (glossari, preguntes, esquemes): crea contingut nou derivat del text adaptat.
+
+RIGOR TERMINOLÒGIC: Conserva sempre els termes curriculars. Defineix-los, no els eliminis. MAI substitueixis per parafrasis buides ("la cosa verda", "el que fa que", "un tipus de").
+
+FORMAT: Comença DIRECTAMENT amb "## Text adaptat". Zero meta-text ("Here is...", "Let me...", "Okay...").
+
+LLENGUA: Català (o la llengua vehicular indicada).
+
+SEGURETAT:
+- No reprodueixis dades personals de l'alumne al text adaptat.
+- Evita exemples potencialment traumàtics amb perfils vulnerables.
+- No inventis estadístiques, dates ni fets no presents al text original.
+**⚠️ ENRIQUIMENT — NO SIMPLIFIQUIS**:
+- Altes capacitats: profundització conceptual — excepcions, fronteres del coneixement, debats oberts.
+- Altes capacitats: PROHIBIT SIMPLIFICAR. Mantén la complexitat lingüística i conceptual original o augmenta-la. NO facis servir vocabulari freqüent, NO eliminis subordinades, NO escurcis frases, NO desnominalitzis, NO eliminis sentit figurat. Les regles universals de simplificació NO s'apliquen a aquest perfil.
+
+**LÈXIC**:
+- Termes tècnics en **negreta** amb definició entre parèntesis la primera vegada.
+- Referents pronominals explícits: si ambigu, repeteix el nom complet.
+- Connectors explícits entre frases: per tant, a més, en canvi, primer, després.
+- Dates en format complet (12 de març de 2026, no 12/03/26). Xifres amb context.
+- Sigles i abreviatures: escriu la forma completa la primera vegada. Ex: ONU (Organització de les Nacions Unides).
+
+**SINTAXI**:
+- Màxim 25 paraules per frase.
+- Estructures complexes permeses.
+
+**ESTRUCTURA**:
+- Paràgrafs curts: 3-5 frases màxim. Un tema per paràgraf.
+- Blocs temàtics amb títol descriptiu. Format pregunta quan sigui possible.
+- Frase tòpic al principi de cada paràgraf: anticipa el contingut.
+- Transicions entre seccions: 'Ja hem vist X. Ara veurem Y.'
+
+**SUPORT COGNITIU**:
+- Densitat conceptual estàndard.
+- Chunking: agrupa informació en blocs de 3-5 elements (límit memòria de treball).
+
+**RIGOR CURRICULAR**:
+- Eliminació de redundància decorativa (principi de coherència, Mayer): cada element ha de tenir funció pedagògica clara.
+- Nucli terminològic intocable: MAI substitueixis un terme tècnic curricular per un de col·loquial.
+- Definició acadèmica completa.
+- Mantén l'exactitud científica: les simplificacions lingüístiques NO poden introduir errors conceptuals.
+- Simplifica processos mantenint la causalitat: la cadena causa→efecte ha de ser completa.
+- Contra-exemples per delimitar conceptes: 'Això SÍ és X, però això NO és X perquè...'
+
+**AVALUACIÓ I COMPRENSIÓ**:
+- Preguntes de pensament crític: per què? i si...? quines alternatives? quines limitacions?
+- Connexions interdisciplinars: relaciona el contingut amb altres matèries i àmbits de coneixement.
+
+**PERSONALITZACIÓ LINGÜÍSTICA**:
+- To acadèmic complet.
+
+⚠️ IMPORTANT: 5 regles de simplificació DESACTIVADES per aquest perfil. NO simplifiquis el text. Enriqueix-lo.
+NIVELL DUA: Enriquiment — Màxima complexitat dins del MECR
+- NO simplifiquis: mantén complexitat lingüística i conceptual
+- Afegeix profunditat: excepcions, fronteres del coneixement, debats oberts
+- Connexions interdisciplinars
+- Preguntes de pensament crític (analitzar, avaluar, crear)
+GÈNERE DISCURSIU: Explicació
+- Progressió del simple al complex
+- Causa → efecte explícita (connector "perquè", "per tant")
+- Desnominalitza processos ("l'oxidació" → "quan s'oxida")
+- Estructura: què és → com funciona → per què importa
+PERSONA-AUDIENCE:
+Escrius per a un alumne de ESO (4t).
+Altes capacitats globals. NO simplificar. Enriquir amb profunditat i connexions interdisciplinars.
+Nivell MECR de sortida: B2.
+Observació del docent: Acaba molt rapid i es desmotiva. Busca reptes.
+CONEIXEMENT PEDAGÒGIC DE REFERÈNCIA (corpus FJE):
+[CONTEXT RAG SIMULAT — 8-12 fragments del corpus FJE recuperats per similitud vectorial]
+
+COMPLEMENTS A GENERAR (a més del text adaptat):
+- Activitats Aprofundiment
+- Mapa Mental
+- Preguntes Comprensio
+
+
+FORMAT DE SORTIDA:
+Respon EXACTAMENT amb les seccions següents, separades per encapçalaments ## .
+Genera NOMÉS les seccions indicades com ACTIVADES.
+
+## Text adaptat
+El text complet adaptat segons tots els paràmetres indicats.
+- Estructura clara amb salts de línia entre idees
+- Termes tècnics en **negreta** amb definició entre parèntesis la primera vegada
+- Una idea per frase
+- Si el nivell és A1 o inferior: frases molt curtes, vocabulari quotidià, sense subordinades
+
+
+## Preguntes de comprensió
+ACTIVAT — Genera un guió de comprensió lectora segons el model MALL/TILC
+(3 moments × 3 nivells de lectura amb formats variats).
+
+### CONTEXT PEDAGÒGIC (l'has d'usar per modular les preguntes)
+- Matèria/àmbit: Biologia
+- Etapa: ESO · Nivell MECR: el nivell MECR indicat
+- Gènere discursiu: explicacio
+- Modalitat del text: INFORMATIU (precisió conceptual, dades, relacions causa-efecte)
+
+### MOMENT 1 — Abans de llegir (activació) · 3 preguntes
+Objectiu: activar coneixements previs, formular hipòtesis i fixar propòsit.
+Genera:
+- **[Hipòtesi]** 1 pregunta sobre el títol o imatges ("De què creus que parlarà…?")
+- **[Activació]** 1 pregunta per connectar amb el que l'alumne ja sap
+- **[Propòsit]** 1 pregunta sobre què volem aprendre amb aquest text
+
+### MOMENT 2 — Durant la lectura (processament actiu) · 3 preguntes
+Objectiu: fer l'alumne lector actiu, que verifiqui hipòtesis i treballi el lèxic.
+Genera:
+- **[Inferència en curs]** 1 pregunta del tipus "Per què creus que diu…?" o "Què vol dir quan afirma…?"
+- **[Visualització]** 1 pregunta per crear imatge mental ("Imagina't…", "Quins sons…", "Com el dibuixaries?")
+- **[Lèxic en context]** 1 pregunta per deduir el significat d'una paraula difícil del text a partir del context (no donar la resposta)
+
+### MOMENT 3 — Després de llegir · distribuïdes en 3 nivells de comprensió
+Genera **7-8 preguntes en TOTAL**, distribuïdes així i amb FORMATS DIFERENTS
+(alterna obertes, verdader/fals, opció múltiple, omplir buits, relaciona amb fletxes):
+
+**Nivell LITERAL** — "Llegir les línies" · 2-3 preguntes
+Informació explícita. Exemples de format a alternar:
+- **[Literal · oberta curta]** "On vivia…?" / "Què servia per…?"
+- **[Literal · V/F amb justificació]** 3 afirmacions on l'alumne marca ✓/✗ i cita la frase que ho demostra
+- **[Literal · opció múltiple]** 1 pregunta amb 3-4 opcions (1 correcta)
+- **[Literal · omplir buits]** "El ______ es feia servir per ______." (amb o sense banc de paraules)
+- **[Literal · relaciona]** 2 columnes (concepte ↔ definició del text)
+
+**Nivell INFERENCIAL** — "Llegir entre línies" · 2-3 preguntes
+Deducció, causa-efecte, intencions no explícites:
+- **[Inferencial · per què]** "Per què creus que …?"
+- **[Inferencial · i si…]** "Què passaria si …?" (contrafactual)
+- **[Inferencial · relaciona causa-efecte]** 2 columnes (causa ↔ conseqüència)
+
+**Nivell CRÍTIC/PROFUND** — "Llegir rere les línies" · 2 preguntes
+Judici, transferència, connexió amb l'experiència pròpia:
+- **[Crític · argumentativa]** Pregunta oberta que demana posició argumentada amb dades del text
+  (la bastida al complement Bastides ajudarà a respondre-la)
+- **[Crític · jo / transferència]** "Què faries tu si…?" o "Com connecta això amb…?"
+  (També vàlid: lectura crítica de biaixos si el text n'ha)
+
+### ADEQUACIÓ PER ETAPA (imprescindible)
+- **Infantil / Cicle Inicial (A1)**: predomina predicció visual, connexió amb el jo,
+  dibuix. EVITA mots com "justifica" o "argumenta". Preguntes molt curtes i concretes.
+- **Cicle Mitjà / Superior primària (A2-B1)**: idea principal, relacions entre idees,
+  verificació d'hipòtesis, comparacions.
+- **Secundària (B1-B2)**: arguments de l'autor, connectors lògics, contrast de fonts,
+  explicar vs justificar (connectar amb el model teòric de la matèria).
+- **Batxillerat/FP (C1)**: anàlisi crítica, intertextualitat, biaixos, multiplicitat de fonts.
+
+### DISTINCIÓ LITERARI vs INFORMATIU
+- Si és LITERARI: deixa "buits" interpretatius — preguntes afectives, d'identificació,
+  d'imatges mentals, de reescriptura creativa.
+- Si és INFORMATIU: precisió conceptual — dades, definicions, relacions causa-efecte,
+  connexió amb el model teòric de Biologia.
+
+### FORMAT DE SORTIDA
+- Cada moment amb encapçalament ### i les preguntes numerades.
+- Davant de cada pregunta posa entre claudàtors la ETIQUETA del tipus
+  (ex: [Literal · V/F], [Inferencial · per què], [Crític · argumentativa]).
+- Si és omplir buits o relacionar, presenta-ho visualment (amb fletxes, guions, etc.).
+
+
+## Activitats d'aprofundiment
+ACTIVAT — Genera 2-3 activitats de repte cognitiu per a ESO:
+- Connexions interdisciplinars amb altres matèries
+- Pensament crític (per què? i si…? què passaria si…?)
+- Recerca guiada (a casa o a biblioteca)
+- Debat o reflexió argumentada
+- Si el text ho permet: dimensió plurilingüe (com es diu X en altres llengües de l'aula?)
+
+
+## Mapa mental
+ACTIVAT — Genera un mapa mental radial (diferent del mapa conceptual).
+El concepte central al mig, amb branques que s'expandeixen amb associacions lliures,
+preguntes generadores i connexions amb altres matèries.
+
+
+## Argumentació pedagògica
+SEMPRE GENERAR — Explica les decisions pedagògiques preses, organitzades per àrees:
+1. **Adaptació lingüística**: què s'ha simplificat i per què (nivell MECR, tipus de frases, vocabulari)
+2. **Atenció a la diversitat**: com s'han tingut en compte les necessitats específiques (dislèxia, TEA, nouvingut, etc.)
+3. **Suport multimodal**: quins canals s'han activat (visual, lingüístic, cognitiu) i per què
+4. **Gradació cognitiva**: com s'ha organitzat la progressió (de reconeixement a producció)
+5. **Rigor curricular**: quins continguts s'han mantingut íntegres i per què
+Breu, 3-5 punts amb explicació de 1-2 frases cadascun.
+
+## Notes d'auditoria
+SEMPRE GENERAR — Taula comparativa breu dels canvis principals:
+| Aspecte | Original | Adaptat | Motiu |
+Màxim 5-6 files amb els canvis més significatius.
+
+
+Omès les seccions marcades com NO ACTIVADES. No generis seccions buides.
+</pre>
+  </details>
+
+  <details>
+    <summary><b>Audit (IDs incloses + suprimides)</b></summary>
+    <table class="audit">
+      <thead><tr><th>ID</th><th>Macro</th><th>Motiu</th></tr></thead>
+      <tbody>
+        <tr class="suppr"><td>A-01</td><td>LEXIC</td><td>suprimit per AC/Enriquiment</td></tr>
+<tr class="incl"><td>A-02</td><td>LEXIC</td><td>SEMPRE</td></tr>
+<tr class="suppr"><td>A-03</td><td>LEXIC</td><td>suprimit per AC/Enriquiment</td></tr>
+<tr class="incl"><td>A-04</td><td>LEXIC</td><td>SEMPRE</td></tr>
+<tr class="suppr"><td>A-05</td><td>LEXIC</td><td>suprimit per AC/Enriquiment</td></tr>
+<tr class="suppr"><td>A-07</td><td>SINTAXI</td><td>suprimit per AC/Enriquiment</td></tr>
+<tr class="incl"><td>A-12</td><td>SINTAXI</td><td>NIVELL B2</td></tr>
+<tr class="incl"><td>A-13</td><td>SINTAXI</td><td>NIVELL B2</td></tr>
+<tr class="incl"><td>A-14</td><td>LEXIC</td><td>SEMPRE</td></tr>
+<tr class="suppr"><td>A-16</td><td>LEXIC</td><td>suprimit per AC/Enriquiment</td></tr>
+<tr class="incl"><td>A-18</td><td>LEXIC</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>A-19</td><td>LEXIC</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>B-01</td><td>ESTRUCTURA</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>B-02</td><td>ESTRUCTURA</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>B-03</td><td>ESTRUCTURA</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>B-10</td><td>ESTRUCTURA</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>C-01</td><td>COGNITIU</td><td>NIVELL B2</td></tr>
+<tr class="incl"><td>C-03</td><td>QUALITAT</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>C-04</td><td>COGNITIU</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>E-01</td><td>QUALITAT</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>E-02</td><td>QUALITAT</td><td>NIVELL B2</td></tr>
+<tr class="incl"><td>E-05</td><td>QUALITAT</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>E-06</td><td>QUALITAT</td><td>SEMPRE</td></tr>
+<tr class="incl"><td>E-12</td><td>QUALITAT</td><td>NIVELL B2</td></tr>
+<tr class="incl"><td>F-09</td><td>AVALUACIO</td><td>PERFIL altes_capacitats</td></tr>
+<tr class="incl"><td>F-10</td><td>AVALUACIO</td><td>PERFIL altes_capacitats</td></tr>
+<tr class="incl"><td>G-06</td><td>PERSONALITZACIO</td><td>NIVELL B2</td></tr>
+<tr class="incl"><td>H-12</td><td>ENRIQUIMENT</td><td>PERFIL altes_capacitats</td></tr>
+<tr class="incl"><td>H-14</td><td>ENRIQUIMENT</td><td>PERFIL altes_capacitats</td></tr>
+      </tbody>
+    </table>
+  </details>
+</section>
+
+
+<div class="callout">
+  <b>Observació clau (cas AACC):</b> les instruccions <code>A-01</code>, <code>A-03</code>, <code>A-05</code>, <code>A-07</code>, <code>A-16</code> queden <strong>suprimides</strong> (motiu: <em>"suprimit per AC/Enriquiment"</em>) perquè tenen <code>suppress_if: ["altes_capacitats"]</code>. El prompt en surt 4.300 caràcters més curt i la macrodirectiva «ENRIQUIMENT — NO SIMPLIFIQUIS» entra al principi del prompt amb ordre 0.
+</div>
+
+
+<section class="case" id="cas-nouvingut">
+  <h3>5.3 Cas C — Aya Sellami (nouvingut àrab · primària A2) · text «El cicle de l'aigua» · 5è primària · Acces + explicació</h3>
+  <div class="case-meta">
+    <span class="pill"><b>Caràcters prompt:</b> 13126</span>
+    <span class="pill"><b>Paraules prompt:</b> 1959</span>
+    <span class="pill"><b>Instruccions actives:</b> 58</span>
+    <span class="pill"><b>Suprimides:</b> 0</span>
+  </div>
+
+  <details>
+    <summary><b>Body enviat (equivalent a <code>/api/prompt-preview</code>)</b></summary>
+    <pre class="json">{
+  "profile": {
+    "nom": "Aya Sellami (nouvingut A2)",
+    "caracteristiques": {
+      "nouvingut": {
+        "actiu": true,
+        "L1": "àrab",
+        "alfabet_llati": false,
+        "escolaritzacio_previa": "si",
+        "calp": "emergent"
+      }
+    },
+    "observacions": "Fa dos mesos que està a l'escola; llegeix bé en àrab."
+  },
+  "context": {
+    "etapa": "primaria",
+    "curs": "5e",
+    "materia": "Ciències naturals"
+  },
+  "params": {
+    "mecr_sortida": "A2",
+    "dua": "Acces",
+    "etapa": "primaria",
+    "materia": "Ciències naturals",
+    "genere_discursiu": "explicacio",
+    "complements": {
+      "glossari": true,
+      "preguntes_comprensio": true
+    }
+  }
+}</pre>
+  </details>
+
+  <details open>
+    <summary><b>Persona-audience generada (<a href="server.py#L1032">server.py:1032</a>)</b></summary>
+<pre class="layer-body">Escrius per a un alumne de primaria (5e).
+Alumne nouvingut que parla àrab com a L1.
+Alfabet no llatí: necessita transliteració fonètica.
+Llengua acadèmica (CALP) emergent: entén consignes bàsiques però li costa el vocabulari abstracte.
+Nivell MECR de sortida: A2.
+Observació del docent: Fa dos mesos que està a l'escola; llegeix bé en àrab.</pre>
+  </details>
+
+  <details>
+    <summary><b>IDs d'instruccions actives (58)</b></summary>
+    <p class="mono" style="font-size:11.5px;white-space:normal">A-01, A-02, A-03, A-04, A-05, A-06, A-07, A-08, A-09, A-10, A-11, A-12, A-13, A-14, A-15, A-16, A-17, A-18, A-19, A-20, A-21, A-22, A-23, A-24, A-25, A-26, A-28, A-29, A-30, B-01, B-02, B-03, B-04, B-05, B-06, B-07, B-08, B-09, B-10, B-11, B-14, C-01, C-02, C-03, C-04, C-05, C-06, C-08, E-01, E-02, E-05, E-06, E-07, E-08, E-09, G-01, G-03, G-06</p>
+    <p class="note">Destaquem: <code>G-01</code> (glossari bilingüe català↔àrab amb alfabet original), <code>G-03</code> (transliteració fonètica — activada per <code>alfabet_llati=false</code>), <code>E-08</code>/<code>E-09</code> (referents culturalment diversos — activades pel perfil nouvingut), <code>A-21</code>/<code>A-30</code> (descomposició de compostos i anglicismes).</p>
+  </details>
+
+  <details>
+    <summary><b>Prompt complet retallat (seccions visibles)</b></summary>
+<pre class="prompt">Ets l'assistent ATNE (Adaptador de Textos a Necessitats Educatives) de Jesuïtes Educació.
+…
+**LÈXIC**:
+- Usa vocabulari freqüent. Substitueix termes poc habituals per equivalents d'alta freqüència lèxica.
+- Termes tècnics en **negreta** amb definició entre parèntesis la primera vegada.
+- Repetició lèxica coherent: un terme = un concepte. NO variïs per elegància (no sinònims).
+- Referents pronominals explícits: si ambigu, repeteix el nom complet.
+- Elimina expressions idiomàtiques, metàfores i sentit figurat. Tot literal.
+- Redueix polisèmia: una accepció per mot. Permet polisèmia si el context desambigua clarament.
+- Connectors explícits entre frases: per tant, a més, en canvi, primer, després.
+- Scaffolding estàndard: 1a aparició = terme + definició; repeticions posteriors = terme sol.
+- Desnominalitza: noms abstractes → verbs. Exemple: 'l'evaporació' → 'quan s'evapora'.
+- Evita negacions múltiples. Permet negació simple ('no és', 'no té').
+- Dates en format complet · Sigles i abreviatures: forma completa la primera vegada.
+- Densitat lèxica controlada: màxim 4-5 paraules de contingut per frase.
+- Descompón paraules compostes llargues: divideix o reformula.
+- Concreta quantificadors abstractes: 'molts' → 'més de 50'.
+- Evita cultismes i llatinismes · Redueix adverbis en -ment · Evita anglicismes.
+
+**SINTAXI**:
+- Una idea per frase · Veu activa preferent · Subjecte explícit.
+- Ordre SVO preferent · Puntuació simplificada (punts, comes i dos punts).
+- Màxim 8-12 paraules per frase · Coordinades simples (i, però, perquè). NO subordinades complexes.
+- Present, passat simple i futur perifràstic. Evita subjuntiu i condicional.
+…
+
+**PERSONALITZACIÓ LINGÜÍSTICA**:
+- Glossari bilingüe complet: cada terme tècnic amb traducció a L1 (en alfabet original si escau).
+  | Terme | Traducció L1 | Explicació |
+  | **Fotosíntesi** | تمثيل ضوئي (àrab) / 光合作用 (xinès) | les plantes fan menjar amb llum |
+- Transliteració fonètica OBLIGATÒRIA al glossari: cada terme català ha d'aparèixer escrit en l'alfabet de L1 al costat.
+  EXEMPLE: fotosíntesi → فوتوسينتيسي (àrab) / 福托辛特西 (xinès)
+- To conversacional-proper ('En aquesta secció veurem...').
+
+NIVELL DUA: Accés — Lectura Fàcil extrema dins del límit MECR
+- Suport visual màxim a cada idea
+- Vocabulari molt bàsic, definicions integrades a CADA aparició
+- Estructura molt explícita i predictible
+- Redundància modal: text + imatge + esquema
+- Eliminació total de farcit: cada frase té funció pedagògica clara
+
+GÈNERE DISCURSIU: Explicació
+- Progressió del simple al complex
+- Causa → efecte explícita (connector "perquè", "per tant")
+- Desnominalitza processos ("l'oxidació" → "quan s'oxida")
+- Estructura: què és → com funciona → per què importa
+
+PERSONA-AUDIENCE:
+Escrius per a un alumne de primaria (5e).
+Alumne nouvingut que parla àrab com a L1.
+Alfabet no llatí: necessita transliteració fonètica.
+Llengua acadèmica (CALP) emergent: entén consignes bàsiques però li costa el vocabulari abstracte.
+Nivell MECR de sortida: A2.
+Observació del docent: Fa dos mesos que està a l'escola; llegeix bé en àrab.
+
+COMPLEMENTS A GENERAR:
+- Glossari
+- Preguntes Comprensio
+
+## Glossari
+ACTIVAT — Genera una TAULA MARKDOWN amb 3 columnes:
+| Terme | Traducció (àrab) | Explicació simple |
+La columna de traducció ha de contenir la traducció REAL al/a la àrab (en el seu alfabet original si escau).
+
+## Preguntes de comprensió
+ACTIVAT — Model MALL/TILC (3 moments × 3 nivells) · matèria Ciències naturals · etapa primaria · gènere explicacio · modalitat INFORMATIU
+…</pre>
+  </details>
+
+  <div class="callout">
+    <b>Observació clau (cas nouvingut):</b> el gènere discursiu <em>explicació</em> i el nivell DUA <em>Accés</em> s'injecten perquè el body els porta explícitament — al flux real Pas 1-2-3 cap dels dos s'envia (veure apèndix de limitacions). L'activació de <code>G-03</code> (transliteració) es dispara per <code>alfabet_llati: false</code>, i el glossari passa automàticament a 3 columnes perquè la capa «FORMAT DE SORTIDA» detecta el perfil <code>nouvingut</code> amb <code>L1</code> definida (<a href="server.py#L1282">server.py:1282-1292</a>).
+  </div>
+</section>
+
+
+<!-- ════════════════ 6 · PROMPTS DEL SISTEMA ════════════════ -->
+<h2 id="prompts-inventari">6 · Prompts del sistema — inventari complet</h2>
+<p>ATNE usa diversos prompts al llarg del pipeline. Aquí els documentem tots amb <em>file:line</em>, perquè fins ara només estava detallat el d'adaptació.</p>
+
+<h3>6.1 <code>adapt</code> — prompt principal d'adaptació</h3>
+<p class="lede">server.py · funció <code>build_system_prompt()</code></p>
+<ul>
+  <li><b>Endpoint:</b> <code>POST /api/adapt</code> (<a href="server.py#L4347">server.py:4347-4420</a>) → <code>run_adaptation()</code> (<a href="server.py#L2345">server.py:2345</a>)</li>
+  <li><b>Trigger:</b> el docent prem «Adapta» al Pas 3.</li>
+  <li><b>Estructura:</b> 7 capes (identitat, instruccions, DUA, gènere, persona, [RAG], FORMAT+complements). Veure secció <a href="#anatomia">2 · Anatomia</a>.</li>
+  <li><b>Rep:</b> <code>profile</code>, <code>context</code>, <code>params</code>, <code>rag_context</code> (actualment buit).</li>
+  <li><b>Model:</b> resolut via <code>_model_for("adapt")</code> (<a href="server.py#L158">server.py:158</a>) — rotació silenciosa.</li>
+</ul>
+
+<h3>6.2 <code>generate-text</code> — generador lliure (Pas 2 mode «Generar»)</h3>
+<p class="lede">generador_lliure/prompt.py · <code>build_prompt()</code></p>
+<ul>
+  <li><b>Endpoint:</b> <code>POST /api/generate-text</code> (<a href="server.py#L3309">server.py:3309-3350</a>) + variant streaming <code>/api/generate-text-stream</code> (<a href="server.py#L3353">server.py:3353</a>).</li>
+  <li><b>Trigger:</b> el docent prem «Generar text» al Pas 2 quan no té un text original (mode IA).</li>
+  <li><b>Arquitectura:</b> <em>prompt mínim (~110 mots)</em>. Separació system/user validada empíricament (Fase 0.5/0.7).</li>
+  <li><b>System prompt (fix):</b> <a href="generador_lliure/prompt.py#L16"><code>generador_lliure/prompt.py:16-25</code></a>
+<pre class="prompt">Ets un redactor de materials escolars en català. Escrius textos clars, ben estructurats, adequats a l'edat i al curs indicats. Respectes exactament el gènere discursiu, la tipologia textual, el to i la llargada demanats. Català normatiu. Uses negretes per als termes clau i, si el tema ho permet, acabes amb una breu caixa "Vocabulari clau" de 3-5 termes. No inventes dades: si dubtes d'un fet concret, evita-ho o formula-ho de manera general. Escriu directament el text, sense introduccions meta ni disclaimers.</pre></li>
+  <li><b>User prompt (plantilla):</b> <a href="generador_lliure/prompt.py#L53"><code>generador_lliure/prompt.py:53-123</code></a> — frase narrativa («Escriu un text del gènere …, tipologia …, de to …, d'aproximadament N paraules, sobre: TEMA.») + bloc destinatari («alumnat de CURS de ETAPA, matèria de MATÈRIA») + notes opcionals del docent + saber curricular (Sprint C).</li>
+  <li><b>Exemple real de user prompt</b> (generat amb <code>build_prompt()</code> per a tema «Revolució Industrial», 3r ESO, Ciències Socials, article divulgatiu, expositiva, to neutre, 400 paraules):
+<pre class="prompt">Escriu un text del gènere «article divulgatiu», tipologia expositiva, de to neutre, d'aproximadament 400 paraules (d'extensió estàndard), sobre: La Revolució Industrial i les seves conseqüències socials.
+
+Destinatari: alumnat de 3r ESO de ESO, matèria de Ciències Socials.
+
+Indicacions del docent: Posa èmfasi en les condicions de treball i l'origen del moviment obrer.</pre>
+Nota: el camp «to» es respecta aquí via plantilla, però <b>no es propaga</b> al <code>/api/adapt</code> posterior (veure §8 «Flux del <i>to</i>»). Si després de generar l'adaptem, l'adaptació no sap que el text partia amb to «proper» o «motivador».</li>
+  <li><b>Mapping d'extensions</b> (<a href="generador_lliure/prompt.py#L31"><code>generador_lliure/prompt.py:31-39</code></a>): <code>curt|breu</code> → 250 paraules, <code>estandard|mitja</code> → 400, <code>extens|llarg</code> → 700. Tolerància observada del model: ±15%.</li>
+  <li><b>NO reutilitza</b> <code>build_system_prompt</code> ni <code>instruction_catalog</code> ni <code>corpus_reader</code>. És una via aïllada per evitar contaminació del pipeline d'adaptació (cas castell medieval, veure <a href="server.py#L3316">server.py:3316-3321</a>).</li>
+</ul>
+
+<h3>6.3 <code>refine-text</code> — refinar (Pas 3 presets)</h3>
+<p class="lede">server.py · <code>refine_text()</code></p>
+<ul>
+  <li><b>Endpoint:</b> <code>POST /api/refine-text</code> (<a href="server.py#L4207">server.py:4207-4321</a>).</li>
+  <li><b>Trigger:</b> popover «Refinar» al Pas 3. Un preset o instrucció lliure.</li>
+  <li><b>Presets disponibles:</b> <code>catala</code>, <code>simplificar</code>, <code>ampliar</code>, <code>escurcar</code>, <code>to_mes_proper</code>, <code>to_mes_formal</code> (<a href="server.py#L3417">server.py:3417-3484</a>).</li>
+  <li><b>Nota important:</b> <code>preset=catala</code> NO crida LLM — va directament a <code>_languagetool_correct()</code> (veure 6.7).</li>
+  <li><b>Prompt:</b> construït a <a href="server.py#L4275">server.py:4275-4297</a> amb format ROL + REGLES + INSTRUCCIONS + TEXT:
+<pre class="prompt"># ROL
+Ets un expert en lingüística catalana. Has de REFINAR el text que et passen segons les instruccions del docent. NO el regeneris des de zero — modifica'l mantenint l'estructura general i el contingut.
+
+# REGLES
+1. Tot el text final ha de ser en català estàndard normatiu (IEC).
+2. NO afegeixis explicacions meta del tipus "Aquí tens el text refinat:". Retorna NOMÉS el text corregit, directament.
+3. NO canviïs el contingut substantiu del text. Només aplica les instruccions de refinament demanades.
+4. Si detectes paraules en altres llengües (francès, castellà, anglès), tradueix-les al català correcte sempre.
+5. Vigila errors típics: "ser vius" → "èssers vius", "ensemble" → "conjunt", apostrofacions, concordances de gènere i nombre.
+
+# INSTRUCCIONS DEL DOCENT
+{instruccio_final}   ← el preset triat, amb el % explícit si és ampliar/escurcar
+
+# TEXT A REFINAR
+{text}
+
+# RETORNA EL TEXT REFINAT (NOMÉS EL TEXT, RES MÉS)</pre></li>
+  <li><b>Model:</b> resolut via <code>_model_for("refine")</code>. NO inclou les 84 instruccions del catàleg; és un prompt curt dedicat a transformar.</li>
+</ul>
+
+<h3>6.4 «Refer amb rúbrica»</h3>
+<p class="lede">No implementat com a endpoint independent.</p>
+<p>No trobat al codi. La rúbrica sí existeix (<a href="evaluator_rubrics.py"><code>evaluator_rubrics.py</code></a>, <a href="docs/decisions/rubrica_avaluacio_v2.md"><code>docs/decisions/rubrica_avaluacio_v2.md</code></a>), però s'usa per avaluar batch, no per refer una adaptació al vol. Si es vol implementar, caldria un endpoint <code>/api/rework-with-rubric</code> que torni a Phase 1 amb feedback rubricat a la persona-audience. <span class="flag todo">PENDENT</span></p>
+
+<h3>6.5 <code>verify</code> — autoavaluador (Phase 2)</h3>
+<p class="lede">server.py · <code>_verify_adaptation()</code> · <code>VERIFY_SYSTEM</code></p>
+<ul>
+  <li><b>Trigger:</b> part de <code>run_adaptation()</code>, s'executa si <code>params.verify_retry</code> és truthy (per defecte true). Si <code>avg(Q,P,C) &lt; 4.0</code>, dispara retry de Phase 1 (màx 2 intents, es queda amb la millor).</li>
+  <li><b>System prompt (fix):</b> <a href="server.py#L2310"><code>server.py:2310-2316</code></a>
+<pre class="prompt">Ets un avaluador pedagògic ràpid. Avalua una adaptació de text educatiu amb 3 criteris breus (1-5 cadascun):
+- Q (Qualitat textual): coherència, correcció gramatical, llegibilitat
+- P (Perfil): s'ha aplicat bé al perfil de l'alumne declarat
+- C (Curricular): preserva el contingut original sense errors
+
+Retorna NOMÉS aquest JSON:
+{"Q":1-5,"P":1-5,"C":1-5,"j":"una frase justificació"}</pre></li>
+  <li><b>User prompt:</b> <code>"PERFIL: {nom} | MECR sortida: {mecr} | DUA: {dua}\n\nTEXT ORIGINAL:\n{orig[:2000]}\n\nTEXT ADAPTAT:\n{adapt[:3000]}\n\nPuntua Q, P, C (1-5). JSON nomes."</code> (<a href="server.py#L2325">server.py:2325-2330</a>).</li>
+  <li><b>Model:</b> el mateix que ha generat l'adaptació (autoavaluació — veure nota a la secció 10).</li>
+</ul>
+
+<h3>6.6 <code>quality</code> / auditor LLM (Phase 3, layer 3) — OPT-IN</h3>
+<p class="lede">server.py · <code>_llm_audit()</code></p>
+<ul>
+  <li><b>Endpoint:</b> capa 3 de <code>post_process_catalan()</code> (<a href="server.py#L4112">server.py:4112</a>). S'invoca des de <code>run_adaptation()</code>.</li>
+  <li><b>Estat:</b> <span class="flag bug">DESACTIVAT per defecte des del 14/04/26</span> — <code>ATNE_AUDITOR_ENABLED=false</code> (<a href="server.py#L3495">server.py:3495-3498</a>). Proves empíriques: ~15% precisió, ~85% falsos positius. Reactivable via env var o toggle UI.</li>
+  <li><b>Model:</b> <code>gpt-4o-mini</code> per defecte (<a href="server.py#L3493">server.py:3493</a>) — clau institucional, no canviable a premium sense aprovació.</li>
+  <li><b>Prompt:</b> <a href="server.py#L4047">server.py:4047-4064</a>. Emet fins a 6 avisos qualitatius (tipus: <code>confusa|salt|vocabulari|repeticio|connector|calc</code>), NO modifica el text.</li>
+  <li><b>Output:</b> <code>{"avisos":[{"tipus","fragment","motiu"}], "disponible":bool}</code> — va directament a les notes d'auditoria del Pas 3.</li>
+</ul>
+
+<h3>6.7 LanguageTool — no és LLM, és part del pipeline de qualitat</h3>
+<p class="lede">server.py · <code>_languagetool_correct()</code> · <code>_languagetool_full_analysis()</code></p>
+<ul>
+  <li><b>Trigger:</b> (a) preset <code>catala</code> del refinar (<a href="server.py#L4226">server.py:4226-4236</a>) → correcció determinista directa; (b) capa 2 de <code>post_process_catalan()</code> (<a href="server.py#L3713">server.py:3713-3887</a>) → anàlisi completa per detectar errors.</li>
+  <li><b>API:</b> <code>https://api.languagetool.org/v2/check</code> (pública, sense LLM). Env var <code>LANGUAGETOOL_URL</code> per overriding.</li>
+  <li><b>Comportament:</b> determinista. Gemma/GPT no s'usen per ortografia per decisió pedagògica (veure <code>project_languagetool_corrector.md</code> a la memòria).</li>
+</ul>
+
+<!-- ════════════════ 7 · TRAÇABILITAT ════════════════ -->
+<h2 id="tracabilitat">7 · Traçabilitat de matèria / tema / etapa / curs / MECR / DUA / gènere / to</h2>
+<p>Aquesta secció respon a una preocupació pedagògica real: <b>cada variable pedagògica es declara, envia i consumeix en llocs diferents</b> del codi. Aquí es documenta el recorregut complet per cada una.</p>
+
+<div class="mermaid-wrap">
+<div class="mermaid">
+flowchart LR
+  classDef ui fill:#e1e4ff,stroke:#3337a6,color:#121a2b;
+  classDef ls fill:#ece8db,stroke:#6a7392,color:#2d3655;
+  classDef api fill:#fff,stroke:#6a7392,color:#121a2b;
+  classDef prompt fill:#e7dcf4,stroke:#6d3aa3,color:#121a2b;
+
+  P1[Pas 1 · perfil]:::ui --> LS1[("atne.profile_id")]:::ls
+  P2[Pas 2 · doc]:::ui --> LS2[("atne.doc_materia<br>atne.doc_nivell<br>atne.complements")]:::ls
+  P2 -- tema/to/genere/tipologia --> GT["/api/generate-text"]:::api
+  P3[Pas 3 · adapta]:::ui --> LS3[("atne.doc_original<br>atne.adapted_*")]:::ls
+  LS2 --> ADAPT["/api/adapt payload"]:::api
+  LS3 --> ADAPT
+  ADAPT --> BSP["build_system_prompt"]:::prompt
+  BSP --> C1[Capa Identitat]:::prompt
+  BSP --> C2[Capa Instruccions filtrades]:::prompt
+  BSP --> C3[Capa DUA]:::prompt
+  BSP --> C4[Capa Gènere]:::prompt
+  BSP --> C5[Capa Persona-audience]:::prompt
+  BSP --> C6[Capa FORMAT + complements<br>MALL/TILC]:::prompt
+</div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Variable</th>
+      <th>Declarada a (UI · localStorage)</th>
+      <th>Enviada a (endpoint · clau payload)</th>
+      <th>Usada per (capa del prompt · instruccions)</th>
+      <th>Risc de contradicció / pèrdua</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b><code>materia</code></b></td>
+      <td>
+        Pas 2 · selector «Matèria» (<a href="ui/atne/pas2.html#L970">pas2.html:970</a>).<br>
+        LS: <code>atne.doc_materia</code> (default <em>Història</em>).<br>
+        Llegida al Pas 3 a <a href="ui/atne/pas3.html#L1855">pas3.html:1855</a>.
+      </td>
+      <td>
+        <code>/api/adapt</code> → <code>context.materia</code> (<a href="ui/atne/js/llm.js#L99">llm.js:99</a>).<br>
+        <code>/api/generate-text</code> → <code>context.materia</code> (via <code>params.context.materia</code>).
+      </td>
+      <td>
+        • Context dels complements <em>preguntes_comprensio</em> i <em>bastides</em> (<a href="server.py#L1367">server.py:1367</a>, var <code>materia_complement</code>).<br>
+        • Incorporat literalment al bloc MALL/TILC i al bloc «Banc de paraules» del scaffolding.<br>
+        • NO s'afegeix al prompt com a línia pròpia a la capa 4 (<a href="server.py#L1240">comentari server.py:1240</a>).
+      </td>
+      <td>
+        Si el docent canvia de matèria al Pas 2 i no reentra al Pas 3, la cache adaptada (<code>atne.adapted_cache_key</code>) pot quedar obsoleta. El frontend sí la regenera perquè <code>materia</code> entra al hash.
+      </td>
+    </tr>
+    <tr>
+      <td><b><code>tema</code></b></td>
+      <td>
+        Pas 2 mode «Generar» · textarea «Tema o tòpic» (<a href="ui/atne/pas2.html#L996">pas2.html:996-997</a>).<br>
+        <em>No es persisteix a localStorage</em> — viu només durant la crida de generació.
+      </td>
+      <td>
+        <code>/api/generate-text</code> · clau <code>tema</code> (<a href="ui/atne/js/llm.js#L361">llm.js:361-365</a>).<br>
+        Validat a <a href="generador_lliure/prompt.py#L66">prompt.py:66</a> (obligatori).
+      </td>
+      <td>
+        Entra al user prompt del generador lliure com a «...sobre: {tema}» (<a href="generador_lliure/prompt.py#L86">prompt.py:86-88</a>).<br>
+        NO s'usa al pipeline d'adaptació.
+      </td>
+      <td>
+        Baix. El tema només existeix al mode generació; després el text generat passa a <code>atne.doc_original</code> i el tema ja no s'arrossega.
+      </td>
+    </tr>
+    <tr>
+      <td><b><code>etapa</code></b></td>
+      <td>
+        Hardcoded a <code>'ESO'</code> al pas2 i pas3 (<a href="ui/atne/pas3.html#L1914">pas3.html:1914</a> no envia; <a href="ui/atne/pas2.html#L1772">pas2.html:1772</a> envia <code>'ESO'</code> fix).<br>
+        LS: no persistida a una clau pròpia (sí implícita a <code>atne.doc_nivell</code>).
+      </td>
+      <td>
+        <code>/api/adapt</code> → <code>context.nivell_curs</code> (no <code>context.etapa</code>!) a <a href="ui/atne/js/llm.js#L100">llm.js:100</a>.<br>
+        <code>/api/generate-text</code> → <code>context.etapa</code>.
+      </td>
+      <td>
+        • A <code>run_adaptation</code> s'usa per calcular MECR via <code>_mecr_from_etapa_curs()</code> (<a href="server.py#L3565">server.py:3565</a>) si no arriba explícit.<br>
+        • Entra al bloc MALL/TILC dels complements (<code>etapa_complement</code>, <a href="server.py#L1368">server.py:1368</a>).<br>
+        • NO apareix com a línia al prompt (<a href="server.py#L1240">eliminat 2026-04-09</a>).
+      </td>
+      <td>
+        <span class="flag bug">ALT.</span> La clau que el frontend envia (<code>nivell_curs</code>) no coincideix amb la que el backend sol esperar (<code>etapa</code> + <code>curs</code> separats). <code>context.get("etapa","ESO")</code> a <a href="server.py#L1042">server.py:1042</a> sempre cau al default <em>ESO</em> si ve per flux Pas 1-2-3.
+      </td>
+    </tr>
+    <tr>
+      <td><b><code>curs</code></b></td>
+      <td>
+        Pas 1 · <code>profile.course</code> (p.ex. «3r ESO B»).<br>
+        Pas 2 · selector «Nivell» (<a href="ui/atne/pas2.html#L1055">pas2.html:1055</a>).<br>
+        LS: <code>atne.doc_nivell</code>.
+      </td>
+      <td>
+        <code>/api/adapt</code> → <code>context.nivell_curs</code> (valor combinat p.ex. <code>"3r ESO"</code>).
+      </td>
+      <td>
+        Input de <code>_mecr_from_etapa_curs()</code>. NO al prompt directament.
+      </td>
+      <td>
+        Mig. El parser del curs a <code>_mecr_from_etapa_curs</code> és heurístic — si el format canvia pot fallar silenciosament i retornar el MECR de fallback.
+      </td>
+    </tr>
+    <tr>
+      <td><b><code>mecr_sortida</code></b></td>
+      <td>
+        <span class="flag todo">No exposat a la UI.</span> Cap pàgina ho permet seleccionar directament.<br>
+        <code>llm.js:126</code> hardcodeja <code>'B1'</code> com a default.
+      </td>
+      <td>
+        <code>/api/adapt</code> → <code>params.mecr_sortida</code> (<a href="ui/atne/js/llm.js#L126">llm.js:126</a>). Default backend: <code>"B1"</code> a <a href="server.py#L4361">server.py:4361</a>.
+      </td>
+      <td>
+        • <b>Motor principal</b> de la gradació de 31 instruccions amb <code>mecr_detail</code>. Cada nivell emet un text diferent.<br>
+        • Consulta a <a href="instruction_filter.py#L283">instruction_filter.py:283-294</a> (<code>mecr_detail</code> o <code>mecr_levels</code>).<br>
+        • Apareix a la persona-audience com a «Nivell MECR de sortida: X».
+      </td>
+      <td>
+        <span class="flag bug">ALT.</span> Com que no hi ha selector, tot el flux real acaba amb MECR=B1 a menys que el profile s'editi manualment. Això explica per què les adaptacions tendeixen a ser totes de complexitat similar.
+      </td>
+    </tr>
+    <tr>
+      <td><b><code>dua</code></b></td>
+      <td>
+        <span class="flag todo">No exposat a la UI.</span> Cap pàgina ho permet seleccionar.<br>
+        Default: <code>"Core"</code> (<a href="server.py#L1206">server.py:1206</a>).
+      </td>
+      <td>
+        <code>/api/adapt</code> → <code>params.dua</code> (només si el body ho inclou explícitament).
+      </td>
+      <td>
+        • <code>corpus_reader.get_dua_block(dua)</code> (<a href="corpus_reader.py#L227">corpus_reader.py:227</a>) — llegeix el bloc DUA del corpus M2.<br>
+        • Dispara la supressió del cas AACC + Enriquiment a <a href="instruction_filter.py#L158">instruction_filter.py:158</a>.
+      </td>
+      <td>
+        <span class="flag bug">ALT.</span> El nivell DUA és una de les 3 decisions pedagògiques més importants (Accés / Core / Enriquiment) però el docent no la pot triar al flux real. Tot va a Core.
+      </td>
+    </tr>
+    <tr>
+      <td><b><code>genere_discursiu</code></b></td>
+      <td>
+        Pas 2 mode «Generar» · selector «Gènere» (<a href="ui/atne/pas2.html#L1000">pas2.html:1000-1015</a>).<br>
+        <em>No es persisteix per al flux d'adaptació.</em>
+      </td>
+      <td>
+        <code>/api/generate-text</code> → <code>genere</code>.<br>
+        <code>/api/adapt</code> → <b>NO s'envia</b>. <code>pas3.html:1914</code> ni <code>llm.js:125</code> no l'afegeixen al payload.
+      </td>
+      <td>
+        • <code>corpus_reader.get_genre_block()</code> llegeix de <code>corpus/M3_generes-discursius.md</code> (via <a href="corpus_reader.py#L178">corpus_reader.py:178</a>).<br>
+        • S'injecta com a capa pròpia (2.4 Gènere) només si arriba al payload.<br>
+        • També entra com a context del bloc MALL/TILC (<code>genere_complement</code>).
+      </td>
+      <td>
+        <span class="flag bug">ALT.</span> El gènere triat al Pas 2 mode «Generar» s'usa per al text generat però es perd en passar al Pas 3 — l'adaptació no el rep. Resultat: l'adaptació no sap si està adaptant un conte, una notícia o un manual.
+      </td>
+    </tr>
+    <tr>
+      <td><b><code>to</code></b></td>
+      <td>
+        Pas 2 mode «Generar» · selector «To» amb 8 valors (<a href="ui/atne/pas2.html#L1024">pas2.html:1024-1033</a>: neutre, informal, creatiu, motivador, reflexiu, empàtic, humorístic, solemne).
+      </td>
+      <td>
+        <code>/api/generate-text</code> → <code>to</code> (<a href="ui/atne/js/llm.js#L363">llm.js:363</a>).<br>
+        <code>/api/adapt</code> → <b>NO s'envia mai</b>. Cap param <code>to</code> al payload d'adaptació.
+      </td>
+      <td>
+        • Al <em>generador lliure</em>: entra a la frase narrativa del user prompt («...de to {to}...» <a href="generador_lliure/prompt.py#L87">prompt.py:87</a>).<br>
+        • Al <em>pipeline d'adaptació</em>: <b>no s'usa</b>. El to efectiu queda determinat per <code>G-06</code> (Ajusta el to segons MECR) i pel to del text original que l'LLM rep.
+      </td>
+      <td>
+        Veure secció següent <a href="#flux-to">§8</a> — és un GAP documentat, no una funcionalitat de l'adaptació.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout warn">
+  <b>Conclusió pedagògica:</b> al flux real Pas 1-2-3, només <code>materia</code>, <code>curs</code>/<code>nivell_curs</code> i <code>complements</code> arriben correctament al prompt. <code>mecr_sortida</code>, <code>dua</code>, <code>genere_discursiu</code> i <code>to</code> no tenen selector i queden a valors per defecte. La pàgina <code>/pipeline</code> (viva) sí permet provar-los tots.
+</div>
+
+
+<!-- ════════════════ 8 · FLUX DEL TO ════════════════ -->
+<h2 id="flux-to">8 · Flux del <i>to</i> (neutre / motivador / reflexiu…)</h2>
+<p>Investigació sobre com es propaga (o no) el to triat pel docent al prompt final d'adaptació.</p>
+
+<h3>8.1 On se selecciona</h3>
+<p>Al <b>Pas 2, mode «Generar»</b>, selector «To» amb 8 valors: <code>neutre</code>, <code>informal</code>, <code>creatiu</code>, <code>motivador</code>, <code>reflexiu</code>, <code>empatic</code>, <code>humoristic</code>, <code>solemne</code> (<a href="ui/atne/pas2.html#L1024">pas2.html:1024-1033</a>). El Pas 2 mode «Pujar» i «Enganxar» NO té selector de to.</p>
+
+<h3>8.2 Com s'envia</h3>
+<p>Només a <code>/api/generate-text</code>. Clau del payload: <code>to</code>. Veure <a href="ui/atne/js/llm.js#L361">llm.js:361-365</a>:</p>
+<pre class="prompt">const body = { tema, genere, tipologia, to, extensio };</pre>
+
+<h3>8.3 Com s'aplica al prompt del <b>generador lliure</b></h3>
+<p>A <a href="generador_lliure/prompt.py#L86">prompt.py:86-89</a> es construeix la frase narrativa:</p>
+<pre class="prompt">Escriu un text del gènere «{genere}», tipologia {tipologia}, de to {to}, d'aproximadament {N} paraules ({etiqueta}), sobre: {tema}.</pre>
+<p>I al system prompt fix: <code>Respectes exactament el gènere discursiu, la tipologia textual, el to i la llargada demanats.</code> (<a href="generador_lliure/prompt.py#L16">prompt.py:16</a>).</p>
+
+<h3>8.4 Com s'aplica al prompt d'<b>adaptació</b> (la pregunta clau)</h3>
+<div class="callout warn">
+  <b>El to NO es propaga a l'adaptació.</b>
+  <ul>
+    <li>El payload de <code>/api/adapt</code> no conté mai <code>params.to</code> ni <code>context.to</code> — verificat a <a href="ui/atne/js/llm.js#L125">llm.js:125-129</a> i <a href="ui/atne/pas3.html#L1915">pas3.html:1915</a>.</li>
+    <li><code>build_system_prompt()</code> no llegeix cap variable de to — verificat amb <code>grep</code>: l'única referència a <code>params.to</code> al backend és zero.</li>
+    <li>El bloc IDENTITAT (capa 1) diu: <code>TO: Acadèmic neutre. Respecta el registre del text original quan sigui identificable.</code> (<a href="corpus_reader.py#L61">corpus_reader.py</a>). És l'única «pista» de to que rep l'LLM al pipeline d'adaptació.</li>
+    <li>La instrucció <code>G-06</code> (<em>Ajusta el to segons MECR</em>) emet variants de to en funció del nivell MECR — no en funció de la selecció del docent.</li>
+  </ul>
+</div>
+
+<h3>8.5 Conseqüència i hipòtesi</h3>
+<ul>
+  <li><b>Conseqüència:</b> si el docent genera un text motivador amb to «motivador» i després l'adapta per a un perfil, l'LLM d'adaptació <b>no</b> rep aquesta instrucció. Només percep el to del text que li passen (heurística implícita) i la pauta G-06 modulada per MECR.</li>
+  <li><b>Hipòtesi:</b> part del to es manté per inèrcia — l'LLM tendeix a conservar el registre del text original que ha de transformar. Però cap instrucció explícita ho garanteix.</li>
+  <li><b>Marca:</b> <span class="flag bug">GAP documentat</span> — no és funcionalitat d'adaptació en producció. Si el pilot demana «adaptació amb to X», caldria: (a) afegir selector de to al Pas 3 o propagar el del Pas 2; (b) afegir <code>params.to</code> al payload de <code>/api/adapt</code>; (c) afegir una capa «TO DEMANAT» a <code>build_system_prompt</code> abans del PERSONA-AUDIENCE.</li>
+</ul>
+
+
+<!-- ════════════════ 9 · DUA ↔ INSTRUCCIONS ════════════════ -->
+<h2 id="dua-solapament">9 · DUA i instruccions — possible solapament</h2>
+<p><span class="flag todo">Pregunta oberta — cal investigació.</span> El bloc DUA (capa 2.3) i les instruccions del catàleg (capa 2.2) s'envien tots dos a l'LLM al mateix prompt. Aquí examinem si diuen el mateix.</p>
+
+<h3>9.1 Contingut dels 3 blocs DUA (font: <code>corpus/M2_DUA-principis-pautes.md</code>)</h3>
+<details open>
+  <summary><b>Accés</b></summary>
+<pre class="layer-body">NIVELL DUA: Accés — Lectura Fàcil extrema dins del límit MECR
+- Suport visual màxim a cada idea
+- Vocabulari molt bàsic, definicions integrades a CADA aparició
+- Estructura molt explícita i predictible
+- Redundància modal: text + imatge + esquema
+- Eliminació total de farcit: cada frase té funció pedagògica clara</pre>
+</details>
+<details>
+  <summary><b>Core</b></summary>
+<pre class="layer-body">NIVELL DUA: Core — Llenguatge Clar (ISO 24495) dins del límit MECR
+- Adaptació estàndard mantenint rigor curricular
+- Frases curtes, vocabulari freqüent
+- Definicions per termes tècnics (la primera vegada)
+- Estructura clara amb connectors</pre>
+</details>
+<details>
+  <summary><b>Enriquiment</b></summary>
+<pre class="layer-body">NIVELL DUA: Enriquiment — Màxima complexitat dins del MECR
+- NO simplifiquis: mantén complexitat lingüística i conceptual
+- Afegeix profunditat: excepcions, fronteres del coneixement, debats oberts
+- Connexions interdisciplinars
+- Preguntes de pensament crític (analitzar, avaluar, crear)</pre>
+</details>
+
+<h3>9.2 Instruccions del catàleg que tracten temes similars</h3>
+<table>
+  <thead><tr><th>Bloc DUA diu…</th><th>Instruccions del catàleg que repeteixen/compleixen</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>«Vocabulari molt bàsic» · «Frases curtes, vocabulari freqüent»</td>
+      <td><code>A-01</code> (vocabulari freqüent) · <code>A-12</code> (longitud màxima) · <code>A-20</code> (densitat lèxica)</td>
+    </tr>
+    <tr>
+      <td>«Definicions integrades» · «Definicions per termes tècnics»</td>
+      <td><code>A-02</code> (termes tècnics en negreta + definició) · <code>E-02</code> (definició graduada per MECR) · <code>C-05</code> (glossari previ)</td>
+    </tr>
+    <tr>
+      <td>«Estructura molt explícita i predictible» · «Estructura clara amb connectors»</td>
+      <td><code>B-01</code> (paràgrafs curts) · <code>B-02</code> (títols temàtics) · <code>B-03</code> (frase tòpic) · <code>A-14</code> (connectors explícits) · <code>B-10</code> (transicions)</td>
+    </tr>
+    <tr>
+      <td>«Suport visual màxim» · «Redundància modal»</td>
+      <td><code>D-01</code> (emojis/icones, via complement <em>pictogrames</em>) · <code>C-02</code> (reforç amb suport visual) — però el DUA Accés ho demana sempre, no només si el docent activa el complement.</td>
+    </tr>
+    <tr>
+      <td>«Eliminació total de farcit: cada frase té funció pedagògica clara»</td>
+      <td><code>C-03</code> (principi de coherència, Mayer — <em>quasi idèntic text</em>)</td>
+    </tr>
+    <tr>
+      <td>«NO simplifiquis: mantén complexitat» (Enriquiment)</td>
+      <td><code>H-12</code>, <code>H-14</code> (ENRIQUIMENT) + el recordatori final del filtre («N regles DESACTIVADES. NO simplifiquis. Enriqueix-lo.»)</td>
+    </tr>
+    <tr>
+      <td>«Afegeix profunditat: excepcions, fronteres, debats oberts» (Enriquiment)</td>
+      <td><code>H-12</code> (profundització conceptual — <em>text quasi idèntic</em>)</td>
+    </tr>
+    <tr>
+      <td>«Preguntes de pensament crític» (Enriquiment)</td>
+      <td><code>F-09</code> (Preguntes de pensament crític — <em>text idèntic</em>) · <code>F-10</code> (connexions interdisciplinars)</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout warn">
+  <b>Pregunta oberta — cal investigació empírica:</b>
+  <ul>
+    <li>Tant a Accés com a Enriquiment hi ha <b>repetició textual quasi exacta</b> entre DUA i 3-4 instruccions del catàleg. L'LLM pot percebre-ho com a èmfasi desitjat (lectura caritativa) o com a redundància que genera soroll.</li>
+    <li>Possible acció: eliminar els bullets DUA que ja tenen una instrucció quasi idèntica, mantenint només els principis de «nivell» que no tenen equivalent (p.ex. «redundància modal» no està al catàleg).</li>
+    <li>Caldria un test A/B: mateix perfil, mateix text, amb/sense bloc DUA — mesurar si l'adaptació millora, empitjora o queda igual. Avaluar amb els 4 models actius (Gemma 3 27B, GPT-4o, GPT-4.1-mini, Gemma 4 31B).</li>
+  </ul>
+</div>
+
+
+<!-- ════════════════ 10 · PERSONA-AUDIENCE VALOR ════════════════ -->
+<h2 id="persona-valor">10 · Persona-audience — aporta valor?</h2>
+<p><span class="flag todo">Pregunta oberta — cal experiment.</span></p>
+
+<h3>10.1 Què és</h3>
+<p>La funció <a href="server.py#L1032"><code>build_persona_audience()</code></a> transforma les característiques del perfil en una narrativa en català natural. En lloc de passar <code>{"tdah": {"grau": "moderat"}}</code> a l'LLM, emet «TDAH, presentació combinat (grau moderat). Memòria de treball baixa: limitar elements simultanis, repetir informació clau.» (Exemple del Cas A, secció <a href="#cas-tdah">§5.1</a>).</p>
+<p>Cobreix 13 perfils amb les seves sub-variables: nouvingut (L1, alfabet, escolarització, CALP), TEA (DSM-5, comunicació oral), TDAH (presentació, grau, memòria, fatiga), dislèxia (tipus, grau), altes_capacitats (global vs talent específic), DI (grau), TDL (modalitat, grau, sub-afectacions), disc. visual/auditiva, trastorn emocional, vulnerabilitat, TDC, 2e.</p>
+
+<h3>10.2 Per què es podria pensar que és redundant</h3>
+<ul>
+  <li>Les instruccions <code>H-*</code> ja descriuen què fer per cada perfil. Si l'LLM ja rep «TDAH: micro-blocs de 3-5 frases amb objectiu explícit» (H-04), ¿necessita a més llegir «Memòria de treball baixa: limitar elements simultanis»?</li>
+  <li>Les sub-variables ja disparen intensificacions automàtiques a <a href="instruction_filter.py#L173"><code>_get_intensified_text()</code></a>. Pot ser sorollós tenir dos senyals (narratiu + instrucció modulada) per al mateix fet.</li>
+  <li>El prompt s'allarga 200-400 caràcters per cada perfil. Amb quotes de tokens limitades, això compta.</li>
+</ul>
+
+<h3>10.3 Per què podria aportar valor</h3>
+<ul>
+  <li>Els LLMs són entrenats majoritàriament amb llenguatge natural. Una descripció narrativa de «per a qui» escrius pot activar representacions internes més riques que una llista de regles.</li>
+  <li>Gemma 3 27B i Gemma 4 31B (els models pilot) responen bé a <em>persona prompting</em> (evidència empírica multi_v2, sessió 31/03).</li>
+  <li>En perfils compostos (2e, grup mixt) la narrativa permet matisos que les instruccions atòmiques no capturen: «TDAH + AACC = repte alt amb suport de format».</li>
+</ul>
+
+<h3>10.4 Hipòtesi</h3>
+<p><b>Hipòtesi treballable:</b> alguns models es beneficien de la persona-audience (segurament els <em>chat-tuned</em> com GPT-4o, Gemma 4), altres la tracten com a soroll (possiblement Mistral, models més instructius). No tenim evidència empírica neta en aquest repo.</p>
+
+<h3>10.5 Com es podria saber</h3>
+<ul>
+  <li>Experiment A/B · 4 models actius (Gemma 3 27B, Gemma 4 31B, GPT-4o, GPT-4.1-mini) × 20 casos × 2 condicions (amb/sense persona) = 160 adaptacions.</li>
+  <li>Avaluar amb la rúbrica <code>evaluator_rubrics.py</code> (5 dimensions × 1-5) + HITL cec (3 docents per cas).</li>
+  <li>Mesurar també: paraules del prompt, latència, cost per crida. Si persona no aporta però encareix, decisió fàcil.</li>
+  <li>Nota: la memòria registra que les proves de 16/04 amb persona <em>activada</em> van donar ranking GPT 4.44 &gt; Gemma 4 4.23. Caldria repetir <em>sense</em> persona per veure delta. <span class="flag todo">PENDENT</span></li>
+</ul>
+
+
+<!-- ════════════════ 11 · LOCALSTORAGE ════════════════ -->
+<h2 id="localstorage">11 · Mapa localStorage</h2>
+<p>Totes les claus comencen amb <code>atne.</code>. Inventari complet (font: grep a <code>ui/atne/pas[123].html</code> i <code>ui/atne/js/llm.js</code>):</p>
+<table>
+  <thead><tr><th>Clau</th><th>Set per</th><th>Get per</th><th>Què guarda</th><th>S'invalida quan...</th></tr></thead>
+  <tbody>
+    <tr><td><code>atne.docent_id</code></td><td><a href="ui/atne/js/llm.js#L505">llm.js:505</a></td><td>llm.js:500</td><td>UUID del docent (anònim)</td><td>Mai (persistent)</td></tr>
+    <tr><td><code>atne.profile_id</code></td><td><a href="ui/atne/pas1.html#L764">pas1:764</a></td><td>pas2/pas3</td><td>ID del perfil triat (marc/mireia/...)</td><td>Quan canvia el perfil al Pas 1</td></tr>
+    <tr><td><code>atne.doc_draft</code></td><td><a href="ui/atne/pas2.html#L1410">pas2:1410</a></td><td>pas2:1335</td><td>Text en edició al Pas 2 (autosave)</td><td>Reset manual</td></tr>
+    <tr><td><code>atne.doc_title</code></td><td>pas2/pas3</td><td>pas2/pas3</td><td>Títol del document</td><td>—</td></tr>
+    <tr><td><code>atne.doc_original</code></td><td><a href="ui/atne/pas2.html#L1564">pas2:1564</a></td><td>pas3:1837</td><td>Text original "congelat" en passar al Pas 3</td><td>Quan es desa nou doc</td></tr>
+    <tr><td><code>atne.doc_materia</code></td><td>pas2:1486</td><td>pas2/pas3</td><td>Matèria del document</td><td>—</td></tr>
+    <tr><td><code>atne.doc_nivell</code></td><td>pas2:1487</td><td>pas2/pas3</td><td>Nivell/curs (ex: "3r ESO")</td><td>—</td></tr>
+    <tr><td><code>atne.doc_font</code></td><td>pas3:1203</td><td>pas3:1291</td><td>Tipografia visual (Atkinson, Verdana...)</td><td>—</td></tr>
+    <tr><td><code>atne.complements</code></td><td>pas2:2285</td><td>pas3:1893</td><td>Objecte <code>{glossari:true,...}</code> dels complements triats</td><td>Quan canvia el perfil (<code>atne.complements_for_pid</code>)</td></tr>
+    <tr><td><code>atne.complements_for_pid</code></td><td>pas2:2286</td><td>pas2:2253</td><td>PID per al qual són els complements</td><td>—</td></tr>
+    <tr><td><code>atne.adapted_text</code></td><td>pas3:1937</td><td>pas3:1862</td><td>HTML adaptat (cache)</td><td>Quan canvia <code>atne.adapted_cache_key</code></td></tr>
+    <tr><td><code>atne.adapted_raw</code></td><td>pas3:1938</td><td>pas3:1872</td><td>Text raw del LLM (markdown amb seccions)</td><td>—</td></tr>
+    <tr><td><code>atne.adapted_cache_key</code></td><td>pas3:1939</td><td>pas3:1861</td><td>Hash del context (perfil+text+complements)</td><td>Quan canvia un dels inputs</td></tr>
+    <tr><td><code>atne.adapted_at</code></td><td>pas3:1941</td><td>pas3:1688</td><td>Timestamp ms de l'última adaptació</td><td>—</td></tr>
+    <tr><td><code>atne.draft_id</code></td><td>pas2:1928</td><td>pas2:1949</td><td>ID a Supabase del draft desat al servidor</td><td>Quan es crea draft nou o s'esborra</td></tr>
+    <tr><td><code>atne.draft_saved_at</code></td><td>pas2:1929</td><td>pas2:1617</td><td>ISO timestamp del draft a servidor</td><td>—</td></tr>
+    <tr><td><code>atne.zoom</code> (×3)</td><td>pas1/2/3</td><td>pas1/2/3</td><td>Nivell de zoom de la pàgina</td><td>—</td></tr>
+  </tbody>
+</table>
+
+<!-- ════════════════ APÈNDIX C · LIMITACIONS ════════════════ -->
+<h2 id="limitacions">Apèndix C · Limitacions conegudes</h2>
+<p class="lede">Elements detectats durant l'anàlisi que requereixen atenció. Ordenats per impacte (bug ≻ selector no exposat ≻ desactivació justificada ≻ nota tècnica).</p>
+<ul>
+  <li><span class="flag bug">Bug a /api/prompt-preview (CORREGIT en aquesta entrega).</span> La línia <code>instruction_ids = [f["id"] for f in filtered]</code> a <code>server.py:4990</code> intentava iterar un <em>dict</em> com si fos llista, fent fallar tota crida real amb 500. <b>Fix aplicat:</b> recorre <code>filtered["macrodirectives"][*].instruccions</code>. Cal <strong>rearrencar el servidor</strong> perquè el fix entri en vigor.</li>
+  <li><span class="flag bug">Mismatch claus entre frontend i backend.</span> <a href="ui/atne/js/llm.js#L22">llm.js:22-28</a> usa claus en MAJÚSCULES (<code>TDAH</code>, <code>DISLEXIA</code>, <code>CAT_L2</code>, <code>AACC</code>) per a <code>profile.caracteristiques</code>, però <a href="server.py#L1049">build_persona_audience</a> i <a href="instruction_catalog.py#L877">PROFILE_INSTRUCTION_MAP</a> esperen MINÚSCULES (<code>tdah</code>, <code>dislexia</code>, <code>nouvingut</code>, <code>altes_capacitats</code>). Conseqüència: el flux real Pas 1→2→3 NO activa cap instrucció per perfil, només les <code>SEMPRE</code> i <code>NIVELL</code>. <b>Verificat amb el codi del repo</b>; cap commit obvi ho corregeix. Recomanació: alinear claus al frontend.</li>
+  <li><span class="flag todo">Selector de gènere discursiu</span>: només exposat al Pas 2 mode «Generar» (8 valors disponibles), però no es propaga al Pas 3 ni a <code>/api/adapt</code>. Conseqüència: l'adaptació no sap si el text és un conte, una notícia o un manual. Veure secció <a href="#tracabilitat">§7</a>. La pàgina <code>/pipeline</code> sí que el permet provar.</li>
+  <li><span class="flag todo">Selector de to</span>: 8 valors al Pas 2 mode «Generar», però no es propaga a <code>/api/adapt</code>. Al pipeline d'adaptació, el to queda dictat per <code>G-06</code> (graduació per MECR) + l'heurística de «respecta el registre del text original». Veure secció <a href="#flux-to">§8</a>.</li>
+  <li><span class="flag todo">Selector DUA</span>: no exposat enlloc del flux Pas 1-2-3. Tot va per defecte a <code>Core</code>. Pedagògicament aquesta és una de les 3 decisions més importants (Accés / Core / Enriquiment) i ara mateix no existeix.</li>
+  <li><span class="flag todo">Selector MECR sortida</span>: tampoc apareix com a control explícit. <code>llm.js:126</code> hardcodeja <code>'B1'</code>. El curs de Pas 2 es parseja via <code>nivellFromCourse()</code> a <a href="ui/atne/pas2.html#L1456">pas2:1456</a> però aquest valor no s'envia com a <code>mecr_sortida</code>; és només una etiqueta UI.</li>
+  <li><span class="flag">RAG/KG desactivat</span> per a <code>/api/adapt</code> des del 2026-04-09 — justificat al comentari <a href="server.py#L2349">server.py:2349</a>. Infraestructura present per a futur ús.</li>
+  <li><span class="flag">Few-shot eliminat</span> 2026-04-09 — la cache es manté carregada però no s'inclou al prompt.</li>
+  <li><span class="flag">Auditor LLM desactivat</span> per defecte des del 14/04/26 (15% precisió, 85% falsos positius). Reactivable via env var <code>ATNE_AUDITOR_ENABLED=true</code> o toggle UI.</li>
+  <li><span class="flag">generador_lliure/</span> és un mòdul aïllat (<code>orquestrador.py</code>, <code>agent.py</code>, <code>prompt.py</code>) que NO crida <code>build_system_prompt</code> ni <code>instruction_catalog</code>. Via experimental per a generació lliure; no afecta el flux Pas 1-2-3.</li>
+  <li><span class="flag todo">«Refer amb rúbrica»</span>: endpoint inexistent. La rúbrica s'usa per avaluar batch (<a href="evaluator_rubrics.py"><code>evaluator_rubrics.py</code></a>) però no hi ha un flux de refer una adaptació feedback-guiat. Decidit pendent.</li>
+  <li><span class="flag">Xifres d'instruccions viu.</span> Històricament el docstring i la documentació tenien xifres hardcoded que es desfasaven. Des del 2026-04-19, la font única de veritat és <a href="instruction_catalog.py#L873"><code>get_catalog_stats()</code></a> exposada a <a href="/api/stats-instruccions"><code>GET /api/stats-instruccions</code></a>. No hardcodejar xifres en prosa.</li>
+</ul>
+
+<p class="note">Documentació generada a partir del codi del repo a <code>2026-04-19</code>. Per a la versió interactiva, obre <code>http://localhost:8000/pipeline</code> amb el servidor engegat (<code>python server.py</code>).</p>
+
+</main>
+</div>
+</body>
+</html>

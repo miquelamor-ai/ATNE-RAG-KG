@@ -492,6 +492,30 @@
               <div class="row-use">fa 1w</div>
               <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
             </div>
+            <div class="row person" data-pid="jana">
+              <div class="row-av av-tdah">J</div>
+              <div><div class="row-name">Jana Bonet</div><div class="row-sub">4t Primària A · 9 anys</div></div>
+              <div class="row-chips"><span class="chip tdah">TDAH</span><span class="chip lv">A2 · Inicial</span></div>
+              <div class="row-course">4t Primària A</div>
+              <div class="row-use">fa 1w</div>
+              <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
+            </div>
+            <div class="row person" data-pid="yassin">
+              <div class="row-av av-cat">Y</div>
+              <div><div class="row-name">Yassin Mansour</div><div class="row-sub">3r Primària B · 8 anys</div></div>
+              <div class="row-chips"><span class="chip cat">Català L2</span><span class="chip lv">3 mesos</span></div>
+              <div class="row-course">3r Primària B</div>
+              <div class="row-use">fa 1w</div>
+              <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
+            </div>
+            <div class="row person" data-pid="clara">
+              <div class="row-av av-ac">C</div>
+              <div><div class="row-name">Clara Font</div><div class="row-sub">5è Primària A · 10 anys</div></div>
+              <div class="row-chips"><span class="chip ac">Altes capacitats</span></div>
+              <div class="row-course">5è Primària A</div>
+              <div class="row-use">fa 1w</div>
+              <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
+            </div>
             <div class="row person" data-pid="acollida">
               <div class="row-av grp grp-cat">L2</div>
               <div><div class="row-name">Aula d'acollida · Cicle sup.</div><div class="mini-row"><span class="mini av-cat">Y</span><span class="mini av-cat">L</span><span class="mini av-cat">Am</span><span class="mini av-neu">+5</span></div></div>
@@ -732,6 +756,18 @@
                     chips:[{label:'TDAH',cat:'tdah'},{label:'Dislèxia',cat:'disl'}],
                     behaviors:['Dificultats atencionals i lectora','Fatiga ràpida','Necessita textos curts'],
                     aids:['Fragmentar el text','Tipografia accessible','Una idea per frase','Marques visuals'] },
+    jana:         { id:'jana', type:'person', name:'Jana Bonet', age:'9', course:'4t Primària A', avatar:'J', cat:'tdah',
+                    chips:[{label:'TDAH',cat:'tdah'},{label:'A2 · Inicial',cat:'lv'}],
+                    behaviors:['Es distreu amb textos llargs','Bones capacitats orals','Necessita suport visual'],
+                    aids:['Textos curts','Fragmentar en blocs','Instruccions numerades','Pictogrames'] },
+    yassin:       { id:'yassin', type:'person', name:'Yassin Mansour', age:'8', course:'3r Primària B', avatar:'Y', cat:'cat', mesos_catalunya:3, l1:'àrab',
+                    chips:[{label:'Català L2',cat:'cat'},{label:'3 mesos',cat:'lv'}],
+                    behaviors:['Arribat fa 3 mesos del Marroc','Vocabulari escàs','Bona motivació'],
+                    aids:['Glossari amb traducció àrab','Pictogrames','Vocabulari freqüent','Frases SVO curtes'] },
+    clara:        { id:'clara', type:'person', name:'Clara Font', age:'10', course:'5è Primària A', avatar:'C', cat:'ac',
+                    chips:[{label:'Altes capacitats',cat:'ac'}],
+                    behaviors:['Llegeix textos d\'adults','Fa connexions creatives','Busca reptes'],
+                    aids:['Profunditzacio','Preguntes obertes','Connexions interdisciplinars','Recerca autònoma'] },
     grup3a:       { id:'grup3a', type:'group', name:'3r ESO A · Grup classe', age:null, course:'24 alumnes', avatar:'3A', cat:'group',
                     chips:[{label:'3 nivells',cat:'lv'},{label:'1 TDAH',cat:'tdah'},{label:'2 L2',cat:'cat'}],
                     behaviors:['Ritmes diversos: 3 MECR diferents','Fatiga lectora del TDAH a mitja classe','L2: dificultats amb connectors i vocabulari'],
@@ -759,7 +795,9 @@
          'atne.adapted_raw',
          'atne.adapted_cache_key',
          'atne.complements',
-         'atne.complements_for_pid'].forEach(k => localStorage.removeItem(k));
+         'atne.complements_for_pid',
+         'atne.doc_nivell',
+         'atne.doc_materia'].forEach(k => localStorage.removeItem(k));
       }
       localStorage.setItem('atne.profile_id', pid);
     }

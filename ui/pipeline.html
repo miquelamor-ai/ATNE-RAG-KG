@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<title>ATNE · /pipeline · Causa-efecte del prompt</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/ui/styles/tokens.css">
+<link rel="stylesheet" href="/ui/styles/base.css">
+
+<style>
+  /* =========================================================
+     /pipeline — Causa-efecte del prompt
+     Estètica: cream editorial, coherent amb Pas 2/Pas 3.
+     Layout: 2 columnes (formulari | prompt real).
+     ========================================================= */
+
+  html, body { background: var(--cream); color: var(--ink-900); }
+  body { font-family: var(--ui); margin: 0; min-height: 100vh; }
+
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 22px;
+    background: var(--cream-2);
+    border-bottom: 1px solid var(--paper-line);
+  }
+  .topbar h1 {
+    font-family: var(--serif); font-weight: 700; font-size: 18px;
+    margin: 0; letter-spacing: -.01em;
+  }
+  .topbar .meta {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-500);
+  }
+  .topbar a { color: var(--primary); text-decoration: none; font-weight: 500; font-size: 12px; }
+  .topbar a:hover { text-decoration: underline; }
+
+  .wrap {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 56px);
+  }
+
+  /* ── COL ESQUERRA: formulari ── */
+  .left {
+    padding: 22px 20px 80px;
+    background: var(--cream);
+    border-right: 1px solid var(--paper-line);
+    overflow-y: auto;
+    max-height: calc(100vh - 56px);
+  }
+  .group { margin-bottom: 18px; }
+  .group h3 {
+    font-family: var(--mono); font-weight: 500; font-size: 10.5px;
+    letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ink-500); margin: 0 0 8px;
+  }
+  .group label {
+    display: block; font-size: 12px; color: var(--ink-700);
+    margin-bottom: 4px;
+  }
+  select, input[type="text"], textarea {
+    width: 100%;
+    background: #fff; border: 1px solid var(--paper-line);
+    border-radius: 6px; padding: 7px 10px;
+    font-family: var(--ui); font-size: 13px; color: var(--ink-900);
+    box-sizing: border-box;
+  }
+  select:focus, input:focus, textarea:focus {
+    outline: 1.5px solid var(--primary); outline-offset: 0;
+    border-color: transparent;
+  }
+  textarea { font-family: var(--serif); font-size: 14px; line-height: 1.55; min-height: 110px; resize: vertical; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; }
+  .check {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--ink-800);
+    padding: 3px 0;
+    cursor: pointer;
+  }
+  .check input { width: 14px; height: 14px; accent-color: var(--primary); }
+  .check.full { grid-column: 1 / -1; }
+
+  .subvars {
+    margin: 6px 0 0 22px;
+    padding: 6px 10px;
+    background: var(--ink-50); border-left: 2px solid var(--primary-100);
+    border-radius: 0 4px 4px 0;
+    display: none;
+  }
+  .subvars.on { display: block; }
+  .subvars label { font-size: 11px; color: var(--ink-700); margin-top: 4px; }
+  .subvars select { padding: 4px 6px; font-size: 11.5px; }
+  .subvars .sub-check {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 11.5px; color: var(--ink-700); margin-top: 4px;
+  }
+
+  .actions {
+    position: sticky; bottom: 0;
+    background: linear-gradient(0deg, var(--cream) 70%, transparent);
+    padding: 12px 0 4px;
+    margin: 18px 0 0;
+  }
+  .btn {
+    background: var(--primary); color: #fff; border: 0;
+    padding: 10px 18px; font-family: var(--ui); font-weight: 600;
+    font-size: 13px; border-radius: 8px; cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  }
+  .btn:hover { background: var(--primary-600); }
+  .btn[disabled] { opacity: .55; cursor: wait; }
+  .btn.ghost {
+    background: transparent; color: var(--primary);
+    border: 1px solid var(--primary-100); box-shadow: none;
+  }
+  .btn.ghost:hover { background: var(--primary-50); }
+  .live {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-left: 12px; font-size: 11.5px; color: var(--ink-600);
+    font-family: var(--mono);
+  }
+  .live input { accent-color: var(--primary); }
+
+  /* ── COL DRETA: prompt real ── */
+  .right {
+    padding: 22px 26px 80px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    max-height: calc(100vh - 56px);
+  }
+  .metrics {
+    display: flex; gap: 16px;
+    margin-bottom: 12px;
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink-700);
+  }
+  .metrics .pill {
+    background: #fff; border: 1px solid var(--paper-line);
+    padding: 5px 10px; border-radius: 12px;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .metrics .pill b { color: var(--ink-900); font-weight: 600; }
+
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--paper-line); margin-bottom: 0; }
+  .tab {
+    padding: 8px 14px; font-size: 12.5px;
+    cursor: pointer; color: var(--ink-600);
+    border-bottom: 2px solid transparent;
+    background: transparent; border-top: 0; border-left: 0; border-right: 0;
+    font-family: var(--ui); font-weight: 500;
+  }
+  .tab:hover { color: var(--ink-900); }
+  .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+
+  .panel { display: none; flex: 1; min-height: 0; overflow: hidden; flex-direction: column; }
+  .panel.active { display: flex; }
+
+  .codebox {
+    background: #fbf8ee; border: 1px solid var(--paper-line);
+    border-radius: 6px; padding: 14px 16px;
+    font-family: var(--mono); font-size: 12px; line-height: 1.55;
+    color: var(--ink-900);
+    white-space: pre-wrap; word-break: break-word;
+    overflow-y: auto; flex: 1; min-height: 0;
+    margin-top: 12px;
+  }
+  .codebox .hl-section { color: var(--primary); font-weight: 600; }
+  .codebox .hl-strong { color: var(--ac); font-weight: 600; }
+
+  .layer-stack { overflow-y: auto; flex: 1; min-height: 0; padding-top: 12px; }
+  .layer {
+    background: #fff; border: 1px solid var(--paper-line);
+    border-radius: 8px; margin-bottom: 12px; overflow: hidden;
+  }
+  .layer-h {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--cream-2);
+    border-bottom: 1px solid var(--paper-line);
+  }
+  .layer-h .name {
+    font-family: var(--mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: .1em;
+    color: var(--primary); font-weight: 600;
+  }
+  .layer-h .cnt {
+    font-family: var(--mono); font-size: 10.5px; color: var(--ink-500);
+  }
+  .layer-body {
+    padding: 12px 14px; max-height: 280px; overflow-y: auto;
+    font-family: var(--mono); font-size: 11.5px; line-height: 1.55;
+    white-space: pre-wrap; word-break: break-word; color: var(--ink-900);
+  }
+  .layer-body.empty { color: var(--ink-400); font-style: italic; }
+
+  .ids-grid {
+    flex: 1; min-height: 0; overflow-y: auto;
+    padding-top: 14px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 6px;
+    align-content: start;
+  }
+  .id-pill {
+    background: #fff; border: 1px solid var(--paper-line);
+    padding: 6px 8px; border-radius: 5px;
+    font-family: var(--mono); font-size: 11px; color: var(--ink-800);
+    text-align: center;
+  }
+  .id-pill.suppr { background: #fcf2f2; color: var(--err); border-color: var(--danger-50); text-decoration: line-through; }
+
+  .empty-state {
+    flex: 1; display: grid; place-items: center; padding: 60px;
+    color: var(--ink-400); font-size: 13px; text-align: center;
+  }
+  .copy-btn {
+    margin-left: auto; background: transparent; border: 1px solid var(--paper-line);
+    padding: 4px 10px; border-radius: 5px; font-size: 11px; cursor: pointer;
+    color: var(--ink-700); font-family: var(--ui);
+  }
+  .copy-btn:hover { background: var(--cream-2); }
+
+  .footer-note {
+    padding: 8px 14px; font-size: 11.5px; color: var(--ink-500);
+    background: var(--cream-2); border-top: 1px solid var(--paper-line);
+    font-family: var(--mono);
+  }
+  .footer-note code { background: rgba(0,0,0,.04); padding: 1px 5px; border-radius: 3px; }
+
+  /* Loader */
+  .loading {
+    position: absolute; inset: 0;
+    background: rgba(244, 241, 232, .85);
+    display: none; place-items: center;
+    z-index: 10;
+  }
+  .loading.on { display: grid; }
+  .spinner {
+    width: 24px; height: 24px;
+    border: 3px solid var(--ink-200);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: sp 0.8s linear infinite;
+  }
+  @keyframes sp { to { transform: rotate(360deg); } }
+
+  .right-rel { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+  @media (max-width: 900px) {
+    .wrap { grid-template-columns: 1fr; }
+    .left { max-height: none; }
+    .right { max-height: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div>
+    <h1>/pipeline · Causa-efecte del prompt</h1>
+    <div class="meta">Edita la configuració · veu el prompt real que rep l'LLM</div>
+  </div>
+  <div>
+    <a href="/ui/atne/pas1.html">← Tornar al flux Pas 1-2-3</a>
+    &nbsp;·&nbsp;
+    <a href="/docs/pipeline-atne.html" target="_blank">Documentació estàtica</a>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ════════════════ COL ESQUERRA ════════════════ -->
+  <aside class="left">
+
+    <div class="group">
+      <h3>Context educatiu</h3>
+      <div class="row2">
+        <div>
+          <label for="etapa">Etapa</label>
+          <select id="etapa">
+            <option value="Infantil">Infantil</option>
+            <option value="Primaria">Primària</option>
+            <option value="ESO" selected>ESO</option>
+            <option value="Batxillerat">Batxillerat</option>
+            <option value="FP">FP</option>
+          </select>
+        </div>
+        <div>
+          <label for="curs">Curs</label>
+          <input type="text" id="curs" value="3r" placeholder="3r, 1r-A...">
+        </div>
+      </div>
+      <div style="margin-top: 8px;">
+        <label for="materia">Matèria / àmbit</label>
+        <select id="materia">
+          <option value="Ciències socials" selected>Ciències socials (humanístic)</option>
+          <option value="Història">Història (humanístic)</option>
+          <option value="Llengua i literatura">Llengua i literatura (lingüístic)</option>
+          <option value="Biologia">Biologia (científic)</option>
+          <option value="Física i química">Física i química (científic)</option>
+          <option value="Matemàtiques">Matemàtiques (científic)</option>
+          <option value="Filosofia">Filosofia (humanístic)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="group">
+      <h3>Adaptació pedagògica</h3>
+      <div class="row2">
+        <div>
+          <label for="mecr">MECR sortida</label>
+          <select id="mecr">
+            <option value="pre-A1">pre-A1</option>
+            <option value="A1">A1</option>
+            <option value="A2">A2</option>
+            <option value="B1" selected>B1</option>
+            <option value="B2">B2</option>
+          </select>
+        </div>
+        <div>
+          <label for="dua">Nivell DUA</label>
+          <select id="dua">
+            <option value="Acces">Accés</option>
+            <option value="Core" selected>Core</option>
+            <option value="Enriquiment">Enriquiment</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top: 8px;">
+        <label for="genere">Gènere discursiu</label>
+        <select id="genere">
+          <option value="">— cap (no força bloc)</option>
+          <option value="explicacio" selected>Explicació</option>
+          <option value="narracio">Narració</option>
+          <option value="instruccio">Instrucció</option>
+          <option value="argumentacio">Argumentació</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="group">
+      <h3>Condicions del perfil <span style="text-transform:none; color:var(--ink-400);">(activa les que apliquin)</span></h3>
+      <div class="checks" id="conditions"></div>
+    </div>
+
+    <div class="group">
+      <h3>Situacions contextuals</h3>
+      <div class="checks" id="situations"></div>
+    </div>
+
+    <div class="group">
+      <h3>Complements a generar</h3>
+      <div class="checks" id="complements"></div>
+    </div>
+
+    <div class="group">
+      <h3>Text de prova <span style="text-transform:none; color:var(--ink-400);">(opcional, només context visual)</span></h3>
+      <textarea id="text-mostra" placeholder="Enganxa aquí un text per tenir-lo de referència visual. NO s'envia al prompt-preview (el sistema prompt es genera abans del text)."></textarea>
+    </div>
+
+    <div class="group">
+      <h3>Observacions del docent</h3>
+      <input type="text" id="observacions" placeholder="Ex: 'Dificultats amb textos narratius llargs'">
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="btn-gen">Generar prompt real</button>
+      <label class="live"><input type="checkbox" id="auto" checked> Actualització en directe</label>
+    </div>
+  </aside>
+
+  <!-- ════════════════ COL DRETA ════════════════ -->
+  <section class="right">
+
+    <div class="metrics" id="metrics">
+      <span class="pill">Caràcters: <b id="m-len">—</b></span>
+      <span class="pill">Paraules: <b id="m-words">—</b></span>
+      <span class="pill">Instruccions actives: <b id="m-instr">—</b></span>
+      <span class="pill">Suprimides: <b id="m-suppr">—</b></span>
+      <button class="copy-btn" id="copy">Copiar prompt</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-panel="full">Prompt complet</button>
+      <button class="tab" data-panel="layers">Capes</button>
+      <button class="tab" data-panel="ids">Instruccions actives</button>
+      <button class="tab" data-panel="audit">Audit</button>
+    </div>
+
+    <div class="right-rel">
+      <div class="loading" id="loading"><div class="spinner"></div></div>
+
+      <div class="panel active" id="panel-full">
+        <pre class="codebox" id="prompt-full"><span style="color:var(--ink-400);">Selecciona condicions/MECR/DUA i prem «Generar prompt real».</span></pre>
+      </div>
+
+      <div class="panel" id="panel-layers">
+        <div class="layer-stack" id="layers"></div>
+      </div>
+
+      <div class="panel" id="panel-ids">
+        <div class="ids-grid" id="ids"></div>
+      </div>
+
+      <div class="panel" id="panel-audit">
+        <pre class="codebox" id="audit"></pre>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      Endpoint cridat: <code>POST /api/prompt-preview</code>
+      &nbsp;·&nbsp; Codi: <code>server.py:4977</code>
+      &nbsp;·&nbsp; build_system_prompt: <code>server.py:1202</code>
+      &nbsp;·&nbsp; Catàleg: <code>instruction_catalog.py</code> (<span id="cataleg-total">?</span> instruccions)
+    </div>
+  </section>
+</div>
+
+<script>
+  // ═══════════════════════════════════════════════════════════════════════
+  // CATÀLEG DE CONDICIONS I SITUACIONS
+  // Sincronitzat amb instruction_catalog.py (PROFILE_INSTRUCTION_MAP) i
+  // build_persona_audience() de server.py:1032
+  // ═══════════════════════════════════════════════════════════════════════
+  const CONDITIONS = [
+    { key: 'tdah',                     label: 'TDAH',                 svars: ['presentacio','grau','baixa_memoria_treball','fatiga_cognitiva'] },
+    { key: 'dislexia',                 label: 'Dislèxia',             svars: ['tipus_dislexia','grau'] },
+    { key: 'tea',                      label: 'TEA (Espectre Autista)', svars: ['nivell_suport','comunicacio_oral'] },
+    { key: 'tdl',                      label: 'TDL (Trastorn del Llenguatge)', svars: ['modalitat','grau','morfosintaxi','semantica','pragmatica','discurs_narrativa','bilingue'] },
+    { key: 'discapacitat_intellectual', label: 'Discapacitat intel·lectual', svars: ['grau'] },
+    { key: 'discapacitat_visual',      label: 'Discapacitat visual',  svars: ['grau'] },
+    { key: 'discapacitat_auditiva',    label: 'Discapacitat auditiva', svars: ['comunicacio','implant_coclear'] },
+    { key: 'altes_capacitats',         label: 'Altes capacitats',     svars: ['tipus_capacitat'] },
+    { key: '2e',                       label: 'Doble excepcionalitat (2e)', svars: [] },
+    { key: 'tdc',                      label: 'TDC / Dispràxia',      svars: ['grau'] },
+    { key: 'trastorn_emocional',       label: 'Trastorn emocional/conductual', svars: ['sensibilitat_tematica'] },
+  ];
+  const SITUATIONS = [
+    { key: 'nouvingut',         label: 'Nouvingut (L2)',         svars: ['L1','familia_linguistica','alfabet_llati','escolaritzacio_previa','calp'] },
+    { key: 'vulnerabilitat',    label: 'Vulnerabilitat socioeducativa', svars: ['sensibilitat_tematica'] },
+  ];
+  const COMPLEMENTS = [
+    { key: 'glossari', label: 'Glossari' },
+    { key: 'preguntes_comprensio', label: 'Preguntes de comprensió (MALL/TILC)' },
+    { key: 'bastides', label: 'Bastides (scaffolding)' },
+    { key: 'esquema_visual', label: 'Esquema visual' },
+    { key: 'mapa_conceptual', label: 'Mapa conceptual' },
+    { key: 'mapa_mental', label: 'Mapa mental' },
+    { key: 'activitats_aprofundiment', label: 'Activitats d\'aprofundiment' },
+    { key: 'pictogrames', label: 'Pictogrames' },
+    { key: 'definicions_integrades', label: 'Definicions integrades' },
+    { key: 'negretes', label: 'Negretes (termes clau)' },
+    { key: 'traduccio_l1', label: 'Traducció L1' },
+  ];
+
+  // Sub-variable enums (font: server.py:1032 build_persona_audience)
+  const SVAR_OPTIONS = {
+    presentacio: ['combinat','inatent','hiperactiu_impulsiu'],
+    grau: ['lleu','moderat','sever'],
+    baixa_memoria_treball: 'bool',
+    fatiga_cognitiva: 'bool',
+    tipus_dislexia: ['fonologica','superficial','mixta'],
+    nivell_suport: ['1','2','3'],
+    comunicacio_oral: ['fluida','limitada','no_verbal'],
+    modalitat: ['expressiu','comprensiu','mixt'],
+    morfosintaxi: 'bool', semantica: 'bool', pragmatica: 'bool', discurs_narrativa: 'bool', bilingue: 'bool',
+    tipus_capacitat: ['global','talent_especific'],
+    comunicacio: ['oral','LSC','bimodal'],
+    implant_coclear: 'bool',
+    sensibilitat_tematica: 'bool',
+    L1: 'text',
+    familia_linguistica: ['romanica','germanica','eslava','semitica','sinotibetana','altra'],
+    alfabet_llati: 'bool',
+    escolaritzacio_previa: ['si','parcial','no'],
+    calp: ['inicial','emergent','consolidat'],
+  };
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // RENDERITZAT DEL FORMULARI
+  // ═══════════════════════════════════════════════════════════════════════
+  function renderConditions(targetId, list) {
+    const root = document.getElementById(targetId);
+    list.forEach(c => {
+      const wrap = document.createElement('div');
+      wrap.className = 'check full';
+      const checkLine = document.createElement('label');
+      checkLine.className = 'check';
+      checkLine.innerHTML = `<input type="checkbox" data-cond="${c.key}"> <span>${c.label}</span>`;
+      wrap.appendChild(checkLine);
+      if (c.svars && c.svars.length) {
+        const sub = document.createElement('div');
+        sub.className = 'subvars';
+        sub.dataset.subFor = c.key;
+        c.svars.forEach(s => {
+          const opts = SVAR_OPTIONS[s];
+          if (Array.isArray(opts)) {
+            const lbl = document.createElement('label');
+            lbl.textContent = s.replace(/_/g, ' ');
+            const sel = document.createElement('select');
+            sel.dataset.subKey = s;
+            sel.innerHTML = '<option value="">—</option>' + opts.map(o => `<option value="${o}">${o}</option>`).join('');
+            sub.appendChild(lbl); sub.appendChild(sel);
+          } else if (opts === 'bool') {
+            const div = document.createElement('div');
+            div.className = 'sub-check';
+            div.innerHTML = `<input type="checkbox" data-sub-key="${s}" id="sb-${c.key}-${s}"><label for="sb-${c.key}-${s}">${s.replace(/_/g, ' ')}</label>`;
+            sub.appendChild(div);
+          } else if (opts === 'text') {
+            const lbl = document.createElement('label');
+            lbl.textContent = s;
+            const inp = document.createElement('input');
+            inp.type = 'text'; inp.dataset.subKey = s;
+            inp.placeholder = s === 'L1' ? 'castellà, àrab, urdú...' : '';
+            sub.appendChild(lbl); sub.appendChild(inp);
+          }
+        });
+        wrap.appendChild(sub);
+        checkLine.querySelector('input').addEventListener('change', e => {
+          sub.classList.toggle('on', e.target.checked);
+          schedule();
+        });
+        sub.addEventListener('change', () => schedule());
+        sub.addEventListener('input', () => schedule());
+      } else {
+        checkLine.querySelector('input').addEventListener('change', schedule);
+      }
+      root.appendChild(wrap);
+    });
+  }
+  renderConditions('conditions', CONDITIONS);
+  renderConditions('situations', SITUATIONS);
+
+  // Complements
+  (function () {
+    const root = document.getElementById('complements');
+    COMPLEMENTS.forEach(c => {
+      const lbl = document.createElement('label');
+      lbl.className = 'check full';
+      lbl.innerHTML = `<input type="checkbox" data-comp="${c.key}"> <span>${c.label}</span>`;
+      lbl.querySelector('input').addEventListener('change', schedule);
+      root.appendChild(lbl);
+    });
+    // Per defecte cap activat (deixem que el docent triï)
+  })();
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // RECULL DELS VALORS DEL FORMULARI
+  // ═══════════════════════════════════════════════════════════════════════
+  function readForm() {
+    const profile = { nom: 'Perfil pipeline', caracteristiques: {}, observacions: document.getElementById('observacions').value || '' };
+    const allConds = [...CONDITIONS, ...SITUATIONS];
+    document.querySelectorAll('input[data-cond]').forEach(inp => {
+      if (!inp.checked) return;
+      const key = inp.dataset.cond;
+      const def = allConds.find(c => c.key === key);
+      const obj = { actiu: true };
+      const subRoot = document.querySelector(`.subvars[data-sub-for="${key}"]`);
+      if (subRoot && def && def.svars) {
+        def.svars.forEach(s => {
+          const opt = SVAR_OPTIONS[s];
+          if (Array.isArray(opt)) {
+            const sel = subRoot.querySelector(`select[data-sub-key="${s}"]`);
+            if (sel && sel.value) obj[s] = sel.value;
+          } else if (opt === 'bool') {
+            const cb = subRoot.querySelector(`input[data-sub-key="${s}"]`);
+            if (cb && cb.checked) obj[s] = true;
+          } else if (opt === 'text') {
+            const txt = subRoot.querySelector(`input[data-sub-key="${s}"]`);
+            if (txt && txt.value) obj[s] = txt.value;
+          }
+        });
+      }
+      profile.caracteristiques[key] = obj;
+    });
+
+    const context = {
+      etapa: document.getElementById('etapa').value,
+      curs: document.getElementById('curs').value,
+      materia: document.getElementById('materia').value,
+    };
+    const params = {
+      mecr_sortida: document.getElementById('mecr').value,
+      dua: document.getElementById('dua').value,
+      etapa: context.etapa,
+      materia: context.materia,
+      genere_discursiu: document.getElementById('genere').value,
+      complements: {},
+    };
+    document.querySelectorAll('input[data-comp]').forEach(inp => {
+      if (inp.checked) params.complements[inp.dataset.comp] = true;
+    });
+    return { profile, context, params };
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // CRIDA AL BACKEND
+  // ═══════════════════════════════════════════════════════════════════════
+  let lastResult = null;
+  async function generate() {
+    const body = readForm();
+    const loading = document.getElementById('loading');
+    loading.classList.add('on');
+    try {
+      const r = await fetch('/api/prompt-preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!r.ok) {
+        const txt = await r.text();
+        document.getElementById('prompt-full').textContent = `Error ${r.status}: ${txt.slice(0,500)}`;
+        return;
+      }
+      const data = await r.json();
+      lastResult = data;
+      renderResult(data);
+    } catch (e) {
+      document.getElementById('prompt-full').textContent = `Error de xarxa: ${e.message}`;
+    } finally {
+      loading.classList.remove('on');
+    }
+  }
+
+  function renderResult(d) {
+    document.getElementById('m-len').textContent = d.prompt_length;
+    document.getElementById('m-words').textContent = d.prompt_words;
+    document.getElementById('m-instr').textContent = d.total_instructions || (d.instruction_ids || []).length;
+    document.getElementById('m-suppr').textContent = (d.suppressed_ids || []).length;
+
+    // Tab 1 — Prompt complet (amb highlight molt simple per a ## i **)
+    const full = (d.prompt_complet || '').replace(/[<>]/g, c => c === '<' ? '&lt;' : '&gt;');
+    const highlighted = full
+      .replace(/^(##? .+)$/gm, '<span class="hl-section">$1</span>')
+      .replace(/\*\*([^*]+)\*\*/g, '<span class="hl-strong">**$1**</span>');
+    document.getElementById('prompt-full').innerHTML = highlighted;
+
+    // Tab 2 — Capes
+    const stack = document.getElementById('layers');
+    stack.innerHTML = '';
+    const capes = d.capes || {};
+    const ORDRE = [
+      ['identitat', 'IDENTITAT (corpus_reader.get_identity)'],
+      ['instruccions', 'INSTRUCCIONS FILTRADES (instruction_filter)'],
+      ['dua', 'DUA (corpus_reader.get_dua_block)'],
+      ['genere', 'GÈNERE DISCURSIU (corpus_reader.get_genre_block)'],
+      ['persona_audience', 'PERSONA-AUDIENCE (build_persona_audience)'],
+      ['fewshot', 'FEW-SHOT (corpus_reader.get_fewshot_example) — eliminat 2026-04-09'],
+    ];
+    ORDRE.forEach(([k, name]) => {
+      const v = capes[k] || '';
+      const layer = document.createElement('div');
+      layer.className = 'layer';
+      const cnt = v ? `${v.length} car · ${v.split(/\s+/).filter(Boolean).length} mots` : 'buit';
+      layer.innerHTML = `
+        <div class="layer-h"><span class="name">${name}</span><span class="cnt">${cnt}</span></div>
+        <div class="layer-body${v ? '' : ' empty'}">${v ? escape(v) : '(no s\'inclou aquesta capa per a aquesta configuració)'}</div>`;
+      stack.appendChild(layer);
+    });
+
+    // Tab 3 — IDs
+    const ids = document.getElementById('ids');
+    ids.innerHTML = '';
+    (d.instruction_ids || []).forEach(id => {
+      const el = document.createElement('div');
+      el.className = 'id-pill'; el.textContent = id;
+      ids.appendChild(el);
+    });
+    (d.suppressed_ids || []).forEach(id => {
+      const el = document.createElement('div');
+      el.className = 'id-pill suppr'; el.textContent = id; el.title = 'suprimit';
+      ids.appendChild(el);
+    });
+
+    // Tab 4 — Audit
+    const audit = (d.audit || []).map(a => `${a.id.padEnd(8)} ${(a.macro||'').padEnd(16)} ${a.motiu||''}`).join('\n')
+      || JSON.stringify(d.stats || {}, null, 2);
+    document.getElementById('audit').textContent = audit || '(sense entrades audit)';
+  }
+
+  function escape(s) { return s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[c]); }
+
+  // Tabs
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      document.getElementById('panel-' + t.dataset.panel).classList.add('active');
+    });
+  });
+
+  // Botons
+  document.getElementById('btn-gen').addEventListener('click', generate);
+  document.getElementById('copy').addEventListener('click', () => {
+    if (!lastResult) return;
+    navigator.clipboard.writeText(lastResult.prompt_complet || '');
+    const b = document.getElementById('copy'); const o = b.textContent;
+    b.textContent = '✓ Copiat'; setTimeout(() => b.textContent = o, 1200);
+  });
+
+  // Auto: regenera quan canvia qualsevol input (debounce 350ms)
+  let _t = null;
+  function schedule() {
+    if (!document.getElementById('auto').checked) return;
+    clearTimeout(_t);
+    _t = setTimeout(generate, 350);
+  }
+  document.querySelectorAll('select, #curs, #observacions, #text-mostra, #etapa, #materia, #mecr, #dua, #genere').forEach(el => {
+    el.addEventListener('change', schedule);
+    el.addEventListener('input', schedule);
+  });
+
+  // Primera generació al carregar
+  generate();
+
+  // Xifra viva del catàleg (font única: /api/stats-instruccions)
+  fetch('/api/stats-instruccions').then(r => r.json()).then(d => {
+    const el = document.getElementById('cataleg-total');
+    if (el && d && d.total) el.textContent = d.total;
+  }).catch(() => {});
+</script>
+</body>
+</html>

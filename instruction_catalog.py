@@ -8,15 +8,19 @@ Arquitectura:
   El filtre agrupa instruccions actives per macro i genera blocs temàtics
   per al prompt, sense IDs visibles per l'LLM.
 
-Activació (84 instruccions efectives):
-  SEMPRE     → tota adaptació (12 instruccions nucli)
-  NIVELL     → segons MECR de sortida (31 instruccions)
-  PERFIL     → segons perfil alumne + sub-variables (38 instruccions)
-  COMPLEMENT → segons complements activats (3 instruccions)
+Activació — 4 tipus:
+  SEMPRE     → tota adaptació (instruccions nucli)
+  NIVELL     → segons MECR de sortida
+  PERFIL     → segons perfil alumne + sub-variables
+  COMPLEMENT → segons complements activats
 
 Macrodirectives:
   LEXIC, SINTAXI, ESTRUCTURA, COHESIO, COGNITIU, QUALITAT,
   MULTIMODAL, AVALUACIO, PERSONALITZACIO, PERFIL_*
+
+Xifres actuals (no hardcodejar — font única: get_catalog_stats()):
+  cridar instruction_catalog.get_catalog_stats() o consultar
+  GET /api/stats-instruccions per obtenir recompte viu.
 """
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -868,6 +872,22 @@ CATALOG = {
         "subvar_conditions": {"tipus_fonologica": True},
     },
 }
+
+
+def get_catalog_stats() -> dict:
+    """Recompte viu d'instruccions del catàleg per tipus d'activació.
+
+    Font única de veritat. Qualsevol documentació, HTML o dashboard que
+    necessiti el nombre d'instruccions ha de cridar aquesta funció o
+    consultar GET /api/stats-instruccions. No hardcodejar en prosa.
+    """
+    stats = {"total": len(CATALOG), "per_activation": {}, "per_macro": {}}
+    for iid, instr in CATALOG.items():
+        act = instr.get("activation", "DESCONEGUT")
+        stats["per_activation"][act] = stats["per_activation"].get(act, 0) + 1
+        macro = instr.get("macro", "DESCONEGUT")
+        stats["per_macro"][macro] = stats["per_macro"].get(macro, 0) + 1
+    return stats
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

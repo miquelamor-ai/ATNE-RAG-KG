@@ -1205,6 +1205,18 @@
                     chips:[{label:'TDAH',cat:'tdah'},{label:'Dislèxia',cat:'disl'}],
                     behaviors:['Dificultats atencionals i lectora','Fatiga ràpida','Necessita textos curts'],
                     aids:['Fragmentar el text','Tipografia accessible','Una idea per frase','Marques visuals'] },
+    jana:         { id:'jana', type:'person', name:'Jana Bonet', age:'9', course:'4t Primària A', avatar:'J', cat:'tdah',
+                    chips:[{label:'TDAH',cat:'tdah'},{label:'A2 · Inicial',cat:'lv'}],
+                    behaviors:['Es distreu amb textos llargs','Bones capacitats orals','Necessita suport visual'],
+                    aids:['Textos curts','Fragmentar en blocs','Instruccions numerades','Pictogrames'] },
+    yassin:       { id:'yassin', type:'person', name:'Yassin Mansour', age:'8', course:'3r Primària B', avatar:'Y', cat:'cat', mesos_catalunya:3, l1:'àrab',
+                    chips:[{label:'Català L2',cat:'cat'},{label:'3 mesos',cat:'lv'}],
+                    behaviors:['Arribat fa 3 mesos del Marroc','Vocabulari escàs','Bona motivació'],
+                    aids:['Glossari amb traducció àrab','Pictogrames','Vocabulari freqüent','Frases SVO curtes'] },
+    clara:        { id:'clara', type:'person', name:'Clara Font', age:'10', course:'5è Primària A', avatar:'C', cat:'ac',
+                    chips:[{label:'Altes capacitats',cat:'ac'}],
+                    behaviors:['Llegeix textos d\'adults','Fa connexions creatives','Busca reptes'],
+                    aids:['Profunditzacio','Preguntes obertes','Connexions interdisciplinars','Recerca autònoma'] },
     grup3a:       { id:'grup3a', type:'group', name:'3r ESO A · Grup classe', age:null, course:'24 alumnes', avatar:'3A', cat:'group',
                     chips:[{label:'3 nivells',cat:'lv'},{label:'1 TDAH',cat:'tdah'},{label:'2 L2',cat:'cat'}],
                     behaviors:['Ritmes diversos: 3 MECR diferents','Fatiga lectora del TDAH a mitja classe','L2: dificultats amb connectors i vocabulari'],
@@ -1767,9 +1779,19 @@
       // TODO: requires llm.js AbortController support (bug FIX-1 bug 5).
       // Passem el signal; si llm.js encara no el respecta, la crida no es pot avortar
       // però no falla — quedarà pendent fins completar-se.
+      // Deriva el context del perfil actual (no hardcodejar ESO)
+      const pidCur = localStorage.getItem('atne.profile_id') || 'marc';
+      const profCur = (window.ATNE_PROFILES && window.ATNE_PROFILES[pidCur]) || (window.ATNE_PROFILES && window.ATNE_PROFILES.marc);
+      const courseNorm = ((profCur && profCur.course) || '3r ESO A').replace(/\s+[A-Z]$/, '').trim();
+      let etapaCur = 'ESO';
+      if (/infantil/i.test(courseNorm)) etapaCur = 'Infantil';
+      else if (/prim[àa]ria/i.test(courseNorm)) etapaCur = 'primària';
+      else if (/eso/i.test(courseNorm)) etapaCur = 'ESO';
+      else if (/batx/i.test(courseNorm)) etapaCur = 'Batxillerat';
+      else if (/fp/i.test(courseNorm)) etapaCur = 'FP';
       const result = await window.ATNE_LLM.generateTextStream({
         tema, genere, tipologia, to, extensio,
-        context: { etapa: 'ESO', curs: '3r ESO' },
+        context: { etapa: etapaCur, curs: courseNorm, materia: (localStorage.getItem('atne.doc_materia') || '').trim() },
         signal: genAbortCtrl.signal,
         onChunk: ({ acumulat }) => {
           if (writeTa) {

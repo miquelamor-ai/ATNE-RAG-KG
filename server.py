@@ -36,6 +36,7 @@ if __name__ == "__main__" or __name__ == "__mp_main__":
 # ────────────────────────────────────────────────────────────────────────────
 
 import corpus_reader
+import instruction_catalog
 import instruction_filter
 import requests
 import uvicorn
@@ -4711,6 +4712,18 @@ async def cuina_page():
     return HTMLResponse("<h1>Cuina no disponible</h1>", status_code=404)
 
 
+@app.get("/pipeline", response_class=HTMLResponse)
+async def pipeline_page():
+    """Pàgina viva /pipeline — formulari → prompt real (crida POST /api/prompt-preview)."""
+    html_path = UI_DIR / "pipeline.html"
+    if html_path.exists():
+        return HTMLResponse(
+            html_path.read_text(encoding="utf-8"),
+            headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
+        )
+    return HTMLResponse("<h1>Pipeline no disponible</h1>", status_code=404)
+
+
 @app.get("/saber-ne", response_class=HTMLResponse)
 async def saber_ne_page():
     """Serveix la pàgina Saber-ne+ (fonaments pedagògics per a docents)."""
@@ -4985,9 +4998,18 @@ async def api_prompt_preview(request: Request):
     mecr = params.get("mecr_sortida", "B2")
 
     # 1. Instruccions filtrades
+    # Bug fix (2026-04-19): instruction_filter.get_instructions() retorna un
+    # dict {macrodirectives, audit, suppressed, stats}, no una llista. Els IDs
+    # actius els recorrem des de `macrodirectives` (només incloses, NO
+    # suprimides — el camp `audit` també conté entrades amb motiu "suprimit").
     filtered = instruction_filter.get_instructions(profile, params)
     instructions_text = instruction_filter.format_instructions_for_prompt(filtered)
-    instruction_ids = [f["id"] for f in filtered]
+    instruction_ids = []
+    for _macro_id, _macro in filtered.get("macrodirectives", {}).items():
+        for _instr in _macro.get("instruccions", []):
+            instruction_ids.append(_instr["id"])
+    suppressed_ids = list(filtered.get("suppressed", []))
+    stats = filtered.get("stats", {})
 
     # 2. Persona-audience
     persona = build_persona_audience(profile, context, mecr)
@@ -5017,8 +5039,22 @@ async def api_prompt_preview(request: Request):
             "fewshot": fewshot,
         },
         "instruction_ids": instruction_ids,
-        "total_instructions": len(filtered),
+        "total_instructions": stats.get("total_instruccions", len(instruction_ids)),
+        "suppressed_ids": suppressed_ids,
+        "stats": stats,
     }
+
+
+# ── API Stats catàleg (font única de veritat) ───────────────────────────────
+
+@app.get("/api/stats-instruccions")
+async def api_stats_instruccions():
+    """Recompte viu d'instruccions del catàleg per tipus d'activació i macro.
+
+    Font única de veritat per a qualsevol documentació o UI que necessiti
+    el nombre d'instruccions. No hardcodejar en prosa — consultar aquí.
+    """
+    return instruction_catalog.get_catalog_stats()
 
 
 # ── API Avaluació (dashboard) ──────────────────────────────────────────────
@@ -5443,5 +5479,11 @@ if __name__ == "__main__":
     print("=" * 50)
     print("  ATNE — Adaptador de Textos")
     print(f"  http://localhost:{port}")
+    try:
+        _stats = instruction_catalog.get_catalog_stats()
+        _parts = ", ".join(f"{k}={v}" for k, v in sorted(_stats["per_activation"].items()))
+        print(f"  Catàleg: {_stats['total']} instruccions ({_parts})")
+    except Exception:
+        pass
     print("=" * 50)
     uvicorn.run(app, host="0.0.0.0", port=port)

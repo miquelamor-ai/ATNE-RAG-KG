@@ -16,16 +16,19 @@
   'use strict';
 
   // Mapeig del nostre model simplificat (pas1 PROFILES) al format que espera
-  // el backend (server.py → run_adaptation → build_system_prompt).
-  // Les claus de 'caracteristiques' han de coincidir amb les del catàleg;
-  // usem les 4 principals que ja fem servir al front (tdah/disl/cat/ac).
+  // el backend (instruction_catalog.py → PROFILE_INSTRUCTION_MAP + camps "profiles"
+  // de les instruccions PERFIL). Les claus HAN de coincidir exactament amb les
+  // que usa el filtre: minúscules i noms canònics (no sigles majúscules).
   const CAT_TO_CHAR = {
-    tdah: 'TDAH',
-    disl: 'DISLEXIA',
-    cat:  'CAT_L2',
-    ac:   'AACC'
+    tdah: 'tdah',
+    disl: 'dislexia',
+    cat:  'nouvingut',
+    ac:   'altes_capacitats'
   };
-  const ALL_CHAR_KEYS = ['TDAH', 'DISLEXIA', 'CAT_L2', 'AACC', 'TEA', 'DI', 'AUD', 'VIS'];
+  const ALL_CHAR_KEYS = [
+    'tdah', 'dislexia', 'nouvingut', 'altes_capacitats',
+    'tea', 'di', 'discapacitat_auditiva', 'discapacitat_visual'
+  ];
 
   // Timeout per defecte de les crides SSE (3 min). Si el backend no respon
   // en aquest temps, es cancel·la la petició per no deixar el loader penjat.
@@ -67,8 +70,8 @@
     if (mainChar) caracteristiques[mainChar] = { actiu: true };
     // Cas especial Anna: TDAH + Dislèxia. Detectem-ho per l'id.
     if (p.id === 'anna') {
-      caracteristiques['TDAH'] = { actiu: true };
-      caracteristiques['DISLEXIA'] = { actiu: true };
+      caracteristiques['tdah'] = { actiu: true };
+      caracteristiques['dislexia'] = { actiu: true };
     }
     // Perfils de grup: el 'cat' del perfil és 'group|group-ac|group-cat' i no casa
     // amb CAT_TO_CHAR. Cal recórrer els chips i activar cada característica trobada.
