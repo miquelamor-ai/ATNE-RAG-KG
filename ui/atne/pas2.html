@@ -2476,8 +2476,8 @@
 
   // ── Visita guiada Pas 2 (Driver.js) ──────────────────────────────────────
   function startTourP2() {
-    if (typeof driver === 'undefined') return;
-    const d = driver.driver({
+    if (typeof driver === 'undefined' || !driver.js) return;
+    const d = driver.js({
       showProgress: true,
       nextBtnText: 'Següent →',
       prevBtnText: '← Anterior',
