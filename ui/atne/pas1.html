@@ -1366,24 +1366,54 @@
     const p = window.ATNE_PROFILES[pid];
     if (!p) return;
     _editingPid = pid;
+
+    // Marca el mode com a "net" per evitar el confirm() de pèrdua de dades
+    pristineState.person = true;
     setMode('person');
-    // Pre-omple el formulari
+
     const form = document.querySelector('.mode[data-m="person"]');
     if (!form) return;
+
+    // Reset complet del formulari abans de pre-omplir
+    form.querySelectorAll('.inp, .txt').forEach(el => { el.value = ''; delete el.closest('label,div')?.dataset?.touched; });
+    form.querySelectorAll('.lvl').forEach(b => b.classList.remove('on'));
+    form.querySelectorAll('.ck input').forEach(cb => { cb.checked = false; delete cb.closest('[data-beh]')?.dataset?.touched; });
+    form.querySelectorAll('.aid-row').forEach(r => { r.querySelector('input').checked = false; delete r.dataset.touched; });
+    form.querySelectorAll('.tag').forEach(t => t.classList.remove('on'));
+    dxSel.clear();
+    renderDx();
+
+    // Pre-omple nom i curs
     const inputs = form.querySelectorAll('.inp');
     if (inputs[0]) inputs[0].value = p.name || '';
     if (inputs[1]) inputs[1].value = p.course || '';
+
     // MECR
-    const mecr = p.mecr || (p.chips?.find(c => c.cat === 'lv')?.label?.split(' ')[0] || 'B1');
+    const mecr = p.mecr || (p.chips?.find(c => c.cat === 'lv')?.label?.split(' ')[0]) || 'B1';
     form.querySelectorAll('.lvl').forEach(btn => {
       const code = btn.querySelector('.lv-code')?.textContent;
       btn.classList.toggle('on', code === mecr);
     });
-    // Canvia el botó a "Desar canvis"
+
+    // Conductes
+    const behaviorTexts = (p.behaviors || []).map(b => b.toLowerCase());
+    form.querySelectorAll('.ck input').forEach(cb => {
+      const txt = cb.closest('label')?.querySelector('span')?.textContent.toLowerCase() || '';
+      cb.checked = behaviorTexts.some(b => txt.includes(b.substring(0, 15)));
+    });
+
+    // Condicions
+    (p.conditions || []).forEach(dx => {
+      const tag = form.querySelector(`.tag[data-dx="${dx}"]`);
+      if (tag) { tag.classList.add('on'); dxSel.add(dx); }
+    });
+    renderDx();
+    updateAids();
+
+    // Canvia el botó
     const saveBtn = form.querySelector('.foot .btn-p');
-    if (saveBtn) {
-      saveBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Desar canvis';
-    }
+    if (saveBtn) saveBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Desar canvis';
+
     if (typeof window.atneToast === 'function') window.atneToast(`Editant "${p.name}" — modifica i clica Desar canvis`, 'info');
   }
 
