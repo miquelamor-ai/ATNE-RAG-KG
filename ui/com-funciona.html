@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<title>Com funciona ATNE · Saber-ne+</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/ui/styles/tokens.css">
+<link rel="stylesheet" href="/ui/styles/base.css">
+<link rel="stylesheet" href="/ui/styles/shell.css">
+
+<style>
+  /* ─── Topbar (idèntic a saber-ne i avaluacio) ───── */
+  .page-header {
+    position: sticky; top: 0; width: 100%; z-index: 50;
+    background: rgba(244,241,232,.92); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--paper-line);
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 var(--sp-6); height: 57px; gap: var(--sp-4);
+    box-sizing: border-box;
+  }
+  .ph-brand { font-family: var(--serif); font-size: var(--fs-xl); font-weight: var(--fw-bold); color: var(--primary); letter-spacing: -0.02em; }
+  .ph-brand:hover { opacity: .8; }
+  .ph-links { display: none; align-items: center; gap: var(--sp-6); }
+  @media (min-width: 768px) { .ph-links { display: flex; } }
+  .ph-links a { font-size: var(--fs-md); font-weight: var(--fw-med); color: var(--ink-600); transition: color var(--trans-fast); }
+  .ph-links a:hover { color: var(--primary); }
+  .ph-links a.active { color: var(--primary); font-weight: var(--fw-semi); }
+  .ph-back { font-family: var(--mono); font-size: var(--fs-xs); font-weight: var(--fw-semi); color: var(--ink-500); transition: color var(--trans-fast); white-space: nowrap; }
+  .ph-back:hover { color: var(--primary); }
+
+  /* ─── Layout ───────────────────────────────────── */
+  body { background: var(--cream); color: var(--ink-900); font-family: var(--ui); }
+  .page-wrap { max-width: 820px; margin: 0 auto; padding: var(--sp-10) var(--sp-6) var(--sp-14); }
+
+  /* ─── Hero ─────────────────────────────────────── */
+  .hero { margin-bottom: var(--sp-10); }
+  .hero-label { font-family: var(--mono); font-size: var(--fs-xs); font-weight: var(--fw-bold); text-transform: uppercase; letter-spacing: .12em; color: var(--primary); margin-bottom: var(--sp-3); }
+  .hero h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; line-height: 1.15; color: var(--ink-900); margin: 0 0 var(--sp-4); }
+  .hero p { font-size: var(--fs-lg); color: var(--ink-600); line-height: 1.6; max-width: 640px; }
+
+  /* ─── Seccions ──────────────────────────────────── */
+  .section { margin-bottom: var(--sp-10); }
+  .section-num { font-family: var(--mono); font-size: var(--fs-xs); font-weight: var(--fw-bold); color: var(--primary); letter-spacing: .1em; text-transform: uppercase; margin-bottom: var(--sp-2); }
+  .section h2 { font-family: var(--serif); font-size: var(--fs-2xl); font-weight: 700; color: var(--ink-900); margin: 0 0 var(--sp-4); }
+  .section p { font-size: var(--fs-base); color: var(--ink-700); line-height: 1.7; margin-bottom: var(--sp-4); }
+
+  /* ─── Cards dels 3 passos ───────────────────────── */
+  .steps-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: var(--sp-4); margin: var(--sp-6) 0; }
+  @media (max-width: 600px) { .steps-grid { grid-template-columns: 1fr; } }
+  .step-card { background: #fff; border: 1px solid var(--paper-line); border-radius: var(--r-xl); padding: var(--sp-5); box-shadow: var(--sh-sm); }
+  .step-card .step-n { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: #fff; font-family: var(--mono); font-size: var(--fs-sm); font-weight: var(--fw-bold); display: grid; place-items: center; margin-bottom: var(--sp-3); }
+  .step-card h3 { font-family: var(--serif); font-size: var(--fs-lg); font-weight: 700; margin: 0 0 var(--sp-2); color: var(--ink-900); }
+  .step-card p { font-size: var(--fs-sm); color: var(--ink-600); line-height: 1.55; margin: 0; }
+
+  /* ─── Llistes il·lustratives ────────────────────── */
+  .feature-list { list-style: none; padding: 0; margin: var(--sp-4) 0; display: flex; flex-direction: column; gap: var(--sp-3); }
+  .feature-list li { display: flex; gap: var(--sp-3); align-items: flex-start; font-size: var(--fs-base); color: var(--ink-700); line-height: 1.55; }
+  .feature-list li .fi { width: 22px; height: 22px; border-radius: 50%; background: var(--primary-50); color: var(--primary); font-size: 12px; display: grid; place-items: center; flex-shrink: 0; margin-top: 1px; font-weight: var(--fw-bold); }
+
+  /* ─── Cards destacades ──────────────────────────── */
+  .highlight-card { background: var(--primary-50); border: 1px solid var(--primary-100); border-radius: var(--r-xl); padding: var(--sp-5) var(--sp-6); margin: var(--sp-6) 0; }
+  .highlight-card p { color: var(--ink-800); margin: 0; font-size: var(--fs-base); line-height: 1.65; }
+  .highlight-card strong { color: var(--primary); }
+
+  .ok-card { background: var(--ok-50); border: 1px solid var(--ok-100); border-radius: var(--r-xl); padding: var(--sp-5) var(--sp-6); margin: var(--sp-6) 0; }
+  .ok-card p { color: var(--ink-800); margin: 0; font-size: var(--fs-base); line-height: 1.65; }
+
+  /* ─── Condicions (chips) ────────────────────────── */
+  .chips { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: var(--sp-4) 0; }
+  .chip { padding: 5px 12px; border-radius: var(--r-pill); font-size: var(--fs-sm); font-weight: var(--fw-semi); background: #fff; border: 1px solid var(--paper-line); color: var(--ink-700); }
+  .chip.tdah { background: #fff8ec; border-color: #f5c842; color: #7a4a00; }
+  .chip.disl { background: #fff0f0; border-color: #f5a0a0; color: #8b2020; }
+  .chip.l2   { background: #f0fff4; border-color: #70c080; color: #1a5c2a; }
+  .chip.aacc { background: #f4f0ff; border-color: #a080d0; color: #4a2080; }
+  .chip.tea  { background: #e8f4ff; border-color: #80b0e0; color: #1a3a6a; }
+
+  /* ─── Pipeline visual ───────────────────────────── */
+  .pipeline { display: flex; flex-direction: column; gap: var(--sp-3); margin: var(--sp-5) 0; }
+  .pipe-step { display: flex; align-items: center; gap: var(--sp-4); background: #fff; border: 1px solid var(--paper-line); border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4); }
+  .pipe-step .ps-icon { width: 36px; height: 36px; border-radius: var(--r-md); background: var(--cream-2); display: grid; place-items: center; flex-shrink: 0; font-size: 18px; }
+  .pipe-step .ps-body { flex: 1; }
+  .pipe-step .ps-title { font-size: var(--fs-sm); font-weight: var(--fw-semi); color: var(--ink-900); margin-bottom: 2px; }
+  .pipe-step .ps-desc { font-size: var(--fs-xs); color: var(--ink-500); line-height: 1.45; }
+  .pipe-arrow { text-align: center; color: var(--ink-300); font-size: 18px; line-height: 1; }
+
+  /* ─── Complements grid ──────────────────────────── */
+  .compl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); margin: var(--sp-5) 0; }
+  @media (max-width: 500px) { .compl-grid { grid-template-columns: 1fr; } }
+  .compl-card { background: #fff; border: 1px solid var(--paper-line); border-radius: var(--r-lg); padding: var(--sp-4); }
+  .compl-card .cc-icon { font-size: 24px; margin-bottom: var(--sp-2); }
+  .compl-card h4 { font-size: var(--fs-sm); font-weight: var(--fw-semi); color: var(--ink-900); margin: 0 0 4px; }
+  .compl-card p { font-size: var(--fs-xs); color: var(--ink-500); margin: 0; line-height: 1.45; }
+
+  /* ─── Divider ───────────────────────────────────── */
+  .divider { height: 1px; background: var(--paper-line); margin: var(--sp-8) 0; }
+
+  /* ─── Footer ────────────────────────────────────── */
+  .page-footer { text-align: center; padding: var(--sp-8) 0 var(--sp-4); border-top: 1px solid var(--paper-line); }
+  .page-footer p { font-size: var(--fs-sm); color: var(--ink-400); margin: 0 0 var(--sp-4); }
+  .footer-btn { display: inline-flex; align-items: center; gap: var(--sp-2); background: var(--primary); color: #fff; padding: 10px 22px; border-radius: var(--r-pill); font-size: var(--fs-sm); font-weight: var(--fw-semi); transition: filter var(--trans-fast); }
+  .footer-btn:hover { filter: brightness(1.08); }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <a href="/ui/saber-ne.html" class="ph-brand">Saber-ne+</a>
+  <nav class="ph-links">
+    <a href="/ui/saber-ne.html">Marc pedagògic</a>
+    <a href="/ui/com-funciona.html" class="active">Com funciona</a>
+    <a href="/ui/avaluacio.html">Avaluació i decisions</a>
+  </nav>
+  <a href="/ui/atne/pas1.html" class="ph-back">← Tornar a ATNE</a>
+</header>
+
+<div class="page-wrap">
+
+  <div class="hero">
+    <div class="hero-label">Com funciona ATNE</div>
+    <h1>De text curricular a material adaptat, en 3 passos</h1>
+    <p>ATNE és un assistent que adapta textos educatius al perfil de cada alumne. Entendre com funciona ajuda a treure-li el màxim partit.</p>
+  </div>
+
+  <!-- ── Secció 1: Els 3 passos ── -->
+  <div class="section">
+    <div class="section-num">01</div>
+    <h2>El flux de treball</h2>
+    <p>ATNE s'organitza en tres passos seqüencials. Cada pas té una funció clara i es pot repetir tantes vegades com calgui.</p>
+
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-n">1</div>
+        <h3>Per a qui</h3>
+        <p>Selecciones o crees el perfil de l'alumne o grup. El perfil defineix el nivell lingüístic, les condicions i els ajuts que s'aplicaran.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-n">2</div>
+        <h3>El text</h3>
+        <p>Enganxes, puges o generes el text que vols adaptar. Configures la matèria, el nivell educatiu i els complements opcionals.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-n">3</div>
+        <h3>Adaptacions</h3>
+        <p>Reps el text adaptat amb tots els ajuts activats. Pots refinar-lo, corregir-lo, comparar-lo amb l'original i exportar-lo.</p>
+      </div>
+    </div>
+
+    <div class="highlight-card">
+      <p>Els perfils es desen al teu compte i es recuperen des de qualsevol dispositiu. Un cop creat el perfil d'un alumne, el reutilitzes en totes les adaptacions futures.</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── Secció 2: Els perfils ── -->
+  <div class="section">
+    <div class="section-num">02</div>
+    <h2>Els perfils: qui és l'alumne</h2>
+    <p>El perfil és la peça clau d'ATNE. Com més precís sigui, millor serà l'adaptació. Es construeix a partir del que <strong>observes a l'aula</strong>, no necessàriament d'un diagnòstic formal.</p>
+
+    <ul class="feature-list">
+      <li><span class="fi">✓</span><span><strong>Nivell MECR:</strong> Del A1 (inicial) al C1 (competent). Defineix la complexitat lingüística de l'adaptació.</span></li>
+      <li><span class="fi">✓</span><span><strong>Conductes observades:</strong> Es distreu amb textos llargs, fatiga lectora, dificultats amb connectors… L'app activa els ajuts adequats automàticament.</span></li>
+      <li><span class="fi">✓</span><span><strong>Condicions i diagnòstics:</strong> Opcional. Si tens informe o PI, pots afegir TDAH, dislèxia, L2, AACC, TEA, etc.</span></li>
+      <li><span class="fi">✓</span><span><strong>Sub-variables:</strong> Per a cada condició apareixen camps addicionals: per a L2, la llengua familiar i el temps a Catalunya; per a AACC, el tipus de superdotació.</span></li>
+    </ul>
+
+    <p>Les condicions disponibles:</p>
+    <div class="chips">
+      <span class="chip tdah">TDAH</span>
+      <span class="chip disl">Dislèxia / DEA</span>
+      <span class="chip l2">Català com a L2</span>
+      <span class="chip aacc">Altes capacitats</span>
+      <span class="chip tea">TEA</span>
+      <span class="chip">Discapacitat intel·lectual</span>
+      <span class="chip">Discapacitat auditiva</span>
+      <span class="chip">Discapacitat visual</span>
+    </div>
+
+    <p>També pots crear <strong>perfils de grup</strong> per adaptar un text a tota la classe amb múltiples nivells simultàniament (Bàsic · Estàndard · Avançat).</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── Secció 3: Com treballa la IA ── -->
+  <div class="section">
+    <div class="section-num">03</div>
+    <h2>Com treballa la intel·ligència artificial</h2>
+    <p>ATNE usa un model de llenguatge gran (LLM) —Gemma 4 31B— guiat per un catàleg de <strong>més de 90 instruccions pedagògiques</strong> específiques per a cada condició i nivell. No és un xat lliure: cada instrucció ha estat validada amb el marc FJE.</p>
+
+    <div class="pipeline">
+      <div class="pipe-step">
+        <div class="ps-icon">👤</div>
+        <div class="ps-body">
+          <div class="ps-title">Filtratge d'instruccions</div>
+          <div class="ps-desc">A partir del perfil i el MECR, el sistema selecciona automàticament les instruccions rellevants del catàleg (unes 40 de 90+).</div>
+        </div>
+      </div>
+      <div class="pipe-arrow">↓</div>
+      <div class="pipe-step">
+        <div class="ps-icon">🤖</div>
+        <div class="ps-body">
+          <div class="ps-title">Generació (LLM)</div>
+          <div class="ps-desc">L'LLM adapta el text seguint les instruccions seleccionades. Típicament tarda 15-30 segons.</div>
+        </div>
+      </div>
+      <div class="pipe-arrow">↓</div>
+      <div class="pipe-step">
+        <div class="ps-icon">🔍</div>
+        <div class="ps-body">
+          <div class="ps-title">Verificació automàtica</div>
+          <div class="ps-desc">Un segon pas de l'LLM avalua si l'adaptació compleix els criteris. Si la puntuació és baixa, es regenera.</div>
+        </div>
+      </div>
+      <div class="pipe-arrow">↓</div>
+      <div class="pipe-step">
+        <div class="ps-icon">📝</div>
+        <div class="ps-body">
+          <div class="ps-title">Pipeline de qualitat</div>
+          <div class="ps-desc">LanguageTool corregeix ortografia i gramàtica catalana. Es detecten paraules sospitoses i caràcters exòtics.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ok-card">
+      <p>🔒 <strong>Privacitat:</strong> Els textos s'envien a l'API de l'LLM per processar-los però no s'emmagatzemen permanentment. ATNE no desa el contingut dels textos originals ni adaptats, només metadades anonimitzades per a millora del sistema.</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── Secció 4: Els complements ── -->
+  <div class="section">
+    <div class="section-num">04</div>
+    <h2>Els complements</h2>
+    <p>A més del text adaptat, pots activar complements opcionals que l'LLM genera simultàniament:</p>
+
+    <div class="compl-grid">
+      <div class="compl-card">
+        <div class="cc-icon">📖</div>
+        <h4>Glossari</h4>
+        <p>Termes clau del text amb definicions accessibles per a l'alumne.</p>
+      </div>
+      <div class="compl-card">
+        <div class="cc-icon">❓</div>
+        <h4>Preguntes de comprensió</h4>
+        <p>Preguntes graduades en 3 nivells (bàsic, estàndard, avançat) sobre el text adaptat.</p>
+      </div>
+      <div class="compl-card">
+        <div class="cc-icon">🗂️</div>
+        <h4>Esquema visual</h4>
+        <p>Resum jeràrquic del contingut. Útil per a alumnat que necessita veure l'estructura abans de llegir.</p>
+      </div>
+      <div class="compl-card">
+        <div class="cc-icon">🪜</div>
+        <h4>Bastides lingüístiques</h4>
+        <p>Suports per a la comprensió i producció textual, seguint el model MALL/TILC de FJE.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── Secció 5: Eines de revisió ── -->
+  <div class="section">
+    <div class="section-num">05</div>
+    <h2>Eines de revisió i exportació</h2>
+    <p>Un cop tens l'adaptació, el Pas 3 ofereix diverses eines per revisar i distribuir el material:</p>
+
+    <ul class="feature-list">
+      <li><span class="fi">Aa</span><span><strong>Tipografia:</strong> Canvia la font (Atkinson, OpenDyslexic, Arial…) per a alumnat amb dislèxia o necessitats visuals.</span></li>
+      <li><span class="fi">⟺</span><span><strong>Vista comparativa:</strong> Original i adaptat costat a costat. Útil per verificar que no s'ha perdut contingut curricular.</span></li>
+      <li><span class="fi">✏️</span><span><strong>Refinar:</strong> Escriu instruccions concretes i l'IA reescriu el text incorporant les teves indicacions.</span></li>
+      <li><span class="fi">📋</span><span><strong>Rúbrica pedagògica:</strong> Avalua l'adaptació i demana a l'IA que millori els aspectes febles.</span></li>
+      <li><span class="fi">⬇</span><span><strong>Exportació:</strong> PDF (llest per imprimir), Word (.docx, editable) o text pla.</span></li>
+    </ul>
+  </div>
+
+  <div class="page-footer">
+    <p>Ara que saps com funciona, prova-ho amb el teu primer text.</p>
+    <a href="/ui/atne/pas1.html" class="footer-btn">Començar amb ATNE →</a>
+  </div>
+
+</div>
+</body>
+</html>
