@@ -27,6 +27,31 @@
   };
   const ALL_CHAR_KEYS = ['TDAH', 'DISLEXIA', 'CAT_L2', 'AACC', 'TEA', 'DI', 'AUD', 'VIS'];
 
+  // Timeout per defecte de les crides SSE (3 min). Si el backend no respon
+  // en aquest temps, es cancel·la la petició per no deixar el loader penjat.
+  const SSE_TIMEOUT_MS = 180000;
+
+  // Combina un AbortSignal de l'usuari amb un timeout. Usa AbortSignal.any
+  // si està disponible (Chrome 116+/FF 124+), si no, fa fallback manual.
+  function combineSignals(userSignal, timeoutMs) {
+    const timeoutSignal = (typeof AbortSignal !== 'undefined' && AbortSignal.timeout)
+      ? AbortSignal.timeout(timeoutMs)
+      : null;
+    if (!userSignal && timeoutSignal) return timeoutSignal;
+    if (userSignal && !timeoutSignal) return userSignal;
+    if (!userSignal && !timeoutSignal) return undefined;
+    if (AbortSignal.any) return AbortSignal.any([userSignal, timeoutSignal]);
+    // Fallback: controller que es cancel·la quan qualsevol dels dos ho fa
+    const ctrl = new AbortController();
+    const abort = () => ctrl.abort();
+    if (userSignal.aborted || timeoutSignal.aborted) ctrl.abort();
+    else {
+      userSignal.addEventListener('abort', abort, { once: true });
+      timeoutSignal.addEventListener('abort', abort, { once: true });
+    }
+    return ctrl.signal;
+  }
+
   /**
    * Converteix el profile simple del nostre front al format dict que espera
    * el backend a /api/adapt.
@@ -45,12 +70,23 @@
       caracteristiques['TDAH'] = { actiu: true };
       caracteristiques['DISLEXIA'] = { actiu: true };
     }
+    // Perfils de grup: el 'cat' del perfil és 'group|group-ac|group-cat' i no casa
+    // amb CAT_TO_CHAR. Cal recórrer els chips i activar cada característica trobada.
+    const isGroup = p.type === 'group' || (p.cat && p.cat.indexOf('group') === 0);
+    if (isGroup && Array.isArray(p.chips)) {
+      for (const chip of p.chips) {
+        const c = CAT_TO_CHAR[chip && chip.cat];
+        if (c) caracteristiques[c] = { actiu: true };
+      }
+    }
     return {
       nom: p.name,
       caracteristiques,
       canal_preferent: 'text',
       observacions: (p.behaviors || []).join(' · '),
-      _via: 'diagnostic'
+      _via: 'diagnostic',
+      // Flag informatiu (el backend l'ignora, útil per debugging al dashboard /admin)
+      group: !!isGroup
     };
   }
 
@@ -77,9 +113,11 @@
    * @param {Function} [args.onStep]  (ev) => void  Callback per events de progrés.
    * @param {Function} [args.onResult]  (ev) => void  Callback quan arriba una versió.
    * @param {Function} [args.onError]  (err) => void
+   * @param {AbortSignal} [args.signal]  Opcional. Si es dispara, es cancel·la la SSE.
+   *   Internament es combina amb un timeout de 180s per evitar loaders penjats.
    * @returns {Promise<{versions: Object, done: boolean}>}
    */
-  async function adaptText({ text, profile, context, params = {}, onStep, onResult, onError }) {
+  async function adaptText({ text, profile, context, params = {}, onStep, onResult, onError, signal }) {
     if (!text || !text.trim()) throw new Error('Text buit');
 
     const backendProfile = buildBackendProfile(profile);
@@ -90,6 +128,7 @@
       ...params
     };
 
+    const combinedSignal = combineSignals(signal, SSE_TIMEOUT_MS);
     const resp = await fetch('/api/adapt', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -99,11 +138,16 @@
         context: backendContext,
         params: backendParams
         // 'model' omès → backend aplica rotació configurada a /admin
-      })
+      }),
+      signal: combinedSignal
     });
 
     if (!resp.ok) {
-      const err = new Error('HTTP ' + resp.status);
+      // Mirem de llegir el cos JSON per obtenir el missatge real del backend
+      // (mateix patró que refineText/generateText/extractFile).
+      let errMsg = 'HTTP ' + resp.status;
+      try { const e = await resp.json(); if (e && e.error) errMsg = e.error; } catch {}
+      const err = new Error(errMsg);
       if (onError) onError(err);
       throw err;
     }
@@ -113,33 +157,43 @@
     let buffer = '';
     const versions = {};
 
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop();
-      for (const line of lines) {
-        if (!line.startsWith('data: ')) continue;
-        let ev;
-        try { ev = JSON.parse(line.slice(6)); } catch { continue; }
+    try {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          let ev;
+          try { ev = JSON.parse(line.slice(6)); } catch { continue; }
 
-        if (ev.type === 'step' && onStep) {
-          onStep(ev);
-        } else if (ev.type === 'result') {
-          const lvl = ev.level || 'single';
-          versions[lvl] = {
-            adapted: ev.adapted,
-            quality_report: ev.quality_report || null,
-            model_used: ev.model_used || null
-          };
-          if (onResult) onResult(ev);
-        } else if (ev.type === 'done_level' && onStep) {
-          onStep(ev);
-        } else if (ev.type === 'done') {
-          return { versions, done: true };
+          if (ev.type === 'step' && onStep) {
+            onStep(ev);
+          } else if (ev.type === 'result') {
+            const lvl = ev.level || 'single';
+            versions[lvl] = {
+              adapted: ev.adapted,
+              quality_report: ev.quality_report || null,
+              model_used: ev.model_used || null
+            };
+            if (onResult) onResult(ev);
+          } else if (ev.type === 'done_level' && onStep) {
+            onStep(ev);
+          } else if (ev.type === 'done') {
+            return { versions, done: true };
+          }
         }
       }
+    } catch (e) {
+      // Si la cancel·lació arriba enmig (fetch/read llança AbortError) la
+      // propaguem; si ja teníem 'done', el break superior ens hauria tret.
+      if (e && (e.name === 'AbortError' || e.name === 'TimeoutError')) {
+        if (onError) onError(e);
+        throw e;
+      }
+      throw e;
     }
     return { versions, done: false };
   }
@@ -160,12 +214,42 @@
     md = md.replace(/<b[^>]*>([\s\S]*?)<\/b>/gi, '**$1**');
     md = md.replace(/<em[^>]*>([\s\S]*?)<\/em>/gi, '_$1_');
     md = md.replace(/<i[^>]*>([\s\S]*?)<\/i>/gi, '_$1_');
+    // <u> no té equivalent a CommonMark pur: fem servir __text__ (CommonMark
+    // extended / GFM). Els exportadors PDF/DOCX del backend ho tornaran a negreta
+    // subratllada o a negreta simple segons pipeline; no perdem el contingut.
+    md = md.replace(/<u[^>]*>([\s\S]*?)<\/u>/gi, '__$1__');
+    // Taules: conversió simple a format pipe. Només gestiona <tr>/<td>/<th>
+    // directes; taules amb colspan/rowspan o <thead>/<tbody> niats no es
+    // representen correctament — s'hi perd l'estructura però el text es manté.
+    md = md.replace(/<table[^>]*>([\s\S]*?)<\/table>/gi, (m, content) => {
+      const rows = [];
+      const rowRe = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+      let rm;
+      while ((rm = rowRe.exec(content)) !== null) {
+        const cellRe = /<(?:th|td)[^>]*>([\s\S]*?)<\/(?:th|td)>/gi;
+        const cells = [];
+        let cm;
+        while ((cm = cellRe.exec(rm[1])) !== null) {
+          // Netegem tags interiors per no trencar la pipe
+          cells.push(cm[1].replace(/<\/?[a-z][^>]*>/gi, '').replace(/\|/g, '\\|').trim());
+        }
+        if (cells.length) rows.push('| ' + cells.join(' | ') + ' |');
+      }
+      if (!rows.length) return '\n';
+      // Separador de capçalera (Markdown pipe): si hi ha ≥1 fila, la 1a es tracta com header
+      const sep = '| ' + rows[0].split('|').slice(1, -1).map(() => '---').join(' | ') + ' |';
+      return '\n' + rows[0] + '\n' + sep + '\n' + rows.slice(1).join('\n') + '\n';
+    });
     md = md.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (m, c) => '\n' + c.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, '- $1\n') + '\n');
+    // NOTA: llistes niades no es recursionen — el niat queda com a llista plana.
+    // Per a l'MVP del pilot és acceptable; millora pendent.
     md = md.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (m, c) => {
       let n = 0;
       return '\n' + c.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_, x) => { n++; return n + '. ' + x + '\n'; }) + '\n';
     });
     md = md.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, '$1\n\n');
+    // <div> com a paràgraf (dues newlines per separar)
+    md = md.replace(/<div[^>]*>([\s\S]*?)<\/div>/gi, '$1\n\n');
     md = md.replace(/<br\s*\/?>/gi, '\n');
     // Spans (ins/sub, marques de diff i altres): mantenim el contingut pla
     md = md.replace(/<span[^>]*>([\s\S]*?)<\/span>/gi, '$1');
@@ -300,20 +384,27 @@
    * @param {Function} [args.onChunk]  ({text, acumulat}) => void   (el text és el delta)
    * @param {Function} [args.onDone]   ({text, paraules, duration_ms, model}) => void
    * @param {Function} [args.onError]  (err) => void
+   * @param {AbortSignal} [args.signal]  Opcional. Si es dispara, es cancel·la la SSE.
+   *   Internament es combina amb un timeout de 180s.
    * @returns {Promise<{text: string, paraules: number, model: string}>}  Resultat final.
    */
-  async function generateTextStream({ tema, genere, tipologia, to, extensio, notes, context, onStart, onChunk, onDone, onError }) {
+  async function generateTextStream({ tema, genere, tipologia, to, extensio, notes, context, onStart, onChunk, onDone, onError, signal }) {
     if (!tema || !tema.trim()) throw new Error('Cal un tema per generar el text');
     const body = { tema, genere, tipologia, to, extensio };
     if (notes) body.notes = notes;
     if (context) body.context = context;
+    const combinedSignal = combineSignals(signal, SSE_TIMEOUT_MS);
     const resp = await fetch('/api/generate-text-stream', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
+      signal: combinedSignal
     });
     if (!resp.ok) {
-      const err = new Error('HTTP ' + resp.status);
+      // Patró coherent amb la resta: intentem llegir .error del JSON
+      let errMsg = 'HTTP ' + resp.status;
+      try { const e = await resp.json(); if (e && e.error) errMsg = e.error; } catch {}
+      const err = new Error(errMsg);
       if (onError) onError(err);
       throw err;
     }
@@ -322,30 +413,38 @@
     let buffer = '';
     let acumulat = '';
     let final = null;
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop();
-      for (const line of lines) {
-        if (!line.startsWith('data: ')) continue;
-        let ev;
-        try { ev = JSON.parse(line.slice(6)); } catch { continue; }
-        if (ev.type === 'start' && onStart) {
-          onStart(ev);
-        } else if (ev.type === 'chunk') {
-          acumulat += (ev.text || '');
-          if (onChunk) onChunk({ text: ev.text || '', acumulat });
-        } else if (ev.type === 'done') {
-          final = ev;
-          if (onDone) onDone(ev);
-        } else if (ev.type === 'error') {
-          const err = new Error(ev.message || 'Error stream');
-          if (onError) onError(err);
-          throw err;
+    try {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          let ev;
+          try { ev = JSON.parse(line.slice(6)); } catch { continue; }
+          if (ev.type === 'start' && onStart) {
+            onStart(ev);
+          } else if (ev.type === 'chunk') {
+            acumulat += (ev.text || '');
+            if (onChunk) onChunk({ text: ev.text || '', acumulat });
+          } else if (ev.type === 'done') {
+            final = ev;
+            if (onDone) onDone(ev);
+          } else if (ev.type === 'error') {
+            const err = new Error(ev.message || 'Error stream');
+            if (onError) onError(err);
+            throw err;
+          }
         }
       }
+    } catch (e) {
+      if (e && (e.name === 'AbortError' || e.name === 'TimeoutError')) {
+        if (onError) onError(e);
+        throw e;
+      }
+      throw e;
     }
     return final || { text: acumulat, paraules: 0, model: '' };
   }
@@ -472,24 +571,37 @@
     if (!text) return result;
     const parts = text.split(/^## /m);
     if (parts.length <= 1) { result.main = text; return result; }
-    // Map de títols del backend → key interna (sense accents, lowercase)
+    // Map de títols del backend → key interna. Les claus del map estan
+    // normalitzades (sense accents, lowercase, sense parèntesis) perquè 'norm()'
+    // les retorna en aquesta forma — així afegir variants és senzill.
     const TITLE_MAP = {
       'text adaptat': '_main',
       'glossari': 'glossari',
       'esquema visual': 'esquema_visual',
       'esquema': 'esquema_visual',
       'mapa conceptual': 'mapa_conceptual',
+      'mapa mental': 'mapa_mental',
       'preguntes de comprensio': 'preguntes_comprensio',
-      'preguntes de comprensió': 'preguntes_comprensio',
       'preguntes': 'preguntes_comprensio',
       'bastides': 'bastides',
+      'bastides scaffolding': 'bastides',
+      'scaffolding': 'bastides',
+      'activitats daprofundiment': 'activitats_aprofundiment',
+      'activitats aprofundiment': 'activitats_aprofundiment',
       'pictogrames': 'pictogrames',
       'traduccio l1': 'traduccio_l1',
-      'traducció l1': 'traduccio_l1',
       'auditoria': 'auditoria',
-      'notes d\'auditoria': 'auditoria'
+      'notes dauditoria': 'auditoria',
+      'argumentacio': 'argumentacio',
+      'argumentacio pedagogica': 'argumentacio'
     };
-    const norm = s => s.toLowerCase().trim().replace(/[^\w\s']/g, '');
+    // norm: sense accents, lowercase, sense puntuació ni parèntesis → clau canònica
+    const stripAccents = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const norm = s => stripAccents(s).toLowerCase().trim()
+      .replace(/[()\[\]{}]/g, ' ')
+      .replace(/[^\w\s]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
     for (const part of parts) {
       if (!part.trim()) continue;
       const nlIdx = part.indexOf('\n');

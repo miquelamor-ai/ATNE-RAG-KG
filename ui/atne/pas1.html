@@ -696,7 +696,16 @@
   });
   backdropEl?.addEventListener('click', closeDrawer);
   document.getElementById('drawer-close')?.addEventListener('click', closeDrawer);
-  document.addEventListener('keydown', e => { if(e.key === 'Escape') closeDrawer(); });
+  // Escape: tanca drawer, sort-menu, el picker de perfils del mode grup
+  // i qualsevol .picker/.popover que tingui la classe .on oberta.
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    closeDrawer();
+    document.getElementById('p1-sort-menu')?.classList.remove('on');
+    const picker = document.getElementById('add-picker');
+    if (picker && !picker.hidden) picker.hidden = true;
+    document.querySelectorAll('.picker.on, .popover.on').forEach(el => el.classList.remove('on'));
+  });
 
   // Model de dades dels 8 perfils (duplicat a Pas 2 i Pas 3)
   window.ATNE_PROFILES = {
@@ -734,9 +743,23 @@
                     aids:['Pictogrames i suport visual','Glossari amb traducció a la L1','Bastides lingüístiques per escriure','Vocabulari bàsic freqüent'] }
   };
 
-  // Navegació: clicar fila o "Seleccionar" → desa perfil a localStorage i navega a Pas 2
+  // Navegació: clicar fila o "Seleccionar" → desa perfil a localStorage i navega a Pas 2.
+  // Si canvia el perfil, invalidem qualsevol adaptació/complements en memòria (quedarien
+  // associats al perfil antic i es veurien al Pas 3 com si fossin del nou).
   function selectProfile(pid) {
-    if (pid && window.ATNE_PROFILES[pid]) localStorage.setItem('atne.profile_id', pid);
+    if (pid && window.ATNE_PROFILES[pid]) {
+      const prev = localStorage.getItem('atne.profile_id');
+      if (prev && prev !== pid) {
+        // Esborrem artefactes lligats al perfil anterior. Conservem doc_draft i
+        // doc_title: són el text del docent, vàlid per a qualsevol perfil.
+        ['atne.adapted_text',
+         'atne.adapted_raw',
+         'atne.adapted_cache_key',
+         'atne.complements',
+         'atne.complements_for_pid'].forEach(k => localStorage.removeItem(k));
+      }
+      localStorage.setItem('atne.profile_id', pid);
+    }
     location.href = '/ui/atne/pas2.html';
   }
   document.querySelectorAll('.row-acts .sel').forEach(b => {
@@ -1068,6 +1091,26 @@
     if(dxSel.has(k)) dxSel.delete(k); else dxSel.add(k);
     renderDx();
   }));
+
+  // ──────────────────────────────────────────────────────
+  // Stub pilot: botons de creació de perfil/grup encara no
+  // fan CRUD real. Notifiquem i tornem al mode "search" per
+  // evitar que el docent es quedi clavat.
+  // ──────────────────────────────────────────────────────
+  function notifyPendingCreation() {
+    const msg = 'La creació de perfils es desenvoluparà en una propera versió. De moment, utilitza els perfils de demostració.';
+    if (typeof window.atneToast === 'function') window.atneToast(msg, 'info');
+    else alert(msg);
+    setTimeout(() => setMode('search'), 2000);
+  }
+  // "Crear i seleccionar" dins dels modes person i group (l'únic .btn-p del peu del form).
+  document.querySelectorAll('.mode[data-m="person"] .foot .btn-p, .mode[data-m="group"] .foot .btn-p').forEach(b => {
+    b.addEventListener('click', e => { e.preventDefault(); notifyPendingCreation(); });
+  });
+  // "+ Afegir conducta pròpia" (stub: mateix patró de toast).
+  document.querySelectorAll('.ck-add').forEach(b => {
+    b.addEventListener('click', e => { e.preventDefault(); notifyPendingCreation(); });
+  });
 </script>
 </body>
 </html>

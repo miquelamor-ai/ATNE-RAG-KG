@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="/ui/styles/tokens.css">
 <link rel="stylesheet" href="/ui/styles/base.css">
 <link rel="stylesheet" href="/ui/styles/shell.css">
-<script src="/ui/atne/js/llm.js?v=20260419c" defer></script>
+<script src="/ui/atne/js/llm.js?v=20260419d" defer></script>
 
 <style>
   /* =========================================================
@@ -468,6 +468,41 @@
     color: var(--ink-500);
   }
   .opt .opt-v { font-weight: 600; color: var(--ink-900); }
+  /* Opts editables: ara són botons clicables (Bug 1) */
+  button.opt { cursor: pointer; transition: background var(--trans-fast), border-color var(--trans-fast); }
+  button.opt:hover { background: var(--cream-2); border-color: var(--primary-100); }
+  button.opt .caret { width: 9px; height: 9px; color: var(--ink-400); margin-left: 2px; }
+
+  /* Popover d'edició d'opcions (Matèria / Nivell) — ancorat a body */
+  .opt-pop {
+    position: fixed;
+    background: #fff;
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-md);
+    box-shadow: var(--sh-lg);
+    padding: 8px;
+    z-index: 150;
+    display: none;
+    min-width: 200px;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+  .opt-pop.on { display: block; }
+  .opt-pop .opt-pop-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 7px 10px;
+    border: 0;
+    background: transparent;
+    font-size: 12.5px;
+    color: var(--ink-800);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .opt-pop .opt-pop-item:hover { background: var(--cream-2); color: var(--primary); }
+  .opt-pop .opt-pop-item.sel { background: var(--primary-50); color: var(--primary); font-weight: 600; }
 
   /* ─── Frail dret (floating rail) ─────────────────────── */
   .frail {
@@ -865,23 +900,25 @@
               <span class="wc" id="wc-card">52 paraules</span>
             </div>
             <div class="opts">
-              <span class="opt"><span class="opt-k">Matèria</span><span class="opt-v">Història</span></span>
-              <span class="opt"><span class="opt-k">Nivell</span><span class="opt-v">ESO 4</span></span>
+              <!-- Bug 1: pills Matèria/Nivell ara són editables (obren popover) -->
+              <button type="button" class="opt" data-opt="materia"><span class="opt-k">Matèria</span><span class="opt-v" data-field="materia">Història</span><svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+              <button type="button" class="opt" data-opt="nivell"><span class="opt-k">Nivell</span><span class="opt-v" data-field="nivell">ESO 4</span><svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
               <span class="opt"><span class="opt-k">Complements</span><span class="opt-v">Cap</span></span>
             </div>
           </div>
 
           <!-- Mode: Pujar fitxer -->
           <div class="mode-panel" data-p="upload">
-            <input type="file" id="upload-file" accept=".pdf,.docx,.md,.txt" style="display:none">
+            <!-- Bug 3: accept estès amb MIME types perquè diàleg natiu filtri bé -->
+            <input type="file" id="upload-file" accept=".pdf,.docx,.md,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/markdown,text/plain" style="display:none">
             <div class="drop" id="drop-zone">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 14l3-3 3 3M12 11v6"/></svg>
               <div class="drop-t">Arrossega un fitxer o fes clic per triar</div>
               <div class="drop-s">PDF · DOCX · MD · TXT · Màx 5 MB</div>
             </div>
             <div class="opts">
-              <span class="opt"><span class="opt-k">Matèria</span><span class="opt-v">Història</span></span>
-              <span class="opt"><span class="opt-k">Nivell</span><span class="opt-v">ESO 4</span></span>
+              <button type="button" class="opt" data-opt="materia"><span class="opt-k">Matèria</span><span class="opt-v" data-field="materia">Història</span><svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+              <button type="button" class="opt" data-opt="nivell"><span class="opt-k">Nivell</span><span class="opt-v" data-field="nivell">ESO 4</span><svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
               <span class="opt"><span class="opt-k">Complements</span><span class="opt-v">Cap</span></span>
             </div>
           </div>
@@ -935,14 +972,21 @@
                   <option value="extens">Extens (+600)</option>
                 </select></div>
               </div>
-              <button class="gen-go" id="gen-go">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3 1.9 4.6L18.5 9l-4.6 1.9L12 15l-1.9-4.6L5.5 9l4.6-1.4z"/></svg>
-                Generar text
-              </button>
+              <!-- Bug 5: gen-cancel apareix mentre el streaming està actiu (display:none per defecte) -->
+              <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center">
+                <button class="gen-go" id="gen-cancel" type="button" style="display:none;background:#fff;color:var(--ink-700);border:1px solid var(--paper-line)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                  Cancel·lar
+                </button>
+                <button class="gen-go" id="gen-go">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3 1.9 4.6L18.5 9l-4.6 1.9L12 15l-1.9-4.6L5.5 9l4.6-1.4z"/></svg>
+                  Generar text
+                </button>
+              </div>
             </div>
             <div class="opts">
-              <span class="opt"><span class="opt-k">Matèria</span><span class="opt-v">Història</span></span>
-              <span class="opt"><span class="opt-k">Nivell</span><span class="opt-v">ESO 4</span></span>
+              <button type="button" class="opt" data-opt="materia"><span class="opt-k">Matèria</span><span class="opt-v" data-field="materia">Història</span><svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+              <button type="button" class="opt" data-opt="nivell"><span class="opt-k">Nivell</span><span class="opt-v" data-field="nivell">ESO 4</span><svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
               <span class="opt"><span class="opt-k">Complements</span><span class="opt-v">Cap</span></span>
             </div>
           </div>
@@ -953,14 +997,15 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
               <input type="text" placeholder="Cerca per títol, matèria o curs…">
             </div>
+            <!-- Bug 2: filtres amb data-filter (els handlers els assigna el JS al carregar historial) -->
             <div class="rec-filters">
-              <button class="rec-f on">Tots</button>
-              <button class="rec-f">Ciències</button>
-              <button class="rec-f">Història</button>
-              <button class="rec-f">Llengua</button>
-              <button class="rec-f">Última setmana</button>
+              <button class="rec-f on" data-filter="all">Tots</button>
+              <button class="rec-f" data-filter="ciencies">Ciències</button>
+              <button class="rec-f" data-filter="historia">Història</button>
+              <button class="rec-f" data-filter="llengua">Llengua</button>
+              <button class="rec-f" data-filter="last-week">Última setmana</button>
             </div>
-            <div class="rec-count">Resultats · 4</div>
+            <div class="rec-count" id="rec-count">Resultats · 4</div>
             <div class="rec-list" id="rec-list">
               <div class="rec-item">
                 <div class="rec-body">
@@ -1070,6 +1115,9 @@
     </nav>
   </main>
 </div>
+
+<!-- Bug 1: popover compartit per seleccionar Matèria / Nivell -->
+<div class="opt-pop" id="opt-pop"></div>
 
 <script>
   // ──────────────────────────────────────────────────────
@@ -1328,6 +1376,111 @@
   updateWC();
 
   // ──────────────────────────────────────────────────────
+  // Bug 1 — pills editables Matèria / Nivell
+  // Els pills ara són botons que obren un popover amb opcions.
+  // El valor seleccionat es persisteix a localStorage i el llegeix onAdaptClick.
+  // ──────────────────────────────────────────────────────
+  const MATERIA_OPTIONS = [
+    'Història','Ciències','Literatura catalana','Matemàtiques','Biologia',
+    'Física','Química','Filosofia','Llengua catalana','Tecnologia',
+    'Educació física','Música','Dibuix','Economia'
+  ];
+  const NIVELL_OPTIONS = [
+    'Infantil','1r Primària','2r Primària','3r Primària','4t Primària','5è Primària','6è Primària',
+    '1r ESO','2n ESO','3r ESO','4t ESO','1r Batxillerat','2n Batxillerat','FP'
+  ];
+
+  // Converteix 'course' del perfil ("3r ESO A") → format de nivell llegible ("3r ESO").
+  // Intenta matxejar contra NIVELL_OPTIONS; si no, retorna fallback raonable.
+  function nivellFromCourse(course) {
+    if (!course) return '3r ESO';
+    const norm = course.replace(/\s+[A-Z]$/,'').trim(); // treu lletra de grup si n'hi ha
+    // Busca coincidència directa amb alguna opció
+    const match = NIVELL_OPTIONS.find(opt => norm.toLowerCase().startsWith(opt.toLowerCase()));
+    if (match) return match;
+    // Detecció per contingut
+    if (/infantil/i.test(course)) return 'Infantil';
+    if (/primària|primaria/i.test(course)) {
+      const num = (course.match(/(\d)/) || [])[1];
+      if (num) {
+        const map = { '1':'1r Primària','2':'2r Primària','3':'3r Primària','4':'4t Primària','5':'5è Primària','6':'6è Primària' };
+        return map[num] || '3r Primària';
+      }
+    }
+    if (/batx/i.test(course)) return course.match(/2/) ? '2n Batxillerat' : '1r Batxillerat';
+    if (/fp/i.test(course)) return 'FP';
+    // ESO per defecte
+    const num = (course.match(/(\d)/) || [])[1];
+    if (num) {
+      const map = { '1':'1r ESO','2':'2n ESO','3':'3r ESO','4':'4t ESO' };
+      return map[num] || '3r ESO';
+    }
+    return '3r ESO';
+  }
+
+  // Inicialitza els valors (localStorage → fallback perfil → defaults)
+  const initialMateria = localStorage.getItem('atne.doc_materia') || 'Història';
+  const initialNivell  = localStorage.getItem('atne.doc_nivell')  || nivellFromCourse(profile?.course);
+  // Persistim els defaults perquè onAdaptClick els trobi si l'usuari no els toca
+  localStorage.setItem('atne.doc_materia', initialMateria);
+  localStorage.setItem('atne.doc_nivell', initialNivell);
+
+  // Pinta els valors actuals a tots els pills
+  function paintOptPills() {
+    document.querySelectorAll('.opt-v[data-field="materia"]').forEach(el => el.textContent = localStorage.getItem('atne.doc_materia') || 'Història');
+    document.querySelectorAll('.opt-v[data-field="nivell"]').forEach(el => el.textContent = localStorage.getItem('atne.doc_nivell') || '3r ESO');
+  }
+  paintOptPills();
+
+  // Popover compartit
+  const optPop = document.getElementById('opt-pop');
+  let optPopOpenFor = null; // 'materia' | 'nivell' | null
+
+  function openOptPop(kind, anchorBtn) {
+    if (!optPop || !anchorBtn) return;
+    const opts = kind === 'materia' ? MATERIA_OPTIONS : NIVELL_OPTIONS;
+    const currentVal = localStorage.getItem(kind === 'materia' ? 'atne.doc_materia' : 'atne.doc_nivell');
+    optPop.innerHTML = opts.map(o =>
+      '<button type="button" class="opt-pop-item' + (o === currentVal ? ' sel' : '') + '" data-val="' + escapeHtml(o) + '">' + escapeHtml(o) + '</button>'
+    ).join('');
+    // Posicionar-lo sota el botó (position:fixed)
+    const r = anchorBtn.getBoundingClientRect();
+    optPop.style.top = (r.bottom + 6) + 'px';
+    optPop.style.left = r.left + 'px';
+    optPop.classList.add('on');
+    optPopOpenFor = kind;
+
+    optPop.querySelectorAll('.opt-pop-item').forEach(b => {
+      b.addEventListener('click', () => {
+        const val = b.dataset.val;
+        localStorage.setItem(kind === 'materia' ? 'atne.doc_materia' : 'atne.doc_nivell', val);
+        paintOptPills();
+        optPop.classList.remove('on');
+        optPopOpenFor = null;
+      });
+    });
+  }
+  function closeOptPop() { optPop?.classList.remove('on'); optPopOpenFor = null; }
+
+  // Click handlers sobre tots els botons .opt (delegació amb querySelectorAll)
+  document.querySelectorAll('button.opt[data-opt]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const kind = btn.dataset.opt;
+      if (optPopOpenFor === kind) { closeOptPop(); return; }
+      openOptPop(kind, btn);
+    });
+  });
+  // Tancar en clicar fora
+  document.addEventListener('click', e => {
+    if (!optPop || !optPop.classList.contains('on')) return;
+    if (optPop.contains(e.target)) return;
+    if (e.target.closest('button.opt[data-opt]')) return;
+    closeOptPop();
+  });
+  window.addEventListener('resize', closeOptPop);
+
+  // ──────────────────────────────────────────────────────
   // Handler "Adaptar" — desa text + opcions a localStorage i navega a Pas 3
   // Els botons són: #adapt-btn (bottom bar) i #adapt-frail (frail dret)
   // ──────────────────────────────────────────────────────
@@ -1342,9 +1495,9 @@
       return;
     }
 
-    // Opcions (per ara hardcodejades; al següent commit les farem editables)
-    const materia = 'Història';
-    const nivell = 'ESO 4';
+    // Bug 1 — Llegim les opcions editades pel docent (persistides pels pills clicables)
+    const materia = localStorage.getItem('atne.doc_materia') || 'Història';
+    const nivell  = localStorage.getItem('atne.doc_nivell')  || nivellFromCourse(profile?.course);
 
     // Desa a localStorage; esborra l'adaptat anterior perquè es regeneri al Pas 3
     localStorage.setItem('atne.doc_original', text);
@@ -1407,6 +1560,16 @@
   });
   async function handleFileUpload(file) {
     if (!window.ATNE_LLM) { window.atneToast && window.atneToast('Mòdul LLM no carregat','error'); return; }
+    // Bug 3 — Validacions prèvies: mida i extensió
+    const MAX_BYTES = 5 * 1024 * 1024;
+    if (file.size > MAX_BYTES) {
+      window.atneToast?.('Fitxer massa gran (màxim 5 MB). Prova amb un fitxer més petit o enganxa el text.', 'error');
+      return;
+    }
+    if (!/\.(pdf|docx|md|txt)$/i.test(file.name)) {
+      window.atneToast?.('Format no suportat. Accepta: PDF, DOCX, MD, TXT.', 'error');
+      return;
+    }
     const dropT = dropZone?.querySelector('.drop-t');
     if (dropT) dropT.textContent = 'Processant ' + file.name + '…';
     try {
@@ -1429,6 +1592,15 @@
   // En clicar "Generar": saltem immediatament al tab Escriure i el textarea
   // es va omplint amb el streaming SSE del LLM. Així el docent veu el progrés
   // i pot començar a llegir abans que acabi (gens de pantalla buida 60-90 s).
+  // Bug 5: AbortController compartit per permetre cancel·lar la crida de generació
+  let genAbortCtrl = null;
+  document.getElementById('gen-cancel')?.addEventListener('click', () => {
+    if (genAbortCtrl) {
+      genAbortCtrl.abort();
+      window.atneToast?.('Generació cancel·lada', 'info');
+    }
+  });
+
   document.getElementById('gen-go')?.addEventListener('click', async () => {
     if (!window.ATNE_LLM) return;
     const aiPanel = document.querySelector('.mode-panel[data-p="ai"]');
@@ -1440,8 +1612,12 @@
     const [genere, tipologia, to, extensio] = Array.from(selects).map(s => s.value);
 
     const btn = document.getElementById('gen-go');
+    const btnCancel = document.getElementById('gen-cancel');
     btn.disabled = true;
     btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3 1.9 4.6L18.5 9l-4.6 1.9L12 15l-1.9-4.6L5.5 9l4.6-1.4z"/></svg> Generant…';
+    // Bug 5: mostrem el botó cancel·lar durant el streaming
+    if (btnCancel) btnCancel.style.display = 'inline-flex';
+    genAbortCtrl = new AbortController();
 
     // Salt immediat al tab Escriure + buidar textarea per veure el streaming
     const tempTitle = tema.length < 80 ? tema : tema.slice(0, 60);
@@ -1449,9 +1625,13 @@
     const writeTa = document.getElementById('write-ta');
 
     try {
+      // TODO: requires llm.js AbortController support (bug FIX-1 bug 5).
+      // Passem el signal; si llm.js encara no el respecta, la crida no es pot avortar
+      // però no falla — quedarà pendent fins completar-se.
       const result = await window.ATNE_LLM.generateTextStream({
         tema, genere, tipologia, to, extensio,
         context: { etapa: 'ESO', curs: '3r ESO' },
+        signal: genAbortCtrl.signal,
         onChunk: ({ acumulat }) => {
           if (writeTa) {
             writeTa.value = acumulat;
@@ -1472,16 +1652,94 @@
         updateWC();
       }
     } catch (err) {
-      window.atneToast && window.atneToast('Error generant: ' + err.message,'error');
+      // Si és una cancel·lació via AbortController, no mostrem toast d'error
+      if (err?.name !== 'AbortError') {
+        window.atneToast && window.atneToast('Error generant: ' + err.message,'error');
+      }
     } finally {
       btn.disabled = false;
       btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3 1.9 4.6L18.5 9l-4.6 1.9L12 15l-1.9-4.6L5.5 9l4.6-1.4z"/></svg> Generar text';
+      if (btnCancel) btnCancel.style.display = 'none';
+      genAbortCtrl = null;
     }
   });
 
   // ──── Mode Recuperar ────
   // Carrega l'historial la primera vegada que es clica el tab 'Recuperar'
   let historyLoaded = false;
+  // Bug 2: cache del resultat brut + filtre + query actuals
+  let recCurrentFilter = 'all';
+  let recCurrentQuery = '';
+
+  // Renderitza la llista aplicant filtre + cerca sobre window.__ATNE_HISTORY_CACHE
+  function renderHistoryList() {
+    const recList = document.getElementById('rec-list');
+    const recCount = document.getElementById('rec-count');
+    if (!recList) return;
+    const cache = window.__ATNE_HISTORY_CACHE;
+    if (!cache) return; // no-op silenciós si encara no hi ha res cachejat
+    const items = Object.values(cache);
+    const q = recCurrentQuery.trim().toLowerCase();
+    const now = Date.now();
+    const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+    const filtered = items.filter(it => {
+      // Filtre per chip
+      if (recCurrentFilter !== 'all') {
+        if (recCurrentFilter === 'last-week') {
+          const ts = it.created_at ? Date.parse(it.created_at) : NaN;
+          if (!ts || (now - ts) > WEEK_MS) return false;
+        } else {
+          // Paraula clau del chip ha d'aparèixer a etapa, curs o profile_name
+          const blob = [it.etapa, it.curs, it.profile_name, it.materia].filter(Boolean).join(' ').toLowerCase();
+          const keywords = {
+            ciencies: ['ciencies','ciències','biologia','física','fisica','química','quimica'],
+            historia: ['historia','història'],
+            llengua:  ['llengua','català','catala','literatura']
+          };
+          const kws = keywords[recCurrentFilter] || [recCurrentFilter];
+          if (!kws.some(kw => blob.includes(kw))) return false;
+        }
+      }
+      // Cerca lliure
+      if (q) {
+        const blob = [it.original_text, it.profile_name, it.etapa, it.curs].filter(Boolean).join(' ').toLowerCase();
+        if (!blob.includes(q)) return false;
+      }
+      return true;
+    });
+
+    if (!filtered.length) {
+      recList.innerHTML = '<div class="rec-item" style="color:var(--ink-500)"><div class="rec-body"><div class="rec-t">Cap resultat</div><div class="rec-m">Prova amb un altre filtre o cerca</div></div></div>';
+      if (recCount) recCount.textContent = 'Resultats · 0';
+      return;
+    }
+
+    recList.innerHTML = filtered.map(it => {
+      const titol = (it.original_text || '').split('\n')[0].slice(0, 60) || it.profile_name || 'Sense títol';
+      const meta = [it.etapa, it.curs, it.profile_name].filter(Boolean).join(' · ');
+      return `<div class="rec-item" data-hid="${it.id}">
+        <div class="rec-body">
+          <div class="rec-t">${escapeHtml(titol)}</div>
+          <div class="rec-m">${escapeHtml(meta)}</div>
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>
+      </div>`;
+    }).join('');
+    if (recCount) recCount.textContent = 'Resultats · ' + filtered.length;
+
+    // Re-attach click handlers per carregar cada item al editor
+    recList.querySelectorAll('.rec-item[data-hid]').forEach(el => {
+      el.addEventListener('click', () => {
+        const it = window.__ATNE_HISTORY_CACHE?.[el.dataset.hid];
+        if (it?.original_text) {
+          const title = it.original_text.split('\n')[0].slice(0, 60) || it.profile_name || 'Sense títol';
+          loadTextIntoEditor(it.original_text, title);
+        }
+      });
+    });
+  }
+
   async function loadHistory() {
     if (historyLoaded || !window.ATNE_LLM) return;
     historyLoaded = true;
@@ -1494,32 +1752,28 @@
         recList.innerHTML = '<div class="rec-item" style="color:var(--ink-500)"><div class="rec-body"><div class="rec-t">Cap document recent</div><div class="rec-m">Adapta un text per veure\'l aquí</div></div></div>';
         return;
       }
-      recList.innerHTML = data.items.map(it => {
-        const titol = (it.original_text || '').split('\n')[0].slice(0, 60) || it.profile_name || 'Sense títol';
-        const meta = [it.etapa, it.curs, it.profile_name].filter(Boolean).join(' · ');
-        return `<div class="rec-item" data-hid="${it.id}">
-          <div class="rec-body">
-            <div class="rec-t">${escapeHtml(titol)}</div>
-            <div class="rec-m">${escapeHtml(meta)}</div>
-          </div>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>
-        </div>`;
-      }).join('');
-      // Guardem els items per recuperar-los en el clic
+      // Bug 2: cache global per al filtre/cerca
       window.__ATNE_HISTORY_CACHE = Object.fromEntries(data.items.map(it => [it.id, it]));
-      recList.querySelectorAll('.rec-item[data-hid]').forEach(el => {
-        el.addEventListener('click', () => {
-          const it = window.__ATNE_HISTORY_CACHE[el.dataset.hid];
-          if (it?.original_text) {
-            const title = it.original_text.split('\n')[0].slice(0, 60) || it.profile_name || 'Sense títol';
-            loadTextIntoEditor(it.original_text, title);
-          }
-        });
-      });
+      renderHistoryList();
     } catch (err) {
       recList.innerHTML = '<div class="rec-item" style="color:var(--err)"><div class="rec-body"><div class="rec-t">Error</div><div class="rec-m">' + escapeHtml(err.message) + '</div></div></div>';
     }
   }
+
+  // Bug 2 — Handlers genèrics dels chips de filtre (no-op silenciós si no hi ha cache)
+  document.querySelectorAll('.rec-filters .rec-f[data-filter]').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.rec-filters .rec-f').forEach(c => c.classList.remove('on'));
+      chip.classList.add('on');
+      recCurrentFilter = chip.dataset.filter || 'all';
+      if (window.__ATNE_HISTORY_CACHE) renderHistoryList();
+    });
+  });
+  // Bug 2 — Cerca en directe
+  document.querySelector('.rec-search input')?.addEventListener('input', e => {
+    recCurrentQuery = e.target.value || '';
+    if (window.__ATNE_HISTORY_CACHE) renderHistoryList();
+  });
   function escapeHtml(s) {
     return String(s || '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
   }
@@ -1533,6 +1787,14 @@
   // Popover Refinar del Pas 2
   const frRefineBtn = document.getElementById('fr-refine');
   const frPopRefine = document.getElementById('fr-pop-refine');
+
+  // Bug 4 — Helper: tanca els popovers que NO són el "keep" (evita obrir-ne dos alhora)
+  function closeOtherPopovers(keep) {
+    if (keep !== 'edit')    document.getElementById('fr-pop-edit')?.classList.remove('on');
+    if (keep !== 'refine')  document.getElementById('fr-pop-refine')?.classList.remove('on');
+    if (keep !== 'compl')   document.getElementById('fr-pop-compl')?.classList.remove('on');
+  }
+
   frRefineBtn?.addEventListener('click', e => {
     e.stopPropagation();
     const currentMode = document.querySelector('.mode-tab.on')?.dataset.mode || 'write';
@@ -1545,6 +1807,8 @@
       window.atneToast?.('Cal text per refinar', 'info');
       return;
     }
+    // Bug 4: tanquem altres popovers abans d'obrir aquest
+    closeOtherPopovers('refine');
     frPopRefine?.classList.toggle('on');
   });
   // Tancar en clicar fora
@@ -1644,10 +1908,9 @@
       window.atneToast?.('Canvia al mode Escriure per editar el format', 'info');
       return;
     }
+    // Bug 4: tanquem altres popovers abans d'obrir aquest (refactor a l'helper)
+    closeOtherPopovers('edit');
     frPopEdit?.classList.toggle('on');
-    // Tanquem altres popovers
-    frPopRefine?.classList.remove('on');
-    frPopCompl?.classList.remove('on');
   });
   frPopEdit?.querySelectorAll('.fr-pop-b').forEach(b => {
     b.addEventListener('click', () => {
@@ -1779,6 +2042,8 @@
   const frComplBtn = document.getElementById('fr-compl');
   const frPopCompl = document.getElementById('fr-pop-compl');
   function openComplementsPopover() {
+    // Bug 4: tanquem altres popovers abans d'obrir Complements
+    closeOtherPopovers('compl');
     renderComplementsList();
     frPopCompl?.classList.add('on');
   }

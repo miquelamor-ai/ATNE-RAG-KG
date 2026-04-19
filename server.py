@@ -42,7 +42,7 @@ import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, Body, Depends, HTTPException, Request, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse, FileResponse
+from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse, FileResponse, RedirectResponse
 
 # ── Configuració ────────────────────────────────────────────────────────────
 
@@ -421,8 +421,17 @@ async def favicon():
     return Response(status_code=204)
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/")
 async def index():
+    # Bug 4 (2026-04-19): l'arrel portava a `ui/index.html` (UI antic). Ara
+    # redirigim al flux del pilot (pas1). L'UI antic continua accessible a
+    # `/legacy` per a debug / admin si cal comparar visualment.
+    return RedirectResponse(url="/ui/atne/pas1.html")
+
+
+@app.get("/legacy", response_class=HTMLResponse)
+async def index_legacy():
+    """UI antic (preservat per a debug / admin). Veure bug 4 (2026-04-19)."""
     return HTMLResponse(
         (UI_DIR / "index.html").read_text(encoding="utf-8"),
         headers={"Cache-Control": "no-store"},
@@ -2720,6 +2729,10 @@ async def list_history(limit: int = 30):
 
     Ordenat per created_at desc, limitat a `limit` (default 30).
     """
+    # Bug 5 (2026-04-19): abans retornàvem sempre HTTP 200 quan Supabase fallava
+    # (el frontend ho llegia com "cap document recent" i amagava l'error real).
+    # Ara els errors de xarxa/Supabase retornen HTTP 503 perquè el frontend,
+    # que ja gestiona status >= 400, els mostri al docent.
     try:
         resp = requests.get(
             f"{SUPABASE_URL}/rest/v1/history"
@@ -2731,9 +2744,15 @@ async def list_history(limit: int = 30):
         )
         if resp.status_code == 200:
             return {"ok": True, "items": resp.json()}
-        return {"ok": False, "items": [], "error": resp.text}
+        return JSONResponse(
+            {"ok": False, "error": resp.text or f"Supabase HTTP {resp.status_code}"},
+            status_code=503,
+        )
     except Exception as e:
-        return {"ok": False, "items": [], "error": str(e)}
+        return JSONResponse(
+            {"ok": False, "error": str(e) or type(e).__name__},
+            status_code=503,
+        )
 
 
 # Sprint 1A+1B: columnes ampliades de history acceptades per POST i PATCH
@@ -3040,6 +3059,39 @@ GENERATE_TONS = {
 }
 
 
+# Bug 2 (2026-04-19): el camp `extensio` arribava al generador com a string
+# descriptiva ("200-300 paraules") i no es traduïa a cap target numèric, de
+# manera que el generador sempre acabava retornant ~400 paraules (default).
+# Aquest mapping fa el pont entre l'etiqueta humana i el `target_words` que
+# espera `generador_lliure`. Si el valor no matcheja cap patró conegut, el
+# mòdul downstream usa el seu default actual (400).
+_EXTENSIO_TO_TARGET_WORDS = {
+    "50-100 paraules": 75,
+    "100-200 paraules": 150,
+    "200-300 paraules": 250,
+    "300-500 paraules": 400,
+    "500-800 paraules": 650,
+    "800-1200 paraules": 1000,
+}
+
+
+def _resolve_target_words(payload: dict) -> dict:
+    """Retorna una còpia del payload amb `target_words` injectat quan
+    l'`extensio` coincideix amb una etiqueta coneguda. No muta l'entrada.
+
+    Si el client ja ha passat `target_words` explícit, el respectem.
+    """
+    if not isinstance(payload, dict):
+        return payload
+    if payload.get("target_words"):
+        return payload
+    ext = (payload.get("extensio") or "").strip().lower()
+    target = _EXTENSIO_TO_TARGET_WORDS.get(ext)
+    if target is None:
+        return payload  # default downstream (400) queda intacte
+    return {**payload, "target_words": target}
+
+
 @app.post("/api/generate-text")
 async def generate_text(payload: dict = Body(...)):
     """
@@ -3065,6 +3117,11 @@ async def generate_text(payload: dict = Body(...)):
         model: str (opcional, override del model admin)
     """
     from generador_lliure import generar as generar_text_lliure
+
+    # Bug 2 (2026-04-19): mapeja `extensio` → `target_words` abans de delegar.
+    # TODO: idealment el mapping faria generador_lliure.py, però no tocat en
+    # aquest parxe (veure _resolve_target_words).
+    payload = _resolve_target_words(payload)
 
     try:
         result = generar_text_lliure(payload)
@@ -3097,6 +3154,10 @@ async def generate_text_stream(payload: dict = Body(...)):
     Payload idèntic a /api/generate-text.
     """
     from generador_lliure import generar_stream as generar_text_stream_lliure
+
+    # Bug 2 (2026-04-19): mateix mapping que /api/generate-text perquè el
+    # streaming també respecti l'extensió demanada.
+    payload = _resolve_target_words(payload)
 
     async def gen():
         # Els chunks del LLM arriben sync; els emetem com events SSE.
@@ -4132,13 +4193,27 @@ async def adapt_stream(payload: dict = Body(...)):
             # 'done' global quan tots els nivells han acabat
             yield f"data: {json.dumps({'type': 'done', 'total_levels': total}, ensure_ascii=False)}\n\n"
 
-    return StreamingResponse(gen(), media_type="text/event-stream")
+    # Bug 1 (2026-04-19): faltaven headers anti-buffering al SSE. Sense això,
+    # nginx/Cloud Run poden bufferar els events i el docent veu la pantalla
+    # congelada 60-90s. Mateixos headers que /api/generate-text-stream.
+    return StreamingResponse(
+        gen(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 # ── Exportació ──────────────────────────────────────────────────────────────
 
 @app.post("/api/export")
 async def export_doc(payload: dict = Body(...)):
+    # TODO: Dockerfile ha d'instal·lar fonts-noto o fonts-amiri perquè àrab es
+    # renderitzi a Cloud Run (aquest server.py afegeix els paths i els rangs
+    # Unicode, però si la font no està instal·lada al contenidor els glifs
+    # continuen sortint com tofu). Veure bug 3 (2026-04-19).
     fmt = payload.get("format", "txt")
     adapted = payload.get("adapted", "")
     original = payload.get("original", "")
@@ -4164,7 +4239,13 @@ async def export_doc(payload: dict = Body(...)):
                 cleaned.append(c)
             elif 0x00A0 <= cp <= 0x024F:   # Latin Extended (à é í ò ú ç · ñ ü)
                 cleaned.append(c)
-            elif 0x0600 <= cp <= 0x06FF:   # Àrab
+            elif 0x0600 <= cp <= 0x06FF:   # Àrab bàsic
+                cleaned.append(c)
+            elif 0x0750 <= cp <= 0x077F:   # Àrab suplementari
+                cleaned.append(c)
+            elif 0xFB50 <= cp <= 0xFDFF:   # Formes de presentació A (àrab)
+                cleaned.append(c)
+            elif 0xFE70 <= cp <= 0xFEFF:   # Formes de presentació B (àrab)
                 cleaned.append(c)
             elif 0x2000 <= cp <= 0x206F:   # Puntuació general (— ' " …)
                 cleaned.append(c)
@@ -4264,10 +4345,18 @@ async def export_doc(payload: dict = Body(...)):
         pdf.set_auto_page_break(auto=True, margin=15)
         # Font Unicode del sistema (Arial suporta català, àrab, etc.)
         font_name = "Helvetica"  # fallback
+        # Bug 3 (2026-04-19): ordre de prioritat pensat perquè a Cloud Run (Linux)
+        # agafi una font amb glifs àrabs abans de caure en Liberation (que NO té
+        # àrab i retorna tofu). El Dockerfile ha d'instal·lar fonts-noto o
+        # fonts-amiri perquè els primers paths Linux existeixin.
         for ttf_normal, ttf_bold, fname in [
             ("C:/Windows/Fonts/arial.ttf", "C:/Windows/Fonts/arialbd.ttf", "ArialUni"),
             ("C:/Windows/Fonts/segoeui.ttf", "C:/Windows/Fonts/segoeuib.ttf", "SegoeUI"),
-            # Linux (Cloud Run / Docker)
+            # Linux (Cloud Run / Docker) — primer les que suporten àrab
+            ("/usr/share/fonts/truetype/noto/NotoSansArabic-Regular.ttf",
+             "/usr/share/fonts/truetype/noto/NotoSansArabic-Bold.ttf", "NotoArabic"),
+            ("/usr/share/fonts/truetype/amiri/amiri-regular.ttf",
+             "/usr/share/fonts/truetype/amiri/amiri-bold.ttf", "Amiri"),
             ("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
              "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf", "LiberationSans"),
             ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",

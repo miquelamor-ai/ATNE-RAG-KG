@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="/ui/styles/tokens.css">
 <link rel="stylesheet" href="/ui/styles/base.css">
 <link rel="stylesheet" href="/ui/styles/shell.css">
-<script src="/ui/atne/js/llm.js?v=20260419c" defer></script>
+<script src="/ui/atne/js/llm.js?v=20260419d" defer></script>
 
 <style>
   /* =========================================================
@@ -1097,7 +1097,9 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3M12 3v18"/></svg>
         <span>Comparar</span>
       </button>
-      <button class="bb-item" onclick="document.querySelector('.fr-b[data-pop=&quot;rubric&quot;]')?.click()">
+      <!-- Bug 2: Pas 3 no té popover de complements (es configuren al Pas 2).
+           Mostrem toast informatiu i naveguem. -->
+      <button class="bb-item" onclick="window.atneToast?.('Configura els complements al Pas 2', 'info'); setTimeout(() => location.href='/ui/atne/pas2.html', 2000)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         <span>Complements</span>
       </button>
@@ -1249,10 +1251,12 @@
         Tornar al text
       </button>
     `;
-    // Click a una versió → activa-la (només visual per ara; canvi de contingut pendent)
-    lside.querySelectorAll('.vcard').forEach(c => c.addEventListener('click', () => {
-      lside.querySelectorAll('.vcard').forEach(x => x.classList.remove('active'));
-      c.classList.add('active');
+    // Bug 7: encara no tenim backend per a diverses versions del mateix grup.
+    // Mostrem toast informatiu i NO canviem ni active ni contingut (evitem
+    // donar la il·lusió que la versió s'ha carregat). Pendent al parking lot.
+    lside.querySelectorAll('.vcard').forEach(c => c.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.atneToast?.('Les versions multinivell es generaran al pilot (encara en desenvolupament)', 'info');
     }));
   }
 
@@ -1443,6 +1447,23 @@
   // Navegació del stepper: ja està gestionada als onclick dels botons del HTML
   // (veure data-step/onclick inline a l'stepper de la topbar).
 
+  // Bug 3: persistir el títol del document a localStorage
+  (function wireDocTitle(){
+    const docTitleEl = document.querySelector('.doc-title');
+    if (!docTitleEl) return;
+    const stored = localStorage.getItem('atne.doc_title');
+    if (stored) docTitleEl.value = stored;
+    docTitleEl.addEventListener('input', e => {
+      localStorage.setItem('atne.doc_title', e.target.value);
+    });
+  })();
+
+  // Bug 6: botó "+ Afegir complement" — la configuració es fa al Pas 2
+  document.querySelectorAll('.cmp-add').forEach(b => b.addEventListener('click', () => {
+    window.atneToast?.('La configuració de complements es fa al Pas 2', 'info');
+    setTimeout(() => location.href = '/ui/atne/pas2.html', 2000);
+  }));
+
   /* =========================================================
      EDITOR: contenteditable + undo/redo
      ========================================================= */
@@ -1454,16 +1475,19 @@
   const history = { stack: [adapted.innerHTML], idx: 0 };
   function pushHistory(){
     history.stack = history.stack.slice(0, history.idx+1);
-    history.stack.push(adapted.innerHTML);
+    // Bug 1: guardem snapshot net (sense .para-handle) perquè en undo/redo
+    // `attachParaHandles()` els re-injecti amb listeners vius.
+    history.stack.push(adaptedInnerHtmlClean());
     history.idx = history.stack.length - 1;
     updateUndoRedo();
+    updateDocMeta();  // Bug 4: recompta paraules a cada canvi
   }
   function updateUndoRedo(){
     btnUndo.disabled = history.idx <= 0;
     btnRedo.disabled = history.idx >= history.stack.length - 1;
   }
-  btnUndo.addEventListener('click', () => { if(history.idx>0){ history.idx--; adapted.innerHTML = history.stack[history.idx]; updateUndoRedo(); attachParaHandles(); }});
-  btnRedo.addEventListener('click', () => { if(history.idx<history.stack.length-1){ history.idx++; adapted.innerHTML = history.stack[history.idx]; updateUndoRedo(); attachParaHandles(); }});
+  btnUndo.addEventListener('click', () => { if(history.idx>0){ history.idx--; adapted.innerHTML = history.stack[history.idx]; updateUndoRedo(); attachParaHandles(); updateDocMeta(); }});
+  btnRedo.addEventListener('click', () => { if(history.idx<history.stack.length-1){ history.idx++; adapted.innerHTML = history.stack[history.idx]; updateUndoRedo(); attachParaHandles(); updateDocMeta(); }});
   let typingTimer;
   adapted.addEventListener('input', () => {
     clearTimeout(typingTimer);
@@ -1609,8 +1633,10 @@
   const paraMenu = document.getElementById('para-menu');
   let paraTarget = null;
   function attachParaHandles(){
+    // Bug 1: sempre remove+recreate, perquè després d'un innerHTML reload
+    // (undo/redo o load des de localStorage) els listeners es perden.
+    adapted.querySelectorAll(':scope > * > .para-handle').forEach(n => n.remove());
     adapted.querySelectorAll('p, ul, h2').forEach(el => {
-      if(el.querySelector(':scope > .para-handle')) return;
       const h = document.createElement('button');
       h.className = 'para-handle';
       h.contentEditable = 'false';
@@ -1627,6 +1653,42 @@
       el.insertBefore(h, el.firstChild);
     });
   }
+
+  // Bug 1: helper que retorna l'innerHTML de l'editor SENSE els .para-handle,
+  // perquè els botons amb listeners no es serialitzin a localStorage.
+  function adaptedInnerHtmlClean(){
+    if (!adapted) return '';
+    const clone = adapted.cloneNode(true);
+    clone.querySelectorAll('.para-handle').forEach(n => n.remove());
+    return clone.innerHTML;
+  }
+
+  // Bug 4: compta paraules del text adaptat i calcula "fa Xs / Xm / Xh"
+  function formatRelativeAge(ts){
+    if (!ts) return 'adaptat ara';
+    const diffMs = Date.now() - Number(ts);
+    if (!isFinite(diffMs) || diffMs < 0) return 'adaptat ara';
+    const s = Math.floor(diffMs/1000);
+    if (s < 60) return 'adaptat fa ' + Math.max(1, s) + 's';
+    const m = Math.floor(s/60);
+    if (m < 60) return 'adaptat fa ' + m + 'm';
+    const h = Math.floor(m/60);
+    if (h < 24) return 'adaptat fa ' + h + 'h';
+    const d = Math.floor(h/24);
+    return 'adaptat fa ' + d + 'd';
+  }
+  function updateDocMeta(){
+    const metaEl = document.querySelector('.doc-meta');
+    if (!metaEl) return;
+    const adaptedEl = document.getElementById('adapted-text');
+    const n = adaptedEl ? (adaptedEl.innerText.trim().match(/\S+/g)?.length || 0) : 0;
+    const ts = localStorage.getItem('atne.adapted_at');
+    const spans = metaEl.querySelectorAll('span:not(.dot)');
+    if (spans[0]) spans[0].textContent = formatRelativeAge(ts);
+    if (spans[1]) spans[1].textContent = n + ' paraules';
+  }
+  // Refresc periòdic del "fa Xs/Xm/Xh" cada 30s
+  setInterval(updateDocMeta, 30000);
   function closeParaMenu(){
     paraMenu.classList.remove('on');
     document.body.appendChild(paraMenu);
@@ -1711,6 +1773,7 @@
     }
   }));
   attachParaHandles();
+  updateDocMeta();  // Bug 4: comptar paraules inicials (substitueix "318" hardcoded)
 
   // ──────────────────────────────────────────────────────
   // Distribueix les seccions parsejades del resultat de /api/adapt a les
@@ -1795,6 +1858,7 @@
         const parsed = window.ATNE_LLM.parseAdaptedSections(cachedRaw);
         applyComplementsToViews(parsed.complements);
       }
+      updateDocMeta();  // Bug 4: refrescar meta post-reload des de cache
       return;
     }
 
@@ -1811,7 +1875,21 @@
     let complements = { glossari: true, esquema_visual: true, preguntes_comprensio: true };
     try {
       const stored = localStorage.getItem('atne.complements');
-      if (stored) complements = JSON.parse(stored) || complements;
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // Bug 5: normalitzar format — el Pas 2 podria desar array o objecte
+        if (Array.isArray(parsed)) {
+          // Format array: ['glossari', 'esquema_visual', ...] → {glossari:true,...}
+          const obj = {};
+          parsed.forEach(k => { if (typeof k === 'string') obj[k] = true; });
+          complements = obj;
+        } else if (parsed && typeof parsed === 'object') {
+          // Format objecte: filtrem només les claus amb valor truthy
+          const obj = {};
+          Object.keys(parsed).forEach(k => { if (parsed[k]) obj[k] = true; });
+          complements = obj;
+        }
+      }
     } catch {}
 
     window.ATNE_LLM.adaptText({
@@ -1838,9 +1916,14 @@
         // Distribueix els complements a les seves vistes
         applyComplementsToViews(parsed.complements);
 
-        localStorage.setItem('atne.adapted_text', adaptedEl?.innerHTML || '');
+        // Bug 1: desem l'innerHTML SENSE els .para-handle per no serialitzar
+        // botons amb listeners morts.
+        localStorage.setItem('atne.adapted_text', adaptedInnerHtmlClean());
         localStorage.setItem('atne.adapted_raw', ev.adapted || '');
         localStorage.setItem('atne.adapted_cache_key', cacheKey);
+        // Bug 4: timestamp de generació per al "adaptat fa ..."
+        localStorage.setItem('atne.adapted_at', String(Date.now()));
+        updateDocMeta();
       },
       onError: (err) => {
         if (regenT) regenT.textContent = 'Error del LLM';
@@ -1890,7 +1973,11 @@
           : window.ATNE_LLM.markdownToHtml(result.text);
         attachParaHandles();
         pushHistory();
-        localStorage.setItem('atne.adapted_text', adaptedEl.innerHTML);
+        // Bug 1: desar net (sense .para-handle)
+        localStorage.setItem('atne.adapted_text', adaptedInnerHtmlClean());
+        // Bug 4: refrescar timestamp després d'un refine
+        localStorage.setItem('atne.adapted_at', String(Date.now()));
+        updateDocMeta();
 
         // Feedback visual i comptador de canvis
         const countWords = s => (s.trim().match(/\S+/g) || []).length;
