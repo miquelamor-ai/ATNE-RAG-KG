@@ -29,105 +29,54 @@
     line-height: 1;
   }
 
-  /* ─── Topbar de la pàgina (navbar de navegació pública) ─ */
+  /* ─── Topbar unificat Saber-ne+ (idèntic a saber-ne.html) ─ */
   .page-header {
     position: sticky;
     top: 0;
+    width: 100%;
     z-index: 50;
     background: rgba(244, 241, 232, .92);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--paper-line);
-  }
-
-  .page-header-inner {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 var(--sp-6);
-    height: 56px;
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: var(--sp-7);
+    padding: 0 var(--sp-6);
+    height: 57px;
+    gap: var(--sp-4);
+    box-sizing: border-box;
   }
-
-  .site-brand {
+  .ph-brand {
     font-family: var(--serif);
     font-size: var(--fs-xl);
     font-weight: var(--fw-bold);
     color: var(--primary);
     letter-spacing: -0.02em;
-    white-space: nowrap;
   }
-  .site-brand:hover { opacity: .8; }
-
-  .site-nav {
-    display: flex;
-    gap: var(--sp-6);
+  .ph-brand:hover { opacity: .8; }
+  .ph-links {
+    display: none;
     align-items: center;
+    gap: var(--sp-6);
   }
-
-  .site-nav a {
-    font-family: var(--ui);
-    font-size: var(--fs-sm);
+  @media (min-width: 768px) { .ph-links { display: flex; } }
+  .ph-links a {
+    font-size: var(--fs-md);
+    font-weight: var(--fw-med);
+    color: var(--ink-600);
+    transition: color var(--trans-fast);
+  }
+  .ph-links a:hover { color: var(--primary); }
+  .ph-links a.active { color: var(--primary); font-weight: var(--fw-semi); }
+  .ph-back {
+    font-family: var(--mono);
+    font-size: var(--fs-xs);
     font-weight: var(--fw-semi);
     color: var(--ink-500);
-    letter-spacing: .02em;
-    text-transform: uppercase;
     transition: color var(--trans-fast);
-    padding-bottom: 2px;
+    white-space: nowrap;
   }
-  .site-nav a:hover { color: var(--primary); }
-  .site-nav a.active {
-    color: var(--primary);
-    border-bottom: 2px solid var(--primary);
-  }
-
-  .header-right {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: var(--sp-3);
-  }
-
-  .search-pill {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-2);
-    background: var(--cream-2);
-    border: 1px solid var(--paper-line);
-    border-radius: var(--r-pill);
-    padding: 6px var(--sp-3);
-  }
-
-  .search-pill .material-symbols-outlined {
-    color: var(--ink-400);
-    font-size: 16px;
-  }
-
-  .search-pill input {
-    border: 0;
-    background: transparent;
-    font-size: var(--fs-sm);
-    color: var(--ink-700);
-    width: 140px;
-  }
-  .search-pill input::placeholder { color: var(--ink-400); }
-
-  .hdr-icon-btn {
-    width: 34px; height: 34px;
-    border-radius: var(--r-md);
-    display: grid; place-items: center;
-    color: var(--ink-500);
-    transition: background var(--trans-fast), color var(--trans-fast);
-  }
-  .hdr-icon-btn:hover { background: var(--cream-2); color: var(--ink-900); }
-  .hdr-icon-btn .material-symbols-outlined { font-size: 20px; }
-
-  .avatar {
-    width: 30px; height: 30px;
-    border-radius: 50%;
-    border: 1px solid var(--paper-line);
-    object-fit: cover;
-  }
+  .ph-back:hover { color: var(--primary); }
 
   /* ─── Contenidor principal ─────────────────────────────── */
   .page-main {
@@ -522,32 +471,12 @@
 
 <!-- Capçalera de navegació -->
 <header class="page-header">
-  <div class="page-header-inner">
-    <a href="/" class="site-brand">Saber-ne+</a>
-
-    <nav class="site-nav">
-      <a href="/saber-ne">Adaptar materials</a>
-      <a href="/cuina">Com funciona ATNE</a>
-      <a href="/avaluacio" class="active">Avaluació i decisions</a>
-    </nav>
-
-    <div class="header-right">
-      <div class="search-pill">
-        <span class="material-symbols-outlined">search</span>
-        <input type="text" placeholder="Cerca en informes…"/>
-      </div>
-      <button class="hdr-icon-btn">
-        <span class="material-symbols-outlined">notifications</span>
-      </button>
-      <button class="hdr-icon-btn">
-        <span class="material-symbols-outlined">settings</span>
-      </button>
-      <img
-        class="avatar"
-        src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4BKdJMzVhuOy3flxj__0ecnegZRT2TR6t6uFbgp6oPg0QHYhpFR7Xgds67-p1bESUjtRYegk4ckl_np_wk7JxlkrdNw1cJFJQUUTt7parM23d8sdi07kVJzQosGnQrk4gAu28SfJqB8nzhFe-CjOm7QrfJVBE9y3tsF6wpa5c6FVxOnDjZME_SXnd2O4uzlJpmPHgo1m592QE2WucwZfZwRu_pIE8yIUF5K1IE3ObI6X2C47_PoWmcmnR2S1VsXpLdU-UfbbODqQ"
-        alt="Avatar usuari"/>
-    </div>
-  </div>
+  <a href="/ui/saber-ne.html" class="ph-brand">Saber-ne+</a>
+  <nav class="ph-links">
+    <a href="/ui/saber-ne.html">Marc pedagògic</a>
+    <a href="/ui/avaluacio.html" class="active">Avaluació i decisions</a>
+  </nav>
+  <a href="/ui/atne/pas1.html" class="ph-back">← Tornar a ATNE</a>
 </header>
 
 <main class="page-main">
