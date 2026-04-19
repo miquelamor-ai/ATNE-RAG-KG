@@ -21,3 +21,8 @@ CREATE TABLE IF NOT EXISTS atne_drafts (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_atne_drafts_docent ON atne_drafts(docent_id, updated_at DESC);
+
+-- Desactivar RLS: el backend autoritza per docent_id via filtre al query
+-- (mateix patró que la taula 'history'). Sense això, la clau anon retorna
+-- error 42501 ("new row violates row-level security policy").
+ALTER TABLE atne_drafts DISABLE ROW LEVEL SECURITY;
