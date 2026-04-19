@@ -1387,8 +1387,8 @@
   // ── Visita guiada (Driver.js) ─────────────────────────────────────────────
 
   function startTour() {
-    if (typeof window.driver === 'undefined') return;
-    const d = window.driver.js.driver({
+    if (typeof driver === 'undefined') return;
+    const d = driver.driver({
       showProgress: true,
       nextBtnText: 'Següent →',
       prevBtnText: '← Anterior',
