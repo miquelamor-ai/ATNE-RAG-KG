@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="/ui/styles/tokens.css">
 <link rel="stylesheet" href="/ui/styles/base.css">
 <link rel="stylesheet" href="/ui/styles/shell.css">
-<script src="/ui/atne/js/llm.js?v=20260419b" defer></script>
+<script src="/ui/atne/js/llm.js?v=20260419c" defer></script>
 
 <style>
   /* =========================================================
@@ -610,7 +610,9 @@
   }
   .fr-pop-btn:hover { background: var(--primary-600); }
   @media (max-width: 900px) {
-    .fr-pop.wide { width: calc(100vw - 32px); right: 16px; left: 16px; top: auto; bottom: 80px; transform: none; max-height: 70vh; }
+    /* Popovers (Refinar, Edició, Complements) al mòbil: bottom sheet */
+    .fr-pop { left: 16px; right: 16px; width: auto; top: auto; bottom: 80px; transform: none; max-height: 70vh; overflow-y: auto; }
+    .fr-pop.wide { width: auto; left: 16px; right: 16px; }
   }
 
   /* ─── Bottom tab bar (només mòbil/tauleta) ───────────── */
@@ -1003,6 +1005,20 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
           </button>
         </div>
+        <!-- Popover Edició (ancorat al frail): format markdown per al text original -->
+        <div class="fr-pop" id="fr-pop-edit">
+          <div class="fr-pop-t">Format del text</div>
+          <div class="fr-pop-s">Selecciona un tros i aplica format. Els canvis es conserven en adaptar.</div>
+          <div class="fr-pop-opts" style="grid-template-columns: 1fr 1fr 1fr;">
+            <button class="fr-pop-b" data-md="bold" title="Negreta"><b style="font-family:var(--serif)">B</b></button>
+            <button class="fr-pop-b" data-md="italic" title="Cursiva"><i style="font-family:var(--serif)">I</i></button>
+            <button class="fr-pop-b" data-md="h1" title="Títol principal" style="font-family:var(--serif);font-weight:700">H1</button>
+            <button class="fr-pop-b" data-md="h2" title="Subtítol" style="font-family:var(--serif);font-weight:700">H2</button>
+            <button class="fr-pop-b" data-md="ul" title="Llista de vinyetes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
+            <button class="fr-pop-b" data-md="ol" title="Llista numerada"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 6h11M10 12h11M10 18h11M4 6h1v4M4 10h2M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></button>
+          </div>
+        </div>
+
         <!-- Popover Refinar (ancorat al frail) -->
         <div class="fr-pop" id="fr-pop-refine">
           <div class="fr-pop-t">Refinar text original</div>
@@ -1563,9 +1579,88 @@
     });
   });
 
-  // Edició del frail: al Pas 2 el textarea no suporta formats rics
-  document.getElementById('fr-edit')?.addEventListener('click', () => {
-    window.atneToast?.('L\'edició rica és al Pas 3 (seleccionar text i usar la toolbar)', 'info');
+  // ──────────────────────────────────────────────────────
+  // Popover Edició — format markdown per al textarea (B, I, H1/H2, UL, OL).
+  // Aplica wrappers a la selecció actual; si no n'hi ha, insereix al cursor.
+  // El text resultant (markdown) s'envia al Pas 3 i el backend ja el processa.
+  // ──────────────────────────────────────────────────────
+  const frEditBtn = document.getElementById('fr-edit');
+  const frPopEdit = document.getElementById('fr-pop-edit');
+
+  function applyMarkdown(kind) {
+    const ta = document.getElementById('write-ta');
+    if (!ta) return;
+    const start = ta.selectionStart ?? 0;
+    const end = ta.selectionEnd ?? 0;
+    const value = ta.value;
+    const sel = value.slice(start, end);
+    p2Snapshot();
+
+    let newVal, caretS, caretE;
+    if (kind === 'bold') {
+      const text = sel || 'text';
+      newVal = value.slice(0, start) + '**' + text + '**' + value.slice(end);
+      caretS = start + 2; caretE = caretS + text.length;
+    } else if (kind === 'italic') {
+      const text = sel || 'text';
+      newVal = value.slice(0, start) + '_' + text + '_' + value.slice(end);
+      caretS = start + 1; caretE = caretS + text.length;
+    } else if (kind === 'h1' || kind === 'h2') {
+      // Títol a l'inici de la línia actual
+      const prefix = kind === 'h1' ? '# ' : '## ';
+      const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+      const existing = value.slice(lineStart);
+      // Si ja comença amb #, el substituïm
+      const cleaned = existing.replace(/^#{1,3}\s+/, '');
+      newVal = value.slice(0, lineStart) + prefix + cleaned;
+      caretS = caretE = lineStart + prefix.length;
+    } else if (kind === 'ul' || kind === 'ol') {
+      // Envolta les línies seleccionades (o la línia actual)
+      const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+      const lineEnd = (value.indexOf('\n', end) === -1) ? value.length : value.indexOf('\n', end);
+      const block = value.slice(lineStart, lineEnd);
+      const lines = block.split('\n');
+      const formatted = lines.map((l, i) => {
+        const stripped = l.replace(/^(\s*[-*]\s+|\s*\d+\.\s+)/, '');
+        return kind === 'ul' ? '- ' + stripped : (i + 1) + '. ' + stripped;
+      }).join('\n');
+      newVal = value.slice(0, lineStart) + formatted + value.slice(lineEnd);
+      caretS = lineStart; caretE = lineStart + formatted.length;
+    } else {
+      return;
+    }
+    ta.value = newVal;
+    ta.focus();
+    ta.setSelectionRange(caretS, caretE);
+    localStorage.setItem('atne.doc_draft', ta.value);
+    updateWC();
+    p2Snapshot();
+  }
+
+  frEditBtn?.addEventListener('click', e => {
+    e.stopPropagation();
+    const mode = document.querySelector('.mode-tab.on')?.dataset.mode;
+    if (mode !== 'write') {
+      window.atneToast?.('Canvia al mode Escriure per editar el format', 'info');
+      return;
+    }
+    frPopEdit?.classList.toggle('on');
+    // Tanquem altres popovers
+    frPopRefine?.classList.remove('on');
+    frPopCompl?.classList.remove('on');
+  });
+  frPopEdit?.querySelectorAll('.fr-pop-b').forEach(b => {
+    b.addEventListener('click', () => {
+      applyMarkdown(b.dataset.md);
+      // No tanquem el popover: l'usuari pot voler aplicar format en cadena
+    });
+  });
+  document.addEventListener('click', e => {
+    if (!frPopEdit) return;
+    if (frPopEdit.contains(e.target)) return;
+    if (frEditBtn?.contains(e.target)) return;
+    if (e.target.closest('.bb-item[data-act="edit"]')) return;
+    frPopEdit.classList.remove('on');
   });
   // ──────────────────────────────────────────────────────
   // Complements — popover amb pre-selecció segons el perfil
@@ -1732,6 +1827,22 @@
       p2Snapshot();
       window.atneToast?.('Text buidat · Ctrl+Z o undo per recuperar', 'info');
     }
+  });
+
+  // Bottom bar mòbil: deleguem als botons del frail (amagat al mòbil).
+  // Els popovers ja tenen un CSS mòbil (bottom:80px) perquè es mostrin sobre
+  // la bottom bar sense que el frail sigui visible.
+  document.querySelector('.bb-item[data-act="edit"]')?.addEventListener('click', e => {
+    e.stopPropagation();
+    document.getElementById('fr-edit')?.click();
+  });
+  document.querySelector('.bb-item[data-act="refine"]')?.addEventListener('click', e => {
+    e.stopPropagation();
+    document.getElementById('fr-refine')?.click();
+  });
+  document.querySelector('.bb-item[data-act="actions"]')?.addEventListener('click', e => {
+    e.stopPropagation();
+    document.getElementById('fr-actions')?.click();
   });
 </script>
 </body>
