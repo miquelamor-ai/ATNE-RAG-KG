@@ -1424,8 +1424,26 @@
         onHighlightStarted: () => setMode('person')
       },
       { element: '.mode[data-m="person"] details.disc',
-        popover: { title: 'Condicions i diagnòstics', description: 'Opcional. Si tens informe o PI, afegeix la condició (TDAH, dislèxia, L2, AACC, TEA…). Diverses condicions poden coexistir.' },
+        popover: { title: 'Condicions i diagnòstics', description: 'Opcional. Si tens informe o PI, obre aquest desplegable i selecciona la condició (TDAH, dislèxia, L2, AACC, TEA…). Diverses condicions poden coexistir.' },
+        onHighlightStarted: () => {
+          setMode('person');
+          // Obre el details per mostrar les condicions
+          const det = document.querySelector('.mode[data-m="person"] details.disc');
+          if (det && !det.open) det.open = true;
+        }
+      },
+      { element: '.mode[data-m="person"] .dx-list',
+        popover: { title: 'Tria la condició', description: 'Clica la condició de l\'alumne. Pots seleccionar-ne més d\'una.' },
         onHighlightStarted: () => setMode('person')
+      },
+      { element: '#dx-subs',
+        popover: { title: 'Sub-variables de la condició', description: 'En seleccionar una condició apareixen sub-variables específiques: per TDAH → intensitat, medicació; per L2 → llengua familiar, país, temps a Catalunya; per AACC → tipus de superdotació. Quant més precís siguis, millor serà l\'adaptació.' },
+        onHighlightStarted: () => {
+          setMode('person');
+          // Activa TDAH per mostrar sub-variables d'exemple
+          const tdahBtn = document.querySelector('.mode[data-m="person"] .tag[data-dx="tdah"]');
+          if (tdahBtn && !tdahBtn.classList.contains('on')) tdahBtn.click();
+        }
       },
       { element: '.mode[data-m="person"] .foot',
         popover: { title: 'Crear i seleccionar', description: 'Un cop omplit, clica <b>Crear i seleccionar</b>. El perfil es desa a Supabase vinculat al teu email i passes directament al Pas 2.' },

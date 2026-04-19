@@ -1001,20 +1001,38 @@
               </div>
               <div class="gen-grid">
                 <div><div class="mp-l">Gènere</div><select class="sel">
-                  <option value="manual" selected>Manual escolar</option>
-                  <option value="divulgatiu">Article divulgatiu</option>
-                  <option value="noticia">Notícia de premsa</option>
-                  <option value="conte">Conte o relat</option>
-                  <option value="fantastic">Relat fantàstic</option>
-                  <option value="carta">Carta o correu</option>
-                  <option value="opinio">Article d'opinió</option>
-                  <option value="instructiu">Procediment instructiu</option>
-                  <option value="enciclopedic">Definició enciclopèdica</option>
-                  <option value="receptari">Receptari</option>
-                  <option value="cronica">Crònica</option>
-                  <option value="biografia">Biografia</option>
-                  <option value="ressenya">Ressenya</option>
-                  <option value="examen">Examen</option>
+                  <optgroup label="Expositiu">
+                    <option value="manual" selected>Manual / capítol</option>
+                    <option value="divulgatiu">Article divulgatiu</option>
+                    <option value="informe">Informe / memòria</option>
+                    <option value="enciclopedic">Definició enciclopèdica</option>
+                    <option value="descripcio">Descripció</option>
+                    <option value="resum">Resum / síntesi</option>
+                  </optgroup>
+                  <optgroup label="Narratiu">
+                    <option value="conte">Conte / relat</option>
+                    <option value="fabula">Fàbula / llegenda</option>
+                    <option value="poema">Poema / vers</option>
+                    <option value="biografia">Biografia</option>
+                    <option value="noticia">Notícia de premsa</option>
+                    <option value="cronica">Crònica</option>
+                    <option value="diari">Diari / blog</option>
+                  </optgroup>
+                  <optgroup label="Argumentatiu">
+                    <option value="opinio">Article d'opinió</option>
+                    <option value="ressenya">Ressenya / crítica</option>
+                    <option value="assaig">Assaig</option>
+                    <option value="carta">Carta / correu</option>
+                  </optgroup>
+                  <optgroup label="Instructiu">
+                    <option value="instructiu">Procediment / protocol</option>
+                    <option value="receptari">Receptari</option>
+                    <option value="reglament">Reglament / normes</option>
+                  </optgroup>
+                  <optgroup label="Dialogat">
+                    <option value="entrevista">Entrevista</option>
+                    <option value="dialeg">Diàleg / guió teatral</option>
+                  </optgroup>
                 </select></div>
                 <div><div class="mp-l">Tipologia</div><select class="sel">
                   <option value="expositiva" selected>Expositiva</option>
@@ -2536,13 +2554,13 @@
           onHighlightStarted: () => _switchTab('write')
         },
         { element: '#fr-refine',
-          popover: { title: 'Refinar', description: 'Opcions avançades per ajustar el to, la llargada o la formalitat de l\'adaptació.', side:'left' }
+          popover: { title: 'Refinar', description: 'Opcions avançades per ajustar el to, la llargada o la formalitat de l\'adaptació.' }
         },
         { element: '#fr-compl',
-          popover: { title: 'Complements', description: 'Afegeix a l\'adaptació: <b>glossari</b> de termes, <b>preguntes</b> de comprensió graduades, <b>esquema visual</b> o <b>bastides</b> lingüístiques.', side:'left' }
+          popover: { title: 'Complements', description: 'Afegeix a l\'adaptació: <b>glossari</b> de termes, <b>preguntes</b> de comprensió graduades, <b>esquema visual</b> o <b>bastides</b> lingüístiques.' }
         },
         { element: '#fr-save-draft',
-          popover: { title: 'Desar esborrany', description: 'Guarda el text actual al servidor. El recuperaràs des de qualsevol dispositiu amb el teu compte @fje.edu.', side:'left' }
+          popover: { title: 'Desar esborrany', description: 'Guarda el text actual al servidor. El recuperaràs des de qualsevol dispositiu amb el teu compte @fje.edu.' }
         },
         { element: '#adapt-btn',
           popover: { title: '¡Adaptar!', description: 'Quan tot estigui a punt, clica aquí. L\'IA processarà el text en 15-30 segons i passaràs al Pas 3 amb l\'adaptació llesta.', side:'top' }
