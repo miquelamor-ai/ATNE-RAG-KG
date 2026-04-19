@@ -5765,7 +5765,9 @@ async def get_docent_profiles(docent_id: str = ""):
     )
     if resp.status_code != 200:
         return JSONResponse({"ok": False, "error": "Error llegint perfils"}, status_code=500)
-    return {"ok": True, "profiles": [r["profile_data"] for r in resp.json()]}
+    return {"ok": True, "profiles": [
+        {"_db_id": r["id"], **r["profile_data"]} for r in resp.json()
+    ]}
 
 
 @app.post("/api/docent/profiles")
@@ -5784,6 +5786,23 @@ async def save_docent_profile(payload: dict = Body(...)):
     if resp.status_code not in (200, 201):
         return JSONResponse({"ok": False, "error": "Error desant perfil"}, status_code=500)
     return {"ok": True, "id": resp.json()[0]["id"]}
+
+
+@app.patch("/api/docent/profiles/{profile_id}")
+async def update_docent_profile(profile_id: str, payload: dict = Body(...)):
+    """Actualitza un perfil personalitzat (només el propietari)."""
+    docent_id = (payload.get("docent_id") or "").strip()
+    profile = payload.get("profile")
+    if not docent_id or not profile:
+        return JSONResponse({"ok": False, "error": "docent_id i profile obligatoris"}, status_code=400)
+    resp = requests.patch(
+        f"{SUPABASE_URL}/rest/v1/atne_custom_profiles"
+        f"?id=eq.{profile_id}&docent_id=eq.{docent_id}",
+        headers={**SUPABASE_HEADERS, "Prefer": "return=minimal"},
+        json={"profile_data": profile},
+        timeout=5,
+    )
+    return {"ok": resp.status_code in (200, 204)}
 
 
 @app.delete("/api/docent/profiles/{profile_id}")

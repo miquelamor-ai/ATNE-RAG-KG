@@ -42,6 +42,13 @@
   .admin-menu .sep{height:1px;background:var(--paper-line);margin:4px 0}
   .admin-badge{font-size:9px;font-weight:700;background:var(--primary);color:#fff;border-radius:3px;padding:1px 4px;margin-left:auto}
 
+  /* Botons editar/eliminar perfils custom */
+  .row-custom-acts{display:flex;gap:4px;margin-left:auto}
+  .btn-edit-prof,.btn-del-prof{width:28px;height:28px;border-radius:var(--r-sm);border:1px solid var(--paper-line);background:#fff;display:grid;place-items:center;cursor:pointer;color:var(--ink-400);transition:.15s;flex-shrink:0}
+  .btn-edit-prof:hover{color:var(--primary);border-color:var(--primary);background:var(--primary-50)}
+  .btn-del-prof:hover{color:#c0392b;border-color:#f5a0a0;background:#fff0f0}
+  .btn-edit-prof svg,.btn-del-prof svg{width:13px;height:13px}
+
   /* Modal d'identificació */
   .id-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
   .id-overlay.hidden{display:none}
@@ -1269,6 +1276,53 @@
     }
   }
 
+  // ── Perfils custom: crear fila DOM ─────────────────────────────────────────
+
+  const CAT_CLASS = {tdah:'av-tdah', disl:'av-disl', cat:'av-cat', ac:'av-ac', tea:'av-ac', generic:'av-neu'};
+
+  function _buildProfileRow(profile) {
+    const pid = profile.id;
+    const isCustom = !!profile.custom;
+    const avClass = CAT_CLASS[profile.cat] || 'av-neu';
+    const av = profile.avatar || (profile.name || '?')[0].toUpperCase();
+    const chips = (profile.chips || []).slice(0,3).map(c =>
+      `<span class="chip ${c.cat || ''}">${c.label}</span>`).join('');
+    const sub = [profile.course, profile.age ? profile.age + ' anys' : ''].filter(Boolean).join(' · ');
+
+    const editBtns = isCustom ? `
+      <div class="row-custom-acts">
+        <button class="btn-edit-prof" data-pid="${pid}" title="Editar perfil">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>
+        </button>
+        <button class="btn-del-prof" data-pid="${pid}" title="Eliminar perfil">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </button>
+      </div>` : '';
+
+    const row = document.createElement('div');
+    row.className = `row person${isCustom ? ' custom-profile' : ''}`;
+    row.dataset.pid = pid;
+    if (profile.cat) row.dataset.cat = profile.cat;
+    row.innerHTML = `
+      <div class="row-av ${avClass}">${av}</div>
+      <div><div class="row-name">${profile.name || pid}</div>${sub ? `<div class="row-sub">${sub}</div>` : ''}</div>
+      <div class="row-chips">${chips}</div>
+      <div class="row-course">${profile.course || ''}</div>
+      <div class="row-use"></div>
+      <div class="row-acts">${editBtns}<button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>`;
+
+    // Seleccionar
+    row.querySelector('.sel').addEventListener('click', e => { e.stopPropagation(); selectProfile(pid); });
+    row.addEventListener('click', () => selectProfile(pid));
+
+    // Editar
+    if (isCustom) {
+      row.querySelector('.btn-edit-prof')?.addEventListener('click', e => { e.stopPropagation(); _openEditProfile(pid); });
+      row.querySelector('.btn-del-prof')?.addEventListener('click', e => { e.stopPropagation(); _deleteProfile(pid, row); });
+    }
+    return row;
+  }
+
   async function _loadCustomProfiles() {
     const did = _docentId();
     if (!did) return;
@@ -1276,11 +1330,64 @@
       const r = await fetch(`/api/docent/profiles?docent_id=${did}`);
       const d = await r.json();
       if (!d.ok || !d.profiles?.length) return;
+      const listRest = document.getElementById('list-rest');
       d.profiles.forEach(p => {
-        if (p.id) window.ATNE_PROFILES[p.id] = p;
+        if (!p.id) return;
+        window.ATNE_PROFILES[p.id] = p;
+        // Afegeix fila DOM si no existeix ja
+        if (!document.querySelector(`.row[data-pid="${p.id}"]`)) {
+          listRest?.appendChild(_buildProfileRow(p));
+        }
       });
       applyFilters(); updateFchipCounts();
     } catch(e) { console.warn('[ATNE] custom profiles:', e); }
+  }
+
+  // ── Editar perfil ────────────────────────────────────────────────────────────
+
+  let _editingPid = null;
+
+  function _openEditProfile(pid) {
+    const p = window.ATNE_PROFILES[pid];
+    if (!p) return;
+    _editingPid = pid;
+    setMode('person');
+    // Pre-omple el formulari
+    const form = document.querySelector('.mode[data-m="person"]');
+    if (!form) return;
+    const inputs = form.querySelectorAll('.inp');
+    if (inputs[0]) inputs[0].value = p.name || '';
+    if (inputs[1]) inputs[1].value = p.course || '';
+    // MECR
+    const mecr = p.mecr || (p.chips?.find(c => c.cat === 'lv')?.label?.split(' ')[0] || 'B1');
+    form.querySelectorAll('.lvl').forEach(btn => {
+      const code = btn.querySelector('.lv-code')?.textContent;
+      btn.classList.toggle('on', code === mecr);
+    });
+    // Canvia el botó a "Desar canvis"
+    const saveBtn = form.querySelector('.foot .btn-p');
+    if (saveBtn) {
+      saveBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Desar canvis';
+    }
+    if (typeof window.atneToast === 'function') window.atneToast(`Editant "${p.name}" — modifica i clica Desar canvis`, 'info');
+  }
+
+  async function _deleteProfile(pid, rowEl) {
+    const p = window.ATNE_PROFILES[pid];
+    if (!confirm(`Eliminar el perfil "${p?.name || pid}"? Aquesta acció no es pot desfer.`)) return;
+    const did = _docentId();
+    const dbId = p?._db_id;
+    if (!dbId) { rowEl?.remove(); delete window.ATNE_PROFILES[pid]; applyFilters(); updateFchipCounts(); return; }
+    try {
+      const r = await fetch(`/api/docent/profiles/${dbId}?docent_id=${did}`, { method: 'DELETE' });
+      const d = await r.json();
+      if (d.ok) {
+        rowEl?.remove();
+        delete window.ATNE_PROFILES[pid];
+        applyFilters(); updateFchipCounts();
+        if (typeof window.atneToast === 'function') window.atneToast('Perfil eliminat', 'info');
+      }
+    } catch(e) { console.warn('[ATNE] delete profile:', e); }
   }
 
   // Modal identificació
@@ -1382,11 +1489,11 @@
         body: JSON.stringify({docent_id: did, profile})
       });
       const d = await r.json();
-      return d.ok ? d.id : null;
+      return d.ok ? d.id : null;  // retorna UUID Supabase
     } catch(e) { return null; }
   }
 
-  // "Crear i seleccionar" mode persona
+  // "Crear i seleccionar" / "Desar canvis" mode persona
   const personCreateBtn = document.querySelector('.mode[data-m="person"] .foot .btn-p');
   if (personCreateBtn) {
     personCreateBtn.addEventListener('click', async e => {
@@ -1403,11 +1510,42 @@
         return;
       }
       personCreateBtn.disabled = true;
-      personCreateBtn.textContent = 'Desant…';
+      const isEdit = !!_editingPid;
+      personCreateBtn.textContent = isEdit ? 'Desant…' : 'Creant…';
+
       const profile = _buildPersonProfile();
-      await _saveCustomProfile(profile);
-      window.ATNE_PROFILES[profile.id] = profile;
+
+      if (isEdit) {
+        // Edició: conserva l'id i el _db_id originals
+        const orig = window.ATNE_PROFILES[_editingPid] || {};
+        profile.id = _editingPid;
+        profile._db_id = orig._db_id;
+        if (orig._db_id) {
+          await fetch(`/api/docent/profiles/${orig._db_id}`, {
+            method: 'PATCH',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({docent_id: _docentId(), profile})
+          });
+        }
+        window.ATNE_PROFILES[_editingPid] = profile;
+        // Actualitza la fila DOM
+        const oldRow = document.querySelector(`.row[data-pid="${_editingPid}"]`);
+        const newRow = _buildProfileRow(profile);
+        oldRow?.replaceWith(newRow);
+        _editingPid = null;
+        // Restaura el botó
+        personCreateBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Crear i seleccionar';
+      } else {
+        // Creació nova
+        const dbId = await _saveCustomProfile(profile);
+        if (dbId) profile._db_id = dbId;
+        window.ATNE_PROFILES[profile.id] = profile;
+        const listRest = document.getElementById('list-rest');
+        listRest?.appendChild(_buildProfileRow(profile));
+      }
+
       applyFilters(); updateFchipCounts();
+      personCreateBtn.disabled = false;
       selectProfile(profile.id);
     });
   }
