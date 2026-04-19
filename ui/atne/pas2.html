@@ -1518,10 +1518,18 @@
     optPop.innerHTML = opts.map(o =>
       '<button type="button" class="opt-pop-item' + (o === currentVal ? ' sel' : '') + '" data-val="' + escapeHtml(o) + '">' + escapeHtml(o) + '</button>'
     ).join('');
-    // Posicionar-lo sota el botó (position:fixed)
+    // Posicionar-lo: per defecte sota, però si no hi ha espai, obre cap amunt
     const r = anchorBtn.getBoundingClientRect();
-    optPop.style.top = (r.bottom + 6) + 'px';
-    optPop.style.left = r.left + 'px';
+    optPop.style.left = Math.min(r.left, window.innerWidth - 220) + 'px';
+    optPop.style.top = '';
+    optPop.style.bottom = '';
+    const popH = Math.min(optPop.scrollHeight || 200, 320);
+    const spaceBelow = window.innerHeight - r.bottom - 8;
+    if (spaceBelow >= popH || spaceBelow >= 120) {
+      optPop.style.top = (r.bottom + 6) + 'px';
+    } else {
+      optPop.style.bottom = (window.innerHeight - r.top + 6) + 'px';
+    }
     optPop.classList.add('on');
     optPopOpenFor = kind;
 
