@@ -705,7 +705,7 @@
 
           <div class="foot">
             <button class="btn btn-g" data-mode="search">Cancel·lar</button>
-            <button class="btn btn-p"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Crear i seleccionar</button>
+            <button class="btn btn-p"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Crear perfil</button>
           </div>
         </div>
       </div>
@@ -760,7 +760,7 @@
 
           <div class="foot">
             <button class="btn btn-g" data-mode="search">Cancel·lar</button>
-            <button class="btn btn-p"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Crear i seleccionar</button>
+            <button class="btn btn-p"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Crear perfil</button>
           </div>
         </div>
       </div>
@@ -1548,8 +1548,7 @@
         const newRow = _buildProfileRow(profile);
         oldRow?.replaceWith(newRow);
         _editingPid = null;
-        // Restaura el botó
-        personCreateBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Crear i seleccionar';
+        personCreateBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Crear perfil';
       } else {
         // Creació nova → apareix a Recents (dalt de tot)
         const dbId = await _saveCustomProfile(profile);
@@ -1561,7 +1560,16 @@
 
       applyFilters(); updateFchipCounts();
       personCreateBtn.disabled = false;
-      selectProfile(profile.id);
+      // No naveguem: el docent selecciona quan vulgui (pot voler crear més perfils)
+      localStorage.setItem('atne.profile_id', profile.id);
+      if (profile.custom) localStorage.setItem('atne.custom_profile', JSON.stringify(profile));
+      setMode('search');
+      // Ressalta la fila creada
+      setTimeout(() => {
+        const row = document.querySelector(`.row[data-pid="${profile.id}"]`);
+        if (row) { row.style.outline = '2px solid var(--primary)'; row.style.borderRadius = 'var(--r-md)'; setTimeout(() => { row.style.outline = ''; }, 2500); }
+      }, 100);
+      if (typeof window.atneToast === 'function') window.atneToast(`Perfil "${profile.name}" creat. Clica Seleccionar per continuar.`, 'ok');
     });
   }
 
