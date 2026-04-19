@@ -379,6 +379,9 @@
         <button class="step" data-step="2" onclick="location.href='/ui/atne/pas2.html'"><span class="step-num">2</span>Text</button>
         <button class="step" data-step="3" onclick="location.href='/ui/atne/pas3.html'"><span class="step-num">3</span>Adaptacions</button>
       </div>
+      <button class="icon-btn" id="zoom-out" title="Reduir mida (Ctrl -)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M8 11h6"/></svg></button>
+      <button class="icon-btn" id="zoom-in" title="Augmentar mida (Ctrl +)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M8 11h6M11 8v6"/></svg></button>
+      <button class="icon-btn" id="fullscreen-btn" title="Pantalla completa (F11)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V3h4M17 3h4v4M21 17v4h-4M7 21H3v-4"/></svg></button>
       <button class="icon-btn" title="Ajuda" onclick="alert('Ajuda: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg></button>
       <button class="icon-btn" title="Compartir" onclick="alert('Compartir: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></button>
       <button class="docent-av" id="docent-av" title="Docent · claudeai.je@fje.edu" onclick="alert('Perfil del docent: pendent d\u0027implementar')">E</button>
@@ -793,10 +796,42 @@
     if(b.dataset.mode) setMode(b.dataset.mode);
   }));
 
-  document.getElementById('fsBtn')?.addEventListener('click', () => {
-    if(!document.fullscreenElement) document.documentElement.requestFullscreen?.();
-    else document.exitFullscreen?.();
-  });
+  // ──────────────────────────────────────────────────────
+  // Zoom + Pantalla completa (inclusió: adaptar la mida als usuaris)
+  // Persistit a localStorage perquè es recordi entre passos i sessions.
+  // ──────────────────────────────────────────────────────
+  (function setupAppControls() {
+    const KEY = 'atne.app_zoom';
+    let zoom = parseFloat(localStorage.getItem(KEY) || '1');
+    if (!(zoom > 0.5 && zoom < 2.1)) zoom = 1;
+    function apply() {
+      document.body.style.zoom = zoom;
+      localStorage.setItem(KEY, String(zoom));
+    }
+    apply();
+    document.getElementById('zoom-in')?.addEventListener('click', () => {
+      zoom = Math.min(1.8, Math.round((zoom + 0.1) * 10) / 10); apply();
+    });
+    document.getElementById('zoom-out')?.addEventListener('click', () => {
+      zoom = Math.max(0.6, Math.round((zoom - 0.1) * 10) / 10); apply();
+    });
+    document.getElementById('fullscreen-btn')?.addEventListener('click', () => {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+      else document.exitFullscreen?.();
+    });
+    // Legacy fsBtn (si existeix en alguna versió antiga de la topbar)
+    document.getElementById('fsBtn')?.addEventListener('click', () => {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+      else document.exitFullscreen?.();
+    });
+    // Atalls: Ctrl+= / Ctrl+- / Ctrl+0 (reset)
+    document.addEventListener('keydown', e => {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      if (e.key === '+' || e.key === '=') { e.preventDefault(); document.getElementById('zoom-in')?.click(); }
+      else if (e.key === '-') { e.preventDefault(); document.getElementById('zoom-out')?.click(); }
+      else if (e.key === '0') { e.preventDefault(); zoom = 1; apply(); }
+    });
+  })();
 
   // ──────────────────────────────────────────────────────
   // Filtres i cerca del Pas 1
