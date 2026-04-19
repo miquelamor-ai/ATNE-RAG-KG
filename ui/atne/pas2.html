@@ -14,6 +14,8 @@
 <link rel="stylesheet" href="/ui/styles/tokens.css">
 <link rel="stylesheet" href="/ui/styles/base.css">
 <link rel="stylesheet" href="/ui/styles/shell.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1/dist/driver.css"/>
+<script src="https://cdn.jsdelivr.net/npm/driver.js@1/dist/driver.iife.js"></script>
 <script src="/ui/atne/js/llm.js?v=20260419j" defer></script>
 
 <style>
@@ -866,7 +868,7 @@
       <button class="icon-btn" id="zoom-out" title="Reduir mida (Ctrl -)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M8 11h6"/></svg></button>
       <button class="icon-btn" id="zoom-in" title="Augmentar mida (Ctrl +)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M8 11h6M11 8v6"/></svg></button>
       <button class="icon-btn" id="fullscreen-btn" title="Pantalla completa (F11)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V3h4M17 3h4v4M21 17v4h-4M7 21H3v-4"/></svg></button>
-      <button class="icon-btn" title="Ajuda" onclick="alert('Ajuda: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg></button>
+      <button class="icon-btn" id="help-btn" title="Visita guiada"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg></button>
       <button class="icon-btn" title="Compartir" onclick="alert('Compartir: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></button>
       <button class="docent-av" title="Docent · claudeai.je@fje.edu" onclick="alert('Perfil del docent: pendent d\u0027implementar')">E</button>
     </div>
@@ -2456,6 +2458,79 @@
       else if (e.key === '0') { e.preventDefault(); zoom = 1; apply(); }
     });
   })();
+
+  // ── Visita guiada Pas 2 (Driver.js) ──────────────────────────────────────
+  function startTourP2() {
+    if (typeof window.driver === 'undefined') return;
+    const d = window.driver.js.driver({
+      showProgress: true,
+      nextBtnText: 'Següent →',
+      prevBtnText: '← Anterior',
+      doneBtnText: 'Entès!',
+      progressText: '{{current}} de {{total}}',
+      steps: [
+        {
+          element: '.pcard',
+          popover: {
+            title: 'El perfil seleccionat',
+            description: 'Aquí veus el perfil de l\'alumne o grup que has triat. Defineix com s\'adaptarà el text: MECR, condicions, ajuts activats.',
+            side: 'right', align: 'start'
+          }
+        },
+        {
+          element: '.mode-tab[data-mode="write"]',
+          popover: {
+            title: 'Via 1 · Enganxar text',
+            description: 'La via més ràpida: enganxa directament el text del teu material (llibre, apunt, presentació…).',
+            side: 'bottom', align: 'start'
+          }
+        },
+        {
+          element: '.mode-tab[data-mode="upload"]',
+          popover: {
+            title: 'Via 2 · Pujar fitxer',
+            description: 'Puja un PDF, Word o Markdown. ATNE extreu el text automàticament.',
+            side: 'bottom', align: 'start'
+          }
+        },
+        {
+          element: '.mode-tab[data-mode="ai"]',
+          popover: {
+            title: 'Via 3 · Generar amb IA',
+            description: 'Descriu el tema i ATNE genera un text de partida. Útil si no tens material propi.',
+            side: 'bottom', align: 'start'
+          }
+        },
+        {
+          element: '.mode-tab[data-mode="recent"]',
+          popover: {
+            title: 'Via 4 · Recuperar recent',
+            description: 'Recupera un text que ja havies adaptat. Els esborranys es desen automàticament.',
+            side: 'bottom', align: 'start'
+          }
+        },
+        {
+          element: '#fr-compl',
+          popover: {
+            title: 'Complements',
+            description: 'Activa complements opcionals: glossari de termes, preguntes de comprensió, esquema visual o bastides lingüístiques. S\'afegiran a l\'adaptació.',
+            side: 'left', align: 'center'
+          }
+        },
+        {
+          element: '#adapt-btn',
+          popover: {
+            title: 'Adaptar!',
+            description: 'Quan tens el text i la configuració a punt, clica aquí. L\'IA adaptarà el text al perfil de l\'alumne en 15-30 segons.',
+            side: 'top', align: 'center'
+          }
+        },
+      ]
+    });
+    d.drive();
+  }
+
+  document.getElementById('help-btn')?.addEventListener('click', startTourP2);
 </script>
 </body>
 </html>

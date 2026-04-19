@@ -15,6 +15,10 @@
 <link rel="stylesheet" href="/ui/styles/base.css">
 <link rel="stylesheet" href="/ui/styles/shell.css">
 
+<!-- Driver.js (product tour) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1/dist/driver.css"/>
+<script src="https://cdn.jsdelivr.net/npm/driver.js@1/dist/driver.iife.js"></script>
+
 <style>
   /* =========================================================
      Pas 1 · overrides
@@ -395,7 +399,7 @@
       <button class="icon-btn" id="zoom-out" title="Reduir mida (Ctrl -)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M8 11h6"/></svg></button>
       <button class="icon-btn" id="zoom-in" title="Augmentar mida (Ctrl +)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M8 11h6M11 8v6"/></svg></button>
       <button class="icon-btn" id="fullscreen-btn" title="Pantalla completa (F11)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V3h4M17 3h4v4M21 17v4h-4M7 21H3v-4"/></svg></button>
-      <button class="icon-btn" title="Ajuda" onclick="alert('Ajuda: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg></button>
+      <button class="icon-btn" id="help-btn" title="Visita guiada"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg></button>
       <button class="icon-btn" title="Compartir" onclick="alert('Compartir: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></button>
       <button class="docent-av" id="docent-av" title="Docent · claudeai.je@fje.edu" onclick="alert('Perfil del docent: pendent d\u0027implementar')">E</button>
     </div>
@@ -1375,6 +1379,87 @@
   document.querySelectorAll('.ck-add').forEach(b => {
     b.addEventListener('click', e => { e.preventDefault(); });
   });
+
+  // ── Visita guiada (Driver.js) ─────────────────────────────────────────────
+
+  function startTour() {
+    if (typeof window.driver === 'undefined') return;
+    const d = window.driver.js.driver({
+      showProgress: true,
+      nextBtnText: 'Següent →',
+      prevBtnText: '← Anterior',
+      doneBtnText: 'Entès!',
+      progressText: '{{current}} de {{total}}',
+      steps: [
+        {
+          element: '.steps',
+          popover: {
+            title: 'El flux de 3 passos',
+            description: 'ATNE té 3 passos: <b>Per a qui</b> (perfil de l\'alumne), <b>El text</b> (configuració i text a adaptar) i <b>Adaptacions</b> (resultat). Ara ets al Pas 1.',
+            side: 'bottom', align: 'center'
+          }
+        },
+        {
+          element: '#p1-search',
+          popover: {
+            title: '1. Cerca un perfil existent',
+            description: 'Escriu el nom, curs o condició de l\'alumne. Hi ha perfils de demostració (Marc TDAH, Yassin nouvingut, Clara AACC…) i els que tu mateix crees.',
+            side: 'bottom', align: 'start'
+          }
+        },
+        {
+          element: '#p1-fchips',
+          popover: {
+            title: 'Filtra per condició',
+            description: 'Clica qualsevol chip per veure només els perfils d\'aquella condició: TDAH, Dislèxia, Català L2, Altes capacitats.',
+            side: 'bottom', align: 'start'
+          }
+        },
+        {
+          element: '.fab-person',
+          popover: {
+            title: '2. Crea un perfil nou',
+            description: 'Si l\'alumne no existeix, clica <b>Nova persona</b>. Ompliràs un formulari breu: nom, nivell MECR, conductes observades i condicions. Es desa al teu compte i el recuperaràs sempre.',
+            side: 'left', align: 'center'
+          }
+        },
+        {
+          element: '.fab-group',
+          popover: {
+            title: 'O crea un perfil de grup',
+            description: 'Per adaptar un text per a tota la classe a la vegada (nivell Bàsic + Estàndard + Avançat), usa <b>Nou grup</b>.',
+            side: 'left', align: 'center'
+          }
+        },
+        {
+          element: '#docent-av',
+          popover: {
+            title: 'El teu compte',
+            description: 'Els perfils que crees es desen associats al teu email. Des de qualsevol dispositiu, tornaran a aparèixer quan et tornis a identificar.',
+            side: 'bottom', align: 'end'
+          }
+        },
+      ]
+    });
+    d.drive();
+  }
+
+  document.getElementById('help-btn')?.addEventListener('click', startTour);
+
+  // Primera visita: llança el tour automàticament si mai s'ha vist
+  if (!localStorage.getItem('atne.tour_p1_done')) {
+    // Esperem que el modal d'identificació (si cal) es tanqui primer
+    const _checkTour = setInterval(() => {
+      const overlay = document.getElementById('id-overlay');
+      if (!overlay || overlay.classList.contains('hidden')) {
+        clearInterval(_checkTour);
+        if (!localStorage.getItem('atne.tour_p1_done')) {
+          localStorage.setItem('atne.tour_p1_done', '1');
+          setTimeout(startTour, 600);
+        }
+      }
+    }, 300);
+  }
 </script>
 </body>
 </html>
