@@ -390,6 +390,7 @@
     <button class="rb" title="Inici" onclick="location.href='/ui/atne/pas1.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 12 9-9 9 9"/><path d="M5 10v10h14V10"/></svg></button>
     <button class="rb on" title="Perfils" onclick="location.href='/ui/atne/pas1.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></button>
     <button class="rb" title="Textos" onclick="location.href='/ui/atne/pas2.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16M4 12h10M4 19h16"/></svg></button>
+    <button class="rb" id="rail-saber" title="Saber-ne+" onclick="location.href='/ui/saber-ne.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></button>
     <button class="rb" title="Biblioteca" onclick="alert('Biblioteca: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h7v12H4zM13 6h7v5h-7zM13 14h7v4h-7z"/></svg></button>
     <div class="rb sep"></div>
     <button class="rb" title="Preferències" onclick="alert('Preferències: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg></button>
@@ -419,7 +420,6 @@
             <a href="/ui/cuina.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M9 21V9M3 3h18v18H3z"/></svg>Cuina (dev)</a>
             <div class="sep"></div>
           </div>
-          <a href="/ui/saber-ne.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Saber-ne+</a>
           <div class="sep"></div>
           <button id="admin-logout-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Canviar d'usuari</button>
         </div>
@@ -1440,6 +1440,17 @@
       onDestroyed: () => setMode('search'),
     };
     const d = driver.js.driver({ ...cfg, steps: [
+      // ── Secció: Introducció general ──
+      { popover: { title: 'Benvingut/da a ATNE', description: 'ATNE és l\'assistent d\'adaptació de textos educatius de la Fundació Jesuïtes Educació. Adapta qualsevol text al perfil de l\'alumne en 15-30 segons.' } },
+      { element: 'nav.rail',
+        popover: { title: 'Barra lateral', description: 'La barra esquerra et porta als <b>3 passos</b> de l\'app i a recursos útils: Saber-ne+ (marc pedagògic), Biblioteca (futur) i Preferències.', side:'right' } },
+      { element: '#rail-saber',
+        popover: { title: 'Saber-ne+', description: 'Aquí trobaràs el marc pedagògic que fonamenta ATNE: DUA, lectura fàcil, MECR, perfils d\'alumnat. Recomanem llegir-lo abans de fer la primera adaptació.', side:'right' } },
+      { element: '#docent-av',
+        popover: { title: 'El teu compte', description: 'L\'avatar mostra les teves inicials. Clica\'l per accedir a la configuració, canviar d\'usuari, i (si ets administrador/a) als panells de gestió de l\'eina.' } },
+      { element: '#help-btn',
+        popover: { title: 'Visita guiada', description: 'Pots tornar a veure aquesta visita guiada quan vulguis clicant el botó <b>?</b> que trobaràs als tres passos.' } },
+
       // ── Secció: Cercar ──
       { element: '.steps', popover: { title: 'El flux de 3 passos', description: 'ATNE té 3 passos: <b>Per a qui</b> → <b>El text</b> → <b>Adaptacions</b>. Ara ets al Pas 1.', side:'bottom' } },
       { element: '#p1-search', popover: { title: 'Cerca un perfil', description: 'Escriu nom, curs o condició. Hi ha perfils de demostració i els que tu crees.', side:'bottom' } },
