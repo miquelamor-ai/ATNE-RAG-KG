@@ -139,7 +139,8 @@
         text,
         profile: backendProfile,
         context: backendContext,
-        params: backendParams
+        params: backendParams,
+        docent_id: getDocentId()
         // 'model' omès → backend aplica rotació configurada a /admin
       }),
       signal: combinedSignal

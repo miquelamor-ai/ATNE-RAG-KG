@@ -2416,7 +2416,7 @@ def _log_session(session: dict) -> None:
 
 
 def run_adaptation(text: str, profile: dict, context: dict, params: dict,
-                   progress_callback=None, model_override: str = None):
+                   progress_callback=None, model_override: str = None, docent_id: str = ""):
     """Executa tot el pipeline d'adaptació: instruccions graduades + LLM + Verify + Retry.
 
     RAG-KG desactivat (2026-04-09): les 98 instruccions graduades del catàleg
@@ -2641,6 +2641,7 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
                 "input_chars":     len(text),
                 "output_chars":    len(adapted),
                 "verify_score":    best_score if verify_enabled and best_score >= 0 else None,
+                "docent_id":       docent_id or None,
             },),
             daemon=True,
         ).start()
@@ -4496,6 +4497,7 @@ async def adapt_stream(payload: dict = Body(...)):
     context = payload.get("context", {})
     params = payload.get("params", {})
     model = payload.get("model", "")  # mistral | gemma4 | (buit = default ATNE_MODEL)
+    docent_id = payload.get("docent_id", "")
 
     if not text.strip():
         return JSONResponse({"error": "Cal proporcionar un text"}, status_code=400)
@@ -4535,7 +4537,8 @@ async def adapt_stream(payload: dict = Body(...)):
                 t = loop.run_in_executor(
                     pool,
                     lambda p=params_lvl, l=level_id: run_adaptation(
-                        text, profile, context, p, make_cb(l), model_override=model or None
+                        text, profile, context, p, make_cb(l), model_override=model or None,
+                        docent_id=docent_id
                     ),
                 )
                 tasks.append(t)
@@ -5615,6 +5618,104 @@ async def eval_v2debug():
     except Exception as e:
         conn.close()
         return JSONResponse({"error": str(e)})
+
+
+# ── Docents i perfils personalitzats ────────────────────────────────────────
+
+def _docent_id_from_email(email: str) -> str:
+    """SHA256(email lowercase) → 16 hex chars."""
+    import hashlib
+    return hashlib.sha256(email.lower().encode()).hexdigest()[:16]
+
+
+def _alias_from_email(email: str) -> str:
+    """'nom.cognom@fje.edu' → 'Nom'."""
+    local = email.split("@")[0]
+    return local.split(".")[0].capitalize()
+
+
+_FJE_EMAIL_RE = re.compile(r"^[a-zA-ZàáâãäåèéêëìíîïòóôõöùúûüçñÀ-ÖØ-öø-ÿ]+\.[a-zA-ZàáâãäåèéêëìíîïòóôõöùúûüçñÀ-ÖØ-öø-ÿ]+@fje\.edu$", re.IGNORECASE)
+
+
+@app.post("/api/docent/login")
+async def docent_login(payload: dict = Body(...)):
+    """Identifica el docent per email FJE. Crea o recupera el registre a atne_docents.
+
+    Retorna {ok, docent_id, alias, is_new}.
+    """
+    email = (payload.get("email") or "").strip().lower()
+    if not _FJE_EMAIL_RE.match(email):
+        return JSONResponse({"ok": False, "error": "L'email ha de ser del format nom.cognom@fje.edu"}, status_code=400)
+
+    docent_id = _docent_id_from_email(email)
+    alias = _alias_from_email(email)
+
+    # Comprova si ja existeix
+    resp = requests.get(
+        f"{SUPABASE_URL}/rest/v1/atne_docents?id=eq.{docent_id}&select=id,alias",
+        headers=SUPABASE_HEADERS, timeout=5,
+    )
+    if resp.status_code == 200 and resp.json():
+        return {"ok": True, "docent_id": docent_id, "alias": resp.json()[0]["alias"], "is_new": False}
+
+    # Crea el registre
+    ins = requests.post(
+        f"{SUPABASE_URL}/rest/v1/atne_docents",
+        headers={**SUPABASE_HEADERS, "Prefer": "return=minimal"},
+        json={"id": docent_id, "email": email, "alias": alias},
+        timeout=5,
+    )
+    if ins.status_code not in (200, 201):
+        return JSONResponse({"ok": False, "error": "Error creant docent"}, status_code=500)
+    return {"ok": True, "docent_id": docent_id, "alias": alias, "is_new": True}
+
+
+@app.get("/api/docent/profiles")
+async def get_docent_profiles(docent_id: str = ""):
+    """Retorna els perfils personalitzats del docent."""
+    docent_id = docent_id.strip()
+    if not docent_id:
+        return JSONResponse({"ok": False, "error": "docent_id buit"}, status_code=400)
+    resp = requests.get(
+        f"{SUPABASE_URL}/rest/v1/atne_custom_profiles"
+        f"?docent_id=eq.{docent_id}&order=created_at.asc",
+        headers=SUPABASE_HEADERS, timeout=5,
+    )
+    if resp.status_code != 200:
+        return JSONResponse({"ok": False, "error": "Error llegint perfils"}, status_code=500)
+    return {"ok": True, "profiles": [r["profile_data"] for r in resp.json()]}
+
+
+@app.post("/api/docent/profiles")
+async def save_docent_profile(payload: dict = Body(...)):
+    """Desa un perfil personalitzat per al docent a atne_custom_profiles."""
+    docent_id = (payload.get("docent_id") or "").strip()
+    profile = payload.get("profile")
+    if not docent_id or not profile:
+        return JSONResponse({"ok": False, "error": "docent_id i profile són obligatoris"}, status_code=400)
+    resp = requests.post(
+        f"{SUPABASE_URL}/rest/v1/atne_custom_profiles",
+        headers={**SUPABASE_HEADERS, "Prefer": "return=representation"},
+        json={"docent_id": docent_id, "profile_data": profile},
+        timeout=5,
+    )
+    if resp.status_code not in (200, 201):
+        return JSONResponse({"ok": False, "error": "Error desant perfil"}, status_code=500)
+    return {"ok": True, "id": resp.json()[0]["id"]}
+
+
+@app.delete("/api/docent/profiles/{profile_id}")
+async def delete_docent_profile(profile_id: str, docent_id: str = ""):
+    """Elimina un perfil personalitzat (només el propietari pot eliminar-lo)."""
+    docent_id = docent_id.strip()
+    if not docent_id:
+        return JSONResponse({"ok": False, "error": "docent_id buit"}, status_code=400)
+    resp = requests.delete(
+        f"{SUPABASE_URL}/rest/v1/atne_custom_profiles"
+        f"?id=eq.{profile_id}&docent_id=eq.{docent_id}",
+        headers=SUPABASE_HEADERS, timeout=5,
+    )
+    return {"ok": resp.status_code in (200, 204)}
 
 
 # ── Main ────────────────────────────────────────────────────────────────────

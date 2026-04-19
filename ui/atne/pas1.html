@@ -30,6 +30,19 @@
   .role .role-av{width:24px;height:24px;border-radius:50%;background:var(--ac-bg);color:var(--ac);display:grid;place-items:center;font-weight:600;font-size:11px}
   .role b{color:var(--ink-900);font-weight:600}
 
+  /* Modal d'identificació */
+  .id-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+  .id-overlay.hidden{display:none}
+  .id-box{background:#fff;border-radius:16px;padding:36px 32px 28px;max-width:420px;width:calc(100% - 40px);box-shadow:0 20px 60px rgba(0,0,0,.2)}
+  .id-box h2{font-size:20px;font-weight:700;margin:0 0 6px;color:var(--ink-900)}
+  .id-box p{font-size:13.5px;color:var(--ink-500);margin:0 0 20px;line-height:1.55}
+  .id-box .id-inp{width:100%;padding:11px 14px;border:1.5px solid var(--ink-200);border-radius:10px;font-size:14px;outline:none;box-sizing:border-box;transition:.15s}
+  .id-box .id-inp:focus{border-color:var(--primary)}
+  .id-box .id-err{font-size:12px;color:#c0392b;margin-top:6px;min-height:18px}
+  .id-box .id-btn{margin-top:16px;width:100%;padding:12px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:.15s}
+  .id-box .id-btn:hover{filter:brightness(1.08)}
+  .id-box .id-btn:disabled{opacity:.5;cursor:default}
+
   /* Floating action selectors (fabs) */
   .fabs{position:fixed;right:22px;bottom:22px;display:flex;flex-direction:column;gap:8px;z-index:30}
   .fab{background:#fff;border:1px solid var(--ink-200);border-radius:99px;padding:10px 16px 10px 12px;display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink-800);box-shadow:var(--sh-md);transition:.15s;white-space:nowrap}
@@ -385,6 +398,17 @@
       <button class="icon-btn" title="Ajuda" onclick="alert('Ajuda: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg></button>
       <button class="icon-btn" title="Compartir" onclick="alert('Compartir: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></button>
       <button class="docent-av" id="docent-av" title="Docent · claudeai.je@fje.edu" onclick="alert('Perfil del docent: pendent d\u0027implementar')">E</button>
+    </div>
+
+    <!-- Modal identificació docent -->
+    <div class="id-overlay hidden" id="id-overlay">
+      <div class="id-box">
+        <h2>Benvingut/da a ATNE</h2>
+        <p>Introdueix el teu email corporatiu per desar els teus perfils i recuperar-los en qualsevol dispositiu.</p>
+        <input class="id-inp" id="id-email" type="email" placeholder="nom.cognom@fje.edu" autocomplete="email" autocapitalize="none">
+        <div class="id-err" id="id-err"></div>
+        <button class="id-btn" id="id-btn">Entrar</button>
+      </div>
     </div>
 
     <div class="fabs">
@@ -1170,19 +1194,186 @@
   // fan CRUD real. Notifiquem i tornem al mode "search" per
   // evitar que el docent es quedi clavat.
   // ──────────────────────────────────────────────────────
-  function notifyPendingCreation() {
-    const msg = 'La creació de perfils es desenvoluparà en una propera versió. De moment, utilitza els perfils de demostració.';
-    if (typeof window.atneToast === 'function') window.atneToast(msg, 'info');
-    else alert(msg);
-    setTimeout(() => setMode('search'), 2000);
+  // ── Identificació docent ──────────────────────────────────────────────────
+
+  const FJE_RE = /^[a-zA-ZàáâäèéêëìíîïòóôöùúûüçñÀ-ÖØ-öø-ÿ]+\.[a-zA-ZàáâäèéêëìíîïòóôöùúûüçñÀ-ÖØ-öø-ÿ]+@fje\.edu$/i;
+
+  function _docentId()  { return localStorage.getItem('atne.docent_id') || ''; }
+  function _docentAlias(){ return localStorage.getItem('atne.docent_alias') || ''; }
+
+  function _updateDocentBtn() {
+    const alias = _docentAlias();
+    const btn = document.getElementById('docent-av');
+    if (!btn) return;
+    if (alias) {
+      btn.textContent = alias[0].toUpperCase();
+      btn.title = alias;
+      btn.onclick = () => {
+        if (confirm(`Estàs identificat/da com a ${alias}.\nVols canviar d'usuari?`)) {
+          localStorage.removeItem('atne.docent_id');
+          localStorage.removeItem('atne.docent_alias');
+          document.getElementById('id-overlay').classList.remove('hidden');
+        }
+      };
+    }
   }
-  // "Crear i seleccionar" dins dels modes person i group (l'únic .btn-p del peu del form).
-  document.querySelectorAll('.mode[data-m="person"] .foot .btn-p, .mode[data-m="group"] .foot .btn-p').forEach(b => {
-    b.addEventListener('click', e => { e.preventDefault(); notifyPendingCreation(); });
-  });
-  // "+ Afegir conducta pròpia" (stub: mateix patró de toast).
+
+  async function _loadCustomProfiles() {
+    const did = _docentId();
+    if (!did) return;
+    try {
+      const r = await fetch(`/api/docent/profiles?docent_id=${did}`);
+      const d = await r.json();
+      if (!d.ok || !d.profiles?.length) return;
+      d.profiles.forEach(p => {
+        if (p.id) window.ATNE_PROFILES[p.id] = p;
+      });
+      renderProfiles();
+    } catch(e) { console.warn('[ATNE] custom profiles:', e); }
+  }
+
+  // Modal identificació
+  (function initIdModal() {
+    const overlay = document.getElementById('id-overlay');
+    const emailInp = document.getElementById('id-email');
+    const errEl   = document.getElementById('id-err');
+    const btn     = document.getElementById('id-btn');
+
+    if (_docentId()) { _updateDocentBtn(); _loadCustomProfiles(); return; }
+    overlay.classList.remove('hidden');
+    setTimeout(() => emailInp?.focus(), 100);
+
+    async function doLogin() {
+      const email = (emailInp.value || '').trim().toLowerCase();
+      errEl.textContent = '';
+      if (!FJE_RE.test(email)) {
+        errEl.textContent = "Ha de ser del format nom.cognom@fje.edu";
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = 'Entrant…';
+      try {
+        const r = await fetch('/api/docent/login', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({email})
+        });
+        const d = await r.json();
+        if (!d.ok) { errEl.textContent = d.error || 'Error desconegut'; btn.disabled = false; btn.textContent = 'Entrar'; return; }
+        localStorage.setItem('atne.docent_id', d.docent_id);
+        localStorage.setItem('atne.docent_alias', d.alias);
+        overlay.classList.add('hidden');
+        _updateDocentBtn();
+        await _loadCustomProfiles();
+      } catch(e) {
+        errEl.textContent = 'Error de connexió';
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
+      }
+    }
+
+    btn.addEventListener('click', doLogin);
+    emailInp.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  })();
+
+  // ── Creació de perfil (persona) ───────────────────────────────────────────
+
+  function _buildPersonProfile() {
+    const nameInp  = document.querySelector('.mode[data-m="person"] .inp');
+    const courseInp= document.querySelectorAll('.mode[data-m="person"] .inp')[1];
+    const mecr     = document.querySelector('.mode[data-m="person"] .lvl.on .lv-code')?.textContent || 'B1';
+    const name     = nameInp?.value.trim() || 'Perfil nou';
+    const course   = courseInp?.value.trim() || '';
+
+    // Conductes seleccionades
+    const behaviors = [];
+    document.querySelectorAll('.mode[data-m="person"] .ck input:checked').forEach(cb => {
+      behaviors.push(cb.closest('label')?.querySelector('span')?.textContent.trim() || '');
+    });
+
+    // Ajuts seleccionats
+    const aids = [];
+    document.querySelectorAll('.mode[data-m="person"] .aid-row input:checked').forEach(cb => {
+      aids.push(cb.closest('label')?.querySelector('.aid-n')?.textContent.trim() || '');
+    });
+
+    // Condicions/diagnòstics seleccionats
+    const dxTags = [];
+    document.querySelectorAll('.mode[data-m="person"] .tag.on').forEach(t => {
+      dxTags.push(t.dataset.dx || t.textContent.trim());
+    });
+
+    // cat principal (per color)
+    const catMap = {tdah:'tdah', disl:'disl', l2:'cat', ac:'ac', tea:'tea'};
+    const cat = catMap[dxTags[0]] || 'generic';
+
+    // Chips
+    const chips = dxTags.slice(0,2).map(dx => ({label: dx.toUpperCase(), cat: catMap[dx] || 'generic'}));
+    chips.push({label: `${mecr} · MECR`, cat:'lv'});
+
+    // ID únic
+    const pid = 'c_' + Date.now().toString(36);
+
+    return {
+      id: pid, type: 'person', name, course, avatar: name[0]?.toUpperCase() || 'P',
+      cat, mecr, chips, behaviors: behaviors.filter(Boolean), aids: aids.filter(Boolean),
+      conditions: dxTags, custom: true
+    };
+  }
+
+  async function _saveCustomProfile(profile) {
+    const did = _docentId();
+    if (!did) return null;
+    try {
+      const r = await fetch('/api/docent/profiles', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({docent_id: did, profile})
+      });
+      const d = await r.json();
+      return d.ok ? d.id : null;
+    } catch(e) { return null; }
+  }
+
+  // "Crear i seleccionar" mode persona
+  const personCreateBtn = document.querySelector('.mode[data-m="person"] .foot .btn-p');
+  if (personCreateBtn) {
+    personCreateBtn.addEventListener('click', async e => {
+      e.preventDefault();
+      const nameInp = document.querySelector('.mode[data-m="person"] .inp');
+      if (!nameInp?.value.trim()) {
+        nameInp?.focus();
+        if (typeof window.atneToast === 'function') window.atneToast('El nom és obligatori', 'error');
+        else alert('El nom és obligatori');
+        return;
+      }
+      if (!_docentId()) {
+        document.getElementById('id-overlay')?.classList.remove('hidden');
+        return;
+      }
+      personCreateBtn.disabled = true;
+      personCreateBtn.textContent = 'Desant…';
+      const profile = _buildPersonProfile();
+      await _saveCustomProfile(profile);
+      window.ATNE_PROFILES[profile.id] = profile;
+      renderProfiles();
+      selectProfile(profile.id);
+    });
+  }
+
+  // "Crear i seleccionar" mode grup → pendent (igual que abans, però amb missatge honest)
+  const groupCreateBtn = document.querySelector('.mode[data-m="group"] .foot .btn-p');
+  if (groupCreateBtn) {
+    groupCreateBtn.addEventListener('click', e => {
+      e.preventDefault();
+      if (typeof window.atneToast === 'function') window.atneToast('La creació de grups personalitzats estarà disponible aviat.', 'info');
+      else alert('La creació de grups personalitzats estarà disponible aviat.');
+    });
+  }
+
+  // "+ Afegir conducta pròpia" (pendent)
   document.querySelectorAll('.ck-add').forEach(b => {
-    b.addEventListener('click', e => { e.preventDefault(); notifyPendingCreation(); });
+    b.addEventListener('click', e => { e.preventDefault(); });
   });
 </script>
 </body>
