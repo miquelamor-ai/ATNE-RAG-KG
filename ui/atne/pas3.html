@@ -127,7 +127,14 @@
   .txt-badge.adapted{color:var(--primary);border-color:var(--primary-100);background:var(--primary-50)}
   .txt-badge svg{width:10px;height:10px}
 
-  .doc-read{font-family:var(--serif);font-size:17px;line-height:1.75;color:var(--ink-800);max-width:68ch;margin:0 auto}
+  .doc-read{font-family:var(--serif);font-size:17px;line-height:1.75;color:var(--ink-800);max-width:68ch;margin:0 auto;transition:background .3s}
+  /* Flash breu quan s'aplica un refinament per indicar que hi ha hagut canvis */
+  .doc-read.just-refined{animation:just-refined 1.6s ease-out}
+  @keyframes just-refined{
+    0%{background:transparent}
+    15%{background:rgba(170,220,170,.22)}
+    100%{background:transparent}
+  }
   .doc-read h1{font-family:var(--serif);font-size:28px;font-weight:700;margin-bottom:16px;letter-spacing:-0.01em;color:var(--ink-900)}
   .doc-read h2{font-family:var(--serif);font-size:19px;font-weight:700;margin:22px 0 10px;color:var(--ink-800)}
   .doc-read p{margin-bottom:14px}
@@ -477,12 +484,54 @@
     .lside { display: none; }
     .frail { display: none; }
 
-    /* Topbar compacta */
-    .topbar { padding: 10px 14px; gap: 8px; flex-wrap: wrap; }
+    /* Topbar compacta: help/compartir/avatar segueixen visibles (mida reduïda) */
+    .topbar { padding: 10px 14px; gap: 6px; flex-wrap: wrap; }
     .steps { order: 3; flex-basis: 100%; overflow-x: auto; padding: 3px; }
     .step { padding: 5px 10px; font-size: 10.5px; white-space: nowrap; }
     .tb-title { font-size: 14px; flex: 1; min-width: 0; }
-    .icon-btn { display: none; }
+    .icon-btn { width: 28px; height: 28px; flex-shrink: 0; }
+    .icon-btn svg { width: 13px; height: 13px; }
+
+    /* Chip "Per a qui" compacte (substitueix la lside amagada) */
+    .mob-profile-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px 4px 4px;
+      background: var(--cream-2);
+      border: 1px solid var(--paper-line);
+      border-radius: 99px;
+      font-family: var(--ui);
+      font-size: 11px;
+      color: var(--ink-700);
+      cursor: pointer;
+      flex-shrink: 0;
+      order: 2;
+    }
+    .mob-profile-chip .mpc-av { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-family: var(--serif); font-weight: 700; font-size: 11px; flex-shrink: 0; }
+    .mob-profile-chip .mpc-n { font-weight: 600; color: var(--ink-800); max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  }
+  /* Per defecte (>640px) el chip mòbil està amagat */
+  .mob-profile-chip { display: none; }
+
+  /* Avatar docent (topbar) */
+  .docent-av {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--ac-bg);
+    color: var(--ac);
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 13.5px;
+    display: grid; place-items: center;
+    border: 1px solid var(--ac);
+    cursor: pointer;
+    transition: transform .1s;
+    flex-shrink: 0;
+  }
+  .docent-av:hover { transform: scale(1.05); }
+  @media (max-width: 640px) {
+    .docent-av { width: 28px; height: 28px; font-size: 12.5px; }
 
     /* Center: header compacte, chead en columna */
     .center-head { padding: 12px 16px 8px; }
@@ -550,6 +599,10 @@
     <div class="topbar">
       <button class="hamb" id="hamb" title="Menú"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
       <div class="tb-title">ATNE</div>
+      <button class="mob-profile-chip" id="mob-profile-chip" onclick="location.href='/ui/atne/pas1.html'" title="Canviar perfil">
+        <span class="mpc-av" id="mpc-av">M</span>
+        <span class="mpc-n" id="mpc-n">Marc</span>
+      </button>
       <div class="steps">
         <button class="step done" data-step="1" onclick="location.href='/ui/atne/pas1.html'"><span class="step-num">1</span>Per a qui</button>
         <button class="step done" data-step="2" onclick="location.href='/ui/atne/pas2.html'"><span class="step-num">2</span>Text</button>
@@ -557,6 +610,7 @@
       </div>
       <button class="icon-btn" title="Ajuda" onclick="alert('Ajuda: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg></button>
       <button class="icon-btn" title="Compartir" onclick="alert('Compartir: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></button>
+      <button class="docent-av" title="Docent · claudeai.je@fje.edu" onclick="alert('Perfil del docent: pendent d\u0027implementar')">E</button>
     </div>
 
     <div class="main">
@@ -1022,7 +1076,8 @@
     <button class="fmt" data-fmt="u" title="Subratllat" style="text-decoration:underline">U</button>
     <div class="sep"></div>
     <button class="fmt" data-fmt="h2" title="Encapçalament" style="font-size:12px">H2</button>
-    <button class="fmt" data-fmt="ul" title="Llista"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
+    <button class="fmt" data-fmt="list" title="Llista (vinyetes → numeració → sense)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
+    <button class="fmt" data-fmt="justify" title="Justificar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
   </div>
 
   <!-- Paragraph actions menu -->
@@ -1046,17 +1101,17 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         <span>Complements</span>
       </button>
-      <button class="bb-item primary" onclick="document.querySelector('.fr-b[data-pop=&quot;refine&quot;]')?.click()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3.5-7.1L21 8"/><path d="M21 3v5h-5"/></svg>
-        <span>Regenerar</span>
+      <button class="bb-item primary" onclick="document.querySelector('.fr-b[data-pop=&quot;export&quot;]')?.click()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v13M7 8l5-5 5 5M5 21h14"/></svg>
+        <span>Exportar</span>
       </button>
       <button class="bb-item" onclick="document.querySelector('.fr-b[data-pop=&quot;rubric&quot;]')?.click()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h13a5 5 0 0 1 0 10H8"/><path d="M7 3 3 7l4 4"/></svg>
         <span>Refer</span>
       </button>
-      <button class="bb-item" onclick="document.querySelector('.fr-b[data-pop=&quot;export&quot;]')?.click()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v13M7 8l5-5 5 5M5 21h14"/></svg>
-        <span>Exportar</span>
+      <button class="bb-item" onclick="document.querySelector('.fr-b[data-pop=&quot;refine&quot;]')?.click()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3.5-7.1L21 8"/><path d="M21 3v5h-5"/></svg>
+        <span>Refinar</span>
       </button>
     </div>
   </nav>
@@ -1205,6 +1260,23 @@
     const pid = localStorage.getItem('atne.profile_id') || 'marc';
     const p = window.ATNE_PROFILES[pid] || window.ATNE_PROFILES.marc;
 
+    // Chip "Per a qui" al topbar mòbil
+    const mpcAv = document.getElementById('mpc-av');
+    const mpcN = document.getElementById('mpc-n');
+    if (mpcAv) {
+      mpcAv.textContent = p.avatar;
+      const palette = {
+        tdah: ['var(--tdah-bg)', 'var(--tdah)'], disl: ['var(--disl-bg)', 'var(--disl)'],
+        cat: ['var(--cat-bg)', 'var(--cat)'], ac: ['var(--ac-bg)', 'var(--ac)'],
+        group: ['var(--primary-50)', 'var(--primary)'],
+        'group-ac': ['var(--ac-bg)', 'var(--ac)'], 'group-cat': ['var(--cat-bg)', 'var(--cat)']
+      };
+      const [bg, fg] = palette[p.cat] || palette.tdah;
+      mpcAv.style.background = bg;
+      mpcAv.style.color = fg;
+    }
+    if (mpcN) mpcN.textContent = (p.name || '').split(' ')[0];
+
     // Grups → sidebar amb capçalera de grup + llista VERSIONS
     if (p.type === 'group') {
       renderGroupSidebar(p);
@@ -1270,7 +1342,14 @@
   });
   backdropEl?.addEventListener('click', closeDrawer);
   document.getElementById('drawer-close')?.addEventListener('click', closeDrawer);
-  document.addEventListener('keydown', e => { if(e.key === 'Escape') closeDrawer(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      // Prioritat: popovers del frail > drawer mòbil > para-menu
+      if (document.querySelector('.pop.on')) { closePops?.(); return; }
+      if (drawerEl?.classList.contains('on')) { closeDrawer(); return; }
+      if (typeof closeParaMenu === 'function' && paraMenu?.classList.contains('on')) { closeParaMenu(); return; }
+    }
+  });
 
   // View switching
   const views = {
@@ -1330,7 +1409,10 @@
   document.addEventListener('click', (e) => {
     const inPop = [...pops].some(p => p.contains(e.target));
     const inRail = [...frBtns].some(b => b.contains(e.target));
-    if(!inPop && !inRail) closePops();
+    // Els botons de la bottom bar mòbil deleguen al frail via .click() sintètic;
+    // cal excloure'ls perquè el bubbling del click original no tanqui el popover.
+    const inBbar = !!e.target.closest('.bottom-bar');
+    if(!inPop && !inRail && !inBbar) closePops();
   });
 
   // Steppers in refine popover
@@ -1490,13 +1572,37 @@
     }
     if (regenEl) regenEl.classList.remove('on');
   }));
+  // Detecta si la selecció actual està dins una UL, OL, o cap de les dues
+  function currentListKind() {
+    const sel = window.getSelection();
+    if (!sel || !sel.anchorNode) return null;
+    let n = sel.anchorNode.nodeType === 3 ? sel.anchorNode.parentElement : sel.anchorNode;
+    while (n && n !== adapted) {
+      if (n.tagName === 'UL') return 'ul';
+      if (n.tagName === 'OL') return 'ol';
+      n = n.parentElement;
+    }
+    return null;
+  }
+
   selTb.querySelectorAll('[data-fmt]').forEach(b => b.addEventListener('click', () => {
     const f = b.dataset.fmt;
     if(f==='b') wrapSelection('strong');
     else if(f==='i') wrapSelection('em');
     else if(f==='u') wrapSelection('u');
     else if(f==='h2'){ document.execCommand('formatBlock', false, 'h2'); pushHistory(); selTb.classList.remove('on'); }
-    else if(f==='ul'){ document.execCommand('insertUnorderedList'); pushHistory(); selTb.classList.remove('on'); }
+    else if(f==='list'){
+      // Cicle: sense llista → UL → OL → sense
+      const kind = currentListKind();
+      if (kind === null) document.execCommand('insertUnorderedList');
+      else if (kind === 'ul') document.execCommand('insertOrderedList');
+      else /* 'ol' */ document.execCommand('insertOrderedList'); // toggle off
+      pushHistory(); selTb.classList.remove('on');
+    }
+    else if(f==='justify'){
+      document.execCommand('justifyFull');
+      pushHistory(); selTb.classList.remove('on');
+    }
   }));
 
   /* Paragraph handle + menu */
@@ -1530,13 +1636,79 @@
   document.addEventListener('click', (e) => {
     if(!paraMenu.contains(e.target) && !e.target.closest('.para-handle')) closeParaMenu();
   });
-  paraMenu.querySelectorAll('button[data-para]').forEach(b => b.addEventListener('click', () => {
+  paraMenu.querySelectorAll('button[data-para]').forEach(b => b.addEventListener('click', async () => {
     const act = b.dataset.para;
+    const targetEl = paraTarget;
     closeParaMenu();
-    if(act==='delete' && paraTarget){ paraTarget.remove(); pushHistory(); return; }
-    const msgs = { simplify:'Reescrivint el pargàraf més senzill…', split:'Dividint en frases curtes…', example:'Afegint un exemple concret…', highlight:'Marcant com a important…' };
-    window.regen && window.regen(msgs[act]);
-    setTimeout(pushHistory, 100);
+    if (!targetEl) return;
+
+    // Acció destructiva: eliminar el paràgraf localment
+    if (act === 'delete') { targetEl.remove(); pushHistory(); return; }
+
+    // Acció local: "Marcar com a important" envolta amb negreta
+    if (act === 'highlight') {
+      // Evita doble-negrat si ja està tot en <strong>
+      const inner = targetEl.innerHTML.trim();
+      if (!/^<strong[^>]*>[\s\S]*<\/strong>$/i.test(inner)) {
+        // Preservem el para-handle inicial
+        const handle = targetEl.querySelector(':scope > .para-handle');
+        const rest = Array.from(targetEl.childNodes).filter(n => n !== handle);
+        const wrap = document.createElement('strong');
+        rest.forEach(n => wrap.appendChild(n));
+        targetEl.appendChild(wrap);
+      }
+      pushHistory();
+      return;
+    }
+
+    // Accions LLM: refineText sobre el text del paràgraf sol
+    const INSTR = {
+      simplify: 'Reescriu aquest text més senzill, amb frases curtes i vocabulari freqüent. Mantén el significat.',
+      split: 'Divideix aquest text en frases més curtes. Una idea per frase. Mantén el significat.',
+      example: 'Afegeix una frase final amb un exemple concret que ajudi a entendre el concepte del text.'
+    };
+    const instruccio = INSTR[act];
+    if (!instruccio || !window.ATNE_LLM) return;
+
+    // Text del paràgraf (sense el handle)
+    const clone = targetEl.cloneNode(true);
+    clone.querySelector('.para-handle')?.remove();
+    const paragraphMd = window.ATNE_LLM.htmlToMarkdown(clone.innerHTML).trim();
+    if (!paragraphMd) return;
+
+    const msgs = { simplify: 'Reescrivint el paràgraf més senzill…', split: 'Dividint en frases curtes…', example: 'Afegint un exemple…' };
+    const regenEl = document.getElementById('regen');
+    const regenT = document.getElementById('regen-t');
+    if (regenT) regenT.textContent = msgs[act] || 'Regenerant…';
+    regenEl?.classList.add('on');
+
+    try {
+      const r = await window.ATNE_LLM.refineText({ text: paragraphMd, instruccio });
+      if (r?.text) {
+        // Renderitzem el markdown de retorn. Per a blocs d'un sol paràgraf,
+        // markdownToHtml retorna <p>...</p>; dins d'un <p> existent no volem
+        // <p> niada, així que l'extreiem.
+        let newHtml = window.ATNE_LLM.markdownToHtml(r.text);
+        // Si el target és <p> i el retorn comença per <p>, desempaquetem el primer
+        if (targetEl.tagName === 'P') {
+          newHtml = newHtml.replace(/^\s*<p>/i, '').replace(/<\/p>\s*$/i, '');
+        }
+        // Preservem el handle si existeix
+        const hadHandle = !!targetEl.querySelector(':scope > .para-handle');
+        targetEl.innerHTML = newHtml;
+        if (hadHandle) attachParaHandles();
+        pushHistory();
+        // Flash temporal
+        targetEl.style.transition = 'background .3s';
+        targetEl.style.background = 'rgba(170,220,170,.22)';
+        setTimeout(() => { targetEl.style.background = ''; }, 1500);
+        window.atneToast?.('Paràgraf actualitzat', 'success');
+      }
+    } catch (err) {
+      window.atneToast?.('Error: ' + err.message, 'error');
+    } finally {
+      regenEl?.classList.remove('on');
+    }
   }));
   attachParaHandles();
 
@@ -1634,9 +1806,13 @@
     if (regenT) regenT.textContent = 'Adaptant el text…';
     if (regenS) regenS.textContent = 'El LLM està personalitzant el text per a ' + profile.name;
 
-    // Llegeix complements a activar (per defecte: glossari + esquema + preguntes)
+    // Complements triats pel docent al Pas 2 (popover Complements).
+    // Si encara no hi són (primer ús), fallback a un set raonable.
     let complements = { glossari: true, esquema_visual: true, preguntes_comprensio: true };
-    try { complements = { ...complements, ...JSON.parse(localStorage.getItem('atne.complements') || '{}') }; } catch {}
+    try {
+      const stored = localStorage.getItem('atne.complements');
+      if (stored) complements = JSON.parse(stored) || complements;
+    } catch {}
 
     window.ATNE_LLM.adaptText({
       text: docOriginal,
@@ -1715,6 +1891,26 @@
         attachParaHandles();
         pushHistory();
         localStorage.setItem('atne.adapted_text', adaptedEl.innerHTML);
+
+        // Feedback visual i comptador de canvis
+        const countWords = s => (s.trim().match(/\S+/g) || []).length;
+        const oldN = countWords(currentMd);
+        const newN = countWords(result.text);
+        const delta = newN - oldN;
+        const sameText = currentMd.trim() === result.text.trim();
+        let msg;
+        if (sameText) msg = 'Refinat: cap canvi detectat';
+        else if (delta === 0) msg = 'Refinat: mateixa longitud · ' + newN + ' paraules';
+        else if (delta > 0) msg = 'Refinat: +' + delta + ' paraules · total ' + newN;
+        else msg = 'Refinat: ' + delta + ' paraules · total ' + newN;
+        window.atneToast?.(msg, sameText ? 'info' : 'success');
+
+        if (!sameText) {
+          adaptedEl.classList.remove('just-refined'); // reset si ja hi era
+          void adaptedEl.offsetWidth;                 // força reflow per reiniciar l'animació
+          adaptedEl.classList.add('just-refined');
+          setTimeout(() => adaptedEl.classList.remove('just-refined'), 1700);
+        }
       }
     } catch (err) {
       if (regenT) regenT.textContent = 'Error: ' + (err.message || 'desconegut');
@@ -1811,20 +2007,22 @@
 
       const adaptedEl = document.getElementById('adapted-text');
       if (!adaptedEl) return;
-      const adapted = adaptedEl.innerText || adaptedEl.textContent || '';
-      if (!adapted.trim()) {
+      // Enviem HTML convertit a Markdown perquè el backend renderitzi H1/H2/negretes/llistes.
+      // Fallback a innerText si htmlToMarkdown no està disponible.
+      const adaptedHtml = adaptedEl.innerHTML || '';
+      const adapted = (window.ATNE_LLM.htmlToMarkdown?.(adaptedHtml) || adaptedEl.innerText || adaptedEl.textContent || '').trim();
+      if (!adapted) {
         window.atneToast?.('No hi ha text per exportar', 'error');
         return;
       }
 
-      const original = localStorage.getItem('atne.doc_original') || '';
       const pid = localStorage.getItem('atne.profile_id') || 'marc';
       const profile = window.ATNE_PROFILES?.[pid];
       const profile_name = profile?.name || 'adaptacio';
 
       window.atneToast?.('Preparant ' + fmt.toUpperCase() + '…', 'info');
       try {
-        await window.ATNE_LLM.exportDoc({ format: fmt, adapted, original, profile_name });
+        await window.ATNE_LLM.exportDoc({ format: fmt, adapted, profile_name });
         window.atneToast?.('Descàrrega iniciada', 'success');
       } catch (err) {
         window.atneToast?.('Error exportant: ' + err.message, 'error');

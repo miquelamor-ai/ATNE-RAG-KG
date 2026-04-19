@@ -4142,6 +4142,9 @@ async def export_doc(payload: dict = Body(...)):
     fmt = payload.get("format", "txt")
     adapted = payload.get("adapted", "")
     original = payload.get("original", "")
+    # Per defecte NO incloem el text original: l'usuari vol el text adaptat net.
+    # Opt-in amb include_original=true si algun flux futur el necessita.
+    include_original = bool(payload.get("include_original", False))
     profile_name = payload.get("profile_name", "adaptacio")
 
     import tempfile
@@ -4186,7 +4189,10 @@ async def export_doc(payload: dict = Body(...)):
     if fmt == "txt":
         tmp = Path(tempfile.gettempdir()) / f"{base_name}.txt"
         clean_adapted = clean_for_plain(adapted)
-        content = f"ADAPTACIÓ ATNE — {profile_name}\n{'='*50}\n\n{clean_adapted}\n\n{'='*50}\nTEXT ORIGINAL:\n\n{original}"
+        parts = [f"ADAPTACIÓ ATNE — {profile_name}", "=" * 50, "", clean_adapted]
+        if include_original and original:
+            parts += ["", "=" * 50, "TEXT ORIGINAL:", "", original]
+        content = "\n".join(parts)
         # BOM UTF-8 perquè Windows/Notepad el reconegui correctament
         with open(tmp, "w", encoding="utf-8-sig") as f:
             f.write(content)
@@ -4197,10 +4203,28 @@ async def export_doc(payload: dict = Body(...)):
         from docx.shared import Pt
         doc = DocxDocument()
         doc.add_heading(f"Adaptació ATNE — {profile_name}", level=1)
-        # Text adaptat + complements (tot el contingut)
+
+        def add_inline(p, text):
+            """Afegeix text a un paràgraf gestionant **negretes** i _cursives_ inline."""
+            # Primer partim per negretes, després per cursives dins de cada tros.
+            for part in re.split(r'(\*\*.*?\*\*)', text):
+                if part.startswith("**") and part.endswith("**") and len(part) > 4:
+                    run = p.add_run(part[2:-2])
+                    run.bold = True
+                else:
+                    for sub in re.split(r'(_[^_]+_)', part):
+                        if sub.startswith("_") and sub.endswith("_") and len(sub) > 2:
+                            run = p.add_run(sub[1:-1])
+                            run.italic = True
+                        elif sub:
+                            p.add_run(sub)
+
         for line in adapted.split("\n"):
             stripped = line.strip()
-            if line.startswith("## "):
+            # H1 (#) → estil Heading 1; H2 (##) → Heading 2; H3 (###) → Heading 3
+            if line.startswith("# ") and not line.startswith("## "):
+                doc.add_heading(line[2:].replace("**", ""), level=1)
+            elif line.startswith("## "):
                 doc.add_heading(line[3:].replace("**", ""), level=2)
             elif line.startswith("### "):
                 doc.add_heading(line[4:].replace("**", ""), level=3)
@@ -4213,26 +4237,22 @@ async def export_doc(payload: dict = Body(...)):
                 continue
             elif re.match(r'^[\s]*[-*]\s+(?!\*)', line) and not stripped.startswith("**"):
                 clean = re.sub(r'^[\s]*[-*]\s+', '', line).strip()
-                doc.add_paragraph(clean.replace("**", ""), style="List Bullet")
+                p = doc.add_paragraph(style="List Bullet")
+                add_inline(p, clean)
             elif re.match(r'^[\s]*\d+\.\s+', line):
                 clean = re.sub(r'^[\s]*\d+\.\s+', '', line).strip()
-                doc.add_paragraph(clean.replace("**", ""), style="List Number")
+                p = doc.add_paragraph(style="List Number")
+                add_inline(p, clean)
             elif stripped:
                 p = doc.add_paragraph()
-                # Gestionar negretes inline
-                parts = re.split(r'(\*\*.*?\*\*)', stripped)
-                for part in parts:
-                    if part.startswith("**") and part.endswith("**"):
-                        run = p.add_run(part[2:-2])
-                        run.bold = True
-                    else:
-                        p.add_run(part)
-        # Separador + text original
-        doc.add_page_break()
-        doc.add_heading("Text original", level=2)
-        for line in original.split("\n"):
-            if line.strip():
-                doc.add_paragraph(line)
+                add_inline(p, stripped)
+
+        if include_original and original:
+            doc.add_page_break()
+            doc.add_heading("Text original", level=2)
+            for line in original.split("\n"):
+                if line.strip():
+                    doc.add_paragraph(line)
         tmp = Path(tempfile.gettempdir()) / f"{base_name}.docx"
         doc.save(str(tmp))
         return FileResponse(tmp, filename=f"{base_name}.docx",
@@ -4275,15 +4295,23 @@ async def export_doc(payload: dict = Body(...)):
             if not stripped:
                 pdf.ln(3)
                 return
-            # Heading ##
-            if line.startswith("## "):
+            # Heading # (H1)
+            if line.startswith("# ") and not line.startswith("## "):
+                pdf.set_font(font_name, "B", 15)
+                pdf.ln(5)
+                pdf.multi_cell(w, 9, pdf_clean(line[2:]), align="L",
+                               new_x="LMARGIN", new_y="NEXT")
+                pdf.set_font(font_name, "", 11)
+                pdf.ln(2)
+            # Heading ## (H2)
+            elif line.startswith("## "):
                 pdf.set_font(font_name, "B", 13)
                 pdf.ln(4)
                 pdf.multi_cell(w, 8, pdf_clean(line[3:]), align="L",
                                new_x="LMARGIN", new_y="NEXT")
                 pdf.set_font(font_name, "", 11)
                 pdf.ln(2)
-            # Heading ###
+            # Heading ### (H3)
             elif line.startswith("### "):
                 pdf.set_font(font_name, "B", 11)
                 pdf.ln(2)
@@ -4326,18 +4354,18 @@ async def export_doc(payload: dict = Body(...)):
         for line in adapted.split("\n"):
             pdf_write_line(line)
 
-        # Text original
-        pdf.add_page()
-        pdf.set_font(font_name, "B", 13)
-        pdf.cell(w, 10, "Text original", new_x="LMARGIN", new_y="NEXT")
-        pdf.set_font(font_name, "", 11)
-        pdf.ln(3)
-        for orig_line in original.split("\n"):
-            if orig_line.strip():
-                pdf.multi_cell(w, 6, pdf_safe(orig_line), align="L",
-                               new_x="LMARGIN", new_y="NEXT")
-            else:
-                pdf.ln(3)
+        if include_original and original:
+            pdf.add_page()
+            pdf.set_font(font_name, "B", 13)
+            pdf.cell(w, 10, "Text original", new_x="LMARGIN", new_y="NEXT")
+            pdf.set_font(font_name, "", 11)
+            pdf.ln(3)
+            for orig_line in original.split("\n"):
+                if orig_line.strip():
+                    pdf.multi_cell(w, 6, pdf_safe(orig_line), align="L",
+                                   new_x="LMARGIN", new_y="NEXT")
+                else:
+                    pdf.ln(3)
         # Footer
         pdf.ln(10)
         pdf.set_font(font_name, "", 8)

@@ -293,6 +293,64 @@
   }
 
   /**
+   * Variant streaming de generateText (SSE).
+   *
+   * @param {Object} args  Mateixos camps que generateText + callbacks:
+   * @param {Function} [args.onStart]  ({model, target_words}) => void
+   * @param {Function} [args.onChunk]  ({text, acumulat}) => void   (el text és el delta)
+   * @param {Function} [args.onDone]   ({text, paraules, duration_ms, model}) => void
+   * @param {Function} [args.onError]  (err) => void
+   * @returns {Promise<{text: string, paraules: number, model: string}>}  Resultat final.
+   */
+  async function generateTextStream({ tema, genere, tipologia, to, extensio, notes, context, onStart, onChunk, onDone, onError }) {
+    if (!tema || !tema.trim()) throw new Error('Cal un tema per generar el text');
+    const body = { tema, genere, tipologia, to, extensio };
+    if (notes) body.notes = notes;
+    if (context) body.context = context;
+    const resp = await fetch('/api/generate-text-stream', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!resp.ok) {
+      const err = new Error('HTTP ' + resp.status);
+      if (onError) onError(err);
+      throw err;
+    }
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let acumulat = '';
+    let final = null;
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        let ev;
+        try { ev = JSON.parse(line.slice(6)); } catch { continue; }
+        if (ev.type === 'start' && onStart) {
+          onStart(ev);
+        } else if (ev.type === 'chunk') {
+          acumulat += (ev.text || '');
+          if (onChunk) onChunk({ text: ev.text || '', acumulat });
+        } else if (ev.type === 'done') {
+          final = ev;
+          if (onDone) onDone(ev);
+        } else if (ev.type === 'error') {
+          const err = new Error(ev.message || 'Error stream');
+          if (onError) onError(err);
+          throw err;
+        }
+      }
+    }
+    return final || { text: acumulat, paraules: 0, model: '' };
+  }
+
+  /**
    * Crida /api/extract-text — pujada d'un fitxer (PDF/DOCX/MD/TXT, màx 5 MB)
    * i retorna el text pla extret.
    *
@@ -338,20 +396,22 @@
    * @param {string} [args.profile_name]  Nom del perfil (per al nom del fitxer).
    * @returns {Promise<void>}  Dispara la descàrrega al navegador.
    */
-  async function exportDoc({ format, adapted, original = '', profile_name = 'adaptacio' }) {
+  async function exportDoc({ format, adapted, profile_name = 'adaptacio' }) {
     if (!adapted || !adapted.trim()) throw new Error('No hi ha text per exportar');
     if (!['pdf', 'docx', 'txt'].includes(format)) throw new Error('Format no suportat: ' + format);
     const resp = await fetch('/api/export', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ format, adapted, original, profile_name })
+      body: JSON.stringify({ format, adapted, profile_name })
     });
     if (!resp.ok) {
       let errMsg = 'HTTP ' + resp.status;
       try { const e = await resp.json(); if (e.error) errMsg = e.error; } catch {}
       throw new Error(errMsg);
     }
-    // El backend retorna el fitxer com a attachment; llegim el blob i disparem descàrrega
+    // El backend retorna el fitxer com a attachment; llegim el blob i disparem descàrrega.
+    // target=_blank evita que el navegador substitueixi la pàgina actual si ignora download
+    // (passa amb alguns Chrome/Edge quan el MIME és application/pdf i hi ha visor natiu).
     const blob = await resp.blob();
     const cd = resp.headers.get('Content-Disposition') || '';
     const match = cd.match(/filename="?([^"]+)"?/);
@@ -359,10 +419,11 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url; a.download = fname;
+    a.target = '_blank'; a.rel = 'noopener';
     document.body.appendChild(a);
     a.click();
     a.remove();
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
   }
 
   // ──────────────────────────────────────────────────────
@@ -446,6 +507,7 @@
     adaptText,
     refineText,
     generateText,
+    generateTextStream,
     extractFile,
     listHistory,
     exportDoc,

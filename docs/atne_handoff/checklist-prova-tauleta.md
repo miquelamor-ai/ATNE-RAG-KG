@@ -8,8 +8,8 @@ Prova sencera del flux responsive a tauleta (~768–1024px). Marca cada item que
 
 ## 0. Preparació
 
-- [ ] Obres la URL en un navegador amb la finestra a amplada **900–1024px** (tauleta apaïsada).
-- [ ] Si pots, obre també en una segona finestra a **390–640px** (mòbil) per comparar.
+- [y] Obres la URL en un navegador amb la finestra a amplada **900–1024px** (tauleta apaïsada).
+- [y] Si pots, obre també en una segona finestra a **390–640px** (mòbil) per comparar.
 - [ ] Si alguna cosa falla, marca amb `[ ]` i afegeix una nota breu al costat.
 
 ---
@@ -17,97 +17,97 @@ Prova sencera del flux responsive a tauleta (~768–1024px). Marca cada item que
 ## 1. Pas 1 — Per a qui adaptem avui? (`pas1.html`)
 
 ### Layout
-- [ ] Rail esquerre estret amb icones (Inici / Perfils actiu / Textos / Biblioteca / Preferències).
-- [ ] Topbar: stepper centrat "1 Perfil (actiu fons fosc) · 2 Entrada · 3 Resultat", títol "Per a qui adaptem avui?", avatar docent "E" (lavanda AACC) a la dreta.
-- [ ] Input de cerca amb placeholder "Cerca per nom, curs, condició…".
-- [ ] Fila de xips filtre: Tots 32, Persones, Grups, TDAH, Dislèxia, Català L2, AACC. Cadascun amb dot de color semàntic.
-- [ ] Botó "Ordre: Últim ús" a la dreta.
-- [ ] Subcapçalera "Recents · 6" i llista de 6 files amb avatars i xips.
-- [ ] Subcapçalera "Tots els altres · 26" amb més files.
-- [ ] FABs a baix-dreta: "Cercar perfil" (actiu dark), "Nova persona" (to tan), "Nou grup" (to lavanda).
+- [y] Rail esquerre estret amb icones (Inici / Perfils actiu / Textos / Biblioteca / Preferències).
+- [y-no avatar] Topbar: stepper centrat "1 Perfil (actiu fons fosc) · 2 Entrada · 3 Resultat", títol "Per a qui adaptem avui?", avatar docent "E" (lavanda AACC) a la dreta.
+- [esta pero no actua] Input de cerca amb placeholder "Cerca per nom, curs, condició…".
+- [esta pero no actua] Fila de xips filtre: Tots 32, Persones, Grups, TDAH, Dislèxia, Català L2, AACC. Cadascun amb dot de color semàntic.
+- [esta pero no actua ] Botó "Ordre: Últim ús" a la dreta.
+- [y] Subcapçalera "Recents · 6" i llista de 6 files amb avatars i xips.
+- [pero tan sols es veuen dos Subcapçalera "Tots els altres · 26" amb més files.
+- [y] FABs a baix-dreta: "Cercar perfil" (actiu dark), "Nova persona" (to tan), "Nou grup" (to lavanda).
 
 ### Interaccions
-- [ ] Clic al xip "TDAH" el ressalta i (visualment) deixaria filtrar la llista.
-- [ ] Clic a la fila de **Marc Ribera** → navega a Pas 2.
-- [ ] Clic al FAB "Nova persona" → canvia a mode formulari amb camps (Nom, Curs, Nivell MECR, Conductes, etc.).
-- [ ] Clic al FAB "Nou grup" → canvia a mode formulari de grup.
-- [ ] Clic al FAB "Cercar perfil" torna a la llista.
-- [ ] Clic al step "2 Entrada" del stepper → navega a Pas 2.
+- [no filtra] Clic al xip "TDAH" el ressalta i (visualment) deixaria filtrar la llista.
+- [y] Clic a la fila de **Marc Ribera** → navega a Pas 2.
+- [y] Clic al FAB "Nova persona" → canvia a mode formulari amb camps (Nom, Curs, Nivell MECR, Conductes, etc.).
+- [y] Clic al FAB "Nou grup" → canvia a mode formulari de grup.
+- [y] Clic al FAB "Cercar perfil" torna a la llista.
+- [y] Clic al step "2 Entrada" del stepper → navega a Pas 2.
 
 ---
 
 ## 2. Pas 2 — El text original (`pas2.html`)
 
 ### Layout
-- [ ] Rail esquerre visible.
-- [ ] Sidebar 200–220px amb label "PER A QUI" + card blanca de Marc Ribera:
-  - [ ] Avatar circular "M" vermell TDAH.
-  - [ ] Nom "Marc Ribera" serif, subtítol "14 anys · 3r ESO A" mono.
-  - [ ] Xips "TDAH" + "B1 · Intermedi".
-  - [ ] Secció "CONDUCTES OBSERVADES" amb 3 items.
-  - [ ] Secció "AJUTS QUE ACTIVA EL PERFIL" amb 4 items.
-  - [ ] Botó "Canviar perfil" a baix.
-- [ ] Topbar: botó hamburguesa (invisible a tauleta), títol "ATNE", stepper "✓1 · 2 Text (actiu fosc) · 3", botó ajuda.
-- [ ] Títol document editable "La Revolució Industrial" (serif) + meta "Desat · 52 paraules".
-- [ ] Tab bar de modes (4 icones): llapis (Escriure actiu fosc), fletxa-amunt (Pujar), espurnes (Generar), rellotge (Recuperar).
-- [ ] Card blanca amb textarea amb el text demo de la Revolució Industrial.
-- [ ] Comptador "52 PARAULES" a la cantonada inferior-dreta del textarea.
-- [ ] Pills d'opcions: MATÈRIA Història · NIVELL ESO 4 · COMPLEMENTS Cap.
-- [ ] Frail dret (pill vertical blanca) amb 4 icones + separador + pill primari blau "Adaptar" (fletxa dreta).
+- [y] Rail esquerre visible.
+- [y] Sidebar 200–220px amb label "PER A QUI" + card blanca de Marc Ribera:
+  - [y] Avatar circular "M" vermell TDAH.
+  - [y] Nom "Marc Ribera" serif, subtítol "14 anys · 3r ESO A" mono.
+  - [y] Xips "TDAH" + "B1 · Intermedi".
+  - [y] Secció "CONDUCTES OBSERVADES" amb 3 items.
+  - [y] Secció "AJUTS QUE ACTIVA EL PERFIL" amb 4 items.
+  - [y] Botó "Canviar perfil" a baix.
+- [y] Topbar: botó hamburguesa (invisible a tauleta), títol "ATNE", stepper "✓1 · 2 Text (actiu fosc) · 3", botó ajuda.
+- [] Títol document editable "La Revolució Industrial" (serif) + meta "Desat · 52 paraules".
+- [y] Tab bar de modes (4 icones): llapis (Escriure actiu fosc), fletxa-amunt (Pujar), espurnes (Generar), rellotge (Recuperar).
+- [y] Card blanca amb textarea amb el text demo de la Revolució Industrial.
+- [] Comptador "52 PARAULES" a la cantonada inferior-dreta del textarea.
+- [y] Pills d'opcions: MATÈRIA Història · NIVELL ESO 4 · COMPLEMENTS Cap.
+- [y] Frail dret (pill vertical blanca) amb 4 icones + separador + pill primari blau "Adaptar" (fletxa dreta).
 
 ### Interaccions
-- [ ] Clic al tab **Pujar fitxer** → la card canvia a drop zone amb icona, "Arrossega un fitxer..." i formats admesos.
-- [ ] Clic al tab **Generar** → la card canvia a formulari amb "Tema o tòpic" + 4 selects (Gènere/Tipologia/To/Extensió) + botó "Generar text".
-- [ ] Clic al tab **Recuperar** → la card canvia a cerca + filter pills + llista de 4 documents recents.
-- [ ] Tornes al tab **Escriure** i el text segueix allà.
-- [ ] Si buides el textarea, els botons del frail (Edició, Refinar, Accions) i el botó Adaptar es desactiven visualment. "Complements" manté l'aparença normal.
-- [ ] Si escrius al textarea, tots tornen a estat normal.
-- [ ] Clic al frail "Adaptar" → navega a Pas 3.
-- [ ] Clic al step "1 Per a qui" → torna a Pas 1.
-- [ ] Clic al botó "Canviar perfil" → (funcionalitat no implementada, però no ha de petar).
+- [y] Clic al tab **Pujar fitxer** → la card canvia a drop zone amb icona, "Arrossega un fitxer..." i formats admesos.
+- [y quan generes s'hauria de passar a la tab escriure i veure's com el text es va omplint en directe] Clic al tab **Generar** → la card canvia a formulari amb "Tema o tòpic" + 4 selects (Gènere/Tipologia/To/Extensió) + botó "Generar text".
+- [y] Clic al tab **Recuperar** → la card canvia a cerca + filter pills + llista de 4 documents recents.
+- [y] Tornes al tab **Escriure** i el text segueix allà.
+- [y pensava que complements s'obriria finestra emergent amb els complements possibles uns seleccionats segons el perfil i la resta sense seleccionar pero amb possibilitat de fer-ho] Si buides el textarea, els botons del frail (Edició, Refinar, Accions) i el botó Adaptar es desactiven visualment. "Complements" manté l'aparença normal.
+- [y] Si escrius al textarea, tots tornen a estat normal.
+- [y pero no hi ha icones de refer i desfer a dalt per si has esborrat el text i vols recuèrar o anar a la versio anterior] Clic al frail "Adaptar" → navega a Pas 3.
+- [y] Clic al step "1 Per a qui" → torna a Pas 1.
+- [ si funciona i et retorna a seleccio de perfil pero quan tores perds el text que estaves treballant] Clic al botó "Canviar perfil" → (funcionalitat no implementada, però no ha de petar).
 
 ---
 
 ## 3. Pas 3 — L'adaptació (`pas3.html`)
 
 ### Layout
-- [ ] Rail esquerre visible.
-- [ ] Sidebar esquerra amb label "PER A QUI" + card de Marc (igual que Pas 2) + botó "Tornar al text".
-- [ ] Topbar: hamburguesa (amagat a tauleta), "ATNE", stepper "✓1 · ✓2 · 3 Adaptacions (actiu fosc)", botons ajuda/compartir.
-- [ ] Center-head: input doc-title "La Revolució Industrial" + badge "Desat" verd + meta "adaptat fa 1m · 318 paraules" + botons undo/redo.
-- [ ] Segona fila: xips complements (Glossari/Esquema/Preguntes amb dots d'estat + Afegir) + botó "Comparar amb l'original".
-- [ ] Targeta blanca gran central amb el text adaptat en serif (H1 + H2 + paràgrafs amb marques groc/verd).
-- [ ] Frail dret amb 4 icones (Refinar/Rúbrica/Nova adaptació/Exportar) + separador + botó primari Exportar.
+- [y] Rail esquerre visible.
+- [y] Sidebar esquerra amb label "PER A QUI" + card de Marc (igual que Pas 2) + botó "Tornar al text".
+- [y] Topbar: hamburguesa (amagat a tauleta), "ATNE", stepper "✓1y · ✓2 · 3 Adaptacions (actiu fosc)", botons ajuda/compartir.
+- [y] Center-head: input doc-title "La Revolució Industrial" + badge"Desat" verd + meta "adaptat fa 1m · 318 paraules" + botons undo/redo.
+- [y] Segona fila: xips complements (Glossari/Esquema/Preguntes amb dots d'estat + Afegir) + botó "Comparar amb l'original".
+- [y] Targeta blanca gran central amb el text adaptat en serif (H1 + H2 + paràgrafs amb marques groc/verd).
+- [y] Frail dret amb 4 icones (Refinar/Rúbrica/Nova adaptació/Exportar) + separador + botó primari Exportar.
 
 ### Interaccions bàsiques
-- [ ] Clic al xip **Glossari** → la card central canvia a una llista de termes.
-- [ ] Clic al xip **Esquema** → la card canvia a una graella de nodes.
-- [ ] Clic al xip **Preguntes** → la card canvia a una llista de preguntes generades.
-- [ ] Clic al botó "Comparar amb l'original" → la card es parteix en 2 columnes (original + adaptat).
-- [ ] Clic al botó "Tornar al text" del sidebar → torna a Pas 2.
-- [ ] Clic al step "1 Per a qui" → torna a Pas 1.
-- [ ] Clic al step "2 Text" → torna a Pas 2.
+- [y] Clic al xip **Glossari** → la card central canvia a una llista de termes.
+- [y] Clic al xip **Esquema** → la card canvia a una graella de nodes.
+- [y] Clic al xip **Preguntes** → la card canvia a una llista de preguntes generades.
+- [y] Clic al botó "Comparar amb l'original" → la card es parteix en 2 columnes (original + adaptat).
+- [y] Clic al botó "Tornar al text" del sidebar → torna a Pas 2.
+- [y] Clic al step "1 Per a qui" → torna a Pas 1.
+- [y pero perds la feina que estaves fent] Clic al step "2 Text" → torna a Pas 2.
 
 ### Eines d'edició del frail
-- [ ] Clic al frail "Refinar" (icona sliders) → obre popover amb 3 steppers (Llargada/Simplificar/To) + checkbox "Revisar català" + àrea de text + botó "Aplicar i regenerar".
-- [ ] Clic al frail "Refer amb rúbrica" → popover amb 5 checkboxes + textarea + botó "Regenerar".
-- [ ] Clic al frail "Nova adaptació" → popover de confirmació amb botó "Nova adaptació".
-- [ ] Clic al frail "Exportar" → popover amb 5 opcions (PDF / Word / Google Docs / Imatge / Imprimir).
-- [ ] Clic fora d'un popover → es tanca.
-- [ ] Tecla `Esc` → tanca el popover actiu.
-
+- [y no indica els canvis] Clic al frail "Refinar" (icona sliders) → obre popover amb 3 steppers (Llargada/Simplificar/To) + checkbox "Revisar català" + àrea de text + botó "Aplicar i regenerar".
+- [y pero no se que fa] Clic al frail "Refer amb rúbrica" → popover amb 5 checkboxes + textarea + botó "Regenerar".
+- [y torna a inici de pas 3 amb el text de la revolucio francesa] Clic al frail "Nova adaptació" → popover de confirmació amb botó "Nova adaptació".
+- [y exporta pero tan sols el text sense cap format i amb el text original sota, amb pdf s'obre el fitxer a la mateixa pantalla i deixes de veure el pas 3] Clic al frail "Exportar" → popover amb 5 opcions (PDF / Word / Google Docs / Imatge / Imprimir).
+- [y] Clic fora d'un popover → es tanca.
+- [y] Tecla `Esc` → tanca el popover actiu.
+al mobil lopcio central del bottonbar és regenerar en el pas 3 en comptes de exporatr. tan sols funciona comparar, les altres no fan res
 ### Eines sobre el text adaptat
-- [ ] Selecciones un fragment de text dins de la targeta → apareix una **selection toolbar** flotant sobre la selecció amb botons (Simplificar/Explicar/Sinònim/Glossari + separador + B/I/U/H2/UL).
-- [ ] Clic a "Simplificar" dins la selection toolbar → apareix overlay "Regenerant…" durant ~1.5s i la selecció es marca amb classe `.ins` (fons clar).
-- [ ] Clic a "B" (bold) amb text seleccionat → el text es posa en negreta.
-- [ ] Passes el cursor sobre un paràgraf → apareix un **handle de 3 punts** a l'esquerra.
-- [ ] Clic al handle → menú contextual amb "Reescriure més senzill", "Dividir en frases curtes", "Afegir un exemple", "Marcar com a important", "Eliminar paràgraf".
-- [ ] Clic a "Dividir en frases curtes" → overlay "Dividint…" i canvi al text.
+- [y la funcio UL tan sols aplica vinyetes i podria fer tabe numeració (un cicle de tres: vinyetes-numeració-res) ] Selecciones un fragment de text dins de la targeta → apareix una **selection toolbar** flotant sobre la selecció amb botons (Simplificar/Explicar/Sinònim/Glossari + separador + B/I/U/H2/UL).No hi ha eina de justificacio.
+- [y] Clic a "Simplificar" dins la selection toolbar → apareix overlay "Regenerant…" durant ~1.5s i la selecció es marca amb classe `.ins` (fons clar).
+- [y] Clic a "B" (bold) amb text seleccionat → el text es posa en negreta.
+- [ de 6 punts i quan els vas a clicar desapareix. per a què serveix?] Passes el cursor sobre un paràgraf → apareix un **handle de 3 punts** a l'esquerra.
+- [no] Clic al handle → menú contextual amb "Reescriure més senzill", "Dividir en frases curtes", "Afegir un exemple", "Marcar com a important", "Eliminar paràgraf".
+- [-] Clic a "Dividir en frases curtes" → overlay "Dividint…" i canvi al text.
 
 ### Undo/Redo
-- [ ] `Cmd/Ctrl+Z` → desfà l'última acció (restaura text).
-- [ ] `Cmd/Ctrl+Shift+Z` → refà.
-- [ ] Botons undo/redo de la topbar reflecteixen l'estat (actius/desactivats segons pila).
+- [y] `Cmd/Ctrl+Z` → desfà l'última acció (restaura text).
+- [y] `Cmd/Ctrl+Shift+Z` → refà.
+- ] Botons undo/redo de la topbar reflecteixen l'estat (actius/desactivats segons pila).
 
 ### Regeneració (aplicació real, no només visual)
 - [ ] Cap acció de regenerar envia una crida real al LLM. **Ara mateix tot és mock**: l'overlay apareix 1.5s i restaura/modifica text amb lògica de client. **Aquesta és la feina pendent crítica** (Fase 5).
@@ -118,24 +118,24 @@ Prova sencera del flux responsive a tauleta (~768–1024px). Marca cada item que
 
 Redimensiona la finestra per sota de 640px d'amplada:
 
-- [ ] Rail esquerre desapareix.
-- [ ] Apareix botó hamburguesa a l'esquerra de la topbar.
-- [ ] Clic al hamburguesa → drawer lateral obert amb 5 entrades (Inici/Perfils/Textos/Biblioteca/Preferències).
-- [ ] L'entrada corresponent al pas actual està ressaltada amb `.on` (fons lavanda clar).
-- [ ] Clic al backdrop fosc → tanca drawer.
-- [ ] Clic a la X (dreta de la capçalera del drawer) → tanca drawer.
-- [ ] Tecla Esc → tanca drawer.
-- [ ] Clic a una entrada del drawer → navega al pas i tanca el drawer.
+- [y] Rail esquerre desapareix.
+- [y] Apareix botó hamburguesa a l'esquerra de la topbar.
+- [y] Clic al hamburguesa → drawer lateral obert amb 5 entrades (Inici/Perfils/Textos/Biblioteca/Preferències).
+- [y] L'entrada corresponent al pas actual està ressaltada amb `.on` (fons lavanda clar).
+- [y] Clic al backdrop fosc → tanca drawer.
+- [ Clic a la X (dreta de la capçalera del drawer) → tanca drawer.
+- [] Tecla Esc → tanca drawer.
+- [] Clic a una entrada del drawer → navega al pas i tanca el drawer.
 
 ---
 
 ## 5. Responsive — redimensionament de la finestra
 
-- [ ] A **>1024px** (escriptori): rail, sidebars i frail tots visibles. El layout és el del prototip desktop original.
-- [ ] A **768–1024px** (tauleta): rail, sidebar i frail encara visibles, però amb mides lleugerament reduïdes.
-- [ ] A **<640px** (mòbil): rail i sidebar amagats, frail substituït per bottom tab bar (a Pas 2 i Pas 3), hamburguesa visible.
-- [ ] Al transicionar entre mides, cap element "peta" visualment (res desbordant, res solapant-se).
-
+- [y] A **>1024px** (escriptori): rail, sidebars i frail tots visibles. El layout és el del prototip desktop original.
+- [] A **768–1024px** (tauleta): rail, sidebar i frail encara visibles, però amb mides lleugerament reduïdes.
+- [y] A **<640px** (mòbil): rail i sidebar amagats, frail substituït per bottom tab bar (a Pas 2 i Pas 3), hamburguesa visible.
+- [y] Al transicionar entre mides, cap element "peta" visualment (res desbordant, res solapant-se).
+desapareixen chard de per a qui, help i compartir, undo/redo
 ---
 
 ## 6. Problemes coneguts
