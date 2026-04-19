@@ -2400,6 +2400,21 @@ def _verify_adaptation(active_model: str, text_original: str, text_adapted: str,
     return avg, {"Q": q, "P": p, "C": c, "j": data.get("j", "")}
 
 
+def _log_session(session: dict) -> None:
+    """Insereix una fila a atne_sessions (Supabase). Fire-and-forget."""
+    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+        return
+    try:
+        requests.post(
+            f"{SUPABASE_URL}/rest/v1/atne_sessions",
+            headers={**SUPABASE_HEADERS, "Prefer": "return=minimal"},
+            json=session,
+            timeout=5,
+        )
+    except Exception as e:
+        print(f"[telemetria] error insert atne_sessions: {e}", flush=True)
+
+
 def run_adaptation(text: str, profile: dict, context: dict, params: dict,
                    progress_callback=None, model_override: str = None):
     """Executa tot el pipeline d'adaptació: instruccions graduades + LLM + Verify + Retry.
@@ -2411,6 +2426,7 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
     (diagnòstic, generació de material, recerca).
     """
     cb = progress_callback or (lambda ev: None)
+    t_start = time.time()
     # Sprint 1B: el model de l'adapt es resol via _MODEL_CONFIG["adapt"]
     # (configurable des de /admin) amb override puntual via payload.model.
     # _model_for() retorna alias curt o model_id llarg; _call_llm() sap
@@ -2420,6 +2436,12 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
     # System prompt — sense RAG, les instruccions graduades són el motor
     cb({"type": "step", "step": "search", "msg": "Preparant instruccions d'adaptació..."})
     system_prompt = build_system_prompt(profile, context, params, rag_context="")
+    _filtered = instruction_filter.get_instructions(profile, params)
+    _instruction_ids = [
+        instr["id"]
+        for _macro in _filtered.get("macrodirectives", {}).values()
+        for instr in _macro.get("instruccions", [])
+    ]
 
     # 5. Cridar LLM segons active_model (amb Generate+Verify+Retry)
     # Label UI derivat del (provider, specific_model) — compat amb alias curts i model_id llargs.
@@ -2597,6 +2619,34 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
                 "msg": f"{len(quality['caracters_exotics'])} caràcter(s) exòtic(s) detectats — revisa al Quality Report"})
     cb(result_ev)
     cb({"type": "done"})
+
+    # Telemetria pilot: log asíncron a atne_sessions (fire-and-forget)
+    try:
+        _conditions = profile.get("conditions") or profile.get("caracteristiques") or []
+        if isinstance(_conditions, str):
+            _conditions = [_conditions]
+        import threading as _threading
+        _threading.Thread(
+            target=_log_session,
+            args=({
+                "profile_type":    profile.get("profile_type") or profile.get("tipus") or "desconegut",
+                "conditions":      list(_conditions),
+                "etapa":           params.get("etapa", ""),
+                "mecr_entrada":    params.get("mecr_base") or params.get("mecr", ""),
+                "mecr_sortida":    params.get("mecr_sortida", ""),
+                "model":           active_model,
+                "instruction_ids": _instruction_ids,
+                "n_instructions":  len(_instruction_ids),
+                "latency_ms":      int((time.time() - t_start) * 1000),
+                "input_chars":     len(text),
+                "output_chars":    len(adapted),
+                "verify_score":    best_score if verify_enabled and best_score >= 0 else None,
+            },),
+            daemon=True,
+        ).start()
+    except Exception as _te:
+        print(f"[telemetria] error creant thread: {_te}", flush=True)
+
     return adapted
 
 
