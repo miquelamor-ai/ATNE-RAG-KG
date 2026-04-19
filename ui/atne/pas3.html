@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="/ui/styles/tokens.css">
 <link rel="stylesheet" href="/ui/styles/base.css">
 <link rel="stylesheet" href="/ui/styles/shell.css">
-<script src="/ui/atne/js/llm.js?v=20260419i" defer></script>
+<script src="/ui/atne/js/llm.js?v=20260419j" defer></script>
 
 <style>
   /* =========================================================
@@ -1833,8 +1833,21 @@
   (function maybeAdaptOnLoad() {
     if (!window.ATNE_LLM) return;  // mòdul llm.js no carregat (cas standalone)
 
+    const adaptedElInit = document.getElementById('adapted-text');
     const docOriginal = localStorage.getItem('atne.doc_original');
-    if (!docOriginal || !docOriginal.trim()) return;  // cap text per adaptar → demo
+    if (!docOriginal || !docOriginal.trim()) {
+      // Cap text real per adaptar. Substituïm el mock hardcoded del HTML per
+      // un missatge clar i tornem a Pas 2 al cap d'uns segons.
+      if (adaptedElInit) {
+        adaptedElInit.innerHTML = '<p style="color:var(--ink-500);font-style:italic;text-align:center;padding:40px 0">Encara no hi ha cap text per adaptar.<br><br>Torna al Pas 2 per escriure-ho, pujar-ho o generar-ho.</p>';
+      }
+      window.atneToast?.('Torna al Pas 2 per escriure o pujar un text', 'info');
+      setTimeout(() => { if (!localStorage.getItem('atne.doc_original')) location.href = '/ui/atne/pas2.html'; }, 2500);
+      return;
+    }
+    // Sempre que venim de Pas 2 amb text real, netegem el mock abans de render
+    // real (evita que l'usuari vegi "Revolució Industrial" mentre espera LLM).
+    if (adaptedElInit) adaptedElInit.innerHTML = '';
 
     const pid = localStorage.getItem('atne.profile_id') || 'marc';
     const profile = window.ATNE_PROFILES[pid] || window.ATNE_PROFILES.marc;
