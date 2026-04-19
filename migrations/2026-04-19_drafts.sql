@@ -22,7 +22,14 @@ CREATE TABLE IF NOT EXISTS atne_drafts (
 );
 CREATE INDEX IF NOT EXISTS idx_atne_drafts_docent ON atne_drafts(docent_id, updated_at DESC);
 
--- Desactivar RLS: el backend autoritza per docent_id via filtre al query
--- (mateix patró que la taula 'history'). Sense això, la clau anon retorna
--- error 42501 ("new row violates row-level security policy").
-ALTER TABLE atne_drafts DISABLE ROW LEVEL SECURITY;
+-- RLS ON + policy allow-all per al rol 'anon'. Equivalent funcional a
+-- DISABLE RLS per a la clau SUPABASE_ANON_KEY (backend pot fer CRUD), però
+-- deixa RLS activat per:
+--   (a) quan s'afegeixi auth real (JWT del docent amb docent_id), només cal
+--       canviar la policy per restringir (USING docent_id = auth.jwt()->>'docent_id').
+--   (b) el dashboard de Supabase respecta RLS si es consulta sense la anon key.
+-- L'autorització actual per docent_id es fa via el filtre del backend al query.
+ALTER TABLE atne_drafts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "atne_drafts_anon_rw"
+  ON atne_drafts FOR ALL TO anon
+  USING (true) WITH CHECK (true);
