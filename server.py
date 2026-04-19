@@ -455,7 +455,7 @@ async def save_draft(payload: dict = Body(...)):
             # UPDATE: cal verificar que el draft pertany al docent (evitem
             # que un docent_id foraster pugui modificar drafts d'un altre).
             resp = requests.patch(
-                f"{SUPABASE_URL}/rest/v1/drafts?id=eq.{draft_id}&docent_id=eq.{docent_id}",
+                f"{SUPABASE_URL}/rest/v1/atne_drafts?id=eq.{draft_id}&docent_id=eq.{docent_id}",
                 headers={**SUPABASE_HEADERS, "Prefer": "return=representation"},
                 json=row,
                 timeout=10,
@@ -475,7 +475,7 @@ async def save_draft(payload: dict = Body(...)):
             # Traiem `updated_at=now()` del row perquè el DEFAULT ja funciona.
             row.pop("updated_at", None)
             resp = requests.post(
-                f"{SUPABASE_URL}/rest/v1/drafts",
+                f"{SUPABASE_URL}/rest/v1/atne_drafts",
                 headers={**SUPABASE_HEADERS, "Prefer": "return=representation"},
                 json=row,
                 timeout=10,
@@ -509,7 +509,7 @@ async def list_drafts(docent_id: str = "", limit: int = 20):
         limit = 20
     try:
         resp = requests.get(
-            f"{SUPABASE_URL}/rest/v1/drafts"
+            f"{SUPABASE_URL}/rest/v1/atne_drafts"
             f"?select=id,profile_id,title,text,materia,nivell,created_at,updated_at"
             f"&docent_id=eq.{docent_id}"
             f"&order=updated_at.desc&limit={limit}",
@@ -548,7 +548,7 @@ async def get_draft(draft_id: int, docent_id: str = ""):
         return JSONResponse({"ok": False, "error": "docent_id buit"}, status_code=400)
     try:
         resp = requests.get(
-            f"{SUPABASE_URL}/rest/v1/drafts"
+            f"{SUPABASE_URL}/rest/v1/atne_drafts"
             f"?select=id,profile_id,title,text,materia,nivell,created_at,updated_at"
             f"&id=eq.{draft_id}&docent_id=eq.{docent_id}",
             headers=SUPABASE_HEADERS,
@@ -577,7 +577,7 @@ async def delete_draft(draft_id: int, docent_id: str = ""):
         return JSONResponse({"ok": False, "error": "docent_id buit"}, status_code=400)
     try:
         resp = requests.delete(
-            f"{SUPABASE_URL}/rest/v1/drafts?id=eq.{draft_id}&docent_id=eq.{docent_id}",
+            f"{SUPABASE_URL}/rest/v1/atne_drafts?id=eq.{draft_id}&docent_id=eq.{docent_id}",
             headers={**SUPABASE_HEADERS, "Prefer": "return=minimal"},
             timeout=10,
         )
@@ -607,7 +607,7 @@ async def patch_draft(draft_id: int, payload: dict = Body(...)):
     update["updated_at"] = "now()"
     try:
         resp = requests.patch(
-            f"{SUPABASE_URL}/rest/v1/drafts?id=eq.{draft_id}&docent_id=eq.{docent_id}",
+            f"{SUPABASE_URL}/rest/v1/atne_drafts?id=eq.{draft_id}&docent_id=eq.{docent_id}",
             headers={**SUPABASE_HEADERS, "Prefer": "return=representation"},
             json=update,
             timeout=10,
