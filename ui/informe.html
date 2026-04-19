@@ -4,61 +4,268 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ATNE — Informe Avaluació 5 Models</title>
+
+<!-- Tipografia -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- ATNE base global (ordre obligatori: tokens → base → shell) -->
+<link rel="stylesheet" href="/ui/styles/tokens.css">
+<link rel="stylesheet" href="/ui/styles/base.css">
+<link rel="stylesheet" href="/ui/styles/shell.css">
+
 <style>
-:root {
-  --bg: #0f172a; --card: #1e293b; --card2: #334155; --text: #e2e8f0; --muted: #94a3b8;
-  --primary: #3b82f6; --success: #22c55e; --danger: #ef4444; --warning: #eab308;
-  --gold: #fbbf24; --silver: #cbd5e1; --bronze: #d97706;
+/* =========================================================
+   Informe 5 Models · overrides Editorial Cream
+   ========================================================= */
+
+body {
+  background: var(--cream);
+  color: var(--ink-900);
+  line-height: 1.6;
 }
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
 
-nav { display:flex; gap:0; background:#111827; padding:0 1rem; position:sticky; top:0; z-index:1000; flex-wrap:wrap; }
-nav a { color:#d1d5db; text-decoration:none; padding:.6rem 1rem; font-size:.85rem; font-weight:500; }
-nav a.active { background:#1a56db; color:#fff; }
-nav a:hover { background:#1f2937; }
+/* ─── Barra de navegació ──────────────────────────────── */
+nav {
+  display: flex;
+  gap: 0;
+  background: var(--ink-900);
+  padding: 0 var(--sp-4);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  flex-wrap: wrap;
+}
+nav a {
+  color: var(--ink-300);
+  text-decoration: none;
+  padding: .6rem var(--sp-4);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-med);
+  transition: background var(--trans-fast), color var(--trans-fast);
+}
+nav a.active {
+  background: var(--primary);
+  color: #fff;
+}
+nav a:hover {
+  background: var(--ink-800);
+  color: var(--ink-100);
+}
 
-header { background: linear-gradient(135deg, #1e3a5f, #0f172a); padding: 2rem; border-bottom: 2px solid var(--primary); }
-header h1 { font-size: 1.8rem; } header h1 span { color: var(--primary); }
-header p { color: var(--muted); margin-top: 0.4rem; font-size: 0.9rem; }
-.meta-pills { display:flex; gap:0.5rem; margin-top:0.75rem; flex-wrap:wrap; }
-.pill { background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); color:var(--primary); padding:0.2rem 0.6rem; border-radius:9999px; font-size:0.75rem; }
+/* ─── Capçalera ───────────────────────────────────────── */
+header {
+  background: var(--ink-800);
+  padding: var(--sp-7) var(--sp-7) var(--sp-6);
+  border-bottom: 2px solid var(--primary);
+}
+header h1 {
+  font-family: var(--serif);
+  font-size: var(--fs-3xl);
+  font-weight: var(--fw-bold);
+  color: var(--ink-50);
+  line-height: var(--lh-tight);
+}
+header h1 span { color: var(--primary-100); }
+header p {
+  color: var(--ink-300);
+  margin-top: var(--sp-2);
+  font-size: var(--fs-sm);
+}
+.meta-pills {
+  display: flex;
+  gap: var(--sp-2);
+  margin-top: var(--sp-3);
+  flex-wrap: wrap;
+}
+.pill {
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .15);
+  color: var(--ink-100);
+  padding: 2px var(--sp-3);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-xs);
+  font-family: var(--mono);
+  font-weight: var(--fw-med);
+}
 
-.container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+/* ─── Contenidor ──────────────────────────────────────── */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--sp-6);
+}
 
-section { background: var(--card); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
-section h2 { font-size: 1.3rem; margin-bottom: 1rem; color: var(--primary); border-bottom: 1px solid var(--card2); padding-bottom: 0.5rem; }
-section h3 { font-size: 1.05rem; margin: 1rem 0 0.5rem; color: var(--text); }
-section p { margin-bottom: 0.8rem; color: var(--text); }
-section ul { margin-left: 1.5rem; margin-bottom: 0.8rem; }
-section li { margin-bottom: 0.4rem; }
+/* ─── Seccions / cards ────────────────────────────────── */
+section {
+  background: #fff;
+  border: 1px solid var(--paper-line);
+  border-radius: var(--r-xl);
+  padding: var(--sp-6);
+  margin-bottom: var(--sp-5);
+  box-shadow: var(--sh-sm);
+}
+section h2 {
+  font-family: var(--serif);
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-bold);
+  margin-bottom: var(--sp-4);
+  color: var(--primary);
+  border-bottom: 1px solid var(--paper-line);
+  padding-bottom: var(--sp-3);
+  line-height: var(--lh-tight);
+}
+section h3 {
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semi);
+  margin: var(--sp-4) 0 var(--sp-2);
+  color: var(--ink-800);
+}
+section p {
+  margin-bottom: var(--sp-3);
+  color: var(--ink-700);
+}
+section ul {
+  margin-left: var(--sp-5);
+  margin-bottom: var(--sp-3);
+  list-style: disc;
+}
+section li {
+  margin-bottom: var(--sp-1);
+  color: var(--ink-700);
+}
 
-table { width: 100%; border-collapse: collapse; margin: 0.8rem 0; font-size: 0.9rem; }
-th, td { padding: 0.6rem 0.8rem; text-align: left; border-bottom: 1px solid var(--card2); }
-th { background: #0f172a; color: var(--primary); font-weight: 600; }
-td.num { text-align: right; font-variant-numeric: tabular-nums; }
-tr:hover { background: rgba(59,130,246,0.05); }
-.row-gold { background: rgba(251,191,36,0.08); }
-.row-silver { background: rgba(203,213,225,0.06); }
-.row-bronze { background: rgba(217,119,6,0.06); }
+/* ─── Taules ──────────────────────────────────────────── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--sp-3) 0;
+  font-size: var(--fs-sm);
+}
+th, td {
+  padding: var(--sp-2) var(--sp-3);
+  text-align: left;
+  border-bottom: 1px solid var(--paper-line);
+}
+th {
+  background: var(--cream-2);
+  color: var(--primary);
+  font-weight: var(--fw-semi);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-family: var(--mono);
+}
+td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--mono);
+  font-size: var(--fs-sm);
+}
+tr:hover { background: var(--primary-50); }
+.row-gold  { background: rgba(251, 191,  36, .06); }
+.row-silver{ background: rgba(181, 189, 212, .10); }
+.row-bronze{ background: rgba(180, 130,  60, .06); }
 
+/* ─── Medalles i badges ───────────────────────────────── */
 .medal { font-size: 1.2rem; }
-.badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
-.badge-free { background: rgba(34,197,94,0.2); color: var(--success); border: 1px solid rgba(34,197,94,0.4); }
-.badge-paid { background: rgba(239,68,68,0.2); color: var(--danger); border: 1px solid rgba(239,68,68,0.4); }
-.badge-bug { background: rgba(234,179,8,0.2); color: var(--warning); border: 1px solid rgba(234,179,8,0.4); }
+.badge {
+  display: inline-block;
+  padding: 2px var(--sp-2);
+  border-radius: var(--r-xs);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semi);
+  font-family: var(--mono);
+}
+.badge-free {
+  background: var(--ok-50);
+  color: var(--ok);
+  border: 1px solid var(--ok-100);
+}
+.badge-paid {
+  background: var(--danger-50);
+  color: var(--danger);
+  border: 1px solid rgba(180, 61, 61, .25);
+}
+.badge-bug {
+  background: var(--warn-50);
+  color: var(--warn);
+  border: 1px solid var(--warn-100);
+}
 
-.highlight { background: rgba(59,130,246,0.1); border-left: 3px solid var(--primary); padding: 0.8rem 1rem; margin: 0.8rem 0; border-radius: 4px; }
-.success-box { background: rgba(34,197,94,0.08); border-left: 3px solid var(--success); padding: 0.8rem 1rem; margin: 0.8rem 0; border-radius: 4px; }
-.warning-box { background: rgba(234,179,8,0.08); border-left: 3px solid var(--warning); padding: 0.8rem 1rem; margin: 0.8rem 0; border-radius: 4px; }
+/* ─── Caixes destacades ───────────────────────────────── */
+.highlight {
+  background: var(--primary-50);
+  border-left: 3px solid var(--primary);
+  padding: var(--sp-3) var(--sp-4);
+  margin: var(--sp-3) 0;
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+}
+.success-box {
+  background: var(--ok-50);
+  border-left: 3px solid var(--ok);
+  padding: var(--sp-3) var(--sp-4);
+  margin: var(--sp-3) 0;
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+}
+.warning-box {
+  background: var(--warn-50);
+  border-left: 3px solid var(--warn);
+  padding: var(--sp-3) var(--sp-4);
+  margin: var(--sp-3) 0;
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+}
 
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+/* ─── Grid 2 columnes ─────────────────────────────────── */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-4);
+}
 @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
 
-.stat-card { background: #0f172a; padding: 1rem; border-radius: 6px; border: 1px solid var(--card2); }
-.stat-label { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; }
-.stat-value { font-size: 2rem; font-weight: 700; color: var(--primary); margin-top: 0.2rem; }
-.stat-sub { color: var(--muted); font-size: 0.85rem; margin-top: 0.2rem; }
+/* ─── Stat cards ──────────────────────────────────────── */
+.stat-card {
+  background: var(--cream);
+  padding: var(--sp-4);
+  border-radius: var(--r-md);
+  border: 1px solid var(--paper-line);
+  box-shadow: var(--sh-xs);
+}
+.stat-label {
+  color: var(--ink-500);
+  font-size: var(--fs-xs);
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-weight: var(--fw-semi);
+}
+.stat-value {
+  font-family: var(--serif);
+  font-size: var(--fs-3xl);
+  font-weight: var(--fw-bold);
+  color: var(--primary);
+  margin-top: var(--sp-1);
+  line-height: var(--lh-tight);
+}
+.stat-sub {
+  color: var(--ink-500);
+  font-size: var(--fs-xs);
+  font-family: var(--mono);
+  margin-top: var(--sp-1);
+}
+
+/* ─── Codi inline ─────────────────────────────────────── */
+code {
+  font-family: var(--mono);
+  font-size: var(--fs-xs);
+  background: var(--cream-2);
+  color: var(--ink-700);
+  padding: 1px 5px;
+  border-radius: var(--r-xs);
+  border: 1px solid var(--paper-line);
+}
 </style>
 </head>
 <body>
@@ -96,7 +303,7 @@ tr:hover { background: rgba(59,130,246,0.05); }
     <h2>Resum executiu</h2>
     <p><strong>Els 3 models gratuits arriben al 94-95% de la qualitat del millor model de pagament.</strong> Per a un pilot educatiu sense pressupost, Mistral Small i Gemma 4 31B son opcions plenament viables.</p>
 
-    <div class="grid-2" style="margin-top: 1rem;">
+    <div class="grid-2" style="margin-top: var(--sp-4);">
         <div class="stat-card">
             <div class="stat-label">Millor model</div>
             <div class="stat-value">GPT-4o-mini</div>
@@ -213,7 +420,7 @@ tr:hover { background: rgba(59,130,246,0.05); }
             </tr>
         </tbody>
     </table>
-    <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem;">En negreta, el lider per cada criteri. Sonnet amb bug conegut a la branca RAG-v2 (textos truncats).</p>
+    <p style="font-size: var(--fs-xs); color: var(--ink-500); margin-top: var(--sp-2); font-family: var(--mono);">En negreta, el lider per cada criteri. Sonnet amb bug conegut a la branca RAG-v2 (textos truncats).</p>
 </section>
 
 <!-- Duel gratuits -->
@@ -270,7 +477,7 @@ tr:hover { background: rgba(59,130,246,0.05); }
             <tr><td>mistral</td><td class="num">—</td><td class="num">—</td><td class="num"><strong>4.19</strong></td><td>Nomes RAG-v2 testat</td></tr>
         </tbody>
     </table>
-    <p style="font-size: 0.85rem; color: var(--muted);">*Sonnet RAG-v2: bug de generacio (textos truncats a 111 paraules).</p>
+    <p style="font-size: var(--fs-xs); color: var(--ink-500); font-family: var(--mono);">*Sonnet RAG-v2: bug de generacio (textos truncats a 111 paraules).</p>
 </section>
 
 <!-- Biaix jutges -->
@@ -334,7 +541,7 @@ tr:hover { background: rgba(59,130,246,0.05); }
         <li><strong>6 marcs teorics</strong>: Halliday, IEC, TSAR, Mayer, CAST/UDL, Sweller, Vygotsky, Bloom</li>
     </ul>
 
-    <p style="margin-top: 1rem; color: var(--muted); font-size: 0.85rem;">
+    <p style="margin-top: var(--sp-4); color: var(--ink-500); font-size: var(--fs-xs); font-family: var(--mono);">
         Documents complets: <code>docs/avaluacio_final_5_models.md</code>,
         <code>docs/avaluacio_rubrica.md</code>,
         <code>docs/estrategia_costos_escalat.md</code>

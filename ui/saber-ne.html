@@ -1,997 +1,1941 @@
 <!DOCTYPE html>
-<html class="light" lang="ca"><head>
+<html class="light" lang="ca">
+<head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Adaptar materials | Saber-ne+</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script id="tailwind-config">
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            "colors": {
-                    "on-tertiary-fixed": "#000965",
-                    "tertiary-fixed-dim": "#bdc2ff",
-                    "surface-tint": "#4c51bf",
-                    "inverse-primary": "#bfc1ff",
-                    "tertiary-container": "#4552c2",
-                    "tertiary-fixed": "#dfe0ff",
-                    "inverse-surface": "#213145",
-                    "surface-container-highest": "#d3e4fe",
-                    "surface-container-high": "#dce9ff",
-                    "secondary-fixed": "#e0e0ff",
-                    "primary-container": "#4c51bf",
-                    "on-tertiary": "#ffffff",
-                    "on-error": "#ffffff",
-                    "primary-fixed": "#e1e0ff",
-                    "on-surface-variant": "#464653",
-                    "primary": "#3337a6",
-                    "outline": "#767684",
-                    "on-error-container": "#93000a",
-                    "on-secondary-fixed": "#000767",
-                    "background": "#f8f9ff",
-                    "on-primary-fixed-variant": "#3337a6",
-                    "primary-fixed-dim": "#bfc1ff",
-                    "error-container": "#ffdad6",
-                    "on-tertiary-container": "#d3d5ff",
-                    "surface": "#f8f9ff",
-                    "on-surface": "#0b1c30",
-                    "error": "#ba1a1a",
-                    "secondary-fixed-dim": "#bdc2ff",
-                    "secondary-container": "#8792fe",
-                    "tertiary": "#2b38a9",
-                    "inverse-on-surface": "#eaf1ff",
-                    "on-primary-container": "#d4d5ff",
-                    "surface-dim": "#cbdbf5",
-                    "surface-container-lowest": "#ffffff",
-                    "surface-container-low": "#eff4ff",
-                    "on-background": "#0b1c30",
-                    "on-primary": "#ffffff",
-                    "surface-container": "#e5eeff",
-                    "outline-variant": "#c7c5d5",
-                    "on-tertiary-fixed-variant": "#2b38aa",
-                    "surface-variant": "#d3e4fe",
-                    "surface-bright": "#f8f9ff",
-                    "on-secondary-fixed-variant": "#2f3aa3",
-                    "on-secondary-container": "#17228f",
-                    "on-primary-fixed": "#03006d",
-                    "on-secondary": "#ffffff",
-                    "secondary": "#4953bc"
-            },
-            "borderRadius": {
-                    "DEFAULT": "0.25rem",
-                    "lg": "0.5rem",
-                    "xl": "1.5rem",
-                    "full": "9999px"
-            },
-            "fontFamily": {
-                    "headline": ["Plus Jakarta Sans"],
-                    "body": ["Inter"],
-                    "label": ["Inter"]
-            }
-          },
-        },
-      }
-    </script>
+
+<!-- Tipografia -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+<!-- ATNE base global (ordre obligatori: tokens → base → shell) -->
+<link rel="stylesheet" href="/ui/styles/tokens.css">
+<link rel="stylesheet" href="/ui/styles/base.css">
+<link rel="stylesheet" href="/ui/styles/shell.css">
+
 <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        body { font-family: 'Inter', sans-serif; }
-        h1, h2, h3, h4, .brand-font { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .sidebar-active { background-color: rgba(51, 55, 166, 0.1); color: #3337a6; border-right: 3px solid #3337a6; }
-        html { scroll-behavior: smooth; }
-        details > summary { list-style: none; cursor: pointer; }
-        details > summary::-webkit-details-marker { display: none; }
-        details[open] .expand-icon { transform: rotate(180deg); }
-        .expand-icon { transition: transform 0.2s ease; }
-    </style>
+  /* =========================================================
+     Saber-ne+ · Layout i estils de la pàgina editorial
+     ========================================================= */
+
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    vertical-align: middle;
+    line-height: 1;
+  }
+
+  /* ─── Pàgina general ────────────────────────────────────── */
+  html { scroll-behavior: smooth; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--cream);
+    color: var(--ink-900);
+  }
+
+  /* ─── TopNavBar ──────────────────────────────────────────── */
+  .topnav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 50;
+    background: rgba(244, 241, 232, 0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--paper-line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 var(--sp-6);
+    height: 57px;
+    gap: var(--sp-4);
+  }
+
+  .topnav-left {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+  }
+
+  .brand-logo {
+    font-family: var(--serif);
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-bold);
+    color: var(--primary);
+    letter-spacing: -0.02em;
+  }
+  .brand-logo a:hover { opacity: .8; }
+
+  .nav-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--paper-line);
+    margin: 0 var(--sp-2);
+    flex-shrink: 0;
+  }
+
+  .nav-label {
+    font-family: var(--mono);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--ink-500);
+  }
+
+  .topnav-links {
+    display: none;
+    align-items: center;
+    gap: var(--sp-6);
+  }
+  @media (min-width: 768px) { .topnav-links { display: flex; } }
+
+  .topnav-links a {
+    font-size: var(--fs-md);
+    font-weight: var(--fw-med);
+    color: var(--ink-600);
+    transition: color var(--trans-fast);
+  }
+  .topnav-links a:hover { color: var(--primary); }
+  .topnav-links a.active {
+    color: var(--primary);
+    font-weight: var(--fw-semi);
+  }
+
+  .topnav-right {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+  }
+
+  .topnav-back {
+    font-family: var(--mono);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semi);
+    color: var(--ink-500);
+    transition: color var(--trans-fast);
+  }
+  .topnav-back:hover { color: var(--primary); }
+
+  .icon-btn {
+    width: 32px; height: 32px;
+    border-radius: var(--r-md);
+    display: grid;
+    place-items: center;
+    color: var(--primary);
+    transition: background var(--trans-fast);
+  }
+  .icon-btn:hover { background: var(--cream-2); }
+
+  /* ─── Layout principal ───────────────────────────────────── */
+  .page-wrap {
+    display: flex;
+    padding-top: 57px;
+    min-height: 100vh;
+  }
+
+  /* ─── Sidebar esquerre ───────────────────────────────────── */
+  .sidebar {
+    width: 256px;
+    background: #fff;
+    border-right: 1px solid var(--paper-line);
+    position: fixed;
+    left: 0;
+    height: calc(100vh - 57px);
+    overflow-y: auto;
+    display: none;
+    z-index: 30;
+  }
+  @media (min-width: 1024px) { .sidebar { display: block; } }
+
+  .sidebar-inner { padding: var(--sp-6); }
+
+  .sidebar-heading {
+    font-family: var(--mono);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--ink-400);
+    margin-bottom: var(--sp-6);
+  }
+
+  .sidebar-nav { display: flex; flex-direction: column; gap: var(--sp-1); }
+
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: 10px var(--sp-4);
+    font-size: var(--fs-md);
+    font-weight: var(--fw-semi);
+    color: var(--ink-700);
+    border-radius: var(--r-lg);
+    transition: background var(--trans-fast), color var(--trans-fast);
+  }
+  .sidebar-link:hover {
+    background: var(--cream-2);
+    color: var(--ink-900);
+  }
+
+  .sidebar-num {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--primary-50);
+    color: var(--primary);
+    display: grid;
+    place-items: center;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: var(--fw-bold);
+    flex-shrink: 0;
+  }
+
+  /* ─── Contingut principal ────────────────────────────────── */
+  .main-content {
+    flex: 1;
+    background: var(--cream);
+    padding: var(--sp-8);
+  }
+  @media (min-width: 1024px) { .main-content { margin-left: 256px; } }
+
+  .content-wrap { max-width: 1400px; margin: 0 auto; }
+
+  /* ─── Header del document ────────────────────────────────── */
+  .doc-header { margin-bottom: var(--sp-9); }
+
+  .doc-title {
+    font-family: var(--serif);
+    font-size: var(--fs-3xl);
+    font-weight: var(--fw-bold);
+    color: var(--ink-900);
+    line-height: var(--lh-tight);
+    letter-spacing: -0.02em;
+    margin-bottom: var(--sp-3);
+  }
+
+  .doc-subtitle {
+    font-size: var(--fs-lg);
+    color: var(--ink-600);
+    line-height: var(--lh-body);
+    max-width: 680px;
+  }
+
+  /* ─── Seccions generals ──────────────────────────────────── */
+  .section {
+    margin-bottom: var(--sp-9);
+    scroll-margin-top: 80px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-6);
+  }
+
+  .section-badge {
+    width: 32px; height: 32px;
+    border-radius: var(--r-md);
+    background: var(--primary);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-md);
+    font-family: var(--mono);
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-family: var(--serif);
+    font-size: var(--fs-2xl);
+    font-weight: var(--fw-bold);
+    color: var(--ink-900);
+    line-height: var(--lh-tight);
+  }
+
+  .section-intro {
+    color: var(--ink-600);
+    line-height: var(--lh-read);
+    margin-bottom: var(--sp-6);
+  }
+
+  /* ─── Cards blanques ─────────────────────────────────────── */
+  .card {
+    background: #fff;
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-xl);
+    box-shadow: var(--sh-sm);
+  }
+  .card-p { padding: var(--sp-7); }
+  .card-p-sm { padding: var(--sp-5); }
+  .card-p-xs { padding: var(--sp-4); }
+
+  .card:hover { border-color: rgba(51, 55, 166, .25); }
+
+  /* ─── Cards cream (fons subtil) ──────────────────────────── */
+  .card-cream {
+    background: var(--primary-50);
+    border: 1px solid var(--primary-100);
+    border-radius: var(--r-xl);
+  }
+
+  /* ─── Overline (etiqueta de categoria) ───────────────────── */
+  .overline {
+    font-family: var(--mono);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--ink-400);
+  }
+
+  /* ─── Grids ──────────────────────────────────────────────── */
+  .grid-2 { display: grid; grid-template-columns: 1fr; gap: var(--sp-7); }
+  @media (min-width: 768px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+
+  .grid-3 { display: grid; grid-template-columns: 1fr; gap: var(--sp-5); }
+  @media (min-width: 768px) { .grid-3 { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1024px) { .grid-3 { grid-template-columns: repeat(3, 1fr); } }
+
+  .grid-4 { display: grid; grid-template-columns: 1fr; gap: var(--sp-6); }
+  @media (min-width: 768px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1280px) { .grid-4 { grid-template-columns: repeat(4, 1fr); } }
+
+  .grid-5 { display: grid; grid-template-columns: 1fr; gap: var(--sp-4); }
+  @media (min-width: 768px) { .grid-5 { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1024px) { .grid-5 { grid-template-columns: repeat(3, 1fr); } }
+  @media (min-width: 1280px) { .grid-5 { grid-template-columns: repeat(5, 1fr); } }
+
+  .col-2-1 { display: grid; grid-template-columns: 1fr; gap: var(--sp-8); }
+  @media (min-width: 1280px) { .col-2-1 { grid-template-columns: 2fr 1fr; } }
+
+  .col-3-1 { display: grid; grid-template-columns: 1fr; gap: var(--sp-8); }
+  @media (min-width: 1280px) { .col-3-1 { grid-template-columns: 3fr 1fr; } }
+
+  /* ─── §1 La mirada ───────────────────────────────────────── */
+  .mirada-body {
+    font-size: var(--fs-lg);
+    line-height: var(--lh-read);
+    color: var(--ink-700);
+  }
+  .mirada-body p { margin-bottom: var(--sp-4); }
+
+  .princip-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--sp-4);
+    margin-top: var(--sp-5);
+  }
+
+  .princip-card {
+    padding: var(--sp-4);
+    background: var(--cream);
+    border-radius: var(--r-lg);
+  }
+  .princip-card-title {
+    font-weight: var(--fw-bold);
+    color: var(--primary);
+    font-size: var(--fs-md);
+    margin-bottom: var(--sp-1);
+  }
+  .princip-card-text {
+    font-size: var(--fs-xs);
+    color: var(--ink-600);
+    line-height: 1.5;
+  }
+
+  /* Details (expandibles) */
+  details > summary { list-style: none; cursor: pointer; }
+  details > summary::-webkit-details-marker { display: none; }
+  details[open] .expand-icon { transform: rotate(180deg); }
+  .expand-icon { transition: transform var(--trans-fast); }
+
+  .details-block {
+    border: 1px solid var(--primary-100);
+    background: var(--primary-50);
+    border-radius: var(--r-xl);
+    padding: var(--sp-7);
+  }
+  .details-block summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .details-block-title {
+    font-weight: var(--fw-bold);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-family: var(--mono);
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+  }
+  .details-block .expand-icon { color: var(--primary); }
+  .details-block .details-body {
+    color: var(--ink-700);
+    font-style: italic;
+    margin-top: var(--sp-4);
+    line-height: var(--lh-read);
+  }
+
+  /* Quotes de corpus */
+  .quote-card {
+    padding: var(--sp-6);
+    background: var(--primary-50);
+    border: 1px solid var(--primary-100);
+    border-radius: var(--r-xl);
+  }
+  .quote-card blockquote {
+    font-style: italic;
+    font-weight: var(--fw-med);
+    color: var(--ink-800);
+    font-size: var(--fs-md);
+    line-height: var(--lh-read);
+    margin-bottom: var(--sp-3);
+  }
+  .quote-source {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: var(--fw-bold);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--ink-500);
+  }
+
+  .visio-card {
+    padding: var(--sp-6);
+    background: #fff;
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-xl);
+  }
+
+  /* ─── §2 Les eines (icon boxes) ─────────────────────────── */
+  .tool-icon {
+    width: 40px; height: 40px;
+    border-radius: var(--r-md);
+    display: grid;
+    place-items: center;
+    margin-bottom: var(--sp-4);
+    flex-shrink: 0;
+  }
+  .tool-icon .material-symbols-outlined { font-size: 22px; }
+
+  .tool-title {
+    font-family: var(--serif);
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-bold);
+    color: var(--ink-900);
+    margin-bottom: var(--sp-2);
+  }
+
+  .tool-desc {
+    font-size: var(--fs-md);
+    color: var(--ink-600);
+    line-height: var(--lh-body);
+    margin-bottom: var(--sp-4);
+  }
+
+  .tool-details {
+    border-top: 1px solid var(--paper-line);
+    padding-top: var(--sp-3);
+    margin-top: var(--sp-3);
+  }
+  .tool-details summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .tool-details-label {
+    font-family: var(--mono);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--primary);
+  }
+  .tool-details .details-content {
+    margin-top: var(--sp-3);
+    font-size: var(--fs-xs);
+    color: var(--ink-600);
+    line-height: var(--lh-read);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+
+  /* ─── §3 Condicions ──────────────────────────────────────── */
+  .via-badge {
+    display: inline-block;
+    padding: 2px var(--sp-2);
+    border-radius: var(--r-xs);
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: var(--fw-bold);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #fff;
+    margin-bottom: var(--sp-2);
+  }
+  .via-badge.primary { background: var(--primary); }
+  .via-badge.purple  { background: #7c3aed; }
+
+  .via-card {
+    padding: var(--sp-5);
+    border-radius: var(--r-xl);
+  }
+  .via-card.primary {
+    background: var(--primary-50);
+    border: 1px solid var(--primary-100);
+  }
+  .via-card.purple {
+    background: #f5f3ff;
+    border: 1px solid #ddd6fe;
+  }
+
+  .condicio-card {
+    padding: var(--sp-4);
+    background: #fff;
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-xl);
+  }
+  .condicio-tag {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: var(--fw-bold);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--primary);
+    margin-bottom: var(--sp-1);
+  }
+  .condicio-title {
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-md);
+    margin-bottom: var(--sp-1);
+  }
+  .condicio-text {
+    font-size: 11px;
+    color: var(--ink-600);
+    line-height: var(--lh-body);
+  }
+
+  .situacio-card {
+    padding: var(--sp-4);
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: var(--r-xl);
+  }
+  .situacio-tag {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: var(--fw-bold);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #92400e;
+    margin-bottom: var(--sp-1);
+  }
+
+  .collapsible-card {
+    background: #fff;
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-xl);
+    overflow: hidden;
+  }
+  .collapsible-card summary {
+    padding: var(--sp-5);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--ink-50);
+  }
+  .collapsible-card .collapsible-body {
+    padding: var(--sp-6);
+    font-size: var(--fs-md);
+    color: var(--ink-600);
+    line-height: var(--lh-read);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    border-top: 1px solid var(--paper-line);
+  }
+
+  /* Conductes observables */
+  .conducta-item {
+    display: flex;
+    gap: var(--sp-3);
+    align-items: flex-start;
+  }
+  .conducta-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--primary-50);
+    color: var(--primary);
+    display: grid;
+    place-items: center;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: var(--fw-bold);
+    flex-shrink: 0;
+  }
+
+  /* NESE side panel */
+  .nese-panel {
+    background: var(--ink-75);
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-xl);
+    padding: var(--sp-6);
+    display: flex;
+    flex-direction: column;
+  }
+  @media (min-width: 1280px) {
+    .nese-panel { position: sticky; top: 80px; }
+  }
+
+  .nese-item {
+    background: rgba(255,255,255,.7);
+    padding: var(--sp-3);
+    border-radius: var(--r-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .nese-item-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: var(--fw-bold);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--primary);
+  }
+  .nese-items { display: flex; flex-direction: column; gap: var(--sp-3); }
+
+  /* ─── §4 MECR (taula) ────────────────────────────────────── */
+  .table-wrap {
+    background: #fff;
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-xl);
+    box-shadow: var(--sh-sm);
+    overflow: hidden;
+  }
+
+  .mecr-table {
+    width: 100%;
+    font-size: var(--fs-md);
+    border-collapse: collapse;
+  }
+  .mecr-table thead {
+    background: var(--ink-50);
+    border-bottom: 1px solid var(--paper-line);
+  }
+  .mecr-table th {
+    padding: var(--sp-4) var(--sp-6);
+    font-family: var(--mono);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--ink-500);
+    text-align: left;
+  }
+  .mecr-table th.center { text-align: center; }
+  .mecr-table tbody tr {
+    border-bottom: 1px solid var(--paper-line);
+    transition: background var(--trans-fast);
+  }
+  .mecr-table tbody tr:hover { background: var(--primary-50); }
+  .mecr-table td { padding: var(--sp-4) var(--sp-6); }
+  .mecr-table td.level {
+    font-weight: var(--fw-bold);
+    color: var(--primary);
+    font-family: var(--mono);
+  }
+  .mecr-table td.muted { color: var(--ink-600); }
+  .mecr-table td.muted em { font-style: italic; }
+  .mecr-table td.center { text-align: center; font-family: var(--mono); font-size: var(--fs-xs); color: var(--ink-600); }
+
+  /* ─── §5 Adaptar: Sí/No ──────────────────────────────────── */
+  .si-header {
+    font-family: var(--mono);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    margin-bottom: var(--sp-4);
+    padding-bottom: var(--sp-2);
+    border-bottom: 2px solid;
+  }
+  .si-header.ok { color: var(--ok); border-color: var(--ok-100); }
+  .si-header.err { color: var(--err); border-color: #fca5a5; }
+
+  .si-card {
+    padding: var(--sp-5);
+    border-radius: var(--r-xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .si-card.ok-card {
+    background: var(--ok-50);
+    border: 1px solid var(--ok-100);
+  }
+  .si-card.err-card {
+    background: var(--danger-50);
+    border: 1px solid #fca5a5;
+  }
+
+  .si-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--sp-3);
+  }
+  .si-card-title {
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-tight);
+  }
+  .si-card-title.ok-text { color: #064e3b; }
+  .si-card-title.err-text { color: #7f1d1d; }
+
+  .badge-si {
+    padding: 2px var(--sp-2);
+    border-radius: var(--r-xs);
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: var(--fw-bold);
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .badge-si.ok  { background: var(--ok); color: #fff; }
+  .badge-si.err { background: var(--err); color: #fff; }
+
+  .si-card-text { font-size: var(--fs-xs); line-height: var(--lh-body); }
+  .si-card-text.ok-text { color: rgba(6, 78, 59, .8); }
+  .si-card-text.err-text { color: rgba(127, 29, 29, .8); }
+
+  /* ─── §6 Catàleg ajuts ───────────────────────────────────── */
+  .ajut-card {
+    padding: var(--sp-5);
+    background: #fff;
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-xl);
+    transition: border-color var(--trans-fast);
+  }
+  .ajut-card:hover { border-color: rgba(51, 55, 166, .3); box-shadow: var(--sh-sm); }
+
+  .ajut-icon-row {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    margin-bottom: var(--sp-3);
+  }
+  .ajut-icon {
+    width: 32px; height: 32px;
+    border-radius: var(--r-sm);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+  .ajut-icon .material-symbols-outlined { font-size: 18px; }
+
+  .ajut-cat {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: var(--fw-bold);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+
+  .ajut-title {
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-md);
+    margin-bottom: var(--sp-1);
+  }
+
+  .ajut-note {
+    padding: var(--sp-4);
+    background: var(--warn-50);
+    border: 1px solid var(--warn-100);
+    border-radius: var(--r-xl);
+    font-size: 11px;
+    color: #713f12;
+    line-height: var(--lh-body);
+    margin-bottom: var(--sp-6);
+    max-width: 720px;
+  }
+
+  /* ─── §7 Matriu ──────────────────────────────────────────── */
+  .matriu-wrap {
+    background: #fff;
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-xl);
+    box-shadow: var(--sh-sm);
+    overflow-x: auto;
+  }
+
+  .matriu-table {
+    width: 100%;
+    text-align: center;
+    border-collapse: collapse;
+    min-width: 900px;
+    font-size: var(--fs-md);
+  }
+  .matriu-table thead {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 10;
+    border-bottom: 2px solid var(--primary-100);
+  }
+  .matriu-table th {
+    padding: var(--sp-5) var(--sp-3);
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: var(--fw-bold);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--ink-500);
+  }
+  .matriu-table th.first {
+    text-align: left;
+    padding-left: var(--sp-6);
+    color: var(--primary);
+    background: var(--ink-50);
+  }
+  .matriu-table tbody tr {
+    border-bottom: 1px solid var(--paper-line);
+    transition: background var(--trans-fast);
+  }
+  .matriu-table tbody tr:hover { background: var(--primary-50); }
+  .matriu-table td { padding: var(--sp-4) var(--sp-3); }
+  .matriu-table td.row-label {
+    text-align: left;
+    padding-left: var(--sp-6);
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-md);
+    color: var(--ink-800);
+  }
+  .dot-yes { color: var(--primary); font-size: 20px; font-weight: var(--fw-bold); line-height: 1; }
+  .dot-no  { color: var(--ink-300);  font-size: 20px; line-height: 1; }
+
+  .matriu-legend {
+    padding: var(--sp-4) var(--sp-6);
+    background: var(--ink-50);
+    display: flex;
+    gap: var(--sp-7);
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: var(--fw-bold);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--ink-500);
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .matriu-legend span { display: flex; align-items: center; gap: var(--sp-2); }
+
+  /* ─── §8 Exemples ────────────────────────────────────────── */
+  .exemple-card {
+    padding: var(--sp-6);
+    background: #fff;
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-xl);
+  }
+  .exemple-title {
+    font-family: var(--serif);
+    font-weight: var(--fw-bold);
+    color: var(--primary);
+    font-size: var(--fs-lg);
+    margin-bottom: var(--sp-4);
+  }
+
+  .exemple-col-label {
+    font-family: var(--mono);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    margin-bottom: var(--sp-2);
+  }
+  .exemple-col-label.original { color: var(--ink-400); }
+  .exemple-col-label.adapted  { color: var(--primary); }
+
+  .text-original {
+    background: var(--ink-50);
+    border-radius: var(--r-lg);
+    padding: var(--sp-5);
+    font-size: var(--fs-md);
+    color: var(--ink-800);
+    line-height: var(--lh-body);
+  }
+  .text-adapted {
+    background: var(--primary-50);
+    border: 2px dashed var(--primary-100);
+    border-radius: var(--r-lg);
+    padding: var(--sp-5);
+    font-size: var(--fs-md);
+    color: var(--ink-800);
+    line-height: var(--lh-body);
+  }
+  .text-adapted p { margin-bottom: var(--sp-2); }
+  .text-adapted .picto-row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-3);
+  }
+  .text-adapted .picto-row span { line-height: 1; font-size: 22px; flex-shrink: 0; }
+
+  .exemple-notes {
+    margin-top: var(--sp-4);
+    padding-top: var(--sp-4);
+    border-top: 1px solid var(--paper-line);
+    font-size: 11px;
+    color: var(--ink-500);
+  }
+
+  /* ─── §9 Bibliografia ────────────────────────────────────── */
+  .biblio-card {
+    padding: var(--sp-6);
+    background: #fff;
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-xl);
+  }
+
+  .biblio-title {
+    font-family: var(--mono);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--primary);
+    margin-bottom: var(--sp-4);
+  }
+
+  .biblio-list { display: flex; flex-direction: column; gap: var(--sp-3); }
+  .biblio-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sp-2);
+    font-size: var(--fs-xs);
+    color: var(--ink-600);
+    line-height: var(--lh-body);
+  }
+  .biblio-dot { color: var(--primary); flex-shrink: 0; margin-top: 2px; }
+
+  /* ─── Footer ─────────────────────────────────────────────── */
+  .page-footer {
+    background: #fff;
+    border-top: 1px solid var(--paper-line);
+    padding: var(--sp-7) var(--sp-8);
+  }
+  @media (min-width: 1024px) { .page-footer { margin-left: 256px; } }
+
+  .footer-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-6);
+  }
+  @media (min-width: 768px) {
+    .footer-inner {
+      flex-direction: row;
+      justify-content: space-between;
+    }
+  }
+
+  .footer-links {
+    display: flex;
+    gap: var(--sp-6);
+  }
+  .footer-links a {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: var(--fw-bold);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--ink-500);
+    transition: color var(--trans-fast);
+  }
+  .footer-links a:hover { color: var(--primary); }
+
+  .footer-copy {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-400);
+    font-weight: var(--fw-med);
+  }
+
+  /* ─── Utilitats ──────────────────────────────────────────── */
+  .space-4  { display: flex; flex-direction: column; gap: var(--sp-4); }
+  .space-5  { display: flex; flex-direction: column; gap: var(--sp-5); }
+  .space-6  { display: flex; flex-direction: column; gap: var(--sp-6); }
+  .space-8  { display: flex; flex-direction: column; gap: var(--sp-8); }
+  .mt-4  { margin-top: var(--sp-4); }
+  .mt-5  { margin-top: var(--sp-5); }
+  .mt-6  { margin-top: var(--sp-6); }
+  .mb-4  { margin-bottom: var(--sp-4); }
+  .mb-6  { margin-bottom: var(--sp-6); }
+  .mb-8  { margin-bottom: var(--sp-8); }
+  .max-w-3xl { max-width: 680px; }
+  .italic { font-style: italic; }
+  .bold   { font-weight: var(--fw-bold); }
+  .text-primary { color: var(--primary); }
+  .text-muted   { color: var(--ink-600); }
+  .text-xs      { font-size: var(--fs-xs); }
+  .text-sm      { font-size: var(--fs-md); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-thumb { background: var(--ink-200); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--ink-300); }
+  ::-webkit-scrollbar-track { background: transparent; }
+</style>
 </head>
-<body class="bg-background text-on-surface selection:bg-primary/10 selection:text-primary min-h-screen flex flex-col">
+<body>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
 <!-- TopNavBar                                                   -->
 <!-- ═══════════════════════════════════════════════════════════ -->
-<nav class="bg-white/80 backdrop-blur-md fixed top-0 w-full z-50 flex justify-between items-center px-6 py-3 border-b border-outline-variant/30">
-<div class="flex items-center gap-4">
-<div class="brand-font text-xl font-bold tracking-tight text-primary"><a class="hover:opacity-80 transition-opacity" href="/">Saber-ne+</a></div>
-<div class="h-6 w-[1px] bg-outline-variant mx-2"></div>
-<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Editorial Reference</span>
-</div>
-<div class="hidden md:flex items-center gap-6">
-<a class="text-primary font-semibold text-sm" href="/saber-ne">Adaptar materials</a>
-<a class="text-on-surface-variant font-medium text-sm hover:text-primary transition-colors" href="/cuina">Com funciona ATNE</a>
-<a class="text-on-surface-variant font-medium text-sm hover:text-primary transition-colors" href="/avaluacio">Avaluació i decisions</a>
-</div>
-<div class="flex items-center gap-4">
-<a class="text-xs font-semibold text-on-surface-variant hover:text-primary transition-colors" href="/">← Adaptador</a>
-<button class="material-symbols-outlined text-primary">account_circle</button>
-</div>
+<nav class="topnav">
+  <div class="topnav-left">
+    <div class="brand-logo"><a href="/">Saber-ne+</a></div>
+    <div class="nav-divider"></div>
+    <span class="nav-label">Editorial Reference</span>
+  </div>
+  <div class="topnav-links">
+    <a class="active" href="/saber-ne">Adaptar materials</a>
+    <a href="/cuina">Com funciona ATNE</a>
+    <a href="/avaluacio">Avaluació i decisions</a>
+  </div>
+  <div class="topnav-right">
+    <a class="topnav-back" href="/">← Adaptador</a>
+    <button class="icon-btn"><span class="material-symbols-outlined">account_circle</span></button>
+  </div>
 </nav>
 
-<div class="flex pt-[57px] min-h-screen">
+<div class="page-wrap">
 
 <!-- ═══════════════════════════════════════════════════════════ -->
 <!-- Left Sidebar                                                -->
 <!-- ═══════════════════════════════════════════════════════════ -->
-<aside class="w-64 bg-white border-r border-outline-variant/30 fixed left-0 h-[calc(100vh-57px)] overflow-y-auto hidden lg:block z-30">
-<div class="p-6">
-<h3 class="text-[10px] font-bold uppercase tracking-widest text-outline mb-6">Navegació del Document</h3>
-<nav class="space-y-1">
-<a class="flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-surface-container transition-colors" href="#mirada">
-<span class="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary text-[10px] rounded-full">01</span>
-                    La mirada
-                </a>
-<a class="flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-surface-container transition-colors" href="#eines">
-<span class="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary text-[10px] rounded-full">02</span>
-                    Eines
-                </a>
-<a class="flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-surface-container transition-colors" href="#diversitat">
-<span class="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary text-[10px] rounded-full">03</span>
-                    Condicions
-                </a>
-<a class="flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-surface-container transition-colors" href="#mecr">
-<span class="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary text-[10px] rounded-full">04</span>
-                    MECR
-                </a>
-<a class="flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-surface-container transition-colors" href="#mites">
-<span class="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary text-[10px] rounded-full">05</span>
-                    Què és adaptar
-                </a>
-<a class="flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-surface-container transition-colors" href="#ajuts">
-<span class="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary text-[10px] rounded-full">06</span>
-                    Catàleg d'ajuts
-                </a>
-<a class="flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-surface-container transition-colors" href="#matriu">
-<span class="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary text-[10px] rounded-full">07</span>
-                    Matriu
-                </a>
-<a class="flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-surface-container transition-colors" href="#exemples">
-<span class="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary text-[10px] rounded-full">08</span>
-                    Exemples
-                </a>
-<a class="flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-surface-container transition-colors" href="#bibliografia">
-<span class="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary text-[10px] rounded-full">09</span>
-                    Bibliografia
-                </a>
-</nav>
-</div>
+<aside class="sidebar">
+  <div class="sidebar-inner">
+    <p class="sidebar-heading">Navegació del Document</p>
+    <nav class="sidebar-nav">
+      <a class="sidebar-link" href="#mirada">
+        <span class="sidebar-num">01</span>
+        La mirada
+      </a>
+      <a class="sidebar-link" href="#eines">
+        <span class="sidebar-num">02</span>
+        Eines
+      </a>
+      <a class="sidebar-link" href="#diversitat">
+        <span class="sidebar-num">03</span>
+        Condicions
+      </a>
+      <a class="sidebar-link" href="#mecr">
+        <span class="sidebar-num">04</span>
+        MECR
+      </a>
+      <a class="sidebar-link" href="#mites">
+        <span class="sidebar-num">05</span>
+        Què és adaptar
+      </a>
+      <a class="sidebar-link" href="#ajuts">
+        <span class="sidebar-num">06</span>
+        Catàleg d'ajuts
+      </a>
+      <a class="sidebar-link" href="#matriu">
+        <span class="sidebar-num">07</span>
+        Matriu
+      </a>
+      <a class="sidebar-link" href="#exemples">
+        <span class="sidebar-num">08</span>
+        Exemples
+      </a>
+      <a class="sidebar-link" href="#bibliografia">
+        <span class="sidebar-num">09</span>
+        Bibliografia
+      </a>
+    </nav>
+  </div>
 </aside>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
 <!-- Main Content                                                -->
 <!-- ═══════════════════════════════════════════════════════════ -->
-<main class="flex-1 lg:ml-64 bg-background p-8">
-<div class="max-w-[1400px] mx-auto">
+<main class="main-content">
+<div class="content-wrap">
 
 <!-- Header -->
-<header class="mb-12">
-<h1 class="text-4xl font-extrabold text-on-surface mb-3 tracking-tight">Estratègies i marcs per a l'adaptació de materials</h1>
-<p class="text-lg text-on-surface-variant max-w-3xl">Una guia integral per a la personalització del currículum, centrada en la mirada inclusiva i l'eficiència pedagògica.</p>
+<header class="doc-header">
+  <h1 class="doc-title">Estratègies i marcs per a l'adaptació de materials</h1>
+  <p class="doc-subtitle">Una guia integral per a la personalització del currículum, centrada en la mirada inclusiva i l'eficiència pedagògica.</p>
 </header>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
-<!-- §1 La mirada (3-col layout)                                 -->
+<!-- §1 La mirada                                                -->
 <!-- ═══════════════════════════════════════════════════════════ -->
-<section class="mb-16 scroll-mt-24" id="mirada">
-<div class="flex items-center gap-3 mb-6">
-<span class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm">01</span>
-<h2 class="text-2xl font-bold">La mirada</h2>
-</div>
-<div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+<section class="section" id="mirada">
+  <div class="section-header">
+    <span class="section-badge">01</span>
+    <h2 class="section-title">La mirada</h2>
+  </div>
 
-<!-- Main column -->
-<div class="xl:col-span-2 space-y-6">
-<div class="bg-white p-8 rounded-xl shadow-sm border border-outline-variant/10 text-lg leading-relaxed text-on-surface-variant">
-<p class="mb-4">Adaptar un text no és una operació tècnica neutra. És un acte pedagògic que parteix d'una mirada concreta sobre la persona que aprèn. La pedagogia ignasiana —fonament de Jesuïtes Educació— posa la persona al centre a través de la <strong>Cura Personalis</strong>: l'atenció individualitzada a cada alumne, reconeixent la seva dignitat i potencial únic.</p>
-<p class="mb-4">L'escola inclusiva no és un programa, és una manera d'entendre l'educació. L'alumnat no s'adapta a l'escola: <strong>l'escola s'adapta a l'alumnat</strong>. No adaptem per caritat, sinó per justícia pedagògica. L'objectiu és oferir el repte adequat a la capacitat real de l'alumne en aquell moment precís del seu procés.</p>
-</div>
+  <div class="col-2-1">
 
-<!-- 4 principis ignasians grid -->
-<div class="bg-white p-8 rounded-xl shadow-sm border border-outline-variant/10">
-<h3 class="text-[10px] font-bold uppercase tracking-widest text-outline mb-4">Quatre principis ignasians</h3>
-<div class="grid grid-cols-2 gap-4">
-<div class="p-4 bg-surface-container-low rounded-lg">
-<div class="font-bold text-primary text-sm mb-1">Cura personalis</div>
-<div class="text-xs text-on-surface-variant leading-snug">Atenció individualitzada. Cada alumne és únic i mereix un acompanyament ajustat a les seves circumstàncies.</div>
-</div>
-<div class="p-4 bg-surface-container-low rounded-lg">
-<div class="font-bold text-primary text-sm mb-1">Temps, llocs i persones</div>
-<div class="text-xs text-on-surface-variant leading-snug">No hi ha una fórmula universal. El context determina l'acció.</div>
-</div>
-<div class="p-4 bg-surface-container-low rounded-lg">
-<div class="font-bold text-primary text-sm mb-1">Salvar la proposició</div>
-<div class="text-xs text-on-surface-variant leading-snug">Confiar en les capacitats de l'alumne, no en els seus dèficits.</div>
-</div>
-<div class="p-4 bg-surface-container-low rounded-lg">
-<div class="font-bold text-primary text-sm mb-1">Magis</div>
-<div class="text-xs text-on-surface-variant leading-snug">Aspirar a més i millor. L'adaptació no és un sostre; és una plataforma.</div>
-</div>
-</div>
-</div>
+    <!-- Columna principal -->
+    <div class="space-6">
+      <div class="card card-p">
+        <div class="mirada-body">
+          <p>Adaptar un text no és una operació tècnica neutra. És un acte pedagògic que parteix d'una mirada concreta sobre la persona que aprèn. La pedagogia ignasiana —fonament de Jesuïtes Educació— posa la persona al centre a través de la <strong>Cura Personalis</strong>: l'atenció individualitzada a cada alumne, reconeixent la seva dignitat i potencial únic.</p>
+          <p>L'escola inclusiva no és un programa, és una manera d'entendre l'educació. L'alumnat no s'adapta a l'escola: <strong>l'escola s'adapta a l'alumnat</strong>. No adaptem per caritat, sinó per justícia pedagògica. L'objectiu és oferir el repte adequat a la capacitat real de l'alumne en aquell moment precís del seu procés.</p>
+        </div>
+      </div>
 
-<!-- Aprofundir -->
-<details class="bg-primary/5 border border-primary/20 p-8 rounded-xl">
-<summary class="flex justify-between items-center">
-<h3 class="font-bold text-primary flex items-center gap-2 uppercase tracking-wide text-xs">
-<span class="material-symbols-outlined text-lg">info</span>
-    APROFUNDIR: MULTIPLE BELONGINGS
-</h3>
-<span class="material-symbols-outlined expand-icon text-primary">expand_more</span>
-</summary>
-<p class="text-on-surface-variant italic mt-4">
-    L'alumne no és només una etiqueta diagnòstica. La seva identitat es construeix a partir de múltiples pertinences (cultura, família, interessos, situació socioeconòmica) que interaccionen amb la seva condició educativa. Per això a ATNE es poden configurar múltiples condicions i situacions simultàniament — el sistema combina els ajuts sense reduir la persona a cap etiqueta aïllada.
-</p>
-</details>
-</div>
+      <div class="card card-p">
+        <p class="overline mb-4">Quatre principis ignasians</p>
+        <div class="princip-grid">
+          <div class="princip-card">
+            <div class="princip-card-title">Cura personalis</div>
+            <div class="princip-card-text">Atenció individualitzada. Cada alumne és únic i mereix un acompanyament ajustat a les seves circumstàncies.</div>
+          </div>
+          <div class="princip-card">
+            <div class="princip-card-title">Temps, llocs i persones</div>
+            <div class="princip-card-text">No hi ha una fórmula universal. El context determina l'acció.</div>
+          </div>
+          <div class="princip-card">
+            <div class="princip-card-title">Salvar la proposició</div>
+            <div class="princip-card-text">Confiar en les capacitats de l'alumne, no en els seus dèficits.</div>
+          </div>
+          <div class="princip-card">
+            <div class="princip-card-title">Magis</div>
+            <div class="princip-card-text">Aspirar a més i millor. L'adaptació no és un sostre; és una plataforma.</div>
+          </div>
+        </div>
+      </div>
 
-<!-- Side column: FJE quotes -->
-<div class="space-y-4">
-<div class="p-6 bg-primary/5 rounded-xl border border-primary/20">
-<p class="italic text-on-surface font-medium text-sm">"No etiquetar l'alumne només pel seu origen: evitar reduir la persona a la seva condició de «nouvingut» o a la seva cultura d'origen. El perfil és la suma de múltiples pertinences."</p>
-<p class="text-[10px] font-semibold text-on-surface-variant mt-3 not-italic uppercase tracking-wider">Corpus FJE · M1 Nouvingut</p>
-</div>
-<div class="p-6 bg-primary/5 rounded-xl border border-primary/20">
-<p class="italic text-on-surface font-medium text-sm">"La persona és primer, i sobretot, persona, i el seu trastorn no és el que la defineix, sinó una característica, de vegades essencial, de la seva persona, però no el que l'etiqueta."</p>
-<p class="text-[10px] font-semibold text-on-surface-variant mt-3 not-italic uppercase tracking-wider">Corpus FJE · M1 TEA</p>
-</div>
-<div class="bg-white p-6 rounded-xl border border-outline-variant/30">
-<h4 class="text-[10px] font-bold uppercase tracking-widest text-outline mb-4">Visió inclusiva</h4>
-<p class="text-xs text-on-surface-variant leading-relaxed">L'escola inclusiva no és un programa. És una manera d'entendre l'educació que parteix de la diversitat com a norma, no com a excepció. Adaptar és l'acte que fa viable aquesta promesa dia a dia.</p>
-</div>
-</div>
-</div>
+      <!-- Aprofundir details -->
+      <details class="details-block">
+        <summary>
+          <span class="details-block-title">
+            <span class="material-symbols-outlined" style="font-size:18px">info</span>
+            Aprofundir: Multiple Belongings
+          </span>
+          <span class="material-symbols-outlined expand-icon" style="color:var(--primary)">expand_more</span>
+        </summary>
+        <p class="details-body">
+          L'alumne no és només una etiqueta diagnòstica. La seva identitat es construeix a partir de múltiples pertinences (cultura, família, interessos, situació socioeconòmica) que interaccionen amb la seva condició educativa. Per això a ATNE es poden configurar múltiples condicions i situacions simultàniament — el sistema combina els ajuts sense reduir la persona a cap etiqueta aïllada.
+        </p>
+      </details>
+    </div>
+
+    <!-- Columna lateral: quotes FJE -->
+    <div class="space-4">
+      <div class="quote-card">
+        <blockquote>"No etiquetar l'alumne només pel seu origen: evitar reduir la persona a la seva condició de «nouvingut» o a la seva cultura d'origen. El perfil és la suma de múltiples pertinences."</blockquote>
+        <p class="quote-source">Corpus FJE · M1 Nouvingut</p>
+      </div>
+      <div class="quote-card">
+        <blockquote>"La persona és primer, i sobretot, persona, i el seu trastorn no és el que la defineix, sinó una característica, de vegades essencial, de la seva persona, però no el que l'etiqueta."</blockquote>
+        <p class="quote-source">Corpus FJE · M1 TEA</p>
+      </div>
+      <div class="visio-card">
+        <p class="overline mb-4">Visió inclusiva</p>
+        <p class="text-xs text-muted" style="line-height:var(--lh-read)">L'escola inclusiva no és un programa. És una manera d'entendre l'educació que parteix de la diversitat com a norma, no com a excepció. Adaptar és l'acte que fa viable aquesta promesa dia a dia.</p>
+      </div>
+    </div>
+
+  </div>
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
-<!-- §2 Les eines (4-column grid)                                -->
+<!-- §2 Les eines                                                -->
 <!-- ═══════════════════════════════════════════════════════════ -->
-<section class="mb-16 scroll-mt-24" id="eines">
-<div class="flex items-center gap-3 mb-6">
-<span class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm">02</span>
-<h2 class="text-2xl font-bold">Les eines</h2>
-</div>
-<p class="text-on-surface-variant mb-6">L'adaptació es recolza en quatre eines complementàries. Cadascuna té un rol diferent dins la mirada inclusiva.</p>
+<section class="section" id="eines">
+  <div class="section-header">
+    <span class="section-badge">02</span>
+    <h2 class="section-title">Les eines</h2>
+  </div>
+  <p class="section-intro">L'adaptació es recolza en quatre eines complementàries. Cadascuna té un rol diferent dins la mirada inclusiva.</p>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+  <div class="grid-4">
 
-<div class="p-6 bg-white rounded-xl shadow-sm border border-outline-variant/20 hover:border-primary/50 transition-colors">
-<div class="w-10 h-10 rounded bg-indigo-100 text-indigo-700 flex items-center justify-center mb-4">
-<span class="material-symbols-outlined">grid_view</span>
-</div>
-<h3 class="font-bold text-lg mb-2">DUA</h3>
-<p class="text-sm text-on-surface-variant leading-snug mb-4">Disseny Universal de l'Aprenentatge. 3 principis: representació (QUÈ), acció/expressió (COM), implicació (PER QUÈ). Adaptar textos actua sobre el Principi I.</p>
-<details class="border-t border-outline-variant/20 pt-3">
-<summary class="text-[10px] font-bold text-primary uppercase tracking-wider flex justify-between items-center">Aprofundir: principis i nivells <span class="material-symbols-outlined text-sm expand-icon">expand_more</span></summary>
-<div class="mt-3 text-xs text-on-surface-variant leading-relaxed space-y-3">
-<p class="font-bold text-on-surface">Els 3 principis del DUA</p>
-<p><strong class="text-on-surface">Principi I — Representació (el QUÈ):</strong> oferir els continguts en múltiples formats (text, imatge, vídeo, materials manipulatius) per assegurar que tothom hi accedeix.</p>
-<p><strong class="text-on-surface">Principi II — Acció i expressió (el COM):</strong> oferir opcions per demostrar el que se sap (oral, escrit, visual, corporal).</p>
-<p><strong class="text-on-surface">Principi III — Implicació (el PER QUÈ):</strong> oferir opcions per motivar i mantenir l'interès, l'esforç i l'autoregulació.</p>
-<p class="italic">Adaptar materials escrits actua sobretot sobre el <strong>Principi I</strong>: transforma com es presenta el contingut. Per això organitzem l'adaptació en tres nivells de suport.</p>
-<p class="font-bold text-on-surface pt-2">Els 3 nivells d'accés</p>
-<p><strong class="text-on-surface">Accés</strong> — Lectura Fàcil extrema, suport visual constant, definicions integrades al flux del text. Dirigit a alumnat amb barreres importants d'accés al text: DI sever, TEA nivell 3, nouvingut pre-A1 sense alfabet llatí.</p>
-<p><strong class="text-on-surface">Core</strong> — Adaptació estàndard que manté el rigor curricular. Dirigit al grup de referència de l'aula — la majoria d'alumnes amb NESE lleus o moderades. És el nivell per defecte quan no hi ha indicadors de severitat.</p>
-<p><strong class="text-on-surface">Enriquiment</strong> — Profundització, pensament crític, connexió interdisciplinar i ampliació del registre lèxic. Dirigit a alumnat amb altes capacitats o que necessita repte addicional per sobre del nivell del curs.</p>
-</div>
-</details>
-</div>
+    <div class="card card-p-sm">
+      <div class="tool-icon" style="background:#e0e7ff;color:#4338ca">
+        <span class="material-symbols-outlined">grid_view</span>
+      </div>
+      <h3 class="tool-title">DUA</h3>
+      <p class="tool-desc">Disseny Universal de l'Aprenentatge. 3 principis: representació (QUÈ), acció/expressió (COM), implicació (PER QUÈ). Adaptar textos actua sobre el Principi I.</p>
+      <details class="tool-details">
+        <summary>
+          <span class="tool-details-label">Aprofundir: principis i nivells</span>
+          <span class="material-symbols-outlined expand-icon text-sm" style="color:var(--primary);font-size:18px">expand_more</span>
+        </summary>
+        <div class="details-content">
+          <p class="bold" style="color:var(--ink-800)">Els 3 principis del DUA</p>
+          <p><strong style="color:var(--ink-800)">Principi I — Representació (el QUÈ):</strong> oferir els continguts en múltiples formats (text, imatge, vídeo, materials manipulatius) per assegurar que tothom hi accedeix.</p>
+          <p><strong style="color:var(--ink-800)">Principi II — Acció i expressió (el COM):</strong> oferir opcions per demostrar el que se sap (oral, escrit, visual, corporal).</p>
+          <p><strong style="color:var(--ink-800)">Principi III — Implicació (el PER QUÈ):</strong> oferir opcions per motivar i mantenir l'interès, l'esforç i l'autoregulació.</p>
+          <p class="italic">Adaptar materials escrits actua sobretot sobre el <strong>Principi I</strong>: transforma com es presenta el contingut. Per això organitzem l'adaptació en tres nivells de suport.</p>
+          <p class="bold" style="color:var(--ink-800);padding-top:var(--sp-2)">Els 3 nivells d'accés</p>
+          <p><strong style="color:var(--ink-800)">Accés</strong> — Lectura Fàcil extrema, suport visual constant, definicions integrades al flux del text. Dirigit a alumnat amb barreres importants d'accés al text: DI sever, TEA nivell 3, nouvingut pre-A1 sense alfabet llatí.</p>
+          <p><strong style="color:var(--ink-800)">Core</strong> — Adaptació estàndard que manté el rigor curricular. Dirigit al grup de referència de l'aula — la majoria d'alumnes amb NESE lleus o moderades. És el nivell per defecte quan no hi ha indicadors de severitat.</p>
+          <p><strong style="color:var(--ink-800)">Enriquiment</strong> — Profundització, pensament crític, connexió interdisciplinar i ampliació del registre lèxic. Dirigit a alumnat amb altes capacitats o que necessita repte addicional per sobre del nivell del curs.</p>
+        </div>
+      </details>
+    </div>
 
-<div class="p-6 bg-white rounded-xl shadow-sm border border-outline-variant/20 hover:border-primary/50 transition-colors">
-<div class="w-10 h-10 rounded bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4">
-<span class="material-symbols-outlined">translate</span>
-</div>
-<h3 class="font-bold text-lg mb-2">MECR</h3>
-<p class="text-sm text-on-surface-variant leading-snug mb-4">Marc Europeu Comú de Referència. Regulador lingüístic: determina la complexitat del text de sortida (pre-A1 a B2). És el sostre dur.</p>
-<details class="border-t border-outline-variant/20 pt-3">
-<summary class="text-[10px] font-bold text-primary uppercase tracking-wider flex justify-between items-center">Aprofundir: modulació <span class="material-symbols-outlined text-sm expand-icon">expand_more</span></summary>
-<div class="mt-3 text-xs text-on-surface-variant leading-relaxed space-y-2">
-<p>22 instruccions graduades per nivell.</p>
-<p><strong class="text-on-surface">Subordinades</strong> — pre-A1 zero, B2 sense restricció.</p>
-<p><strong class="text-on-surface">Veu passiva</strong> — només B2 si aporta claredat.</p>
-<p><strong class="text-on-surface">Puntuació</strong> — pre-A1 només punts; B1 afegeix coma.</p>
-</div>
-</details>
-</div>
+    <div class="card card-p-sm">
+      <div class="tool-icon" style="background:#d1fae5;color:#065f46">
+        <span class="material-symbols-outlined">translate</span>
+      </div>
+      <h3 class="tool-title">MECR</h3>
+      <p class="tool-desc">Marc Europeu Comú de Referència. Regulador lingüístic: determina la complexitat del text de sortida (pre-A1 a B2). És el sostre dur.</p>
+      <details class="tool-details">
+        <summary>
+          <span class="tool-details-label">Aprofundir: modulació</span>
+          <span class="material-symbols-outlined expand-icon" style="color:var(--primary);font-size:18px">expand_more</span>
+        </summary>
+        <div class="details-content">
+          <p>22 instruccions graduades per nivell.</p>
+          <p><strong style="color:var(--ink-800)">Subordinades</strong> — pre-A1 zero, B2 sense restricció.</p>
+          <p><strong style="color:var(--ink-800)">Veu passiva</strong> — només B2 si aporta claredat.</p>
+          <p><strong style="color:var(--ink-800)">Puntuació</strong> — pre-A1 només punts; B1 afegeix coma.</p>
+        </div>
+      </details>
+    </div>
 
-<div class="p-6 bg-white rounded-xl shadow-sm border border-outline-variant/20 hover:border-primary/50 transition-colors">
-<div class="w-10 h-10 rounded bg-amber-100 text-amber-700 flex items-center justify-center mb-4">
-<span class="material-symbols-outlined">auto_stories</span>
-</div>
-<h3 class="font-bold text-lg mb-2">Lectura Fàcil</h3>
-<p class="text-sm text-on-surface-variant leading-snug mb-4">Dues normes: UNE 153101 (LF) per a nivells més accessibles i ISO 24495 (Plain Language) per a intermedis. Progressió: ordinari → CC → LF → CAA.</p>
-<details class="border-t border-outline-variant/20 pt-3">
-<summary class="text-[10px] font-bold text-primary uppercase tracking-wider flex justify-between items-center">Aprofundir: 4 pilars <span class="material-symbols-outlined text-sm expand-icon">expand_more</span></summary>
-<div class="mt-3 text-xs text-on-surface-variant leading-relaxed space-y-2">
-<p><strong class="text-on-surface">1. Puntuació mínima</strong> — punts i dos punts.</p>
-<p><strong class="text-on-surface">2. Veu activa</strong> — subjecte explícit sempre.</p>
-<p><strong class="text-on-surface">3. Una idea per frase</strong> — connectors entre frases.</p>
-<p><strong class="text-on-surface">4. Vocabulari freqüent</strong> — tècnics en negreta.</p>
-</div>
-</details>
-</div>
+    <div class="card card-p-sm">
+      <div class="tool-icon" style="background:#fef3c7;color:#92400e">
+        <span class="material-symbols-outlined">auto_stories</span>
+      </div>
+      <h3 class="tool-title">Lectura Fàcil</h3>
+      <p class="tool-desc">Dues normes: UNE 153101 (LF) per a nivells més accessibles i ISO 24495 (Plain Language) per a intermedis. Progressió: ordinari → CC → LF → CAA.</p>
+      <details class="tool-details">
+        <summary>
+          <span class="tool-details-label">Aprofundir: 4 pilars</span>
+          <span class="material-symbols-outlined expand-icon" style="color:var(--primary);font-size:18px">expand_more</span>
+        </summary>
+        <div class="details-content">
+          <p><strong style="color:var(--ink-800)">1. Puntuació mínima</strong> — punts i dos punts.</p>
+          <p><strong style="color:var(--ink-800)">2. Veu activa</strong> — subjecte explícit sempre.</p>
+          <p><strong style="color:var(--ink-800)">3. Una idea per frase</strong> — connectors entre frases.</p>
+          <p><strong style="color:var(--ink-800)">4. Vocabulari freqüent</strong> — tècnics en negreta.</p>
+        </div>
+      </details>
+    </div>
 
-<div class="p-6 bg-white rounded-xl shadow-sm border border-outline-variant/20 hover:border-primary/50 transition-colors">
-<div class="w-10 h-10 rounded bg-rose-100 text-rose-700 flex items-center justify-center mb-4">
-<span class="material-symbols-outlined">architecture</span>
-</div>
-<h3 class="font-bold text-lg mb-2">CLT</h3>
-<p class="text-sm text-on-surface-variant leading-snug mb-4">Cognitive Load Theory (Sweller, 1988). Explica per què funcionen les tècniques: reduir extrínseca (soroll), gestionar intrínseca (dificultat), potenciar germana (aprenentatge).</p>
-<details class="border-t border-outline-variant/20 pt-3">
-<summary class="text-[10px] font-bold text-primary uppercase tracking-wider flex justify-between items-center">Aprofundir: 3 càrregues <span class="material-symbols-outlined text-sm expand-icon">expand_more</span></summary>
-<div class="mt-3 text-xs text-on-surface-variant leading-relaxed space-y-2">
-<p><strong class="text-on-surface">Intrínseca</strong> — dificultat pròpia. Chunking 3-5 elements.</p>
-<p><strong class="text-on-surface">Extrínseca</strong> — soroll per mal disseny. Reduir.</p>
-<p><strong class="text-on-surface">Germana</strong> — esforç productiu. Potenciar amb bastides.</p>
-</div>
-</details>
-</div>
+    <div class="card card-p-sm">
+      <div class="tool-icon" style="background:#ffe4e6;color:#9f1239">
+        <span class="material-symbols-outlined">architecture</span>
+      </div>
+      <h3 class="tool-title">CLT</h3>
+      <p class="tool-desc">Cognitive Load Theory (Sweller, 1988). Explica per què funcionen les tècniques: reduir extrínseca (soroll), gestionar intrínseca (dificultat), potenciar germana (aprenentatge).</p>
+      <details class="tool-details">
+        <summary>
+          <span class="tool-details-label">Aprofundir: 3 càrregues</span>
+          <span class="material-symbols-outlined expand-icon" style="color:var(--primary);font-size:18px">expand_more</span>
+        </summary>
+        <div class="details-content">
+          <p><strong style="color:var(--ink-800)">Intrínseca</strong> — dificultat pròpia. Chunking 3-5 elements.</p>
+          <p><strong style="color:var(--ink-800)">Extrínseca</strong> — soroll per mal disseny. Reduir.</p>
+          <p><strong style="color:var(--ink-800)">Germana</strong> — esforç productiu. Potenciar amb bastides.</p>
+        </div>
+      </details>
+    </div>
 
-</div>
+  </div>
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
-<!-- §3 Condicions (4-col layout: 3 main + 1 side panel)          -->
+<!-- §3 Condicions                                               -->
 <!-- ═══════════════════════════════════════════════════════════ -->
-<section class="mb-16 scroll-mt-24" id="diversitat">
-<div class="flex items-center gap-3 mb-6">
-<span class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm">03</span>
-<h2 class="text-2xl font-bold">Condicions i situacions</h2>
-</div>
-<p class="text-on-surface-variant mb-8 max-w-4xl">La diversitat a l'aula és molt més àmplia del que presentem aquí: hi ha diversitat funcional que no interfereix en l'accés a materials escrits, i diversitat identitària que interpel·la l'escola més enllà d'adaptar un text. En aquesta secció recollim <strong class="text-on-surface">les condicions i situacions rellevants a l'hora d'adaptar materials escrits</strong>.</p>
+<section class="section" id="diversitat">
+  <div class="section-header">
+    <span class="section-badge">03</span>
+    <h2 class="section-title">Condicions i situacions</h2>
+  </div>
+  <p class="section-intro max-w-3xl">La diversitat a l'aula és molt més àmplia del que presentem aquí: hi ha diversitat funcional que no interfereix en l'accés a materials escrits, i diversitat identitària que interpel·la l'escola més enllà d'adaptar un text. En aquesta secció recollim <strong>les condicions i situacions rellevants a l'hora d'adaptar materials escrits</strong>.</p>
 
-<div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
+  <div class="col-3-1">
 
-<!-- Main column (3 cols) -->
-<div class="xl:col-span-3 space-y-8">
+    <!-- Columna principal (3 cols) -->
+    <div class="space-8">
 
-<!-- Dues vies per conèixer l'alumne -->
-<div>
-<h3 class="text-[10px] font-bold uppercase tracking-widest text-outline mb-4">Dues vies per conèixer l'alumne</h3>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<div class="p-5 bg-primary/5 rounded-xl border border-primary/25">
-<span class="inline-block px-2 py-0.5 bg-primary text-white text-[9px] font-bold uppercase tracking-wider rounded mb-2">Via diagnòstic</span>
-<h4 class="font-bold text-sm mb-2">Tens informació formal</h4>
-<p class="text-xs text-on-surface-variant leading-snug">El docent disposa d'un informe psicopedagògic, un PI o una valoració del DOP que identifica condicions concretes. L'adaptació parteix d'aquestes característiques.</p>
-</div>
-<div class="p-5 bg-purple-50 rounded-xl border border-purple-300">
-<span class="inline-block px-2 py-0.5 bg-purple-600 text-white text-[9px] font-bold uppercase tracking-wider rounded mb-2">Via observable</span>
-<h4 class="font-bold text-sm mb-2">Només veus conductes a l'aula</h4>
-<p class="text-xs text-on-surface-variant leading-snug">Sovint no es disposa de diagnòstic clínic. El docent marca el que observa i el sistema dedueix els ajuts. Les conductes no estigmatitzen.</p>
-</div>
-</div>
-</div>
+      <!-- Dues vies -->
+      <div>
+        <p class="overline mb-4">Dues vies per conèixer l'alumne</p>
+        <div class="grid-2">
+          <div class="via-card primary">
+            <span class="via-badge primary">Via diagnòstic</span>
+            <h4 class="bold text-sm mb-2">Tens informació formal</h4>
+            <p class="text-xs text-muted" style="line-height:var(--lh-body)">El docent disposa d'un informe psicopedagògic, un PI o una valoració del DOP que identifica condicions concretes. L'adaptació parteix d'aquestes característiques.</p>
+          </div>
+          <div class="via-card purple">
+            <span class="via-badge purple">Via observable</span>
+            <h4 class="bold text-sm mb-2">Només veus conductes a l'aula</h4>
+            <p class="text-xs text-muted" style="line-height:var(--lh-body)">Sovint no es disposa de diagnòstic clínic. El docent marca el que observa i el sistema dedueix els ajuts. Les conductes no estigmatitzen.</p>
+          </div>
+        </div>
+      </div>
 
-<!-- 9 Condicions -->
-<div>
-<h3 class="text-[10px] font-bold uppercase tracking-widest text-outline mb-4">Condicions (permanents)</h3>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-<div class="p-4 bg-white rounded-xl border border-outline-variant/20">
-<div class="text-[9px] font-bold text-indigo-700 uppercase tracking-wider mb-1">TEA</div>
-<h4 class="font-bold text-sm mb-1">Trastorn de l'Espectre Autista</h4>
-<p class="text-[11px] text-on-surface-variant leading-snug">Patrons restrictius, dificultats socials, reaccions a canvis. <strong>Adaptació:</strong> literalitat, estructura previsible, suport visual.</p>
-</div>
-<div class="p-4 bg-white rounded-xl border border-outline-variant/20">
-<div class="text-[9px] font-bold text-indigo-700 uppercase tracking-wider mb-1">TDAH</div>
-<h4 class="font-bold text-sm mb-1">Dèficit d'atenció i hiperactivitat</h4>
-<p class="text-[11px] text-on-surface-variant leading-snug">Dificultat per seguir instruccions complexes, fatiga ràpida. <strong>Adaptació:</strong> chunking, seccions numerades, retall 60-70%.</p>
-</div>
-<div class="p-4 bg-white rounded-xl border border-outline-variant/20">
-<div class="text-[9px] font-bold text-indigo-700 uppercase tracking-wider mb-1">Dislèxia</div>
-<h4 class="font-bold text-sm mb-1">Dificultats lectores</h4>
-<p class="text-[11px] text-on-surface-variant leading-snug">Dificultat en decodificació i fluïdesa. <strong>Adaptació:</strong> vocabulari d'alta freqüència, tipografia accessible.</p>
-</div>
-<div class="p-4 bg-white rounded-xl border border-outline-variant/20">
-<div class="text-[9px] font-bold text-indigo-700 uppercase tracking-wider mb-1">DI</div>
-<h4 class="font-bold text-sm mb-1">Discapacitat intel·lectual</h4>
-<p class="text-[11px] text-on-surface-variant leading-snug">Necessita concreció extrema i repetició. <strong>Adaptació:</strong> definicions integrades, pictogrames, bastides permanents.</p>
-</div>
-<div class="p-4 bg-white rounded-xl border border-outline-variant/20">
-<div class="text-[9px] font-bold text-indigo-700 uppercase tracking-wider mb-1">TDL</div>
-<h4 class="font-bold text-sm mb-1">Trastorn del llenguatge</h4>
-<p class="text-[11px] text-on-surface-variant leading-snug">Dificultats en comprensió/expressió. <strong>Adaptació:</strong> frases molt curtes, vocabulari controlat.</p>
-</div>
-<div class="p-4 bg-white rounded-xl border border-outline-variant/20">
-<div class="text-[9px] font-bold text-indigo-700 uppercase tracking-wider mb-1">Altes capacitats</div>
-<h4 class="font-bold text-sm mb-1">Superdotació</h4>
-<p class="text-[11px] text-on-surface-variant leading-snug">Necessita profunditat i repte. <strong>Adaptació:</strong> enriquiment, pensament crític, ampliació lèxica.</p>
-</div>
-<div class="p-4 bg-white rounded-xl border border-outline-variant/20">
-<div class="text-[9px] font-bold text-indigo-700 uppercase tracking-wider mb-1">Disc. auditiva</div>
-<h4 class="font-bold text-sm mb-1">Sordesa i hipoacúsia</h4>
-<p class="text-[11px] text-on-surface-variant leading-snug">Retard de llenguatge per manca d'accés auditiu — NO retard cognitiu. <strong>Adaptació:</strong> reforç visual, vocabulari explícit.</p>
-</div>
-<div class="p-4 bg-white rounded-xl border border-outline-variant/20">
-<div class="text-[9px] font-bold text-indigo-700 uppercase tracking-wider mb-1">Disc. visual</div>
-<h4 class="font-bold text-sm mb-1">Baixa visió i ceguesa</h4>
-<p class="text-[11px] text-on-surface-variant leading-snug">Graus: baixa visió moderada/severa, ceguesa. <strong>Adaptació:</strong> descripcions textuals del visual, estructura lineal.</p>
-</div>
-<div class="p-4 bg-white rounded-xl border border-outline-variant/20">
-<div class="text-[9px] font-bold text-indigo-700 uppercase tracking-wider mb-1">TDC</div>
-<h4 class="font-bold text-sm mb-1">Dispraxia / coordinació</h4>
-<p class="text-[11px] text-on-surface-variant leading-snug">Dificultat en motricitat fina i/o gruixuda. <strong>Adaptació:</strong> format que minimitza la manipulació.</p>
-</div>
-</div>
-</div>
+      <!-- 9 Condicions -->
+      <div>
+        <p class="overline mb-4">Condicions (permanents)</p>
+        <div class="grid-3">
+          <div class="condicio-card">
+            <div class="condicio-tag">TEA</div>
+            <h4 class="condicio-title">Trastorn de l'Espectre Autista</h4>
+            <p class="condicio-text">Patrons restrictius, dificultats socials, reaccions a canvis. <strong>Adaptació:</strong> literalitat, estructura previsible, suport visual.</p>
+          </div>
+          <div class="condicio-card">
+            <div class="condicio-tag">TDAH</div>
+            <h4 class="condicio-title">Dèficit d'atenció i hiperactivitat</h4>
+            <p class="condicio-text">Dificultat per seguir instruccions complexes, fatiga ràpida. <strong>Adaptació:</strong> chunking, seccions numerades, retall 60-70%.</p>
+          </div>
+          <div class="condicio-card">
+            <div class="condicio-tag">Dislèxia</div>
+            <h4 class="condicio-title">Dificultats lectores</h4>
+            <p class="condicio-text">Dificultat en decodificació i fluïdesa. <strong>Adaptació:</strong> vocabulari d'alta freqüència, tipografia accessible.</p>
+          </div>
+          <div class="condicio-card">
+            <div class="condicio-tag">DI</div>
+            <h4 class="condicio-title">Discapacitat intel·lectual</h4>
+            <p class="condicio-text">Necessita concreció extrema i repetició. <strong>Adaptació:</strong> definicions integrades, pictogrames, bastides permanents.</p>
+          </div>
+          <div class="condicio-card">
+            <div class="condicio-tag">TDL</div>
+            <h4 class="condicio-title">Trastorn del llenguatge</h4>
+            <p class="condicio-text">Dificultats en comprensió/expressió. <strong>Adaptació:</strong> frases molt curtes, vocabulari controlat.</p>
+          </div>
+          <div class="condicio-card">
+            <div class="condicio-tag">Altes capacitats</div>
+            <h4 class="condicio-title">Superdotació</h4>
+            <p class="condicio-text">Necessita profunditat i repte. <strong>Adaptació:</strong> enriquiment, pensament crític, ampliació lèxica.</p>
+          </div>
+          <div class="condicio-card">
+            <div class="condicio-tag">Disc. auditiva</div>
+            <h4 class="condicio-title">Sordesa i hipoacúsia</h4>
+            <p class="condicio-text">Retard de llenguatge per manca d'accés auditiu — NO retard cognitiu. <strong>Adaptació:</strong> reforç visual, vocabulari explícit.</p>
+          </div>
+          <div class="condicio-card">
+            <div class="condicio-tag">Disc. visual</div>
+            <h4 class="condicio-title">Baixa visió i ceguesa</h4>
+            <p class="condicio-text">Graus: baixa visió moderada/severa, ceguesa. <strong>Adaptació:</strong> descripcions textuals del visual, estructura lineal.</p>
+          </div>
+          <div class="condicio-card">
+            <div class="condicio-tag">TDC</div>
+            <h4 class="condicio-title">Dispraxia / coordinació</h4>
+            <p class="condicio-text">Dificultat en motricitat fina i/o gruixuda. <strong>Adaptació:</strong> format que minimitza la manipulació.</p>
+          </div>
+        </div>
+      </div>
 
-<!-- 3 Situacions -->
-<div>
-<h3 class="text-[10px] font-bold uppercase tracking-widest text-outline mb-4">Situacions contextuals (transitòries)</h3>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-<div class="p-4 bg-amber-50/50 rounded-xl border border-amber-200/50">
-<div class="text-[9px] font-bold text-amber-800 uppercase tracking-wider mb-1">Nouvingut</div>
-<h4 class="font-bold text-sm mb-1">Alumnat nouvingut</h4>
-<p class="text-[11px] text-on-surface-variant leading-snug">Barrera lingüística, no cognitiva. Fatiga per processar en una llengua nova. <strong>Adaptació:</strong> glossari bilingüe, traducció L1, scaffolding decreixent.</p>
-</div>
-<div class="p-4 bg-amber-50/50 rounded-xl border border-amber-200/50">
-<div class="text-[9px] font-bold text-amber-800 uppercase tracking-wider mb-1">Vulnerabilitat</div>
-<h4 class="font-bold text-sm mb-1">Vulnerabilitat socioeducativa</h4>
-<p class="text-[11px] text-on-surface-variant leading-snug">Pobresa, inestabilitat habitacional, trauma. <strong>Adaptació:</strong> sensibilitat contextual, to acollidor, exemples propers.</p>
-</div>
-<div class="p-4 bg-amber-50/50 rounded-xl border border-amber-200/50">
-<div class="text-[9px] font-bold text-amber-800 uppercase tracking-wider mb-1">Emocional</div>
-<h4 class="font-bold text-sm mb-1">Trastorn emocional i conducta</h4>
-<p class="text-[11px] text-on-surface-variant leading-snug">Ansietat, depressió, dificultats de regulació. <strong>Adaptació:</strong> to cuidadós, estructura previsible, sense pressió temporal.</p>
-</div>
-</div>
-</div>
+      <!-- 3 Situacions -->
+      <div>
+        <p class="overline mb-4">Situacions contextuals (transitòries)</p>
+        <div class="grid-3">
+          <div class="situacio-card">
+            <div class="situacio-tag">Nouvingut</div>
+            <h4 class="condicio-title">Alumnat nouvingut</h4>
+            <p class="condicio-text">Barrera lingüística, no cognitiva. Fatiga per processar en una llengua nova. <strong>Adaptació:</strong> glossari bilingüe, traducció L1, scaffolding decreixent.</p>
+          </div>
+          <div class="situacio-card">
+            <div class="situacio-tag">Vulnerabilitat</div>
+            <h4 class="condicio-title">Vulnerabilitat socioeducativa</h4>
+            <p class="condicio-text">Pobresa, inestabilitat habitacional, trauma. <strong>Adaptació:</strong> sensibilitat contextual, to acollidor, exemples propers.</p>
+          </div>
+          <div class="situacio-card">
+            <div class="situacio-tag">Emocional</div>
+            <h4 class="condicio-title">Trastorn emocional i conducta</h4>
+            <p class="condicio-text">Ansietat, depressió, dificultats de regulació. <strong>Adaptació:</strong> to cuidadós, estructura previsible, sense pressió temporal.</p>
+          </div>
+        </div>
+      </div>
 
-<!-- Línies vermelles details -->
-<details class="bg-white rounded-xl border border-outline-variant/20 overflow-hidden">
-<summary class="p-5 flex justify-between items-center bg-surface-container-low">
-<h4 class="font-bold text-sm">Línies vermelles del corpus FJE</h4>
-<span class="material-symbols-outlined expand-icon">expand_more</span>
-</summary>
-<div class="p-6 text-sm text-on-surface-variant leading-relaxed space-y-3 border-t border-outline-variant/20">
-<p>El corpus FJE identifica pràctiques a evitar per a algunes condicions. Aquí les que més fàcilment es passen per alt:</p>
-<p><strong class="text-on-surface">DI:</strong> Evitar tasques sense sentit o purament mecàniques.</p>
-<p><strong class="text-on-surface">Nouvinguts:</strong> No assumir un dèficit intel·lectual per la barrera lingüística.</p>
-<p><strong class="text-on-surface">Auditiva:</strong> No confondre sordesa amb discapacitat intel·lectual.</p>
-<p><strong class="text-on-surface">TDAH:</strong> No etiquetar ni estigmatitzar. No homogeneïtzar les respostes.</p>
-<p><strong class="text-on-surface">TEA:</strong> No reduir l'alumne al diagnòstic. No forçar el contacte social sense mediació.</p>
-</div>
-</details>
+      <!-- Línies vermelles -->
+      <details class="collapsible-card">
+        <summary>
+          <h4 class="bold text-sm">Línies vermelles del corpus FJE</h4>
+          <span class="material-symbols-outlined expand-icon">expand_more</span>
+        </summary>
+        <div class="collapsible-body">
+          <p>El corpus FJE identifica pràctiques a evitar per a algunes condicions. Aquí les que més fàcilment es passen per alt:</p>
+          <p><strong style="color:var(--ink-800)">DI:</strong> Evitar tasques sense sentit o purament mecàniques.</p>
+          <p><strong style="color:var(--ink-800)">Nouvinguts:</strong> No assumir un dèficit intel·lectual per la barrera lingüística.</p>
+          <p><strong style="color:var(--ink-800)">Auditiva:</strong> No confondre sordesa amb discapacitat intel·lectual.</p>
+          <p><strong style="color:var(--ink-800)">TDAH:</strong> No etiquetar ni estigmatitzar. No homogeneïtzar les respostes.</p>
+          <p><strong style="color:var(--ink-800)">TEA:</strong> No reduir l'alumne al diagnòstic. No forçar el contacte social sense mediació.</p>
+        </div>
+      </details>
 
-<!-- 5 conductes observables details -->
-<details class="bg-white rounded-xl border border-outline-variant/20 overflow-hidden">
-<summary class="p-5 flex justify-between items-center bg-surface-container-low">
-<h4 class="font-bold text-sm">Les 5 conductes observables</h4>
-<span class="material-symbols-outlined expand-icon">expand_more</span>
-</summary>
-<div class="p-6 text-sm text-on-surface-variant leading-relaxed border-t border-outline-variant/20">
-<p class="mb-4">Quan el docent no té diagnòstic, marca les conductes que veu. 5 conductes síntesi, cadascuna apuntant a un perfil o necessitat principal:</p>
-<div class="space-y-3">
-<div class="flex gap-3"><span class="font-bold text-primary text-xs bg-primary/10 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0">01</span><div><p class="text-on-surface font-semibold">Li costa mantenir l'atenció en un text llarg</p><p class="text-xs">→ perfil TDAH. Activa: fragmentació, paràgrafs curts, una idea per frase.</p></div></div>
-<div class="flex gap-3"><span class="font-bold text-primary text-xs bg-primary/10 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0">02</span><div><p class="text-on-surface font-semibold">Li costa llegir amb fluïdesa</p><p class="text-xs">→ perfil dislèxia. Activa: vocabulari freqüent, tipografia adaptada.</p></div></div>
-<div class="flex gap-3"><span class="font-bold text-primary text-xs bg-primary/10 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0">03</span><div><p class="text-on-surface font-semibold">Li costa entendre el que llegeix</p><p class="text-xs">→ perfil TDL comprensiu. Activa: connectors explícits, destacats visuals.</p></div></div>
-<div class="flex gap-3"><span class="font-bold text-primary text-xs bg-primary/10 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0">04</span><div><p class="text-on-surface font-semibold">Li costa amb el vocabulari del curs</p><p class="text-xs">→ perfil TDL semàntic. Activa: glossari integrat, definicions en línia.</p></div></div>
-<div class="flex gap-3"><span class="font-bold text-primary text-xs bg-primary/10 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0">05</span><div><p class="text-on-surface font-semibold">Li costa seguir instruccions de més d'un pas</p><p class="text-xs">→ memòria de treball / TDAH inatent. Activa: instruccions numerades pas a pas.</p></div></div>
-</div>
-<p class="mt-4 text-xs italic">Una sola conducta ja activa ajuts. Les conductes no generen cap perfil clínic inferit; només ajuts al text.</p>
-</div>
-</details>
+      <!-- 5 conductes observables -->
+      <details class="collapsible-card">
+        <summary>
+          <h4 class="bold text-sm">Les 5 conductes observables</h4>
+          <span class="material-symbols-outlined expand-icon">expand_more</span>
+        </summary>
+        <div class="collapsible-body">
+          <p>Quan el docent no té diagnòstic, marca les conductes que veu. 5 conductes síntesi, cadascuna apuntant a un perfil o necessitat principal:</p>
+          <div class="space-4" style="margin-top:var(--sp-2)">
+            <div class="conducta-item">
+              <span class="conducta-num">01</span>
+              <div>
+                <p style="font-weight:var(--fw-semi);color:var(--ink-800)">Li costa mantenir l'atenció en un text llarg</p>
+                <p class="text-xs text-muted">→ perfil TDAH. Activa: fragmentació, paràgrafs curts, una idea per frase.</p>
+              </div>
+            </div>
+            <div class="conducta-item">
+              <span class="conducta-num">02</span>
+              <div>
+                <p style="font-weight:var(--fw-semi);color:var(--ink-800)">Li costa llegir amb fluïdesa</p>
+                <p class="text-xs text-muted">→ perfil dislèxia. Activa: vocabulari freqüent, tipografia adaptada.</p>
+              </div>
+            </div>
+            <div class="conducta-item">
+              <span class="conducta-num">03</span>
+              <div>
+                <p style="font-weight:var(--fw-semi);color:var(--ink-800)">Li costa entendre el que llegeix</p>
+                <p class="text-xs text-muted">→ perfil TDL comprensiu. Activa: connectors explícits, destacats visuals.</p>
+              </div>
+            </div>
+            <div class="conducta-item">
+              <span class="conducta-num">04</span>
+              <div>
+                <p style="font-weight:var(--fw-semi);color:var(--ink-800)">Li costa amb el vocabulari del curs</p>
+                <p class="text-xs text-muted">→ perfil TDL semàntic. Activa: glossari integrat, definicions en línia.</p>
+              </div>
+            </div>
+            <div class="conducta-item">
+              <span class="conducta-num">05</span>
+              <div>
+                <p style="font-weight:var(--fw-semi);color:var(--ink-800)">Li costa seguir instruccions de més d'un pas</p>
+                <p class="text-xs text-muted">→ memòria de treball / TDAH inatent. Activa: instruccions numerades pas a pas.</p>
+              </div>
+            </div>
+          </div>
+          <p class="text-xs italic text-muted" style="margin-top:var(--sp-4)">Una sola conducta ja activa ajuts. Les conductes no generen cap perfil clínic inferit; només ajuts al text.</p>
+        </div>
+      </details>
 
-</div>
+    </div>
 
-<!-- Side panel: NESE vs NEE -->
-<div class="bg-surface-container-highest p-6 rounded-xl border border-outline-variant/30 flex flex-col h-fit xl:sticky xl:top-20">
-<h4 class="font-bold text-sm mb-4">Marc normatiu NESE</h4>
-<p class="text-[11px] text-on-surface-variant mb-4">La normativa catalana (Decret 175/2022, LOE/LOMLOE) usa <strong class="text-on-surface">NESE</strong> com a paraigua que inclou diverses subcategories:</p>
-<div class="space-y-3">
-<div class="bg-white/60 p-3 rounded-lg">
-<h5 class="text-[10px] font-bold text-primary mb-1 uppercase">NEE</h5>
-<p class="text-[11px] text-on-surface-variant">Discapacitats i trastorns greus amb adaptacions curriculars significatives (TEA, DI, disc. sensorials, TDC).</p>
-</div>
-<div class="bg-white/60 p-3 rounded-lg">
-<h5 class="text-[10px] font-bold text-primary mb-1 uppercase">Dif. específiques</h5>
-<p class="text-[11px] text-on-surface-variant">Trastorns que afecten processos d'aprenentatge concrets (Dislèxia, TDL, TDAH).</p>
-</div>
-<div class="bg-white/60 p-3 rounded-lg">
-<h5 class="text-[10px] font-bold text-primary mb-1 uppercase">Altes capacitats</h5>
-<p class="text-[11px] text-on-surface-variant">Necessiten enriquiment i aprofundiment curricular.</p>
-</div>
-<div class="bg-white/60 p-3 rounded-lg">
-<h5 class="text-[10px] font-bold text-primary mb-1 uppercase">Incorporació tardana</h5>
-<p class="text-[11px] text-on-surface-variant">Alumnat que s'incorpora tard (nouvingut).</p>
-</div>
-<div class="bg-white/60 p-3 rounded-lg">
-<h5 class="text-[10px] font-bold text-primary mb-1 uppercase">Cond. personals</h5>
-<p class="text-[11px] text-on-surface-variant">Factors socials, emocionals, de trajectòria (vulnerabilitat, trastorn emocional).</p>
-</div>
-</div>
-<div class="mt-4 pt-4 border-t border-outline-variant/30 text-[10px] text-on-surface-variant leading-tight italic">
-    Important: les NEE són un subconjunt de les NESE. L'adaptació cobreix totes les subcategories.
-</div>
-</div>
+    <!-- Side panel: NESE -->
+    <div class="nese-panel">
+      <h4 class="bold text-sm mb-4">Marc normatiu NESE</h4>
+      <p class="text-xs text-muted mb-4" style="line-height:var(--lh-read)">La normativa catalana (Decret 175/2022, LOE/LOMLOE) usa <strong style="color:var(--ink-800)">NESE</strong> com a paraigua que inclou diverses subcategories:</p>
+      <div class="nese-items">
+        <div class="nese-item">
+          <span class="nese-item-title">NEE</span>
+          <p class="text-xs text-muted">Discapacitats i trastorns greus amb adaptacions curriculars significatives (TEA, DI, disc. sensorials, TDC).</p>
+        </div>
+        <div class="nese-item">
+          <span class="nese-item-title">Dif. específiques</span>
+          <p class="text-xs text-muted">Trastorns que afecten processos d'aprenentatge concrets (Dislèxia, TDL, TDAH).</p>
+        </div>
+        <div class="nese-item">
+          <span class="nese-item-title">Altes capacitats</span>
+          <p class="text-xs text-muted">Necessiten enriquiment i aprofundiment curricular.</p>
+        </div>
+        <div class="nese-item">
+          <span class="nese-item-title">Incorporació tardana</span>
+          <p class="text-xs text-muted">Alumnat que s'incorpora tard (nouvingut).</p>
+        </div>
+        <div class="nese-item">
+          <span class="nese-item-title">Cond. personals</span>
+          <p class="text-xs text-muted">Factors socials, emocionals, de trajectòria (vulnerabilitat, trastorn emocional).</p>
+        </div>
+      </div>
+      <div style="margin-top:var(--sp-4);padding-top:var(--sp-4);border-top:1px solid var(--paper-line);font-size:10px;color:var(--ink-500);line-height:var(--lh-body);font-style:italic">
+        Important: les NEE són un subconjunt de les NESE. L'adaptació cobreix totes les subcategories.
+      </div>
+    </div>
 
-</div>
+  </div>
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
 <!-- §4 MECR                                                     -->
 <!-- ═══════════════════════════════════════════════════════════ -->
-<section class="mb-16 scroll-mt-24" id="mecr">
-<div class="flex items-center gap-3 mb-6">
-<span class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm">04</span>
-<h2 class="text-2xl font-bold">MECR traduïts a l'aula</h2>
-</div>
-<p class="text-on-surface-variant mb-6 max-w-3xl">El MECR defineix nivells de competència lingüística. ATNE els utilitza com a sostre per calibrar la complexitat del text adaptat. Cada nivell té un descriptor concret a l'aula, una frase tipus i una longitud orientativa.</p>
-<div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
-<div class="overflow-x-auto">
-<table class="w-full text-sm">
-<thead class="bg-surface-container-low border-b border-outline-variant/20">
-<tr class="text-left">
-<th class="px-6 py-4 font-bold text-xs uppercase tracking-wider text-outline">Nivell</th>
-<th class="px-6 py-4 font-bold text-xs uppercase tracking-wider text-outline">Descriptor a l'aula</th>
-<th class="px-6 py-4 font-bold text-xs uppercase tracking-wider text-outline">Frase tipus</th>
-<th class="px-6 py-4 font-bold text-xs uppercase tracking-wider text-outline text-center">Longitud</th>
-</tr>
-</thead>
-<tbody class="divide-y divide-outline-variant/10">
-<tr class="hover:bg-surface-container-lowest transition-colors">
-<td class="px-6 py-4 font-bold text-primary">pre-A1</td>
-<td class="px-6 py-4 text-on-surface-variant">Paraules aïllades i frases memoritzades. Necessita suport visual constant.</td>
-<td class="px-6 py-4 text-on-surface-variant italic">«Les plantes fan menjar amb la llum.»</td>
-<td class="px-6 py-4 text-on-surface-variant text-center">3-5 paraules/frase</td>
-</tr>
-<tr class="hover:bg-surface-container-lowest transition-colors">
-<td class="px-6 py-4 font-bold text-primary">A1</td>
-<td class="px-6 py-4 text-on-surface-variant">Frases simples sobre temes familiars. Vocabulari bàsic quotidià.</td>
-<td class="px-6 py-4 text-on-surface-variant italic">«L'aparell digestiu transforma el menjar en nutrients.»</td>
-<td class="px-6 py-4 text-on-surface-variant text-center">5-8 paraules/frase</td>
-</tr>
-<tr class="hover:bg-surface-container-lowest transition-colors">
-<td class="px-6 py-4 font-bold text-primary">A2</td>
-<td class="px-6 py-4 text-on-surface-variant">Comunicació habitual. Connecta amb «i», «però», «perquè».</td>
-<td class="px-6 py-4 text-on-surface-variant italic">«La digestió comença a la boca, on les dents trituren el menjar.»</td>
-<td class="px-6 py-4 text-on-surface-variant text-center">8-12 paraules/frase</td>
-</tr>
-<tr class="hover:bg-surface-container-lowest transition-colors">
-<td class="px-6 py-4 font-bold text-primary">B1</td>
-<td class="px-6 py-4 text-on-surface-variant">Textos coneguts. Segueix argumentacions senzilles.</td>
-<td class="px-6 py-4 text-on-surface-variant italic">«El procés digestiu implica diverses fases mecàniques i químiques.»</td>
-<td class="px-6 py-4 text-on-surface-variant text-center">12-18 paraules/frase</td>
-</tr>
-<tr class="hover:bg-surface-container-lowest transition-colors">
-<td class="px-6 py-4 font-bold text-primary">B2</td>
-<td class="px-6 py-4 text-on-surface-variant">Textos complexos i abstractes. Registre formal i tècnic.</td>
-<td class="px-6 py-4 text-on-surface-variant italic">Text original o amb adaptacions mínimes.</td>
-<td class="px-6 py-4 text-on-surface-variant text-center">fins a 25 paraules</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<section class="section" id="mecr">
+  <div class="section-header">
+    <span class="section-badge">04</span>
+    <h2 class="section-title">MECR traduïts a l'aula</h2>
+  </div>
+  <p class="section-intro max-w-3xl">El MECR defineix nivells de competència lingüística. ATNE els utilitza com a sostre per calibrar la complexitat del text adaptat. Cada nivell té un descriptor concret a l'aula, una frase tipus i una longitud orientativa.</p>
+
+  <div class="table-wrap" style="overflow-x:auto">
+    <table class="mecr-table">
+      <thead>
+        <tr>
+          <th>Nivell</th>
+          <th>Descriptor a l'aula</th>
+          <th>Frase tipus</th>
+          <th class="center">Longitud</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="level">pre-A1</td>
+          <td class="muted">Paraules aïllades i frases memoritzades. Necessita suport visual constant.</td>
+          <td class="muted"><em>«Les plantes fan menjar amb la llum.»</em></td>
+          <td class="center">3-5 paraules/frase</td>
+        </tr>
+        <tr>
+          <td class="level">A1</td>
+          <td class="muted">Frases simples sobre temes familiars. Vocabulari bàsic quotidià.</td>
+          <td class="muted"><em>«L'aparell digestiu transforma el menjar en nutrients.»</em></td>
+          <td class="center">5-8 paraules/frase</td>
+        </tr>
+        <tr>
+          <td class="level">A2</td>
+          <td class="muted">Comunicació habitual. Connecta amb «i», «però», «perquè».</td>
+          <td class="muted"><em>«La digestió comença a la boca, on les dents trituren el menjar.»</em></td>
+          <td class="center">8-12 paraules/frase</td>
+        </tr>
+        <tr>
+          <td class="level">B1</td>
+          <td class="muted">Textos coneguts. Segueix argumentacions senzilles.</td>
+          <td class="muted"><em>«El procés digestiu implica diverses fases mecàniques i químiques.»</em></td>
+          <td class="center">12-18 paraules/frase</td>
+        </tr>
+        <tr>
+          <td class="level">B2</td>
+          <td class="muted">Textos complexos i abstractes. Registre formal i tècnic.</td>
+          <td class="muted"><em>Text original o amb adaptacions mínimes.</em></td>
+          <td class="center">fins a 25 paraules</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
-<!-- §5 Què és (i què no és) adaptar — 2 columns SÍ/NO           -->
+<!-- §5 Què és (i què no és) adaptar                             -->
 <!-- ═══════════════════════════════════════════════════════════ -->
-<section class="mb-16 scroll-mt-24" id="mites">
-<div class="flex items-center gap-3 mb-6">
-<span class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm">05</span>
-<h2 class="text-2xl font-bold">Què és (i què no és) adaptar</h2>
-</div>
-<p class="text-on-surface-variant mb-8 max-w-3xl">Abans d'entrar a eines i perfils, cal posar sobre la taula què entenem per adaptació. Les dues cares alhora: el que sí i el que no.</p>
+<section class="section" id="mites">
+  <div class="section-header">
+    <span class="section-badge">05</span>
+    <h2 class="section-title">Què és (i què no és) adaptar</h2>
+  </div>
+  <p class="section-intro max-w-3xl">Abans d'entrar a eines i perfils, cal posar sobre la taula què entenem per adaptació. Les dues cares alhora: el que sí i el que no.</p>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+  <div class="grid-2">
 
-<!-- COLUMNA SÍ -->
-<div>
-<h3 class="text-[10px] font-bold uppercase tracking-widest text-emerald-700 mb-4 pb-2 border-b-2 border-emerald-200">Sí que és</h3>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<div class="p-5 bg-emerald-50 rounded-xl border border-emerald-100 flex flex-col justify-between">
-<div>
-<div class="flex justify-between items-start mb-4">
-<h3 class="font-bold text-emerald-900 leading-tight">Apropar-se a la ZDP</h3>
-<span class="px-2 py-0.5 bg-emerald-600 text-white text-[9px] font-bold uppercase rounded">Sí</span>
-</div>
-<p class="text-xs text-emerald-900/80">Situar el text a la Zona de Desenvolupament Pròxim: prou a l'abast perquè l'alumne pugui entrar-hi amb ajuts, prou lluny perquè aprengui.</p>
-</div>
-</div>
-<div class="p-5 bg-emerald-50 rounded-xl border border-emerald-100 flex flex-col justify-between">
-<div>
-<div class="flex justify-between items-start mb-4">
-<h3 class="font-bold text-emerald-900 leading-tight">Oferir bastides</h3>
-<span class="px-2 py-0.5 bg-emerald-600 text-white text-[9px] font-bold uppercase rounded">Sí</span>
-</div>
-<p class="text-xs text-emerald-900/80">Proporcionar suports explícits (vocabulari, estructura, exemples, visual) que l'alumne retira a mesura que guanya autonomia.</p>
-</div>
-</div>
-<div class="p-5 bg-emerald-50 rounded-xl border border-emerald-100 flex flex-col justify-between">
-<div>
-<div class="flex justify-between items-start mb-4">
-<h3 class="font-bold text-emerald-900 leading-tight">Ajustar la fricció</h3>
-<span class="px-2 py-0.5 bg-emerald-600 text-white text-[9px] font-bold uppercase rounded">Sí</span>
-</div>
-<p class="text-xs text-emerald-900/80">Modular la dificultat productiva —la que genera aprenentatge— i eliminar la que només genera soroll. Ajustar no és evitar.</p>
-</div>
-</div>
-<div class="p-5 bg-emerald-50 rounded-xl border border-emerald-100 flex flex-col justify-between">
-<div>
-<div class="flex justify-between items-start mb-4">
-<h3 class="font-bold text-emerald-900 leading-tight">Transformar amb rigor</h3>
-<span class="px-2 py-0.5 bg-emerald-600 text-white text-[9px] font-bold uppercase rounded">Sí</span>
-</div>
-<p class="text-xs text-emerald-900/80">Canviar la forma de presentar el contingut sense amputar-lo. Un text a pre-A1 segueix parlant de fotosíntesi.</p>
-</div>
-</div>
-</div>
-</div>
+    <!-- Columna SÍ -->
+    <div>
+      <p class="si-header ok">Sí que és</p>
+      <div class="grid-2" style="gap:var(--sp-4)">
+        <div class="si-card ok-card">
+          <div class="si-card-header">
+            <h3 class="si-card-title ok-text">Apropar-se a la ZDP</h3>
+            <span class="badge-si ok">Sí</span>
+          </div>
+          <p class="si-card-text ok-text">Situar el text a la Zona de Desenvolupament Pròxim: prou a l'abast perquè l'alumne pugui entrar-hi amb ajuts, prou lluny perquè aprengui.</p>
+        </div>
+        <div class="si-card ok-card">
+          <div class="si-card-header">
+            <h3 class="si-card-title ok-text">Oferir bastides</h3>
+            <span class="badge-si ok">Sí</span>
+          </div>
+          <p class="si-card-text ok-text">Proporcionar suports explícits (vocabulari, estructura, exemples, visual) que l'alumne retira a mesura que guanya autonomia.</p>
+        </div>
+        <div class="si-card ok-card">
+          <div class="si-card-header">
+            <h3 class="si-card-title ok-text">Ajustar la fricció</h3>
+            <span class="badge-si ok">Sí</span>
+          </div>
+          <p class="si-card-text ok-text">Modular la dificultat productiva —la que genera aprenentatge— i eliminar la que només genera soroll. Ajustar no és evitar.</p>
+        </div>
+        <div class="si-card ok-card">
+          <div class="si-card-header">
+            <h3 class="si-card-title ok-text">Transformar amb rigor</h3>
+            <span class="badge-si ok">Sí</span>
+          </div>
+          <p class="si-card-text ok-text">Canviar la forma de presentar el contingut sense amputar-lo. Un text a pre-A1 segueix parlant de fotosíntesi.</p>
+        </div>
+      </div>
+    </div>
 
-<!-- COLUMNA NO -->
-<div>
-<h3 class="text-[10px] font-bold uppercase tracking-widest text-red-700 mb-4 pb-2 border-b-2 border-red-200">No és</h3>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<div class="p-5 bg-red-50 rounded-xl border border-red-100 flex flex-col justify-between">
-<div>
-<div class="flex justify-between items-start mb-4">
-<h3 class="font-bold text-red-900 leading-tight">Rebaixar</h3>
-<span class="px-2 py-0.5 bg-red-600 text-white text-[9px] font-bold uppercase rounded">Mite</span>
-</div>
-<p class="text-xs text-red-700/80">Adaptar no és treure contingut: és fer-lo accessible sense perdre rigor. No és rebaixar, és apropar.</p>
-</div>
-</div>
-<div class="p-5 bg-red-50 rounded-xl border border-red-100 flex flex-col justify-between">
-<div>
-<div class="flex justify-between items-start mb-4">
-<h3 class="font-bold text-red-900 leading-tight">Fer fàcil</h3>
-<span class="px-2 py-0.5 bg-red-600 text-white text-[9px] font-bold uppercase rounded">Mite</span>
-</div>
-<p class="text-xs text-red-700/80">No es tracta d'eliminar la fricció sinó d'ajustar-la. La dificultat productiva genera aprenentatge; la improductiva l'impedeix.</p>
-</div>
-</div>
-<div class="p-5 bg-red-50 rounded-xl border border-red-100 flex flex-col justify-between">
-<div>
-<div class="flex justify-between items-start mb-4">
-<h3 class="font-bold text-red-900 leading-tight">Infantilitzar</h3>
-<span class="px-2 py-0.5 bg-red-600 text-white text-[9px] font-bold uppercase rounded">Mite</span>
-</div>
-<p class="text-xs text-red-700/80">L'alumne de 15 anys té interessos de 15 anys, encara que el seu nivell lector sigui de 8. Adaptar ≠ infantilitzar.</p>
-</div>
-</div>
-<div class="p-5 bg-red-50 rounded-xl border border-red-100 flex flex-col justify-between">
-<div>
-<div class="flex justify-between items-start mb-4">
-<h3 class="font-bold text-red-900 leading-tight">Uniformar</h3>
-<span class="px-2 py-0.5 bg-red-600 text-white text-[9px] font-bold uppercase rounded">Mite</span>
-</div>
-<p class="text-xs text-red-700/80">Adaptar és el contrari: fer el text divers perquè arribi a persones diverses. Per això el DUA defineix 3 nivells.</p>
-</div>
-</div>
-</div>
-</div>
-</div>
+    <!-- Columna NO -->
+    <div>
+      <p class="si-header err">No és</p>
+      <div class="grid-2" style="gap:var(--sp-4)">
+        <div class="si-card err-card">
+          <div class="si-card-header">
+            <h3 class="si-card-title err-text">Rebaixar</h3>
+            <span class="badge-si err">Mite</span>
+          </div>
+          <p class="si-card-text err-text">Adaptar no és treure contingut: és fer-lo accessible sense perdre rigor. No és rebaixar, és apropar.</p>
+        </div>
+        <div class="si-card err-card">
+          <div class="si-card-header">
+            <h3 class="si-card-title err-text">Fer fàcil</h3>
+            <span class="badge-si err">Mite</span>
+          </div>
+          <p class="si-card-text err-text">No es tracta d'eliminar la fricció sinó d'ajustar-la. La dificultat productiva genera aprenentatge; la improductiva l'impedeix.</p>
+        </div>
+        <div class="si-card err-card">
+          <div class="si-card-header">
+            <h3 class="si-card-title err-text">Infantilitzar</h3>
+            <span class="badge-si err">Mite</span>
+          </div>
+          <p class="si-card-text err-text">L'alumne de 15 anys té interessos de 15 anys, encara que el seu nivell lector sigui de 8. Adaptar ≠ infantilitzar.</p>
+        </div>
+        <div class="si-card err-card">
+          <div class="si-card-header">
+            <h3 class="si-card-title err-text">Uniformar</h3>
+            <span class="badge-si err">Mite</span>
+          </div>
+          <p class="si-card-text err-text">Adaptar és el contrari: fer el text divers perquè arribi a persones diverses. Per això el DUA defineix 3 nivells.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
-<!-- §6 Catàleg d'ajuts — 10 cards amb descripció                 -->
+<!-- §6 Catàleg d'ajuts                                          -->
 <!-- ═══════════════════════════════════════════════════════════ -->
-<section class="mb-16 scroll-mt-24" id="ajuts">
-<div class="flex items-center gap-3 mb-6">
-<span class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm">06</span>
-<h2 class="text-2xl font-bold">Catàleg d'ajuts</h2>
-</div>
-<p class="text-on-surface-variant mb-4 max-w-3xl">A més del text adaptat, el sistema pot generar <strong>ajuts</strong>: materials complementaris que acompanyen l'adaptació. Cadascun té un rol pedagògic concret. Com es trien i s'activen s'explica al Bloc 2.</p>
+<section class="section" id="ajuts">
+  <div class="section-header">
+    <span class="section-badge">06</span>
+    <h2 class="section-title">Catàleg d'ajuts</h2>
+  </div>
+  <p class="section-intro max-w-3xl">A més del text adaptat, el sistema pot generar <strong>ajuts</strong>: materials complementaris que acompanyen l'adaptació. Cadascun té un rol pedagògic concret. Com es trien i s'activen s'explica al Bloc 2.</p>
 
-<div class="p-4 bg-amber-50 border border-amber-200 rounded-xl mb-6 max-w-3xl">
-<p class="text-[11px] text-amber-900 leading-snug"><strong>Distinció important:</strong> els ajuts són <em>complements que s'afegeixen al costat del text</em>, no transformacions del text mateix. Les regles d'adaptació del text (lèxic, sintaxi, estructura…) són les <strong>instruccions</strong> del catàleg (veure Bloc 2, Macrodirectives). Aquí parlem d'ajuts <em>afegits</em>; allà, de modificacions <em>internes</em>.</p>
-</div>
+  <div class="ajut-note">
+    <strong>Distinció important:</strong> els ajuts són <em>complements que s'afegeixen al costat del text</em>, no transformacions del text mateix. Les regles d'adaptació del text (lèxic, sintaxi, estructura…) són les <strong>instruccions</strong> del catàleg (veure Bloc 2, Macrodirectives). Aquí parlem d'ajuts <em>afegits</em>; allà, de modificacions <em>internes</em>.
+  </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+  <div class="grid-5">
 
-<div class="p-5 bg-white rounded-xl border border-outline-variant/20 hover:border-primary/50 transition-colors">
-<div class="flex items-center gap-2 mb-3">
-<div class="w-8 h-8 rounded bg-pink-100 text-pink-700 flex items-center justify-center"><span class="material-symbols-outlined text-base">list</span></div>
-<span class="text-[9px] font-bold text-pink-700 uppercase tracking-wider">Ajuts lèxics</span>
-</div>
-<h4 class="font-bold text-sm mb-1">Glossari</h4>
-<p class="text-[11px] text-on-surface-variant leading-snug">Taula al final del text amb termes clau, definicions simplificades i traducció a la L1 si cal.</p>
-</div>
+    <div class="ajut-card">
+      <div class="ajut-icon-row">
+        <div class="ajut-icon" style="background:#fce7f3;color:#be185d"><span class="material-symbols-outlined">list</span></div>
+        <span class="ajut-cat" style="color:#be185d">Ajuts lèxics</span>
+      </div>
+      <h4 class="ajut-title">Glossari</h4>
+      <p class="text-xs text-muted" style="line-height:var(--lh-body)">Taula al final del text amb termes clau, definicions simplificades i traducció a la L1 si cal.</p>
+    </div>
 
-<div class="p-5 bg-white rounded-xl border border-outline-variant/20 hover:border-primary/50 transition-colors">
-<div class="flex items-center gap-2 mb-3">
-<div class="w-8 h-8 rounded bg-pink-100 text-pink-700 flex items-center justify-center"><span class="material-symbols-outlined text-base">format_bold</span></div>
-<span class="text-[9px] font-bold text-pink-700 uppercase tracking-wider">Ajuts lèxics</span>
-</div>
-<h4 class="font-bold text-sm mb-1">Negretes</h4>
-<p class="text-[11px] text-on-surface-variant leading-snug">Termes tècnics destacats amb explicació entre parèntesis la primera vegada.</p>
-</div>
+    <div class="ajut-card">
+      <div class="ajut-icon-row">
+        <div class="ajut-icon" style="background:#fce7f3;color:#be185d"><span class="material-symbols-outlined">format_bold</span></div>
+        <span class="ajut-cat" style="color:#be185d">Ajuts lèxics</span>
+      </div>
+      <h4 class="ajut-title">Negretes</h4>
+      <p class="text-xs text-muted" style="line-height:var(--lh-body)">Termes tècnics destacats amb explicació entre parèntesis la primera vegada.</p>
+    </div>
 
-<div class="p-5 bg-white rounded-xl border border-outline-variant/20 hover:border-primary/50 transition-colors">
-<div class="flex items-center gap-2 mb-3">
-<div class="w-8 h-8 rounded bg-pink-100 text-pink-700 flex items-center justify-center"><span class="material-symbols-outlined text-base">subject</span></div>
-<span class="text-[9px] font-bold text-pink-700 uppercase tracking-wider">Ajuts lèxics</span>
-</div>
-<h4 class="font-bold text-sm mb-1">Definicions integrades</h4>
-<p class="text-[11px] text-on-surface-variant leading-snug">Al flux del text, no al final, perquè l'alumne les trobi al moment.</p>
-</div>
+    <div class="ajut-card">
+      <div class="ajut-icon-row">
+        <div class="ajut-icon" style="background:#fce7f3;color:#be185d"><span class="material-symbols-outlined">subject</span></div>
+        <span class="ajut-cat" style="color:#be185d">Ajuts lèxics</span>
+      </div>
+      <h4 class="ajut-title">Definicions integrades</h4>
+      <p class="text-xs text-muted" style="line-height:var(--lh-body)">Al flux del text, no al final, perquè l'alumne les trobi al moment.</p>
+    </div>
 
-<div class="p-5 bg-white rounded-xl border border-outline-variant/20 hover:border-primary/50 transition-colors">
-<div class="flex items-center gap-2 mb-3">
-<div class="w-8 h-8 rounded bg-pink-100 text-pink-700 flex items-center justify-center"><span class="material-symbols-outlined text-base">translate</span></div>
-<span class="text-[9px] font-bold text-pink-700 uppercase tracking-wider">Ajuts lèxics</span>
-</div>
-<h4 class="font-bold text-sm mb-1">Traducció L1</h4>
-<p class="text-[11px] text-on-surface-variant leading-snug">Columna al glossari amb la traducció a la llengua materna. Per a nouvinguts.</p>
-</div>
+    <div class="ajut-card">
+      <div class="ajut-icon-row">
+        <div class="ajut-icon" style="background:#fce7f3;color:#be185d"><span class="material-symbols-outlined">translate</span></div>
+        <span class="ajut-cat" style="color:#be185d">Ajuts lèxics</span>
+      </div>
+      <h4 class="ajut-title">Traducció L1</h4>
+      <p class="text-xs text-muted" style="line-height:var(--lh-body)">Columna al glossari amb la traducció a la llengua materna. Per a nouvinguts.</p>
+    </div>
 
-<div class="p-5 bg-white rounded-xl border border-outline-variant/20 hover:border-primary/50 transition-colors">
-<div class="flex items-center gap-2 mb-3">
-<div class="w-8 h-8 rounded bg-sky-100 text-sky-700 flex items-center justify-center"><span class="material-symbols-outlined text-base">image</span></div>
-<span class="text-[9px] font-bold text-sky-700 uppercase tracking-wider">Ajuts visuals</span>
-</div>
-<h4 class="font-bold text-sm mb-1">Pictogrames</h4>
-<p class="text-[11px] text-on-surface-variant leading-snug">Suport visual al costat de termes o idees clau. Redueix la dependència textual.</p>
-</div>
+    <div class="ajut-card">
+      <div class="ajut-icon-row">
+        <div class="ajut-icon" style="background:#e0f2fe;color:#0369a1"><span class="material-symbols-outlined">image</span></div>
+        <span class="ajut-cat" style="color:#0369a1">Ajuts visuals</span>
+      </div>
+      <h4 class="ajut-title">Pictogrames</h4>
+      <p class="text-xs text-muted" style="line-height:var(--lh-body)">Suport visual al costat de termes o idees clau. Redueix la dependència textual.</p>
+    </div>
 
-<div class="p-5 bg-white rounded-xl border border-outline-variant/20 hover:border-primary/50 transition-colors">
-<div class="flex items-center gap-2 mb-3">
-<div class="w-8 h-8 rounded bg-emerald-100 text-emerald-700 flex items-center justify-center"><span class="material-symbols-outlined text-base">schema</span></div>
-<span class="text-[9px] font-bold text-emerald-700 uppercase tracking-wider">Ajuts estructurals</span>
-</div>
-<h4 class="font-bold text-sm mb-1">Esquema visual</h4>
-<p class="text-[11px] text-on-surface-variant leading-snug">Diagrama o mapa que resumeix l'estructura del text (parts, seqüència, jerarquia).</p>
-</div>
+    <div class="ajut-card">
+      <div class="ajut-icon-row">
+        <div class="ajut-icon" style="background:#d1fae5;color:#065f46"><span class="material-symbols-outlined">schema</span></div>
+        <span class="ajut-cat" style="color:#065f46">Ajuts estructurals</span>
+      </div>
+      <h4 class="ajut-title">Esquema visual</h4>
+      <p class="text-xs text-muted" style="line-height:var(--lh-body)">Diagrama o mapa que resumeix l'estructura del text (parts, seqüència, jerarquia).</p>
+    </div>
 
-<div class="p-5 bg-white rounded-xl border border-outline-variant/20 hover:border-primary/50 transition-colors">
-<div class="flex items-center gap-2 mb-3">
-<div class="w-8 h-8 rounded bg-amber-100 text-amber-700 flex items-center justify-center"><span class="material-symbols-outlined text-base">hub</span></div>
-<span class="text-[9px] font-bold text-amber-700 uppercase tracking-wider">Ajuts de síntesi</span>
-</div>
-<h4 class="font-bold text-sm mb-1">Mapa conceptual</h4>
-<p class="text-[11px] text-on-surface-variant leading-snug">Arbre o xarxa dels conceptes clau i les seves relacions. Útil a partir de l'ESO.</p>
-</div>
+    <div class="ajut-card">
+      <div class="ajut-icon-row">
+        <div class="ajut-icon" style="background:#fef3c7;color:#92400e"><span class="material-symbols-outlined">hub</span></div>
+        <span class="ajut-cat" style="color:#92400e">Ajuts de síntesi</span>
+      </div>
+      <h4 class="ajut-title">Mapa conceptual</h4>
+      <p class="text-xs text-muted" style="line-height:var(--lh-body)">Arbre o xarxa dels conceptes clau i les seves relacions. Útil a partir de l'ESO.</p>
+    </div>
 
-<div class="p-5 bg-white rounded-xl border border-outline-variant/20 hover:border-primary/50 transition-colors">
-<div class="flex items-center gap-2 mb-3">
-<div class="w-8 h-8 rounded bg-indigo-100 text-indigo-700 flex items-center justify-center"><span class="material-symbols-outlined text-base">quiz</span></div>
-<span class="text-[9px] font-bold text-indigo-700 uppercase tracking-wider">Ajuts de comprensió</span>
-</div>
-<h4 class="font-bold text-sm mb-1">Preguntes de comprensió</h4>
-<p class="text-[11px] text-on-surface-variant leading-snug">Graduades segons el model MALL/TILC en 3 moments (abans/durant/després) i 3 nivells (literal, inferencial, crític).</p>
-</div>
+    <div class="ajut-card">
+      <div class="ajut-icon-row">
+        <div class="ajut-icon" style="background:#e0e7ff;color:#4338ca"><span class="material-symbols-outlined">quiz</span></div>
+        <span class="ajut-cat" style="color:#4338ca">Ajuts de comprensió</span>
+      </div>
+      <h4 class="ajut-title">Preguntes de comprensió</h4>
+      <p class="text-xs text-muted" style="line-height:var(--lh-body)">Graduades segons el model MALL/TILC en 3 moments (abans/durant/després) i 3 nivells (literal, inferencial, crític).</p>
+    </div>
 
-<div class="p-5 bg-white rounded-xl border border-outline-variant/20 hover:border-primary/50 transition-colors">
-<div class="flex items-center gap-2 mb-3">
-<div class="w-8 h-8 rounded bg-indigo-100 text-indigo-700 flex items-center justify-center"><span class="material-symbols-outlined text-base">stairs</span></div>
-<span class="text-[9px] font-bold text-indigo-700 uppercase tracking-wider">Ajuts de comprensió</span>
-</div>
-<h4 class="font-bold text-sm mb-1">Bastides</h4>
-<p class="text-[11px] text-on-surface-variant leading-snug">Suports progressius (connectors, frases model, banc de paraules) que es retiren a mesura que l'alumne guanya autonomia (Vygotsky, ZDP).</p>
-</div>
+    <div class="ajut-card">
+      <div class="ajut-icon-row">
+        <div class="ajut-icon" style="background:#e0e7ff;color:#4338ca"><span class="material-symbols-outlined">stairs</span></div>
+        <span class="ajut-cat" style="color:#4338ca">Ajuts de comprensió</span>
+      </div>
+      <h4 class="ajut-title">Bastides</h4>
+      <p class="text-xs text-muted" style="line-height:var(--lh-body)">Suports progressius (connectors, frases model, banc de paraules) que es retiren a mesura que l'alumne guanya autonomia (Vygotsky, ZDP).</p>
+    </div>
 
-<div class="p-5 bg-white rounded-xl border border-outline-variant/20 hover:border-primary/50 transition-colors">
-<div class="flex items-center gap-2 mb-3">
-<div class="w-8 h-8 rounded bg-purple-100 text-purple-700 flex items-center justify-center"><span class="material-symbols-outlined text-base">rocket_launch</span></div>
-<span class="text-[9px] font-bold text-purple-700 uppercase tracking-wider">Ajuts d'ampliació</span>
-</div>
-<h4 class="font-bold text-sm mb-1">Activitats d'aprofundiment</h4>
-<p class="text-[11px] text-on-surface-variant leading-snug">Propostes per anar més enllà: connexions interdisciplinars, investigació, debat.</p>
-</div>
+    <div class="ajut-card">
+      <div class="ajut-icon-row">
+        <div class="ajut-icon" style="background:#f3e8ff;color:#7e22ce"><span class="material-symbols-outlined">rocket_launch</span></div>
+        <span class="ajut-cat" style="color:#7e22ce">Ajuts d'ampliació</span>
+      </div>
+      <h4 class="ajut-title">Activitats d'aprofundiment</h4>
+      <p class="text-xs text-muted" style="line-height:var(--lh-body)">Propostes per anar més enllà: connexions interdisciplinars, investigació, debat.</p>
+    </div>
 
-</div>
+  </div>
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
-<!-- §7 Matriu — 12 files × 10 columnes                          -->
+<!-- §7 Matriu condició → ajuts                                  -->
 <!-- ═══════════════════════════════════════════════════════════ -->
-<section class="mb-16 scroll-mt-24" id="matriu">
-<div class="flex items-center gap-3 mb-6">
-<span class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm">07</span>
-<h2 class="text-2xl font-bold">Matriu condició → ajuts</h2>
-</div>
-<p class="text-on-surface-variant mb-6 max-w-3xl">Quins complements s'activen automàticament per a cada condició o situació. El sistema ho fa sol; aquí es veu la lògica.</p>
-<div class="bg-white rounded-xl shadow-md border border-outline-variant/20 overflow-x-auto">
-<table class="w-full text-center border-collapse min-w-[900px]">
-<thead class="sticky top-0 bg-white z-10 border-b-2 border-primary/20">
-<tr>
-<th class="text-left py-5 px-6 font-bold text-primary text-xs uppercase tracking-widest bg-surface-container-lowest">Condició / Ajut</th>
-<th class="py-5 px-3 font-bold text-[10px] uppercase tracking-wider text-on-surface-variant">Glossari</th>
-<th class="py-5 px-3 font-bold text-[10px] uppercase tracking-wider text-on-surface-variant">Negretes</th>
-<th class="py-5 px-3 font-bold text-[10px] uppercase tracking-wider text-on-surface-variant">Def.integr.</th>
-<th class="py-5 px-3 font-bold text-[10px] uppercase tracking-wider text-on-surface-variant">Trad. L1</th>
-<th class="py-5 px-3 font-bold text-[10px] uppercase tracking-wider text-on-surface-variant">Pictogr.</th>
-<th class="py-5 px-3 font-bold text-[10px] uppercase tracking-wider text-on-surface-variant">Esquema</th>
-<th class="py-5 px-3 font-bold text-[10px] uppercase tracking-wider text-on-surface-variant">Bastides</th>
-<th class="py-5 px-3 font-bold text-[10px] uppercase tracking-wider text-on-surface-variant">Mapa conc.</th>
-<th class="py-5 px-3 font-bold text-[10px] uppercase tracking-wider text-on-surface-variant">Preguntes</th>
-<th class="py-5 px-3 font-bold text-[10px] uppercase tracking-wider text-on-surface-variant">Aprofundim.</th>
-</tr>
-</thead>
-<tbody class="divide-y divide-outline-variant/10">
-<tr class="hover:bg-primary/5 transition-colors"><td class="text-left py-4 px-6 font-bold text-sm text-on-surface">TEA</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td></tr>
-<tr class="hover:bg-primary/5 transition-colors"><td class="text-left py-4 px-6 font-bold text-sm text-on-surface">TDAH</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td></tr>
-<tr class="hover:bg-primary/5 transition-colors"><td class="text-left py-4 px-6 font-bold text-sm text-on-surface">Dislèxia</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td></tr>
-<tr class="hover:bg-primary/5 transition-colors"><td class="text-left py-4 px-6 font-bold text-sm text-on-surface">DI</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-outline-variant text-xl">○</td></tr>
-<tr class="hover:bg-primary/5 transition-colors"><td class="text-left py-4 px-6 font-bold text-sm text-on-surface">TDL</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td></tr>
-<tr class="hover:bg-primary/5 transition-colors"><td class="text-left py-4 px-6 font-bold text-sm text-on-surface">Altes capacitats</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td></tr>
-<tr class="hover:bg-primary/5 transition-colors"><td class="text-left py-4 px-6 font-bold text-sm text-on-surface">Disc. auditiva</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td></tr>
-<tr class="hover:bg-primary/5 transition-colors"><td class="text-left py-4 px-6 font-bold text-sm text-on-surface">Disc. visual</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td></tr>
-<tr class="hover:bg-primary/5 transition-colors"><td class="text-left py-4 px-6 font-bold text-sm text-on-surface">TDC / Dispraxia</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td></tr>
-<tr class="hover:bg-primary/5 transition-colors"><td class="text-left py-4 px-6 font-bold text-sm text-on-surface">Nouvingut</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td></tr>
-<tr class="hover:bg-primary/5 transition-colors"><td class="text-left py-4 px-6 font-bold text-sm text-on-surface">Vulnerabilitat</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td></tr>
-<tr class="hover:bg-primary/5 transition-colors"><td class="text-left py-4 px-6 font-bold text-sm text-on-surface">Emocional</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td><td class="py-4 px-3 text-primary text-xl font-bold">●</td><td class="py-4 px-3 text-outline-variant text-xl">○</td></tr>
-</tbody>
-</table>
-<div class="p-4 bg-surface-container-low flex gap-6 text-[10px] text-on-surface-variant uppercase font-bold tracking-widest justify-end">
-<span class="flex items-center gap-2"><span class="text-primary text-lg">●</span> Recomanat</span>
-<span class="flex items-center gap-2"><span class="text-outline-variant text-lg">○</span> No aplica</span>
-</div>
-</div>
+<section class="section" id="matriu">
+  <div class="section-header">
+    <span class="section-badge">07</span>
+    <h2 class="section-title">Matriu condició → ajuts</h2>
+  </div>
+  <p class="section-intro max-w-3xl">Quins complements s'activen automàticament per a cada condició o situació. El sistema ho fa sol; aquí es veu la lògica.</p>
+
+  <div class="matriu-wrap">
+    <table class="matriu-table">
+      <thead>
+        <tr>
+          <th class="first">Condició / Ajut</th>
+          <th>Glossari</th>
+          <th>Negretes</th>
+          <th>Def.integr.</th>
+          <th>Trad. L1</th>
+          <th>Pictogr.</th>
+          <th>Esquema</th>
+          <th>Bastides</th>
+          <th>Mapa conc.</th>
+          <th>Preguntes</th>
+          <th>Aprofundim.</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="row-label">TEA</td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td></tr>
+        <tr><td class="row-label">TDAH</td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td><td><span class="dot-no">○</span></td><td><span class="dot-no">○</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td></tr>
+        <tr><td class="row-label">Dislèxia</td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td><td><span class="dot-no">○</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td></tr>
+        <tr><td class="row-label">DI</td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td><td><span class="dot-no">○</span></td><td><span class="dot-no">○</span></td></tr>
+        <tr><td class="row-label">TDL</td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td><td><span class="dot-no">○</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td></tr>
+        <tr><td class="row-label">Altes capacitats</td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td><td><span class="dot-no">○</span></td><td><span class="dot-no">○</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td></tr>
+        <tr><td class="row-label">Disc. auditiva</td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td></tr>
+        <tr><td class="row-label">Disc. visual</td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td><td><span class="dot-no">○</span></td><td><span class="dot-no">○</span></td><td><span class="dot-no">○</span></td><td><span class="dot-no">○</span></td><td><span class="dot-no">○</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td></tr>
+        <tr><td class="row-label">TDC / Dispraxia</td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td><td><span class="dot-no">○</span></td><td><span class="dot-no">○</span></td><td><span class="dot-no">○</span></td><td><span class="dot-no">○</span></td><td><span class="dot-no">○</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td></tr>
+        <tr><td class="row-label">Nouvingut</td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td></tr>
+        <tr><td class="row-label">Vulnerabilitat</td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td><td><span class="dot-no">○</span></td><td><span class="dot-no">○</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td></tr>
+        <tr><td class="row-label">Emocional</td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td><td><span class="dot-no">○</span></td><td><span class="dot-no">○</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td><td><span class="dot-yes">●</span></td><td><span class="dot-no">○</span></td></tr>
+      </tbody>
+    </table>
+    <div class="matriu-legend">
+      <span><span class="dot-yes">●</span> Recomanat</span>
+      <span><span class="dot-no">○</span> No aplica</span>
+    </div>
+  </div>
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
-<!-- §8 Exemples — 3 casos reals amb text                         -->
+<!-- §8 Exemples                                                  -->
 <!-- ═══════════════════════════════════════════════════════════ -->
-<section class="mb-16 scroll-mt-24" id="exemples">
-<div class="flex items-center gap-3 mb-6">
-<span class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm">08</span>
-<h2 class="text-2xl font-bold">Exemples abans/després</h2>
-</div>
-<p class="text-on-surface-variant mb-6 max-w-3xl">Tres casos concrets de com un mateix text es transforma segons el perfil de l'alumne i el nivell DUA.</p>
-<div class="space-y-6">
+<section class="section" id="exemples">
+  <div class="section-header">
+    <span class="section-badge">08</span>
+    <h2 class="section-title">Exemples abans/després</h2>
+  </div>
+  <p class="section-intro max-w-3xl">Tres casos concrets de com un mateix text es transforma segons el perfil de l'alumne i el nivell DUA.</p>
 
-<!-- Exemple 1 -->
-<div class="p-6 bg-white rounded-xl border border-outline-variant/30">
-<h3 class="font-bold text-primary text-base mb-4">Fotosíntesi · DI, A2, DUA Accés</h3>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<div>
-<h4 class="text-[10px] font-bold text-outline uppercase tracking-widest mb-2">Text Original</h4>
-<div class="bg-surface-container rounded-lg p-5 text-sm text-on-surface leading-snug">La fotosíntesi és un procés bioquímic complex mitjançant el qual les plantes, les algues i alguns bacteris sintetitzen matèria orgànica a partir de diòxid de carboni i aigua, utilitzant l'energia lumínica captada per la clorofil·la, amb alliberament d'oxigen.</div>
-</div>
-<div>
-<h4 class="text-[10px] font-bold text-primary uppercase tracking-widest mb-2">Versió Adaptada</h4>
-<div class="bg-primary/5 border-2 border-dashed border-primary/20 rounded-lg p-5 text-sm text-on-surface leading-snug">
-<p class="mb-2">Les plantes fan menjar amb la llum del sol.</p>
-<p class="mb-2">Necessiten aigua i aire.</p>
-<p class="mb-2">Aquest procés es diu <strong>fotosíntesi</strong>.</p>
-<p>Al final, les plantes fan oxigen.</p>
-</div>
-</div>
-</div>
-<div class="mt-4 pt-4 border-t border-outline-variant/20 text-[11px] text-on-surface-variant"><strong class="text-on-surface">Tècniques:</strong> LF extrema · una idea per frase · vocabulari d'alta freqüència · terme tècnic destacat · eliminació d'abstraccions</div>
-</div>
+  <div class="space-6">
 
-<!-- Exemple 2 -->
-<div class="p-6 bg-white rounded-xl border border-outline-variant/30">
-<h3 class="font-bold text-primary text-base mb-4">Aparell digestiu · TDAH, A2, DUA Core</h3>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<div>
-<h4 class="text-[10px] font-bold text-outline uppercase tracking-widest mb-2">Text Original</h4>
-<div class="bg-surface-container rounded-lg p-5 text-sm text-on-surface leading-snug">L'aparell digestiu està format per un conjunt d'òrgans que intervenen en el procés de la digestió, mitjançant el qual els aliments són transformats en nutrients assimilables que passen a la sang per ser distribuïts a totes les cèl·lules del cos.</div>
-</div>
-<div>
-<h4 class="text-[10px] font-bold text-primary uppercase tracking-widest mb-2">Versió Adaptada</h4>
-<div class="bg-primary/5 border-2 border-dashed border-primary/20 rounded-lg p-5 text-sm text-on-surface leading-snug">
-<p class="mb-2"><strong>L'aparell digestiu</strong> transforma el menjar en nutrients.</p>
-<p class="mb-2">Els nutrients passen a la sang. Després arriben a totes les cèl·lules.</p>
-<p class="mb-2">Aquest procés té tres fases:</p>
-<p>1. Entrada del menjar per la boca.<br>2. Transformació a l'estómac i l'intestí.<br>3. Absorció dels nutrients.</p>
-</div>
-</div>
-</div>
-<div class="mt-4 pt-4 border-t border-outline-variant/20 text-[11px] text-on-surface-variant"><strong class="text-on-surface">Tècniques:</strong> chunking en 3 fases numerades · retall al 60% · Comunicació Clara · connectors explícits · estructura visible</div>
-</div>
+    <!-- Exemple 1 -->
+    <div class="exemple-card">
+      <h3 class="exemple-title">Fotosíntesi · DI, A2, DUA Accés</h3>
+      <div class="grid-2">
+        <div>
+          <p class="exemple-col-label original">Text Original</p>
+          <div class="text-original">La fotosíntesi és un procés bioquímic complex mitjançant el qual les plantes, les algues i alguns bacteris sintetitzen matèria orgànica a partir de diòxid de carboni i aigua, utilitzant l'energia lumínica captada per la clorofil·la, amb alliberament d'oxigen.</div>
+        </div>
+        <div>
+          <p class="exemple-col-label adapted">Versió Adaptada</p>
+          <div class="text-adapted">
+            <p>Les plantes fan menjar amb la llum del sol.</p>
+            <p>Necessiten aigua i aire.</p>
+            <p>Aquest procés es diu <strong>fotosíntesi</strong>.</p>
+            <p>Al final, les plantes fan oxigen.</p>
+          </div>
+        </div>
+      </div>
+      <div class="exemple-notes"><strong style="color:var(--ink-800)">Tècniques:</strong> LF extrema · una idea per frase · vocabulari d'alta freqüència · terme tècnic destacat · eliminació d'abstraccions</div>
+    </div>
 
-<!-- Exemple 3 -->
-<div class="p-6 bg-white rounded-xl border border-outline-variant/30">
-<h3 class="font-bold text-primary text-base mb-4">La Revolució Industrial · Nouvingut A1, DUA Accés</h3>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<div>
-<h4 class="text-[10px] font-bold text-outline uppercase tracking-widest mb-2">Text Original</h4>
-<div class="bg-surface-container rounded-lg p-5 text-sm text-on-surface leading-snug">La Revolució Industrial va suposar una transformació radical dels modes de producció, caracteritzada pel pas de l'artesania i la manufactura a la fàbrica mecanitzada, impulsada per l'aparició de la màquina de vapor i la consolidació del capitalisme industrial al llarg dels segles XVIII i XIX.</div>
-</div>
-<div>
-<h4 class="text-[10px] font-bold text-primary uppercase tracking-widest mb-2">Versió Adaptada</h4>
-<div class="bg-primary/5 border-2 border-dashed border-primary/20 rounded-lg p-5 text-sm text-on-surface leading-relaxed space-y-3">
-<div class="flex items-start gap-3">
-<span class="text-2xl leading-none select-none" aria-hidden="true">🛠️</span>
-<p class="flex-1">Abans la gent fa les coses a mà.</p>
-</div>
-<div class="flex items-start gap-3">
-<span class="text-2xl leading-none select-none" aria-hidden="true">🏭</span>
-<p class="flex-1">Després la gent treballa a la <strong>fàbrica</strong>.</p>
-</div>
-<div class="flex items-start gap-3">
-<span class="text-2xl leading-none select-none" aria-hidden="true">⚙️</span>
-<p class="flex-1">A la fàbrica hi ha <strong>màquines</strong>.</p>
-</div>
-<div class="flex items-start gap-3">
-<span class="text-2xl leading-none select-none" aria-hidden="true">🚂</span>
-<p class="flex-1">La <strong>màquina de vapor</strong> és molt important.</p>
-</div>
-<div class="flex items-start gap-3">
-<span class="text-2xl leading-none select-none" aria-hidden="true">📅</span>
-<p class="flex-1">Això passa als segles XVIII i XIX.</p>
-</div>
-<div class="flex items-start gap-3">
-<span class="text-2xl leading-none select-none" aria-hidden="true">💡</span>
-<p class="flex-1">Això és la <strong>Revolució Industrial</strong>.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="mt-4 pt-4 border-t border-outline-variant/20 text-[11px] text-on-surface-variant"><strong class="text-on-surface">Tècniques:</strong> LF extrema · pictogrames per a cada idea · vocabulari bàsic · una idea per frase · termes clau destacats · contrast "abans/després" · dates com a context</div>
-</div>
+    <!-- Exemple 2 -->
+    <div class="exemple-card">
+      <h3 class="exemple-title">Aparell digestiu · TDAH, A2, DUA Core</h3>
+      <div class="grid-2">
+        <div>
+          <p class="exemple-col-label original">Text Original</p>
+          <div class="text-original">L'aparell digestiu està format per un conjunt d'òrgans que intervenen en el procés de la digestió, mitjançant el qual els aliments són transformats en nutrients assimilables que passen a la sang per ser distribuïts a totes les cèl·lules del cos.</div>
+        </div>
+        <div>
+          <p class="exemple-col-label adapted">Versió Adaptada</p>
+          <div class="text-adapted">
+            <p><strong>L'aparell digestiu</strong> transforma el menjar en nutrients.</p>
+            <p>Els nutrients passen a la sang. Després arriben a totes les cèl·lules.</p>
+            <p>Aquest procés té tres fases:</p>
+            <p>1. Entrada del menjar per la boca.<br>2. Transformació a l'estómac i l'intestí.<br>3. Absorció dels nutrients.</p>
+          </div>
+        </div>
+      </div>
+      <div class="exemple-notes"><strong style="color:var(--ink-800)">Tècniques:</strong> chunking en 3 fases numerades · retall al 60% · Comunicació Clara · connectors explícits · estructura visible</div>
+    </div>
 
-</div>
+    <!-- Exemple 3 -->
+    <div class="exemple-card">
+      <h3 class="exemple-title">La Revolució Industrial · Nouvingut A1, DUA Accés</h3>
+      <div class="grid-2">
+        <div>
+          <p class="exemple-col-label original">Text Original</p>
+          <div class="text-original">La Revolució Industrial va suposar una transformació radical dels modes de producció, caracteritzada pel pas de l'artesania i la manufactura a la fàbrica mecanitzada, impulsada per l'aparició de la màquina de vapor i la consolidació del capitalisme industrial al llarg dels segles XVIII i XIX.</div>
+        </div>
+        <div>
+          <p class="exemple-col-label adapted">Versió Adaptada</p>
+          <div class="text-adapted">
+            <div class="picto-row">
+              <span aria-hidden="true">🛠️</span>
+              <p>Abans la gent fa les coses a mà.</p>
+            </div>
+            <div class="picto-row">
+              <span aria-hidden="true">🏭</span>
+              <p>Després la gent treballa a la <strong>fàbrica</strong>.</p>
+            </div>
+            <div class="picto-row">
+              <span aria-hidden="true">⚙️</span>
+              <p>A la fàbrica hi ha <strong>màquines</strong>.</p>
+            </div>
+            <div class="picto-row">
+              <span aria-hidden="true">🚂</span>
+              <p>La <strong>màquina de vapor</strong> és molt important.</p>
+            </div>
+            <div class="picto-row">
+              <span aria-hidden="true">📅</span>
+              <p>Això passa als segles XVIII i XIX.</p>
+            </div>
+            <div class="picto-row">
+              <span aria-hidden="true">💡</span>
+              <p>Això és la <strong>Revolució Industrial</strong>.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="exemple-notes"><strong style="color:var(--ink-800)">Tècniques:</strong> LF extrema · pictogrames per a cada idea · vocabulari bàsic · una idea per frase · termes clau destacats · contrast "abans/després" · dates com a context</div>
+    </div>
+
+  </div>
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
-<!-- §9 Bibliografia — 5 grups                                   -->
+<!-- §9 Bibliografia                                              -->
 <!-- ═══════════════════════════════════════════════════════════ -->
-<section class="mb-24 scroll-mt-24" id="bibliografia">
-<div class="flex items-center gap-3 mb-6">
-<span class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm">09</span>
-<h2 class="text-2xl font-bold">Per anar més lluny</h2>
-</div>
-<p class="text-on-surface-variant mb-6 max-w-3xl">Fonts i marcs teòrics en què es fonamenta l'adaptació de materials a ATNE.</p>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<section class="section" style="margin-bottom:6rem" id="bibliografia">
+  <div class="section-header">
+    <span class="section-badge">09</span>
+    <h2 class="section-title">Per anar més lluny</h2>
+  </div>
+  <p class="section-intro max-w-3xl">Fonts i marcs teòrics en què es fonamenta l'adaptació de materials a ATNE.</p>
 
-<div class="bg-white p-6 rounded-xl border border-outline-variant/20">
-<h3 class="text-xs font-bold text-primary uppercase tracking-widest mb-4">Lectura Fàcil i CC</h3>
-<ul class="space-y-3 text-xs text-on-surface-variant">
-<li class="flex items-start gap-2"><span class="text-primary mt-0.5">●</span><span><strong class="text-on-surface">AENOR (2018).</strong> UNE 153101:2018 EX — Lectura Fàcil.</span></li>
-<li class="flex items-start gap-2"><span class="text-primary mt-0.5">●</span><span><strong class="text-on-surface">IFLA (2010).</strong> Guidelines for Easy-to-Read Materials.</span></li>
-<li class="flex items-start gap-2"><span class="text-primary mt-0.5">●</span><span><strong class="text-on-surface">ISO (2023).</strong> ISO 24495-1 — Plain language.</span></li>
-<li class="flex items-start gap-2"><span class="text-primary mt-0.5">●</span><span><strong class="text-on-surface">Ajuntament BCN (2022).</strong> Siguem clars.</span></li>
-</ul>
-</div>
+  <div class="grid-3">
 
-<div class="bg-white p-6 rounded-xl border border-outline-variant/20">
-<h3 class="text-xs font-bold text-primary uppercase tracking-widest mb-4">Disseny Universal</h3>
-<ul class="space-y-3 text-xs text-on-surface-variant">
-<li class="flex items-start gap-2"><span class="text-primary mt-0.5">●</span><span><strong class="text-on-surface">CAST (2024).</strong> UDL Guidelines 3.0.</span></li>
-<li class="flex items-start gap-2"><span class="text-primary mt-0.5">●</span><span><strong class="text-on-surface">Meyer, Rose, Gordon (2014).</strong> Universal Design for Learning: Theory and Practice.</span></li>
-</ul>
-</div>
+    <div class="biblio-card">
+      <h3 class="biblio-title">Lectura Fàcil i CC</h3>
+      <ul class="biblio-list">
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">AENOR (2018).</strong> UNE 153101:2018 EX — Lectura Fàcil.</span></li>
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">IFLA (2010).</strong> Guidelines for Easy-to-Read Materials.</span></li>
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">ISO (2023).</strong> ISO 24495-1 — Plain language.</span></li>
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">Ajuntament BCN (2022).</strong> Siguem clars.</span></li>
+      </ul>
+    </div>
 
-<div class="bg-white p-6 rounded-xl border border-outline-variant/20">
-<h3 class="text-xs font-bold text-primary uppercase tracking-widest mb-4">Càrrega cognitiva</h3>
-<ul class="space-y-3 text-xs text-on-surface-variant">
-<li class="flex items-start gap-2"><span class="text-primary mt-0.5">●</span><span><strong class="text-on-surface">Sweller (1988).</strong> Cognitive load during problem solving.</span></li>
-<li class="flex items-start gap-2"><span class="text-primary mt-0.5">●</span><span><strong class="text-on-surface">Mayer (2009).</strong> Multimedia Learning.</span></li>
-<li class="flex items-start gap-2"><span class="text-primary mt-0.5">●</span><span><strong class="text-on-surface">Dehaene (2009).</strong> Reading in the Brain.</span></li>
-<li class="flex items-start gap-2"><span class="text-primary mt-0.5">●</span><span><strong class="text-on-surface">Wolf (2018).</strong> Reader, Come Home.</span></li>
-<li class="flex items-start gap-2"><span class="text-primary mt-0.5">●</span><span><strong class="text-on-surface">Miller (1956).</strong> The magical number seven.</span></li>
-</ul>
-</div>
+    <div class="biblio-card">
+      <h3 class="biblio-title">Disseny Universal</h3>
+      <ul class="biblio-list">
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">CAST (2024).</strong> UDL Guidelines 3.0.</span></li>
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">Meyer, Rose, Gordon (2014).</strong> Universal Design for Learning: Theory and Practice.</span></li>
+      </ul>
+    </div>
 
-<div class="bg-white p-6 rounded-xl border border-outline-variant/20">
-<h3 class="text-xs font-bold text-primary uppercase tracking-widest mb-4">ZDP i pedagogia</h3>
-<ul class="space-y-3 text-xs text-on-surface-variant">
-<li class="flex items-start gap-2"><span class="text-primary mt-0.5">●</span><span><strong class="text-on-surface">Vygotsky (1978).</strong> Mind in Society.</span></li>
-<li class="flex items-start gap-2"><span class="text-primary mt-0.5">●</span><span><strong class="text-on-surface">Ausubel (1968).</strong> Educational Psychology.</span></li>
-<li class="flex items-start gap-2"><span class="text-primary mt-0.5">●</span><span><strong class="text-on-surface">Paradigma Pedagògic Ignasià (1993).</strong></span></li>
-</ul>
-</div>
+    <div class="biblio-card">
+      <h3 class="biblio-title">Càrrega cognitiva</h3>
+      <ul class="biblio-list">
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">Sweller (1988).</strong> Cognitive load during problem solving.</span></li>
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">Mayer (2009).</strong> Multimedia Learning.</span></li>
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">Dehaene (2009).</strong> Reading in the Brain.</span></li>
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">Wolf (2018).</strong> Reader, Come Home.</span></li>
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">Miller (1956).</strong> The magical number seven.</span></li>
+      </ul>
+    </div>
 
-<div class="bg-white p-6 rounded-xl border border-outline-variant/20">
-<h3 class="text-xs font-bold text-primary uppercase tracking-widest mb-4">Diversitat i perfils</h3>
-<ul class="space-y-3 text-xs text-on-surface-variant">
-<li class="flex items-start gap-2"><span class="text-primary mt-0.5">●</span><span><strong class="text-on-surface">APA (2013).</strong> DSM-5.</span></li>
-<li class="flex items-start gap-2"><span class="text-primary mt-0.5">●</span><span><strong class="text-on-surface">Cummins (2000).</strong> Language, Power and Pedagogy.</span></li>
-<li class="flex items-start gap-2"><span class="text-primary mt-0.5">●</span><span><strong class="text-on-surface">Bishop (2017).</strong> Terminology agreement paper.</span></li>
-<li class="flex items-start gap-2"><span class="text-primary mt-0.5">●</span><span><strong class="text-on-surface">Renzulli (2005).</strong> Three-ring conception of giftedness.</span></li>
-<li class="flex items-start gap-2"><span class="text-primary mt-0.5">●</span><span><strong class="text-on-surface">Baum, Schader, Owen (2017).</strong> To Be Gifted and Learning Disabled.</span></li>
-</ul>
-</div>
+    <div class="biblio-card">
+      <h3 class="biblio-title">ZDP i pedagogia</h3>
+      <ul class="biblio-list">
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">Vygotsky (1978).</strong> Mind in Society.</span></li>
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">Ausubel (1968).</strong> Educational Psychology.</span></li>
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">Paradigma Pedagògic Ignasià (1993).</strong></span></li>
+      </ul>
+    </div>
 
-<div class="bg-white p-6 rounded-xl border border-outline-variant/20">
-<h3 class="text-xs font-bold text-primary uppercase tracking-widest mb-4">Marcs oficials</h3>
-<ul class="space-y-3 text-xs text-on-surface-variant">
-<li class="flex items-start gap-2"><span class="text-primary mt-0.5">●</span><span><strong class="text-on-surface">Council of Europe (2020).</strong> MECR — Common European Framework.</span></li>
-<li class="flex items-start gap-2"><span class="text-primary mt-0.5">●</span><span><strong class="text-on-surface">Decret 175/2022.</strong> Normativa educativa catalana.</span></li>
-<li class="flex items-start gap-2"><span class="text-primary mt-0.5">●</span><span><strong class="text-on-surface">LOE/LOMLOE.</strong> Marc normatiu NESE estatal.</span></li>
-</ul>
-</div>
+    <div class="biblio-card">
+      <h3 class="biblio-title">Diversitat i perfils</h3>
+      <ul class="biblio-list">
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">APA (2013).</strong> DSM-5.</span></li>
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">Cummins (2000).</strong> Language, Power and Pedagogy.</span></li>
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">Bishop (2017).</strong> Terminology agreement paper.</span></li>
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">Renzulli (2005).</strong> Three-ring conception of giftedness.</span></li>
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">Baum, Schader, Owen (2017).</strong> To Be Gifted and Learning Disabled.</span></li>
+      </ul>
+    </div>
 
-</div>
+    <div class="biblio-card">
+      <h3 class="biblio-title">Marcs oficials</h3>
+      <ul class="biblio-list">
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">Council of Europe (2020).</strong> MECR — Common European Framework.</span></li>
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">Decret 175/2022.</strong> Normativa educativa catalana.</span></li>
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">LOE/LOMLOE.</strong> Marc normatiu NESE estatal.</span></li>
+      </ul>
+    </div>
+
+  </div>
 </section>
 
 </div>
@@ -1002,18 +1946,17 @@
 <!-- ═══════════════════════════════════════════════════════════ -->
 <!-- Footer                                                      -->
 <!-- ═══════════════════════════════════════════════════════════ -->
-<footer class="bg-white py-8 lg:ml-64 px-8 border-t border-outline-variant/30">
-<div class="max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-<div class="brand-font text-lg font-bold text-primary"><a class="hover:opacity-80 transition-opacity" href="/">Saber-ne+</a></div>
-<div class="flex gap-6 text-[10px] font-bold uppercase text-on-surface-variant">
-<a class="hover:text-primary" href="/">Adaptador</a>
-<a class="hover:text-primary" href="/cuina">Com funciona</a>
-<a class="hover:text-primary" href="/avaluacio">Avaluació</a>
-</div>
-<div class="text-[10px] text-outline font-medium">
-    © 2026 ATNE · Jesuïtes Educació
-</div>
-</div>
+<footer class="page-footer">
+  <div class="footer-inner">
+    <div class="brand-logo"><a href="/">Saber-ne+</a></div>
+    <div class="footer-links">
+      <a href="/">Adaptador</a>
+      <a href="/cuina">Com funciona</a>
+      <a href="/avaluacio">Avaluació</a>
+    </div>
+    <div class="footer-copy">© 2026 ATNE · Jesuïtes Educació</div>
+  </div>
 </footer>
+
 </body>
 </html>

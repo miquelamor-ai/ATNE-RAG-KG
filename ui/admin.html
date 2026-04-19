@@ -4,77 +4,395 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ATNE · Admin</title>
+
+<!-- Tipografia -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- ATNE base global (ordre obligatori: tokens → base → shell) -->
+<link rel="stylesheet" href="/ui/styles/tokens.css">
+<link rel="stylesheet" href="/ui/styles/base.css">
+<link rel="stylesheet" href="/ui/styles/shell.css">
+
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #f5f7fa; margin: 0; padding: 0; color: #1a202c; }
-  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
-  header.page { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 32px 24px; border-radius: 16px; margin-bottom: 24px; }
-  header.page h1 { margin: 0 0 4px 0; font-size: 28px; }
-  header.page .subtitle { opacity: 0.9; font-size: 14px; }
-  nav { background: #1e293b; padding: 10px 24px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  nav a { color: #d1d5db; text-decoration: none; padding: .4rem .8rem; font-size: .85rem; border-radius: 4px; }
-  nav a:hover { background: #334155; color: white; }
+  /* ─── Layout ─────────────────────────────────────────────── */
+  body {
+    font-family: var(--ui);
+    background: var(--cream);
+    margin: 0;
+    padding: 0;
+    color: var(--ink-900);
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--sp-6);
+  }
+
+  /* ─── Nav ────────────────────────────────────────────────── */
+  nav {
+    background: var(--ink-900);
+    padding: 0 var(--sp-6);
+    display: flex;
+    gap: var(--sp-2);
+    align-items: center;
+    flex-wrap: wrap;
+    height: 48px;
+  }
+  nav a {
+    color: var(--ink-300);
+    text-decoration: none;
+    padding: .35rem .75rem;
+    font-size: var(--fs-sm);
+    border-radius: var(--r-xs);
+    transition: background var(--trans-fast), color var(--trans-fast);
+  }
+  nav a:hover {
+    background: var(--ink-800);
+    color: #fff;
+  }
   nav .spacer { margin-left: auto; }
-  nav .logout-btn { background: #ef4444; color: white; border: none; padding: .4rem .8rem; font-size: .85rem; cursor: pointer; border-radius: 4px; }
-  nav .logout-btn:hover { background: #dc2626; }
-  section.card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); margin-bottom: 20px; }
-  section.card h2 { margin: 0 0 6px 0; color: #1e293b; font-size: 20px; }
-  section.card .hint { color: #64748b; font-style: italic; margin-bottom: 16px; font-size: 13px; }
-  .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; margin: 16px 0; }
+  nav .logout-btn {
+    background: var(--danger);
+    color: #fff;
+    border: none;
+    padding: .35rem .75rem;
+    font-size: var(--fs-sm);
+    cursor: pointer;
+    border-radius: var(--r-xs);
+    font-family: var(--ui);
+    transition: filter var(--trans-fast);
+  }
+  nav .logout-btn:hover { filter: brightness(1.12); }
+
+  /* ─── Capçalera de pàgina ────────────────────────────────── */
+  header.page {
+    background: var(--primary);
+    color: #fff;
+    padding: var(--sp-7) var(--sp-6);
+    border-radius: var(--r-2xl);
+    margin-bottom: var(--sp-6);
+    box-shadow: var(--sh-md);
+  }
+  header.page h1 {
+    margin: 0 0 4px 0;
+    font-family: var(--serif);
+    font-size: var(--fs-3xl);
+    font-weight: 700;
+    letter-spacing: -.01em;
+  }
+  header.page .subtitle {
+    opacity: 0.85;
+    font-size: var(--fs-base);
+  }
+
+  /* ─── Cards ──────────────────────────────────────────────── */
+  section.card {
+    background: #fff;
+    padding: var(--sp-6);
+    border-radius: var(--r-xl);
+    box-shadow: var(--sh-sm);
+    border: 1px solid var(--paper-line);
+    margin-bottom: var(--sp-5);
+  }
+  section.card h2 {
+    margin: 0 0 6px 0;
+    color: var(--ink-800);
+    font-size: var(--fs-xl);
+    font-family: var(--serif);
+    font-weight: 700;
+  }
+  section.card .hint {
+    color: var(--ink-500);
+    font-style: italic;
+    margin-bottom: var(--sp-4);
+    font-size: var(--fs-md);
+  }
+
+  /* ─── Grid de fases ──────────────────────────────────────── */
+  .config-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-4) var(--sp-6);
+    margin: var(--sp-4) 0;
+  }
   @media (max-width: 800px) { .config-grid { grid-template-columns: 1fr; } }
-  .phase-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; background: #fafbfc; }
-  .phase-card h3 { margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: #1e293b; }
-  .phase-card .desc { font-size: 11px; color: #94a3b8; margin-bottom: 10px; }
-  .phase-mode-tabs { display: flex; gap: 6px; margin-bottom: 10px; background: #f1f5f9; padding: 3px; border-radius: 6px; }
-  .phase-mode-tabs label { flex: 1; font-size: 12px; font-weight: 600; color: #64748b; text-align: center; padding: 5px 8px; border-radius: 4px; cursor: pointer; }
-  .phase-mode-tabs label:has(input:checked) { background: white; color: #1e40af; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+
+  /* ─── Phase cards ────────────────────────────────────────── */
+  .phase-card {
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-lg);
+    padding: 14px var(--sp-4);
+    background: var(--ink-50);
+  }
+  .phase-card h3 {
+    margin: 0 0 4px 0;
+    font-size: var(--fs-base);
+    font-weight: var(--fw-bold);
+    color: var(--ink-800);
+  }
+  .phase-card .desc {
+    font-size: var(--fs-xs);
+    color: var(--ink-400);
+    margin-bottom: 10px;
+    font-family: var(--mono);
+  }
+  .phase-mode-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+    background: var(--ink-100);
+    padding: 3px;
+    border-radius: var(--r-sm);
+  }
+  .phase-mode-tabs label {
+    flex: 1;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semi);
+    color: var(--ink-500);
+    text-align: center;
+    padding: 5px var(--sp-2);
+    border-radius: var(--r-xs);
+    cursor: pointer;
+    transition: background var(--trans-fast), color var(--trans-fast);
+  }
+  .phase-mode-tabs label:has(input:checked) {
+    background: #fff;
+    color: var(--primary);
+    box-shadow: var(--sh-xs);
+  }
   .phase-mode-tabs input { display: none; }
-  .phase-fix-select, .phase-rotate-list { transition: opacity 0.15s; }
-  .phase-fix-select select { width: 100%; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; background: white; }
-  .phase-rotate-list { display: flex; flex-direction: column; gap: 4px; max-height: 180px; overflow-y: auto; padding-right: 4px; }
-  .phase-rotate-list label { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #475569; padding: 3px 6px; border-radius: 4px; cursor: pointer; }
-  .phase-rotate-list label:hover { background: #e0e7ff; }
+  .phase-fix-select, .phase-rotate-list { transition: opacity var(--trans-fast); }
+  .phase-fix-select select {
+    width: 100%;
+    padding: 7px 10px;
+    border: 1px solid var(--ink-200);
+    border-radius: var(--r-sm);
+    font-size: var(--fs-md);
+    font-family: var(--ui);
+    background: #fff;
+    color: var(--ink-800);
+  }
+  .phase-rotate-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 180px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  .phase-rotate-list label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--fs-sm);
+    color: var(--ink-600);
+    padding: 3px 6px;
+    border-radius: var(--r-xs);
+    cursor: pointer;
+    transition: background var(--trans-fast);
+  }
+  .phase-rotate-list label:hover { background: var(--primary-50); }
   .phase-rotate-list input[type="checkbox"] { margin: 0; }
-  .phase-rotate-hint { font-size: 10px; color: #64748b; font-style: italic; margin-top: 4px; }
-  .phase-cost-preview { font-size: 11px; color: #64748b; margin-top: 8px; padding-top: 6px; border-top: 1px dashed #e2e8f0; }
-  .field { display: flex; flex-direction: column; gap: 4px; }
-  .field label { font-size: 13px; font-weight: 600; color: #475569; }
-  .field .desc { font-size: 12px; color: #94a3b8; margin-bottom: 4px; }
-  .field select, .field input[type="number"], .field input[type="text"], .field input[type="password"] { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background: white; }
-  .field select:focus, .field input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
-  .cost-tag { display: inline-block; padding: 2px 6px; font-size: 11px; border-radius: 4px; background: #f1f5f9; color: #64748b; margin-left: 6px; }
-  .cost-tag.free { background: #d1fae5; color: #065f46; }
-  .cost-tag.cheap { background: #dbeafe; color: #1e40af; }
-  .cost-tag.pricey { background: #fef3c7; color: #92400e; }
-  .cost-tag.expensive { background: #fee2e2; color: #991b1b; }
-  .toggles { display: flex; gap: 24px; flex-wrap: wrap; margin: 16px 0; }
-  .toggles label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #475569; }
-  .actions { display: flex; gap: 12px; margin-top: 16px; }
-  button.primary { background: #3b82f6; color: white; border: none; padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 6px; }
-  button.primary:hover { background: #2563eb; }
-  button.primary:disabled { background: #94a3b8; cursor: not-allowed; }
-  button.ghost { background: white; color: #475569; border: 1px solid #cbd5e1; padding: 10px 20px; font-size: 14px; cursor: pointer; border-radius: 6px; }
-  button.ghost:hover { background: #f1f5f9; }
-  .status { padding: 12px; border-radius: 6px; font-size: 13px; margin-top: 12px; }
-  .status.ok { background: #d1fae5; color: #065f46; border-left: 4px solid #10b981; }
-  .status.error { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
-  .status.info { background: #dbeafe; color: #1e40af; border-left: 4px solid #3b82f6; }
-  table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-  th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
-  th { background: #f1f5f9; font-weight: 600; color: #475569; position: sticky; top: 0; }
-  tbody tr:hover { background: #f8fafc; }
-  .badge { display: inline-block; padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
-  .badge-gemma { background: #dbeafe; color: #1e40af; }
-  .badge-gpt { background: #fef3c7; color: #92400e; }
-  .badge-mistral { background: #fce7f3; color: #9d174d; }
-  .badge-gemini { background: #e0e7ff; color: #3730a3; }
+  .phase-rotate-hint {
+    font-size: var(--fs-xs);
+    color: var(--ink-400);
+    font-style: italic;
+    margin-top: 4px;
+  }
+  .phase-cost-preview {
+    font-size: var(--fs-xs);
+    color: var(--ink-500);
+    margin-top: var(--sp-2);
+    padding-top: 6px;
+    border-top: 1px dashed var(--ink-200);
+    font-family: var(--mono);
+  }
+
+  /* ─── Fields / formularis ────────────────────────────────── */
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .field label {
+    font-size: var(--fs-md);
+    font-weight: var(--fw-semi);
+    color: var(--ink-600);
+  }
+  .field .desc {
+    font-size: var(--fs-sm);
+    color: var(--ink-400);
+    margin-bottom: 4px;
+  }
+  .field select,
+  .field input[type="number"],
+  .field input[type="text"],
+  .field input[type="password"] {
+    padding: var(--sp-2) var(--sp-3);
+    border: 1px solid var(--ink-200);
+    border-radius: var(--r-sm);
+    font-size: var(--fs-base);
+    font-family: var(--ui);
+    background: #fff;
+    color: var(--ink-900);
+    transition: border-color var(--trans-fast), box-shadow var(--trans-fast);
+  }
+  .field select:focus,
+  .field input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-100);
+  }
+
+  /* ─── Cost tags ──────────────────────────────────────────── */
+  .cost-tag {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: var(--fs-xs);
+    border-radius: var(--r-xs);
+    background: var(--ink-100);
+    color: var(--ink-500);
+    margin-left: 6px;
+    font-family: var(--mono);
+  }
+  .cost-tag.free     { background: var(--ok-50);     color: var(--ok); }
+  .cost-tag.cheap    { background: var(--primary-50); color: var(--primary); }
+  .cost-tag.pricey   { background: var(--warn-50);   color: var(--warn); }
+  .cost-tag.expensive{ background: var(--danger-50); color: var(--danger); }
+
+  /* ─── Toggles ────────────────────────────────────────────── */
+  .toggles {
+    display: flex;
+    gap: var(--sp-6);
+    flex-wrap: wrap;
+    margin: var(--sp-4) 0;
+  }
+  .toggles label {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: var(--fs-base);
+    color: var(--ink-600);
+    cursor: pointer;
+  }
+
+  /* ─── Botons ─────────────────────────────────────────────── */
+  .actions {
+    display: flex;
+    gap: var(--sp-3);
+    margin-top: var(--sp-4);
+  }
+  button.primary {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 10px var(--sp-5);
+    font-size: var(--fs-base);
+    font-weight: var(--fw-semi);
+    font-family: var(--ui);
+    cursor: pointer;
+    border-radius: var(--r-sm);
+    transition: filter var(--trans-fast);
+  }
+  button.primary:hover { filter: brightness(1.1); }
+  button.primary:disabled { opacity: .45; cursor: not-allowed; }
+  button.ghost {
+    background: #fff;
+    color: var(--ink-600);
+    border: 1px solid var(--ink-200);
+    padding: 10px var(--sp-5);
+    font-size: var(--fs-base);
+    font-family: var(--ui);
+    cursor: pointer;
+    border-radius: var(--r-sm);
+    transition: background var(--trans-fast);
+  }
+  button.ghost:hover { background: var(--ink-75); }
+
+  /* ─── Missatges d'estat ──────────────────────────────────── */
+  .status {
+    padding: var(--sp-3);
+    border-radius: var(--r-sm);
+    font-size: var(--fs-md);
+    margin-top: var(--sp-3);
+  }
+  .status.ok    { background: var(--ok-50);     color: var(--ok);     border-left: 4px solid var(--ok); }
+  .status.error { background: var(--danger-50); color: var(--danger); border-left: 4px solid var(--danger); }
+  .status.info  { background: var(--primary-50); color: var(--primary); border-left: 4px solid var(--primary); }
+
+  /* ─── Taules ─────────────────────────────────────────────── */
+  table { width: 100%; border-collapse: collapse; margin-top: var(--sp-3); }
+  th, td {
+    padding: var(--sp-2) 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--paper-line);
+    font-size: var(--fs-md);
+  }
+  th {
+    background: var(--ink-75);
+    font-weight: var(--fw-semi);
+    color: var(--ink-600);
+    position: sticky;
+    top: 0;
+  }
+  tbody tr:hover { background: var(--ink-50); }
+
+  /* ─── Badges de model ────────────────────────────────────── */
+  .badge {
+    display: inline-block;
+    padding: 3px var(--sp-2);
+    border-radius: var(--r-pill);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semi);
+    font-family: var(--mono);
+  }
+  .badge-gemma   { background: var(--primary-100); color: var(--primary); }
+  .badge-gpt     { background: var(--warn-50);     color: var(--warn); }
+  .badge-mistral { background: #fce7f3;            color: #9d174d; }
+  .badge-gemini  { background: var(--primary-50);  color: var(--primary); }
+
+  /* ─── Login ──────────────────────────────────────────────── */
   .login-card { max-width: 400px; margin: 80px auto; }
-  .login-card .field { margin-bottom: 16px; }
+  .login-card .field { margin-bottom: var(--sp-4); }
+
+  /* ─── Utiliats ───────────────────────────────────────────── */
   .hidden { display: none !important; }
-  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 12px 0; }
-  .kpi { background: #f8fafc; padding: 16px; border-radius: 8px; border-left: 4px solid #3b82f6; }
-  .kpi-label { font-size: 11px; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em; }
-  .kpi-value { font-size: 22px; font-weight: bold; margin: 4px 0; color: #1e293b; }
-  .kpi-sub { font-size: 12px; color: #94a3b8; }
+
+  /* ─── KPI grid ───────────────────────────────────────────── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--sp-3);
+    margin: var(--sp-3) 0;
+  }
+  .kpi {
+    background: var(--ink-50);
+    padding: var(--sp-4);
+    border-radius: var(--r-md);
+    border-left: 4px solid var(--primary);
+    border: 1px solid var(--paper-line);
+    border-left: 4px solid var(--primary);
+  }
+  .kpi-label {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    color: var(--ink-500);
+    letter-spacing: 0.05em;
+    font-family: var(--mono);
+  }
+  .kpi-value {
+    font-size: var(--fs-2xl);
+    font-weight: var(--fw-bold);
+    margin: 4px 0;
+    color: var(--ink-900);
+    font-family: var(--serif);
+  }
+  .kpi-sub {
+    font-size: var(--fs-sm);
+    color: var(--ink-400);
+  }
 </style>
 </head>
 <body>
@@ -86,7 +404,7 @@
   <a href="/dashboard">Xat 9</a>
   <a href="/saber-ne">Saber-ne+</a>
   <span class="spacer"></span>
-  <span id="session-info" style="color:#94a3b8;font-size:.8rem;margin-right:12px;"></span>
+  <span id="session-info" style="color:var(--ink-400);font-size:var(--fs-sm);margin-right:12px;"></span>
   <button class="logout-btn" onclick="doLogout()">Tanca sessió</button>
 </nav>
 
@@ -174,32 +492,32 @@
 
   <!-- Analytics pilot -->
   <section class="card" id="analytics-card">
-    <h2>📊 Analytics del pilot <span id="analytics-ts" style="font-size:12px;font-weight:400;color:#64748b;margin-left:8px"></span></h2>
+    <h2>📊 Analytics del pilot <span id="analytics-ts" style="font-size:var(--fs-sm);font-weight:var(--fw-reg);color:var(--ink-500);margin-left:8px"></span></h2>
     <p class="hint">Dades de <code>atne_sessions</code> (Supabase). <button onclick="loadAnalytics()" style="font-size:12px;padding:2px 8px;cursor:pointer">↻ Actualitzar</button></p>
     <div id="analytics-status"></div>
     <div id="analytics-body" style="display:none">
       <!-- KPIs -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px" id="kpi-grid"></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:var(--sp-3);margin-bottom:20px" id="kpi-grid"></div>
       <!-- Per model / etapa / perfil / condicions -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
-        <div><div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px">Per model</div><div id="by-model"></div></div>
-        <div><div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px">Per etapa</div><div id="by-etapa"></div></div>
-        <div><div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px">Per perfil</div><div id="by-profile"></div></div>
-        <div><div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px">Per condicions (top 10)</div><div id="by-conditions"></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);margin-bottom:20px">
+        <div><div style="font-size:var(--fs-sm);font-weight:var(--fw-semi);color:var(--ink-600);margin-bottom:6px">Per model</div><div id="by-model"></div></div>
+        <div><div style="font-size:var(--fs-sm);font-weight:var(--fw-semi);color:var(--ink-600);margin-bottom:6px">Per etapa</div><div id="by-etapa"></div></div>
+        <div><div style="font-size:var(--fs-sm);font-weight:var(--fw-semi);color:var(--ink-600);margin-bottom:6px">Per perfil</div><div id="by-profile"></div></div>
+        <div><div style="font-size:var(--fs-sm);font-weight:var(--fw-semi);color:var(--ink-600);margin-bottom:6px">Per condicions (top 10)</div><div id="by-conditions"></div></div>
       </div>
       <!-- Sessions recents -->
-      <div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px">Últimes 20 sessions</div>
+      <div style="font-size:var(--fs-sm);font-weight:var(--fw-semi);color:var(--ink-600);margin-bottom:6px">Últimes 20 sessions</div>
       <div style="max-height:320px;overflow:auto;">
-        <table style="width:100%;border-collapse:collapse;font-size:12px">
-          <thead><tr style="background:#f8fafc;position:sticky;top:0">
-            <th style="padding:6px 8px;text-align:left;border-bottom:1px solid #e2e8f0">Data</th>
-            <th style="padding:6px 8px;text-align:left;border-bottom:1px solid #e2e8f0">Model</th>
-            <th style="padding:6px 8px;text-align:left;border-bottom:1px solid #e2e8f0">Perfil</th>
-            <th style="padding:6px 8px;text-align:left;border-bottom:1px solid #e2e8f0">Etapa</th>
-            <th style="padding:6px 8px;text-align:left;border-bottom:1px solid #e2e8f0">MECR</th>
-            <th style="padding:6px 8px;text-align:right;border-bottom:1px solid #e2e8f0">ms</th>
-            <th style="padding:6px 8px;text-align:right;border-bottom:1px solid #e2e8f0">Instr.</th>
-            <th style="padding:6px 8px;text-align:right;border-bottom:1px solid #e2e8f0">Score</th>
+        <table style="width:100%;border-collapse:collapse;font-size:var(--fs-sm)">
+          <thead><tr style="background:var(--ink-75);position:sticky;top:0">
+            <th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--paper-line)">Data</th>
+            <th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--paper-line)">Model</th>
+            <th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--paper-line)">Perfil</th>
+            <th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--paper-line)">Etapa</th>
+            <th style="padding:6px 8px;text-align:left;border-bottom:1px solid var(--paper-line)">MECR</th>
+            <th style="padding:6px 8px;text-align:right;border-bottom:1px solid var(--paper-line)">ms</th>
+            <th style="padding:6px 8px;text-align:right;border-bottom:1px solid var(--paper-line)">Instr.</th>
+            <th style="padding:6px 8px;text-align:right;border-bottom:1px solid var(--paper-line)">Score</th>
           </tr></thead>
           <tbody id="analytics-tbody"></tbody>
         </table>
@@ -571,7 +889,7 @@ async function loadEvents() {
       tbody.appendChild(tr);
     }
     if (!data.items || data.items.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:24px;">Cap activitat recent</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink-400);padding:24px;">Cap activitat recent</td></tr>';
     }
     status.innerHTML = "";
   } catch (e) {
@@ -582,20 +900,20 @@ async function loadEvents() {
 // ── Analytics ──────────────────────────────────────────────────
 function _bar(label, count, total, color) {
   const pct = total ? Math.round(count / total * 100) : 0;
-  return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:12px">
-    <div style="width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#334155">${label}</div>
-    <div style="flex:1;background:#f1f5f9;border-radius:4px;height:12px;overflow:hidden">
-      <div style="width:${pct}%;background:${color};height:100%;border-radius:4px;transition:.3s"></div>
+  return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:var(--fs-sm)">
+    <div style="width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink-700)">${label}</div>
+    <div style="flex:1;background:var(--ink-100);border-radius:var(--r-xs);height:12px;overflow:hidden">
+      <div style="width:${pct}%;background:${color};height:100%;border-radius:var(--r-xs);transition:.3s"></div>
     </div>
-    <div style="width:32px;text-align:right;color:#64748b">${count}</div>
+    <div style="width:32px;text-align:right;color:var(--ink-500)">${count}</div>
   </div>`;
 }
 
 function _kpi(label, value, sub) {
-  return `<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px">
-    <div style="font-size:22px;font-weight:700;color:#1e293b">${value ?? '—'}</div>
-    <div style="font-size:11px;font-weight:600;color:#64748b;margin-top:2px">${label}</div>
-    ${sub ? `<div style="font-size:10px;color:#94a3b8;margin-top:1px">${sub}</div>` : ''}
+  return `<div style="background:var(--ink-50);border:1px solid var(--paper-line);border-radius:var(--r-lg);padding:12px 14px">
+    <div style="font-size:var(--fs-2xl);font-weight:var(--fw-bold);color:var(--ink-900);font-family:var(--serif)">${value ?? '—'}</div>
+    <div style="font-size:var(--fs-xs);font-weight:var(--fw-semi);color:var(--ink-500);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">${label}</div>
+    ${sub ? `<div style="font-size:var(--fs-xs);color:var(--ink-400);margin-top:1px;font-family:var(--mono)">${sub}</div>` : ''}
   </div>`;
 }
 
@@ -649,16 +967,16 @@ async function loadAnalytics() {
 
     // Taula sessions recents
     document.getElementById('analytics-tbody').innerHTML = d.recent.map(r => `
-      <tr style="border-bottom:1px solid #f1f5f9">
-        <td style="padding:5px 8px;color:#64748b">${r.ts}</td>
-        <td style="padding:5px 8px"><span style="background:#f1f5f9;border-radius:4px;padding:2px 6px;font-size:11px">${r.model || '?'}</span></td>
+      <tr style="border-bottom:1px solid var(--paper-line)">
+        <td style="padding:5px 8px;color:var(--ink-500)">${r.ts}</td>
+        <td style="padding:5px 8px"><span style="background:var(--ink-100);border-radius:var(--r-xs);padding:2px 6px;font-size:var(--fs-xs);font-family:var(--mono)">${r.model || '?'}</span></td>
         <td style="padding:5px 8px">${r.profile_type || '?'}</td>
         <td style="padding:5px 8px">${r.etapa || ''}</td>
         <td style="padding:5px 8px">${r.mecr || ''}</td>
         <td style="padding:5px 8px;text-align:right">${r.latency_ms ?? ''}</td>
         <td style="padding:5px 8px;text-align:right">${r.n_instr ?? ''}</td>
         <td style="padding:5px 8px;text-align:right">${r.score != null ? r.score.toFixed(1) : ''}</td>
-      </tr>`).join('') || '<tr><td colspan="8" style="padding:12px;text-align:center;color:#94a3b8">Sense sessions registrades</td></tr>';
+      </tr>`).join('') || '<tr><td colspan="8" style="padding:12px;text-align:center;color:var(--ink-400)">Sense sessions registrades</td></tr>';
   } catch(e) {
     st.textContent = 'Error de connexió: ' + e.message;
   }

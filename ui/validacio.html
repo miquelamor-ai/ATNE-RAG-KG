@@ -4,97 +4,140 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ATNE — Validacio humana</title>
-    <style>
-        :root { --pri: #1a56db; --pri-light: #dbeafe; --ok: #059669; --ok-light: #d1fae5;
-                --warn: #d97706; --warn-light: #fef3c7; --err: #dc2626; --err-light: #fee2e2;
-                --purple: #7c3aed; --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb;
-                --g300: #d1d5db; --g500: #6b7280; --g700: #374151; --g900: #111827; --r: 8px; }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-               background: var(--g50); color: var(--g900); line-height: 1.6; }
 
-        .header { background: white; border-bottom: 1px solid var(--g200); padding: 16px 32px;
-                  display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100; }
-        .header .logo { font-size: 20px; font-weight: 700; color: var(--pri); }
-        .header .logo span { font-weight: 400; color: var(--g500); }
+    <!-- Tipografia -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- ATNE base global (ordre obligatori: tokens → base → shell) -->
+    <link rel="stylesheet" href="/ui/styles/tokens.css">
+    <link rel="stylesheet" href="/ui/styles/base.css">
+    <link rel="stylesheet" href="/ui/styles/shell.css">
+
+    <style>
+        /* =========================================================
+           Validacio humana · overrides locals
+           ========================================================= */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--ui); background: var(--cream); color: var(--ink-900); line-height: var(--lh-body); }
+
+        .header { background: #fff; border-bottom: 1px solid var(--paper-line); padding: 16px 32px;
+                  display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: var(--z-overlay); box-shadow: var(--sh-sm); }
+        .header .logo { font-family: var(--serif); font-size: 20px; font-weight: 700; color: var(--primary); }
+        .header .logo span { font-family: var(--ui); font-weight: 400; color: var(--ink-500); }
         .header nav { display: flex; gap: 4px; margin-left: 16px; }
-        .header nav a, .header nav button { padding: 8px 16px; border-radius: 6px; text-decoration: none;
-            color: var(--g700); font-size: 14px; font-weight: 500; background: none; border: none; cursor: pointer; }
-        .header nav a:hover, .header nav button:hover, .header nav a.active { background: var(--pri-light); color: var(--pri); }
-        .header .back-link { margin-left: auto; color: var(--g500); text-decoration: none; font-size: 13px; }
+        .header nav a, .header nav button { padding: 8px 16px; border-radius: var(--r-sm); text-decoration: none;
+            color: var(--ink-700); font-size: var(--fs-base); font-weight: var(--fw-med); background: none; border: none; cursor: pointer; font-family: var(--ui); }
+        .header nav a:hover, .header nav button:hover, .header nav a.active { background: var(--primary-50); color: var(--primary); }
+        .header .back-link { margin-left: auto; color: var(--ink-500); text-decoration: none; font-size: var(--fs-md); }
 
         .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
-        h1 { font-size: 22px; margin-bottom: 8px; }
-        .subtitle { color: var(--g500); font-size: 14px; margin-bottom: 24px; }
+        h1 { font-family: var(--serif); font-size: var(--fs-2xl); margin-bottom: 8px; color: var(--ink-800); }
+        .subtitle { color: var(--ink-500); font-size: var(--fs-base); margin-bottom: 24px; }
 
         /* Rubrica */
-        .rubrica { background: white; border: 1px solid var(--g200); border-radius: var(--r);
-                   padding: 20px; margin-bottom: 24px; display: none; }
+        .rubrica { background: #fff; border: 1px solid var(--paper-line); border-radius: var(--r-md);
+                   padding: 20px; margin-bottom: 24px; display: none; box-shadow: var(--sh-xs); }
         .rubrica.visible { display: block; }
-        .rubrica h2 { font-size: 16px; margin-bottom: 12px; color: var(--pri); }
-        .rubrica table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .rubrica th, .rubrica td { padding: 8px 12px; border: 1px solid var(--g200); text-align: left; vertical-align: top; }
-        .rubrica th { background: var(--g50); font-weight: 600; }
-        .rubrica .crit-name { font-weight: 700; white-space: nowrap; }
+        .rubrica h2 { font-family: var(--serif); font-size: var(--fs-lg); margin-bottom: 12px; color: var(--primary); }
+        .rubrica table { width: 100%; border-collapse: collapse; font-size: var(--fs-md); }
+        .rubrica th, .rubrica td { padding: 8px 12px; border: 1px solid var(--paper-line); text-align: left; vertical-align: top; }
+        .rubrica th { background: var(--cream-2); font-weight: var(--fw-semi); color: var(--ink-700); }
+        .rubrica .crit-name { font-weight: var(--fw-bold); white-space: nowrap; color: var(--ink-800); }
 
         /* Cas selector */
         .cas-nav { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
-        .cas-btn { padding: 8px 14px; border: 2px solid var(--g200); border-radius: 6px;
-                   background: white; cursor: pointer; font-size: 12px; transition: all .15s; }
-        .cas-btn:hover { border-color: var(--pri); }
-        .cas-btn.active { border-color: var(--pri); background: var(--pri-light); color: var(--pri); font-weight: 600; }
+        .cas-btn { padding: 8px 14px; border: 2px solid var(--ink-200); border-radius: var(--r-sm);
+                   background: #fff; cursor: pointer; font-size: var(--fs-sm); transition: all var(--trans-fast); font-family: var(--ui); color: var(--ink-700); }
+        .cas-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .cas-btn.active { border-color: var(--primary); background: var(--primary-50); color: var(--primary); font-weight: var(--fw-semi); }
         .cas-btn.scored { border-color: var(--ok); }
-        .cas-btn .model-tag { display: block; font-size: 10px; color: var(--g500); margin-top: 2px; }
+        .cas-btn .model-tag { display: block; font-size: 10px; color: var(--ink-500); margin-top: 2px; }
 
         /* Text panels */
         .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-        .panel { background: white; border: 1px solid var(--g200); border-radius: var(--r); overflow: hidden; }
-        .panel-head { padding: 12px 16px; border-bottom: 1px solid var(--g200); display: flex;
-                      justify-content: space-between; align-items: center; }
-        .panel-head h3 { font-size: 13px; font-weight: 700; }
-        .panel-head .badge { font-size: 11px; padding: 2px 8px; border-radius: 4px; }
-        .panel-body { padding: 16px; font-size: 14px; line-height: 1.8; max-height: 500px; overflow-y: auto; }
-        .panel-body.original { color: var(--g500); }
+        .panel { background: #fff; border: 1px solid var(--paper-line); border-radius: var(--r-md); overflow: hidden; box-shadow: var(--sh-xs); }
+        .panel-head { padding: 12px 16px; border-bottom: 1px solid var(--paper-line); display: flex;
+                      justify-content: space-between; align-items: center; background: var(--cream-2); }
+        .panel-head h3 { font-size: var(--fs-md); font-weight: var(--fw-bold); color: var(--ink-800); }
+        .panel-head .badge { font-size: var(--fs-xs); padding: 2px 8px; border-radius: var(--r-xs); }
+        .panel-body { padding: 16px; font-size: var(--fs-base); line-height: var(--lh-read); max-height: 500px; overflow-y: auto; }
+        .panel-body.original { color: var(--ink-500); }
 
         /* Perfil bar */
         .perfil-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; padding: 12px 16px;
-                      background: white; border: 1px solid var(--g200); border-radius: var(--r); }
-        .perfil-tag { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+                      background: #fff; border: 1px solid var(--paper-line); border-radius: var(--r-md); box-shadow: var(--sh-xs); }
+        .perfil-tag { padding: 4px 12px; border-radius: var(--r-pill); font-size: var(--fs-sm); font-weight: var(--fw-semi); }
+
+        /* Selector de tanda */
+        .tanda-bar { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; padding: 12px 16px;
+                     background: #fff; border: 1px solid var(--paper-line); border-radius: var(--r-md); box-shadow: var(--sh-xs); }
+        .tanda-bar label { font-size: var(--fs-md); font-weight: var(--fw-semi); color: var(--ink-700); }
+        .tanda-bar select { padding: 8px 14px; border: 1px solid var(--ink-200); border-radius: var(--r-sm);
+                            font-size: var(--fs-base); font-family: var(--ui); color: var(--ink-800); background: #fff; }
+        .tanda-bar select:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+        .tanda-bar .tanda-info { font-size: var(--fs-sm); color: var(--ink-500); }
+
+        /* System prompt details */
+        .prompt-details { margin-bottom: 16px; }
+        .prompt-details summary { cursor: pointer; padding: 12px 16px; background: #fff;
+                                   border: 1px solid var(--paper-line); border-radius: var(--r-md);
+                                   font-weight: var(--fw-semi); font-size: var(--fs-base); color: var(--ac);
+                                   box-shadow: var(--sh-xs); list-style: none; }
+        .prompt-details summary::-webkit-details-marker { display: none; }
+        .prompt-details[open] summary { border-radius: var(--r-md) var(--r-md) 0 0; }
+        .prompt-body { background: #fff; border: 1px solid var(--paper-line); border-radius: 0 0 var(--r-md) var(--r-md);
+                       border-top: none; padding: 16px; font-family: var(--mono); font-size: var(--fs-xs);
+                       line-height: 1.7; max-height: 500px; overflow-y: auto; white-space: pre-wrap; color: var(--ink-700); }
 
         /* Scoring */
-        .scoring { background: white; border: 2px solid var(--pri); border-radius: var(--r); padding: 20px; margin-bottom: 20px; }
-        .scoring h3 { font-size: 15px; color: var(--pri); margin-bottom: 16px; }
-        .score-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--g100); }
+        .scoring { background: #fff; border: 2px solid var(--primary); border-radius: var(--r-md);
+                   padding: 20px; margin-bottom: 20px; box-shadow: var(--sh-md); }
+        .scoring h3 { font-family: var(--serif); font-size: var(--fs-lg); color: var(--primary); margin-bottom: 16px; }
+        .score-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--ink-100); }
         .score-row:last-child { border-bottom: none; }
-        .score-label { flex: 0 0 220px; font-size: 13px; }
-        .score-label strong { display: block; }
-        .score-label .hint { font-size: 11px; color: var(--g500); }
+        .score-label { flex: 0 0 220px; font-size: var(--fs-md); }
+        .score-label strong { display: block; color: var(--ink-800); }
+        .score-label .hint { font-size: var(--fs-xs); color: var(--ink-500); }
         .score-btns { display: flex; gap: 6px; }
-        .score-btn { width: 44px; height: 44px; border: 2px solid var(--g200); border-radius: 8px;
-                     background: white; cursor: pointer; font-size: 16px; font-weight: 700; transition: all .15s; }
-        .score-btn:hover { border-color: var(--pri); background: var(--pri-light); }
-        .score-btn.selected { border-color: var(--pri); background: var(--pri); color: white; }
-        .score-btn.gpt { border-color: var(--warn); background: var(--warn-light); color: var(--warn); font-size: 12px; }
+        .score-btn { width: 44px; height: 44px; border: 2px solid var(--ink-200); border-radius: var(--r-sm);
+                     background: #fff; cursor: pointer; font-size: var(--fs-lg); font-weight: var(--fw-bold);
+                     transition: all var(--trans-fast); font-family: var(--ui); color: var(--ink-700); }
+        .score-btn:hover { border-color: var(--primary); background: var(--primary-50); color: var(--primary); }
+        .score-btn.selected { border-color: var(--primary); background: var(--primary); color: #fff; }
+        .score-btn.gpt { border-color: var(--warn); background: var(--warn-50); color: var(--warn); font-size: var(--fs-sm); }
+
+        /* Reveal button */
+        .btn-reveal { padding: 10px 20px; background: var(--warn); color: #fff; border: none;
+                      border-radius: var(--r-sm); font-size: var(--fs-base); cursor: pointer;
+                      font-weight: var(--fw-semi); font-family: var(--ui); transition: filter var(--trans-fast); }
+        .btn-reveal:hover { filter: brightness(1.08); }
+        .reveal-msg { font-size: var(--fs-md); color: var(--ink-500); }
 
         /* Compare */
-        .compare-section { background: white; border: 1px solid var(--g200); border-radius: var(--r);
-                           padding: 20px; margin-bottom: 20px; display: none; }
+        .compare-section { background: #fff; border: 1px solid var(--paper-line); border-radius: var(--r-md);
+                           padding: 20px; margin-bottom: 20px; display: none; box-shadow: var(--sh-xs); }
         .compare-section.visible { display: block; }
+        .compare-section h3 { font-family: var(--serif); font-size: var(--fs-lg); margin-bottom: 16px; color: var(--ink-800); }
         .compare-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-        .compare-bar .label { font-size: 13px; font-weight: 600; flex: 0 0 200px; }
-        .compare-fill { height: 24px; border-radius: 4px; display: flex; align-items: center;
-                        padding: 0 8px; font-size: 11px; font-weight: 700; color: white; min-width: 30px; }
+        .compare-bar .label { font-size: var(--fs-md); font-weight: var(--fw-semi); flex: 0 0 200px; color: var(--ink-700); }
+        .compare-fill { height: 24px; border-radius: var(--r-xs); display: flex; align-items: center;
+                        padding: 0 8px; font-size: var(--fs-xs); font-weight: var(--fw-bold); color: #fff; min-width: 30px; }
 
         /* Summary */
-        .summary { background: var(--g50); border: 2px solid var(--g200); border-radius: var(--r);
+        .summary { background: var(--cream-2); border: 2px solid var(--ink-200); border-radius: var(--r-md);
                    padding: 20px; margin-top: 24px; display: none; }
         .summary.visible { display: block; }
-        .summary h2 { font-size: 16px; margin-bottom: 16px; }
-        .summary table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .summary th, .summary td { padding: 8px 12px; border: 1px solid var(--g200); text-align: center; }
-        .summary th { background: white; }
-        .diff-pos { color: var(--err); font-weight: 700; }
-        .diff-neg { color: var(--ok); font-weight: 700; }
+        .summary h2 { font-family: var(--serif); font-size: var(--fs-lg); margin-bottom: 16px; color: var(--ink-800); }
+        .summary table { width: 100%; border-collapse: collapse; font-size: var(--fs-md); }
+        .summary th, .summary td { padding: 8px 12px; border: 1px solid var(--paper-line); text-align: center; }
+        .summary th { background: #fff; font-weight: var(--fw-semi); color: var(--ink-700); }
+        .diff-pos { color: var(--err); font-weight: var(--fw-bold); }
+        .diff-neg { color: var(--ok); font-weight: var(--fw-bold); }
+
+        /* Progress badge */
+        .progress-badge { font-size: var(--fs-sm); color: var(--ink-500); }
 
         @media (max-width: 768px) {
             .panels { grid-template-columns: 1fr; }
@@ -110,7 +153,7 @@
         <button onclick="toggleRubrica()">Rubrica</button>
         <button onclick="showSummary()">Resum</button>
     </nav>
-    <span id="progress" style="font-size:12px;color:var(--g500)"></span>
+    <span id="progress" class="progress-badge"></span>
     <a href="/cuina" class="back-link">&larr; Cuina</a>
 </div>
 
@@ -119,15 +162,15 @@
     <p class="subtitle">Llegeix cada text adaptat, puntua de 1 a 5, i compara amb el jutge GPT.</p>
 
     <!-- Selector de tanda -->
-    <div style="display:flex;gap:12px;align-items:center;margin-bottom:20px;padding:12px 16px;background:white;border:1px solid var(--g200);border-radius:var(--r);">
-        <label style="font-size:13px;font-weight:600;color:var(--g700);">Tanda:</label>
-        <select id="tanda-select" onchange="changeTanda()" style="padding:8px 14px;border:1px solid var(--g200);border-radius:6px;font-size:14px;">
+    <div class="tanda-bar">
+        <label>Tanda:</label>
+        <select id="tanda-select" onchange="changeTanda()">
             <option value="det" selected>DET (determinista pur, sense RAG)</option>
             <option value="rag_v3">RAG-v3 (22 sub-vars)</option>
             <option value="rag_v2">RAG-v2 (10 sub-vars)</option>
             <option value="hc">HC (hardcoded antic)</option>
         </select>
-        <span id="tanda-info" style="font-size:12px;color:var(--g500);"></span>
+        <span id="tanda-info" class="tanda-info"></span>
     </div>
 
     <!-- Rubrica desplegable -->
@@ -189,25 +232,23 @@
         <div class="panel">
             <div class="panel-head">
                 <h3>Text original</h3>
-                <span class="badge" style="background:var(--g100);color:var(--g700)" id="orig-words"></span>
+                <span class="badge" style="background:var(--cream-2);color:var(--ink-700)" id="orig-words"></span>
             </div>
             <div class="panel-body original" id="panel-original"></div>
         </div>
         <div class="panel">
             <div class="panel-head">
                 <h3 id="panel-gen-title">Text adaptat</h3>
-                <span class="badge" style="background:var(--pri-light);color:var(--pri)" id="adapt-words"></span>
+                <span class="badge" style="background:var(--primary-50);color:var(--primary)" id="adapt-words"></span>
             </div>
             <div class="panel-body" id="panel-adaptat"></div>
         </div>
     </div>
 
     <!-- System prompt -->
-    <details style="margin-bottom:16px;">
-        <summary style="cursor:pointer;padding:12px 16px;background:white;border:1px solid var(--g200);border-radius:var(--r);font-weight:600;font-size:14px;color:var(--purple);">
-            Veure el prompt que ha rebut el model (system prompt complet)
-        </summary>
-        <div id="panel-prompt" style="background:white;border:1px solid var(--g200);border-radius:0 0 var(--r) var(--r);border-top:none;padding:16px;font-family:monospace;font-size:12px;line-height:1.7;max-height:500px;overflow-y:auto;white-space:pre-wrap;color:var(--g700);"></div>
+    <details class="prompt-details">
+        <summary>Veure el prompt que ha rebut el model (system prompt complet)</summary>
+        <div id="panel-prompt" class="prompt-body"></div>
     </details>
 
     <!-- Scoring -->
@@ -215,17 +256,16 @@
         <h3>La teva puntuacio</h3>
         <div id="score-rows"></div>
         <div style="margin-top:16px;display:flex;gap:12px;align-items:center;">
-            <button onclick="revealGPT()" id="btn-reveal"
-                style="padding:10px 20px;background:var(--warn);color:white;border:none;border-radius:6px;font-size:14px;cursor:pointer;font-weight:600;">
+            <button onclick="revealGPT()" id="btn-reveal" class="btn-reveal">
                 Mostra puntuacio GPT
             </button>
-            <span id="reveal-msg" style="font-size:13px;color:var(--g500);"></span>
+            <span id="reveal-msg" class="reveal-msg"></span>
         </div>
     </div>
 
     <!-- Compare -->
     <div class="compare-section" id="compare-section">
-        <h3 style="font-size:15px;margin-bottom:16px;">Comparacio: Tu vs GPT</h3>
+        <h3>Comparacio: Tu vs GPT</h3>
         <div id="compare-bars"></div>
     </div>
 
@@ -256,7 +296,7 @@ async function loadData(tanda) {
     DATA = await res.json();
     document.getElementById('tanda-info').textContent = `${DATA.length} textos`;
     if (DATA.length === 0) {
-        document.getElementById('cas-nav').innerHTML = '<p style="color:var(--g500)">No hi ha textos per aquesta tanda.</p>';
+        document.getElementById('cas-nav').innerHTML = '<p style="color:var(--ink-500)">No hi ha textos per aquesta tanda.</p>';
         return;
     }
     renderNav();
@@ -291,14 +331,16 @@ function selectCase(idx) {
     });
 
     // Perfil bar
-    const mecr_colors = {'pre-A1':'#dc2626','A1':'#d97706','A2':'#d97706','B1':'#059669','B2':'#1a56db'};
-    const dua_colors = {'Acces':'#dc2626','Core':'#1a56db','Enriquiment':'#7c3aed'};
+    const mecr_colors = {'pre-A1':'var(--err)','A1':'var(--warn)','A2':'var(--warn)','B1':'var(--ok)','B2':'var(--primary)'};
+    const mecr_bg    = {'pre-A1':'var(--danger-50)','A1':'var(--warn-50)','A2':'var(--warn-50)','B1':'var(--ok-50)','B2':'var(--primary-50)'};
+    const dua_colors = {'Acces':'var(--err)','Core':'var(--primary)','Enriquiment':'var(--ac)'};
+    const dua_bg     = {'Acces':'var(--danger-50)','Core':'var(--primary-50)','Enriquiment':'var(--ac-bg)'};
     document.getElementById('perfil-bar').innerHTML = `
-        <span class="perfil-tag" style="background:var(--ok-light);color:var(--ok)">${c.perfil}</span>
-        <span class="perfil-tag" style="background:${mecr_colors[c.mecr]||'#6b7280'}22;color:${mecr_colors[c.mecr]||'#6b7280'}">MECR: ${c.mecr}</span>
-        <span class="perfil-tag" style="background:${dua_colors[c.dua]||'#6b7280'}22;color:${dua_colors[c.dua]||'#6b7280'}">DUA: ${c.dua}</span>
-        <span class="perfil-tag" style="background:var(--g100);color:var(--g700)">${c.paraules} paraules</span>
-        <span class="perfil-tag" style="background:var(--purple);22;color:var(--purple)">${c.generator.toUpperCase()}</span>`;
+        <span class="perfil-tag" style="background:var(--ok-100);color:var(--ok)">${c.perfil}</span>
+        <span class="perfil-tag" style="background:${mecr_bg[c.mecr]||'var(--ink-100)'};color:${mecr_colors[c.mecr]||'var(--ink-600)'}">MECR: ${c.mecr}</span>
+        <span class="perfil-tag" style="background:${dua_bg[c.dua]||'var(--ink-100)'};color:${dua_colors[c.dua]||'var(--ink-600)'}">DUA: ${c.dua}</span>
+        <span class="perfil-tag" style="background:var(--cream-2);color:var(--ink-700)">${c.paraules} paraules</span>
+        <span class="perfil-tag" style="background:var(--ac-bg);color:var(--ac)">${c.generator.toUpperCase()}</span>`;
 
     // Panels
     document.getElementById('panel-original').innerHTML = renderMarkdown(c.original);
@@ -391,8 +433,8 @@ function showCompare(human) {
             <div class="label">${cr.id}. ${cr.label}</div>
             <div style="flex:1;display:flex;flex-direction:column;gap:3px">
                 <div style="display:flex;align-items:center;gap:8px">
-                    <span style="font-size:11px;width:30px;color:var(--pri)">Tu</span>
-                    <div class="compare-fill" style="width:${hPct}%;background:var(--pri)">${h}</div>
+                    <span style="font-size:11px;width:30px;color:var(--primary)">Tu</span>
+                    <div class="compare-fill" style="width:${hPct}%;background:var(--primary)">${h}</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px">
                     <span style="font-size:11px;width:30px;color:var(--warn)">GPT</span>
@@ -439,7 +481,7 @@ function showSummary() {
     });
 
     // Mitjanes
-    html += '<tr style="font-weight:700;background:var(--pri-light)"><td colspan="3">MITJANA</td>';
+    html += '<tr style="font-weight:700;background:var(--primary-50)"><td colspan="3">MITJANA</td>';
     CRITERIA.forEach(cr => {
         const n = totalN[cr.id];
         const hm = n ? (totalH[cr.id] / n).toFixed(2) : '-';
@@ -465,12 +507,12 @@ function toggleRubrica() {
 function renderMarkdown(text) {
     return text
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        .replace(/\*\*([^*]+)\*\*/g, '<strong style="color:var(--pri)">$1</strong>')
-        .replace(/^### (.+)$/gm, '<h4 style="font-size:14px;font-weight:700;margin:16px 0 6px;color:var(--g900);border-bottom:1px solid var(--g100);padding-bottom:4px">$1</h4>')
-        .replace(/^## (.+)$/gm, '<h3 style="font-size:15px;font-weight:700;margin:20px 0 8px;color:var(--pri)">$1</h3>')
+        .replace(/\*\*([^*]+)\*\*/g, '<strong style="color:var(--primary)">$1</strong>')
+        .replace(/^### (.+)$/gm, '<h4 style="font-size:14px;font-weight:700;margin:16px 0 6px;color:var(--ink-900);border-bottom:1px solid var(--paper-line);padding-bottom:4px">$1</h4>')
+        .replace(/^## (.+)$/gm, '<h3 style="font-size:15px;font-weight:700;margin:20px 0 8px;color:var(--primary)">$1</h3>')
         .replace(/^\|(.+)\|$/gm, (m) => {
             const cells = m.split('|').filter(c => c.trim());
-            return '<div style="display:flex;gap:8px;padding:4px 0;font-size:13px;border-bottom:1px solid var(--g100)">' +
+            return '<div style="display:flex;gap:8px;padding:4px 0;font-size:13px;border-bottom:1px solid var(--paper-line)">' +
                 cells.map(c => `<span style="flex:1">${c.trim()}</span>`).join('') + '</div>';
         })
         .replace(/^- (.+)$/gm, '<div style="padding-left:16px;margin:3px 0">&#8226; $1</div>')

@@ -1,341 +1,777 @@
 <!DOCTYPE html>
-
-<html class="light" lang="ca"><head>
+<html lang="ca">
+<head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Avaluació i decisions - ATNE Saber-ne+</title>
-<!-- Fonts -->
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<title>Avaluació i decisions — ATNE</title>
+
+<!-- Tipografia -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 <!-- Material Symbols -->
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<!-- Tailwind -->
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "on-background": "#0b1c30",
-                        "error-container": "#ffdad6",
-                        "tertiary-fixed": "#dfe0ff",
-                        "surface": "#f8f9ff",
-                        "primary-fixed": "#e1e0ff",
-                        "secondary": "#4953bc",
-                        "surface-container": "#e5eeff",
-                        "background": "#f8f9ff",
-                        "surface-container-low": "#eff4ff",
-                        "on-tertiary": "#ffffff",
-                        "on-secondary": "#ffffff",
-                        "inverse-surface": "#213145",
-                        "tertiary": "#2b38a9",
-                        "on-primary": "#ffffff",
-                        "inverse-on-surface": "#eaf1ff",
-                        "secondary-fixed": "#e0e0ff",
-                        "on-error": "#ffffff",
-                        "surface-variant": "#d3e4fe",
-                        "surface-bright": "#f8f9ff",
-                        "on-surface-variant": "#464653",
-                        "on-primary-fixed-variant": "#3337a6",
-                        "on-secondary-fixed": "#000767",
-                        "inverse-primary": "#bfc1ff",
-                        "on-error-container": "#93000a",
-                        "surface-container-highest": "#d3e4fe",
-                        "primary-fixed-dim": "#bfc1ff",
-                        "outline": "#767684",
-                        "surface-container-high": "#dce9ff",
-                        "outline-variant": "#c7c5d5",
-                        "primary": "#3337a6",
-                        "surface-tint": "#4c51bf",
-                        "on-primary-fixed": "#03006d",
-                        "secondary-container": "#8792fe",
-                        "on-tertiary-fixed-variant": "#2b38aa",
-                        "primary-container": "#4c51bf",
-                        "on-tertiary-container": "#d3d5ff",
-                        "on-surface": "#0b1c30",
-                        "surface-container-lowest": "#ffffff",
-                        "surface-dim": "#cbdbf5",
-                        "on-tertiary-fixed": "#000965",
-                        "on-primary-container": "#d4d5ff",
-                        "on-secondary-fixed-variant": "#2f3aa3",
-                        "secondary-fixed-dim": "#bdc2ff",
-                        "on-secondary-container": "#17228f",
-                        "tertiary-fixed-dim": "#bdc2ff",
-                        "tertiary-container": "#4552c2",
-                        "error": "#ba1a1a"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "1.5rem",
-                        "full": "9999px"
-                    },
-                    "fontFamily": {
-                        "headline": ["Plus Jakarta Sans"],
-                        "body": ["Inter"],
-                        "label": ["Inter"]
-                    }
-                },
-            },
-        }
-    </script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+<!-- ATNE base global (ordre obligatori: tokens → base → shell) -->
+<link rel="stylesheet" href="/ui/styles/tokens.css">
+<link rel="stylesheet" href="/ui/styles/base.css">
+<link rel="stylesheet" href="/ui/styles/shell.css">
+
 <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-            vertical-align: middle;
-        }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8f9ff;
-            color: #0b1c30;
-        }
-        h1, h2, h3 {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-        .editorial-gradient {
-            background: linear-gradient(135deg, #3337a6 0%, #4c51bf 100%);
-        }
-        .ghost-border {
-            outline: 1px solid rgba(199, 197, 213, 0.15);
-        }
-    </style>
+  /* =========================================================
+     Avaluació · Layout de pàgina informativa
+     ========================================================= */
+
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    vertical-align: middle;
+    line-height: 1;
+  }
+
+  /* ─── Topbar de la pàgina (navbar de navegació pública) ─ */
+  .page-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(244, 241, 232, .92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--paper-line);
+  }
+
+  .page-header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 var(--sp-6);
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-7);
+  }
+
+  .site-brand {
+    font-family: var(--serif);
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-bold);
+    color: var(--primary);
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+  .site-brand:hover { opacity: .8; }
+
+  .site-nav {
+    display: flex;
+    gap: var(--sp-6);
+    align-items: center;
+  }
+
+  .site-nav a {
+    font-family: var(--ui);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semi);
+    color: var(--ink-500);
+    letter-spacing: .02em;
+    text-transform: uppercase;
+    transition: color var(--trans-fast);
+    padding-bottom: 2px;
+  }
+  .site-nav a:hover { color: var(--primary); }
+  .site-nav a.active {
+    color: var(--primary);
+    border-bottom: 2px solid var(--primary);
+  }
+
+  .header-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+  }
+
+  .search-pill {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    background: var(--cream-2);
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-pill);
+    padding: 6px var(--sp-3);
+  }
+
+  .search-pill .material-symbols-outlined {
+    color: var(--ink-400);
+    font-size: 16px;
+  }
+
+  .search-pill input {
+    border: 0;
+    background: transparent;
+    font-size: var(--fs-sm);
+    color: var(--ink-700);
+    width: 140px;
+  }
+  .search-pill input::placeholder { color: var(--ink-400); }
+
+  .hdr-icon-btn {
+    width: 34px; height: 34px;
+    border-radius: var(--r-md);
+    display: grid; place-items: center;
+    color: var(--ink-500);
+    transition: background var(--trans-fast), color var(--trans-fast);
+  }
+  .hdr-icon-btn:hover { background: var(--cream-2); color: var(--ink-900); }
+  .hdr-icon-btn .material-symbols-outlined { font-size: 20px; }
+
+  .avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--paper-line);
+    object-fit: cover;
+  }
+
+  /* ─── Contenidor principal ─────────────────────────────── */
+  .page-main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: var(--sp-9) var(--sp-6) 80px;
+  }
+
+  /* ─── Hero ─────────────────────────────────────────────── */
+  .hero {
+    margin-bottom: 72px;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-tight);
+    color: var(--ink-900);
+    letter-spacing: -0.03em;
+    margin-bottom: var(--sp-5);
+  }
+
+  .hero p {
+    font-size: var(--fs-lg);
+    color: var(--ink-600);
+    max-width: 580px;
+    line-height: var(--lh-read);
+  }
+
+  /* ─── Separador de secció ──────────────────────────────── */
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    margin-bottom: var(--sp-7);
+  }
+
+  .section-head h2 {
+    font-family: var(--ui);
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-bold);
+    color: var(--ink-900);
+    white-space: nowrap;
+  }
+
+  .section-rule {
+    flex: 1;
+    height: 1px;
+    background: var(--paper-line);
+  }
+
+  /* ─── Resum executiu ───────────────────────────────────── */
+  .summary-block {
+    margin-bottom: 72px;
+    background: var(--cream-2);
+    border-radius: var(--r-2xl);
+    padding: var(--sp-9) var(--sp-9) var(--sp-8);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .summary-accent {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, var(--primary) 0%, var(--primary-600) 100%);
+    border-radius: var(--r-2xl) 0 0 var(--r-2xl);
+  }
+
+  .summary-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--sp-8);
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+  }
+
+  .summary-top h2 {
+    font-family: var(--ui);
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-bold);
+    color: var(--primary);
+    letter-spacing: -0.01em;
+  }
+
+  .badge-executiu {
+    font-family: var(--mono);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semi);
+    color: var(--primary);
+    background: rgba(255,255,255,.7);
+    border: 1px solid var(--primary-100);
+    border-radius: var(--r-pill);
+    padding: 3px var(--sp-3);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .findings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--sp-6);
+  }
+
+  .finding {
+    display: flex;
+    gap: var(--sp-4);
+    align-items: flex-start;
+    transition: transform var(--trans-med);
+  }
+  .finding:hover { transform: translateX(3px); }
+
+  .finding-icon {
+    flex-shrink: 0;
+    width: 40px; height: 40px;
+    border-radius: var(--r-lg);
+    background: rgba(255,255,255,.8);
+    border: 1px solid var(--paper-line);
+    display: grid; place-items: center;
+    box-shadow: var(--sh-xs);
+  }
+
+  .finding-icon .material-symbols-outlined {
+    color: var(--primary);
+    font-size: 20px;
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+
+  .finding-text p {
+    font-size: var(--fs-base);
+    font-weight: var(--fw-med);
+    color: var(--ink-900);
+    line-height: 1.45;
+    transition: color var(--trans-fast);
+  }
+  .finding:hover .finding-text p { color: var(--primary); }
+
+  .finding-label {
+    font-family: var(--mono);
+    font-size: var(--fs-xs);
+    color: var(--ink-500);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    margin-top: 4px;
+  }
+
+  /* ─── Cards d'experiments ──────────────────────────────── */
+  .section-mb {
+    margin-bottom: 72px;
+  }
+
+  .cards-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: var(--sp-5);
+  }
+
+  .exp-card {
+    background: rgba(255,255,255,.75);
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-2xl);
+    padding: var(--sp-7);
+    display: block;
+    transition: box-shadow var(--trans-med), transform var(--trans-med);
+  }
+  .exp-card:hover {
+    box-shadow: var(--sh-lg);
+    transform: translateY(-3px);
+  }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--sp-6);
+  }
+
+  .tag-triangulacio {
+    font-family: var(--mono);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ok);
+    background: var(--ok-50);
+    border-radius: var(--r-pill);
+    padding: 3px var(--sp-3);
+  }
+
+  .card-arrow {
+    color: var(--ink-300);
+    font-size: 16px;
+    transition: color var(--trans-fast);
+  }
+  .exp-card:hover .card-arrow { color: var(--primary); }
+
+  .exp-card h3 {
+    font-family: var(--ui);
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-bold);
+    color: var(--ink-900);
+    margin-bottom: var(--sp-2);
+  }
+
+  .exp-card p {
+    font-size: var(--fs-sm);
+    color: var(--ink-600);
+    line-height: var(--lh-read);
+  }
+
+  /* ─── Grid 2×2 anàlisi qualitativa ─────────────────────── */
+  .cards-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--sp-5);
+  }
+
+  .qual-card {
+    background: var(--cream-2);
+    border-radius: var(--r-2xl);
+    padding: var(--sp-7);
+    cursor: pointer;
+    transition: background var(--trans-med);
+    position: relative;
+  }
+  .qual-card:hover { background: var(--cream-3); }
+
+  .qual-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--sp-4);
+  }
+
+  .tag-indigo {
+    font-family: var(--mono);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--primary);
+    background: var(--primary-50);
+    border-radius: var(--r-xs);
+    padding: 2px var(--sp-2);
+  }
+
+  .tag-amber {
+    font-family: var(--mono);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-bold);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--warn);
+    background: var(--warn-50);
+    border-radius: var(--r-xs);
+    padding: 2px var(--sp-2);
+  }
+
+  .qual-open-icon {
+    color: var(--primary);
+    font-size: 18px;
+    opacity: 0;
+    transition: opacity var(--trans-fast);
+  }
+  .qual-card:hover .qual-open-icon { opacity: 1; }
+
+  .qual-card h3 {
+    font-family: var(--ui);
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-bold);
+    color: var(--ink-900);
+    margin-bottom: var(--sp-3);
+  }
+
+  .qual-card p {
+    font-size: var(--fs-sm);
+    color: var(--ink-600);
+    line-height: var(--lh-read);
+  }
+
+  /* ─── Informes ─────────────────────────────────────────── */
+  .reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--sp-5);
+  }
+
+  .report-card {
+    background: rgba(255,255,255,.75);
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-2xl);
+    padding: var(--sp-6);
+    min-height: 176px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: border-color var(--trans-med), box-shadow var(--trans-med);
+  }
+  .report-card:hover {
+    border-color: var(--primary-100);
+    box-shadow: var(--sh-md);
+  }
+
+  .report-icon-wrap {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--cream-2);
+    display: grid; place-items: center;
+    margin-bottom: var(--sp-4);
+  }
+  .report-icon-wrap .material-symbols-outlined { color: var(--primary); font-size: 20px; }
+
+  .report-card h3 {
+    font-size: var(--fs-base);
+    font-weight: var(--fw-bold);
+    color: var(--ink-900);
+  }
+
+  .report-meta {
+    font-size: var(--fs-xs);
+    font-family: var(--mono);
+    color: var(--ink-500);
+    margin-top: 4px;
+  }
+
+  .download-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--primary);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semi);
+    transition: opacity var(--trans-fast);
+  }
+  .download-btn:hover { opacity: .75; }
+  .download-btn .material-symbols-outlined {
+    font-size: 18px;
+    transition: transform var(--trans-fast);
+  }
+  .download-btn:hover .material-symbols-outlined { transform: translateY(2px); }
+
+  /* ─── Footer ───────────────────────────────────────────── */
+  .page-footer {
+    background: var(--cream-2);
+    border-top: 1px solid var(--paper-line);
+    padding: var(--sp-8) 0;
+  }
+
+  .page-footer-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 var(--sp-6);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--sp-6);
+  }
+
+  .footer-copy {
+    font-size: var(--fs-sm);
+    color: var(--ink-500);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: var(--sp-7);
+  }
+
+  .footer-links a {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-med);
+    color: var(--ink-500);
+    transition: color var(--trans-fast);
+  }
+  .footer-links a:hover { color: var(--primary); }
+
+  /* ─── Responsive ────────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .site-nav { display: none; }
+    .search-pill { display: none; }
+    .page-main { padding: var(--sp-7) var(--sp-4) 60px; }
+    .summary-block { padding: var(--sp-7) var(--sp-5) var(--sp-6); }
+    .summary-top { flex-direction: column; align-items: flex-start; }
+  }
+</style>
 </head>
-<body class="bg-surface text-on-surface selection:bg-primary-fixed">
-<!-- TopAppBar Shell (Transcribed from JSON) -->
-<header class="bg-[#f8f9ff] dark:bg-slate-950 backdrop-blur-md bg-opacity-80 docked full-width top-0 sticky z-50 shadow-none">
-<div class="flex justify-between items-center w-full px-8 py-4 max-w-[1440px] mx-auto">
-<div class="flex items-center gap-8">
-<span class="text-xl font-extrabold text-[#3337a6] dark:text-[#d3e4fe] tracking-tight"><a href="/" class="hover:opacity-80 transition-opacity">Saber-ne+</a></span>
-<nav class="hidden md:flex gap-6 items-center">
-<a class="font-['Plus_Jakarta_Sans'] font-semibold text-sm tracking-wide text-slate-500 dark:text-slate-400 hover:text-[#3337a6] transition-colors" href="/saber-ne">Adaptar materials</a>
-<a class="font-['Plus_Jakarta_Sans'] font-semibold text-sm tracking-wide text-slate-500 dark:text-slate-400 hover:text-[#3337a6] transition-colors" href="/cuina">Com funciona ATNE</a>
-<a class="font-['Plus_Jakarta_Sans'] font-semibold text-sm tracking-wide text-[#3337a6] dark:text-[#d3e4fe] border-b-2 border-[#3337a6] pb-1" href="/avaluacio">Avaluació i decisions</a>
-</nav>
-</div>
-<div class="flex items-center gap-4">
-<div class="hidden lg:flex bg-[#eff4ff] dark:bg-slate-900 rounded-lg px-3 py-1.5 items-center gap-2">
-<span class="material-symbols-outlined text-slate-400 text-lg">search</span>
-<input class="bg-transparent border-none focus:ring-0 text-sm w-48 text-on-surface-variant placeholder:text-slate-400" placeholder="Cerca en informes..." type="text"/>
-</div>
-<div class="flex items-center gap-2">
-<button class="p-2 text-slate-500 hover:bg-[#eff4ff] dark:hover:bg-slate-800 rounded-lg transition-all scale-95 active:scale-90 duration-200">
-<span class="material-symbols-outlined">notifications</span>
-</button>
-<button class="p-2 text-slate-500 hover:bg-[#eff4ff] dark:hover:bg-slate-800 rounded-lg transition-all scale-95 active:scale-90 duration-200">
-<span class="material-symbols-outlined">settings</span>
-</button>
-<img alt="User profile avatar" class="w-8 h-8 rounded-full ml-2 border border-surface-container-highest" data-alt="close-up portrait of a professional educator smiling softly against a blurred academic background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4BKdJMzVhuOy3flxj__0ecnegZRT2TR6t6uFbgp6oPg0QHYhpFR7Xgds67-p1bESUjtRYegk4ckl_np_wk7JxlkrdNw1cJFJQUUTt7parM23d8sdi07kVJzQosGnQrk4gAu28SfJqB8nzhFe-CjOm7QrfJVBE9y3tsF6wpa5c6FVxOnDjZME_SXnd2O4uzlJpmPHgo1m592QE2WucwZfZwRu_pIE8yIUF5K1IE3ObI6X2C47_PoWmcmnR2S1VsXpLdU-UfbbODqQ"/>
-</div>
-</div>
-</div>
+
+<body>
+
+<!-- Capçalera de navegació -->
+<header class="page-header">
+  <div class="page-header-inner">
+    <a href="/" class="site-brand">Saber-ne+</a>
+
+    <nav class="site-nav">
+      <a href="/saber-ne">Adaptar materials</a>
+      <a href="/cuina">Com funciona ATNE</a>
+      <a href="/avaluacio" class="active">Avaluació i decisions</a>
+    </nav>
+
+    <div class="header-right">
+      <div class="search-pill">
+        <span class="material-symbols-outlined">search</span>
+        <input type="text" placeholder="Cerca en informes…"/>
+      </div>
+      <button class="hdr-icon-btn">
+        <span class="material-symbols-outlined">notifications</span>
+      </button>
+      <button class="hdr-icon-btn">
+        <span class="material-symbols-outlined">settings</span>
+      </button>
+      <img
+        class="avatar"
+        src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4BKdJMzVhuOy3flxj__0ecnegZRT2TR6t6uFbgp6oPg0QHYhpFR7Xgds67-p1bESUjtRYegk4ckl_np_wk7JxlkrdNw1cJFJQUUTt7parM23d8sdi07kVJzQosGnQrk4gAu28SfJqB8nzhFe-CjOm7QrfJVBE9y3tsF6wpa5c6FVxOnDjZME_SXnd2O4uzlJpmPHgo1m592QE2WucwZfZwRu_pIE8yIUF5K1IE3ObI6X2C47_PoWmcmnR2S1VsXpLdU-UfbbODqQ"
+        alt="Avatar usuari"/>
+    </div>
+  </div>
 </header>
-<main class="max-w-[1100px] mx-auto px-6 py-16">
-<!-- Hero Section: Editorial Authority -->
-<section class="mb-20">
-<h1 class="text-[3.5rem] leading-tight font-bold text-on-surface mb-6 tracking-tight">
-                Avaluació i decisions
-            </h1>
-<p class="text-[1.125rem] text-on-surface-variant max-w-2xl leading-relaxed">
-                Què hem provat, com ho hem mesurat, quines decisions tecnopedagògiques se n'han derivat.
-            </p>
-</section>
-<!-- Executive Summary: Layered Paper Philosophy -->
-<section class="mb-20 bg-surface-container-high rounded-xl p-10 relative overflow-hidden">
-<div class="absolute left-0 top-0 bottom-0 w-1 editorial-gradient"></div>
-<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10">
-<h2 class="text-xl font-bold text-primary tracking-tight">Decisions principals</h2>
-<span class="text-[0.75rem] font-medium text-primary bg-surface-container-lowest px-3 py-1 rounded-full uppercase tracking-wider">Resum Executiu</span>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-<!-- Finding 1 -->
-<div class="flex gap-4 items-start group transition-transform duration-200 hover:translate-x-1">
-<div class="mt-1 w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center shadow-sm">
-<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">trending_up</span>
-</div>
-<div>
-<p class="text-[1rem] font-medium text-on-surface group-hover:text-primary transition-colors">Gemma 4 31B guanya en adaptacions, complements i preguntes</p>
-<p class="text-[0.75rem] text-on-surface-variant mt-1 uppercase tracking-wider">Triangulació en 3 experiments</p>
-</div>
-</div>
-<!-- Finding 2 -->
-<div class="flex gap-4 items-start group transition-transform duration-200 hover:translate-x-1">
-<div class="mt-1 w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center shadow-sm">
-<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">terminal</span>
-</div>
-<div>
-<p class="text-[1rem] font-medium text-on-surface group-hover:text-primary transition-colors">Prompt determinista supera RAG hardcoded (+0.26)</p>
-<p class="text-[0.75rem] text-on-surface-variant mt-1 uppercase tracking-wider">Mètrica d'eficiència tècnica</p>
-</div>
-</div>
-<!-- Finding 3 -->
-<div class="flex gap-4 items-start group transition-transform duration-200 hover:translate-x-1">
-<div class="mt-1 w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center shadow-sm">
-<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">verified_user</span>
-</div>
-<div>
-<p class="text-[1rem] font-medium text-on-surface group-hover:text-primary transition-colors">Jutge GPT infla puntuacions — validació humana pendent</p>
-<p class="text-[0.75rem] text-on-surface-variant mt-1 uppercase tracking-wider">Biaix algorítmic detectat</p>
-</div>
-</div>
-<!-- Finding 4 -->
-<div class="flex gap-4 items-start group transition-transform duration-200 hover:translate-x-1">
-<div class="mt-1 w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center shadow-sm">
-<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">analytics</span>
-</div>
-<div>
-<p class="text-[1rem] font-medium text-on-surface group-hover:text-primary transition-colors">1.280 avaluacions en 6 models en paral·lel</p>
-<p class="text-[0.75rem] text-on-surface-variant mt-1 uppercase tracking-wider">Volum de dades analitzat</p>
-</div>
-</div>
-</div>
-</section>
-<!-- Experiments: Destination Cards -->
-<section class="mb-20">
-<div class="flex items-center gap-4 mb-8">
-<h2 class="text-2xl font-bold text-on-surface">Experiments principals</h2>
-<div class="h-px flex-grow bg-outline-variant opacity-20"></div>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-<!-- Card 1 -->
-<a class="group block bg-surface-container-lowest rounded-xl p-8 transition-all hover:shadow-[0_10px_40px_-10px_rgba(11,28,48,0.06)] hover:-translate-y-1 ghost-border" href="#">
-<div class="flex justify-between items-start mb-6">
-<span class="inline-block px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[0.7rem] font-bold uppercase tracking-widest">Triangulació</span>
-<span class="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors">arrow_forward_ios</span>
-</div>
-<h3 class="text-lg font-bold text-on-surface mb-2">Xat 9</h3>
-<p class="text-sm text-on-surface-variant leading-relaxed">Avaluació de la coherència en diàlegs pedagògics complexos.</p>
-</a>
-<!-- Card 2 -->
-<a class="group block bg-surface-container-lowest rounded-xl p-8 transition-all hover:shadow-[0_10px_40px_-10px_rgba(11,28,48,0.06)] hover:-translate-y-1 ghost-border" href="#">
-<div class="flex justify-between items-start mb-6">
-<span class="inline-block px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[0.7rem] font-bold uppercase tracking-widest">Triangulació</span>
-<span class="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors">arrow_forward_ios</span>
-</div>
-<h3 class="text-lg font-bold text-on-surface mb-2">Complements</h3>
-<p class="text-sm text-on-surface-variant leading-relaxed">Qualitat de la generació de materials didàctics auxiliars.</p>
-</a>
-<!-- Card 3 -->
-<a class="group block bg-surface-container-lowest rounded-xl p-8 transition-all hover:shadow-[0_10px_40px_-10px_rgba(11,28,48,0.06)] hover:-translate-y-1 ghost-border" href="#">
-<div class="flex justify-between items-start mb-6">
-<span class="inline-block px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[0.7rem] font-bold uppercase tracking-widest">Triangulació</span>
-<span class="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors">arrow_forward_ios</span>
-</div>
-<h3 class="text-lg font-bold text-on-surface mb-2">Preguntes</h3>
-<p class="text-sm text-on-surface-variant leading-relaxed">Taxonomia de Bloom i precisió en la generació d'ítems.</p>
-</a>
-</div>
-</section>
-<!-- Qualitative Analysis: 2x2 Bento-ish Grid -->
-<section class="mb-20">
-<div class="flex items-center gap-4 mb-8">
-<h2 class="text-2xl font-bold text-on-surface">Anàlisi qualitativa i casos</h2>
-<div class="h-px flex-grow bg-outline-variant opacity-20"></div>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-<!-- Qualitative 1 -->
-<div class="group relative bg-surface-container-low rounded-xl p-8 hover:bg-surface-container-highest transition-colors cursor-pointer">
-<div class="flex justify-between items-center mb-4">
-<span class="px-2.5 py-0.5 rounded bg-primary/10 text-primary text-[0.7rem] font-bold uppercase">Indigo Focus</span>
-<span class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</span>
-</div>
-<h3 class="text-xl font-bold mb-3">Avaluació general</h3>
-<p class="text-sm text-on-surface-variant leading-relaxed">Visió holística dels resultats a través de tots els pilars d'ATNE.</p>
-</div>
-<!-- Qualitative 2 -->
-<div class="group relative bg-surface-container-low rounded-xl p-8 hover:bg-surface-container-highest transition-colors cursor-pointer">
-<div class="flex justify-between items-center mb-4">
-<span class="px-2.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[0.7rem] font-bold uppercase">Cas Pràctic</span>
-<span class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</span>
-</div>
-<h3 class="text-xl font-bold mb-3">Casos individuals</h3>
-<p class="text-sm text-on-surface-variant leading-relaxed">Exploració detallada de respostes anòmales i èxits específics.</p>
-</div>
-<!-- Qualitative 3 -->
-<div class="group relative bg-surface-container-low rounded-xl p-8 hover:bg-surface-container-highest transition-colors cursor-pointer">
-<div class="flex justify-between items-center mb-4">
-<span class="px-2.5 py-0.5 rounded bg-primary/10 text-primary text-[0.7rem] font-bold uppercase">Mètriques</span>
-<span class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</span>
-</div>
-<h3 class="text-xl font-bold mb-3">Resultats comparats</h3>
-<p class="text-sm text-on-surface-variant leading-relaxed">Benchmark entre models open-source i propietaris.</p>
-</div>
-<!-- Qualitative 4 -->
-<div class="group relative bg-surface-container-low rounded-xl p-8 hover:bg-surface-container-highest transition-colors cursor-pointer">
-<div class="flex justify-between items-center mb-4">
-<span class="px-2.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[0.7rem] font-bold uppercase">Timeline</span>
-<span class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</span>
-</div>
-<h3 class="text-xl font-bold mb-3">Progrés d'avaluacions</h3>
-<p class="text-sm text-on-surface-variant leading-relaxed">Evolució de la precisió del sistema segons les versions del prompt.</p>
-</div>
-</div>
-</section>
-<!-- Reports: Download Section -->
-<section class="mb-20">
-<div class="flex items-center gap-4 mb-8">
-<h2 class="text-2xl font-bold text-on-surface">Informes</h2>
-<div class="h-px flex-grow bg-outline-variant opacity-20"></div>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-<!-- Report 1 -->
-<div class="bg-surface-container-lowest rounded-xl p-6 flex flex-col justify-between h-48 ghost-border transition-all hover:border-primary/30">
-<div>
-<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center mb-4">
-<span class="material-symbols-outlined text-primary">description</span>
-</div>
-<h3 class="font-bold text-on-surface">Informe Complet</h3>
-<p class="text-[0.75rem] text-on-surface-variant mt-1">42 pàgines • PDF</p>
-</div>
-<button class="flex items-center justify-between text-primary font-semibold text-sm group">
-                        Descarregar
-                        <span class="material-symbols-outlined group-hover:translate-y-0.5 transition-transform">download</span>
-</button>
-</div>
-<!-- Report 2 -->
-<div class="bg-surface-container-lowest rounded-xl p-6 flex flex-col justify-between h-48 ghost-border transition-all hover:border-primary/30">
-<div>
-<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center mb-4">
-<span class="material-symbols-outlined text-primary">school</span>
-</div>
-<h3 class="font-bold text-on-surface">Informe FJE</h3>
-<p class="text-[0.75rem] text-on-surface-variant mt-1">12 pàgines • PDF</p>
-</div>
-<button class="flex items-center justify-between text-primary font-semibold text-sm group">
-                        Descarregar
-                        <span class="material-symbols-outlined group-hover:translate-y-0.5 transition-transform">download</span>
-</button>
-</div>
-<!-- Report 3 -->
-<div class="bg-surface-container-lowest rounded-xl p-6 flex flex-col justify-between h-48 ghost-border transition-all hover:border-primary/30">
-<div>
-<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center mb-4">
-<span class="material-symbols-outlined text-primary">settings_ethernet</span>
-</div>
-<h3 class="font-bold text-on-surface">Informe Tècnic</h3>
-<p class="text-[0.75rem] text-on-surface-variant mt-1">28 pàgines • PDF</p>
-</div>
-<button class="flex items-center justify-between text-primary font-semibold text-sm group">
-                        Descarregar
-                        <span class="material-symbols-outlined group-hover:translate-y-0.5 transition-transform">download</span>
-</button>
-</div>
-</div>
-</section>
+
+<main class="page-main">
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1>Avaluació i decisions</h1>
+    <p>Què hem provat, com ho hem mesurat, quines decisions tecnopedagògiques se n'han derivat.</p>
+  </section>
+
+  <!-- Resum executiu -->
+  <section class="summary-block">
+    <div class="summary-accent"></div>
+
+    <div class="summary-top">
+      <h2>Decisions principals</h2>
+      <span class="badge-executiu">Resum Executiu</span>
+    </div>
+
+    <div class="findings-grid">
+      <!-- Finding 1 -->
+      <div class="finding">
+        <div class="finding-icon">
+          <span class="material-symbols-outlined">trending_up</span>
+        </div>
+        <div class="finding-text">
+          <p>Gemma 4 31B guanya en adaptacions, complements i preguntes</p>
+          <div class="finding-label">Triangulació en 3 experiments</div>
+        </div>
+      </div>
+
+      <!-- Finding 2 -->
+      <div class="finding">
+        <div class="finding-icon">
+          <span class="material-symbols-outlined">terminal</span>
+        </div>
+        <div class="finding-text">
+          <p>Prompt determinista supera RAG hardcoded (+0.26)</p>
+          <div class="finding-label">Mètrica d'eficiència tècnica</div>
+        </div>
+      </div>
+
+      <!-- Finding 3 -->
+      <div class="finding">
+        <div class="finding-icon">
+          <span class="material-symbols-outlined">verified_user</span>
+        </div>
+        <div class="finding-text">
+          <p>Jutge GPT infla puntuacions — validació humana pendent</p>
+          <div class="finding-label">Biaix algorítmic detectat</div>
+        </div>
+      </div>
+
+      <!-- Finding 4 -->
+      <div class="finding">
+        <div class="finding-icon">
+          <span class="material-symbols-outlined">analytics</span>
+        </div>
+        <div class="finding-text">
+          <p>1.280 avaluacions en 6 models en paral·lel</p>
+          <div class="finding-label">Volum de dades analitzat</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Experiments principals -->
+  <section class="section-mb">
+    <div class="section-head">
+      <h2>Experiments principals</h2>
+      <div class="section-rule"></div>
+    </div>
+
+    <div class="cards-3">
+      <!-- Card 1 -->
+      <a class="exp-card" href="#">
+        <div class="card-top">
+          <span class="tag-triangulacio">Triangulació</span>
+          <span class="material-symbols-outlined card-arrow">arrow_forward_ios</span>
+        </div>
+        <h3>Xat 9</h3>
+        <p>Avaluació de la coherència en diàlegs pedagògics complexos.</p>
+      </a>
+
+      <!-- Card 2 -->
+      <a class="exp-card" href="#">
+        <div class="card-top">
+          <span class="tag-triangulacio">Triangulació</span>
+          <span class="material-symbols-outlined card-arrow">arrow_forward_ios</span>
+        </div>
+        <h3>Complements</h3>
+        <p>Qualitat de la generació de materials didàctics auxiliars.</p>
+      </a>
+
+      <!-- Card 3 -->
+      <a class="exp-card" href="#">
+        <div class="card-top">
+          <span class="tag-triangulacio">Triangulació</span>
+          <span class="material-symbols-outlined card-arrow">arrow_forward_ios</span>
+        </div>
+        <h3>Preguntes</h3>
+        <p>Taxonomia de Bloom i precisió en la generació d'ítems.</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- Anàlisi qualitativa i casos -->
+  <section class="section-mb">
+    <div class="section-head">
+      <h2>Anàlisi qualitativa i casos</h2>
+      <div class="section-rule"></div>
+    </div>
+
+    <div class="cards-2">
+      <!-- Qual 1 -->
+      <div class="qual-card">
+        <div class="qual-card-top">
+          <span class="tag-indigo">Indigo Focus</span>
+          <span class="material-symbols-outlined qual-open-icon">open_in_new</span>
+        </div>
+        <h3>Avaluació general</h3>
+        <p>Visió holística dels resultats a través de tots els pilars d'ATNE.</p>
+      </div>
+
+      <!-- Qual 2 -->
+      <div class="qual-card">
+        <div class="qual-card-top">
+          <span class="tag-amber">Cas Pràctic</span>
+          <span class="material-symbols-outlined qual-open-icon">open_in_new</span>
+        </div>
+        <h3>Casos individuals</h3>
+        <p>Exploració detallada de respostes anòmales i èxits específics.</p>
+      </div>
+
+      <!-- Qual 3 -->
+      <div class="qual-card">
+        <div class="qual-card-top">
+          <span class="tag-indigo">Mètriques</span>
+          <span class="material-symbols-outlined qual-open-icon">open_in_new</span>
+        </div>
+        <h3>Resultats comparats</h3>
+        <p>Benchmark entre models open-source i propietaris.</p>
+      </div>
+
+      <!-- Qual 4 -->
+      <div class="qual-card">
+        <div class="qual-card-top">
+          <span class="tag-amber">Timeline</span>
+          <span class="material-symbols-outlined qual-open-icon">open_in_new</span>
+        </div>
+        <h3>Progrés d'avaluacions</h3>
+        <p>Evolució de la precisió del sistema segons les versions del prompt.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Informes -->
+  <section class="section-mb">
+    <div class="section-head">
+      <h2>Informes</h2>
+      <div class="section-rule"></div>
+    </div>
+
+    <div class="reports-grid">
+      <!-- Informe 1 -->
+      <div class="report-card">
+        <div>
+          <div class="report-icon-wrap">
+            <span class="material-symbols-outlined">description</span>
+          </div>
+          <h3>Informe Complet</h3>
+          <p class="report-meta">42 pàgines · PDF</p>
+        </div>
+        <button class="download-btn">
+          Descarregar
+          <span class="material-symbols-outlined">download</span>
+        </button>
+      </div>
+
+      <!-- Informe 2 -->
+      <div class="report-card">
+        <div>
+          <div class="report-icon-wrap">
+            <span class="material-symbols-outlined">school</span>
+          </div>
+          <h3>Informe FJE</h3>
+          <p class="report-meta">12 pàgines · PDF</p>
+        </div>
+        <button class="download-btn">
+          Descarregar
+          <span class="material-symbols-outlined">download</span>
+        </button>
+      </div>
+
+      <!-- Informe 3 -->
+      <div class="report-card">
+        <div>
+          <div class="report-icon-wrap">
+            <span class="material-symbols-outlined">settings_ethernet</span>
+          </div>
+          <h3>Informe Tècnic</h3>
+          <p class="report-meta">28 pàgines · PDF</p>
+        </div>
+        <button class="download-btn">
+          Descarregar
+          <span class="material-symbols-outlined">download</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
 </main>
-<!-- Footer Space -->
-<footer class="py-12 bg-surface-container-low">
-<div class="max-w-[1100px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
-<div class="text-sm text-on-surface-variant">
-                © 2024 ATNE • Institució Educativa • Panell de Gestió
-            </div>
-<div class="flex gap-8">
-<a class="text-sm font-medium text-slate-500 hover:text-primary transition-colors" href="#">Privadesa</a>
-<a class="text-sm font-medium text-slate-500 hover:text-primary transition-colors" href="#">Accessibilitat</a>
-<a class="text-sm font-medium text-slate-500 hover:text-primary transition-colors" href="#">Suport tècnic</a>
-</div>
-</div>
+
+<!-- Footer -->
+<footer class="page-footer">
+  <div class="page-footer-inner">
+    <span class="footer-copy">© 2024 ATNE · Institució Educativa · Panell de Gestió</span>
+    <nav class="footer-links">
+      <a href="#">Privadesa</a>
+      <a href="#">Accessibilitat</a>
+      <a href="#">Suport tècnic</a>
+    </nav>
+  </div>
 </footer>
-</body></html>
+
+</body>
+</html>
