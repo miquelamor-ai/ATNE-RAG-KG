@@ -686,7 +686,13 @@
   function parseAdaptedSections(text) {
     const result = { main: '', complements: {} };
     if (!text) return result;
-    const parts = text.split(/^## /m);
+    // Tolerant a «##Preguntes» sense espai (alguns LLMs l'ometen) i a cometes
+    // típiques («##'Preguntes'» o «## "Preguntes"»). La normalització també
+    // es fa al backend (clean_gemini_output), aquí fem defensa en profunditat.
+    // IMPORTANT: el negative lookahead «(?!#)» és obligatori perquè si no,
+    // les línies «### Abans de llegir» (sub-seccions dins de Preguntes) també
+    // es tractarien com a separador i trencarien la secció.
+    const parts = text.split(/^##(?!#)\s*["'`«»“”‘’]*/m);
     if (parts.length <= 1) { result.main = text; return result; }
     // Map de títols del backend → key interna. Les claus del map estan
     // normalitzades (sense accents, lowercase, sense parèntesis) perquè 'norm()'
@@ -724,7 +730,26 @@
       const nlIdx = part.indexOf('\n');
       const title = nlIdx > -1 ? part.slice(0, nlIdx).trim() : part.trim();
       const body = nlIdx > -1 ? part.slice(nlIdx + 1).trim() : '';
-      const key = TITLE_MAP[norm(title)] || norm(title).replace(/\s+/g, '_');
+      // Detecció robusta del títol: primer match literal; si no, cerca per
+      // paraula clau (tolerant a variants com "Preguntes de comprensió lectora",
+      // "1. Preguntes", "Comprensió lectora", etc.). Fallback: clau generada.
+      const titleNorm = norm(title);
+      let key = TITLE_MAP[titleNorm];
+      if (!key) {
+        if (/\btext adapt/.test(titleNorm)) key = '_main';
+        else if (/\bpregunt|\bcomprensi/.test(titleNorm)) key = 'preguntes_comprensio';
+        else if (/\bglossari|\blexic|\bvocabulari/.test(titleNorm)) key = 'glossari';
+        else if (/mapa conceptual/.test(titleNorm)) key = 'mapa_conceptual';
+        else if (/mapa mental/.test(titleNorm)) key = 'mapa_mental';
+        else if (/\besquema|diagrama/.test(titleNorm)) key = 'esquema_visual';
+        else if (/bastid|scaffolding/.test(titleNorm)) key = 'bastides';
+        else if (/aprofundiment|enriquiment/.test(titleNorm)) key = 'activitats_aprofundiment';
+        else if (/argumentaci/.test(titleNorm)) key = 'argumentacio';
+        else if (/auditoria/.test(titleNorm)) key = 'auditoria';
+        else if (/pictogram/.test(titleNorm)) key = 'pictogrames';
+        else if (/traducci/.test(titleNorm)) key = 'traduccio_l1';
+        else key = titleNorm.replace(/\s+/g, '_');
+      }
       if (key === '_main') result.main = body;
       else result.complements[key] = body;
     }

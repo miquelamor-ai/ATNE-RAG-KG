@@ -1380,71 +1380,77 @@ Mostra les relacions jeràrquiques entre els conceptes principals del text.
 ACTIVAT — Genera un guió de comprensió lectora segons el model MALL/TILC
 (3 moments × 3 nivells de lectura amb formats variats).
 
-### CONTEXT PEDAGÒGIC (l'has d'usar per modular les preguntes)
+**Context pedagògic** (per modular-les):
 - Matèria/àmbit: {materia_complement}
 - Etapa: {etapa_complement} · Nivell MECR: {mecr_complement}
 - Gènere discursiu: {genere_complement}
 - Modalitat del text: {modalitat_text}
 
-### MOMENT 1 — Abans de llegir (activació) · 3 preguntes
-Objectiu: activar coneixements previs, formular hipòtesis i fixar propòsit.
-Genera:
-- **[Hipòtesi]** 1 pregunta sobre el títol o imatges ("De què creus que parlarà…?")
-- **[Activació]** 1 pregunta per connectar amb el que l'alumne ja sap
-- **[Propòsit]** 1 pregunta sobre què volem aprendre amb aquest text
+**Tipologia interna (ÚS TEU, NO la mostris a la sortida)**
 
-### MOMENT 2 — Durant la lectura (processament actiu) · 3 preguntes
-Objectiu: fer l'alumne lector actiu, que verifiqui hipòtesis i treballi el lèxic.
-Genera:
-- **[Inferència en curs]** 1 pregunta del tipus "Per què creus que diu…?" o "Què vol dir quan afirma…?"
-- **[Visualització]** 1 pregunta per crear imatge mental ("Imagina't…", "Quins sons…", "Com el dibuixaries?")
-- **[Lèxic en context]** 1 pregunta per deduir el significat d'una paraula difícil del text a partir del context (no donar la resposta)
+MOMENT 1 · Abans de llegir · activació · 3 preguntes:
+hipòtesi (sobre títol/imatges) + connexió amb coneixements previs + propòsit.
 
-### MOMENT 3 — Després de llegir · distribuïdes en 3 nivells de comprensió
-Genera **7-8 preguntes en TOTAL**, distribuïdes així i amb FORMATS DIFERENTS
-(alterna obertes, verdader/fals, opció múltiple, omplir buits, relaciona amb fletxes):
+MOMENT 2 · Durant la lectura · processament actiu · 3 preguntes:
+inferència en curs + visualització/imatge mental + lèxic en context.
 
-**Nivell LITERAL** — "Llegir les línies" · 2-3 preguntes
-Informació explícita. Exemples de format a alternar:
-- **[Literal · oberta curta]** "On vivia…?" / "Què servia per…?"
-- **[Literal · V/F amb justificació]** 3 afirmacions on l'alumne marca ✓/✗ i cita la frase que ho demostra
-- **[Literal · opció múltiple]** 1 pregunta amb 3-4 opcions (1 correcta)
-- **[Literal · omplir buits]** "El ______ es feia servir per ______." (amb o sense banc de paraules)
-- **[Literal · relaciona]** 2 columnes (concepte ↔ definició del text)
+MOMENT 3 · Després de llegir · 7-8 preguntes en 3 nivells cognitius, alternant formats:
+- Nivell LITERAL (2-3): oberta curta, V/F amb justificació, opció múltiple,
+  omplir buits, relaciona amb fletxes.
+- Nivell INFERENCIAL (2-3): per què creus…?, i si…?, relaciona causa-efecte.
+- Nivell CRÍTIC (2): argumentativa oberta, transferència al jo / biaixos.
 
-**Nivell INFERENCIAL** — "Llegir entre línies" · 2-3 preguntes
-Deducció, causa-efecte, intencions no explícites:
-- **[Inferencial · per què]** "Per què creus que …?"
-- **[Inferencial · i si…]** "Què passaria si …?" (contrafactual)
-- **[Inferencial · relaciona causa-efecte]** 2 columnes (causa ↔ conseqüència)
+**Adequació per etapa**:
+- Infantil / Cicle Inicial (A1): predicció visual, connexió amb el jo, dibuix.
+  Evita «justifica» i «argumenta». Preguntes curtes.
+- Cicle Mitjà / Superior (A2-B1): idea principal, relacions, comparacions.
+- Secundària (B1-B2): arguments, connectors lògics, contrast de fonts.
+- Batxillerat/FP (C1): anàlisi crítica, intertextualitat, biaixos.
 
-**Nivell CRÍTIC/PROFUND** — "Llegir rere les línies" · 2 preguntes
-Judici, transferència, connexió amb l'experiència pròpia:
-- **[Crític · argumentativa]** Pregunta oberta que demana posició argumentada amb dades del text
-  (la bastida al complement Bastides ajudarà a respondre-la)
-- **[Crític · jo / transferència]** "Què faries tu si…?" o "Com connecta això amb…?"
-  (També vàlid: lectura crítica de biaixos si el text n'ha)
+**Literari vs informatiu**:
+- Literari: preguntes afectives, d'identificació, d'imatges mentals, creatives.
+- Informatiu: precisió conceptual, dades, causa-efecte, model teòric de {materia_complement}.
 
-### ADEQUACIÓ PER ETAPA (imprescindible)
-- **Infantil / Cicle Inicial (A1)**: predomina predicció visual, connexió amb el jo,
-  dibuix. EVITA mots com "justifica" o "argumenta". Preguntes molt curtes i concretes.
-- **Cicle Mitjà / Superior primària (A2-B1)**: idea principal, relacions entre idees,
-  verificació d'hipòtesis, comparacions.
-- **Secundària (B1-B2)**: arguments de l'autor, connectors lògics, contrast de fonts,
-  explicar vs justificar (connectar amb el model teòric de la matèria).
-- **Batxillerat/FP (C1)**: anàlisi crítica, intertextualitat, biaixos, multiplicitat de fonts.
+**FORMAT DE SORTIDA — OBLIGATORI (és el que veu l'alumnat)**
 
-### DISTINCIÓ LITERARI vs INFORMATIU
-- Si és LITERARI: deixa "buits" interpretatius — preguntes afectives, d'identificació,
-  d'imatges mentals, de reescriptura creativa.
-- Si és INFORMATIU: precisió conceptual — dades, definicions, relacions causa-efecte,
-  connexió amb el model teòric de {materia_complement}.
+La teva resposta per aquesta secció ha de ser EXACTAMENT aquesta estructura
+(comença amb «## Preguntes de comprensió» i a dins tres sub-seccions «###»):
 
-### FORMAT DE SORTIDA
-- Cada moment amb encapçalament ### i les preguntes numerades.
-- Davant de cada pregunta posa entre claudàtors la ETIQUETA del tipus
-  (ex: [Literal · V/F], [Inferencial · per què], [Crític · argumentativa]).
-- Si és omplir buits o relacionar, presenta-ho visualment (amb fletxes, guions, etc.).
+```
+## Preguntes de comprensió
+
+### Abans de llegir
+- [pregunta d'hipòtesi]
+- [pregunta de connexió prèvia]
+- [pregunta de propòsit]
+
+### Durant la lectura
+- [pregunta d'inferència en curs]
+- [pregunta de visualització]
+- [pregunta de lèxic en context]
+
+### Després de llegir
+- [pregunta literal 1]
+- [pregunta literal 2]
+- [pregunta inferencial 1]
+- [pregunta inferencial 2]
+- [pregunta crítica 1]
+- [pregunta crítica 2]
+- [afegeix 1-2 més si cal, alternant formats]
+```
+
+Regles estrictes de la SORTIDA:
+- La secció ha de començar SEMPRE amb la línia literal «## Preguntes de comprensió».
+- Les tres sub-seccions han de ser SEMPRE, en aquest ordre, amb els títols literals
+  «### Abans de llegir», «### Durant la lectura», «### Després de llegir».
+- NO escriguis la paraula «Moment» ni «Moment 1/2/3», ni parèntesis explicatius
+  als encapçalaments, ni sub-encapçalaments de nivell («Nivell LITERAL»…).
+- NO posis etiquetes entre claudàtors davant de cap pregunta («[Literal · V/F]»,
+  «[Inferencial · per què]», «[Hipòtesi]», «[Propòsit]»…).
+- Cada pregunta comença amb «- » (vinyeta), text directe, sense numerar.
+- Per als formats visuals (omplir buits, relaciona), integra'ls dins de la pregunta:
+  ex: «- Omple els buits: El ______ serveix per ______.» / «- Relaciona amb una
+  fletxa: aigua → …, foc → …».
 """)
 
     if comp.get("activitats_aprofundiment"):
@@ -1541,6 +1547,22 @@ Màxim 5-6 files amb els canvis més significatius.
 
     output_sections.append("""
 Omès les seccions marcades com NO ACTIVADES. No generis seccions buides.
+
+RECORDATORI CRÍTIC DE TÍTOLS (imprescindible per al parsing posterior):
+Usa EXACTAMENT aquests títols de secció amb dos «##» (res més ni abans ni després):
+- «## Text adaptat»
+- «## Glossari»
+- «## Esquema visual»
+- «## Mapa conceptual»
+- «## Mapa mental»
+- «## Preguntes de comprensió»
+- «## Bastides»
+- «## Activitats d'aprofundiment»
+- «## Argumentació pedagògica»
+- «## Notes d'auditoria»
+No afegeixis prefixos numèrics (1., 2…), emojis ni qualificadors
+(«lectora», «per al grup», «finals»…) al títol. Els sub-apartats dins de cada
+secció van amb tres «###» (mai amb «##»).
 """)
 
     parts.append("\n".join(output_sections))
@@ -1608,6 +1630,16 @@ def clean_gemini_output(text: str) -> str:
     # 2. Arreglar ## que queden enganxats a text anterior (sense salt de línia)
     text = re.sub(r'(?<!\n)(## )', r'\n\1', text)
 
+    # 2b. Normalitzar headings sense espai després del ## / ### / ####
+    #     («##Preguntes» → «## Preguntes», «###Abans» → «### Abans»).
+    #     Cal perquè parseAdaptedSections exigeix «^## » amb espai; sense aquesta
+    #     normalització la secció es queda enganxada a la precedent.
+    text = re.sub(r'^(#{2,4})([^\s#])', r'\1 \2', text, flags=re.MULTILINE)
+    # 2c. Netejar cometes que algun LLM posa al voltant del títol
+    #     («## 'Preguntes de comprensió'», «## "Preguntes…"»): només al títol.
+    text = re.sub(r'^(#{2,4} )["\'`«»“”‘’]+', r'\1', text, flags=re.MULTILINE)
+    text = re.sub(r'^(#{2,4} .*?)["\'`«»“”‘’]+\s*$', r'\1', text, flags=re.MULTILINE)
+
     # 3. Treure línies de meta-comentari típiques de Gemini
     lines_to_remove = [
         r"^Final draft.*$",
@@ -1649,6 +1681,31 @@ def clean_gemini_output(text: str) -> str:
 
     # 5. Treure línies que són només "#" (artefacte de Gemini)
     text = re.sub(r'^#\s*$', '', text, flags=re.MULTILINE)
+
+    # 5b. Normalitza variants dels títols de les tres sub-seccions de preguntes
+    #     («Abans de la lectura», «Previ a la lectura»…) als canònics.
+    text = re.sub(r'^###\s+(pr[eè]via\s+a\s+la\s+lectura|lectura\s+pr[eè]via)\s*$',
+                  '### Abans de llegir', text, flags=re.MULTILINE | re.IGNORECASE)
+    text = re.sub(r'^###\s+abans\s+de\s+la\s+lectura\s*$',
+                  '### Abans de llegir', text, flags=re.MULTILINE | re.IGNORECASE)
+    text = re.sub(r'^###\s+durant\s+la\s+lectura\s*$',
+                  '### Durant la lectura', text, flags=re.MULTILINE | re.IGNORECASE)
+    text = re.sub(r'^###\s+despr[eé]s\s+de\s+(la\s+)?llegir\s*$',
+                  '### Després de llegir', text, flags=re.MULTILINE | re.IGNORECASE)
+    text = re.sub(r'^###\s+despr[eé]s\s+de\s+la\s+lectura\s*$',
+                  '### Després de llegir', text, flags=re.MULTILINE | re.IGNORECASE)
+
+    # 5c. Xarxa de seguretat: si apareix un encapçalament «### Abans de llegir»
+    #     (o variants ja normalitzades a dalt) orfe — sense «## Preguntes de
+    #     comprensió» al davant — inserta el wrapper. Alguns LLMs ometen el «##»
+    #     pare quan el prompt els mostra el template de sub-seccions amb «###».
+    m_abans = re.search(r'^###\s+Abans de llegir\b', text, flags=re.MULTILINE | re.IGNORECASE)
+    if m_abans:
+        preceding = text[: m_abans.start()]
+        last_h2 = list(re.finditer(r'^##\s+(.+)$', preceding, flags=re.MULTILINE))
+        last_title = last_h2[-1].group(1).lower() if last_h2 else ""
+        if "pregunt" not in last_title and "comprensi" not in last_title:
+            text = text[: m_abans.start()] + "## Preguntes de comprensió\n\n" + text[m_abans.start():]
 
     # 6. Netejar línies buides excessives
     text = re.sub(r'\n{4,}', '\n\n\n', text)
@@ -2407,9 +2464,47 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
         label_attempt = f" (intent {attempt}/{max_attempts})" if verify_enabled else ""
         cb({"type": "step", "step": "adapting", "msg": f"Generant adaptació amb {model_label}{label_attempt}..."})
         try:
-            adapted = _call_llm(active_model, system_prompt, user_text)
-            adapted = clean_gemini_output(adapted)
+            adapted_raw = _call_llm(active_model, system_prompt, user_text)
+            adapted = clean_gemini_output(adapted_raw)
             adapted = _post_process_llm_output(adapted)
+            # Diagnòstic verbós: escriu la sortida crua i la neta a disc i
+            # loguegea si hi falten seccions de complements.
+            try:
+                _comp_active = params.get("complements", {}) if isinstance(params, dict) else {}
+                _lower_raw = (adapted_raw or "").lower()
+                _lower = adapted.lower()
+                _has_preg_raw = bool(re.search(r'^##\s*["\'`«»]*pregunt', adapted_raw or "", re.MULTILINE | re.IGNORECASE))
+                _has_preg_clean = bool(re.search(r'^##\s+preguntes\s+de\s+comprensi', adapted, re.MULTILINE | re.IGNORECASE))
+                _missing = []
+                if _comp_active.get("preguntes_comprensio") and not _has_preg_clean:
+                    _missing.append("preguntes_comprensio")
+                if _comp_active.get("glossari") and "## glossari" not in _lower:
+                    _missing.append("glossari")
+                if _comp_active.get("esquema_visual") and not re.search(r'^##\s+esquema', adapted, re.MULTILINE | re.IGNORECASE):
+                    _missing.append("esquema_visual")
+                print(
+                    f"[adapt] model={active_model} raw_len={len(adapted_raw or '')} "
+                    f"clean_len={len(adapted)} preg_raw={_has_preg_raw} preg_clean={_has_preg_clean} "
+                    f"missing={_missing} comp={_comp_active}",
+                    flush=True,
+                )
+                # Dump a disc si falta alguna cosa per poder inspeccionar
+                if _missing:
+                    import time as _t
+                    _ts = int(_t.time())
+                    _path = f"tests/debug_adapt_{_ts}_{active_model.replace('/', '_')}.txt"
+                    try:
+                        with open(_path, "w", encoding="utf-8") as _f:
+                            _f.write(f"### MODEL: {active_model}\n### PARAMS complements: {_comp_active}\n\n")
+                            _f.write("=" * 40 + " RAW " + "=" * 40 + "\n")
+                            _f.write(adapted_raw or "")
+                            _f.write("\n\n" + "=" * 40 + " CLEAN " + "=" * 40 + "\n")
+                            _f.write(adapted)
+                        print(f"[adapt] Debug dump a {_path}", flush=True)
+                    except Exception as _e:
+                        print(f"[adapt] No s'ha pogut guardar dump: {_e}", flush=True)
+            except Exception as _e:
+                print(f"[adapt] diagnostic err: {_e}", flush=True)
         except Exception as e:
             adapted = f"Error en la generació ({active_model}): {e}"
             break

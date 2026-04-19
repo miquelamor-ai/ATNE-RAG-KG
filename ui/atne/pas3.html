@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="/ui/styles/tokens.css">
 <link rel="stylesheet" href="/ui/styles/base.css">
 <link rel="stylesheet" href="/ui/styles/shell.css">
-<script src="/ui/atne/js/llm.js?v=20260419j" defer></script>
+<script src="/ui/atne/js/llm.js?v=20260419m" defer></script>
 
 <style>
   /* =========================================================
@@ -148,6 +148,20 @@
 
   /* Compare view */
   .cmp-view{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;max-width:1180px;margin:0 auto;width:100%}
+  /* Llegenda del diff (sobre les dues cartes del compare) */
+  .cmp-legend{grid-column:1 / -1;display:flex;align-items:center;gap:16px;padding:10px 14px;background:#fff;border:1px solid var(--paper-line);border-radius:10px;font-family:var(--ui);font-size:12px;color:var(--ink-600);box-shadow:var(--sh-xs);flex-wrap:wrap;margin-bottom:-4px}
+  .cmp-legend-t{font-weight:600;color:var(--ink-800)}
+  .cmp-legend-item{display:inline-flex;align-items:center;gap:6px}
+  .cmp-legend-swatch{display:inline-block;width:14px;height:14px;border-radius:3px;border-style:solid;border-width:0 0 1.5px 0}
+  .cmp-legend-swatch.ins{background:var(--ok-50);border-color:var(--ok-100)}
+  .cmp-legend-swatch.sub{background:var(--warn-50);border-color:var(--warn-100)}
+  .cmp-legend-sep{height:14px;width:1px;background:var(--paper-line)}
+  .cmp-wc{font-family:var(--mono);font-size:11.5px;color:var(--ink-600);display:inline-flex;gap:6px;align-items:baseline}
+  .cmp-wc strong{color:var(--ink-800);font-weight:600}
+  .cmp-wc-delta{font-size:10.5px;padding:1px 6px;border-radius:99px;background:var(--cream-2);color:var(--ink-500);margin-left:2px}
+  .cmp-wc-delta.pos{background:var(--ok-50);color:var(--ok-700,#176b2a)}
+  .cmp-wc-delta.neg{background:var(--warn-50);color:var(--warn-700,#8a5a00)}
+  .txt-badge-wc{font-family:var(--mono);font-size:9.5px;color:var(--ink-400);margin-left:8px;letter-spacing:.02em}
   .cmp-view .txt-card{padding:28px 34px 36px;max-width:none}
   .cmp-view .doc-read{font-size:14.5px;line-height:1.65}
   .cmp-view .doc-read h1{font-size:20px}
@@ -189,7 +203,7 @@
   .q-text{font-family:var(--serif);font-size:14px;color:var(--ink-800);line-height:1.5}
 
   /* Floating rail */
-  .frail{position:absolute;right:22px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;background:#fff;border:1px solid var(--paper-line);border-radius:12px;padding:6px;box-shadow:0 10px 28px -12px rgba(16,24,40,.18),0 2px 6px rgba(16,24,40,.06);z-index:20}
+  .frail{position:fixed;right:22px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;background:#fff;border:1px solid var(--paper-line);border-radius:12px;padding:6px;box-shadow:0 10px 28px -12px rgba(16,24,40,.18),0 2px 6px rgba(16,24,40,.06);z-index:20}
   .fr-b{width:40px;height:40px;border-radius:9px;display:grid;place-items:center;color:var(--ink-600);transition:.1s;position:relative}
   .fr-b:hover{background:var(--cream-2);color:var(--primary)}
   .fr-b.on{background:var(--primary-50);color:var(--primary)}
@@ -201,7 +215,7 @@
   .fr-b.export:hover{background:var(--primary-600);color:#fff}
 
   /* Popover */
-  .pop{position:absolute;right:76px;background:#fff;border:1px solid var(--paper-line);border-radius:12px;box-shadow:0 20px 50px -20px rgba(16,24,40,.3),0 4px 12px rgba(16,24,40,.1);padding:16px;width:330px;display:none;z-index:30}
+  .pop{position:fixed;right:76px;background:#fff;border:1px solid var(--paper-line);border-radius:12px;box-shadow:0 20px 50px -20px rgba(16,24,40,.3),0 4px 12px rgba(16,24,40,.1);padding:16px;width:330px;display:none;z-index:30}
   .pop.on{display:block}
   .pop-t{font-family:var(--serif);font-size:15px;font-weight:700;color:var(--ink-900);margin-bottom:4px}
   .pop-s{font-size:12px;color:var(--ink-600);margin-bottom:12px;line-height:1.5}
@@ -279,6 +293,10 @@
 
   /* Paragraph hover handle */
   .doc-read p, .doc-read ul, .doc-read h1, .doc-read h2{position:relative}
+  /* Paràgrafs/subtítols/llistes del doc-read han de ser position:relative perquè
+     el .para-handle (position:absolute, left:-30px) s'ancori a cadascun i no
+     salti al .txt-card parent. Sense això els 6 puntets no es veien. */
+  .doc-read p, .doc-read h2, .doc-read ul, .doc-read ol { position: relative; }
   .para-handle{position:absolute;left:-30px;top:3px;width:22px;height:22px;border-radius:5px;display:none;align-items:center;justify-content:center;color:var(--ink-400);background:transparent;cursor:pointer;border:0;z-index:5}
   .para-handle:hover{background:var(--cream-2);color:var(--ink-700)}
   .para-handle svg{width:14px;height:14px}
@@ -763,41 +781,31 @@
 
           <!-- Compare (two cards) -->
           <div class="cmp-view" id="view-compare" hidden>
+            <div class="cmp-legend">
+              <span class="cmp-legend-t">Marques al text adaptat:</span>
+              <span class="cmp-legend-item"><span class="cmp-legend-swatch ins"></span>Contingut <strong style="color:var(--ink-800)">afegit</strong> (explicacions, exemples o informació que no hi era a l'original)</span>
+              <span class="cmp-legend-item"><span class="cmp-legend-swatch sub"></span><strong style="color:var(--ink-800)">Reformulació</strong> (mateixa idea que a l'original, escrita amb paraules més senzilles)</span>
+              <span class="cmp-legend-sep"></span>
+              <span class="cmp-wc" id="cmp-wc">
+                Original: <strong id="cmp-wc-orig">—</strong> paraules · Adaptat: <strong id="cmp-wc-adapt">—</strong> paraules
+                <span class="cmp-wc-delta" id="cmp-wc-delta"></span>
+              </span>
+            </div>
             <div class="txt-card">
               <div class="txt-badge">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l4 4v14H6z"/></svg>
                 Text original
+                <span class="txt-badge-wc" id="cmp-wc-orig-badge"></span>
               </div>
-              <div class="doc-read no-diff">
-                <h1>La Revolució Industrial</h1>
-                <p>La Revolució Industrial és el període de transformació profunda de les formes de producció que va començar al Regne Unit cap al 1760 i es va estendre per Europa i Amèrica del Nord durant el segle XIX. Suposa el pas d'una economia basada en la manufactura artesanal i el camp a una economia dominada per la indústria i la màquina de vapor.</p>
-                <p>Els canvis tècnics, com la invenció de la filadora mecànica i la locomotora, van permetre produir béns a una velocitat i escala sense precedents. Les fàbriques van atraure milers de treballadors del camp cap a les ciutats, que van créixer ràpidament. Aquest procés d'urbanització va canviar la vida quotidiana, les relacions laborals i l'estructura social.</p>
-                <p>Però la Revolució Industrial també va tenir un cost. Les condicions de treball eren dures: jornades de catorze hores, salaris baixos, treball infantil i habitatges insalubres. Aquestes tensions van donar lloc als primers moviments obrers i a les idees que més endavant formarien el sindicalisme.</p>
-              </div>
+              <div class="doc-read no-diff" id="compare-original"></div>
             </div>
             <div class="txt-card">
               <div class="txt-badge adapted">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m12 3 1.9 4.6L18.5 9l-4.6 1.9L12 15l-1.9-4.6L5.5 9l4.6-1.4z"/></svg>
                 Text adaptat
+                <span class="txt-badge-wc" id="cmp-wc-adapt-badge"></span>
               </div>
-              <div class="doc-read">
-                <h1>La Revolució Industrial</h1>
-                <h2>Què va passar?</h2>
-                <p>La Revolució Industrial va ser un <span class="ins">canvi molt gran</span> en la manera de produir coses. <span class="sub">Va començar al Regne Unit l'any 1760</span> i després es va estendre per Europa i Amèrica.</p>
-                <p>Abans, la gent feia les coses a mà, al camp o a petits tallers. Amb la Revolució Industrial, les coses es van fabricar a les <strong>fàbriques</strong>, amb <strong>màquines</strong>.</p>
-                <h2>Per què és important?</h2>
-                <p>Hi va haver <span class="ins">tres canvis clau</span>:</p>
-                <p><span class="ins">1.</span> Es va inventar la <strong>màquina de vapor</strong>.</p>
-                <p><span class="ins">2.</span> La gent va marxar del camp a la ciutat per treballar a les fàbriques.</p>
-                <p><span class="ins">3.</span> Es produïen moltes més coses, i més barates.</p>
-                <h2>El costat dur</h2>
-                <p>Però no tot era bo. Les condicions de treball eren <strong>dures</strong>:</p>
-                <ul>
-                  <li>Es treballava fins a <span class="sub">14 hores al dia</span>.</li>
-                  <li>Els sous eren baixos.</li>
-                  <li><span class="ins">També treballaven els nens.</span></li>
-                </ul>
-              </div>
+              <div class="doc-read" id="compare-adapted"></div>
             </div>
           </div>
 
@@ -945,6 +953,10 @@
 
         <!-- Floating rail -->
         <div class="frail">
+          <button class="fr-b" id="fr-lt" data-tip="Revisar català (LanguageTool)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 12 3 3 9-9"/><path d="M4 20h16"/></svg>
+          </button>
+          <div class="fr-sep"></div>
           <button class="fr-b" data-pop="refine" data-tip="Refinar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-7M4 7h4M20 17h-4M4 17h9M13 12h7M4 12h5"/><circle cx="10" cy="7" r="2"/><circle cx="14" cy="17" r="2"/><circle cx="11" cy="12" r="2"/></svg>
           </button>
@@ -1006,9 +1018,13 @@
             <label class="rub-item"><span class="cbox"></span><span>El text té errors de català o no sona natural</span></label>
             <label class="rub-item"><span class="cbox"></span><span>Ha perdut contingut important de l'original</span></label>
             <label class="rub-item"><span class="cbox"></span><span>No s'apliquen bé les estratègies del perfil</span></label>
-            <label class="rub-item"><span class="cbox"></span><span>Falten ajuts: glossari, definicions, esquema o pictogrames</span></label>
+            <label class="rub-item" data-rub-kind="complements"><span class="cbox"></span><span>Falten ajuts: glossari, definicions, esquema o pictogrames</span></label>
             <label class="rub-item"><span class="cbox"></span><span>L'alumne no ho entendria tal com està</span></label>
           </div>
+          <button type="button" class="ref-check" id="rub-preserve" style="margin-top:10px;width:100%">
+            <span class="cbox"></span>
+            <span style="flex:1;text-align:left">Mantenir el text adaptat actual (només regenerar complements)</span>
+          </button>
           <div class="ref-open" style="margin-top:10px">
             <div class="ref-label"><span>Observació pròpia</span><span class="cur" style="font-family:var(--mono);color:var(--ink-400)">opcional</span></div>
             <textarea placeholder="Afegeix detalls específics…"></textarea>
@@ -1384,9 +1400,178 @@
 
   function setView(v){
     currentView = v;
-    Object.keys(views).forEach(k => views[k].hidden = (k !== v));
+    Object.keys(views).forEach(k => { if (views[k]) views[k].hidden = (k !== v); });
     cmpToggle.classList.toggle('on', v === 'compare');
     cmpChips.forEach(c => c.classList.toggle('active', c.dataset.comp === v));
+    if (v === 'compare') populateCompareView();
+  }
+
+  // Omple el #view-compare amb el text ORIGINAL i l'ADAPTAT reals.
+  // L'original ve de localStorage 'atne.doc_original' (dipositat al Pas 2).
+  // L'adaptat ve de l'estat actual de #adapted-text (el que l'usuari veu).
+  function populateCompareView() {
+    const origEl = document.getElementById('compare-original');
+    const adaptEl = document.getElementById('compare-adapted');
+    if (!origEl || !adaptEl) return;
+    const title = (document.querySelector('.doc-title')?.value || '').trim()
+      || localStorage.getItem('atne.doc_title') || '';
+    const origMd = localStorage.getItem('atne.doc_original') || '';
+    const md2html = window.ATNE_LLM?.markdownToHtml;
+    // Original (sense marques)
+    if (origMd && md2html) {
+      const titleHtml = title ? ('<h1>' + escapeHtml(title) + '</h1>') : '';
+      origEl.innerHTML = titleHtml + md2html(origMd);
+    } else if (!origMd) {
+      origEl.innerHTML = '<p style="color:var(--ink-400);font-style:italic">No s\'ha trobat el text original (tornar al Pas 2).</p>';
+    }
+    // Adaptat amb marques de diff (paraules noves en relació a l'original
+    // ressaltades amb <span class="ins">). Heurística senzilla: lèxic nou
+    // respecte al pool de paraules de l'original.
+    const adaptSrc = document.getElementById('adapted-text');
+    if (adaptSrc) {
+      const markedHtml = origMd
+        ? highlightNewWords(adaptSrc.innerHTML, origMd)
+        : adaptSrc.innerHTML;
+      adaptEl.innerHTML = markedHtml;
+      adaptEl.classList.remove('no-diff');
+    }
+    // Recompte de paraules per a cada costat + % de variació.
+    const countWords = (s) => (String(s || '').match(/\S+/g) || []).length;
+    const nOrig = countWords(origMd);
+    const nAdapt = adaptSrc ? countWords(adaptSrc.innerText) : 0;
+    const _set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    _set('cmp-wc-orig', nOrig || '—');
+    _set('cmp-wc-adapt', nAdapt || '—');
+    _set('cmp-wc-orig-badge', nOrig ? (nOrig + ' paraules') : '');
+    _set('cmp-wc-adapt-badge', nAdapt ? (nAdapt + ' paraules') : '');
+    const deltaEl = document.getElementById('cmp-wc-delta');
+    if (deltaEl) {
+      if (nOrig > 0 && nAdapt > 0) {
+        const pct = Math.round(((nAdapt - nOrig) / nOrig) * 100);
+        const sign = pct > 0 ? '+' : '';
+        deltaEl.textContent = sign + pct + '%';
+        deltaEl.classList.remove('pos', 'neg');
+        if (pct > 0) deltaEl.classList.add('pos');
+        else if (pct < 0) deltaEl.classList.add('neg');
+      } else {
+        deltaEl.textContent = '';
+        deltaEl.classList.remove('pos', 'neg');
+      }
+    }
+  }
+
+  // Diff word-level LCS entre el text original i l'adaptat.
+  // Classifica cada paraula nova de l'adaptat en:
+  //   - .ins (insercions pures): contingut que no tenia equivalent a l'original
+  //     (explicacions afegides, exemples, llistes noves).
+  //   - .sub (substitucions): reformulacions — un tros de l'original es reescriu
+  //     amb paraules diferents (simplificació de vocabulari, frases més curtes).
+  // L'heurística: si un grup consecutiu de paraules noves a l'adaptat apareix
+  // entre paraules eliminades de l'original → substitució. Si és entre paraules
+  // iguals sense res eliminat → inserció pura.
+  function highlightNewWords(adaptedHtml, originalMd) {
+    const normalize = (s) => s.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[.,;:!?¿¡«»"'`—–\-()\[\]{}]/g, '')
+      .trim();
+
+    // 1) Tokenitza original (text pla). markdownToHtml converteix `**` etc,
+    //    però per al diff n'hi ha prou amb les paraules crues.
+    const origWords = (originalMd.match(/[\p{L}\p{N}\-']+/gu) || [])
+      .filter(w => w.length >= 2)
+      .map(w => normalize(w))
+      .filter(Boolean);
+
+    // 2) Tokenitza adaptat caminant els text nodes (respectant l'HTML).
+    const container = document.createElement('div');
+    container.innerHTML = adaptedHtml;
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
+    const nodeTokens = []; // per cada text node: array de {text, isWord, wordIdx?}
+    const adaptWords = []; // llista plana de paraules normalitzades + pointer
+    const textNodes = [];
+    let n;
+    while ((n = walker.nextNode())) {
+      if (n.parentElement?.closest('span.ins, span.sub, pre, code, script, style')) continue;
+      const parts = n.nodeValue.split(/([\p{L}\p{N}\-']+)/gu).filter(p => p);
+      const tokens = parts.map(p => ({ text: p, isWord: /[\p{L}\p{N}]/u.test(p) }));
+      tokens.forEach(t => {
+        if (t.isWord && t.text.length >= 2 && !/^\d+$/.test(t.text)) {
+          t.wordIdx = adaptWords.length;
+          adaptWords.push(normalize(t.text));
+        }
+      });
+      nodeTokens.push(tokens);
+      textNodes.push(n);
+    }
+
+    // 3) LCS entre origWords i adaptWords (DP). Backtrack per generar ops.
+    //    Per eficiència limitem a textos raonables (200k ops OK en temps).
+    const N = origWords.length, M = adaptWords.length;
+    if (N === 0 || M === 0) return adaptedHtml;
+    // Int32Array per files consecutives per estalviar memòria (N*M × 4 bytes).
+    const dp = new Int32Array((N + 1) * (M + 1));
+    const W = M + 1;
+    for (let i = 1; i <= N; i++) {
+      for (let j = 1; j <= M; j++) {
+        if (origWords[i-1] === adaptWords[j-1]) dp[i*W + j] = dp[(i-1)*W + (j-1)] + 1;
+        else dp[i*W + j] = Math.max(dp[(i-1)*W + j], dp[i*W + (j-1)]);
+      }
+    }
+    const ops = []; // {type:'eq'|'del'|'add', aIdx?, bIdx?}
+    let i = N, j = M;
+    while (i > 0 && j > 0) {
+      if (origWords[i-1] === adaptWords[j-1]) {
+        ops.push({ type:'eq', bIdx: j-1 }); i--; j--;
+      } else if (dp[(i-1)*W + j] >= dp[i*W + (j-1)]) {
+        ops.push({ type:'del' }); i--;
+      } else {
+        ops.push({ type:'add', bIdx: j-1 }); j--;
+      }
+    }
+    while (i > 0) { ops.push({ type:'del' }); i--; }
+    while (j > 0) { ops.push({ type:'add', bIdx: j-1 }); j--; }
+    ops.reverse();
+
+    // 4) Classificar runs: entre dos 'eq' consecutius, si hi ha 'del' dins del
+    //    run → els 'add' d'aquest run són .sub (substitucions). Si només 'add'
+    //    → són .ins (inserció pura).
+    const classByWordIdx = new Map(); // adaptWordIdx → 'ins'|'sub'
+    let k = 0;
+    while (k < ops.length) {
+      if (ops[k].type === 'eq') { k++; continue; }
+      let end = k;
+      let hasDel = false;
+      while (end < ops.length && ops[end].type !== 'eq') {
+        if (ops[end].type === 'del') hasDel = true;
+        end++;
+      }
+      const kind = hasDel ? 'sub' : 'ins';
+      for (let x = k; x < end; x++) {
+        if (ops[x].type === 'add') classByWordIdx.set(ops[x].bIdx, kind);
+      }
+      k = end;
+    }
+
+    // 5) Re-aplica els spans als text nodes en funció del wordIdx.
+    nodeTokens.forEach((tokens, ni) => {
+      const needsRewrite = tokens.some(t => t.isWord && classByWordIdx.has(t.wordIdx));
+      if (!needsRewrite) return;
+      const frag = document.createDocumentFragment();
+      tokens.forEach(t => {
+        const kind = t.isWord ? classByWordIdx.get(t.wordIdx) : null;
+        if (kind) {
+          const span = document.createElement('span');
+          span.className = kind;
+          span.textContent = t.text;
+          frag.appendChild(span);
+        } else {
+          frag.appendChild(document.createTextNode(t.text));
+        }
+      });
+      textNodes[ni].parentNode.replaceChild(frag, textNodes[ni]);
+    });
+
+    return container.innerHTML;
   }
   window.setView = setView;
 
@@ -1411,6 +1596,80 @@
       if (card) card.classList.toggle('off', !active);
       if (chip) chip.classList.toggle('off', !active);
     });
+  });
+
+  // ──────────────────────────────────────────────────────
+  // Revisar català (LanguageTool) — acció determinista sobre
+  // el complement visible (Text adaptat / Glossari / Preguntes).
+  // L'esquema visual no es revisa (és un diagrama, no prosa).
+  // ──────────────────────────────────────────────────────
+  function getVisibleComplement() {
+    // Retorna { key, kind, getMd, setMd } segons currentView.
+    if (currentView === 'single') {
+      const el = document.getElementById('adapted-text');
+      if (!el) return null;
+      return {
+        key: 'single',
+        kind: 'html',
+        getMd: () => window.ATNE_LLM?.htmlToMarkdown?.(el.innerHTML) || '',
+        setMd: (md) => {
+          const html = window.ATNE_LLM?.markdownToHtml?.(md) || md;
+          el.innerHTML = html;
+          try { attachParaHandles(); pushHistory(); } catch {}
+          localStorage.setItem('atne.adapted_text', adaptedInnerHtmlClean());
+        }
+      };
+    }
+    const map = {
+      glossari: '#view-glossari .gl-list',
+      preguntes: '#view-preguntes .q-list'
+    };
+    const sel = map[currentView];
+    if (!sel) return null;
+    const el = document.querySelector(sel);
+    if (!el) return null;
+    return {
+      key: currentView,
+      kind: 'md',
+      getMd: () => el.dataset.md || '',
+      setMd: (md) => {
+        el.dataset.md = md;
+        el.innerHTML = window.ATNE_LLM?.markdownToHtml?.(md) || md;
+      }
+    };
+  }
+  document.getElementById('fr-lt')?.addEventListener('click', async () => {
+    const btn = document.getElementById('fr-lt');
+    if (btn.classList.contains('busy')) return;
+    if (currentView === 'esquema') {
+      window.atneToast?.('L\'esquema visual no es revisa (és un diagrama, no prosa).', 'info');
+      return;
+    }
+    if (currentView === 'compare') {
+      window.atneToast?.('Posa\'t a "Text adaptat" o un complement per revisar-lo.', 'info');
+      return;
+    }
+    const target = getVisibleComplement();
+    if (!target) { window.atneToast?.('No hi ha cap contingut a revisar.', 'info'); return; }
+    const md = (target.getMd() || '').trim();
+    if (!md) { window.atneToast?.('El contingut encara no s\'ha generat.', 'info'); return; }
+    btn.classList.add('busy', 'on');
+    btn.style.opacity = '.6';
+    btn.style.pointerEvents = 'none';
+    try {
+      const r = await window.ATNE_LLM.refineText({ text: md, preset: 'catala' });
+      const n = (r && typeof r.n_canvis === 'number') ? r.n_canvis : 0;
+      const corrected = r?.text || md;
+      target.setMd(corrected);
+      if (n === 0) window.atneToast?.('Revisió català: cap correcció necessària.', 'ok');
+      else window.atneToast?.('Revisió català: ' + n + (n === 1 ? ' correcció aplicada.' : ' correccions aplicades.'), 'ok');
+    } catch (err) {
+      window.atneToast?.('No s\'ha pogut revisar: ' + (err?.message || 'error desconegut'), 'error');
+    } finally {
+      btn.classList.remove('busy', 'on');
+      btn.style.opacity = '';
+      btn.style.pointerEvents = '';
+    }
   });
 
   // Popovers
@@ -1447,6 +1706,30 @@
   // Checkboxes (rubric + language tool toggle)
   document.querySelectorAll('.rub-item, .ref-check').forEach(r => {
     r.addEventListener('click', (e) => { e.preventDefault(); r.classList.toggle('on'); });
+  });
+
+  // Auto-suggerir "mantenir text adaptat" quan NOMÉS es tica "Falten ajuts".
+  // El docent sempre pot desmarcar-ho si també vol que es reescrigui el text.
+  function refreshRubricPreserveSuggestion() {
+    const pop = document.getElementById('pop-rubric');
+    if (!pop) return;
+    const preserveBtn = document.getElementById('rub-preserve');
+    if (!preserveBtn) return;
+    const ticked = Array.from(pop.querySelectorAll('.rub-item.on'));
+    const onlyComplements = ticked.length === 1 && ticked[0].dataset.rubKind === 'complements';
+    // Només auto-marquem quan passa a "només complements"; si el docent l'ha
+    // tocat (o ja hi ha altres problemes ticats), respectem la seva elecció.
+    if (onlyComplements && !preserveBtn.dataset.userTouched) {
+      preserveBtn.classList.add('on');
+    } else if (!onlyComplements && !preserveBtn.dataset.userTouched) {
+      preserveBtn.classList.remove('on');
+    }
+  }
+  document.querySelectorAll('#pop-rubric .rub-item').forEach(r => {
+    r.addEventListener('click', () => { setTimeout(refreshRubricPreserveSuggestion, 0); });
+  });
+  document.getElementById('rub-preserve')?.addEventListener('click', (e) => {
+    e.currentTarget.dataset.userTouched = '1';
   });
 
   // Regen animation
@@ -1798,6 +2081,105 @@
   // contingut mock. Renderer custom (taula gl-item, sc-node, q-item)
   // queda al parking lot.
   // ──────────────────────────────────────────────────────
+  // ──────────────────────────────────────────────────────
+  // Metadades dels complements (nom curt del xip, label de la card,
+  // data-comp del xip — que és la clau curta que ja usa la resta del
+  // codi — i la clau llarga del backend).
+  // ──────────────────────────────────────────────────────
+  const COMP_META = {
+    glossari:                  { chip: 'glossari',   chipLabel: 'Glossari',              cardTitle: 'Glossari' },
+    esquema_visual:            { chip: 'esquema',    chipLabel: 'Esquema',               cardTitle: 'Esquema visual' },
+    preguntes_comprensio:      { chip: 'preguntes',  chipLabel: 'Preguntes',             cardTitle: 'Preguntes de comprensió' },
+    mapa_conceptual:           { chip: 'mapa-conc',  chipLabel: 'Mapa conceptual',       cardTitle: 'Mapa conceptual' },
+    mapa_mental:               { chip: 'mapa-ment',  chipLabel: 'Mapa mental',           cardTitle: 'Mapa mental' },
+    bastides:                  { chip: 'bastides',   chipLabel: 'Bastides',              cardTitle: 'Bastides (scaffolding)' },
+    activitats_aprofundiment:  { chip: 'activitats', chipLabel: 'Activitats',            cardTitle: "Activitats d'aprofundiment" },
+    pictogrames:               { chip: 'pictogrames',chipLabel: 'Pictogrames',           cardTitle: 'Pictogrames' },
+  };
+
+  // Ajusta visibilitat dels xips segons els complements triats al Pas 2
+  // (localStorage 'atne.complements'). Els xips de complements no seleccionats
+  // s'amaguen; els addicionals (mapa/bastides/etc.) s'afegeixen dinàmicament.
+  function syncComplementChips(compActive) {
+    const chipsEl = document.querySelector('.cmp-chips');
+    if (!chipsEl) return;
+    const addBtn = chipsEl.querySelector('.cmp-add');
+    // Amaga tots els xips hardcodejats si no estan actius
+    chipsEl.querySelectorAll('.cmp-chip').forEach(c => {
+      if (c.dataset.comp === 'text') { c.style.display = ''; return; }
+      const backendKey = Object.keys(COMP_META).find(k => COMP_META[k].chip === c.dataset.comp);
+      const active = !!(backendKey && compActive[backendKey]);
+      c.style.display = active ? '' : 'none';
+    });
+    // Afegeix xips dinàmics per als complements extra (mapa/bastides/etc.)
+    Object.keys(COMP_META).forEach(key => {
+      const meta = COMP_META[key];
+      if (!compActive[key]) return;
+      const existing = chipsEl.querySelector('.cmp-chip[data-comp="' + meta.chip + '"]');
+      if (existing) return; // ja hi és (els 3 hardcodejats)
+      const b = document.createElement('button');
+      b.className = 'cmp-chip';
+      b.dataset.comp = meta.chip;
+      b.innerHTML = '<span class="dot-pending"></span>' + meta.chipLabel;
+      b.addEventListener('click', () => {
+        if (currentView === meta.chip) setView('single');
+        else setView(meta.chip);
+      });
+      if (addBtn) chipsEl.insertBefore(b, addBtn);
+      else chipsEl.appendChild(b);
+      // Registra també la vista dinàmica perquè setView la pugui mostrar/amagar
+      views[meta.chip] = ensureGenericView(key, meta);
+    });
+  }
+
+  // Crea (si no existeix) una vista genèrica per a un complement extra i la
+  // retorna. Reutilitza l'estructura .comp-view / .comp-card existent.
+  function ensureGenericView(backendKey, meta) {
+    const id = 'view-' + meta.chip;
+    let view = document.getElementById(id);
+    if (view) return view;
+    const host = document.querySelector('.center-body');
+    if (!host) return null;
+    view = document.createElement('div');
+    view.className = 'comp-view';
+    view.id = id;
+    view.hidden = true;
+    view.innerHTML = `
+      <div class="comp-card" data-comp="${meta.chip}">
+        <label class="comp-toggle-bar">
+          <span class="comp-switch">
+            <input type="checkbox" checked data-comp-toggle="${meta.chip}">
+            <span class="comp-switch-slider"></span>
+            <span class="comp-switch-label">Inclou a l'export</span>
+          </span>
+          <span class="comp-switch-status">Actiu per a aquesta versió</span>
+        </label>
+        <div class="comp-head">
+          <div class="comp-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div>
+          <div>
+            <div class="comp-title">${meta.cardTitle}</div>
+            <div class="comp-sub">Contingut generat</div>
+          </div>
+          <button class="comp-back" onclick="setView('single')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 19 8 12l7-7"/></svg>Tornar al text</button>
+        </div>
+        <div class="generic-md" data-backend-key="${backendKey}"></div>
+      </div>`;
+    host.appendChild(view);
+    // Re-associar comp-toggle handler per al nou checkbox
+    view.querySelectorAll('[data-comp-toggle]').forEach(cb => {
+      cb.addEventListener('change', e => {
+        e.stopPropagation();
+        const comp = cb.dataset.compToggle;
+        const active = cb.checked;
+        const card = cb.closest('.comp-card');
+        const chip = document.querySelector('.cmp-chip[data-comp="' + comp + '"]');
+        if (card) card.classList.toggle('off', !active);
+        if (chip) chip.classList.toggle('off', !active);
+      });
+    });
+    return view;
+  }
+
   function applyComplementsToViews(complements) {
     if (!complements || !window.ATNE_LLM?.markdownToHtml) return;
     const md2html = window.ATNE_LLM.markdownToHtml;
@@ -1805,7 +2187,7 @@
     // Glossari
     if (complements.glossari) {
       const cont = document.querySelector('#view-glossari .gl-list');
-      if (cont) cont.innerHTML = md2html(complements.glossari);
+      if (cont) { cont.dataset.md = complements.glossari; cont.innerHTML = md2html(complements.glossari); }
       updateChipDot('glossari', 'ok');
     }
     // Esquema visual
@@ -1814,16 +2196,31 @@
       if (cont) {
         // L'esquema sovint ve dins de ``` ``` (bloc de codi). El mantenim com a <pre>.
         const raw = complements.esquema_visual.replace(/^```[^\n]*\n/, '').replace(/\n```$/, '');
+        cont.dataset.md = complements.esquema_visual;
         cont.innerHTML = '<pre style="font-family:var(--ui);font-size:13px;line-height:1.6;white-space:pre-wrap;color:var(--ink-700);margin:0">' + escapeHtml(raw) + '</pre>';
       }
       updateChipDot('esquema', 'ok');
     }
     // Preguntes de comprensió
+    console.log('[ATNE] preguntes_comprensio len=', (complements.preguntes_comprensio||'').length, complements.preguntes_comprensio ? complements.preguntes_comprensio.slice(0,80) : 'ABSENT');
     if (complements.preguntes_comprensio) {
       const cont = document.querySelector('#view-preguntes .q-list');
-      if (cont) cont.innerHTML = md2html(complements.preguntes_comprensio);
+      console.log('[ATNE] #view-preguntes .q-list found=', !!cont);
+      if (cont) { cont.dataset.md = complements.preguntes_comprensio; cont.innerHTML = md2html(complements.preguntes_comprensio); }
       updateChipDot('preguntes', 'ok');
     }
+    // Complements extra (mapa conceptual/mental, bastides, activitats, pictogrames):
+    // renderitzar a la vista genèrica creada per syncComplementChips().
+    Object.keys(COMP_META).forEach(key => {
+      if (['glossari', 'esquema_visual', 'preguntes_comprensio'].includes(key)) return;
+      if (!complements[key]) return;
+      const meta = COMP_META[key];
+      const view = document.getElementById('view-' + meta.chip);
+      if (!view) return;
+      const cont = view.querySelector('.generic-md');
+      if (cont) { cont.dataset.md = complements[key]; cont.innerHTML = md2html(complements[key]); }
+      updateChipDot(meta.chip, 'ok');
+    });
   }
   function updateChipDot(comp, state) {
     const chip = document.querySelector('.cmp-chip[data-comp="' + comp + '"]');
@@ -1938,16 +2335,53 @@
 
     if (docTitleEl) docTitleEl.value = title;
 
-    if (cachedKey === cacheKey && cachedText) {
-      if (adaptedEl) { adaptedEl.innerHTML = cachedText; attachParaHandles(); pushHistory(); }
-      // Restaurem complements cached si n'hi ha
-      const cachedRaw = localStorage.getItem('atne.adapted_raw');
-      if (cachedRaw && window.ATNE_LLM?.parseAdaptedSections) {
-        const parsed = window.ATNE_LLM.parseAdaptedSections(cachedRaw);
-        applyComplementsToViews(parsed.complements);
+    // Carrega els complements triats pel docent al Pas 2 ABANS del cache check
+    // perquè els xips dinàmics (mapa conceptual, bastides, etc.) s'hagin de
+    // crear tant si venim de cache com si s'acaba d'adaptar.
+    let complements = { glossari: true, esquema_visual: true, preguntes_comprensio: true };
+    try {
+      const stored = localStorage.getItem('atne.complements');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // Bug 5: normalitzar format — el Pas 2 podria desar array o objecte
+        if (Array.isArray(parsed)) {
+          const obj = {};
+          parsed.forEach(k => { if (typeof k === 'string') obj[k] = true; });
+          complements = obj;
+        } else if (parsed && typeof parsed === 'object') {
+          const obj = {};
+          Object.keys(parsed).forEach(k => { if (parsed[k]) obj[k] = true; });
+          complements = obj;
+        }
       }
-      updateDocMeta();  // Bug 4: refrescar meta post-reload des de cache
-      return;
+    } catch {}
+    try { syncComplementChips(complements); } catch (_e) { console.error(_e); }
+
+    if (cachedKey === cacheKey && cachedText) {
+      const cachedRaw = localStorage.getItem('atne.adapted_raw') || '';
+      // Validació del cache: si el raw no conté les seccions de complements
+      // actius, el cache és obsolet (generat abans dels canvis de prompt).
+      // Invalidem i regenerem en comptes d'usar un cache incomplet.
+      const cacheStale = Object.keys(complements).some(k => {
+        if (!complements[k]) return false;
+        const keywords = { glossari: '## glossari', esquema_visual: '## esquema', preguntes_comprensio: '## preguntes' };
+        const kw = keywords[k];
+        return kw && cachedRaw && !cachedRaw.toLowerCase().includes(kw);
+      });
+      if (cacheStale) {
+        localStorage.removeItem('atne.adapted_text');
+        localStorage.removeItem('atne.adapted_cache_key');
+        localStorage.removeItem('atne.adapted_raw');
+        // cau al bloc de generació a sota
+      } else {
+        if (adaptedEl) { adaptedEl.innerHTML = cachedText; attachParaHandles(); pushHistory(); }
+        if (cachedRaw && window.ATNE_LLM?.parseAdaptedSections) {
+          const parsed = window.ATNE_LLM.parseAdaptedSections(cachedRaw);
+          applyComplementsToViews(parsed.complements);
+        }
+        updateDocMeta();
+        return;
+      }
     }
 
     // Cal generar — mostra overlay i crida LLM
@@ -1958,35 +2392,23 @@
     if (regenT) regenT.textContent = 'Adaptant el text…';
     if (regenS) regenS.textContent = 'El LLM està personalitzant el text per a ' + profile.name;
 
-    // Complements triats pel docent al Pas 2 (popover Complements).
-    // Si encara no hi són (primer ús), fallback a un set raonable.
-    let complements = { glossari: true, esquema_visual: true, preguntes_comprensio: true };
-    try {
-      const stored = localStorage.getItem('atne.complements');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        // Bug 5: normalitzar format — el Pas 2 podria desar array o objecte
-        if (Array.isArray(parsed)) {
-          // Format array: ['glossari', 'esquema_visual', ...] → {glossari:true,...}
-          const obj = {};
-          parsed.forEach(k => { if (typeof k === 'string') obj[k] = true; });
-          complements = obj;
-        } else if (parsed && typeof parsed === 'object') {
-          // Format objecte: filtrem només les claus amb valor truthy
-          const obj = {};
-          Object.keys(parsed).forEach(k => { if (parsed[k]) obj[k] = true; });
-          complements = obj;
-        }
-      }
-    } catch {}
-
     const mecrSortida = computeMECRSortida(profile, profile.course);
     const nivellPerfilAdapt = (profile.course || '').replace(/\s+[A-Z]$/, '').trim();
+    // Correccions pendents (guardades pel popover Rúbrica). Es consumeixen
+    // aquí i s'esborren un cop aplicades, perquè un refresh posterior no les
+    // reapliqui sense motiu.
+    let pendingCorrections = [];
+    try {
+      const rawCorr = localStorage.getItem('atne.pending_corrections');
+      if (rawCorr) pendingCorrections = JSON.parse(rawCorr) || [];
+    } catch {}
+    const adaptParams = { levels: ['single'], complements, mecr_sortida: mecrSortida };
+    if (pendingCorrections.length) adaptParams.corrections = pendingCorrections;
     window.ATNE_LLM.adaptText({
       text: docOriginal,
       profile: profile,
       context: { materia, titol: title, nivell_curs: nivellPerfilAdapt },
-      params: { levels: ['single'], complements, mecr_sortida: mecrSortida },
+      params: adaptParams,
       onStep: (ev) => {
         if (regenT && ev.msg) regenT.textContent = ev.msg;
       },
@@ -1995,10 +2417,19 @@
         const parsed = window.ATNE_LLM.parseAdaptedSections(ev.adapted || '');
         const md2html = window.ATNE_LLM.markdownToHtml;
 
+        // Si el docent ha demanat "mantenir text adaptat actual", restaurem
+        // el snapshot i ignorem la versió nova del text (pero conservem els
+        // complements nous). El flag es consumeix en un sol ús.
+        const preservedHtml = localStorage.getItem('atne.preserve_adapted');
         if (adaptedEl) {
-          const mainText = parsed.main || ev.adapted || '';
-          const looksLikeHtml = /<(p|h[1-6]|ul|ol|li|strong|em)[\s>]/i.test(mainText);
-          adaptedEl.innerHTML = looksLikeHtml ? mainText : md2html(mainText);
+          if (preservedHtml) {
+            adaptedEl.innerHTML = preservedHtml;
+            localStorage.removeItem('atne.preserve_adapted');
+          } else {
+            const mainText = parsed.main || ev.adapted || '';
+            const looksLikeHtml = /<(p|h[1-6]|ul|ol|li|strong|em)[\s>]/i.test(mainText);
+            adaptedEl.innerHTML = looksLikeHtml ? mainText : md2html(mainText);
+          }
           attachParaHandles();
           pushHistory();
         }
@@ -2013,6 +2444,11 @@
         localStorage.setItem('atne.adapted_cache_key', cacheKey);
         // Bug 4: timestamp de generació per al "adaptat fa ..."
         localStorage.setItem('atne.adapted_at', String(Date.now()));
+        // Un cop aplicades correctament, esborrem les correccions pendents
+        // perquè no tornin a aplicar-se en una futura regeneració.
+        if (pendingCorrections.length) {
+          localStorage.removeItem('atne.pending_corrections');
+        }
         updateDocMeta();
       },
       onError: (err) => {
@@ -2142,7 +2578,11 @@
     refineAdaptedText({ preset, instruccio, overlayMsg: 'Refinant el text…' });
   });
 
-  // Popover "Refer amb rúbrica" — construeix instrucció amb els problemes marcats
+  // Popover "Refer amb rúbrica" — en comptes de només refinar el text (que
+  // no toca els complements), fa una REGENERACIÓ COMPLETA passant els
+  // problemes marcats com a `corrections` a `/api/adapt`. Així el LLM
+  // reescriu tant el text adaptat com els complements (glossari, esquema,
+  // preguntes...) tenint en compte el feedback del docent.
   document.getElementById('btn-rubric-apply')?.addEventListener('click', () => {
     const pop = document.getElementById('pop-rubric');
     if (!pop) return;
@@ -2150,22 +2590,43 @@
       .map(r => (r.querySelector('span:last-child')?.textContent || '').trim())
       .filter(Boolean);
     const userObs = (pop.querySelector('textarea')?.value || '').trim();
-
     if (!problems.length && !userObs) { closePops(); return; }
-    const parts = [];
-    if (problems.length) {
-      parts.push('Revisa el text tenint en compte aquests problemes detectats: ' + problems.join('; '));
+    const corrections = [];
+    problems.forEach(p => corrections.push(p));
+    if (userObs) corrections.push('Observació del docent: ' + userObs);
+    const preserveText = document.getElementById('rub-preserve')?.classList.contains('on');
+    if (preserveText) {
+      // Snapshot del text adaptat actual perquè després de la regeneració el
+      // puguem restaurar íntegrament (keeping els complements nous).
+      const adaptedNow = document.getElementById('adapted-text');
+      if (adaptedNow) {
+        try {
+          localStorage.setItem('atne.preserve_adapted', adaptedNow.innerHTML);
+        } catch {}
+      }
+      // Pista per al LLM perquè no reescrigui el text en profunditat
+      corrections.push('El text adaptat actual ja és satisfactori. Manté-lo pràcticament igual i focalitza els esforços en generar bé els complements mancants (glossari, esquema, preguntes, bastides...).');
     }
-    if (userObs) parts.push('Observació del docent: ' + userObs);
-    const instruccio = parts.join('. ') + '.';
-
-    refineAdaptedText({ instruccio, overlayMsg: 'Regenerant amb correccions…' });
+    try {
+      localStorage.setItem('atne.pending_corrections', JSON.stringify(corrections));
+    } catch {}
+    // Invalidar cache perquè _maybeAdaptOnLoadImpl torni a cridar /api/adapt
+    localStorage.removeItem('atne.adapted_text');
+    localStorage.removeItem('atne.adapted_cache_key');
+    localStorage.removeItem('atne.adapted_raw');
+    closePops();
+    const msg = preserveText
+      ? 'Regenerant només els complements (text intacte)...'
+      : 'Regenerant l\'adaptació amb ' + corrections.length + ' correcci' + (corrections.length === 1 ? 'ó' : 'ons') + '...';
+    window.atneToast?.(msg, 'info');
+    location.reload();
   });
 
   // Popover "Nova adaptació" — invalida cache i recarrega (dispararà maybeAdaptOnLoad)
   document.getElementById('btn-new-adapt')?.addEventListener('click', () => {
     localStorage.removeItem('atne.adapted_text');
     localStorage.removeItem('atne.adapted_cache_key');
+    localStorage.removeItem('atne.adapted_raw');
     location.reload();
   });
 
