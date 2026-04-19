@@ -191,6 +191,32 @@ SEGURETAT:
             if blocks:
                 _cache["genres"][key] = blocks[0].strip()
 
+    # ── Sub-gèneres (M3_generes-22.md, 22 blocs amb format "## <key>") ──
+    # Complementa els 4 macro-gèneres amb els 22 sub-gèneres del dropdown del Pas 2.
+    # Format: cada bloc comença amb "## <clau>" i continua fins al següent "## " o final.
+    subgenres = _load_file("M3_generes-22.md")
+    if subgenres:
+        # Extreure només el cos del document (després del frontmatter i de la intro)
+        # Cerca tots els blocs que comencin amb "## <clau>\n" i capturar fins al següent "## "
+        matches = re.findall(r"^## ([a-z]+)\s*\n(.*?)(?=\n## |\Z)", subgenres, re.MULTILINE | re.DOTALL)
+        for key, body in matches:
+            _cache["genres"][key] = body.strip()
+
+    # ── Aliases: tipologies → macro-gènere més proper ──
+    # Permet usar directament el valor del dropdown "Tipologia" del Pas 2 si el
+    # sub-gènere no està disponible.
+    _typology_aliases = {
+        "expositiva": "explicacio",
+        "narrativa": "narracio",
+        "argumentativa": "argumentacio",
+        "instructiva": "instruccio",
+        "descriptiva": "explicacio",  # descripció encaixa millor amb explicació
+        "dialogada": "narracio",       # dialogat tractat com a variant narrativa
+    }
+    for alias, target in _typology_aliases.items():
+        if alias not in _cache["genres"] and target in _cache["genres"]:
+            _cache["genres"][alias] = _cache["genres"][target]
+
     # ── Creuaments (llegits del M1_creuament) ──
     crossings = _load_file("M1_creuament-variables-dependencies.md")
     if crossings:

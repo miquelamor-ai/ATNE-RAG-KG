@@ -1843,6 +1843,10 @@
         if (docTitle) docTitle.value = title;
         localStorage.setItem('atne.doc_title', title);
         localStorage.setItem('atne.doc_draft', result.text);
+        // Persistim el gènere i la tipologia per al Pas 3 (adaptació genere-aware).
+        // El backend els fa servir via corpus_reader.get_genre_block(genere).
+        if (genere) localStorage.setItem('atne.genere_discursiu', genere);
+        if (tipologia) localStorage.setItem('atne.tipologia', tipologia);
         updateWC();
       }
     } catch (err) {

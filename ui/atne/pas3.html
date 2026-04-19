@@ -2408,6 +2408,11 @@
     } catch {}
     const adaptParams = { levels: ['single'], complements, mecr_sortida: mecrSortida };
     if (pendingCorrections.length) adaptParams.corrections = pendingCorrections;
+    // Injectem el gènere discursiu si ha estat persistit pel generador (Pas 2).
+    // El backend el fa servir via corpus_reader.get_genre_block() per afegir
+    // regles crítiques específiques del gènere al system prompt.
+    const savedGenere = localStorage.getItem('atne.genere_discursiu');
+    if (savedGenere) adaptParams.genere_discursiu = savedGenere;
     window.ATNE_LLM.adaptText({
       text: docOriginal,
       profile: profile,
