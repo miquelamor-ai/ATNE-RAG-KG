@@ -17,6 +17,9 @@
 <link rel="stylesheet" href="/ui/driver.css"/>
 <script src="/ui/driver.iife.js"></script>
 <script src="/ui/atne/js/llm.js?v=20260419m" defer></script>
+<!-- html2pdf.js per exportar PDF client-side preservant tipografia + complements triats.
+     CDN jsDelivr amb bundle (inclou html2canvas + jsPDF en un sol fitxer). -->
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.2/dist/html2pdf.bundle.min.js" defer></script>
 
 <style>
   /* =========================================================
@@ -2659,6 +2662,37 @@
         return;
       }
 
+      const pid = localStorage.getItem('atne.profile_id') || 'marc';
+      const profile = window.ATNE_PROFILES?.[pid];
+      const profile_name = profile?.name || 'adaptacio';
+
+      // PDF: client-side amb html2pdf.js — preserva tipografia triada i complements actius.
+      // Veure project_parking_lot #61: refactor futur a WeasyPrint/Puppeteer per fidelitat total.
+      if (fmt === 'pdf') {
+        if (!window.html2pdf) {
+          window.atneToast?.('Carregant generador PDF…', 'info');
+          // Espera fins a 3s que el CDN acabi de descarregar (defer)
+          const t0 = Date.now();
+          while (!window.html2pdf && Date.now() - t0 < 3000) {
+            await new Promise(r => setTimeout(r, 100));
+          }
+          if (!window.html2pdf) {
+            window.atneToast?.('Generador PDF no disponible (revisa connexió)', 'error');
+            return;
+          }
+        }
+        window.atneToast?.('Preparant PDF…', 'info');
+        try {
+          await exportPdfClientSide(profile_name);
+          window.atneToast?.('PDF desat', 'success');
+        } catch (err) {
+          console.error('[pdf]', err);
+          window.atneToast?.('Error exportant PDF: ' + err.message, 'error');
+        }
+        return;
+      }
+
+      // DOCX / TXT: server-side (format bàsic sense complements, pendent millora #61).
       if (!window.ATNE_LLM || !window.ATNE_LLM.exportDoc) {
         window.atneToast?.('Mòdul d\'exportació no disponible', 'error');
         return;
@@ -2666,18 +2700,12 @@
 
       const adaptedEl = document.getElementById('adapted-text');
       if (!adaptedEl) return;
-      // Enviem HTML convertit a Markdown perquè el backend renderitzi H1/H2/negretes/llistes.
-      // Fallback a innerText si htmlToMarkdown no està disponible.
       const adaptedHtml = adaptedEl.innerHTML || '';
       const adapted = (window.ATNE_LLM.htmlToMarkdown?.(adaptedHtml) || adaptedEl.innerText || adaptedEl.textContent || '').trim();
       if (!adapted) {
         window.atneToast?.('No hi ha text per exportar', 'error');
         return;
       }
-
-      const pid = localStorage.getItem('atne.profile_id') || 'marc';
-      const profile = window.ATNE_PROFILES?.[pid];
-      const profile_name = profile?.name || 'adaptacio';
 
       window.atneToast?.('Preparant ' + fmt.toUpperCase() + '…', 'info');
       try {
@@ -2688,6 +2716,110 @@
       }
     });
   });
+
+  // ──────────────────────────────────────────────────────
+  // PDF client-side (html2pdf.js)
+  // ──────────────────────────────────────────────────────
+  // Construeix un document net amb: títol + metadades + text adaptat + complements
+  // actius (segons toggles). Aplica la tipografia triada al selector i el disseny
+  // d'impressió (margen A4, sense UI chrome). Limitació: text com a imatge, no
+  // seleccionable. Per fidelitat total cal migrar a WeasyPrint/Puppeteer server-side.
+  async function exportPdfClientSide(profileName) {
+    const adaptedEl = document.getElementById('adapted-text');
+    if (!adaptedEl) throw new Error('No hi ha text adaptat');
+
+    // Detectar tipografia activa (classe font-X al .doc-read)
+    const fontClasses = ['font-atkinson', 'font-lexend', 'font-inter', 'font-fraunces', 'font-opendyslexic'];
+    const activeFontClass = fontClasses.find(c => adaptedEl.classList.contains(c)) || 'font-atkinson';
+
+    // Títol del document
+    const titleText = (document.querySelector('.doc-title')?.value || 'Adaptació').trim();
+    const today = new Date().toLocaleDateString('ca-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    // Contenidor oculte off-screen per renderitzar
+    const root = document.createElement('div');
+    root.className = 'pdf-export-root ' + activeFontClass;
+    root.style.cssText = [
+      'position:fixed', 'top:-10000px', 'left:0',
+      'width:180mm', 'padding:0',
+      'background:#fff', 'color:#1a1a1a',
+      'font-size:14pt', 'line-height:1.65',
+    ].join(';');
+
+    // Capçalera: títol + metadades
+    const header = document.createElement('header');
+    header.style.cssText = 'margin-bottom:16mm;padding-bottom:6mm;border-bottom:1px solid #d0d0d0;';
+    header.innerHTML = `
+      <h1 style="font-size:22pt;font-weight:700;margin:0 0 4mm 0;letter-spacing:-0.01em;">${escapeHtml(titleText)}</h1>
+      <div style="font-size:10pt;color:#666;">
+        Adaptat per a <strong>${escapeHtml(profileName)}</strong> · ATNE · ${today}
+      </div>`;
+    root.appendChild(header);
+
+    // Text adaptat principal
+    const mainSec = document.createElement('section');
+    mainSec.style.cssText = 'margin-bottom:12mm;';
+    const mainContent = adaptedEl.cloneNode(true);
+    mainContent.removeAttribute('contenteditable');
+    mainContent.removeAttribute('id');
+    mainContent.style.cssText = 'font-size:14pt;line-height:1.65;';
+    // Treure marques d'edició (ins/sub) i altres xifres de runtime
+    mainContent.querySelectorAll('.ins, .sub').forEach(el => {
+      // Mantenir el text però treure les classes de marcatge
+      el.classList.remove('ins', 'sub');
+      el.style.background = '';
+      el.style.textDecoration = '';
+    });
+    mainSec.appendChild(mainContent);
+    root.appendChild(mainSec);
+
+    // Complements actius (segons data-comp-toggle checked)
+    const toggles = document.querySelectorAll('[data-comp-toggle]');
+    const seenComps = new Set();
+    toggles.forEach(toggle => {
+      if (!toggle.checked) return;
+      const compId = toggle.dataset.compToggle;
+      if (seenComps.has(compId)) return;
+      seenComps.add(compId);
+
+      const compView = document.getElementById('view-' + compId);
+      if (!compView) return;
+
+      const clone = compView.cloneNode(true);
+      clone.removeAttribute('hidden');
+      clone.removeAttribute('id');
+      // Netejar UI chrome dins del complement
+      clone.querySelectorAll('.comp-toggle-bar, .comp-back, .gl-edit, .q-edit, button').forEach(el => el.remove());
+      // Cada complement comença a una pàgina nova (visualment coherent)
+      clone.style.cssText = 'page-break-before:always;margin-top:12mm;';
+      root.appendChild(clone);
+    });
+
+    document.body.appendChild(root);
+
+    const safeName = profileName.replace(/[^\w\s-]/g, '').replace(/\s+/g, '_').slice(0, 30) || 'adaptacio';
+    const ts = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const filename = `ATNE_${safeName}_${ts}.pdf`;
+
+    try {
+      await window.html2pdf().set({
+        margin:     [15, 15, 18, 15],  // mm: top, right, bottom, left
+        filename:   filename,
+        image:      { type: 'jpeg', quality: 0.96 },
+        html2canvas:{ scale: 2, useCORS: true, letterRendering: true, backgroundColor: '#ffffff' },
+        jsPDF:      { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
+        pagebreak:  { mode: ['css', 'legacy'] }
+      }).from(root).save();
+    } finally {
+      root.remove();
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
 
   // ──────────────────────────────────────────────────────
   // Zoom + Pantalla completa (inclusió: adaptar la mida als usuaris)
