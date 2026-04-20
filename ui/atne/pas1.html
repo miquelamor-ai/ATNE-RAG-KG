@@ -957,8 +957,71 @@
     modes.forEach(x => x.classList.toggle('on', x.dataset.m === m));
   }
   actBtns.forEach(b => b.addEventListener('click', () => {
-    if(b.dataset.mode) setMode(b.dataset.mode);
+    if (!b.dataset.mode) return;
+    // Quan clicken un FAB (Nova persona / Nou grup) per crear nou, cal
+    // assegurar-se que no queda en curs cap edició prèvia i que el formulari
+    // corresponent arrenca net. Sense això els camps arrossegarien els
+    // valors del darrer perfil editat.
+    if (_editingPid && (b.dataset.mode === 'person' || b.dataset.mode === 'group')) {
+      _editingPid = null;
+      if (b.dataset.mode === 'person') _resetPersonForm();
+      else _resetGroupForm();
+    } else if (b.dataset.mode === 'group') {
+      // Crear nou grup: també cal netejar si ve del formulari ja utilitzat.
+      _resetGroupForm();
+    } else if (b.dataset.mode === 'person') {
+      _resetPersonForm();
+    }
+    setMode(b.dataset.mode);
   }));
+
+  function _resetPersonForm() {
+    const form = document.querySelector('.mode[data-m="person"]');
+    if (!form) return;
+    form.querySelectorAll('.inp, .txt').forEach(el => { el.value = ''; });
+    form.querySelectorAll('.lvl').forEach(b => b.classList.remove('on'));
+    // Restaurem el MECR per defecte "B1" com a la versió neta del HTML
+    const b1 = form.querySelector('.lvl:nth-child(3)');
+    if (b1) b1.classList.add('on');
+    form.querySelectorAll('.ck input').forEach(cb => { cb.checked = false; });
+    form.querySelectorAll('.aid-row input').forEach(cb => { cb.checked = false; });
+    form.querySelectorAll('.aid-row').forEach(r => r.classList.remove('suggested'));
+    form.querySelectorAll('.tag').forEach(t => t.classList.remove('on'));
+    if (typeof dxSel !== 'undefined') { dxSel.clear(); renderDx(); }
+    const btn = form.querySelector('.foot .btn-p');
+    if (btn) btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Crear perfil';
+    pristineState.person = true;
+  }
+
+  function _resetGroupForm() {
+    const cursSel = document.getElementById('grp-curs');
+    const lletraInp = document.getElementById('grp-lletra');
+    const nomInp = document.getElementById('grp-nom');
+    if (cursSel) cursSel.value = '';
+    if (lletraInp) lletraInp.value = '';
+    if (nomInp) nomInp.value = '';
+    document.querySelectorAll('#grp-multi-list input[type="checkbox"]').forEach(cb => cb.checked = false);
+    const wrap = document.getElementById('grp-multi-wrap');
+    if (wrap) wrap.style.display = 'none';
+    // Membres afegits
+    if (window._atneGroupAdded) window._atneGroupAdded.clear();
+    const addedListEl = document.getElementById('added-list');
+    if (addedListEl) addedListEl.innerHTML = '<div class="empty-add">Cap perfil afegit encara.</div>';
+    document.querySelectorAll('#add-picker .pick.added').forEach(el => el.classList.remove('added'));
+    // Nivells lectors: valors per defecte (Bàsic + Estàndard on, Avançat off)
+    const lvls = document.querySelectorAll('.mode[data-m="group"] .lvl');
+    lvls.forEach((b, i) => b.classList.toggle('on', i < 2));
+    // Placeholder nom tornat al defecte
+    if (nomInp) nomInp.placeholder = 'Nom del grup';
+    // Títol i chip MECR neutres
+    const title = document.getElementById('grp-title');
+    if (title) title.textContent = 'Nou perfil de grup';
+    const chip = document.getElementById('grp-mecr-chip');
+    if (chip) chip.style.display = 'none';
+    const btn = document.querySelector('.mode[data-m="group"] .foot .btn-p');
+    if (btn) btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Crear perfil';
+    pristineState.group = true;
+  }
 
   // ──────────────────────────────────────────────────────
   // Zoom + Pantalla completa (inclusió: adaptar la mida als usuaris)
