@@ -1717,9 +1717,10 @@
 
       applyFilters(); updateFchipCounts();
       personCreateBtn.disabled = false;
-      // No naveguem: el docent selecciona quan vulgui (pot voler crear més perfils)
       localStorage.setItem('atne.profile_id', profile.id);
       if (profile.custom) localStorage.setItem('atne.custom_profile', JSON.stringify(profile));
+      // Marca el formulari com a net per evitar el confirm "descartaràs els canvis".
+      pristineState.person = true;
       setMode('search');
       // Ressalta la fila creada
       setTimeout(() => {
@@ -1762,8 +1763,11 @@
       applyFilters(); updateFchipCounts();
       groupCreateBtn.disabled = false;
       groupCreateBtn.innerHTML = originalLabel;
-      // No naveguem: el docent selecciona quan vulgui (pot voler crear més)
       localStorage.setItem('atne.profile_id', profile.id);
+
+      // Torna a la vista principal (llista de perfils) sense demanar confirmació.
+      pristineState.group = true;
+      setMode('search');
 
       // Feedback visual: destaca la fila nova
       setTimeout(() => {
