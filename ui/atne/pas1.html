@@ -723,10 +723,10 @@
 
           <div class="card">
             <div class="card-t">Identificació</div>
-            <div class="two">
-              <div class="f"><div class="f-l">Curs <span class="req">*</span></div>
+            <div style="display:grid;grid-template-columns:180px 70px 1fr;gap:10px;align-items:end">
+              <div class="f" style="margin:0"><div class="f-l">Curs <span class="req">*</span></div>
                 <select class="inp" id="grp-curs">
-                  <option value="" disabled selected>Tria el curs…</option>
+                  <option value="" disabled selected>Tria…</option>
                   <optgroup label="Educació infantil">
                     <option value="I3">I3</option>
                     <option value="I4">I4</option>
@@ -761,15 +761,15 @@
                     <option value="Grau Superior">FP · Grau Superior</option>
                   </optgroup>
                   <optgroup label="Cas especial">
-                    <option value="Multinivell">Multinivell (aula d'acollida, grup mixt…)</option>
+                    <option value="Multinivell">Multinivell</option>
                   </optgroup>
                 </select>
-                <div id="grp-mecr-hint" style="font-size:11px;color:var(--primary);margin-top:6px;min-height:14px;font-weight:500"></div>
               </div>
-              <div class="f"><div class="f-l">Lletra <span style="color:var(--ink-400);font-weight:400">(opcional)</span></div><input class="inp" id="grp-lletra" placeholder="A, B…" maxlength="3"></div>
+              <div class="f" style="margin:0"><div class="f-l">Lletra</div><input class="inp" id="grp-lletra" placeholder="A" maxlength="3"></div>
+              <div class="f" style="margin:0"><div class="f-l">Nom <span style="color:var(--ink-400);font-weight:400">(opcional)</span></div><input class="inp" id="grp-nom" placeholder="Auto-generat: «Curs + Lletra»"></div>
             </div>
-            <div class="f" style="margin-top:10px"><div class="f-l">Nom del grup <span style="color:var(--ink-400);font-weight:400">(opcional)</span></div><input class="inp" id="grp-nom" placeholder="Es genera automàticament amb curs + lletra"></div>
-            <div id="grp-name-preview" style="font-size:12px;color:var(--ink-500);margin-top:8px;padding:8px 10px;background:var(--ink-50);border-radius:8px;min-height:18px">El grup es dirà: <b id="grp-name-preview-val" style="color:var(--ink-800)">—</b></div>
+            <div id="grp-mecr-hint" style="font-size:11px;color:var(--primary);margin-top:8px;min-height:14px;font-weight:500"></div>
+            <div id="grp-name-preview" style="font-size:12px;color:var(--ink-500);margin-top:6px;padding:8px 10px;background:var(--ink-50);border-radius:8px;min-height:18px">El grup es dirà: <b id="grp-name-preview-val" style="color:var(--ink-800)">—</b></div>
             <div class="f" id="grp-multi-wrap" style="margin-top:10px;display:none">
               <div class="f-l">Cursos del grup multinivell</div>
               <div id="grp-multi-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:4px;padding:8px;background:var(--ink-50);border:1px solid var(--ink-150);border-radius:9px"></div>
