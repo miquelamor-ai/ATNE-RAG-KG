@@ -2309,6 +2309,69 @@
       const idx = ladder.indexOf(mecr);
       if (idx >= 0 && idx < ladder.length - 1) mecr = ladder[idx + 1];
     }
+
+    // ──────────────────────────────────────────────────────
+    // 2026-04-20: condicions/nivells que BAIXEN el MECR efectiu
+    // Heurística: usar el MECR del curs anterior (només té efecte quan
+    // el curs actual està a frontera de nivell). Com que mapegem 2 cursos
+    // per nivell MECR, aquesta regla només canvia a les fronteres:
+    //   1r ESO (B1) → 6è Prim (A2) ← baixa
+    //   3r Prim (A2) → 2n Prim (A1) ← baixa
+    //   3r ESO (B1) → 2n ESO (B1) ← NO canvia (dins el mateix nivell)
+    // ──────────────────────────────────────────────────────
+    const COURSE_SEQ = [
+      'I3','I4','I5',
+      '1r Primària','2n Primària','3r Primària','4t Primària','5è Primària','6è Primària',
+      '1r ESO','2n ESO','3r ESO','4t ESO',
+      '1r Batxillerat','2n Batxillerat'
+    ];
+    const COURSE_MECR_MAP = {
+      'I3':'pre-A1','I4':'pre-A1','I5':'pre-A1',
+      '1r Primària':'A1','2n Primària':'A1',
+      '3r Primària':'A2','4t Primària':'A2','5è Primària':'A2','6è Primària':'A2',
+      '1r ESO':'B1','2n ESO':'B1','3r ESO':'B1','4t ESO':'B1',
+      '1r Batxillerat':'B2','2n Batxillerat':'B2'
+    };
+    const CYCLE_TO_FIRST = {
+      'Primer cicle Primària':'1r Primària','Segon cicle Primària':'3r Primària','Tercer cicle Primària':'5è Primària',
+      'Primer cicle ESO':'1r ESO','Segon cicle ESO':'4t ESO'
+    };
+    function _mecrOfPrevCourse(c) {
+      const key = CYCLE_TO_FIRST[c] || c;
+      const idx = COURSE_SEQ.indexOf(key);
+      if (idx <= 0) return null;
+      return COURSE_MECR_MAP[COURSE_SEQ[idx - 1]] || null;
+    }
+    function _mecrOfNextCourse(c) {
+      const key = CYCLE_TO_FIRST[c] || c;
+      const idx = COURSE_SEQ.indexOf(key);
+      if (idx < 0 || idx >= COURSE_SEQ.length - 1) return null;
+      return COURSE_MECR_MAP[COURSE_SEQ[idx + 1]] || null;
+    }
+
+    const condicions = (profile && profile.conditions) || [];
+    const esDI = condicions.includes('di') || (chars2 && chars2.discapacitat_intellectual && chars2.discapacitat_intellectual.actiu);
+    const esTDL = condicions.includes('tdl') || (chars2 && chars2.tdl && chars2.tdl.actiu);
+    const cursId = (profile && profile.curs_id) || norm;
+    if (esDI || esTDL) {
+      const prev = _mecrOfPrevCourse(cursId);
+      if (prev && prev !== mecr) mecr = prev;
+    }
+
+    // Ajust per nivell lector triat (Bàsic / Estàndard / Avançat)
+    // Bàsic → MECR del curs anterior (si canvia)
+    // Avançat → MECR del curs següent (si canvia)
+    // Estàndard o múltiples seleccionats → usem el més baix dels triats.
+    const levels = (profile && profile.levels) || [];
+    if (levels.length && cursId) {
+      if (levels.includes('basic')) {
+        const prev = _mecrOfPrevCourse(cursId);
+        if (prev && prev !== mecr) mecr = prev;
+      } else if (levels.includes('advanced') && !levels.includes('standard') && !levels.includes('basic')) {
+        const next = _mecrOfNextCourse(cursId);
+        if (next && next !== mecr) mecr = next;
+      }
+    }
     return mecr;
   }
 
