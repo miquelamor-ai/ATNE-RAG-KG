@@ -782,6 +782,21 @@
               <div id="grp-multi-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:4px;padding:8px;background:var(--ink-50);border:1px solid var(--ink-150);border-radius:9px"></div>
               <div style="font-size:11px;color:var(--ink-500);margin-top:6px">El MECR s'assignarà al més baix dels cursos marcats.</div>
             </div>
+            <details style="margin-top:10px;font-size:12px" id="grp-mecr-override-wrap">
+              <summary style="cursor:pointer;color:var(--ink-500);padding:4px 0">Ajust MECR manual (només si el nivell lector real difereix del curs)</summary>
+              <div style="margin-top:8px;padding:8px 10px;background:var(--ink-50);border-radius:8px">
+                <div style="font-size:11.5px;color:var(--ink-500);margin-bottom:6px">Si al grup hi ha alumnes amb nivell lector significativament per sota del curs (p.ex. nouvinguts sense diagnòstic formal, alumnes amb DI o TDL), pots forçar el MECR aquí. Per defecte ATNE usa el derivat del curs.</div>
+                <select class="inp" id="grp-mecr-override" style="max-width:260px">
+                  <option value="" selected>Usa el MECR automàtic del curs</option>
+                  <option value="pre-A1">pre-A1 — lectura fàcil extrema</option>
+                  <option value="A1">A1 — primeres paraules, suport visual</option>
+                  <option value="A2">A2 — frases curtes, vocabulari quotidià</option>
+                  <option value="B1">B1 — textos adaptats, idees principals</option>
+                  <option value="B2">B2 — textos autèntics amb suport puntual</option>
+                  <option value="C1">C1 — textos complexos i abstractes</option>
+                </select>
+              </div>
+            </details>
           </div>
 
           <div class="card">
@@ -1004,6 +1019,10 @@
     if (cursSel) cursSel.value = '';
     if (lletraInp) lletraInp.value = '';
     if (nomInp) nomInp.value = '';
+    const overrideSel = document.getElementById('grp-mecr-override');
+    if (overrideSel) overrideSel.value = '';
+    const overrideWrap = document.getElementById('grp-mecr-override-wrap');
+    if (overrideWrap) overrideWrap.open = false;
     document.querySelectorAll('#grp-multi-list input[type="checkbox"]').forEach(cb => cb.checked = false);
     const wrap = document.getElementById('grp-multi-wrap');
     if (wrap) wrap.style.display = 'none';
@@ -1612,6 +1631,11 @@
     // Repobla
     if (cursSel && p.curs_id) cursSel.value = p.curs_id;
     if (lletraInp && p.lletra) lletraInp.value = p.lletra;
+    // Override MECR manual si hi havia
+    const overrideSel = document.getElementById('grp-mecr-override');
+    const overrideWrap = document.getElementById('grp-mecr-override-wrap');
+    if (overrideSel) overrideSel.value = p.mecr_override || '';
+    if (overrideWrap) overrideWrap.open = !!p.mecr_override;
     // Si el nom no coincideix amb el que es generaria auto, l'escrivim manualment
     const autoName = p.lletra ? `${p.curs_id} ${p.lletra}` : p.curs_id;
     if (nomInp && p.name && p.name !== autoName) nomInp.value = p.name;
@@ -1854,8 +1878,8 @@
       nomEl.placeholder = (previewName && previewName !== '—') ? previewName : 'Nom del grup';
     }
 
-    // MECR derivat
-    let mecr;
+    // MECR derivat (auto)
+    let mecrAuto;
     if (curs === 'Multinivell') {
       const selected = Array.from(multiBoxes).map(cb => cb.value);
       if (selected.length) {
@@ -1865,16 +1889,21 @@
           const idx = MECR_LADDER.indexOf(m);
           if (idx >= 0 && idx < minIdx) minIdx = idx;
         });
-        mecr = minIdx < MECR_LADDER.length ? MECR_LADDER[minIdx] : null;
+        mecrAuto = minIdx < MECR_LADDER.length ? MECR_LADDER[minIdx] : null;
       }
     } else if (curs) {
-      mecr = COURSE_TO_MECR[curs];
+      mecrAuto = COURSE_TO_MECR[curs];
     }
+    // Override manual del docent (si n'hi ha, té prioritat)
+    const overrideVal = (document.getElementById('grp-mecr-override')?.value || '').trim();
+    const mecrFinal = overrideVal || mecrAuto;
     // Chip MECR a la dreta del títol del card
     const chipEl = document.getElementById('grp-mecr-chip');
     if (chipEl) {
-      if (mecr) {
-        chipEl.textContent = `MECR ${mecr}`;
+      if (mecrFinal) {
+        const isOverride = overrideVal && overrideVal !== mecrAuto;
+        chipEl.textContent = isOverride ? `MECR ${mecrFinal} (ajust manual)` : `MECR ${mecrFinal}`;
+        chipEl.style.background = isOverride ? 'var(--tdah)' : 'var(--primary)';
         chipEl.style.display = '';
       } else {
         chipEl.style.display = 'none';
@@ -1883,7 +1912,7 @@
   }
 
   // Listeners per actualitzar la preview
-  ['grp-curs','grp-lletra','grp-nom'].forEach(id => {
+  ['grp-curs','grp-lletra','grp-nom','grp-mecr-override'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('input', updateGroupPreview);
@@ -1935,8 +1964,9 @@
       .map(pid => window.ATNE_PROFILES[pid])
       .filter(Boolean);
 
-    // MECR del grup: derivat del curs (o del multinivell més baix)
-    let mecrGroup;
+    // MECR del grup: derivat del curs (o del multinivell més baix).
+    // Si el docent ha triat un override manual, té prioritat sobre l'auto.
+    let mecrAuto;
     if (curs === 'Multinivell') {
       const selected = Array.from(multiBoxes).map(cb => cb.value);
       if (selected.length) {
@@ -1947,13 +1977,16 @@
           const idx = MECR_LADDER.indexOf(m);
           if (idx >= 0 && idx < minIdx) minIdx = idx;
         });
-        mecrGroup = minIdx < MECR_LADDER.length ? MECR_LADDER[minIdx] : 'A2';
+        mecrAuto = minIdx < MECR_LADDER.length ? MECR_LADDER[minIdx] : 'A2';
       } else {
-        mecrGroup = 'A2';  // fallback per multinivell sense cursos marcats
+        mecrAuto = 'A2';  // fallback per multinivell sense cursos marcats
       }
     } else {
-      mecrGroup = COURSE_TO_MECR[curs] || 'B1';
+      mecrAuto = COURSE_TO_MECR[curs] || 'B1';
     }
+    const overrideVal = (document.getElementById('grp-mecr-override')?.value || '').trim();
+    const mecrGroup = overrideVal || mecrAuto;
+    const mecrIsOverridden = !!overrideVal && overrideVal !== mecrAuto;
 
     // Chips: 1 de MECR + 1 de nivells + 1 per condició agregada dels membres.
     const chips = [
@@ -2011,7 +2044,10 @@
       custom: true,
       lletra,
       curs_id: curs,  // per poder editar i saber què va triar
-      multinivell_cursos: curs === 'Multinivell' ? Array.from(multiBoxes).map(cb => cb.value) : []
+      multinivell_cursos: curs === 'Multinivell' ? Array.from(multiBoxes).map(cb => cb.value) : [],
+      mecr_override: overrideVal || null,     // NULL si no hi ha override
+      mecr_auto: mecrAuto,                    // el MECR auto per poder comparar al logging
+      mecr_is_overridden: mecrIsOverridden    // marca per detectar overrides al pilot
     };
   }
 

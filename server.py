@@ -5959,6 +5959,15 @@ async def save_docent_profile(payload: dict = Body(...)):
     profile = payload.get("profile")
     if not docent_id or not profile:
         return JSONResponse({"ok": False, "error": "docent_id i profile són obligatoris"}, status_code=400)
+    # Logging del pilot: si el docent ha fet override manual del MECR, ho
+    # deixem rastre per analitzar patrons post-pilot (project_parking_lot #63).
+    if isinstance(profile, dict) and profile.get("mecr_is_overridden"):
+        print(
+            f"[ATNE:mecr-override] docent={docent_id} type={profile.get('type','?')} "
+            f"curs={profile.get('curs_id','?')} auto={profile.get('mecr_auto','?')} "
+            f"→ override={profile.get('mecr_override','?')}",
+            flush=True,
+        )
     resp = requests.post(
         f"{SUPABASE_URL}/rest/v1/atne_custom_profiles",
         headers={**SUPABASE_HEADERS, "Prefer": "return=representation"},
