@@ -2258,17 +2258,36 @@
   //   - Nouvingut guanya sobre AACC si ambdós actius
   // ──────────────────────────────────────────────────────
   function computeMECRSortida(profile, cursRaw) {
+    // Si el perfil ja porta un MECR explícit (grup creat amb dropdown, o
+    // persona amb MECR triat), el prioritzem sobre la derivació per regex.
+    if (profile && profile.mecr && typeof profile.mecr === 'string') {
+      // Els ajustos de nouvingut/AACC continuen aplicant-se més avall.
+      var _explicitMecr = profile.mecr;
+      var cat2 = (profile && profile.cat) || '';
+      var chars2 = (profile && profile.caracteristiques) || {};
+      var esN2 = cat2 === 'cat' || cat2 === 'group-cat' || (chars2.nouvingut && chars2.nouvingut.actiu);
+      var esA2 = cat2 === 'ac' || cat2 === 'group-ac' || (chars2.altes_capacitats && chars2.altes_capacitats.actiu);
+      if (!esN2 && !esA2) return _explicitMecr;
+      // Si hi ha nouvingut o AACC, continuem al flux general perquè apliqui
+      // els ajustos (el regex agafarà 'B1' per defecte però el _explicitMecr
+      // és el punt de partida).
+    }
     const norm = (cursRaw || '').replace(/\s+[A-Z]$/, '').trim();
     const low = norm.toLowerCase();
-    let mecr = 'B1';
-    if (/infantil/.test(low)) mecr = 'pre-A1';
+    let mecr = (profile && profile.mecr) || 'B1';
+    if (/i[345]/i.test(norm) || /infantil/.test(low)) mecr = 'pre-A1';
     else if (/prim[àa]ria/.test(low)) {
-      const n = parseInt((low.match(/(\d)/) || [])[1] || '4', 10);
-      mecr = n <= 3 ? 'A1' : 'A2';
+      if (/primer cicle/i.test(low)) mecr = 'A1';
+      else if (/segon cicle|tercer cicle/i.test(low)) mecr = 'A2';
+      else {
+        const n = parseInt((low.match(/(\d)/) || [])[1] || '4', 10);
+        mecr = n <= 2 ? 'A1' : 'A2';
+      }
     }
     else if (/eso/.test(low)) mecr = 'B1';
     else if (/batx/.test(low)) mecr = 'B2';
-    else if (/fp/.test(low)) mecr = 'B1';
+    else if (/grau b[àa]sic|fp\s*b/.test(low)) mecr = 'A2';
+    else if (/grau mitj|grau superior|fp/.test(low)) mecr = 'B1';
     // Detecta tipus via camp 'cat' (format ATNE_PROFILES) o 'caracteristiques' (format backend)
     const cat = (profile && profile.cat) || '';
     const chars = (profile && profile.caracteristiques) || {};

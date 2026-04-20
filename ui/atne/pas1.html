@@ -724,14 +724,62 @@
           <div class="card">
             <div class="card-t">Identificació</div>
             <div class="two">
-              <div class="f"><div class="f-l">Nom del grup <span class="req">*</span></div><input class="inp" placeholder="Ex: 3r ESO A · Grup classe"></div>
-              <div class="f"><div class="f-l">Context</div><input class="inp" placeholder="Matèria, desdoblament, aula…"></div>
+              <div class="f"><div class="f-l">Curs <span class="req">*</span></div>
+                <select class="inp" id="grp-curs">
+                  <option value="" disabled selected>Tria el curs…</option>
+                  <optgroup label="Educació infantil">
+                    <option value="I3">I3</option>
+                    <option value="I4">I4</option>
+                    <option value="I5">I5</option>
+                  </optgroup>
+                  <optgroup label="Primària">
+                    <option value="1r Primària">1r Primària</option>
+                    <option value="2n Primària">2n Primària</option>
+                    <option value="3r Primària">3r Primària</option>
+                    <option value="4t Primària">4t Primària</option>
+                    <option value="5è Primària">5è Primària</option>
+                    <option value="6è Primària">6è Primària</option>
+                    <option value="Primer cicle Primària">Tot el primer cicle (1r–2n)</option>
+                    <option value="Segon cicle Primària">Tot el segon cicle (3r–4t)</option>
+                    <option value="Tercer cicle Primària">Tot el tercer cicle (5è–6è)</option>
+                  </optgroup>
+                  <optgroup label="ESO">
+                    <option value="1r ESO">1r ESO</option>
+                    <option value="2n ESO">2n ESO</option>
+                    <option value="3r ESO">3r ESO</option>
+                    <option value="4t ESO">4t ESO</option>
+                    <option value="Primer cicle ESO">Tot el primer cicle (1r–3r)</option>
+                    <option value="Segon cicle ESO">Segon cicle (4t)</option>
+                  </optgroup>
+                  <optgroup label="Batxillerat">
+                    <option value="1r Batxillerat">1r Batxillerat</option>
+                    <option value="2n Batxillerat">2n Batxillerat</option>
+                  </optgroup>
+                  <optgroup label="Formació Professional">
+                    <option value="Grau Bàsic">FP · Grau Bàsic</option>
+                    <option value="Grau Mitjà">FP · Grau Mitjà</option>
+                    <option value="Grau Superior">FP · Grau Superior</option>
+                  </optgroup>
+                  <optgroup label="Cas especial">
+                    <option value="Multinivell">Multinivell (aula d'acollida, grup mixt…)</option>
+                  </optgroup>
+                </select>
+                <div id="grp-mecr-hint" style="font-size:11px;color:var(--primary);margin-top:6px;min-height:14px;font-weight:500"></div>
+              </div>
+              <div class="f"><div class="f-l">Lletra <span style="color:var(--ink-400);font-weight:400">(opcional)</span></div><input class="inp" id="grp-lletra" placeholder="A, B…" maxlength="3"></div>
+            </div>
+            <div class="f" style="margin-top:10px"><div class="f-l">Nom del grup <span style="color:var(--ink-400);font-weight:400">(opcional)</span></div><input class="inp" id="grp-nom" placeholder="Es genera automàticament amb curs + lletra"></div>
+            <div id="grp-name-preview" style="font-size:12px;color:var(--ink-500);margin-top:8px;padding:8px 10px;background:var(--ink-50);border-radius:8px;min-height:18px">El grup es dirà: <b id="grp-name-preview-val" style="color:var(--ink-800)">—</b></div>
+            <div class="f" id="grp-multi-wrap" style="margin-top:10px;display:none">
+              <div class="f-l">Cursos del grup multinivell</div>
+              <div id="grp-multi-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:4px;padding:8px;background:var(--ink-50);border:1px solid var(--ink-150);border-radius:9px"></div>
+              <div style="font-size:11px;color:var(--ink-500);margin-top:6px">El MECR s'assignarà al més baix dels cursos marcats.</div>
             </div>
           </div>
 
           <div class="card">
-            <div class="card-t">Composició de nivells lectors</div>
-            <div style="font-size:11.5px;color:var(--ink-500);margin-bottom:10px">Quins nivells hi ha al grup? ATNE adaptarà el text per a cada nivell. Els ajuts concrets (glossari, preguntes guia…) es decideixen al Pas 2. Els alumnes amb perfil personal sumaran els seus ajuts específics.</div>
+            <div class="card-t">Versions paral·leles del text</div>
+            <div style="font-size:11.5px;color:var(--ink-500);margin-bottom:10px">Vols que ATNE generi <b>1, 2 o 3 versions</b> del mateix text amb nivells de complexitat diferents? Pensa-ho com el que fas naturalment a l'aula: el mateix contingut amb fragments curts + bastides per uns, amb el nivell del curs per la majoria, amb ampliació i repte per als més ràpids. No afecta el MECR del curs; és una capa multinivell a sobre.</div>
             <div class="levels" style="grid-template-columns:repeat(3,1fr)">
               <button class="lvl on"><b>Bàsic</b><small>fragments curts + bastides</small></button>
               <button class="lvl on"><b>Estàndard</b><small>nivell del curs</small></button>
@@ -1578,10 +1626,133 @@
 
   // ── Creació de perfil (grup) ──────────────────────────────────────────────
 
+  // Mapatge MECR unificat per cursos — Decret 175/2022 (primària + ESO),
+  // 171/2022 (batx), 21/2023 (infantil). Regla: 2 cursos per nivell; si hi
+  // ha dubte entre dos nivells, agafa el més baix.
+  const COURSE_TO_MECR = {
+    'I3': 'pre-A1', 'I4': 'pre-A1', 'I5': 'pre-A1',
+    '1r Primària': 'A1', '2n Primària': 'A1',
+    '3r Primària': 'A2', '4t Primària': 'A2',
+    '5è Primària': 'A2', '6è Primària': 'A2',
+    'Primer cicle Primària': 'A1',
+    'Segon cicle Primària': 'A2',
+    'Tercer cicle Primària': 'A2',
+    '1r ESO': 'B1', '2n ESO': 'B1', '3r ESO': 'B1', '4t ESO': 'B1',
+    'Primer cicle ESO': 'B1', 'Segon cicle ESO': 'B1',
+    '1r Batxillerat': 'B2', '2n Batxillerat': 'B2',
+    'Grau Bàsic': 'A2', 'Grau Mitjà': 'B1', 'Grau Superior': 'B1',
+  };
+  const MECR_LADDER = ['pre-A1','A1','A2','B1','B2','C1','C2'];
+
+  // Multinivell: ompla el multi-select amb tots els cursos base i mostra/amaga
+  // el bloc segons el que triï l'usuari al dropdown principal.
+  (function setupGroupMultinivell() {
+    const list = document.getElementById('grp-multi-list');
+    const wrap = document.getElementById('grp-multi-wrap');
+    const sel  = document.getElementById('grp-curs');
+    if (!list || !wrap || !sel) return;
+    const baseCourses = [
+      'I3','I4','I5',
+      '1r Primària','2n Primària','3r Primària','4t Primària','5è Primària','6è Primària',
+      '1r ESO','2n ESO','3r ESO','4t ESO',
+      '1r Batxillerat','2n Batxillerat',
+      'Grau Bàsic','Grau Mitjà','Grau Superior'
+    ];
+    list.innerHTML = baseCourses.map(c =>
+      `<label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;padding:4px 6px;border-radius:6px">
+        <input type="checkbox" value="${c}"><span>${c}</span>
+      </label>`
+    ).join('');
+    sel.addEventListener('change', () => {
+      wrap.style.display = (sel.value === 'Multinivell') ? '' : 'none';
+      updateGroupPreview();
+    });
+  })();
+
+  // Preview en viu del nom del grup i del MECR derivat. Es reconstrueix cada
+  // vegada que el docent canvia qualsevol input del formulari.
+  function updateGroupPreview() {
+    const curs = (document.getElementById('grp-curs')?.value || '').trim();
+    const lletra = (document.getElementById('grp-lletra')?.value || '').trim().toUpperCase();
+    const nomManual = (document.getElementById('grp-nom')?.value || '').trim();
+    const multiBoxes = document.querySelectorAll('#grp-multi-list input[type="checkbox"]:checked');
+
+    // Nom previst
+    let previewName = nomManual;
+    if (!previewName) {
+      if (curs === 'Multinivell') {
+        const marks = Array.from(multiBoxes).map(cb => cb.value);
+        previewName = marks.length
+          ? `Multinivell ${marks[0]}${marks.length>1?'–'+marks[marks.length-1]:''}`
+          : 'Grup multinivell';
+      } else if (curs) {
+        previewName = lletra ? `${curs} ${lletra}` : curs;
+      } else {
+        previewName = '—';
+      }
+    }
+    const nameEl = document.getElementById('grp-name-preview-val');
+    if (nameEl) nameEl.textContent = previewName;
+
+    // MECR derivat
+    let mecr;
+    if (curs === 'Multinivell') {
+      const selected = Array.from(multiBoxes).map(cb => cb.value);
+      if (selected.length) {
+        let minIdx = MECR_LADDER.length;
+        selected.forEach(c => {
+          const m = COURSE_TO_MECR[c];
+          const idx = MECR_LADDER.indexOf(m);
+          if (idx >= 0 && idx < minIdx) minIdx = idx;
+        });
+        mecr = minIdx < MECR_LADDER.length ? MECR_LADDER[minIdx] : null;
+      }
+    } else if (curs) {
+      mecr = COURSE_TO_MECR[curs];
+    }
+    const hintEl = document.getElementById('grp-mecr-hint');
+    if (hintEl) {
+      hintEl.textContent = mecr ? `→ MECR ${mecr} (referència pedagògica)` : '';
+    }
+  }
+
+  // Listeners per actualitzar la preview
+  ['grp-curs','grp-lletra','grp-nom'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', updateGroupPreview);
+    el.addEventListener('change', updateGroupPreview);
+  });
+  document.addEventListener('change', e => {
+    if (e.target.matches('#grp-multi-list input[type="checkbox"]')) updateGroupPreview();
+  });
+
   function _buildGroupProfile() {
-    const inputs = document.querySelectorAll('.mode[data-m="group"] .inp');
-    const name    = inputs[0]?.value.trim() || 'Grup nou';
-    const context = inputs[1]?.value.trim() || '';
+    const cursSel = document.getElementById('grp-curs');
+    const lletraInp = document.getElementById('grp-lletra');
+    const nomInp = document.getElementById('grp-nom');
+    const multiBoxes = document.querySelectorAll('#grp-multi-list input[type="checkbox"]:checked');
+    const curs = (cursSel?.value || '').trim();
+    const lletra = (lletraInp?.value || '').trim().toUpperCase();
+    const nomManual = (nomInp?.value || '').trim();
+
+    // Auto-construcció del nom si no n'hi ha de manual
+    let name = nomManual;
+    if (!name) {
+      if (curs === 'Multinivell') {
+        const marks = Array.from(multiBoxes).map(cb => cb.value);
+        name = marks.length ? `Multinivell ${marks[0]}${marks.length>1?'–'+marks[marks.length-1]:''}` : 'Grup multinivell';
+      } else if (curs) {
+        name = lletra ? `${curs} ${lletra}` : curs;
+      } else {
+        name = 'Grup nou';
+      }
+    }
+
+    // Context (antic camp) ja no existeix; course ara ve del dropdown
+    const context = curs === 'Multinivell'
+      ? Array.from(multiBoxes).map(cb => cb.value).join(' · ') || 'Multinivell'
+      : curs;
 
     // Nivells lectors activats (Bàsic / Estàndard / Avançat)
     const levelLabelToId = { 'bàsic': 'basic', 'estàndard': 'standard', 'avançat': 'advanced' };
@@ -1598,8 +1769,31 @@
       .map(pid => window.ATNE_PROFILES[pid])
       .filter(Boolean);
 
-    // Chips: 1 de nivells + 1 per condició agregada dels membres.
-    const chips = [{ label: `${levels.length} nivell${levels.length===1?'':'s'}`, cat: 'lv' }];
+    // MECR del grup: derivat del curs (o del multinivell més baix)
+    let mecrGroup;
+    if (curs === 'Multinivell') {
+      const selected = Array.from(multiBoxes).map(cb => cb.value);
+      if (selected.length) {
+        // Troba el MECR més baix a l'escala
+        let minIdx = MECR_LADDER.length;
+        selected.forEach(c => {
+          const m = COURSE_TO_MECR[c];
+          const idx = MECR_LADDER.indexOf(m);
+          if (idx >= 0 && idx < minIdx) minIdx = idx;
+        });
+        mecrGroup = minIdx < MECR_LADDER.length ? MECR_LADDER[minIdx] : 'A2';
+      } else {
+        mecrGroup = 'A2';  // fallback per multinivell sense cursos marcats
+      }
+    } else {
+      mecrGroup = COURSE_TO_MECR[curs] || 'B1';
+    }
+
+    // Chips: 1 de MECR + 1 de nivells + 1 per condició agregada dels membres.
+    const chips = [
+      { label: `${mecrGroup} · MECR`, cat: 'lv' },
+      { label: `${levels.length} nivell${levels.length===1?'':'s'}`, cat: 'lv' }
+    ];
     const condCount = {};
     members.forEach(m => {
       const catKey = m.cat || 'generic';
@@ -1642,12 +1836,15 @@
       course: context || `${members.length} perfil${members.length===1?'':'s'}`,
       avatar: avatar.slice(0, 2),
       cat: mainCat,
+      mecr: mecrGroup,
       chips,
       behaviors,
       aids,
       members: memberIds,
       levels,
-      custom: true
+      custom: true,
+      lletra,
+      curs_id: curs  // per poder editar i saber què va triar
     };
   }
 
