@@ -769,7 +769,7 @@
                 </select>
               </div>
               <div class="f" style="margin:0"><input class="inp" id="grp-lletra" placeholder="Lletra" maxlength="3" style="text-align:center;text-transform:uppercase"></div>
-              <div class="f" style="margin:0"><input class="inp" id="grp-nom" placeholder="Nom del grup (opcional — s'agafa curs + lletra)"></div>
+              <div class="f" style="margin:0"><input class="inp" id="grp-nom" placeholder="Nom del grup"></div>
             </div>
             <div class="f" id="grp-multi-wrap" style="margin-top:10px;display:none">
               <div class="f-l">Cursos del grup multinivell</div>
@@ -1697,6 +1697,13 @@
     const titleEl = document.getElementById('grp-title');
     if (titleEl) {
       titleEl.textContent = (previewName && previewName !== '—') ? previewName : 'Nou perfil de grup';
+    }
+
+    // Placeholder del camp "Nom" dinàmic: si el docent no escriu res, li
+    // mostrem quin nom s'auto-generarà a partir de curs + lletra.
+    const nomEl = document.getElementById('grp-nom');
+    if (nomEl && !nomManual) {
+      nomEl.placeholder = (previewName && previewName !== '—') ? previewName : 'Nom del grup';
     }
 
     // MECR derivat
