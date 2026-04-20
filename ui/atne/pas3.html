@@ -2349,14 +2349,11 @@
       return COURSE_MECR_MAP[COURSE_SEQ[idx + 1]] || null;
     }
 
-    const condicions = (profile && profile.conditions) || [];
-    const esDI = condicions.includes('di') || (chars2 && chars2.discapacitat_intellectual && chars2.discapacitat_intellectual.actiu);
-    const esTDL = condicions.includes('tdl') || (chars2 && chars2.tdl && chars2.tdl.actiu);
     const cursId = (profile && profile.curs_id) || norm;
-    if (esDI || esTDL) {
-      const prev = _mecrOfPrevCourse(cursId);
-      if (prev && prev !== mecr) mecr = prev;
-    }
+
+    // DI/TDL i altres condicions: de moment NO toquen el MECR automàticament.
+    // Decisió pendent d'investigació pedagògica (corpus i equip FJE).
+    // Veure project_parking_lot.md #63.
 
     // Ajust per nivell lector triat (Bàsic / Estàndard / Avançat)
     // Bàsic → MECR del curs anterior (si canvia)
