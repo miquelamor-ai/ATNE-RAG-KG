@@ -759,9 +759,15 @@
                     <option value="2n Batxillerat">2n Batxillerat</option>
                   </optgroup>
                   <optgroup label="Formació Professional">
-                    <option value="Grau Bàsic">FP · Grau Bàsic</option>
-                    <option value="Grau Mitjà">FP · Grau Mitjà</option>
-                    <option value="Grau Superior">FP · Grau Superior</option>
+                    <option value="1r FP Grau Bàsic">FP · 1r Grau Bàsic</option>
+                    <option value="2n FP Grau Bàsic">FP · 2n Grau Bàsic</option>
+                    <option value="Grau Bàsic">FP · Grau Bàsic (tot)</option>
+                    <option value="1r FP Grau Mitjà">FP · 1r Grau Mitjà</option>
+                    <option value="2n FP Grau Mitjà">FP · 2n Grau Mitjà</option>
+                    <option value="Grau Mitjà">FP · Grau Mitjà (tot)</option>
+                    <option value="1r FP Grau Superior">FP · 1r Grau Superior</option>
+                    <option value="2n FP Grau Superior">FP · 2n Grau Superior</option>
+                    <option value="Grau Superior">FP · Grau Superior (tot)</option>
                   </optgroup>
                   <optgroup label="Cas especial">
                     <option value="Multinivell">Multinivell</option>
@@ -1461,6 +1467,15 @@
     if (!p) return;
     _editingPid = pid;
 
+    // Route segons tipus del perfil: grups → formulari grup; persones → persona
+    const isGroup = p.type === 'group';
+    if (isGroup) {
+      pristineState.group = true;
+      setMode('group');
+      _prefillGroupForm(p);
+      return;
+    }
+
     // Marca el mode com a "net" per evitar el confirm() de pèrdua de dades
     pristineState.person = true;
     setMode('person');
@@ -1507,6 +1522,67 @@
     // Canvia el botó
     const saveBtn = form.querySelector('.foot .btn-p');
     if (saveBtn) saveBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Desar canvis';
+
+    if (typeof window.atneToast === 'function') window.atneToast(`Editant "${p.name}" — modifica i clica Desar canvis`, 'info');
+  }
+
+  // Pre-ompla el formulari de GRUP amb les dades d'un perfil existent (per editar)
+  function _prefillGroupForm(p) {
+    const cursSel = document.getElementById('grp-curs');
+    const lletraInp = document.getElementById('grp-lletra');
+    const nomInp = document.getElementById('grp-nom');
+    // Reset visual previ
+    if (cursSel) cursSel.value = '';
+    if (lletraInp) lletraInp.value = '';
+    if (nomInp) nomInp.value = '';
+    document.querySelectorAll('#grp-multi-list input[type="checkbox"]').forEach(cb => cb.checked = false);
+    // Neteja la llista de perfils afegits i el Set
+    if (window._atneGroupAdded) window._atneGroupAdded.clear();
+    const addedListEl = document.getElementById('added-list');
+    if (addedListEl) addedListEl.innerHTML = '<div class="empty-add">Cap perfil afegit encara.</div>';
+    document.querySelectorAll('#add-picker .pick.added').forEach(el => el.classList.remove('added'));
+
+    // Repobla
+    if (cursSel && p.curs_id) cursSel.value = p.curs_id;
+    if (lletraInp && p.lletra) lletraInp.value = p.lletra;
+    // Si el nom no coincideix amb el que es generaria auto, l'escrivim manualment
+    const autoName = p.lletra ? `${p.curs_id} ${p.lletra}` : p.curs_id;
+    if (nomInp && p.name && p.name !== autoName) nomInp.value = p.name;
+
+    // Cursos multinivell
+    if (p.curs_id === 'Multinivell' && Array.isArray(p.multinivell_cursos)) {
+      p.multinivell_cursos.forEach(c => {
+        const cb = document.querySelector(`#grp-multi-list input[type="checkbox"][value="${c}"]`);
+        if (cb) cb.checked = true;
+      });
+      const wrap = document.getElementById('grp-multi-wrap');
+      if (wrap) wrap.style.display = '';
+    }
+
+    // Membres del grup
+    if (window._atneGroupAdded && Array.isArray(p.members)) {
+      p.members.forEach(mid => {
+        const pick = document.querySelector(`#add-picker .pick[data-pid="${mid}"]`);
+        if (pick) pick.click();  // simula afegir per construir la row visual correcta
+      });
+    }
+
+    // Nivells lectors (Bàsic/Estàndard/Avançat)
+    const lvlToLabel = { basic: 'bàsic', standard: 'estàndard', advanced: 'avançat' };
+    if (Array.isArray(p.levels)) {
+      document.querySelectorAll('.mode[data-m="group"] .lvl').forEach(btn => {
+        const label = btn.querySelector('b')?.textContent.trim().toLowerCase();
+        const active = p.levels.some(l => lvlToLabel[l] === label);
+        btn.classList.toggle('on', active);
+      });
+    }
+
+    // Actualitza la preview del nom i MECR
+    if (typeof updateGroupPreview === 'function') updateGroupPreview();
+
+    // Canvia el botó "Crear perfil" → "Desar canvis"
+    const btn = document.querySelector('.mode[data-m="group"] .foot .btn-p');
+    if (btn) btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Desar canvis';
 
     if (typeof window.atneToast === 'function') window.atneToast(`Editant "${p.name}" — modifica i clica Desar canvis`, 'info');
   }
@@ -1642,6 +1718,9 @@
     'Primer cicle ESO': 'B1', 'Segon cicle ESO': 'B1',
     '1r Batxillerat': 'B2', '2n Batxillerat': 'B2',
     'Grau Bàsic': 'A2', 'Grau Mitjà': 'B1', 'Grau Superior': 'B1',
+    '1r FP Grau Bàsic': 'A2', '2n FP Grau Bàsic': 'A2',
+    '1r FP Grau Mitjà': 'B1', '2n FP Grau Mitjà': 'B1',
+    '1r FP Grau Superior': 'B1', '2n FP Grau Superior': 'B1',
   };
   const MECR_LADDER = ['pre-A1','A1','A2','B1','B2','C1','C2'];
 
@@ -1657,7 +1736,9 @@
       '1r Primària','2n Primària','3r Primària','4t Primària','5è Primària','6è Primària',
       '1r ESO','2n ESO','3r ESO','4t ESO',
       '1r Batxillerat','2n Batxillerat',
-      'Grau Bàsic','Grau Mitjà','Grau Superior'
+      '1r FP Grau Bàsic','2n FP Grau Bàsic',
+      '1r FP Grau Mitjà','2n FP Grau Mitjà',
+      '1r FP Grau Superior','2n FP Grau Superior'
     ];
     list.innerHTML = baseCourses.map(c =>
       `<label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;padding:4px 6px;border-radius:6px">
@@ -1862,7 +1943,8 @@
       levels,
       custom: true,
       lletra,
-      curs_id: curs  // per poder editar i saber què va triar
+      curs_id: curs,  // per poder editar i saber què va triar
+      multinivell_cursos: curs === 'Multinivell' ? Array.from(multiBoxes).map(cb => cb.value) : []
     };
   }
 
@@ -1946,16 +2028,17 @@
     });
   }
 
-  // "Crear perfil" mode grup — desa un perfil custom amb type='group'
+  // "Crear perfil" / "Desar canvis" mode grup
   const groupCreateBtn = document.querySelector('.mode[data-m="group"] .foot .btn-p');
   if (groupCreateBtn) {
     groupCreateBtn.addEventListener('click', async e => {
       e.preventDefault();
-      const nameInp = document.querySelector('.mode[data-m="group"] .inp');
-      if (!nameInp?.value.trim()) {
-        nameInp?.focus();
-        if (typeof window.atneToast === 'function') window.atneToast('El nom del grup és obligatori', 'error');
-        else alert('El nom del grup és obligatori');
+      // Validació mínima: ha de tenir curs triat
+      const cursSel = document.getElementById('grp-curs');
+      if (!cursSel?.value) {
+        cursSel?.focus();
+        if (typeof window.atneToast === 'function') window.atneToast('Tria un curs abans de desar el grup', 'error');
+        else alert('Tria un curs abans de desar el grup');
         return;
       }
       if (!_docentId()) {
@@ -1964,32 +2047,53 @@
       }
       groupCreateBtn.disabled = true;
       const originalLabel = groupCreateBtn.innerHTML;
-      groupCreateBtn.textContent = 'Creant…';
+      const isEdit = !!_editingPid;
+      groupCreateBtn.textContent = isEdit ? 'Desant…' : 'Creant…';
 
       const profile = _buildGroupProfile();
-      const dbId = await _saveCustomProfile(profile);
-      if (dbId) profile._db_id = dbId;
-      window.ATNE_PROFILES[profile.id] = profile;
 
-      // Afegeix la fila a "Recents" a dalt de tot
-      const listRecent = document.getElementById('list-recent');
-      listRecent?.prepend(_buildProfileRow(profile));
+      if (isEdit) {
+        // Edició: conserva id i _db_id originals
+        const orig = window.ATNE_PROFILES[_editingPid] || {};
+        profile.id = _editingPid;
+        profile._db_id = orig._db_id;
+        if (orig._db_id) {
+          await fetch(`/api/docent/profiles/${orig._db_id}`, {
+            method: 'PATCH',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({docent_id: _docentId(), profile})
+          });
+        }
+        window.ATNE_PROFILES[_editingPid] = profile;
+        // Reemplaça la fila DOM existent
+        const oldRow = document.querySelector(`.row[data-pid="${_editingPid}"]`);
+        const newRow = _buildProfileRow(profile);
+        oldRow?.replaceWith(newRow);
+        _editingPid = null;
+        groupCreateBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Crear perfil';
+      } else {
+        const dbId = await _saveCustomProfile(profile);
+        if (dbId) profile._db_id = dbId;
+        window.ATNE_PROFILES[profile.id] = profile;
+        const listRecent = document.getElementById('list-recent');
+        listRecent?.prepend(_buildProfileRow(profile));
+      }
 
       applyFilters(); updateFchipCounts();
       groupCreateBtn.disabled = false;
-      groupCreateBtn.innerHTML = originalLabel;
+      if (!isEdit) groupCreateBtn.innerHTML = originalLabel;
       localStorage.setItem('atne.profile_id', profile.id);
 
-      // Torna a la vista principal (llista de perfils) sense demanar confirmació.
+      // Torna a la vista principal (llista de perfils) sense confirmació.
       pristineState.group = true;
       setMode('search');
 
-      // Feedback visual: destaca la fila nova
+      // Feedback visual: destaca la fila
       setTimeout(() => {
         const row = document.querySelector('.row[data-pid="' + profile.id + '"]');
         if (row) { row.style.outline = '2px solid var(--primary)'; row.style.borderRadius = 'var(--r-md)'; setTimeout(() => { row.style.outline = ''; }, 2500); }
       }, 100);
-      if (typeof window.atneToast === 'function') window.atneToast(`Grup "${profile.name}" creat.`, 'ok');
+      if (typeof window.atneToast === 'function') window.atneToast(isEdit ? `Grup "${profile.name}" actualitzat.` : `Grup "${profile.name}" creat.`, 'ok');
     });
   }
 
