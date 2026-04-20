@@ -1096,6 +1096,39 @@
   // perfils afegits al grup en el moment de desar.
   window._atneGroupAdded = added;
 
+  // Reconstrueix el picker dinàmicament des de window.ATNE_PROFILES (només
+  // persones). Això inclou el catàleg i els perfils custom del docent, que
+  // es carreguen asíncronament via _loadCustomProfiles.
+  const AV_CAT_CLASS = { tdah:'av-tdah', disl:'av-disl', cat:'av-cat', ac:'av-ac', tea:'av-ac', generic:'av-neu' };
+  const CHIP_CAT_LABEL = { tdah:'TDAH', disl:'Dislèxia', cat:'Català L2', ac:'AACC', tea:'TEA' };
+  function rebuildPicker() {
+    if (!picker) return;
+    picker.innerHTML = '';
+    const persons = Object.values(window.ATNE_PROFILES || {}).filter(p => p.type === 'person');
+    persons.forEach(p => {
+      const label = document.createElement('label');
+      label.className = 'pick';
+      label.dataset.pid = p.id;
+      if (added.has(p.id)) label.classList.add('added');
+      const avClass = AV_CAT_CLASS[p.cat] || 'av-neu';
+      const av = (p.avatar || (p.name || '?')[0] || 'P').toUpperCase().slice(0, 2);
+      const sub = [p.age ? p.age + ' anys' : '', p.course || ''].filter(Boolean).join(' · ');
+      const chipsHtml = (p.chips || [])
+        .filter(c => c && c.cat && c.cat !== 'lv')
+        .slice(0, 2)
+        .map(c => `<span class="chip ${c.cat}">${c.label || CHIP_CAT_LABEL[c.cat] || c.cat}</span>`)
+        .join('');
+      label.innerHTML =
+        `<div class="m-av ${avClass}">${av}</div>` +
+        `<div><div class="m-n">${p.name || 'Perfil'}</div><div class="m-s">${sub}</div></div>` +
+        chipsHtml;
+      picker.appendChild(label);
+    });
+  }
+  rebuildPicker();
+  // Reconstrueix quan arribin els perfils custom (carregats asíncronament).
+  window._atneRebuildGroupPicker = rebuildPicker;
+
   searchInp?.addEventListener('focus', () => { picker.hidden = false; });
   searchInp?.addEventListener('input', () => {
     const q = searchInp.value.toLowerCase().trim();
@@ -1105,29 +1138,31 @@
       p.style.display = !q || txt.includes(q) ? '' : 'none';
     });
   });
-  picker?.querySelectorAll('.pick').forEach(p => {
-    p.addEventListener('click', () => {
-      const pid = p.dataset.pid;
-      if(added.has(pid)) return;
-      added.add(pid);
-      p.classList.add('added');
-      const av = p.querySelector('.m-av').cloneNode(true);
-      const name = p.querySelector('.m-n').textContent;
-      const sub = p.querySelector('.m-s').textContent;
-      const chips = [...p.querySelectorAll('.chip')].map(c => c.outerHTML).join('');
-      const row = document.createElement('div');
-      row.className = 'added-row';
-      row.innerHTML = `${av.outerHTML}<div><div class="m-n">${name}</div><div class="m-s">${sub}</div></div>${chips}<button class="remove" type="button" aria-label="Treure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M18 6 6 18M6 6l12 12"/></svg></button>`;
-      row.querySelector('.remove').addEventListener('click', () => {
-        added.delete(pid);
-        p.classList.remove('added');
-        row.remove();
-        if(added.size === 0) addedList.innerHTML = '<div class="empty-add">Cap perfil afegit encara.</div>';
-      });
-      const empty = addedList.querySelector('.empty-add');
-      if(empty) empty.remove();
-      addedList.appendChild(row);
+  // Delegació de clicks — suporta tant picks hardcoded com dinàmics post-rebuild.
+  picker?.addEventListener('click', e => {
+    const p = e.target.closest('.pick');
+    if (!p || !picker.contains(p)) return;
+    const pid = p.dataset.pid;
+    if (!pid || added.has(pid)) return;
+    added.add(pid);
+    p.classList.add('added');
+    const avNode = p.querySelector('.m-av');
+    const avHtml = avNode ? avNode.cloneNode(true).outerHTML : '<div class="m-av av-neu">P</div>';
+    const name = p.querySelector('.m-n')?.textContent || 'Perfil';
+    const sub = p.querySelector('.m-s')?.textContent || '';
+    const chips = [...p.querySelectorAll('.chip')].map(c => c.outerHTML).join('');
+    const row = document.createElement('div');
+    row.className = 'added-row';
+    row.innerHTML = `${avHtml}<div><div class="m-n">${name}</div><div class="m-s">${sub}</div></div>${chips}<button class="remove" type="button" aria-label="Treure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M18 6 6 18M6 6l12 12"/></svg></button>`;
+    row.querySelector('.remove').addEventListener('click', () => {
+      added.delete(pid);
+      p.classList.remove('added');
+      row.remove();
+      if (added.size === 0) addedList.innerHTML = '<div class="empty-add">Cap perfil afegit encara.</div>';
     });
+    const empty = addedList.querySelector('.empty-add');
+    if (empty) empty.remove();
+    addedList.appendChild(row);
   });
   document.querySelectorAll('.tag').forEach(t => t.addEventListener('click', () => t.classList.toggle('on')));
 
@@ -1360,6 +1395,10 @@
           else listRest?.appendChild(row);
         }
       });
+      // Refresca el picker del mode grup perquè inclogui els perfils custom
+      if (typeof window._atneRebuildGroupPicker === 'function') {
+        window._atneRebuildGroupPicker();
+      }
       applyFilters(); updateFchipCounts();
     } catch(e) { console.warn('[ATNE] custom profiles:', e); }
   }
