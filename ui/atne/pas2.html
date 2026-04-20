@@ -875,7 +875,7 @@
       <button class="icon-btn" id="fullscreen-btn" title="Pantalla completa (F11)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V3h4M17 3h4v4M21 17v4h-4M7 21H3v-4"/></svg></button>
       <button class="icon-btn" id="help-btn" title="Visita guiada"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg></button>
       <button class="icon-btn" title="Compartir" onclick="alert('Compartir: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></button>
-      <button class="docent-av" title="Docent · claudeai.je@fje.edu" onclick="alert('Perfil del docent: pendent d\u0027implementar')">E</button>
+      <button class="docent-av" id="docent-av">·</button>
     </div>
 
     <div class="main">
@@ -1611,7 +1611,9 @@
     const materia = localStorage.getItem('atne.doc_materia') || 'Història';
     const nivell  = localStorage.getItem('atne.doc_nivell')  || nivellFromCourse(profile?.course);
 
-    // Desa a localStorage; esborra l'adaptat anterior perquè es regeneri al Pas 3
+    // Desa a localStorage. 2026-04-20: NO esborrem cache aquí — el Pas 3 ja
+    // detecta canvis via cacheKey (perfil+títol+text). Si el docent torna a
+    // Pas 3 sense canvis, volem reutilitzar l'adaptació i no cremar crides LLM.
     localStorage.setItem('atne.doc_original', text);
     localStorage.setItem('atne.doc_title', title);
     localStorage.setItem('atne.doc_materia', materia);
@@ -1623,8 +1625,6 @@
       defaultComplementsForProfile(profile).forEach(id => defaults[id] = true);
       localStorage.setItem('atne.complements', JSON.stringify(defaults));
     }
-    localStorage.removeItem('atne.adapted_text');
-    localStorage.removeItem('atne.adapted_cache_key');
 
     // Desa l'estat fullscreen perquè el Pas 3 el pugui restaurar
     localStorage.setItem('atne.restore_fullscreen', document.fullscreenElement ? '1' : '0');
