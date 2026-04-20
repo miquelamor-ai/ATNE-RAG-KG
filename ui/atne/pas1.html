@@ -5,6 +5,9 @@
 <title>ATNE · Pas 1 · Per a qui</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
+<!-- Auth Supabase (ha de ser el primer script, sense defer/async) -->
+<script src="/ui/atne/js/auth.js"></script>
+
 <!-- Tipografia -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1443,8 +1446,6 @@
     const btn     = document.getElementById('id-btn');
 
     if (_docentId()) { _updateDocentBtn(); _loadCustomProfiles(); return; }
-    overlay.classList.remove('hidden');
-    setTimeout(() => emailInp?.focus(), 100);
 
     async function doLogin() {
       const email = (emailInp.value || '').trim().toLowerCase();
@@ -1477,6 +1478,15 @@
 
     btn.addEventListener('click', doLogin);
     emailInp.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+    // Auto-login si ja tenim l'email verificat de Supabase
+    if (window.ATNE_AUTH && window.ATNE_AUTH.email) {
+      emailInp.value = window.ATNE_AUTH.email;
+      doLogin();
+    } else {
+      overlay.classList.remove('hidden');
+      setTimeout(() => emailInp?.focus(), 100);
+    }
   })();
 
   // ── Creació de perfil (persona) ───────────────────────────────────────────

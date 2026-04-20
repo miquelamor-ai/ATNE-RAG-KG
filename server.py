@@ -38,6 +38,7 @@ if __name__ == "__main__" or __name__ == "__mp_main__":
 import corpus_reader
 import instruction_catalog
 import instruction_filter
+import jwt as pyjwt
 import requests
 import uvicorn
 from dotenv import load_dotenv
@@ -395,12 +396,193 @@ print(f"[ATNE] Model actiu: {ATNE_MODEL}")
 # ── FastAPI app ─────────────────────────────────────────────────────────────
 
 app = FastAPI(title="ATNE", version="0.1.0")
+
+# ── Auth (Supabase JWT + domini @fje.edu) ──────────────────────────────────
+#
+# Middleware ASGI pur (no BaseHTTPMiddleware) per compatibilitat amb les
+# respostes streaming (SSE del pipeline LLM). Valida el JWT HS256 emès per
+# Supabase a partir del Legacy JWT Secret. Rebutja qui no tingui email
+# acabat en @fje.edu. Els endpoints públics i els /api/admin/* (auth pròpia
+# via HMAC cookie) queden exempts.
+
+SUPABASE_JWT_SECRET = os.getenv("SUPABASE_JWT_SECRET", "")
+
+# Cache simple de tokens validats contra Supabase per evitar una crida HTTP
+# a cada request. Key = hash del token; value = (expires_at_monotonic, email).
+# TTL curt (2 min) perquè en cas de logout/revocació la invalidació arribi.
+_ATNE_AUTH_CACHE: dict[str, tuple[float, str]] = {}
+_ATNE_AUTH_CACHE_TTL = 120.0
+
+ATNE_PUBLIC_API_PATHS = {
+    "/api/health",
+    "/api/runtime-config",
+}
+
+def _atne_is_public_path(path: str) -> bool:
+    if not path.startswith("/api/"):
+        return True
+    if path in ATNE_PUBLIC_API_PATHS:
+        return True
+    # /api/admin/* manté la seva auth pròpia (cookie HMAC, veure _require_admin)
+    if path.startswith("/api/admin/"):
+        return True
+    return False
+
+
+def _atne_validate_token_via_supabase(token: str) -> tuple[int, str]:
+    """Valida el token fent una crida a Supabase /auth/v1/user.
+
+    Retorna (status_code, email_lowercase). status_code:
+      200 → email vàlid (i s'ha retornat)
+      401 → token rebutjat per Supabase
+      503 → no es pot contactar Supabase
+    """
+    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+        return 503, ""
+    try:
+        import time as _time
+        now = _time.monotonic()
+        # Cache hit?
+        cached = _ATNE_AUTH_CACHE.get(token)
+        if cached and cached[0] > now:
+            return 200, cached[1]
+        r = requests.get(
+            f"{SUPABASE_URL}/auth/v1/user",
+            headers={
+                "apikey": SUPABASE_ANON_KEY,
+                "Authorization": f"Bearer {token}",
+            },
+            timeout=5,
+        )
+        if r.status_code != 200:
+            return 401, ""
+        data = r.json()
+        email = (data.get("email") or "").lower()
+        if not email:
+            return 401, ""
+        _ATNE_AUTH_CACHE[token] = (now + _ATNE_AUTH_CACHE_TTL, email)
+        # Prevenció de fugida de memòria: purga entrades expirades si el cache
+        # creix molt. Operació O(n) però infreqüent.
+        if len(_ATNE_AUTH_CACHE) > 500:
+            expired = [k for k, (exp, _) in _ATNE_AUTH_CACHE.items() if exp <= now]
+            for k in expired:
+                _ATNE_AUTH_CACHE.pop(k, None)
+        return 200, email
+    except Exception as e:
+        print(f"[ATNE] Auth: error contactant Supabase: {e}")
+        return 503, ""
+
+
+class _AtneAuthMiddleware:
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        path = scope.get("path", "")
+        method = scope.get("method", "GET")
+        # Preflight CORS (OPTIONS) el gestiona CORSMiddleware; passa de llarg.
+        if method == "OPTIONS" or _atne_is_public_path(path):
+            await self.app(scope, receive, send)
+            return
+        if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+            await self._send_error(send, 503, "Auth no configurada al servidor")
+            return
+        auth_header = ""
+        for k, v in scope.get("headers", []):
+            if k == b"authorization":
+                auth_header = v.decode("latin-1", errors="replace")
+                break
+        if not auth_header.lower().startswith("bearer "):
+            await self._send_error(send, 401, "No autenticat")
+            return
+        token = auth_header[7:].strip()
+        # Validació delegada a Supabase (compatible amb HS256 i claus
+        # asimètriques modernes). Inclou cache de 2 min per reduir latència.
+        status, email = _atne_validate_token_via_supabase(token)
+        if status == 503:
+            await self._send_error(send, 503, "No es pot validar sessió")
+            return
+        if status != 200:
+            await self._send_error(send, 401, "Token invàlid o expirat")
+            return
+        if not email.endswith("@fje.edu"):
+            await self._send_error(send, 403, "Accés restringit a comptes @fje.edu")
+            return
+        scope.setdefault("state", {})
+        scope["state"]["user_email"] = email
+        # Traçabilitat del pilot: qui fa cada crida (stdout → Cloud Logging)
+        print(f"[ATNE:auth] {email} {method} {path}", flush=True)
+        await self.app(scope, receive, send)
+
+    async def _send_error(self, send, status: int, msg: str):
+        body = json.dumps({"ok": False, "error": msg}).encode("utf-8")
+        await send({
+            "type": "http.response.start",
+            "status": status,
+            "headers": [
+                (b"content-type", b"application/json; charset=utf-8"),
+                (b"content-length", str(len(body)).encode("ascii")),
+            ],
+        })
+        await send({"type": "http.response.body", "body": body})
+
+
+class _AtneSecurityHeadersMiddleware:
+    """Afegeix headers de seguretat bàsics a totes les respostes."""
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        async def _send_with_headers(message):
+            if message["type"] == "http.response.start":
+                headers = list(message.get("headers") or [])
+                def _set(h, v):
+                    for i, (k, _) in enumerate(headers):
+                        if k.lower() == h:
+                            headers[i] = (h, v)
+                            return
+                    headers.append((h, v))
+                _set(b"x-content-type-options", b"nosniff")
+                _set(b"x-frame-options", b"DENY")
+                _set(b"referrer-policy", b"strict-origin-when-cross-origin")
+                _set(b"permissions-policy", b"camera=(), microphone=(), geolocation=()")
+                message["headers"] = headers
+            await send(message)
+
+        await self.app(scope, receive, _send_with_headers)
+
+
+# Ordre de registre (primer = més extern en la request):
+#  1. Security headers (outermost, aplica a totes les respostes inclòs 401)
+#  2. CORS (gestiona preflight OPTIONS sense passar per auth)
+#  3. Auth (innermost, verifica JWT per /api/* protegits)
+app.add_middleware(_AtneSecurityHeadersMiddleware)
+
+ATNE_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://localhost:8001",
+    "http://127.0.0.1:8001",
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    "https://atne-1050342211642.europe-west1.run.app",
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=ATNE_ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-Requested-With"],
 )
+
+app.add_middleware(_AtneAuthMiddleware)
 
 
 @app.on_event("startup")
