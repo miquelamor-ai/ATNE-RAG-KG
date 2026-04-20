@@ -1092,6 +1092,9 @@
   const addedList = document.getElementById('added-list');
   const searchInp = document.getElementById('add-prof-q');
   const added = new Set();
+  // Exposat perquè _buildGroupProfile (fora d'aquesta IIFE) pugui llegir els
+  // perfils afegits al grup en el moment de desar.
+  window._atneGroupAdded = added;
 
   searchInp?.addEventListener('focus', () => { picker.hidden = false; });
   searchInp?.addEventListener('input', () => {
@@ -1293,7 +1296,7 @@
 
   // ── Perfils custom: crear fila DOM ─────────────────────────────────────────
 
-  const CAT_CLASS = {tdah:'av-tdah', disl:'av-disl', cat:'av-cat', ac:'av-ac', tea:'av-ac', generic:'av-neu'};
+  const CAT_CLASS = {tdah:'av-tdah', disl:'av-disl', cat:'av-cat', ac:'av-ac', tea:'av-ac', generic:'av-neu', 'group':'av-neu', 'group-cat':'av-cat', 'group-ac':'av-ac'};
 
   function _buildProfileRow(profile) {
     const pid = profile.id;
@@ -1534,6 +1537,81 @@
     };
   }
 
+  // ── Creació de perfil (grup) ──────────────────────────────────────────────
+
+  function _buildGroupProfile() {
+    const inputs = document.querySelectorAll('.mode[data-m="group"] .inp');
+    const name    = inputs[0]?.value.trim() || 'Grup nou';
+    const context = inputs[1]?.value.trim() || '';
+
+    // Nivells lectors activats (Bàsic / Estàndard / Avançat)
+    const levelLabelToId = { 'bàsic': 'basic', 'estàndard': 'standard', 'avançat': 'advanced' };
+    const levels = [];
+    document.querySelectorAll('.mode[data-m="group"] .lvl.on b').forEach(b => {
+      const key = b.textContent.trim().toLowerCase();
+      if (levelLabelToId[key]) levels.push(levelLabelToId[key]);
+    });
+    if (!levels.length) levels.push('standard');
+
+    // Perfils afegits al grup (reaprofitem del picker si hi són)
+    const memberIds = Array.from(window._atneGroupAdded || []);
+    const members = memberIds
+      .map(pid => window.ATNE_PROFILES[pid])
+      .filter(Boolean);
+
+    // Chips: 1 de nivells + 1 per condició agregada dels membres.
+    const chips = [{ label: `${levels.length} nivell${levels.length===1?'':'s'}`, cat: 'lv' }];
+    const condCount = {};
+    members.forEach(m => {
+      const catKey = m.cat || 'generic';
+      if (['tdah','disl','cat','ac','tea'].indexOf(catKey) >= 0) {
+        condCount[catKey] = (condCount[catKey] || 0) + 1;
+      }
+    });
+    const CAT_LABEL = { tdah:'TDAH', disl:'Dislèxia', cat:'Català L2', ac:'AACC', tea:'TEA' };
+    Object.keys(condCount).forEach(k => {
+      chips.push({ label: `${condCount[k]} ${CAT_LABEL[k]}`, cat: k });
+    });
+
+    // Cat principal del grup (per color avatar): primera condició dominant,
+    // o 'group' genèric si no n'hi ha cap.
+    let mainCat = 'group';
+    if (condCount.cat) mainCat = 'group-cat';
+    else if (condCount.ac) mainCat = 'group-ac';
+    else if (Object.keys(condCount).length) mainCat = 'group';
+
+    // Agrega conductes i ajuts únics dels membres (màx 4 de cadascun).
+    const behaviorsSet = new Set();
+    const aidsSet = new Set();
+    members.forEach(m => {
+      (m.behaviors || []).forEach(b => behaviorsSet.add(b));
+      (m.aids || []).forEach(a => aidsSet.add(a));
+    });
+    const behaviors = Array.from(behaviorsSet).slice(0, 4);
+    const aids = Array.from(aidsSet).slice(0, 4);
+
+    // Avatar: inicials del nom (màx 2 caràcters)
+    const nameParts = name.split(/\s+/).filter(Boolean);
+    const avatar = (nameParts[0]?.[0] || 'G').toUpperCase()
+                 + (nameParts[1]?.[0] || nameParts[0]?.[1] || '').toUpperCase();
+
+    const pid = 'g_' + Date.now().toString(36);
+
+    return {
+      id: pid, type: 'group', name,
+      age: null,
+      course: context || `${members.length} perfil${members.length===1?'':'s'}`,
+      avatar: avatar.slice(0, 2),
+      cat: mainCat,
+      chips,
+      behaviors,
+      aids,
+      members: memberIds,
+      levels,
+      custom: true
+    };
+  }
+
   async function _saveCustomProfile(profile) {
     const did = _docentId();
     if (!did) return null;
@@ -1613,13 +1691,47 @@
     });
   }
 
-  // "Crear i seleccionar" mode grup → pendent (igual que abans, però amb missatge honest)
+  // "Crear perfil" mode grup — desa un perfil custom amb type='group'
   const groupCreateBtn = document.querySelector('.mode[data-m="group"] .foot .btn-p');
   if (groupCreateBtn) {
-    groupCreateBtn.addEventListener('click', e => {
+    groupCreateBtn.addEventListener('click', async e => {
       e.preventDefault();
-      if (typeof window.atneToast === 'function') window.atneToast('La creació de grups personalitzats estarà disponible aviat.', 'info');
-      else alert('La creació de grups personalitzats estarà disponible aviat.');
+      const nameInp = document.querySelector('.mode[data-m="group"] .inp');
+      if (!nameInp?.value.trim()) {
+        nameInp?.focus();
+        if (typeof window.atneToast === 'function') window.atneToast('El nom del grup és obligatori', 'error');
+        else alert('El nom del grup és obligatori');
+        return;
+      }
+      if (!_docentId()) {
+        document.getElementById('id-overlay')?.classList.remove('hidden');
+        return;
+      }
+      groupCreateBtn.disabled = true;
+      const originalLabel = groupCreateBtn.innerHTML;
+      groupCreateBtn.textContent = 'Creant…';
+
+      const profile = _buildGroupProfile();
+      const dbId = await _saveCustomProfile(profile);
+      if (dbId) profile._db_id = dbId;
+      window.ATNE_PROFILES[profile.id] = profile;
+
+      // Afegeix la fila a "Recents" a dalt de tot
+      const listRecent = document.getElementById('list-recent');
+      listRecent?.prepend(_buildProfileRow(profile));
+
+      applyFilters(); updateFchipCounts();
+      groupCreateBtn.disabled = false;
+      groupCreateBtn.innerHTML = originalLabel;
+      // No naveguem: el docent selecciona quan vulgui (pot voler crear més)
+      localStorage.setItem('atne.profile_id', profile.id);
+
+      // Feedback visual: destaca la fila nova
+      setTimeout(() => {
+        const row = document.querySelector('.row[data-pid="' + profile.id + '"]');
+        if (row) { row.style.outline = '2px solid var(--primary)'; row.style.borderRadius = 'var(--r-md)'; setTimeout(() => { row.style.outline = ''; }, 2500); }
+      }, 100);
+      if (typeof window.atneToast === 'function') window.atneToast(`Grup "${profile.name}" creat.`, 'ok');
     });
   }
 
