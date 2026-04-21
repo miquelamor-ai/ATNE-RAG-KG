@@ -2842,9 +2842,9 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
     result_ev = {"type": "result", "adapted": adapted, "post_process": pp}
     if verify_info is not None:
         result_ev["verify"] = {"score": best_score, **verify_info}
-    # Debug: emplenar la sortida adaptada al registre en memòria.
-    # Afegim adapted_raw (pre post-process) per distingir corrupció del model
-    # vs corrupció introduïda pel pipeline de neteja.
+    # Debug: emplenar la sortida adaptada al registre en memòria + persistir
+    # a Supabase perquè sobrevisqui canvis d'instància a Cloud Run (fins 3
+    # instàncies concurrents amb buffers separats).
     try:
         if _ATNE_LAST_ADAPTATION:
             _ATNE_LAST_ADAPTATION["adapted_output"] = adapted
@@ -2853,6 +2853,16 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
                 _ATNE_LAST_ADAPTATION["adapted_raw"] = adapted_raw or ""
                 _ATNE_LAST_ADAPTATION["adapted_raw_len"] = len(adapted_raw or "")
             except NameError:
+                pass
+            # Persisteix a Supabase (fire-and-forget, en thread per no bloquejar SSE)
+            try:
+                import threading as _thr_audit
+                _thr_audit.Thread(
+                    target=_persist_adaptation_to_supabase,
+                    args=(dict(_ATNE_LAST_ADAPTATION),),
+                    daemon=True,
+                ).start()
+            except Exception:
                 pass
     except Exception:
         pass
@@ -3397,16 +3407,77 @@ async def audit_last_adaptation(_: bool = Depends(_require_admin)):
     return {"ok": True, "empty": False, "data": _ATNE_LAST_ADAPTATION}
 
 
+def _persist_adaptation_to_supabase(entry: dict) -> None:
+    """Persisteix l'entrada del buffer a la taula atne_prompt_debug de Supabase.
+    Fire-and-forget (errors només es loguegen, no aturen l'adaptació)."""
+    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+        return
+    try:
+        requests.post(
+            f"{SUPABASE_URL}/rest/v1/atne_prompt_debug",
+            headers={**SUPABASE_HEADERS, "Prefer": "return=minimal"},
+            json={
+                "adapt_id": entry.get("id"),
+                "ts_ms": int(entry.get("ts", 0) * 1000),
+                "docent_id": entry.get("docent_id") or None,
+                "model": entry.get("model"),
+                "data": entry,  # jsonb amb tot
+            },
+            timeout=5,
+        )
+    except Exception as e:
+        print(f"[audit] error persist atne_prompt_debug: {e}", flush=True)
+
+
+def _list_adaptations_from_supabase(limit: int = 20) -> list:
+    """Fallback quan el buffer en memòria està buit (ex: Cloud Run amb múltiples
+    instàncies). Llegeix les últimes N de Supabase."""
+    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+        return []
+    try:
+        r = requests.get(
+            f"{SUPABASE_URL}/rest/v1/atne_prompt_debug"
+            f"?select=data&order=ts_ms.desc&limit={limit}",
+            headers=SUPABASE_HEADERS, timeout=10,
+        )
+        if r.status_code == 200:
+            return [row["data"] for row in r.json() if row.get("data")]
+    except Exception as e:
+        print(f"[audit] error list atne_prompt_debug: {e}", flush=True)
+    return []
+
+
+def _get_adaptation_from_supabase(adapt_id: str) -> dict:
+    """Recupera una adaptació per id si no és al buffer en memòria."""
+    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+        return {}
+    try:
+        r = requests.get(
+            f"{SUPABASE_URL}/rest/v1/atne_prompt_debug"
+            f"?adapt_id=eq.{adapt_id}&select=data&limit=1",
+            headers=SUPABASE_HEADERS, timeout=5,
+        )
+        if r.status_code == 200:
+            rows = r.json()
+            if rows:
+                return rows[0].get("data", {})
+    except Exception as e:
+        print(f"[audit] error get atne_prompt_debug: {e}", flush=True)
+    return {}
+
+
 @app.get("/api/audit/adaptations")
 async def audit_adaptations_list(_: bool = Depends(_require_admin)):
     """Retorna un resum de les últimes N adaptacions (N més recents primer).
 
-    Cada entrada: id, ts, iso, docent_id, model, mecr_sortida, n_instructions,
-    input_chars, output_chars, n_conditions. Sense system_prompt ni outputs
-    complets (usar GET /api/audit/adaptations/{id} per al detall).
+    Primer mira el buffer en memòria. Si està buit (Cloud Run amb múltiples
+    instàncies o instància acabada de reiniciar), cau a Supabase.
     """
+    source_entries = list(reversed(_ATNE_ADAPTATIONS_LOG)) if _ATNE_ADAPTATIONS_LOG \
+                     else _list_adaptations_from_supabase(limit=_ATNE_ADAPTATIONS_MAX)
+    source = "memory" if _ATNE_ADAPTATIONS_LOG else "supabase"
     summary = []
-    for e in reversed(_ATNE_ADAPTATIONS_LOG):  # més recents primer
+    for e in source_entries:
         chars = (e.get("profile") or {}).get("caracteristiques") or {}
         n_cond = sum(1 for v in chars.values() if isinstance(v, dict) and v.get("actiu"))
         summary.append({
@@ -3422,16 +3493,19 @@ async def audit_adaptations_list(_: bool = Depends(_require_admin)):
             "output_chars": e.get("adapted_output_len"),
             "profile_name": (e.get("profile") or {}).get("nom", ""),
         })
-    return {"ok": True, "count": len(summary), "adaptations": summary}
+    return {"ok": True, "count": len(summary), "adaptations": summary, "source": source}
 
 
 @app.get("/api/audit/adaptations/{adapt_id}")
 async def audit_adaptation_detail(adapt_id: str, _: bool = Depends(_require_admin)):
-    """Retorna el detall complet d'una adaptació concreta del buffer."""
+    """Retorna el detall d'una adaptació concreta: buffer primer, Supabase fallback."""
     for e in _ATNE_ADAPTATIONS_LOG:
         if e.get("id") == adapt_id:
-            return {"ok": True, "data": e}
-    return {"ok": False, "error": "No trobada (pot haver sortit del buffer)"}
+            return {"ok": True, "data": e, "source": "memory"}
+    sb = _get_adaptation_from_supabase(adapt_id)
+    if sb:
+        return {"ok": True, "data": sb, "source": "supabase"}
+    return {"ok": False, "error": "No trobada ni al buffer ni a Supabase"}
 
 
 @app.post("/api/audit/instruction-map")
