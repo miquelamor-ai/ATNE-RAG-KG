@@ -219,8 +219,14 @@
     }
     return originalFetch(input, init).then(function (resp) {
       if (isApi && resp.status === 401) {
-        // Sessió expirada o invàlida → re-login
-        redirectToLogin();
+        // /api/admin/* i /api/audit/* tenen auth pròpia (HMAC cookie) que
+        // gestiona la mateixa pàgina admin/audit. Un 401 allà NO vol dir
+        // sessió Supabase expirada — és que no hi ha cookie d'admin.
+        var isAdminPath = url.indexOf('/api/admin/') >= 0 || url.indexOf('/api/audit/') >= 0;
+        if (!isAdminPath) {
+          // Sessió Supabase expirada o invàlida → re-login Google
+          redirectToLogin();
+        }
       }
       return resp;
     });
