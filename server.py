@@ -1409,6 +1409,20 @@ def build_system_prompt(profile: dict, context: dict, params: dict, rag_context:
     # ═══ CAPA 1: IDENTITAT (fixa) ═══
     parts.append(corpus_reader.get_identity())
 
+    # T-05: Role prompting docent (si hi ha matèria definida)
+    materia = params.get("materia") or context.get("materia", "")
+    etapa = context.get("etapa") or params.get("etapa", "")
+    if materia:
+        role_parts = [f"Ets un especialista en {materia}"]
+        if etapa:
+            role_parts.append(f"que ensenya a {etapa}")
+        role_parts.append("i pedagog DUA: escrius amb precisió conceptual i màxima accessibilitat.")
+        parts.append(" ".join(role_parts))
+
+    # T-04: Ancoratge MECR max-paraules just abans del catàleg d'instruccions.
+    _max_words = MECR_MAX_WORDS.get(mecr, 25)
+    parts.append(f"⚓ REGLA CRÍTICA (MECR {mecr}): màxim {_max_words} paraules per frase. Una idea per frase.")
+
     # ═══ CAPES 2-3: INSTRUCCIONS FILTRADES (catàleg de 89 instruccions LLM) ═══
     # Filtra segons perfils actius, sub-variables, MECR, DUA i complements
     filtered = instruction_filter.get_instructions(profile, params)
