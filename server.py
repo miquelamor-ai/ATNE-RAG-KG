@@ -423,8 +423,8 @@ def _atne_is_public_path(path: str) -> bool:
         return True
     if path in ATNE_PUBLIC_API_PATHS:
         return True
-    # /api/admin/* manté la seva auth pròpia (cookie HMAC, veure _require_admin)
-    if path.startswith("/api/admin/"):
+    # /api/admin/* i /api/audit/* mantenen auth pròpia (cookie HMAC admin)
+    if path.startswith("/api/admin/") or path.startswith("/api/audit/"):
         return True
     return False
 
@@ -3308,6 +3308,102 @@ async def admin_analytics(_: bool = Depends(_require_admin)):
         "latency_p90_ms": latency_p90,
         "verify_avg": verify_avg,
         "recent": recent,
+    }
+
+
+@app.post("/api/audit/instruction-map")
+async def audit_instruction_map(
+    payload: dict = Body(...),
+    _: bool = Depends(_require_admin),
+):
+    """Auditoria en viu: quines instruccions s'activen per a una combinació.
+
+    Input JSON:
+      {
+        "profile": {caracteristiques: {tdah: {actiu, grau, ...}, ...}},
+        "params": {mecr_sortida, dua, complements, ...}
+      }
+
+    Retorna per a cada instrucció del catàleg:
+      - id, text, macro, activation
+      - status: 'ACTIVE' | 'SUPPRESSED' | 'NOT_MATCHED'
+      - reason: perquè queda fora si NOT_MATCHED o SUPPRESSED
+    Més estadístiques i el resultat filtrat agrupat per macro.
+    """
+    from instruction_catalog import CATALOG, MACRODIRECTIVES
+
+    profile = payload.get("profile") or {"caracteristiques": {}}
+    params = payload.get("params") or {}
+
+    # Filtra via la funció real que fa servir el pipeline
+    filtered = instruction_filter.get_instructions(profile, params)
+
+    active_ids = set()
+    for macro_id, macro in (filtered.get("macrodirectives") or {}).items():
+        for instr in macro.get("instruccions", []):
+            active_ids.add(instr["id"])
+    suppressed_ids = set(filtered.get("suppressed") or [])
+    audit_list = filtered.get("audit") or []
+    audit_by_id = {a["id"]: a for a in audit_list}
+
+    # Estat de TOTES les instruccions del catàleg
+    all_rows = []
+    for iid, instr in CATALOG.items():
+        activation = instr.get("activation", "?")
+        macro_id = instr.get("macro", "ALTRES")
+        macro_label = MACRODIRECTIVES.get(macro_id, {}).get("label", macro_id)
+        if iid in active_ids:
+            status = "ACTIVE"
+            reason = "inclosa al prompt"
+        elif iid in suppressed_ids:
+            status = "SUPPRESSED"
+            reason = audit_by_id.get(iid, {}).get("motiu", "suprimida")
+        else:
+            # No activada per les condicions actuals (p.ex. PERFIL sense perfil actiu)
+            status = "NOT_MATCHED"
+            if activation == "PERFIL":
+                reason = f"perfils objectiu {instr.get('profiles', [])} no actius"
+            elif activation == "COMPLEMENT":
+                reason = f"complement '{instr.get('complement', '?')}' no triat"
+            elif activation == "NIVELL":
+                reason = f"MECR '{params.get('mecr_sortida', '?')}' no dispara"
+            else:
+                reason = "no inclosa per condicions"
+        all_rows.append({
+            "id": iid,
+            "text": instr.get("text", "")[:300],
+            "macro_id": macro_id,
+            "macro_label": macro_label,
+            "activation": activation,
+            "status": status,
+            "reason": reason,
+        })
+
+    # Resum per activació i status
+    counts = {
+        "total": len(all_rows),
+        "active": len(active_ids),
+        "suppressed": len(suppressed_ids),
+        "not_matched": len(all_rows) - len(active_ids) - len(suppressed_ids),
+        "by_activation": {},
+    }
+    for row in all_rows:
+        act = row["activation"]
+        counts["by_activation"].setdefault(act, {"active": 0, "suppressed": 0, "not_matched": 0})
+        counts["by_activation"][act][row["status"].lower()] += 1
+
+    return {
+        "ok": True,
+        "params": params,
+        "profile_summary": {
+            "caracteristiques_actives": [
+                k for k, v in (profile.get("caracteristiques") or {}).items()
+                if isinstance(v, dict) and v.get("actiu")
+            ],
+        },
+        "counts": counts,
+        "macrodirectives": filtered.get("macrodirectives", {}),
+        "instructions": all_rows,
     }
 
 

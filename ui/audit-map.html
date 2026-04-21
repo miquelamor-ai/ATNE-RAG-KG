@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ATNE · Auditoria instruccions</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/ui/styles/tokens.css">
+<link rel="stylesheet" href="/ui/styles/base.css">
+<link rel="stylesheet" href="/ui/styles/shell.css">
+
+<style>
+body{font-family:var(--ui);background:var(--cream);margin:0;color:var(--ink-900)}
+.wrap{max-width:1200px;margin:0 auto;padding:24px}
+h1{font-family:var(--serif);font-weight:700;font-size:28px;margin:0 0 6px}
+.sub{color:var(--ink-500);font-size:13px;margin-bottom:24px}
+.card{background:#fff;border:1px solid var(--paper-line);border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:var(--sh-sm)}
+.row2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.f-l{font-size:11px;font-weight:600;color:var(--ink-500);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+select,input[type=text]{width:100%;padding:10px 12px;font-size:14px;border:1px solid var(--ink-150);border-radius:8px;background:#fff;font-family:inherit}
+.check-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:8px}
+.check-grid label{display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;padding:6px 8px;border-radius:6px}
+.check-grid label:hover{background:var(--cream-2)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;font-size:14px;font-weight:600;border-radius:8px;border:none;cursor:pointer;background:var(--primary);color:#fff}
+.btn:hover{filter:brightness(1.08)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
+.stat{background:var(--cream-2);padding:12px;border-radius:8px;text-align:center}
+.stat b{display:block;font-family:var(--serif);font-size:28px;color:var(--primary);line-height:1}
+.stat small{color:var(--ink-500);font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+.stat.ok b{color:#2b8a3e}
+.stat.warn b{color:#c0392b}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;padding:10px 8px;background:var(--cream-2);font-weight:600;color:var(--ink-700);font-size:11px;text-transform:uppercase;letter-spacing:.05em;border-bottom:2px solid var(--paper-line);cursor:pointer}
+td{padding:10px 8px;border-bottom:1px solid var(--paper-line);vertical-align:top}
+tr:hover td{background:var(--cream-2)}
+.badge{display:inline-block;padding:2px 8px;font-size:10.5px;font-weight:600;border-radius:10px;text-transform:uppercase;letter-spacing:.03em}
+.badge.active{background:#d3f9d8;color:#2b8a3e}
+.badge.suppressed{background:#ffe3e3;color:#c0392b}
+.badge.not_matched{background:var(--ink-100);color:var(--ink-500)}
+.badge.ACTIVE{background:#d3f9d8;color:#2b8a3e}
+.badge.SUPPRESSED{background:#ffe3e3;color:#c0392b}
+.badge.NOT_MATCHED{background:var(--ink-100);color:var(--ink-500)}
+.filter-row{display:flex;gap:8px;margin-bottom:12px;align-items:center}
+.filter-row input{max-width:260px}
+.filter-row select{max-width:160px}
+.macro-section{margin-bottom:16px}
+.macro-section h3{font-family:var(--serif);font-size:18px;margin:0 0 8px;color:var(--primary)}
+.macro-section ul{padding-left:20px;margin:0}
+.macro-section li{font-size:13px;line-height:1.5;margin-bottom:4px}
+.hidden{display:none}
+.empty{padding:30px;text-align:center;color:var(--ink-400);font-style:italic}
+a.back{color:var(--primary);text-decoration:none;font-size:13px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <a href="/admin" class="back">← Tornar a /admin</a>
+  <h1>Auditoria del prompt · Mapa d'instruccions</h1>
+  <p class="sub">Tria una combinació de perfil + MECR + DUA + complements i veuràs <b>exactament quines instruccions</b> arriben al prompt del LLM. Transparència total del catàleg (107 instruccions Python).</p>
+
+  <section class="card">
+    <div class="row3">
+      <div>
+        <div class="f-l">MECR sortida</div>
+        <select id="mecr">
+          <option value="pre-A1">pre-A1</option>
+          <option value="A1">A1</option>
+          <option value="A2">A2</option>
+          <option value="B1" selected>B1</option>
+          <option value="B2">B2</option>
+          <option value="C1">C1</option>
+        </select>
+      </div>
+      <div>
+        <div class="f-l">DUA</div>
+        <select id="dua">
+          <option value="Acces">Accés</option>
+          <option value="Core" selected>Core</option>
+          <option value="Enriquiment">Enriquiment</option>
+        </select>
+      </div>
+      <div>
+        <div class="f-l">Gènere (informatiu, no afecta filtre)</div>
+        <input type="text" id="genere" placeholder="ex: explicatiu" value="explicatiu">
+      </div>
+    </div>
+
+    <div style="margin-top:16px">
+      <div class="f-l">Condicions actives del perfil</div>
+      <div class="check-grid" id="chars-list">
+        <label><input type="checkbox" data-char="tdah"><span>TDAH</span></label>
+        <label><input type="checkbox" data-char="dislexia"><span>Dislèxia</span></label>
+        <label><input type="checkbox" data-char="nouvingut"><span>Nouvingut (L2)</span></label>
+        <label><input type="checkbox" data-char="altes_capacitats"><span>Altes capacitats</span></label>
+        <label><input type="checkbox" data-char="tea"><span>TEA</span></label>
+        <label><input type="checkbox" data-char="discapacitat_intellectual"><span>Discapacitat intel·lectual</span></label>
+        <label><input type="checkbox" data-char="discapacitat_auditiva"><span>Discapacitat auditiva</span></label>
+        <label><input type="checkbox" data-char="discapacitat_visual"><span>Discapacitat visual</span></label>
+        <label><input type="checkbox" data-char="tdl"><span>TDL (trastorn llenguatge)</span></label>
+        <label><input type="checkbox" data-char="tdc"><span>TDC (coordinació)</span></label>
+        <label><input type="checkbox" data-char="vulnerabilitat"><span>Vulnerabilitat</span></label>
+        <label><input type="checkbox" data-char="trastorn_emocional"><span>Trastorn emocional</span></label>
+      </div>
+    </div>
+
+    <div style="margin-top:16px">
+      <div class="f-l">Complements activats</div>
+      <div class="check-grid" id="complements-list">
+        <label><input type="checkbox" data-comp="glossari" checked><span>Glossari</span></label>
+        <label><input type="checkbox" data-comp="esquema_visual"><span>Esquema visual</span></label>
+        <label><input type="checkbox" data-comp="preguntes_comprensio" checked><span>Preguntes comprensió</span></label>
+        <label><input type="checkbox" data-comp="negretes"><span>Negretes</span></label>
+        <label><input type="checkbox" data-comp="definicions_integrades"><span>Definicions integrades</span></label>
+        <label><input type="checkbox" data-comp="traduccio_l1"><span>Traducció L1</span></label>
+        <label><input type="checkbox" data-comp="pictogrames"><span>Pictogrames</span></label>
+        <label><input type="checkbox" data-comp="mapa_conceptual"><span>Mapa conceptual</span></label>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;display:flex;gap:10px;align-items:center">
+      <button class="btn" id="run-btn">Calcular instruccions actives</button>
+      <span id="run-status" style="font-size:13px;color:var(--ink-500)"></span>
+    </div>
+  </section>
+
+  <div id="results" class="hidden">
+    <section class="card">
+      <h2 style="margin:0 0 8px;font-family:var(--serif)">Resum</h2>
+      <div class="stats">
+        <div class="stat ok"><b id="cnt-active">—</b><small>Actives</small></div>
+        <div class="stat warn"><b id="cnt-suppressed">—</b><small>Suprimides</small></div>
+        <div class="stat"><b id="cnt-notmatched">—</b><small>No disparades</small></div>
+        <div class="stat"><b id="cnt-total">—</b><small>Total catàleg</small></div>
+      </div>
+      <div id="by-act" style="margin-top:16px;font-size:12.5px;color:var(--ink-500)"></div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin:0 0 8px;font-family:var(--serif)">Prompt final (agrupat per macrodirectiva)</h2>
+      <div id="macros-block" class="empty">Cap macrodirectiva activa.</div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin:0 0 8px;font-family:var(--serif)">Catàleg complet amb estat</h2>
+      <div class="filter-row">
+        <input type="text" id="filter-text" placeholder="Filtra per ID o text…">
+        <select id="filter-status">
+          <option value="">Totes</option>
+          <option value="ACTIVE">Actives</option>
+          <option value="SUPPRESSED">Suprimides</option>
+          <option value="NOT_MATCHED">No disparades</option>
+        </select>
+        <select id="filter-activation">
+          <option value="">Totes activacions</option>
+          <option value="SEMPRE">SEMPRE</option>
+          <option value="NIVELL">NIVELL</option>
+          <option value="PERFIL">PERFIL</option>
+          <option value="COMPLEMENT">COMPLEMENT</option>
+        </select>
+      </div>
+      <div style="overflow-x:auto">
+        <table id="instr-table">
+          <thead>
+            <tr>
+              <th style="width:80px">ID</th>
+              <th style="width:110px">Macro</th>
+              <th style="width:100px">Activació</th>
+              <th style="width:110px">Estat</th>
+              <th>Text</th>
+              <th style="width:180px">Motiu</th>
+            </tr>
+          </thead>
+          <tbody id="instr-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+
+let allRows = [];
+
+function buildProfile() {
+  const chars = {};
+  $$('#chars-list input[type="checkbox"]').forEach(cb => {
+    const k = cb.dataset.char;
+    chars[k] = { actiu: cb.checked };
+  });
+  return { nom: "Perfil audit", caracteristiques: chars, observacions: "" };
+}
+
+function buildParams() {
+  const complements = {};
+  $$('#complements-list input[type="checkbox"]').forEach(cb => {
+    complements[cb.dataset.comp] = cb.checked;
+  });
+  return {
+    mecr_sortida: $('#mecr').value,
+    dua: $('#dua').value,
+    genere_discursiu: $('#genere').value,
+    complements,
+    levels: ['single'],
+  };
+}
+
+async function runAudit() {
+  $('#run-status').textContent = 'Calculant…';
+  try {
+    const resp = await fetch('/api/audit/instruction-map', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profile: buildProfile(), params: buildParams() }),
+    });
+    if (resp.status === 401) {
+      $('#run-status').innerHTML = '<span style="color:#c0392b">Sessió admin expirada — <a href="/admin">entra de nou</a></span>';
+      return;
+    }
+    const data = await resp.json();
+    if (!data.ok) throw new Error(data.error || 'Error');
+    renderResults(data);
+    $('#run-status').textContent = '';
+  } catch (e) {
+    $('#run-status').innerHTML = '<span style="color:#c0392b">Error: ' + e.message + '</span>';
+  }
+}
+
+function renderResults(data) {
+  $('#results').classList.remove('hidden');
+  const c = data.counts;
+  $('#cnt-active').textContent = c.active;
+  $('#cnt-suppressed').textContent = c.suppressed;
+  $('#cnt-notmatched').textContent = c.not_matched;
+  $('#cnt-total').textContent = c.total;
+
+  // Per activació
+  const byAct = c.by_activation || {};
+  const rows = ['SEMPRE', 'NIVELL', 'PERFIL', 'COMPLEMENT'].map(k => {
+    const s = byAct[k] || {active:0,suppressed:0,not_matched:0};
+    return `<b>${k}</b>: ${s.active} actives / ${s.suppressed} supr. / ${s.not_matched} no disparades`;
+  });
+  $('#by-act').innerHTML = rows.join(' · ');
+
+  // Macros
+  const macros = data.macrodirectives || {};
+  const mblock = $('#macros-block');
+  if (!Object.keys(macros).length) {
+    mblock.classList.add('empty');
+    mblock.textContent = 'Cap macrodirectiva activa amb aquesta combinació.';
+  } else {
+    mblock.classList.remove('empty');
+    const sorted = Object.entries(macros).sort((a,b) => (a[1].ordre||99) - (b[1].ordre||99));
+    mblock.innerHTML = sorted.map(([mid, m]) => {
+      const items = (m.instruccions || []).map(i => `<li><code style="color:var(--ink-500);font-size:11px">${i.id}</code> ${escapeHtml(i.text || '')}</li>`).join('');
+      return `<div class="macro-section"><h3>${escapeHtml(m.label || mid)}</h3><ul>${items || '<li><em>cap</em></li>'}</ul></div>`;
+    }).join('');
+  }
+
+  // Taula complet
+  allRows = data.instructions || [];
+  renderTable();
+}
+
+function renderTable() {
+  const q = $('#filter-text').value.toLowerCase().trim();
+  const status = $('#filter-status').value;
+  const act = $('#filter-activation').value;
+  const tbody = $('#instr-tbody');
+  const filtered = allRows.filter(r => {
+    if (status && r.status !== status) return false;
+    if (act && r.activation !== act) return false;
+    if (q && !(r.id.toLowerCase().includes(q) || r.text.toLowerCase().includes(q))) return false;
+    return true;
+  });
+  tbody.innerHTML = filtered.map(r =>
+    `<tr>
+      <td><code style="font-size:11px">${r.id}</code></td>
+      <td style="font-size:11px;color:var(--ink-500)">${escapeHtml(r.macro_label || r.macro_id)}</td>
+      <td style="font-size:11px">${r.activation}</td>
+      <td><span class="badge ${r.status}">${r.status}</span></td>
+      <td>${escapeHtml(r.text)}</td>
+      <td style="font-size:11px;color:var(--ink-500)">${escapeHtml(r.reason)}</td>
+    </tr>`
+  ).join('');
+  if (!filtered.length) tbody.innerHTML = '<tr><td colspan="6" class="empty">Cap instrucció amb els filtres aplicats.</td></tr>';
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+$('#run-btn').addEventListener('click', runAudit);
+$('#filter-text').addEventListener('input', renderTable);
+$('#filter-status').addEventListener('change', renderTable);
+$('#filter-activation').addEventListener('change', renderTable);
+
+// Primera execució automàtica
+runAudit();
+</script>
+
+</body>
+</html>

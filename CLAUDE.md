@@ -11,11 +11,13 @@ Explicacions clares i practiques.
 ## Stack tecnic
 - **Backend**: Python 3.12 + FastAPI + uvicorn
 - **Frontend**: HTML + JavaScript pur + CSS (ZERO frameworks)
-- **LLM**: Gemini 2.5-flash (google.genai SDK, capa gratuita)
-- **Dades**: Supabase (PostgreSQL + pgvector)
-  - Vector store: taula `rag_fje` (1.443 chunks, embeddings 768d)
-  - Knowledge Graph: taules `kg_nodes` (952) + `kg_edges` (2.294)
-  - Funcio SQL: `match_rag_fje` (cerca vectorial) + `kg_expand` (graf)
+- **LLM**: Gemma 4 31B + rotacio GPT-4o / GPT-4.1-mini / Gemma 3 27B (decidit 2026-04-16)
+  - Gemini 2.5-flash disponible al codi pero no es el model per defecte des de 2026-04-12
+- **Auth**: Supabase Auth + Google OAuth restringit a `@fje.edu` (desplegat 2026-04-20)
+- **Dades**: Supabase (PostgreSQL)
+  - Perfils docents: `atne_docents`, `atne_custom_profiles`, `atne_drafts`
+  - Historial i analytics: `history`, `pilot_events`, `system_config`
+  - Vector store i KG: `rag_fje`, `kg_nodes`, `kg_edges` — **INFRAESTRUCTURA DESACTIVADA** (veure seccio seguent)
 - **NO usar**: React, Vue, Next.js, Tailwind, Prisma, TypeScript
 
 ## Credencials (fitxer .env, NO al git)
@@ -25,29 +27,41 @@ SUPABASE_URL=https://qlftykfqjwaxucoeqcjv.supabase.co
 SUPABASE_ANON_KEY=...
 ```
 
-## Arquitectura de cerca (RAG + KG)
-La cerca combina dos senyals:
-1. **Vector search**: embedding de la query → match_rag_fje (Supabase)
-2. **KG expansion**: conceptes de la query → kg_expand (1-2 salts)
-3. **Fusio**: bonus per senyal dual (vector + KG > nomes un)
+## Arquitectura del prompt (RAG-KG DESACTIVAT — 2026-04-09)
 
-Documents obligatoris per regles de negoci (sempre inclosos segons context):
-- Adaptar text → M3_lectura-facil-comunicacio-clara.md + M2_DUA-principis-pautes.md
-- Nouvingut → M1_alumnat-nouvingut.md + M1_acollida-marc-conceptual.md
-- Avaluacio → M6_avaluacio-formativa-formadora.md
+**IMPORTANT**: ATNE NO usa RAG-KG dinamic. L'auditoria 2026-04-21 confirma
+que `vector_search()`, `kg_expand_concept()`, `combined_search()` son dead
+code: zero crides reals. El prompt s'omple via:
+
+1. **`instruction_catalog.py` (Python hardcoded)** — 107 instruccions amb
+   text literal. Filtre via `instruction_filter.py` segons:
+   - `SEMPRE` (nucli, sempre actiu)
+   - `NIVELL` (segons MECR)
+   - `PERFIL` (segons condicions: tdah, dislexia, nouvingut, etc.)
+   - `COMPLEMENT` (segons complements triats)
+2. **`corpus_reader.py` (legeix MD)** — SOMENTS aquests blocs:
+   - `get_identity()` — identitat fixa de l'assistent
+   - `get_dua_block(dua)` — blocs DUA Acces/Core/Enriquiment
+   - `get_genre_block(genre)` — gèneres discursius (22)
+   - `get_crossing_blocks(active_profiles)` — creuaments entre condicions
+   - `get_fewshot_example(mecr)` — exemple abans/despres
+   - **NO usats**: `get_profile_block()`, `get_mecr_block()` — funcions orfes.
+3. **Corpus MD local** (`ATNE/corpus/`) — 18 fitxers locals, font duplicada.
+   Font de veritat real: `github.com/miquelamor-ai/corpusFJE` (93 fitxers).
+   Fase D pendent post-pilot: substituir corpus local per submodule del corpusFJE.
+
+**Implicacio practica**: editar un M1_*.md NO canvia el prompt per a perfils
+(TDAH, dislexia, etc.) — les instruccions de perfil venen del Python hardcoded.
+Si edites M1, ha de ser tambe a `instruction_catalog.py` per tenir efecte.
 
 ## Pipeline de l'assistent
-1. **Input**: docent puja o enganxa un text
-2. **Configuracio** (parametres, NO xat obert):
-   - Perfil alumnat: nouvingut | NESE | altes capacitats | generic
-   - Etapa: infantil | primaria | ESO | batxillerat | FP
-   - Nivell linguistic (MECR): pre-A1 | A1 | A2 | B1 | B2
-   - Tipus adaptacio: lectura facil | multinivell (Acces/Core/Enriquiment) | ambdos
-   - Materia: cientific | humanistic | linguistic
-   - Ajuts: definicions | exemples | esquema | pictogrames
-3. **Adaptacio**: Gemini transforma el text usant RAG+KG com a context
-4. **Auditoria**: taula comparativa original vs adaptat
-5. **Producte**: visualitzacio + descarrega (PDF/DOCX/TXT)
+1. **Pas 1**: docent tria perfil (persona o grup) amb curs + MECR + condicions
+2. **Pas 2**: enganxa/puja/genera text + configura materia, genere, complements
+3. **Pas 3**: LLM adapta amb streaming SSE, mostra complements, permet refinar
+4. **Export**: PDF client-side (html2pdf.js), copia al porta-papers, impressio
+
+Tot el flux passa per `/api/adapt` (SSE). Auth obligatori via Supabase JWT
+amb email `@fje.edu`.
 
 ## Regles de Lectura Facil (LF)
 - Puntuacio: nomes punts i dos punts (no ; ni ...)
