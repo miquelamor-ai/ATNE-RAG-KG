@@ -128,8 +128,8 @@
     div.innerHTML =
       '<div id="admin-menu-top" style="padding:6px 10px 4px;font-size:11px;color:var(--ink-500,#6b6b6b);border-bottom:1px solid var(--paper-line,#e4e0da);margin-bottom:4px">' + alias + '</div>' +
       '<div id="admin-links" style="display:none">' +
-        '<a href="/admin">Admin <span class="admin-badge">ADMIN</span></a>' +
-        '<a href="/ui/cuina.html">Cuina (dev)</a>' +
+        '<a href="/admin" target="_blank" rel="noopener">Admin <span class="admin-badge">ADMIN</span></a>' +
+        '<a href="/ui/cuina.html" target="_blank" rel="noopener">Cuina (dev)</a>' +
         '<div class="sep"></div>' +
       '</div>' +
       '<div class="sep"></div>' +
