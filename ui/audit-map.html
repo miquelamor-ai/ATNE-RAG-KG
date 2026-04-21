@@ -11,11 +11,10 @@
 
 <link rel="stylesheet" href="/ui/styles/tokens.css">
 <link rel="stylesheet" href="/ui/styles/base.css">
-<link rel="stylesheet" href="/ui/styles/shell.css">
 
 <style>
-body{font-family:var(--ui);background:var(--cream);margin:0;color:var(--ink-900)}
-.wrap{max-width:1200px;margin:0 auto;padding:24px}
+body{font-family:var(--ui);background:var(--cream);margin:0;color:var(--ink-900);min-height:100vh}
+.audit-wrap{max-width:1200px;margin:0 auto;padding:24px}
 h1{font-family:var(--serif);font-weight:700;font-size:28px;margin:0 0 6px}
 .sub{color:var(--ink-500);font-size:13px;margin-bottom:24px}
 .card{background:#fff;border:1px solid var(--paper-line);border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:var(--sh-sm)}
@@ -59,7 +58,7 @@ a.back{color:var(--primary);text-decoration:none;font-size:13px}
 </head>
 <body>
 
-<div class="wrap">
+<div class="audit-wrap">
   <a href="/admin" class="back">← Tornar a /admin</a>
   <h1>Auditoria del prompt · Mapa d'instruccions</h1>
   <p class="sub">Tria una combinació de perfil + MECR + DUA + complements i veuràs <b>exactament quines instruccions</b> arriben al prompt del LLM. Transparència total del catàleg (107 instruccions Python).</p>
