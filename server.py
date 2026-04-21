@@ -2132,47 +2132,70 @@ def _call_llm(model_id: str, system_prompt: str, text: str) -> str:
         return r.json()["choices"][0]["message"]["content"] or ""
     elif provider == "gemma4":
         errors = []
+        # Retry amb backoff per errors transitoris (500 INTERNAL, 503 UNAVAILABLE,
+        # timeouts). Google Gemma 4 API tè hipos puntuals, sense retry perds la
+        # crida sencera. Amb [2s, 4s] resolem la majoria.
+        _RETRYABLE = ("INTERNAL", "UNAVAILABLE", "RESOURCE_EXHAUSTED",
+                      "DEADLINE_EXCEEDED", "500", "502", "503", "504")
         for attempt in range(len(GEMMA4_API_KEYS)):
             idx = (_gemma4_key_idx + attempt) % len(GEMMA4_API_KEYS)
             client = genai.Client(
                 api_key=GEMMA4_API_KEYS[idx],
                 http_options=types.HttpOptions(timeout=300_000),
             )
-            try:
-                response = client.models.generate_content(
-                    model=specific_model,
-                    contents=[types.Content(role="user", parts=[types.Part(text=f"{system_prompt}\n\n---\n\nTEXT ORIGINAL A ADAPTAR:\n\n{text}")])],
-                    config=types.GenerateContentConfig(temperature=0.4, max_output_tokens=8192),
-                )
-                _gemma4_key_idx = (idx + 1) % len(GEMMA4_API_KEYS)  # rotar per la pròxima crida
-                return response.text or ""
-            except Exception as e:
-                errors.append(f"clau {idx+1}: {e}")
-                continue
+            last_err = None
+            for retry_delay in (0, 2, 4):
+                if retry_delay > 0:
+                    time.sleep(retry_delay)
+                try:
+                    response = client.models.generate_content(
+                        model=specific_model,
+                        contents=[types.Content(role="user", parts=[types.Part(text=f"{system_prompt}\n\n---\n\nTEXT ORIGINAL A ADAPTAR:\n\n{text}")])],
+                        config=types.GenerateContentConfig(temperature=0.4, max_output_tokens=8192),
+                    )
+                    _gemma4_key_idx = (idx + 1) % len(GEMMA4_API_KEYS)  # rotar per la pròxima crida
+                    return response.text or ""
+                except Exception as e:
+                    last_err = e
+                    err_str = str(e)
+                    if not any(code in err_str for code in _RETRYABLE):
+                        break  # error no transitori (auth, quota, etc.) — passa a la seguent clau
+                    print(f"[Gemma4 retry] clau {idx+1}: {err_str[:120]} — backoff {retry_delay}s", flush=True)
+            errors.append(f"clau {idx+1}: {last_err}")
         raise RuntimeError(f"Totes les claus Gemma4 han fallat: {'; '.join(errors)}")
     elif provider == "gemini":
         errors = []
+        _RETRYABLE = ("INTERNAL", "UNAVAILABLE", "RESOURCE_EXHAUSTED",
+                      "DEADLINE_EXCEEDED", "500", "502", "503", "504")
         for attempt in range(len(GEMINI_API_KEYS)):
             idx = (_gemini_key_idx + attempt) % len(GEMINI_API_KEYS)
             client = genai.Client(
                 api_key=GEMINI_API_KEYS[idx],
                 http_options=types.HttpOptions(timeout=300_000),
             )
-            try:
-                response = client.models.generate_content(
-                    model=specific_model,
-                    contents=[types.Content(role="user", parts=[types.Part(text=text)])],
-                    config=types.GenerateContentConfig(
-                        system_instruction=system_prompt,
-                        temperature=0.4, max_output_tokens=8192,
-                        thinking_config=types.ThinkingConfig(thinking_budget=0),
-                    ),
-                )
-                _gemini_key_idx = (idx + 1) % len(GEMINI_API_KEYS)
-                return response.text or ""
-            except Exception as e:
-                errors.append(f"clau {idx+1}: {e}")
-                continue
+            last_err = None
+            for retry_delay in (0, 2, 4):
+                if retry_delay > 0:
+                    time.sleep(retry_delay)
+                try:
+                    response = client.models.generate_content(
+                        model=specific_model,
+                        contents=[types.Content(role="user", parts=[types.Part(text=text)])],
+                        config=types.GenerateContentConfig(
+                            system_instruction=system_prompt,
+                            temperature=0.4, max_output_tokens=8192,
+                            thinking_config=types.ThinkingConfig(thinking_budget=0),
+                        ),
+                    )
+                    _gemini_key_idx = (idx + 1) % len(GEMINI_API_KEYS)
+                    return response.text or ""
+                except Exception as e:
+                    last_err = e
+                    err_str = str(e)
+                    if not any(code in err_str for code in _RETRYABLE):
+                        break
+                    print(f"[Gemini retry] clau {idx+1}: {err_str[:120]} — backoff {retry_delay}s", flush=True)
+            errors.append(f"clau {idx+1}: {last_err}")
         raise RuntimeError(f"Totes les claus Gemini han fallat: {'; '.join(errors)}")
     elif provider == "gpt":
         from openai import OpenAI
