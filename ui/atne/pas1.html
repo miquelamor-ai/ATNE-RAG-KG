@@ -1378,7 +1378,7 @@
       const sub = DX_SUBS[k]; if(!sub) return '';
       let body = '';
       if(sub.type === 'tags'){
-        body = `<div class="tags">${sub.items.map(s=>`<button class="tag" type="button">${s}</button>`).join('')}</div>`;
+        body = `<div class="tags" data-subvar="tags">${sub.items.map(s=>`<button class="tag" type="button" data-val="${s}">${s}</button>`).join('')}</div>`;
       } else if(sub.type === 'l2'){
         const cOpts = ['Marroc','Pakistan','Xina','Senegal','Hondures','Colòmbia','Bolívia','Equador','Romania','Ucraïna','Filipines','Bangla Desh','Algèria','Nigèria','Sahara Occidental','Altre…'];
         const tOpts = ['Menys de 6 mesos','6-12 mesos','1-2 anys','Més de 2 anys'];
@@ -1388,14 +1388,14 @@
             <select class="inp" data-l2="l1"><option value="">— Tria —</option>${L1_OPTS.map(o=>`<option>${o}</option>`).join('')}</select>
             <span class="l2-meta" data-l2-meta hidden></span>
           </label>
-          <label class="sub-f"><span class="sub-l">País d'origen</span><select class="inp"><option value="">— Tria —</option>${cOpts.map(o=>`<option>${o}</option>`).join('')}</select></label>
-          <label class="sub-f"><span class="sub-l">Temps a Catalunya</span><select class="inp"><option value="">— Tria —</option>${tOpts.map(o=>`<option>${o}</option>`).join('')}</select></label>
-          <div class="sub-f"><span class="sub-l">Coneix l'alfabet llatí</span><div class="toggle"><button class="tg" type="button">Sí</button><button class="tg" type="button">No</button></div></div>
-          <div class="sub-f"><span class="sub-l">Alfabetització en L1</span><div class="toggle"><button class="tg" type="button">Sí</button><button class="tg" type="button">No</button></div></div>
-          <div class="sub-f"><span class="sub-l">Escolarització prèvia</span><div class="toggle"><button class="tg" type="button">Regular</button><button class="tg" type="button">Interrompuda</button></div></div>
+          <label class="sub-f"><span class="sub-l">País d'origen</span><select class="inp" data-l2="pais"><option value="">— Tria —</option>${cOpts.map(o=>`<option>${o}</option>`).join('')}</select></label>
+          <label class="sub-f"><span class="sub-l">Temps a Catalunya</span><select class="inp" data-l2="mesos_range"><option value="">— Tria —</option>${tOpts.map(o=>`<option>${o}</option>`).join('')}</select></label>
+          <div class="sub-f" data-l2="alfabet_llati"><span class="sub-l">Coneix l'alfabet llatí</span><div class="toggle"><button class="tg" type="button" data-val="true">Sí</button><button class="tg" type="button" data-val="false">No</button></div></div>
+          <div class="sub-f" data-l2="alfabetitzacio_l1"><span class="sub-l">Alfabetització en L1</span><div class="toggle"><button class="tg" type="button" data-val="true">Sí</button><button class="tg" type="button" data-val="false">No</button></div></div>
+          <div class="sub-f" data-l2="escolaritzacio"><span class="sub-l">Escolarització prèvia</span><div class="toggle"><button class="tg" type="button" data-val="regular">Regular</button><button class="tg" type="button" data-val="interrompuda">Interrompuda</button></div></div>
         </div>`;
       }
-      return `<div class="sub"><div class="sub-t">${DX_NAMES[k]} · subvariables</div>${body}</div>`;
+      return `<div class="sub" data-dx="${k}"><div class="sub-t">${DX_NAMES[k]} · subvariables</div>${body}</div>`;
     }).join('');
     host.querySelectorAll('.tag').forEach(t => t.addEventListener('click', e => { e.preventDefault(); t.classList.toggle('on'); }));
     host.querySelectorAll('.toggle').forEach(tg => {
@@ -1603,6 +1603,41 @@
       if (tag) { tag.classList.add('on'); dxSel.add(dx); }
     });
     renderDx();
+    // Restaurar subvariables després de renderDx (que crea els inputs)
+    if (p.subvariables && typeof p.subvariables === 'object') {
+      Object.entries(p.subvariables).forEach(([dx, sv]) => {
+        const subEl = form.querySelector(`#dx-subs .sub[data-dx="${dx}"]`);
+        if (!subEl) return;
+        if (Array.isArray(sv.tags)) {
+          sv.tags.forEach(val => {
+            const btn = subEl.querySelector(`[data-subvar="tags"] .tag[data-val="${val}"]`);
+            if (btn) btn.classList.add('on');
+          });
+        }
+        if (dx === 'l2') {
+          if (sv.l1) {
+            const sel = subEl.querySelector('[data-l2="l1"]');
+            if (sel) { sel.value = sv.l1; sel.dispatchEvent(new Event('change')); }
+          }
+          if (sv.pais) {
+            const sel = subEl.querySelector('[data-l2="pais"]');
+            if (sel) sel.value = sv.pais;
+          }
+          if (sv.mesos_range) {
+            const sel = subEl.querySelector('[data-l2="mesos_range"]');
+            if (sel) sel.value = sv.mesos_range;
+          }
+          ['alfabet_llati','alfabetitzacio_l1','escolaritzacio'].forEach(k => {
+            if (sv[k] === undefined) return;
+            const wrap = subEl.querySelector(`[data-l2="${k}"]`);
+            if (!wrap) return;
+            const wanted = (sv[k] === true) ? 'true' : (sv[k] === false) ? 'false' : String(sv[k]);
+            const btn = wrap.querySelector(`.tg[data-val="${wanted}"]`);
+            if (btn) btn.classList.add('on');
+          });
+        }
+      });
+    }
     updateAids();
 
     // Canvia el botó
@@ -1749,6 +1784,45 @@
 
   // ── Creació de perfil (persona) ───────────────────────────────────────────
 
+  // Captura les subvariables (tags + camps L2) del DOM generat per renderDx().
+  function _collectPersonSubvariables() {
+    const subvariables = {};
+    document.querySelectorAll('.mode[data-m="person"] #dx-subs .sub').forEach(sub => {
+      const dx = sub.dataset.dx;
+      if (!dx) return;
+      // Tags (per tdah, disl, ac, tea, di, au, vi)
+      const tagBox = sub.querySelector('[data-subvar="tags"]');
+      if (tagBox) {
+        const tags = Array.from(tagBox.querySelectorAll('.tag.on'))
+          .map(t => t.dataset.val || t.textContent.trim());
+        if (tags.length) subvariables[dx] = { tags };
+      }
+      // L2 (nouvingut): L1, país, mesos, alfabet, alfabetització, escolarització
+      if (dx === 'l2') {
+        const l2 = {};
+        const l1Sel = sub.querySelector('[data-l2="l1"]');
+        if (l1Sel && l1Sel.value) l2.l1 = l1Sel.value;
+        const paisSel = sub.querySelector('[data-l2="pais"]');
+        if (paisSel && paisSel.value) l2.pais = paisSel.value;
+        const mesosSel = sub.querySelector('[data-l2="mesos_range"]');
+        if (mesosSel && mesosSel.value) l2.mesos_range = mesosSel.value;
+        ['alfabet_llati','alfabetitzacio_l1','escolaritzacio'].forEach(key => {
+          const wrap = sub.querySelector(`[data-l2="${key}"]`);
+          if (!wrap) return;
+          const active = wrap.querySelector('.tg.on');
+          if (active) {
+            let v = active.dataset.val ?? active.textContent.trim();
+            if (v === 'true') v = true;
+            else if (v === 'false') v = false;
+            l2[key] = v;
+          }
+        });
+        if (Object.keys(l2).length) subvariables.l2 = l2;
+      }
+    });
+    return subvariables;
+  }
+
   function _buildPersonProfile() {
     const nameInp  = document.querySelector('.mode[data-m="person"] .inp');
     const courseInp= document.querySelectorAll('.mode[data-m="person"] .inp')[1];
@@ -1788,7 +1862,7 @@
     return {
       id: pid, type: 'person', name, course, avatar: name[0]?.toUpperCase() || 'P',
       cat, mecr, chips, behaviors: behaviors.filter(Boolean), aids: aids.filter(Boolean),
-      conditions: dxTags, custom: true
+      conditions: dxTags, subvariables: _collectPersonSubvariables(), custom: true
     };
   }
 

@@ -959,6 +959,27 @@
             </div>
           </div>
 
+          <!-- Meta info per al docent: argumentació pedagògica + notes d'auditoria.
+               Sempre es generen al prompt (server.py:1718,1727). Abans es perdien
+               perquè parseAdaptedSections les captava però applyComplementsToViews
+               no les renderitzava. -->
+          <details id="view-meta-docent" class="meta-docent" hidden style="margin-top:24px;background:var(--cream-2);border:1px solid var(--paper-line);border-radius:10px;padding:12px 16px">
+            <summary style="cursor:pointer;font-family:var(--serif);font-size:15px;font-weight:600;color:var(--primary);padding:4px 0">
+              Informació per al docent
+              <span style="color:var(--ink-500);font-weight:400;font-size:12px;margin-left:6px">(argumentació pedagògica + canvis realitzats)</span>
+            </summary>
+            <div style="margin-top:14px;display:grid;grid-template-columns:1fr;gap:18px">
+              <div id="meta-argumentacio-wrap" hidden>
+                <div style="font-family:var(--serif);font-weight:700;font-size:14px;color:var(--ink-800);margin-bottom:6px">Argumentació pedagògica</div>
+                <div id="meta-argumentacio" style="font-size:13px;line-height:1.55;color:var(--ink-700)"></div>
+              </div>
+              <div id="meta-auditoria-wrap" hidden>
+                <div style="font-family:var(--serif);font-weight:700;font-size:14px;color:var(--ink-800);margin-bottom:6px">Notes d'auditoria</div>
+                <div id="meta-auditoria" style="font-size:13px;line-height:1.55;color:var(--ink-700)"></div>
+              </div>
+            </div>
+          </details>
+
         </div>
 
         <!-- Floating rail -->
@@ -2237,6 +2258,23 @@
       if (cont) { cont.dataset.md = complements[key]; cont.innerHTML = md2html(complements[key]); }
       updateChipDot(meta.chip, 'ok');
     });
+
+    // Meta-informació per al docent: argumentació pedagògica + notes
+    // d'auditoria. El prompt SEMPRE demana aquestes seccions (server.py:1718,
+    // 1727); les mostrem plegades al peu del Pas 3 si el LLM les ha generat.
+    const metaWrap = document.getElementById('view-meta-docent');
+    let anyMeta = false;
+    if (complements.argumentacio) {
+      const wrap = document.getElementById('meta-argumentacio-wrap');
+      const cont = document.getElementById('meta-argumentacio');
+      if (wrap && cont) { cont.innerHTML = md2html(complements.argumentacio); wrap.hidden = false; anyMeta = true; }
+    }
+    if (complements.auditoria) {
+      const wrap = document.getElementById('meta-auditoria-wrap');
+      const cont = document.getElementById('meta-auditoria');
+      if (wrap && cont) { cont.innerHTML = md2html(complements.auditoria); wrap.hidden = false; anyMeta = true; }
+    }
+    if (metaWrap) metaWrap.hidden = !anyMeta;
   }
   function updateChipDot(comp, state) {
     const chip = document.querySelector('.cmp-chip[data-comp="' + comp + '"]');

@@ -61,6 +61,106 @@
    * @param {Object} p  Perfil de window.ATNE_PROFILES (marc/mireia/...).
    * @returns {Object}  Dict amb {nom, caracteristiques, canal_preferent, ...}
    */
+  // Mapeig de subvariables del front (profile.subvariables) cap al format
+  // que espera el backend dins de caracteristiques.{condicio}.{subvar}.
+  // Referència de keys suportades: instruction_filter._check_subvar_conditions.
+  function _applySubvarsToBackendChars(sv, chars) {
+    if (!sv || typeof sv !== 'object') return;
+
+    // TDAH: tags → grau (Lleu/Moderat/Sever) o subtipus. El catàleg només
+    // consulta tdah.grau=='sever' i tdah.baixa_memoria_treball, tdah.fatiga_cognitiva.
+    if (sv.tdah && Array.isArray(sv.tdah.tags)) {
+      const tags = sv.tdah.tags.map(t => String(t).toLowerCase());
+      chars.tdah = chars.tdah || { actiu: true };
+      if (tags.some(t => t.includes('sever'))) chars.tdah.grau = 'sever';
+      chars.tdah.subtipus = sv.tdah.tags[0] || '';
+    }
+
+    // Dislèxia: tags → tipus_dislexia (fonologica/superficial/mixta) i grau.
+    if (sv.disl && Array.isArray(sv.disl.tags)) {
+      const tags = sv.disl.tags.map(t => String(t).toLowerCase());
+      chars.dislexia = chars.dislexia || { actiu: true };
+      if (tags.some(t => t.includes('fono'))) chars.dislexia.tipus_dislexia = 'fonologica';
+      else if (tags.some(t => t.includes('mixta'))) chars.dislexia.tipus_dislexia = 'mixta';
+      else if (tags.some(t => t.includes('superf'))) chars.dislexia.tipus_dislexia = 'superficial';
+    }
+
+    // Altes capacitats: tags informatius (creativa/acadèmica/doble excep.).
+    if (sv.ac && Array.isArray(sv.ac.tags)) {
+      chars.altes_capacitats = chars.altes_capacitats || { actiu: true };
+      chars.altes_capacitats.tipus = sv.ac.tags[0] || '';
+    }
+
+    // TEA: tags → suport_nivell (1/2/3) + sensibilitat sensorial flag.
+    if (sv.tea && Array.isArray(sv.tea.tags)) {
+      const tags = sv.tea.tags.map(t => String(t).toLowerCase());
+      chars.tea = chars.tea || { actiu: true };
+      if (tags.some(t => t.includes('nivell 3'))) chars.tea.suport_nivell = 3;
+      else if (tags.some(t => t.includes('nivell 2'))) chars.tea.suport_nivell = 2;
+      else if (tags.some(t => t.includes('nivell 1'))) chars.tea.suport_nivell = 1;
+      if (tags.some(t => t.includes('sensibilitat'))) chars.tea.sensibilitat_sensorial = true;
+    }
+
+    // DI: tags → grau ('Significativa' → 'sever', altres → valor directe).
+    if (sv.di && Array.isArray(sv.di.tags)) {
+      const tags = sv.di.tags.map(t => String(t).toLowerCase());
+      chars.discapacitat_intellectual = chars.discapacitat_intellectual || { actiu: true };
+      if (tags.some(t => t.includes('signi'))) chars.discapacitat_intellectual.grau = 'sever';
+      else if (tags.some(t => t.includes('moder'))) chars.discapacitat_intellectual.grau = 'moderat';
+      else if (tags.some(t => t.includes('lleu'))) chars.discapacitat_intellectual.grau = 'lleu';
+    }
+
+    // Disc. auditiva: tags → grau + comunicacio (LSC per al catàleg).
+    if (sv.au && Array.isArray(sv.au.tags)) {
+      const tags = sv.au.tags.map(t => String(t).toLowerCase());
+      chars.discapacitat_auditiva = chars.discapacitat_auditiva || { actiu: true };
+      if (tags.some(t => t.includes('lsc'))) chars.discapacitat_auditiva.comunicacio = 'LSC';
+      if (tags.some(t => t.includes('sever'))) chars.discapacitat_auditiva.grau = 'sever';
+      else if (tags.some(t => t.includes('moder'))) chars.discapacitat_auditiva.grau = 'moderat';
+      else if (tags.some(t => t.includes('lleu'))) chars.discapacitat_auditiva.grau = 'lleu';
+    }
+
+    // Disc. visual: tags → grau (Ceguesa consulta al catàleg amb grau_ceguesa).
+    if (sv.vi && Array.isArray(sv.vi.tags)) {
+      const tags = sv.vi.tags.map(t => String(t).toLowerCase());
+      chars.discapacitat_visual = chars.discapacitat_visual || { actiu: true };
+      if (tags.some(t => t.includes('ceguesa'))) chars.discapacitat_visual.grau = 'ceguesa';
+      else if (tags.some(t => t.includes('baixa'))) chars.discapacitat_visual.grau = 'baixa_visio';
+      if (tags.some(t => t.includes('braille'))) chars.discapacitat_visual.usa_braille = true;
+    }
+
+    // L2 / Nouvingut: L1, país, mesos_catalunya, alfabet_llati, alfabetitzacio_l1.
+    if (sv.l2 && typeof sv.l2 === 'object') {
+      chars.nouvingut = chars.nouvingut || { actiu: true };
+      if (sv.l2.l1) chars.nouvingut.l1 = sv.l2.l1;
+      if (sv.l2.pais) chars.nouvingut.pais = sv.l2.pais;
+      if (sv.l2.mesos_range) {
+        chars.nouvingut.mesos_catalunya_range = sv.l2.mesos_range;
+        // Mapeig rang → punt mitjà en mesos (per a computeMECRSortida)
+        const mesosMap = {
+          'Menys de 6 mesos': 3,
+          '6-12 mesos': 9,
+          '1-2 anys': 18,
+          'Més de 2 anys': 30,
+        };
+        if (mesosMap[sv.l2.mesos_range] !== undefined) {
+          chars.nouvingut.mesos_catalunya = mesosMap[sv.l2.mesos_range];
+        }
+      }
+      if (sv.l2.alfabet_llati !== undefined) {
+        chars.nouvingut.alfabet_llati = !!sv.l2.alfabet_llati;
+      }
+      if (sv.l2.alfabetitzacio_l1 !== undefined) {
+        chars.nouvingut.alfabetitzacio_l1 = !!sv.l2.alfabetitzacio_l1;
+      }
+      if (sv.l2.escolaritzacio) chars.nouvingut.escolaritzacio = sv.l2.escolaritzacio;
+      // Família lingüística i L1_romanica (per a l'instrucció E-11)
+      const ROMANCE = ['català','castellà','espanyol','portuguès','italià','francès','romanès','gallec','occità','romanes'];
+      const l1Norm = String(sv.l2.l1 || '').toLowerCase();
+      if (ROMANCE.some(r => l1Norm.includes(r))) chars.nouvingut.familia_linguistica = 'romanica';
+    }
+  }
+
   function buildBackendProfile(p) {
     const caracteristiques = {};
     // Totes les característiques inicialitzades a actiu=false (requisit backend)
@@ -82,6 +182,10 @@
         if (c) caracteristiques[c] = { actiu: true };
       }
     }
+    // Propaga subvariables al format backend (caracteristiques.{condicio}.{subvar}).
+    // Això és el que dispara instruccions fines al filtre (ex: G-01 bilingüisme
+    // amb L1 concret, H-20b LSC, A-21 alfabet no-llatí, etc.).
+    _applySubvarsToBackendChars(p.subvariables, caracteristiques);
     return {
       nom: p.name,
       caracteristiques,

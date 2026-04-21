@@ -2585,6 +2585,11 @@ def _verify_adaptation(active_model: str, text_original: str, text_adapted: str,
     return avg, {"Q": q, "P": p, "C": c, "j": data.get("j", "")}
 
 
+# Debug: darrera adaptació feta (inspecció admin). Només en memòria.
+# S'omple a run_adaptation() i es llegeix via /api/debug/last-adaptation.
+_ATNE_LAST_ADAPTATION: dict = {}
+
+
 def _log_session(session: dict) -> None:
     """Insereix una fila a atne_sessions (Supabase). Fire-and-forget."""
     if not SUPABASE_URL or not SUPABASE_ANON_KEY:
@@ -2627,6 +2632,28 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
         for _macro in _filtered.get("macrodirectives", {}).values()
         for instr in _macro.get("instruccions", [])
     ]
+
+    # Debug: desem el context de la darrera adaptació per poder inspeccionar
+    # des de /api/debug/last-adaptation (admin-only). Només memòria, no disc.
+    global _ATNE_LAST_ADAPTATION
+    _ATNE_LAST_ADAPTATION = {
+        "ts": time.time(),
+        "iso": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "docent_id": docent_id or "",
+        "model": active_model,
+        "profile": profile,
+        "context": context,
+        "params": params,
+        "text_input": text,
+        "text_input_len": len(text),
+        "system_prompt": system_prompt,
+        "system_prompt_len": len(system_prompt),
+        "system_prompt_words": len(system_prompt.split()),
+        "instruction_ids": _instruction_ids,
+        "n_instructions": len(_instruction_ids),
+        "adapted_output": "",  # s'emplena després
+        "adapted_output_len": 0,
+    }
 
     # 5. Cridar LLM segons active_model (amb Generate+Verify+Retry)
     # Label UI derivat del (provider, specific_model) — compat amb alias curts i model_id llargs.
@@ -2786,6 +2813,13 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
     result_ev = {"type": "result", "adapted": adapted, "post_process": pp}
     if verify_info is not None:
         result_ev["verify"] = {"score": best_score, **verify_info}
+    # Debug: emplenar la sortida adaptada al registre en memòria
+    try:
+        if _ATNE_LAST_ADAPTATION:
+            _ATNE_LAST_ADAPTATION["adapted_output"] = adapted
+            _ATNE_LAST_ADAPTATION["adapted_output_len"] = len(adapted)
+    except Exception:
+        pass
     if quality is not None:
         result_ev["quality_report"] = {
             "n_correccions": quality["n_correccions"],
@@ -2807,9 +2841,17 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
 
     # Telemetria pilot: log asíncron a atne_sessions (fire-and-forget)
     try:
-        _conditions = profile.get("conditions") or profile.get("caracteristiques") or []
-        if isinstance(_conditions, str):
-            _conditions = [_conditions]
+        # Bug fix 2026-04-21: caracteristiques és un dict {key: {actiu: bool}}.
+        # list(dict) retornava totes les claus (actives i no actives). Ara
+        # filtrem només les condicions actives.
+        _raw_conds = profile.get("conditions") or profile.get("caracteristiques") or []
+        if isinstance(_raw_conds, str):
+            _conditions = [_raw_conds]
+        elif isinstance(_raw_conds, dict):
+            _conditions = [k for k, v in _raw_conds.items()
+                           if isinstance(v, dict) and v.get("actiu")]
+        else:
+            _conditions = list(_raw_conds)
         import threading as _threading
         _threading.Thread(
             target=_log_session,
@@ -3309,6 +3351,20 @@ async def admin_analytics(_: bool = Depends(_require_admin)):
         "verify_avg": verify_avg,
         "recent": recent,
     }
+
+
+@app.get("/api/audit/last-adaptation")
+async def audit_last_adaptation(_: bool = Depends(_require_admin)):
+    """Retorna el context complet de la darrera adaptació feta (memòria).
+
+    Inclou: system prompt complet, text original, perfil, params, model usat,
+    instruction_ids filtrades, i output del LLM. Permet inspeccionar
+    EXACTAMENT què va rebre el LLM per diagnosticar per què no obeeix
+    instruccions concretes.
+    """
+    if not _ATNE_LAST_ADAPTATION:
+        return {"ok": True, "empty": True, "msg": "No hi ha cap adaptació registrada des del reinici del servidor."}
+    return {"ok": True, "empty": False, "data": _ATNE_LAST_ADAPTATION}
 
 
 @app.post("/api/audit/instruction-map")

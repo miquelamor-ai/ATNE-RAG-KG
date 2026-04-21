@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ATNE · Darrera adaptació</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/ui/styles/tokens.css">
+<link rel="stylesheet" href="/ui/styles/base.css">
+
+<style>
+body{font-family:var(--ui);background:var(--cream);margin:0;color:var(--ink-900);min-height:100vh}
+.wrap{max-width:1200px;margin:0 auto;padding:24px}
+h1{font-family:var(--serif);font-weight:700;font-size:26px;margin:0 0 6px}
+.sub{color:var(--ink-500);font-size:13px;margin-bottom:20px}
+.card{background:#fff;border:1px solid var(--paper-line);border-radius:10px;padding:16px 20px;margin-bottom:16px;box-shadow:var(--sh-sm)}
+.card h2{font-family:var(--serif);margin:0 0 10px;font-size:17px;color:var(--primary)}
+.meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;font-size:12.5px}
+.meta-grid b{color:var(--ink-500);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.03em;display:block;margin-bottom:2px}
+pre{background:var(--cream-2);border:1px solid var(--paper-line);padding:12px;border-radius:6px;font-family:var(--mono);font-size:11.5px;line-height:1.55;overflow-x:auto;white-space:pre-wrap;max-height:520px;color:var(--ink-800)}
+.id-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.id-chip{display:inline-block;padding:2px 7px;background:var(--cream-2);border:1px solid var(--paper-line);border-radius:10px;font-family:var(--mono);font-size:10px;color:var(--ink-600)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;font-size:13px;font-weight:600;border-radius:7px;border:none;cursor:pointer;background:var(--primary);color:#fff;text-decoration:none}
+.btn.secondary{background:var(--cream-2);color:var(--ink-800);border:1px solid var(--paper-line)}
+.empty{padding:40px;text-align:center;color:var(--ink-500);font-style:italic}
+.back{color:var(--primary);text-decoration:none;font-size:13px;margin-bottom:12px;display:inline-block}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <a href="/admin" class="back">← Tornar a /admin</a>
+  <h1>Darrera adaptació</h1>
+  <p class="sub">Mostra el context complet de l'última crida a <code>/api/adapt</code>: el system prompt exacte que el LLM va rebre, les IDs d'instruccions filtrades, i la resposta. Només en memòria — es perd si el servidor es reinicia.</p>
+
+  <div class="row" style="margin-bottom:16px">
+    <button class="btn" onclick="load()">↻ Recarregar</button>
+    <span id="ts" style="font-size:11.5px;color:var(--ink-500)"></span>
+  </div>
+
+  <div id="content"></div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+async function load() {
+  const target = $('#content');
+  target.innerHTML = '<div class="empty">Carregant…</div>';
+  try {
+    const r = await fetch('/api/audit/last-adaptation', { credentials: 'same-origin' });
+    if (r.status === 401) {
+      target.innerHTML = '<div class="empty">Sessió admin expirada. <a href="/admin">Entra</a></div>';
+      return;
+    }
+    const j = await r.json();
+    if (j.empty) {
+      target.innerHTML = '<div class="empty">Encara no hi ha cap adaptació registrada des de l\'últim reinici del servidor. Fes una adaptació i torna aquí.</div>';
+      return;
+    }
+    const d = j.data;
+    $('#ts').textContent = 'Darrera adaptació: ' + d.iso + ' (fa ' + humanSince(d.ts) + ')';
+    const chars = (d.profile && d.profile.caracteristiques) || {};
+    const activeChars = Object.entries(chars).filter(([k,v]) => v && v.actiu).map(([k])=>k);
+    target.innerHTML = `
+      <div class="card">
+        <h2>Context de la crida</h2>
+        <div class="meta-grid">
+          <div><b>Model usat</b>${esc(d.model)}</div>
+          <div><b>Docent ID</b>${esc(d.docent_id || '—')}</div>
+          <div><b>MECR sortida</b>${esc((d.params || {}).mecr_sortida || '—')}</div>
+          <div><b>DUA</b>${esc((d.params || {}).dua || '—')}</div>
+          <div><b>Gènere</b>${esc((d.params || {}).genere_discursiu || '—')}</div>
+          <div><b>Condicions actives</b>${activeChars.length ? activeChars.map(c => `<span class="id-chip">${esc(c)}</span>`).join(' ') : '—'}</div>
+          <div><b>Complements activats</b>${Object.entries((d.params||{}).complements||{}).filter(([k,v])=>v).map(([k])=>`<span class="id-chip">${esc(k)}</span>`).join(' ') || '—'}</div>
+          <div><b>Instruccions filtrades</b>${d.n_instructions} actives</div>
+          <div><b>System prompt</b>${d.system_prompt_len} caràcters · ${d.system_prompt_words} paraules</div>
+          <div><b>Text input</b>${d.text_input_len} caràcters</div>
+          <div><b>Output adaptat</b>${d.adapted_output_len} caràcters</div>
+        </div>
+        <div style="margin-top:12px"><b style="font-size:11px;color:var(--ink-500);text-transform:uppercase">Instruction IDs (${d.n_instructions})</b></div>
+        <div class="id-chips">${(d.instruction_ids||[]).map(id => `<span class="id-chip">${esc(id)}</span>`).join('')}</div>
+      </div>
+
+      <div class="card">
+        <h2>System prompt complet (exactament el que va rebre el LLM)</h2>
+        <pre>${esc(d.system_prompt)}</pre>
+      </div>
+
+      <div class="card">
+        <h2>Text original d'entrada</h2>
+        <pre>${esc(d.text_input)}</pre>
+      </div>
+
+      <div class="card">
+        <h2>Output adaptat (resposta del LLM)</h2>
+        <pre>${esc(d.adapted_output)}</pre>
+      </div>
+    `;
+  } catch (e) {
+    target.innerHTML = '<div class="empty">Error: ' + esc(e.message) + '</div>';
+  }
+}
+
+function humanSince(ts) {
+  const diff = Math.floor((Date.now()/1000) - ts);
+  if (diff < 60) return diff + 's';
+  if (diff < 3600) return Math.floor(diff/60) + 'min';
+  if (diff < 86400) return Math.floor(diff/3600) + 'h';
+  return Math.floor(diff/86400) + 'd';
+}
+
+load();
+</script>
+
+</body>
+</html>
