@@ -57,17 +57,17 @@ Tot assaig adaptat ha de tenir **aquestes parts, en aquest ordre**:
 ```markdown
 # [Títol de l'assaig]
 
-## Introducció
+### Introducció
 [Tesi clara, explícita.]
 
-## [Apartat 1 - idea del paraigua tesi]
+### [Apartat 1 - idea del paraigua tesi]
 [Desenvolupament. "Cita integrada", diu [autor]. La cita importa
 perquè...]
 
-## [Apartat 2 - altra idea del paraigua tesi]
+### [Apartat 2 - altra idea del paraigua tesi]
 [Desenvolupament amb vocabulari acadèmic definit.]
 
-## Conclusió
+### Conclusió
 [Síntesi que reprèn la tesi.]
 ```
 

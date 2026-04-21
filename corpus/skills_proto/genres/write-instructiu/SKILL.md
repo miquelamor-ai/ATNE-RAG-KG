@@ -59,17 +59,17 @@ ordre**:
 ```markdown
 # [Títol: què s'aprendrà a fer]
 
-## Materials
+### Materials
 - [Material 1]
 - [Material 2]
 - [Material 3]
 
-## Passos
+### Passos
 1. [Verb + objecte concret.]
 2. [Verb + objecte concret.]
 3. [Verb + objecte concret.]
 
-## Resultat
+### Resultat
 [Què s'ha aconseguit.]
 ```
 

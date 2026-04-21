@@ -95,6 +95,23 @@ def validate_skill(skill_md: Path) -> list[str]:
     if len(body) < 50:
         errors.append(f"{rel}: body molt curt ({len(body)} chars) — probablement buit")
 
+    # Regla anti-regressió: dins del bloc de codi "## Format de sortida",
+    # NO poden aparèixer línies amb "## " (han d'anar amb "###"). Motiu:
+    # el model copia literalment aquest format i trenca el parser de ## top-level.
+    import re as _re
+    fmt_match = _re.search(
+        r'## Format de sortida\s*\n+```[a-z]*\n(.+?)\n```',
+        body, _re.DOTALL,
+    )
+    if fmt_match:
+        inner = fmt_match.group(1)
+        bad_lines = [ln for ln in inner.split("\n") if _re.match(r'^## [^#]', ln)]
+        if bad_lines:
+            errors.append(
+                f"{rel}: el bloc 'Format de sortida' conté {len(bad_lines)} línia(es) amb "
+                f"'## ' (haurien de ser '### '): {bad_lines[0][:60]!r}..."
+            )
+
     return errors
 
 

@@ -61,14 +61,14 @@ Tot manual adaptat ha de tenir **aquestes parts, en aquest ordre**:
 
 [Entradeta: una o dues frases que anuncien què s'explicarà.]
 
-## [Apartat 1]
+### [Apartat 1]
 [Paràgraf amb idea principal. **Terme tècnic**: definició breu.
 Exemple concret.]
 
-## [Apartat 2]
+### [Apartat 2]
 [Paràgraf que es recolza en l'apartat anterior.]
 
-## [Apartat 3]
+### [Apartat 3]
 [Paràgraf final amb la idea més complexa.]
 ```
 

@@ -59,21 +59,21 @@ Tot informe adaptat ha de tenir **aquestes parts, en aquest ordre**:
 ```markdown
 # [Títol de l'informe]
 
-## Resum executiu
+### Resum executiu
 [1-2 frases: què s'ha fet i què s'ha trobat.]
 
-## Objectiu
+### Objectiu
 [Per què s'ha fet l'informe.]
 
-## Mètode
+### Mètode
 [Com s'ha fet, en passat.]
 
-## Resultats
+### Resultats
 - Dada 1
 - Dada 2
 - Dada 3
 
-## Conclusions
+### Conclusions
 **[Frase final prominent amb la idea clau, en present.]**
 ```
 

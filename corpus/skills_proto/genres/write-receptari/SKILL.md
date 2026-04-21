@@ -58,17 +58,17 @@ Tota recepta adaptada ha de tenir **aquestes parts, en aquest ordre**:
 ```markdown
 # [Nom del plat]
 
-## Ingredients
+### Ingredients
 - [Quantitat + ingredient 1]
 - [Quantitat + ingredient 2]
 - [Quantitat + ingredient 3]
 
-## Preparació
+### Preparació
 1. [Verb + objecte concret.]
 2. [Verb + objecte concret.]
 3. [Verb + objecte + indicació sensorial.]
 
-## Resultat
+### Resultat
 [Plat obtingut, amb indicació de racions.]
 ```
 

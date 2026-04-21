@@ -60,16 +60,16 @@ Tot reglament adaptat ha de tenir **aquestes parts, en aquest ordre**:
 ```markdown
 # [Títol del reglament]
 
-## [Tema 1]
+### [Tema 1]
 1. [Norma en imperatiu directe.]
 2. [Norma positiva.]
 3. [Norma positiva.]
 
-## [Tema 2]
+### [Tema 2]
 4. [Norma en imperatiu directe.]
 5. [Norma positiva.]
 
-## Conseqüències
+### Conseqüències
 [Text breu amb les conseqüències si no es compleixen les normes.]
 ```
 
