@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ATNE · Darrera adaptació</title>
+<title>ATNE · Historial d'adaptacions</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,99 +24,200 @@ h1{font-family:var(--serif);font-weight:700;font-size:26px;margin:0 0 6px}
 pre{background:var(--cream-2);border:1px solid var(--paper-line);padding:12px;border-radius:6px;font-family:var(--mono);font-size:11.5px;line-height:1.55;overflow-x:auto;white-space:pre-wrap;max-height:520px;color:var(--ink-800)}
 .id-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
 .id-chip{display:inline-block;padding:2px 7px;background:var(--cream-2);border:1px solid var(--paper-line);border-radius:10px;font-family:var(--mono);font-size:10px;color:var(--ink-600)}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;font-size:13px;font-weight:600;border-radius:7px;border:none;cursor:pointer;background:var(--primary);color:#fff;text-decoration:none}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;font-size:12.5px;font-weight:600;border-radius:6px;border:none;cursor:pointer;background:var(--primary);color:#fff;text-decoration:none}
+.btn:hover{filter:brightness(1.08)}
 .btn.secondary{background:var(--cream-2);color:var(--ink-800);border:1px solid var(--paper-line)}
+.btn-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
 .empty{padding:40px;text-align:center;color:var(--ink-500);font-style:italic}
 .back{color:var(--primary);text-decoration:none;font-size:13px;margin-bottom:12px;display:inline-block}
-.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+select{padding:8px 12px;font-size:13px;border:1px solid var(--ink-150);border-radius:6px;background:#fff;font-family:inherit;min-width:360px}
+.card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.card-head h2{margin:0}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--primary);color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;box-shadow:var(--sh-lg);display:none;z-index:100}
+.toast.on{display:block;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 </style>
 </head>
 <body>
 
 <div class="wrap">
   <a href="/admin" class="back">← Tornar a /admin</a>
-  <h1>Darrera adaptació</h1>
-  <p class="sub">Mostra el context complet de l'última crida a <code>/api/adapt</code>: el system prompt exacte que el LLM va rebre, les IDs d'instruccions filtrades, i la resposta. Només en memòria — es perd si el servidor es reinicia.</p>
+  <h1>Historial d'adaptacions</h1>
+  <p class="sub">Rolling buffer de les últimes 20 adaptacions fetes al servidor. Inclou el system prompt exacte rebut pel LLM, el text original, la resposta i metadades. Es perd al reiniciar Cloud Run.</p>
 
-  <div class="row" style="margin-bottom:16px">
-    <button class="btn" onclick="load()">↻ Recarregar</button>
-    <span id="ts" style="font-size:11.5px;color:var(--ink-500)"></span>
+  <div class="row" style="margin-bottom:16px;gap:14px">
+    <div style="display:flex;gap:8px;align-items:center;flex:1;min-width:300px">
+      <label style="font-size:12px;color:var(--ink-500);font-weight:600">Adaptació:</label>
+      <select id="adapt-select"><option>Carregant…</option></select>
+    </div>
+    <div class="btn-row">
+      <button class="btn secondary" onclick="loadList()">↻ Refrescar llista</button>
+      <button class="btn" id="btn-download">⬇ Descarrega JSON</button>
+    </div>
   </div>
 
   <div id="content"></div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
 const $ = s => document.querySelector(s);
 function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function showToast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('on');
+  setTimeout(() => t.classList.remove('on'), 1800);
+}
 
-async function load() {
-  const target = $('#content');
-  target.innerHTML = '<div class="empty">Carregant…</div>';
+let currentData = null;
+
+async function loadList() {
   try {
-    const r = await fetch('/api/audit/last-adaptation', { credentials: 'same-origin' });
+    const r = await fetch('/api/audit/adaptations', { credentials: 'same-origin' });
     if (r.status === 401) {
-      target.innerHTML = '<div class="empty">Sessió admin expirada. <a href="/admin">Entra</a></div>';
+      $('#content').innerHTML = '<div class="empty">Sessió admin expirada. <a href="/admin">Entra</a></div>';
       return;
     }
     const j = await r.json();
-    if (j.empty) {
-      target.innerHTML = '<div class="empty">Encara no hi ha cap adaptació registrada des de l\'últim reinici del servidor. Fes una adaptació i torna aquí.</div>';
+    const sel = $('#adapt-select');
+    if (!j.adaptations || j.adaptations.length === 0) {
+      sel.innerHTML = '<option>Cap adaptació registrada</option>';
+      $('#content').innerHTML = '<div class="empty">No hi ha cap adaptació des del reinici del servidor.</div>';
       return;
     }
-    const d = j.data;
-    $('#ts').textContent = 'Darrera adaptació: ' + d.iso + ' (fa ' + humanSince(d.ts) + ')';
-    const chars = (d.profile && d.profile.caracteristiques) || {};
-    const activeChars = Object.entries(chars).filter(([k,v]) => v && v.actiu).map(([k])=>k);
-    target.innerHTML = `
-      <div class="card">
-        <h2>Context de la crida</h2>
-        <div class="meta-grid">
-          <div><b>Model usat</b>${esc(d.model)}</div>
-          <div><b>Docent ID</b>${esc(d.docent_id || '—')}</div>
-          <div><b>MECR sortida</b>${esc((d.params || {}).mecr_sortida || '—')}</div>
-          <div><b>DUA</b>${esc((d.params || {}).dua || '—')}</div>
-          <div><b>Gènere</b>${esc((d.params || {}).genere_discursiu || '—')}</div>
-          <div><b>Condicions actives</b>${activeChars.length ? activeChars.map(c => `<span class="id-chip">${esc(c)}</span>`).join(' ') : '—'}</div>
-          <div><b>Complements activats</b>${Object.entries((d.params||{}).complements||{}).filter(([k,v])=>v).map(([k])=>`<span class="id-chip">${esc(k)}</span>`).join(' ') || '—'}</div>
-          <div><b>Instruccions filtrades</b>${d.n_instructions} actives</div>
-          <div><b>System prompt</b>${d.system_prompt_len} caràcters · ${d.system_prompt_words} paraules</div>
-          <div><b>Text input</b>${d.text_input_len} caràcters</div>
-          <div><b>Output adaptat</b>${d.adapted_output_len} caràcters</div>
-        </div>
-        <div style="margin-top:12px"><b style="font-size:11px;color:var(--ink-500);text-transform:uppercase">Instruction IDs (${d.n_instructions})</b></div>
-        <div class="id-chips">${(d.instruction_ids||[]).map(id => `<span class="id-chip">${esc(id)}</span>`).join('')}</div>
-      </div>
-
-      <div class="card">
-        <h2>System prompt complet (exactament el que va rebre el LLM)</h2>
-        <pre>${esc(d.system_prompt)}</pre>
-      </div>
-
-      <div class="card">
-        <h2>Text original d'entrada</h2>
-        <pre>${esc(d.text_input)}</pre>
-      </div>
-
-      <div class="card">
-        <h2>Output adaptat (resposta del LLM)</h2>
-        <pre>${esc(d.adapted_output)}</pre>
-      </div>
-    `;
+    sel.innerHTML = j.adaptations.map((a, idx) => {
+      const label = `${a.iso} · ${a.model} · MECR ${a.mecr_sortida||'?'} · ${a.n_instructions} instr · ${a.n_conditions} cond${idx === 0 ? ' · [darrera]' : ''}`;
+      return `<option value="${a.id}">${esc(label)}</option>`;
+    }).join('');
+    sel.onchange = () => loadDetail(sel.value);
+    await loadDetail(j.adaptations[0].id);
   } catch (e) {
-    target.innerHTML = '<div class="empty">Error: ' + esc(e.message) + '</div>';
+    $('#content').innerHTML = '<div class="empty">Error: ' + esc(e.message) + '</div>';
   }
 }
 
-function humanSince(ts) {
-  const diff = Math.floor((Date.now()/1000) - ts);
-  if (diff < 60) return diff + 's';
-  if (diff < 3600) return Math.floor(diff/60) + 'min';
-  if (diff < 86400) return Math.floor(diff/3600) + 'h';
-  return Math.floor(diff/86400) + 'd';
+async function loadDetail(id) {
+  $('#content').innerHTML = '<div class="empty">Carregant…</div>';
+  try {
+    const r = await fetch('/api/audit/adaptations/' + encodeURIComponent(id), { credentials: 'same-origin' });
+    const j = await r.json();
+    if (!j.ok) {
+      $('#content').innerHTML = '<div class="empty">Error: ' + esc(j.error || 'sense detall') + '</div>';
+      return;
+    }
+    currentData = j.data;
+    renderDetail(j.data);
+  } catch (e) {
+    $('#content').innerHTML = '<div class="empty">Error: ' + esc(e.message) + '</div>';
+  }
 }
 
-load();
+function copyToClipboard(text, label) {
+  navigator.clipboard.writeText(text).then(
+    () => showToast(label + ' copiat al porta-papers'),
+    () => showToast('No s\'ha pogut copiar')
+  );
+}
+
+function downloadJSON() {
+  if (!currentData) return;
+  const json = JSON.stringify(currentData, null, 2);
+  const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `atne-adaptation-${currentData.id || 'last'}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('JSON descarregat');
+}
+
+$('#btn-download').addEventListener('click', downloadJSON);
+
+function renderDetail(d) {
+  const chars = (d.profile && d.profile.caracteristiques) || {};
+  const activeChars = Object.entries(chars).filter(([k,v]) => v && v.actiu);
+  const subvars = activeChars
+    .map(([k, v]) => {
+      const extra = Object.entries(v).filter(([sk]) => sk !== 'actiu');
+      if (!extra.length) return k;
+      return k + '{' + extra.map(([sk,sv]) => `${sk}=${JSON.stringify(sv)}`).join(',') + '}';
+    })
+    .join(', ');
+
+  $('#content').innerHTML = `
+    <div class="card">
+      <div class="card-head">
+        <h2>Context de la crida</h2>
+        <button class="btn secondary" id="btn-copy-summary">📋 Copia resum</button>
+      </div>
+      <div class="meta-grid">
+        <div><b>ID</b><code style="font-size:11px">${esc(d.id)}</code></div>
+        <div><b>Data</b>${esc(d.iso)}</div>
+        <div><b>Model usat</b>${esc(d.model)}</div>
+        <div><b>Docent ID</b>${esc(d.docent_id || '—')}</div>
+        <div><b>MECR sortida</b>${esc((d.params || {}).mecr_sortida || '—')}</div>
+        <div><b>DUA</b>${esc((d.params || {}).dua || '—')}</div>
+        <div><b>Gènere</b>${esc((d.params || {}).genere_discursiu || '—')}</div>
+        <div style="grid-column:1/-1"><b>Caracteristiques actives (amb subvariables)</b>${activeChars.length ? '<div class="id-chips">'+activeChars.map(([k,v]) => `<span class="id-chip">${esc(k)}${Object.keys(v).length > 1 ? ' ⚙' : ''}</span>`).join('')+'</div>' : '—'}${subvars ? '<div style="font-family:var(--mono);font-size:11px;color:var(--ink-500);margin-top:6px">'+esc(subvars)+'</div>' : ''}</div>
+        <div><b>Complements activats</b>${Object.entries((d.params||{}).complements||{}).filter(([k,v])=>v).map(([k])=>`<span class="id-chip">${esc(k)}</span>`).join(' ') || '—'}</div>
+        <div><b>Instruccions filtrades</b>${d.n_instructions} actives</div>
+        <div><b>System prompt</b>${d.system_prompt_len} caràcters · ${d.system_prompt_words} paraules</div>
+        <div><b>Text input</b>${d.text_input_len} caràcters</div>
+        <div><b>Output adaptat</b>${d.adapted_output_len} caràcters</div>
+      </div>
+      <div style="margin-top:12px"><b style="font-size:11px;color:var(--ink-500);text-transform:uppercase">Instruction IDs (${d.n_instructions})</b></div>
+      <div class="id-chips">${(d.instruction_ids||[]).map(id => `<span class="id-chip">${esc(id)}</span>`).join('')}</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>System prompt complet (exactament el que va rebre el LLM)</h2>
+        <button class="btn secondary" id="btn-copy-prompt">📋 Copia prompt</button>
+      </div>
+      <pre id="pre-prompt">${esc(d.system_prompt)}</pre>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>Text original d'entrada</h2>
+        <button class="btn secondary" id="btn-copy-input">📋 Copia text</button>
+      </div>
+      <pre id="pre-input">${esc(d.text_input)}</pre>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>Output adaptat (resposta del LLM)</h2>
+        <button class="btn secondary" id="btn-copy-output">📋 Copia output</button>
+      </div>
+      <pre id="pre-output">${esc(d.adapted_output)}</pre>
+    </div>
+  `;
+
+  $('#btn-copy-prompt').addEventListener('click', () => copyToClipboard(d.system_prompt, 'Prompt'));
+  $('#btn-copy-input').addEventListener('click', () => copyToClipboard(d.text_input, 'Text original'));
+  $('#btn-copy-output').addEventListener('click', () => copyToClipboard(d.adapted_output, 'Output'));
+  $('#btn-copy-summary').addEventListener('click', () => {
+    const summary = `ATNE adaptation ${d.id}
+Data: ${d.iso}
+Model: ${d.model}
+MECR: ${(d.params||{}).mecr_sortida||'?'} · DUA: ${(d.params||{}).dua||'?'}
+Condicions: ${subvars || '(cap)'}
+Instruccions (${d.n_instructions}): ${(d.instruction_ids||[]).join(', ')}
+System prompt: ${d.system_prompt_len} chars · ${d.system_prompt_words} words
+Input: ${d.text_input_len} chars
+Output: ${d.adapted_output_len} chars`;
+    copyToClipboard(summary, 'Resum');
+  });
+}
+
+loadList();
 </script>
 
 </body>

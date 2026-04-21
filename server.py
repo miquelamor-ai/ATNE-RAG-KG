@@ -2585,9 +2585,12 @@ def _verify_adaptation(active_model: str, text_original: str, text_adapted: str,
     return avg, {"Q": q, "P": p, "C": c, "j": data.get("j", "")}
 
 
-# Debug: darrera adaptació feta (inspecció admin). Només en memòria.
-# S'omple a run_adaptation() i es llegeix via /api/debug/last-adaptation.
+# Debug: rolling buffer de les últimes adaptacions (inspecció admin).
+# Només en memòria — es perd al reiniciar el servidor.
+# S'omple a run_adaptation() i es llegeix via /api/audit/adaptations*.
 _ATNE_LAST_ADAPTATION: dict = {}
+_ATNE_ADAPTATIONS_LOG: list = []  # més antiga primer (append); els nous al final
+_ATNE_ADAPTATIONS_MAX = 20
 
 
 def _log_session(session: dict) -> None:
@@ -2633,10 +2636,11 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
         for instr in _macro.get("instruccions", [])
     ]
 
-    # Debug: desem el context de la darrera adaptació per poder inspeccionar
-    # des de /api/debug/last-adaptation (admin-only). Només memòria, no disc.
-    global _ATNE_LAST_ADAPTATION
-    _ATNE_LAST_ADAPTATION = {
+    # Debug: desem el context de la darrera adaptació al buffer per poder
+    # inspeccionar des de /api/audit/adaptations* (admin). Només memòria.
+    global _ATNE_LAST_ADAPTATION, _ATNE_ADAPTATIONS_LOG
+    _entry = {
+        "id": f"adapt-{int(time.time() * 1000)}",  # timestamp ms com a id únic
         "ts": time.time(),
         "iso": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "docent_id": docent_id or "",
@@ -2654,6 +2658,11 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
         "adapted_output": "",  # s'emplena després
         "adapted_output_len": 0,
     }
+    _ATNE_LAST_ADAPTATION = _entry  # backwards-compat
+    _ATNE_ADAPTATIONS_LOG.append(_entry)
+    # Manté només les N darreres al buffer
+    if len(_ATNE_ADAPTATIONS_LOG) > _ATNE_ADAPTATIONS_MAX:
+        _ATNE_ADAPTATIONS_LOG[:] = _ATNE_ADAPTATIONS_LOG[-_ATNE_ADAPTATIONS_MAX:]
 
     # 5. Cridar LLM segons active_model (amb Generate+Verify+Retry)
     # Label UI derivat del (provider, specific_model) — compat amb alias curts i model_id llargs.
@@ -3355,16 +3364,47 @@ async def admin_analytics(_: bool = Depends(_require_admin)):
 
 @app.get("/api/audit/last-adaptation")
 async def audit_last_adaptation(_: bool = Depends(_require_admin)):
-    """Retorna el context complet de la darrera adaptació feta (memòria).
-
-    Inclou: system prompt complet, text original, perfil, params, model usat,
-    instruction_ids filtrades, i output del LLM. Permet inspeccionar
-    EXACTAMENT què va rebre el LLM per diagnosticar per què no obeeix
-    instruccions concretes.
-    """
+    """Retorna la darrera adaptació (retrocompatibilitat amb UI antiga)."""
     if not _ATNE_LAST_ADAPTATION:
         return {"ok": True, "empty": True, "msg": "No hi ha cap adaptació registrada des del reinici del servidor."}
     return {"ok": True, "empty": False, "data": _ATNE_LAST_ADAPTATION}
+
+
+@app.get("/api/audit/adaptations")
+async def audit_adaptations_list(_: bool = Depends(_require_admin)):
+    """Retorna un resum de les últimes N adaptacions (N més recents primer).
+
+    Cada entrada: id, ts, iso, docent_id, model, mecr_sortida, n_instructions,
+    input_chars, output_chars, n_conditions. Sense system_prompt ni outputs
+    complets (usar GET /api/audit/adaptations/{id} per al detall).
+    """
+    summary = []
+    for e in reversed(_ATNE_ADAPTATIONS_LOG):  # més recents primer
+        chars = (e.get("profile") or {}).get("caracteristiques") or {}
+        n_cond = sum(1 for v in chars.values() if isinstance(v, dict) and v.get("actiu"))
+        summary.append({
+            "id": e.get("id"),
+            "ts": e.get("ts"),
+            "iso": e.get("iso"),
+            "docent_id": e.get("docent_id"),
+            "model": e.get("model"),
+            "mecr_sortida": (e.get("params") or {}).get("mecr_sortida"),
+            "n_instructions": e.get("n_instructions"),
+            "n_conditions": n_cond,
+            "input_chars": e.get("text_input_len"),
+            "output_chars": e.get("adapted_output_len"),
+            "profile_name": (e.get("profile") or {}).get("nom", ""),
+        })
+    return {"ok": True, "count": len(summary), "adaptations": summary}
+
+
+@app.get("/api/audit/adaptations/{adapt_id}")
+async def audit_adaptation_detail(adapt_id: str, _: bool = Depends(_require_admin)):
+    """Retorna el detall complet d'una adaptació concreta del buffer."""
+    for e in _ATNE_ADAPTATIONS_LOG:
+        if e.get("id") == adapt_id:
+            return {"ok": True, "data": e}
+    return {"ok": False, "error": "No trobada (pot haver sortit del buffer)"}
 
 
 @app.post("/api/audit/instruction-map")
