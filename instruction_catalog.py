@@ -504,7 +504,7 @@ CATALOG = {
     },
     # C-04b absorbit dins C-04 via _get_intensified_text (no cal instrucció separada)
     "C-05": {
-        "text": "Glossari previ (pre-training, Sweller): comença amb '## Paraules clau' amb els termes essencials.",
+        "text": "Glossari previ (pre-training, Sweller): comença amb '### Paraules clau' (sub-secció dins del '## Text adaptat') amb els termes essencials.",
         "activation": "NIVELL",
         "macro": "COGNITIU",
         "mecr_detail": {
