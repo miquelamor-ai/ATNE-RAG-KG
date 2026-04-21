@@ -1769,6 +1769,36 @@
     e.currentTarget.dataset.userTouched = '1';
   });
 
+  // Persistència de l'observació pròpia del popover "Tornar a generar":
+  // - desa a cada tecla al localStorage
+  // - restaura en obrir el popover
+  // - esborra quan es regenera amb èxit
+  (function persistRubricObs() {
+    const RUB_OBS_KEY = 'atne.rubric_observation';
+    const rubPop = document.getElementById('pop-rubric');
+    if (!rubPop) return;
+    const ta = rubPop.querySelector('textarea');
+    if (!ta) return;
+    // Desa a cada tecla
+    ta.addEventListener('input', () => {
+      try { localStorage.setItem(RUB_OBS_KEY, ta.value); } catch {}
+    });
+    // Restaura en obrir: observer del classList 'on'
+    const mo = new MutationObserver(() => {
+      if (rubPop.classList.contains('on')) {
+        try {
+          const saved = localStorage.getItem(RUB_OBS_KEY);
+          if (saved && !ta.value) ta.value = saved;
+        } catch {}
+      }
+    });
+    mo.observe(rubPop, { attributes: true, attributeFilter: ['class'] });
+    // Esborra quan es regenera (btn-rubric-apply)
+    document.getElementById('btn-rubric-apply')?.addEventListener('click', () => {
+      try { localStorage.removeItem(RUB_OBS_KEY); } catch {}
+    });
+  })();
+
   // Regen animation
   const regenEl = document.getElementById('regen');
   const regenT = document.getElementById('regen-t');
