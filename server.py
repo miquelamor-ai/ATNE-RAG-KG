@@ -1467,8 +1467,8 @@ def build_system_prompt(profile: dict, context: dict, params: dict, rag_context:
     try:
         import skills_loader
         if skills_loader.is_skills_enabled():
-            _skills_root = Path(__file__).parent / "corpus" / "skills_proto"
-            _all_skills = skills_loader.load_skills(_skills_root)
+            # Roots per defecte: corpusFJE (submodule) primer, skills_proto fallback.
+            _all_skills = skills_loader.load_skills(skills_loader.default_skills_roots())
             # MVP single-call: carreguem adapter + complements en un sol prompt.
             # Quan migrem a multiagent, cada agent carregarà només el seu rol.
             _active = []

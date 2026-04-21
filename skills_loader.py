@@ -42,43 +42,72 @@ def is_skills_enabled() -> bool:
 
 # ── Càrrega ────────────────────────────────────────────────────────────
 
-def load_skills(skills_root: Path) -> list[Skill]:
-    """Escaneja skills_root recursivament i retorna tots els Skill vàlids.
+def load_skills(skills_roots) -> list[Skill]:
+    """Escaneja un o més directoris recursivament i retorna els Skill vàlids.
+
+    `skills_roots` pot ser un Path o una llista de Paths. S'escaneja en ordre;
+    si un `name` apareix a dos roots, guanya el PRIMER (prioritat a la font
+    canònica, p.ex. corpusFJE sobre skills_proto local).
 
     Un SKILL.md ha de començar per `---\n...frontmatter...\n---\nbody`.
     Fitxers mal formats es salten silenciosament (amb print d'avís).
     """
-    if not skills_root.exists():
-        return []
+    if isinstance(skills_roots, Path):
+        skills_roots = [skills_roots]
 
     skills: list[Skill] = []
-    for skill_md in skills_root.rglob("SKILL.md"):
-        try:
-            content = skill_md.read_text(encoding="utf-8")
-            parts = content.split("---", 2)
-            if len(parts) < 3:
-                print(f"[skills_loader] ignored (no frontmatter): {skill_md}")
-                continue
-            fm = yaml.safe_load(parts[1]) or {}
-            body = parts[2].strip()
-            name = fm.get("name")
-            if not name:
-                print(f"[skills_loader] ignored (no name): {skill_md}")
-                continue
-            skills.append(Skill(
-                path=skill_md.parent,
-                name=name,
-                description=str(fm.get("description", "")).strip(),
-                agent_role=fm.get("agent_role", "adapter"),
-                triggers=fm.get("triggers", []) or [],
-                tools_required=fm.get("tools_required", []) or [],
-                frontmatter=fm,
-                body=body,
-            ))
-        except Exception as e:
-            print(f"[skills_loader] error parsing {skill_md}: {e}")
+    seen_names: set[str] = set()
+    for root in skills_roots:
+        if not root.exists():
             continue
+        for skill_md in root.rglob("SKILL.md"):
+            try:
+                content = skill_md.read_text(encoding="utf-8")
+                parts = content.split("---", 2)
+                if len(parts) < 3:
+                    print(f"[skills_loader] ignored (no frontmatter): {skill_md}")
+                    continue
+                fm = yaml.safe_load(parts[1]) or {}
+                body = parts[2].strip()
+                name = fm.get("name")
+                if not name:
+                    print(f"[skills_loader] ignored (no name): {skill_md}")
+                    continue
+                if name in seen_names:
+                    # Guanya la primera font (corpusFJE abans que skills_proto)
+                    continue
+                seen_names.add(name)
+                skills.append(Skill(
+                    path=skill_md.parent,
+                    name=name,
+                    description=str(fm.get("description", "")).strip(),
+                    agent_role=fm.get("agent_role", "adapter"),
+                    triggers=fm.get("triggers", []) or [],
+                    tools_required=fm.get("tools_required", []) or [],
+                    frontmatter=fm,
+                    body=body,
+                ))
+            except Exception as e:
+                print(f"[skills_loader] error parsing {skill_md}: {e}")
+                continue
     return skills
+
+
+def default_skills_roots() -> list[Path]:
+    """Retorna els directoris on buscar skills, en ordre de prioritat.
+
+    1r: `corpus/external/corpusFJE/skills/` — font canònica compartida amb
+        els altres assistents FJE (submodule git, veure .gitmodules).
+    2n: `corpus/skills_proto/` — contingut local d'ATNE (fallback mentre no
+        es migra el contingut a corpusFJE).
+
+    Si un skill amb el mateix `name` apareix a ambdues, guanya corpusFJE.
+    """
+    here = Path(__file__).resolve().parent
+    return [
+        here / "corpus" / "external" / "corpusFJE" / "skills",
+        here / "corpus" / "skills_proto",
+    ]
 
 
 # ── Triggers ───────────────────────────────────────────────────────────
@@ -164,21 +193,25 @@ def render_skill_block(skills: list[Skill]) -> str:
 
 # ── Debug helper ───────────────────────────────────────────────────────
 
-def debug_dump(skills_root: Path, profile: dict, params: dict, agent_role: str = "adapter"):
+def debug_dump(skills_roots, profile: dict, params: dict, agent_role: str = "adapter"):
     """Imprimeix un resum de les skills actives per a inspecció humana."""
-    all_skills = load_skills(skills_root)
+    if isinstance(skills_roots, Path):
+        skills_roots = [skills_roots]
+    all_skills = load_skills(skills_roots)
     active = select_active(all_skills, profile, params, agent_role=agent_role)
-    print(f"[skills_loader] skills_root: {skills_root}")
+    print(f"[skills_loader] skills_roots: {[str(r) for r in skills_roots]}")
     print(f"[skills_loader] total carregades: {len(all_skills)}")
     print(f"[skills_loader] actives per agent={agent_role}: {len(active)}")
     for s in active:
-        print(f"   - {s.name}  (trig={len(s.triggers)})")
+        rel = str(s.path).replace(str(Path(__file__).resolve().parent), ".")
+        print(f"   - {s.name}  (trig={len(s.triggers)})  [{rel}]")
     return active
 
 
 if __name__ == "__main__":
-    # Smoke test amb un perfil TDAH + gènere notícia + glossari
-    root = Path(__file__).parent / "corpus" / "skills_proto"
+    # Smoke test amb un perfil TDAH + gènere notícia + glossari.
+    # Usa els roots per defecte: corpusFJE primer, skills_proto com a fallback.
+    roots = default_skills_roots()
     profile = {
         "caracteristiques": {
             "tdah": {"actiu": True, "grau": "moderat"},
@@ -189,4 +222,4 @@ if __name__ == "__main__":
         "genere_discursiu": "noticia",
         "complements": {"glossari": True},
     }
-    debug_dump(root, profile, params)
+    debug_dump(roots, profile, params)

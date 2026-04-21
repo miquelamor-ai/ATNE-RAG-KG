@@ -1,0 +1,3 @@
+[submodule "corpus/external/corpusFJE"]
+	path = corpus/external/corpusFJE
+	url = https://github.com/miquelamor-ai/corpusFJE.git

@@ -3,6 +3,18 @@
 **Estat:** prototip (2026-04-21). Activació per feature flag `ATNE_USE_SKILLS=true`.
 **Per defecte OFF** — el comportament d'ATNE no canvia fins que s'activi.
 
+**Arquitectura de fonts (veure `skills_loader.py`):**
+ATNE llegeix skills de **dues ubicacions, en aquest ordre**:
+
+1. `corpus/external/corpusFJE/skills/` — submodule git de
+   [github.com/miquelamor-ai/corpusFJE](https://github.com/miquelamor-ai/corpusFJE).
+   Font **canònica** compartida amb altres assistents FJE futurs.
+2. `corpus/skills_proto/` — contingut **local d'ATNE** (aquest directori).
+   Fallback mentre no es migra el contingut a corpusFJE.
+
+Si un skill apareix a les dues amb el mateix `name`, guanya **corpusFJE**.
+Això permet migrar skills progressivament sense tocar codi d'ATNE.
+
 Aquest directori conté la biblioteca de **Skills** compliant amb
 [agentskills.io](https://agentskills.io), el format obert per a capacitats
 especialitzades d'agents IA.
