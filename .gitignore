@@ -7,9 +7,12 @@ output/
 node_modules/
 .next/
 profiles/
+# Excepció: skills de perfils a corpus/skills_proto/profiles/ SÍ s'han de pujar
+!corpus/skills_proto/profiles/
 server.log
 *.log
 tests/.tmp/
+tests/.test-token
 tests/results/*.db
 tests/results/*.db-shm
 tests/results/*.db-wal
