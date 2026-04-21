@@ -262,9 +262,19 @@ Quan un tema es resolgui, es **manté al document** amb estat `resolt` i un camp
     `mermaid.js` afegit a la UI i als exports PDF, el mateix output serviria
     tant per a visualització com per a impressió. Requereix ~un dia de feina
     al frontend.
-- **Estat**: `obert` — decisió prioritària: **no s'ha creat cap SKILL.md**
-  per a aquests 3 complements fins que l'equip decideixi la direcció.
+- **Estat**: `resolt` el 2026-04-21 amb Opció B.
 - **Obert per**: Miquel Amor, 2026-04-21.
+- **Acord (2026-04-21)**: s'ha triat **Opció B** — guió jeràrquic utilitzable.
+  S'ha creat una skill unificada `generate-mapa-conceptual` (amb triggers per
+  a `mapa_conceptual`) que produeix una jerarquia markdown (concepte central
+  + branques + sub-elements) directament usable com a guia d'estudi i copy-
+  pasteable a qualsevol eina de diagrames (Canva, MindMeister, XMind…). Cap
+  ASCII-art, cap emoji decoratiu.
+  - `mapa_mental` i `esquema_visual`: sense skill pròpia de moment; si un
+    docent els activa, el prompt actual (server.py) seguirà generant
+    ASCII-art fins a futura migració o eliminació del Pas 2.
+  - Multimodal / imatges reals: Miquel obrirà un xat a part per explorar
+    opcions (API visió, Mermaid renderitzat, generació d'imatges via LLM).
 
 ### 5.3 Modalitat de les preguntes per textos literaris vs informatius
 
