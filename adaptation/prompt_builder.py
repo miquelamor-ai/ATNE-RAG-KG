@@ -436,83 +436,57 @@ Mostra les relacions jeràrquiques entre els conceptes principals del text.
     es_literari = any(k in genere_complement.lower() for k in literari_keywords)
     modalitat_text = "LITERARI (deixa espais interpretatius, afectius, d'identificació)" if es_literari else "INFORMATIU (precisió conceptual, dades, relacions causa-efecte)"
 
+    # Una sola línia de modalitat segons el gènere detectat
+    modalitat_linia = (
+        "- Literari: preguntes afectives, d'identificació, d'imatges mentals, creatives."
+        if es_literari else
+        f"- Informatiu: precisió conceptual, dades, causa-efecte, model teòric de {materia_complement}."
+    )
+
+    # Línia d'adequació segons l'etapa (filtra només la rama rellevant)
+    _etapa_lower = (etapa_complement or "").lower()
+    if any(k in _etapa_lower for k in ("infantil", "cicle inicial")):
+        adequacio_linia = "- Predicció visual, connexió amb el jo, dibuix. Evita «justifica» i «argumenta». Preguntes curtes."
+    elif any(k in _etapa_lower for k in ("cicle mitjà", "cicle mitja", "cicle superior", "primària", "primaria")):
+        adequacio_linia = "- Idea principal, relacions, comparacions."
+    elif any(k in _etapa_lower for k in ("batxillerat", "fp", "cicle formatiu", "cfgm", "cfgs")):
+        adequacio_linia = "- Anàlisi crítica, intertextualitat, biaixos."
+    else:
+        # ESO / secundària i fallback
+        adequacio_linia = "- Arguments, connectors lògics, contrast de fonts."
+
     if comp.get("preguntes_comprensio"):
         output_sections.append(f"""
 ## Preguntes de comprensió
-ACTIVAT — Genera un guió de comprensió lectora segons el model MALL/TILC
-(3 moments × 3 nivells de lectura amb formats variats).
+ACTIVAT — Guió de comprensió lectora MALL/TILC (3 moments · formats variats).
 
-**Context pedagògic** (per modular-les):
-- Matèria/àmbit: {materia_complement}
-- Etapa: {etapa_complement} · Nivell MECR: {mecr_complement}
-- Gènere discursiu: {genere_complement}
-- Modalitat del text: {modalitat_text}
+Context: {materia_complement} · {etapa_complement} · MECR {mecr_complement} · gènere {genere_complement} · {modalitat_text}
+Adequació a l'etapa: {adequacio_linia[2:]}
+Modalitat: {modalitat_linia[2:]}
 
-**Tipologia interna (ÚS TEU, NO la mostris a la sortida)**
+FORMAT DE SORTIDA (exacte, és el que veu l'alumnat):
 
-MOMENT 1 · Abans de llegir · activació · 3 preguntes:
-hipòtesi (sobre títol/imatges) + connexió amb coneixements previs + propòsit.
-
-MOMENT 2 · Durant la lectura · processament actiu · 3 preguntes:
-inferència en curs + visualització/imatge mental + lèxic en context.
-
-MOMENT 3 · Després de llegir · 7-8 preguntes en 3 nivells cognitius, alternant formats:
-- Nivell LITERAL (2-3): oberta curta, V/F amb justificació, opció múltiple,
-  omplir buits, relaciona amb fletxes.
-- Nivell INFERENCIAL (2-3): per què creus…?, i si…?, relaciona causa-efecte.
-- Nivell CRÍTIC (2): argumentativa oberta, transferència al jo / biaixos.
-
-**Adequació per etapa**:
-- Infantil / Cicle Inicial (A1): predicció visual, connexió amb el jo, dibuix.
-  Evita «justifica» i «argumenta». Preguntes curtes.
-- Cicle Mitjà / Superior (A2-B1): idea principal, relacions, comparacions.
-- Secundària (B1-B2): arguments, connectors lògics, contrast de fonts.
-- Batxillerat/FP (C1): anàlisi crítica, intertextualitat, biaixos.
-
-**Literari vs informatiu**:
-- Literari: preguntes afectives, d'identificació, d'imatges mentals, creatives.
-- Informatiu: precisió conceptual, dades, causa-efecte, model teòric de {materia_complement}.
-
-**FORMAT DE SORTIDA — OBLIGATORI (és el que veu l'alumnat)**
-
-La teva resposta per aquesta secció ha de ser EXACTAMENT aquesta estructura
-(comença amb «## Preguntes de comprensió» i a dins tres sub-seccions «###»):
-
-```
 ## Preguntes de comprensió
 
 ### Abans de llegir
-- [pregunta d'hipòtesi]
-- [pregunta de connexió prèvia]
-- [pregunta de propòsit]
+- [hipòtesi sobre títol]
+- [connexió amb coneixements previs]
+- [propòsit de lectura]
 
 ### Durant la lectura
-- [pregunta d'inferència en curs]
-- [pregunta de visualització]
-- [pregunta de lèxic en context]
+- [inferència en curs]
+- [visualització / imatge mental]
+- [lèxic en context]
 
 ### Després de llegir
-- [pregunta literal 1]
-- [pregunta literal 2]
-- [pregunta inferencial 1]
-- [pregunta inferencial 2]
-- [pregunta crítica 1]
-- [pregunta crítica 2]
-- [afegeix 1-2 més si cal, alternant formats]
-```
+- [literal 1: V/F amb justificació, omplir buits, relaciona amb fletxes…]
+- [literal 2: format diferent de l'anterior]
+- [inferencial 1: per què creus…? i si…?]
+- [inferencial 2: causa-efecte]
+- [crític 1: argumentativa oberta]
+- [crític 2: transferència al jo / biaixos]
 
-Regles estrictes de la SORTIDA:
-- La secció ha de començar SEMPRE amb la línia literal «## Preguntes de comprensió».
-- Les tres sub-seccions han de ser SEMPRE, en aquest ordre, amb els títols literals
-  «### Abans de llegir», «### Durant la lectura», «### Després de llegir».
-- NO escriguis la paraula «Moment» ni «Moment 1/2/3», ni parèntesis explicatius
-  als encapçalaments, ni sub-encapçalaments de nivell («Nivell LITERAL»…).
-- NO posis etiquetes entre claudàtors davant de cap pregunta («[Literal · V/F]»,
-  «[Inferencial · per què]», «[Hipòtesi]», «[Propòsit]»…).
-- Cada pregunta comença amb «- » (vinyeta), text directe, sense numerar.
-- Per als formats visuals (omplir buits, relaciona), integra'ls dins de la pregunta:
-  ex: «- Omple els buits: El ______ serveix per ______.» / «- Relaciona amb una
-  fletxa: aigua → …, foc → …».
+Regles: NO escriguis «Moment», «Nivell LITERAL», ni etiquetes [Literal · V/F]. Cada pregunta comença amb «- ». Integra els formats visuals dins la pregunta («- Omple els buits: El ___ serveix per ___.»).
 """)
 
     if comp.get("activitats_aprofundiment"):
@@ -608,23 +582,8 @@ Màxim 5-6 files amb els canvis més significatius.
 """)
 
     output_sections.append("""
-Omès les seccions marcades com NO ACTIVADES. No generis seccions buides.
-
-RECORDATORI CRÍTIC DE TÍTOLS (imprescindible per al parsing posterior):
-Usa EXACTAMENT aquests títols de secció amb dos «##» (res més ni abans ni després):
-- «## Text adaptat»
-- «## Glossari»
-- «## Esquema visual»
-- «## Mapa conceptual»
-- «## Mapa mental»
-- «## Preguntes de comprensió»
-- «## Bastides»
-- «## Activitats d'aprofundiment»
-- «## Argumentació pedagògica»
-- «## Notes d'auditoria»
-No afegeixis prefixos numèrics (1., 2…), emojis ni qualificadors
-(«lectora», «per al grup», «finals»…) al títol. Els sub-apartats dins de cada
-secció van amb tres «###» (mai amb «##»).
+Omet les seccions NO activades. No generis seccions buides.
+Títols: usa literalment «## Text adaptat», «## Glossari», «## Esquema visual», «## Mapa conceptual», «## Mapa mental», «## Preguntes de comprensió», «## Bastides», «## Activitats d'aprofundiment», «## Argumentació pedagògica», «## Notes d'auditoria». Sense prefixos numèrics, emojis ni qualificadors. Sub-apartats amb «###».
 """)
 
     parts.append("\n".join(output_sections))
