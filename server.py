@@ -38,7 +38,6 @@ if __name__ == "__main__" or __name__ == "__mp_main__":
 import corpus_reader
 import instruction_catalog
 import instruction_filter
-import jwt as pyjwt
 import requests
 import uvicorn
 from dotenv import load_dotenv
@@ -845,7 +844,7 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
 
     # Debug: desem el context de la darrera adaptació al buffer per poder
     # inspeccionar des de /api/audit/adaptations* (admin). Només memòria.
-    global _ATNE_LAST_ADAPTATION, _ATNE_ADAPTATIONS_LOG
+    global _ATNE_LAST_ADAPTATION
     _entry = {
         "id": f"adapt-{int(time.time() * 1000)}",  # timestamp ms com a id únic
         "ts": time.time(),
@@ -921,7 +920,6 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
             # loguegea si hi falten seccions de complements.
             try:
                 _comp_active = params.get("complements", {}) if isinstance(params, dict) else {}
-                _lower_raw = (adapted_raw or "").lower()
                 _lower = adapted.lower()
                 _has_preg_raw = bool(re.search(r'^##\s*["\'`«»]*pregunt', adapted_raw or "", re.MULTILINE | re.IGNORECASE))
                 _has_preg_clean = bool(re.search(r'^##\s+preguntes\s+de\s+comprensi', adapted, re.MULTILINE | re.IGNORECASE))
@@ -4210,7 +4208,6 @@ async def eval_progress():
     """Monitoratge en temps real del batch en curs — llegeix directament la BD."""
     try:
         import eval_db
-        import sqlite3
         conn = eval_db.init_db()
 
         # Últim run
@@ -4375,7 +4372,7 @@ async def eval_progress():
 @app.get("/api/eval/v2debug")
 async def eval_v2debug():
     """Debug endpoint per testar multi_v2 recent query."""
-    import eval_db, sqlite3
+    import eval_db
     conn = eval_db.init_db()
     try:
         n_evals = conn.execute("SELECT COUNT(*) FROM multi_v2_evaluations").fetchone()[0]
