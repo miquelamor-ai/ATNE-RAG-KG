@@ -1234,23 +1234,41 @@ def build_persona_audience(profile: dict, context: dict, mecr: str) -> str:
             continue
 
         if key == "nouvingut":
-            l1 = val.get("L1", "")
+            # Fix 2026-04-21: frontend envia 'l1' (minúscula); suportem ambdós.
+            l1 = val.get("L1", "") or val.get("l1", "")
+            pais = val.get("pais", "")
+            mesos = val.get("mesos_catalunya")
             frag = "Alumne nouvingut"
             if l1:
-                frag += f" que parla {l1} com a L1"
+                frag += f" que parla **{l1}** com a llengua materna (L1)"
+            if pais:
+                frag += f", originari de {pais}"
+            if isinstance(mesos, (int, float)):
+                frag += f". Porta aproximadament {int(mesos)} mesos a Catalunya"
             lines.append(frag + ".")
 
             alfabet = val.get("alfabet_llati", True)
             if isinstance(alfabet, str):
                 alfabet = alfabet.lower() not in ("no", "false", "0")
             if not alfabet:
-                lines.append("Alfabet no llatí: necessita transliteració fonètica.")
+                lines.append(
+                    f"Alfabet no llatí (la seva L1 {l1 or 'original'} usa un altre sistema d'escriptura): "
+                    "és OBLIGATORI incloure transliteració fonètica al glossari i traducció dels termes clau a la seva L1 concreta."
+                )
+            elif l1:
+                lines.append(f"L1 amb alfabet llatí ({l1}): usa analogies etimològiques entre català i {l1} quan ajudin.")
 
-            esc = val.get("escolaritzacio_previa", "si")
-            if esc == "no":
+            # Frontend pot enviar 'escolaritzacio' (regular/interrompuda) o
+            # 'escolaritzacio_previa' (si/parcial/no) segons la versió del perfil.
+            esc = val.get("escolaritzacio_previa") or val.get("escolaritzacio", "")
+            if esc == "no" or esc == "cap":
                 lines.append("No ha estat escolaritzat regularment al seu país d'origen. No familiaritzat amb gèneres escolars.")
-            elif esc == "parcial":
+            elif esc == "parcial" or esc == "interrompuda":
                 lines.append("Escolarització prèvia parcial o interrompuda.")
+
+            alfL1 = val.get("alfabetitzacio_l1")
+            if alfL1 is False:
+                lines.append("No alfabetitzat en la seva L1.")
 
             calp = val.get("calp", "")
             if calp == "inicial":
@@ -1445,7 +1463,9 @@ COMPLEMENTS A GENERAR (a més del text adaptat):
     comp = params.get("complements", {})
     # Extreure L1 del perfil nouvingut (si existeix)
     chars = profile.get("caracteristiques", {})
-    l1 = chars.get("nouvingut", {}).get("L1", "")
+    # Fix 2026-04-21: suportem tant L1 (legacy) com l1 (frontend nou).
+    _nouv = chars.get("nouvingut", {})
+    l1 = _nouv.get("L1", "") or _nouv.get("l1", "")
     l1_display = l1 if l1 else "la llengua materna de l'alumne"
 
     output_sections = []
