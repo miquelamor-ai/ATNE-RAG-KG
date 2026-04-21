@@ -9,11 +9,16 @@ description: >
 author: FJE — Fundació Jesuïtes Educació
 version: 1.0.0-proto
 mecr_range: [A1, A2, B1, B2, C1]
+agent_role: adapter
+tools_required: []
 subvariables:
   - presentacio: [inatent, hiperactiu, combinat]
   - grau: [lleu, moderat, sever]
   - baixa_memoria_treball: bool
   - fatiga_cognitiva: bool
+triggers:
+  - path: profile.caracteristiques.tdah.actiu
+    equals: true
 ---
 
 # Adaptar text per a alumnat amb TDAH

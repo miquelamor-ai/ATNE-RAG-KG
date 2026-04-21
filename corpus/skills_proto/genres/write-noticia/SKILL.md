@@ -10,6 +10,11 @@ version: 1.0.0-proto
 genre_key: noticia
 tipologia: Narrativa / Expositiva
 mecr_range: [A1, A2, B1, B2, C1]
+agent_role: adapter
+tools_required: []
+triggers:
+  - path: params.genere_discursiu
+    equals: noticia
 ---
 
 # Escriure/adaptar una notícia

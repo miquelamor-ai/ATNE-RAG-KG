@@ -8,8 +8,11 @@ description: >
 author: FJE — Fundació Jesuïtes Educació
 version: 1.0.0-proto
 complement_key: glossari
+agent_role: complements
+tools_required: []
 triggers:
-  - params.complements.glossari == true
+  - path: params.complements.glossari
+    equals: true
 variants:
   - monolingue   # quan l'alumne NO és nouvingut o L1 desconegut
   - bilingue     # quan l'alumne és nouvingut i L1 coneguda
