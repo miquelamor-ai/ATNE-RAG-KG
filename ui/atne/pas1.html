@@ -2187,6 +2187,12 @@
         window.ATNE_PROFILES[profile.id] = profile;
         const listRecent = document.getElementById('list-recent');
         listRecent?.prepend(_buildProfileRow(profile));
+        // Afegeix el pid a recents perquè sobrevisqui al recarrega de la pàgina
+        try {
+          const rec = JSON.parse(localStorage.getItem('atne.recent_pids') || '[]').filter(x => x !== profile.id);
+          rec.unshift(profile.id);
+          localStorage.setItem('atne.recent_pids', JSON.stringify(rec.slice(0, 10)));
+        } catch {}
       }
 
       applyFilters(); updateFchipCounts();
@@ -2254,6 +2260,12 @@
         window.ATNE_PROFILES[profile.id] = profile;
         const listRecent = document.getElementById('list-recent');
         listRecent?.prepend(_buildProfileRow(profile));
+        // Afegeix el pid a recents perquè sobrevisqui al recarrega de la pàgina
+        try {
+          const rec = JSON.parse(localStorage.getItem('atne.recent_pids') || '[]').filter(x => x !== profile.id);
+          rec.unshift(profile.id);
+          localStorage.setItem('atne.recent_pids', JSON.stringify(rec.slice(0, 10)));
+        } catch {}
       }
 
       applyFilters(); updateFchipCounts();
