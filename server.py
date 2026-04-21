@@ -4658,16 +4658,13 @@ def _suggestion_is_safe(original: str, suggestion: str,
     if rcat in _STYLE_WARNING_CATEGORIES:
         return False
 
-    # 4. Normalització alfanumèrica: iguals?
-    #    Elimina accents, puntuació, espais i passa a minúscules.
-    import unicodedata
-
-    def _norm(s: str) -> str:
-        s_norm = unicodedata.normalize("NFKD", s.lower())
-        s_ascii = s_norm.encode("ascii", "ignore").decode("ascii")
-        return "".join(c for c in s_ascii if c.isalnum())
-
-    return _norm(original) == _norm(suggestion)
+    # 4. Per defecte: no és segur → avís visible, no auto-apply.
+    #    Abans hi havia un fallback "normalització alfanumèrica iguals →
+    #    segur" que era massa laxista: auto-aplicava qualsevol canvi
+    #    d'accent, incloent suggeriments dubtosos de 'picky' com
+    #    "diferència" (nom) → "diferencia" (verb conjugat). Ara només
+    #    s'auto-aplica si hi ha regla/categoria explícitament segura (#1/#2).
+    return False
 
 
 def _readability_score(text: str, target_mecr: str = "") -> dict:
