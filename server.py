@@ -4245,11 +4245,15 @@ def _languagetool_correct(text: str) -> tuple[str, int, list[dict]]:
         new_value = replacements[0].get("value", "")
         if new_value is None:
             continue
-        old_value = corrected[offset:offset + length]
+        # Offsets LT en UTF-16 code units: cal convertir per extreure/substituir
+        _b_cur = corrected.encode('utf-16-le')
+        _b_start = offset * 2
+        _b_end = (offset + length) * 2
+        old_value = _b_cur[_b_start:_b_end].decode('utf-16-le', errors='replace')
         # Saltar si la substitució és idèntica
         if new_value == old_value:
             continue
-        corrected = corrected[:offset] + new_value + corrected[offset + length:]
+        corrected = _lt_splice(corrected, offset, length, new_value)
         changes.append({
             "original": old_value,
             "corregit": new_value,
@@ -4414,6 +4418,22 @@ _READABILITY_TARGETS = {
 }
 
 
+def _lt_splice(text: str, offset_u16: int, length_u16: int, new_value: str) -> str:
+    """Splice a LT match respectant UTF-16 code units.
+
+    LanguageTool retorna offsets i lengths en codeunits UTF-16 (com JS).
+    Python str opera en codepoints. Els emojis astral (🌍, 💧, 🐰…) ocupen
+    2 codeunits UTF-16 però 1 codepoint Python — sense aquesta conversió,
+    les correccions cauen desfasades dins d'altres paraules.
+    """
+    b = text.encode('utf-16-le')
+    start = offset_u16 * 2
+    end = (offset_u16 + length_u16) * 2
+    prefix = b[:start].decode('utf-16-le', errors='replace')
+    suffix = b[end:].decode('utf-16-le', errors='replace')
+    return prefix + new_value + suffix
+
+
 def _languagetool_full_analysis(text: str) -> dict:
     """
     Crida LanguageTool i separa matches en 3 categories:
@@ -4468,7 +4488,14 @@ def _languagetool_full_analysis(text: str) -> dict:
         replacements = m.get("replacements", [])
         rule_id = m.get("rule", {}).get("id", "")
         rule_cat = m.get("rule", {}).get("category", {}).get("id", "")
-        old_value = text[offset:offset + length] if offset >= 0 else ""
+        # Offsets de LT són UTF-16 code units; cal convertir per extreure old_value
+        if offset >= 0:
+            _b_orig = text.encode('utf-16-le')
+            _b_start = offset * 2
+            _b_end = (offset + length) * 2
+            old_value = _b_orig[_b_start:_b_end].decode('utf-16-le', errors='replace')
+        else:
+            old_value = ""
         missatge = m.get("shortMessage") or m.get("message", "")
 
         # Whitelist local: mots catalans legítims que LT marca erròniament.
@@ -4501,7 +4528,7 @@ def _languagetool_full_analysis(text: str) -> dict:
             ):
                 new_value = replacements[0].get("value", "")
                 if new_value and new_value != old_value:
-                    corrected = corrected[:offset] + new_value + corrected[offset + length:]
+                    corrected = _lt_splice(corrected, offset, length, new_value)
                     correccions.append({
                         "original": old_value,
                         "corregit": new_value,
@@ -4516,7 +4543,7 @@ def _languagetool_full_analysis(text: str) -> dict:
             if new_value and new_value != old_value and _suggestion_is_safe(
                 old_value, new_value, rule_id, rule_cat
             ):
-                corrected = corrected[:offset] + new_value + corrected[offset + length:]
+                corrected = _lt_splice(corrected, offset, length, new_value)
                 correccions.append({
                     "original": old_value,
                     "corregit": new_value,
