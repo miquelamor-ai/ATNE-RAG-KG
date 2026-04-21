@@ -2446,7 +2446,9 @@ def _languagetool_full_analysis(text: str) -> dict:
 _SAFE_RULE_CATEGORIES = {
     "PUNCTUATION",
     "TYPOGRAPHY",
-    "CASING",
+    # CASING tret 2026-04-21 (Miquel): LT baixa "Revolucio Industrial" a
+    # minuscules per norma IEC estricta, xoca amb us pedagogic de tractar-ho
+    # com a nom propi d'epoca. Ara passa a warning, el docent decideix.
     "HYPHENATION",
     "WHITESPACE",
     "DIACRITICS_CA",
@@ -2464,8 +2466,8 @@ _SAFE_RULE_PREFIXES = (
     "HIAT",                    # hiatus
     "WHITESPACE",
     "DOUBLE_PUNCTUATION",
-    "UPPERCASE_SENTENCE_START",
-    "UPPERCASE_",
+    # UPPERCASE_SENTENCE_START i UPPERCASE_ trets 2026-04-21: passen a warning
+    # (veure nota al _SAFE_RULE_CATEGORIES sobre CASING).
     "NUMBER_SPACE",
     "PUNT_FINAL",              # punt final
     "A_EL",                    # a el → al
