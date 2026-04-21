@@ -237,7 +237,36 @@ Quan un tema es resolgui, es **manté al document** amb estat `resolt` i un camp
   vegi i decideixi si torna a provar?
 - **Estat**: `en discussió`.
 
-### 5.2 Modalitat de les preguntes per textos literaris vs informatius
+### 5.2 Valor real dels complements "mapes/esquemes" en text pla
+
+- **Context**: els complements `esquema_visual`, `mapa_conceptual` i
+  `mapa_mental` generen actualment ASCII-art amb fletxes, bullets i emojis
+  (p.ex. `ELEMENT ☀️ → RESULTAT`). Per a alumnat amb TEA o dislèxia, aquesta
+  sortida pot ser **soroll visual** més que ajuda. Per al docent, no és
+  utilitzable: no es pot imprimir ni projectar de forma professional, hauria
+  de refer el diagrama a una eina externa (Canva, SmartArt, MindMeister…).
+- **On impacta**: prompt (`FORMAT SORTIDA` servidor), complements,
+  experiència docent, cost de tokens.
+- **Situació actual**: si el docent activa qualsevol d'aquests 3 complements,
+  l'LLM genera la seva aproximació en text pla + emojis. Sortida de qualitat
+  pedagògica discutible.
+- **Dubte obert**: què volem fer amb aquests 3 complements?
+- **Proposta provisional — 3 opcions**:
+  - **A. Eliminar-los del MVP**. Netament. El docent usarà eines externes.
+  - **B. Reconvertir-los a "guió per crear el mapa"**: en comptes d'ASCII-art,
+    l'LLM genera una jerarquia de concepte central + branques ben
+    estructurada, pensada perquè el docent la copiï i enganxi a la seva eina
+    de diagrames. Això sí aporta valor.
+  - **C. Generar codi [Mermaid](https://mermaid.js.org/)**: text que una
+    llibreria JS del frontend pot renderitzar com a diagrama real. Amb
+    `mermaid.js` afegit a la UI i als exports PDF, el mateix output serviria
+    tant per a visualització com per a impressió. Requereix ~un dia de feina
+    al frontend.
+- **Estat**: `obert` — decisió prioritària: **no s'ha creat cap SKILL.md**
+  per a aquests 3 complements fins que l'equip decideixi la direcció.
+- **Obert per**: Miquel Amor, 2026-04-21.
+
+### 5.3 Modalitat de les preguntes per textos literaris vs informatius
 
 - **Context**: la skill `generate-preguntes-comprensio` (creada el
   2026-04-21) detecta automàticament si un text és literari o informatiu a
