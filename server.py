@@ -2842,11 +2842,18 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
     result_ev = {"type": "result", "adapted": adapted, "post_process": pp}
     if verify_info is not None:
         result_ev["verify"] = {"score": best_score, **verify_info}
-    # Debug: emplenar la sortida adaptada al registre en memòria
+    # Debug: emplenar la sortida adaptada al registre en memòria.
+    # Afegim adapted_raw (pre post-process) per distingir corrupció del model
+    # vs corrupció introduïda pel pipeline de neteja.
     try:
         if _ATNE_LAST_ADAPTATION:
             _ATNE_LAST_ADAPTATION["adapted_output"] = adapted
             _ATNE_LAST_ADAPTATION["adapted_output_len"] = len(adapted)
+            try:
+                _ATNE_LAST_ADAPTATION["adapted_raw"] = adapted_raw or ""
+                _ATNE_LAST_ADAPTATION["adapted_raw_len"] = len(adapted_raw or "")
+            except NameError:
+                pass
     except Exception:
         pass
     if quality is not None:

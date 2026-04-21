@@ -193,16 +193,29 @@ function renderDetail(d) {
 
     <div class="card">
       <div class="card-head">
-        <h2>Output adaptat (resposta del LLM)</h2>
+        <h2>Output adaptat (post-processat, el que veu el docent)</h2>
         <button class="btn secondary" id="btn-copy-output">📋 Copia output</button>
       </div>
       <pre id="pre-output">${esc(d.adapted_output)}</pre>
     </div>
+
+    ${d.adapted_raw ? `
+    <div class="card" style="border:2px dashed var(--tdah);background:#fff8e1">
+      <div class="card-head">
+        <h2>Output CRU (abans del post-process de neteja)</h2>
+        <button class="btn secondary" id="btn-copy-raw">📋 Copia raw</button>
+      </div>
+      <div style="font-size:11px;color:var(--ink-500);margin-bottom:8px">Compara amb el d'amunt: si el raw ja té les mateixes corrupcions, ve del MODEL. Si no, ve del pipeline de neteja (_fix_word_concatenations, _strip_latex_artifacts, etc.).</div>
+      <pre id="pre-raw">${esc(d.adapted_raw)}</pre>
+    </div>
+    ` : ''}
   `;
 
   $('#btn-copy-prompt').addEventListener('click', () => copyToClipboard(d.system_prompt, 'Prompt'));
   $('#btn-copy-input').addEventListener('click', () => copyToClipboard(d.text_input, 'Text original'));
   $('#btn-copy-output').addEventListener('click', () => copyToClipboard(d.adapted_output, 'Output'));
+  const btnRaw = document.getElementById('btn-copy-raw');
+  if (btnRaw) btnRaw.addEventListener('click', () => copyToClipboard(d.adapted_raw || '', 'Raw'));
   $('#btn-copy-summary').addEventListener('click', () => {
     const summary = `ATNE adaptation ${d.id}
 Data: ${d.iso}
