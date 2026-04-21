@@ -4253,6 +4253,9 @@ def _languagetool_correct(text: str) -> tuple[str, int, list[dict]]:
         # Saltar si la substitució és idèntica
         if new_value == old_value:
             continue
+        # Protecció markdown: no tocar backticks (trenca blocs de codi)
+        if '`' in old_value:
+            continue
         corrected = _lt_splice(corrected, offset, length, new_value)
         changes.append({
             "original": old_value,
@@ -4502,6 +4505,12 @@ def _languagetool_full_analysis(text: str) -> dict:
         # Es comprova abans de qualsevol classificació — si hi és, s'ignora
         # el match sencer (ni correcció, ni avís, ni paraula sospitosa).
         if old_value and old_value.strip(".,;:!?'\"()[]{}").lower() in _LOCAL_WORD_WHITELIST:
+            continue
+
+        # Protecció markdown: saltar qualsevol match que abasti backticks.
+        # LT 'picky' transforma ` aïllats en apòstrofs tipogràfics, cosa que
+        # trenca els blocs de codi (```) i els codis inline (`x`).
+        if '`' in old_value:
             continue
 
         # Estil explícit → warning, MAI auto-aplicar
