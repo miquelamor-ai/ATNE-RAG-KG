@@ -10,7 +10,7 @@ Els IDs es conserven als logs i a l'auditoria per traçabilitat.
 Referència: docs/decisions/mapa_variables_instruccions.md
 """
 
-from instruction_catalog import CATALOG, MACRODIRECTIVES, PROFILE_INSTRUCTION_MAP, LLENGUES_ROMANIQUES
+from instruction_catalog import CATALOG, MACRODIRECTIVES, LLENGUES_ROMANIQUES
 
 
 def _is_l1_romanica(l1: str) -> bool:

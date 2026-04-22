@@ -1,0 +1,649 @@
+{
+  "version": 1,
+  "routes_digest": "8e0e1e035b54d25946a0e46e6821bd3220115dacc77bdf88080c901366c0ca43",
+  "routes_count": 78,
+  "routes": [
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/",
+      "name": "index"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/admin",
+      "name": "admin_page"
+    },
+    {
+      "methods": [
+        "POST"
+      ],
+      "path": "/api/adapt",
+      "name": "adapt_stream"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/admin/analytics",
+      "name": "admin_analytics"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/admin/config",
+      "name": "admin_get_config"
+    },
+    {
+      "methods": [
+        "PUT"
+      ],
+      "path": "/api/admin/config",
+      "name": "admin_put_config"
+    },
+    {
+      "methods": [
+        "DELETE"
+      ],
+      "path": "/api/admin/history",
+      "name": "admin_wipe_history"
+    },
+    {
+      "methods": [
+        "POST"
+      ],
+      "path": "/api/admin/login",
+      "name": "admin_login"
+    },
+    {
+      "methods": [
+        "POST"
+      ],
+      "path": "/api/admin/logout",
+      "name": "admin_logout"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/admin/whoami",
+      "name": "admin_whoami"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/audit/adaptations",
+      "name": "audit_adaptations_list"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/audit/adaptations/{adapt_id}",
+      "name": "audit_adaptation_detail"
+    },
+    {
+      "methods": [
+        "POST"
+      ],
+      "path": "/api/audit/instruction-map",
+      "name": "audit_instruction_map"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/audit/last-adaptation",
+      "name": "audit_last_adaptation"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/catalog",
+      "name": "api_catalog"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/corpus",
+      "name": "api_corpus_list"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/corpus/{filename}",
+      "name": "api_corpus_file"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/docent/is-admin",
+      "name": "check_is_admin"
+    },
+    {
+      "methods": [
+        "POST"
+      ],
+      "path": "/api/docent/login",
+      "name": "docent_login"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/docent/profiles",
+      "name": "get_docent_profiles"
+    },
+    {
+      "methods": [
+        "POST"
+      ],
+      "path": "/api/docent/profiles",
+      "name": "save_docent_profile"
+    },
+    {
+      "methods": [
+        "DELETE"
+      ],
+      "path": "/api/docent/profiles/{profile_id}",
+      "name": "delete_docent_profile"
+    },
+    {
+      "methods": [
+        "PATCH"
+      ],
+      "path": "/api/docent/profiles/{profile_id}",
+      "name": "update_docent_profile"
+    },
+    {
+      "methods": [
+        "POST"
+      ],
+      "path": "/api/docent/set-admin",
+      "name": "set_admin"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/drafts",
+      "name": "list_drafts"
+    },
+    {
+      "methods": [
+        "POST"
+      ],
+      "path": "/api/drafts",
+      "name": "save_draft"
+    },
+    {
+      "methods": [
+        "DELETE"
+      ],
+      "path": "/api/drafts/{draft_id}",
+      "name": "delete_draft"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/drafts/{draft_id}",
+      "name": "get_draft"
+    },
+    {
+      "methods": [
+        "PATCH"
+      ],
+      "path": "/api/drafts/{draft_id}",
+      "name": "patch_draft"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/eval/cases/{run_id}",
+      "name": "eval_cases_detail"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/eval/comparative",
+      "name": "eval_comparative"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/eval/originals",
+      "name": "eval_originals"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/eval/progress",
+      "name": "eval_progress"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/eval/run/{run_id}",
+      "name": "eval_run_detail"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/eval/runs",
+      "name": "eval_runs"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/eval/v2debug",
+      "name": "eval_v2debug"
+    },
+    {
+      "methods": [
+        "POST"
+      ],
+      "path": "/api/export",
+      "name": "export_doc"
+    },
+    {
+      "methods": [
+        "POST"
+      ],
+      "path": "/api/extract-text",
+      "name": "extract_text_from_file"
+    },
+    {
+      "methods": [
+        "POST"
+      ],
+      "path": "/api/generate-text",
+      "name": "generate_text"
+    },
+    {
+      "methods": [
+        "POST"
+      ],
+      "path": "/api/generate-text-stream",
+      "name": "generate_text_stream"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/health",
+      "name": "health"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/history",
+      "name": "list_history"
+    },
+    {
+      "methods": [
+        "POST"
+      ],
+      "path": "/api/history",
+      "name": "save_history"
+    },
+    {
+      "methods": [
+        "PATCH"
+      ],
+      "path": "/api/history/{history_id}",
+      "name": "update_history_feedback"
+    },
+    {
+      "methods": [
+        "POST"
+      ],
+      "path": "/api/history/{history_id}/beacon",
+      "name": "history_beacon"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/profiles",
+      "name": "list_profiles"
+    },
+    {
+      "methods": [
+        "POST"
+      ],
+      "path": "/api/profiles",
+      "name": "save_profile"
+    },
+    {
+      "methods": [
+        "DELETE"
+      ],
+      "path": "/api/profiles/{nom}",
+      "name": "delete_profile"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/profiles/{nom}",
+      "name": "load_profile"
+    },
+    {
+      "methods": [
+        "POST"
+      ],
+      "path": "/api/prompt-preview",
+      "name": "api_prompt_preview"
+    },
+    {
+      "methods": [
+        "POST"
+      ],
+      "path": "/api/propose",
+      "name": "propose"
+    },
+    {
+      "methods": [
+        "POST"
+      ],
+      "path": "/api/refine-text",
+      "name": "refine_text"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/runtime-config",
+      "name": "runtime_config"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/stats-instruccions",
+      "name": "api_stats_instruccions"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/api/validacio/{tanda}",
+      "name": "api_validacio_tanda"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/avaluacio",
+      "name": "avaluacio_page"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/cuina",
+      "name": "cuina_page"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/dashboard",
+      "name": "dashboard_xat9_page"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/dashboard_complements",
+      "name": "dashboard_complements_page"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/dashboard_questions",
+      "name": "dashboard_questions_page"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/demo",
+      "name": "demo_v7_page"
+    },
+    {
+      "methods": [
+        "GET",
+        "HEAD"
+      ],
+      "path": "/docs",
+      "name": "swagger_ui_html"
+    },
+    {
+      "methods": [
+        "GET",
+        "HEAD"
+      ],
+      "path": "/docs/oauth2-redirect",
+      "name": "swagger_ui_redirect"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/eval",
+      "name": "eval_dashboard"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/eval/cases",
+      "name": "eval_cases_page"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/eval/progress",
+      "name": "eval_progress_page"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/eval/results",
+      "name": "eval_results_page"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/favicon.ico",
+      "name": "favicon"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/informe_fje",
+      "name": "informe_fje_md"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/informe_tecnic",
+      "name": "informe_tecnic_md"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/legacy",
+      "name": "index_legacy"
+    },
+    {
+      "methods": [
+        "GET",
+        "HEAD"
+      ],
+      "path": "/openapi.json",
+      "name": "openapi"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/pipeline",
+      "name": "pipeline_page"
+    },
+    {
+      "methods": [
+        "GET",
+        "HEAD"
+      ],
+      "path": "/redoc",
+      "name": "redoc_html"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/saber-ne",
+      "name": "saber_ne_page"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/ui/{path:path}",
+      "name": "serve_static"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/validacio",
+      "name": "validacio_page"
+    },
+    {
+      "methods": [
+        "GET"
+      ],
+      "path": "/validacio_data.json",
+      "name": "validacio_data"
+    }
+  ],
+  "exports": {
+    "app": {
+      "present": true,
+      "kind": "FastAPI",
+      "signature": "(scope: collections.abc.MutableMapping[str, typing.Any], receive: collections.abc.Callable[[], collections.abc.Awaitable[collections.abc.MutableMapping[str, typing.Any]]], send: collections.abc.Callable[[collections.abc.MutableMapping[str, typing.Any]], collections.abc.Awaitable[None]]) -> None"
+    },
+    "_call_llm": {
+      "present": true,
+      "kind": "function",
+      "signature": "(model_id: str, system_prompt: str, text: str) -> str"
+    },
+    "_call_llm_raw": {
+      "present": true,
+      "kind": "function",
+      "signature": "(model_id: str, system_prompt: str, user_text: str, temperature: float = 1.0, top_p: float = 0.95, max_tokens: int = 2048) -> str"
+    },
+    "_call_llm_stream": {
+      "present": true,
+      "kind": "function",
+      "signature": "(model_id: str, system_prompt: str, user_text: str, temperature: float = 1.0, top_p: float = 0.95, max_tokens: int = 2048)"
+    },
+    "_model_for": {
+      "present": true,
+      "kind": "function",
+      "signature": "(phase: str, override: str = '') -> str"
+    },
+    "_resolve_model": {
+      "present": true,
+      "kind": "function",
+      "signature": "(model_id: str) -> tuple[str, str]"
+    },
+    "build_system_prompt": {
+      "present": true,
+      "kind": "function",
+      "signature": "(profile: dict, context: dict, params: dict, rag_context: str = '') -> str"
+    },
+    "build_persona_audience": {
+      "present": true,
+      "kind": "function",
+      "signature": "(profile: dict, context: dict, mecr: str) -> str"
+    },
+    "_get_active_profiles": {
+      "present": true,
+      "kind": "function",
+      "signature": "(profile: dict) -> list[str]"
+    },
+    "post_process_adaptation": {
+      "present": true,
+      "kind": "function",
+      "signature": "(text: str, mecr: str) -> dict"
+    },
+    "clean_gemini_output": {
+      "present": true,
+      "kind": "function",
+      "signature": "(text: str) -> str"
+    },
+    "_post_process_llm_output": {
+      "present": true,
+      "kind": "function",
+      "signature": "(text: str) -> str"
+    },
+    "_strip_latex_artifacts": {
+      "present": true,
+      "kind": "function",
+      "signature": "(text: str) -> str"
+    },
+    "_fix_english_words": {
+      "present": true,
+      "kind": "function",
+      "signature": "(text: str) -> str"
+    },
+    "_fix_typos": {
+      "present": true,
+      "kind": "function",
+      "signature": "(text: str) -> str"
+    },
+    "_fix_word_concatenations": {
+      "present": true,
+      "kind": "function",
+      "signature": "(text: str) -> str"
+    },
+    "run_adaptation": {
+      "present": true,
+      "kind": "function",
+      "signature": "(text: str, profile: dict, context: dict, params: dict, progress_callback=None, model_override: str = None, docent_id: str = '')"
+    },
+    "propose_adaptation": {
+      "present": true,
+      "kind": "function",
+      "signature": "(characteristics: dict, context: dict) -> dict"
+    }
+  }
+}

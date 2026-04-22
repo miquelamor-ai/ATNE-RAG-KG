@@ -244,12 +244,6 @@ def get_universal_rules() -> str:
     return _cache.get("universal_rules", "")
 
 
-def get_mecr_block(level: str) -> str:
-    if not _cache:
-        load_corpus()
-    return _cache.get("mecr", {}).get(level, "")
-
-
 def get_dua_block(level: str) -> str:
     if not _cache:
         load_corpus()
@@ -260,20 +254,6 @@ def get_genre_block(genre: str) -> str:
     if not _cache:
         load_corpus()
     return _cache.get("genres", {}).get(genre, "")
-
-
-def get_profile_block(profile_key: str) -> str:
-    if not _cache:
-        load_corpus()
-    # Mapejg de claus del frontend a claus del corpus
-    alias = {
-        "di": "discapacitat_intellectual",
-        "disc_visual": "discapacitat_visual",
-        "disc_auditiva": "discapacitat_auditiva",
-        "disc_motora": "tdc",
-    }
-    key = alias.get(profile_key, profile_key)
-    return _cache.get("profiles", {}).get(key, "")
 
 
 def _normalize(text: str) -> str:
