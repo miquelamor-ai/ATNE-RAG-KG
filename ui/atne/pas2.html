@@ -2296,7 +2296,8 @@
     { id: 'bastides',              label: 'Bastides lingüístiques',       desc: 'Suports per a l\'expressió escrita' },
     { id: 'activitats_aprofundiment', label: 'Activitats d\'aprofundiment', desc: 'Per a alumnes d\'altes capacitats' },
     { id: 'mapa_mental',           label: 'Mapa mental',                  desc: 'Pensament divergent' },
-    { id: 'pictogrames',           label: 'Pictogrames',                  desc: 'Suport visual (L2, TEA)' }
+    { id: 'pictogrames',           label: 'Pictogrames',                  desc: 'Suport visual (L2, TEA)' },
+    { id: 'illustracions',         label: 'Il·lustracions IA',            desc: 'Imatges generades (beta · 1-3 min)' }
   ];
 
   function defaultComplementsForProfile(p) {
@@ -2376,23 +2377,56 @@
     host.innerHTML = COMPLEMENT_DEFS.map(c => {
       const checked = complSelected.includes(c.id) ? 'checked' : '';
       const auto = autoDefaults.includes(c.id) ? ' auto' : '';
-      return (
+      let html = (
         '<label class="compl-item' + auto + '">' +
           '<input type="checkbox" data-compl="' + c.id + '" ' + checked + '>' +
           '<div class="ci-b"><div class="ci-t">' + c.label + '</div><div class="ci-s">' + c.desc + '</div></div>' +
         '</label>'
       );
+      // Selector d'estil per a il·lustracions (apareix quan s'activa)
+      if (c.id === 'illustracions') {
+        const storedStyle = localStorage.getItem('atne.illus_style') || 'aquarela_storybook';
+        const hidden = complSelected.includes('illustracions') ? '' : ' style="display:none"';
+        html += (
+          '<div class="illus-style-picker" id="illus-style-wrap"' + hidden + '>' +
+            '<label style="font-size:.85em;font-weight:500">Estil de les il·lustracions:</label>' +
+            '<select id="illus-style-select" style="margin-top:.3em;padding:.4em;border:1px solid #ddd;border-radius:4px;width:100%">' +
+              '<option value="aquarela_storybook"'      + (storedStyle==='aquarela_storybook'      ? ' selected' : '') + '>🎨 Aquarel·la storybook (primària, contes)</option>' +
+              '<option value="vectorial_editorial"'      + (storedStyle==='vectorial_editorial'      ? ' selected' : '') + '>📐 Vectorial editorial (ESO+, humanitats)</option>' +
+              '<option value="isometric_infografic"'     + (storedStyle==='isometric_infografic'     ? ' selected' : '') + '>📊 Isomètric infogràfic (STEM)</option>' +
+              '<option value="icona_minimalista"'        + (storedStyle==='icona_minimalista'        ? ' selected' : '') + '>🔵 Icona minimalista (DUA)</option>' +
+              '<option value="claymation_plastilina"'    + (storedStyle==='claymation_plastilina'    ? ' selected' : '') + '>🟠 Claymation (infantil)</option>' +
+              '<option value="escala_grisos_carbonet"'   + (storedStyle==='escala_grisos_carbonet'   ? ' selected' : '') + '>✏️ Escala de grisos (història)</option>' +
+              '<option value="fotografia_documental"'    + (storedStyle==='fotografia_documental'    ? ' selected' : '') + '>📷 Fotografia documental (natura)</option>' +
+            '</select>' +
+            '<div style="font-size:.78em;color:#a85500;font-style:italic;margin-top:.3em">⚠️ Beta: qualitat no garantida, demora 1-3 min per imatge.</div>' +
+          '</div>'
+        );
+      }
+      return html;
     }).join('');
     host.querySelectorAll('input[type=checkbox]').forEach(cb => {
       cb.addEventListener('change', () => {
         const id = cb.dataset.compl;
         if (cb.checked) { if (!complSelected.includes(id)) complSelected.push(id); }
         else { complSelected = complSelected.filter(x => x !== id); }
+        // Mostra/amaga el selector d'estil quan canvia 'illustracions'
+        if (id === 'illustracions') {
+          const wrap = document.getElementById('illus-style-wrap');
+          if (wrap) wrap.style.display = cb.checked ? '' : 'none';
+        }
         // Actualització en temps real: el xip inferior i el localStorage es
         // refresquen a cada toggle (no només al clicar "Aplicar").
         saveComplementsState();
       });
     });
+    // Persist style selection when changed
+    const styleSel = host.querySelector('#illus-style-select');
+    if (styleSel) {
+      styleSel.addEventListener('change', () => {
+        localStorage.setItem('atne.illus_style', styleSel.value);
+      });
+    }
     // Hint amb nom del perfil
     const hint = document.getElementById('compl-hint');
     if (hint && profile) {
