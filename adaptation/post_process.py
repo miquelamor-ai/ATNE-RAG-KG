@@ -276,6 +276,7 @@ _TYPO_FIXES = {
     # MORFOLOGIK_RULE_CA_ES els detecta però no els auto-aplica (falsos positius
     # del motor LT). Llista manual conservadora: només errors amb correcció
     # inequívoca, verificats a context real.
+    # ⚠ CAT only — veure memory/project_i18n_postprocess.md
     'delfí': 'dofí',
     'delfins': 'dofins',
     'ratols': 'ratolins',
@@ -286,6 +287,14 @@ _TYPO_FIXES = {
     'estrict': 'estricte',
     'limited': 'limitat',      # anglicisme
     'interesants': 'interessants',
+    # Errors addicionals detectats a adaptació grup 3r ESO A (22/04)
+    # ⚠ CAT only
+    'possueixen': 'posseeixen',
+    'possueix': 'posseeix',
+    'dos cent': 'dos-cents',
+    'tres cent': 'tres-cents',
+    'quatre cent': 'quatre-cents',
+    'cinc cent': 'cinc-cents',
 }
 
 
@@ -298,7 +307,11 @@ _SPECIAL_FIXES = [
 
 
 def _fix_typos(text: str) -> str:
-    """Corregeix typos del LLM a partir d'un catàleg conservador observat empíricament."""
+    """Corregeix typos del LLM a partir d'un catàleg conservador observat empíricament.
+
+    ⚠ CAT only — quan ATNE s'escali a multi-llengua cal refactor.
+    Veure memory/project_i18n_postprocess.md
+    """
     if not text:
         return text
     for bad, good in _TYPO_FIXES.items():
@@ -307,6 +320,12 @@ def _fix_typos(text: str) -> str:
     # Fixes especials amb caràcters que trenquen \b (apòstrof, guionet)
     for pattern, replacement in _SPECIAL_FIXES:
         text = re.sub(pattern, replacement, text)
+    # Interrogant invertit castellà `¿...?` → `...?` (català no el porta)
+    # CAT only: a castellà SÍ el requereix. Quan s'implementi multi-llengua,
+    # condicionar aquest fix a lang=="ca".
+    text = re.sub(r'¿', '', text)
+    # Admiració invertida castellana `¡...!` → `...!` (mateix raonament)
+    text = re.sub(r'¡', '', text)
     return text
 
 
