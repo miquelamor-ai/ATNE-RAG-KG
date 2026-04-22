@@ -3775,7 +3775,7 @@ ${compsHtml.join('\n')}
     const caption = pick.caption || concept;
     const safeConcept = concept.replace(/"/g, '&quot;');
     return (
-      '<figure class="illus-final" data-kind="' + kind + '" data-concept="' + safeConcept + '" data-size="medium" data-align="center" data-from-pick="1">' +
+      '<figure class="illus-final" data-kind="' + kind + '" data-concept="' + safeConcept + '" data-size="medium" data-align="center" data-from-pick="1" data-idx="' + idx + '">' +
         '<img src="' + src + '" alt="' + alt + '">' +
         '<figcaption>' + caption + '</figcaption>' +
         '<div class="illus-final-actions" contenteditable="false">' +
@@ -3787,10 +3787,51 @@ ${compsHtml.join('\n')}
           '<button type="button" class="btn-illus-align" data-align="center" title="Centrar">⇔</button>' +
           '<button type="button" class="btn-illus-align" data-align="right" title="Alinear a la dreta">⇥</button>' +
           '<span class="illus-divider">|</span>' +
+          '<button type="button" class="btn-illus-change-picked" title="Tornar a triar (reobre el chooser)">↶ Canviar</button>' +
           '<button type="button" class="btn-illus-remove" title="Eliminar imatge d\'aquesta versió">✕</button>' +
         '</div>' +
       '</figure>'
     );
+  }
+
+  // Handler per al botó "↶ Canviar" de figures auto-aplicades (data-from-pick="1").
+  // Reobre el chooser per al concepte, removent-lo del store compartit per no
+  // tornar a auto-aplicar la tria antiga. Fa una crida puntual a /api/illustration
+  // (cache backend 30 min → hit instantani si el concepte s'havia resolt abans).
+  function _rebuildChooserForPicked(fig) {
+    const concept = fig.dataset.concept || '';
+    const idx = fig.dataset.idx || '0';
+    if (!concept) return;
+    // Treu del store: si no, la nova versió tornaria a auto-aplicar el pick vell
+    try {
+      if (window.ATNE_ILLUS_PICKS) delete window.ATNE_ILLUS_PICKS[concept];
+    } catch (_) {}
+    // Placeholder chooser amb spinners mentre arriba la resposta
+    const placeholder = document.createElement('template');
+    placeholder.innerHTML = buildIllusPlaceholder(parseInt(idx, 10), concept).trim();
+    const chooserEl = placeholder.content.firstChild;
+    fig.parentNode.replaceChild(chooserEl, fig);
+    try { bindIllusUploads(chooserEl); bindIllusSkips(chooserEl); } catch (_) {}
+    // Context per al backend
+    const mecr = (window.ATNE_PROFILE && window.ATNE_PROFILE.mecr_sortida) || localStorage.getItem('atne.mecr') || 'B1';
+    const subject = localStorage.getItem('atne.materia') || 'general';
+    const style = localStorage.getItem('atne.illus_style') || 'aquarela_storybook';
+    fetch('/api/illustration', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        concept,
+        context: { mecr, subject },
+        style,
+        seed: 42,
+      }),
+    })
+      .then(r => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))
+      .then(resolution => { try { fillIllusChooser(chooserEl, resolution); } catch (e) { console.error(e); } })
+      .catch(err => {
+        console.error('[illus] canviar error:', err);
+        window.atneToast?.('No s\'ha pogut recuperar alternatives: ' + (err.message || 'error'), 'error');
+      });
   }
 
   function processIllustrationMarkers(containerEl, rawText) {
@@ -4296,6 +4337,18 @@ ${compsHtml.join('\n')}
           } catch (e) {
             console.error('[illustracions] error restaurant chooser:', e);
           }
+        });
+      }
+      // Canviar una imatge auto-aplicada (figura sense data-chooser, amb
+      // data-from-pick="1"). Reobre el chooser via crida puntual a
+      // /api/illustration (cache 30 min al backend → hit instantani si ja
+      // havia estat resolt per a una altra versió del grup).
+      const changePickedBtn = fig.querySelector('.btn-illus-change-picked');
+      if (changePickedBtn) {
+        changePickedBtn.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          _rebuildChooserForPicked(fig);
         });
       }
       // Eliminar la figura
