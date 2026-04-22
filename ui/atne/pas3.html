@@ -1209,9 +1209,9 @@
                     chips:[{label:'3 nivells',cat:'lv'},{label:'1 TDAH',cat:'tdah'},{label:'2 L2',cat:'cat'}],
                     behaviors:[], aids:[],
                     versions:[
-                      {id:'v-b1', type:'level', avatar:'B1', label:'Nivell B1', sub:'Intermedi · 12 alumnes'},
-                      {id:'v-a2', type:'level', avatar:'A2', label:'Nivell A2', sub:'Bàsic · 4 alumnes'},
-                      {id:'v-estandard', type:'level', avatar:'Est', label:'Estàndard', sub:'Nivell del curs · 8 alumnes'},
+                      {id:'v-b1', type:'level', avatar:'B1', label:'Nivell B1', sub:'Intermedi · 12 alumnes', level_mecr:'B1'},
+                      {id:'v-a2', type:'level', avatar:'A2', label:'Nivell A2', sub:'Bàsic · 4 alumnes', level_mecr:'A2'},
+                      {id:'v-estandard', type:'level', avatar:'Est', label:'Estàndard', sub:'Nivell del curs · 8 alumnes', level_mecr:'B1'},
                       {id:'v-marc', type:'person', avatar:'M', cat:'tdah', label:'Marc R.', sub:'B1 · TDAH'},
                       {id:'v-liu', type:'person', avatar:'L', cat:'cat', label:'Liu C.', sub:'A2 · Català L2'},
                       {id:'v-mireia', type:'person', avatar:'Mi', cat:'disl', label:'Mireia S.', sub:'B1 · Dislèxia'}
@@ -1220,8 +1220,8 @@
                     chips:[{label:'2 nivells',cat:'lv'},{label:'3 AACC',cat:'ac'}],
                     behaviors:[], aids:[],
                     versions:[
-                      {id:'v-estandard', type:'level', avatar:'Est', label:'Estàndard', sub:'Nivell del curs · 9 alumnes'},
-                      {id:'v-ampliat', type:'level', avatar:'Amp', label:'Ampliació', sub:'Repte + investigació · 3 alumnes'},
+                      {id:'v-estandard', type:'level', avatar:'Est', label:'Estàndard', sub:'Nivell del curs · 9 alumnes', level_mecr:'B1'},
+                      {id:'v-ampliat', type:'level', avatar:'Amp', label:'Ampliació', sub:'Repte + investigació · 3 alumnes', level_mecr:'B2'},
                       {id:'v-pol', type:'person', avatar:'P', cat:'ac', label:'Pol Vidal', sub:'4t · AACC'},
                       {id:'v-an', type:'person', avatar:'An', cat:'ac', label:'Anna M.', sub:'4t · AACC'},
                       {id:'v-sa', type:'person', avatar:'Sa', cat:'ac', label:'Sara G.', sub:'4t · AACC'}
@@ -1230,10 +1230,10 @@
                     chips:[{label:'4 nivells',cat:'lv'},{label:'Tots L2',cat:'cat'}],
                     behaviors:[], aids:[],
                     versions:[
-                      {id:'v-a1', type:'level', avatar:'A1', label:'Nivell A1', sub:'Inicial · 2 alumnes'},
-                      {id:'v-a2', type:'level', avatar:'A2', label:'Nivell A2', sub:'Bàsic · 3 alumnes'},
-                      {id:'v-b1', type:'level', avatar:'B1', label:'Nivell B1', sub:'Intermedi · 2 alumnes'},
-                      {id:'v-b2', type:'level', avatar:'B2', label:'Nivell B2', sub:'Avançat · 1 alumne'},
+                      {id:'v-a1', type:'level', avatar:'A1', label:'Nivell A1', sub:'Inicial · 2 alumnes', level_mecr:'A1'},
+                      {id:'v-a2', type:'level', avatar:'A2', label:'Nivell A2', sub:'Bàsic · 3 alumnes', level_mecr:'A2'},
+                      {id:'v-b1', type:'level', avatar:'B1', label:'Nivell B1', sub:'Intermedi · 2 alumnes', level_mecr:'B1'},
+                      {id:'v-b2', type:'level', avatar:'B2', label:'Nivell B2', sub:'Avançat · 1 alumne', level_mecr:'B2'},
                       {id:'v-you', type:'person', avatar:'Y', cat:'cat', label:'Youssef E.', sub:'A1 · Àrab L1'},
                       {id:'v-liu2', type:'person', avatar:'L', cat:'cat', label:'Liu Z.', sub:'A2 · Xinès L1'},
                       {id:'v-am', type:'person', avatar:'Am', cat:'cat', label:'Amina K.', sub:'B1 · Àrab L1'}
@@ -1319,12 +1319,45 @@
         Tornar al text
       </button>
     `;
-    // Bug 7: encara no tenim backend per a diverses versions del mateix grup.
-    // Mostrem toast informatiu i NO canviem ni active ni contingut (evitem
-    // donar la il·lusió que la versió s'ha carregat). Pendent al parking lot.
-    lside.querySelectorAll('.vcard').forEach(c => c.addEventListener('click', (e) => {
+    // MULTINIVELL MVP (2026-04-22): quan es clica una vcard type:'level' d'un
+    // grup, canviem la versió activa i regenerem amb el MECR corresponent.
+    // Els vcards type:'person' (perfils individuals dins del grup) encara
+    // mostren toast informatiu — requereixen perfils diferents, pendent post-MVP.
+    lside.querySelectorAll('.vcard').forEach((c) => c.addEventListener('click', (e) => {
       e.preventDefault();
-      window.atneToast?.('Les versions multinivell es generaran al pilot (encara en desenvolupament)', 'info');
+      const vid = c.dataset.vid;
+      const version = (g.versions || []).find(v => v.id === vid);
+      if (!version) return;
+
+      // Perfils individuals: encara no suportats
+      if (version.type !== 'level' || !version.level_mecr) {
+        window.atneToast?.('Les versions per alumne individual es generaran post-pilot', 'info');
+        return;
+      }
+
+      // Si ja era activa, no fem res
+      if (c.classList.contains('active')) return;
+
+      // Activar aquesta vcard
+      lside.querySelectorAll('.vcard').forEach(x => x.classList.remove('active'));
+      c.classList.add('active');
+
+      // Persistir l'id de la versió activa i el MECR a localStorage
+      localStorage.setItem('atne.active_level_vid', vid);
+      localStorage.setItem('atne.active_level_mecr', version.level_mecr);
+
+      // Invalidar cache de text adaptat perquè _maybeAdaptOnLoadImpl el regeneri
+      // amb el nou MECR.
+      localStorage.removeItem('atne.adapted_cache_key');
+      localStorage.removeItem('atne.adapted_text');
+      localStorage.removeItem('atne.adapted_raw');
+
+      window.atneToast?.(`Generant versió ${version.label} (MECR ${version.level_mecr})…`, 'info');
+
+      // Regenerar
+      if (typeof _maybeAdaptOnLoadImpl === 'function') {
+        _maybeAdaptOnLoadImpl();
+      }
     }));
   }
 
@@ -2544,7 +2577,19 @@
     if (regenT) regenT.textContent = 'Adaptant el text…';
     if (regenS) regenS.textContent = 'El LLM està personalitzant el text per a ' + profile.name;
 
-    const mecrSortida = computeMECRSortida(profile, profile.course);
+    // MULTINIVELL MVP: si el perfil és un grup i hi ha una vcard type:'level'
+    // activa, fem servir el seu MECR en lloc del derivat del perfil global.
+    let mecrSortida = computeMECRSortida(profile, profile.course);
+    if (profile && profile.type === 'group') {
+      const activeMecr = localStorage.getItem('atne.active_level_mecr');
+      const activeVid = localStorage.getItem('atne.active_level_vid');
+      if (activeMecr && activeVid) {
+        // Validar que la vcard existeix al perfil actual (evita arrossegar
+        // vid d'un grup anterior si l'usuari ha canviat de perfil)
+        const valid = (profile.versions || []).some(v => v.id === activeVid && v.type === 'level');
+        if (valid) mecrSortida = activeMecr;
+      }
+    }
     const nivellPerfilAdapt = (profile.course || '').replace(/\s+[A-Z]$/, '').trim();
     // Correccions pendents (guardades pel popover Rúbrica). Es consumeixen
     // aquí i s'esborren un cop aplicades, perquè un refresh posterior no les
