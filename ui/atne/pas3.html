@@ -3215,108 +3215,262 @@
   // actius (segons toggles). Aplica la tipografia triada al selector i el disseny
   // d'impressió (margen A4, sense UI chrome). Limitació: text com a imatge, no
   // seleccionable. Per fidelitat total cal migrar a WeasyPrint/Puppeteer server-side.
+  // Abandonem html2pdf.js: cap combinació d'options (posicionament, scale, DPI,
+  // margin) renderitzava bé el canvas (text tallat, només meitat d'amplada, etc.).
+  // Solució recomanada pels experts web: popup + `window.print()`. El navegador
+  // genera el PDF nativament amb tipografia perfecta i sense bugs de canvas.
+  // L'usuari només ha de triar "Desar com PDF" al diàleg d'impressió.
   async function exportPdfClientSide(profileName) {
     const adaptedEl = document.getElementById('adapted-text');
     if (!adaptedEl) throw new Error('No hi ha text adaptat');
 
-    // Detectar tipografia activa (classe font-X al .doc-read)
-    const fontClasses = ['font-atkinson', 'font-lexend', 'font-inter', 'font-fraunces', 'font-opendyslexic'];
-    const activeFontClass = fontClasses.find(c => adaptedEl.classList.contains(c)) || 'font-atkinson';
+    // Tipografia activa al text adaptat
+    const fontMap = {
+      'font-atkinson':    "'Atkinson Hyperlegible', system-ui, sans-serif",
+      'font-lexend':      "'Lexend', system-ui, sans-serif",
+      'font-inter':       "'Inter', system-ui, sans-serif",
+      'font-fraunces':    "'Fraunces', Georgia, serif",
+      'font-opendyslexic':"'OpenDyslexic', system-ui, sans-serif",
+    };
+    const activeFontClass = Object.keys(fontMap).find(c => adaptedEl.classList.contains(c)) || 'font-atkinson';
+    // Inserim les fonts d'emoji del sistema ABANS del fallback (`sans-serif`/`serif`).
+    // Si estan després de `sans-serif`/`serif` el navegador ja no les consulta.
+    const fontFamily = fontMap[activeFontClass]
+      .replace(/(sans-serif|serif)/, "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', $1");
 
-    // Títol del document
     const titleText = (document.querySelector('.doc-title')?.value || 'Adaptació').trim();
     const today = new Date().toLocaleDateString('ca-ES', { day: 'numeric', month: 'long', year: 'numeric' });
 
-    // Contenidor oculte off-screen per renderitzar.
-    // IMPORTANT: `position:absolute; left:-99999px` en comptes de `fixed; top:-10000px`
-    // perquè html2canvas captura pàgina en blanc amb fixed fora del viewport
-    // (no pot resoldre els bounding rects correctament).
-    const root = document.createElement('div');
-    root.className = 'pdf-export-root ' + activeFontClass;
-    root.style.cssText = [
-      'position:absolute', 'top:0', 'left:-99999px',
-      'width:180mm', 'padding:0',
-      'background:#fff', 'color:#1a1a1a',
-      'font-size:14pt', 'line-height:1.65',
-      'z-index:-1',
-    ].join(';');
+    // 1) Preparar el contingut del text adaptat (clonat + neteja)
+    const mainClone = adaptedEl.cloneNode(true);
+    mainClone.removeAttribute('contenteditable');
+    mainClone.removeAttribute('id');
+    mainClone.querySelectorAll('.ins, .sub').forEach(el => el.classList.remove('ins', 'sub'));
+    mainClone.querySelectorAll(
+      '.illus-final-actions, .para-handle, .para-menu, ' +
+      'button, input, select, textarea, [role="toolbar"], .toolbar, .edit-bar'
+    ).forEach(el => el.remove());
 
-    // Capçalera: títol + metadades
-    const header = document.createElement('header');
-    header.style.cssText = 'margin-bottom:16mm;padding-bottom:6mm;border-bottom:1px solid #d0d0d0;';
-    header.innerHTML = `
-      <h1 style="font-size:22pt;font-weight:700;margin:0 0 4mm 0;letter-spacing:-0.01em;">${escapeHtml(titleText)}</h1>
-      <div style="font-size:10pt;color:#666;">
-        Adaptat per a <strong>${escapeHtml(profileName)}</strong> · ATNE · ${today}
-      </div>`;
-    root.appendChild(header);
+    // Converteix seqüències de <p> amb pipes `| cel | cel |` a <table> HTML real.
+    // El parser `markdownToHtml` del llm.js no gestiona taules → al glossari es veuen
+    // pipes literals. Aquí detectem els <p> consecutius amb format pipe i els unim
+    // en una única <table> amb capçalera i cossos.
+    function convertPipeTablesIn(rootEl) {
+      const paras = Array.from(rootEl.querySelectorAll('p'));
+      let i = 0;
+      while (i < paras.length) {
+        const p = paras[i];
+        const txt = (p.textContent || '').trim();
+        if (!/^\|.*\|$/.test(txt)) { i++; continue; }
+        const runStart = i;
+        const rows = [];
+        while (i < paras.length) {
+          const t = (paras[i].textContent || '').trim();
+          if (!/^\|.*\|$/.test(t)) break;
+          rows.push(t);
+          i++;
+        }
+        if (rows.length < 2) continue;
+        const maybeSep = rows[1].replace(/[\|:\-\s]/g, '');
+        const hasHeader = maybeSep === '';
+        const header = hasHeader ? rows[0] : null;
+        const body = hasHeader ? rows.slice(2) : rows;
+        const splitCells = row => row.replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim());
+        const table = document.createElement('table');
+        table.style.cssText = 'width:100%;border-collapse:collapse;margin:3mm 0;font-size:10.5pt;';
+        if (header) {
+          const thead = document.createElement('thead');
+          const tr = document.createElement('tr');
+          splitCells(header).forEach(c => {
+            const th = document.createElement('th');
+            th.innerHTML = c.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            th.style.cssText = 'border:1px solid #ccc;padding:2mm 3mm;background:#f4f4f4;text-align:left;font-weight:600;';
+            tr.appendChild(th);
+          });
+          thead.appendChild(tr);
+          table.appendChild(thead);
+        }
+        const tbody = document.createElement('tbody');
+        body.forEach(row => {
+          const tr = document.createElement('tr');
+          splitCells(row).forEach(c => {
+            const td = document.createElement('td');
+            td.innerHTML = c.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            td.style.cssText = 'border:1px solid #ddd;padding:2mm 3mm;vertical-align:top;';
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+        paras[runStart].replaceWith(table);
+        for (let j = runStart + 1; j < i; j++) paras[j].remove();
+      }
+    }
 
-    // Text adaptat principal
-    const mainSec = document.createElement('section');
-    mainSec.style.cssText = 'margin-bottom:12mm;';
-    const mainContent = adaptedEl.cloneNode(true);
-    mainContent.removeAttribute('contenteditable');
-    mainContent.removeAttribute('id');
-    mainContent.style.cssText = 'font-size:14pt;line-height:1.65;';
-    // Treure marques d'edició (ins/sub) i altres xifres de runtime
-    mainContent.querySelectorAll('.ins, .sub').forEach(el => {
-      // Mantenir el text però treure les classes de marcatge
-      el.classList.remove('ins', 'sub');
-      el.style.background = '';
-      el.style.textDecoration = '';
-    });
-    mainSec.appendChild(mainContent);
-    root.appendChild(mainSec);
-
-    // Complements actius (segons data-comp-toggle checked)
-    const toggles = document.querySelectorAll('[data-comp-toggle]');
+    // 2) Preparar els complements actius
+    const compsHtml = [];
     const seenComps = new Set();
-    toggles.forEach(toggle => {
+    document.querySelectorAll('[data-comp-toggle]').forEach(toggle => {
       if (!toggle.checked) return;
       const compId = toggle.dataset.compToggle;
       if (seenComps.has(compId)) return;
       seenComps.add(compId);
-
       const compView = document.getElementById('view-' + compId);
       if (!compView) return;
-
       const clone = compView.cloneNode(true);
       clone.removeAttribute('hidden');
       clone.removeAttribute('id');
-      // Netejar UI chrome dins del complement
-      clone.querySelectorAll('.comp-toggle-bar, .comp-back, .gl-edit, .q-edit, button').forEach(el => el.remove());
-      // Cada complement comença a una pàgina nova (visualment coherent)
-      clone.style.cssText = 'page-break-before:always;margin-top:12mm;';
-      root.appendChild(clone);
+      clone.querySelectorAll(
+        '.comp-toggle-bar, .comp-back, .gl-edit, .q-edit, .q-actions, .gl-actions, ' +
+        '.edit-bar, .toolbar, [role="toolbar"], .illus-final-actions, ' +
+        '.para-handle, .para-menu, ' +
+        'button, input, select, textarea'
+      ).forEach(el => el.remove());
+      convertPipeTablesIn(clone);
+      compsHtml.push('<section class="pdf-comp">' + clone.innerHTML + '</section>');
     });
 
-    document.body.appendChild(root);
-    // Esperar un frame perquè el layout s'hagi calculat abans que html2canvas llegeixi rects.
-    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    // 3) Obrir popup i escriure-hi el document net
+    const printWin = window.open('', '_blank', 'width=900,height=1100');
+    if (!printWin) {
+      throw new Error('El navegador ha bloquejat la finestra d\'impressió. Permet finestres emergents per a aquest lloc i torna a provar.');
+    }
 
     const safeName = profileName.replace(/[^\w\s-]/g, '').replace(/\s+/g, '_').slice(0, 30) || 'adaptacio';
     const ts = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    const filename = `ATNE_${safeName}_${ts}.pdf`;
+    const docTitle = `ATNE_${safeName}_${ts}`;
 
-    // El zoom CSS al documentElement (controls de zoom de l'app) trenca html2canvas:
-    // captura coordenades escalades i pot donar pàgina buida. Neutralitzem durant l'export.
-    const htmlEl = document.documentElement;
-    const prevZoom = htmlEl.style.zoom;
-    htmlEl.style.zoom = '1';
-
-    try {
-      await window.html2pdf().set({
-        margin:     [15, 15, 18, 15],  // mm: top, right, bottom, left
-        filename:   filename,
-        image:      { type: 'jpeg', quality: 0.96 },
-        html2canvas:{ scale: 2, useCORS: true, letterRendering: true, backgroundColor: '#ffffff', windowWidth: root.scrollWidth, windowHeight: root.scrollHeight },
-        jsPDF:      { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
-        pagebreak:  { mode: ['css', 'legacy'] }
-      }).from(root).save();
-    } finally {
-      root.remove();
-      htmlEl.style.zoom = prevZoom;
+    printWin.document.open();
+    printWin.document.write(`<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<title>${escapeHtml(docTitle)}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 15mm 15mm 18mm 15mm; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #fff; }
+  body {
+    font-family: ${fontFamily};
+    color: #1a1a1a;
+    font-size: 11pt;
+    line-height: 1.55;
+  }
+  header.pdf-head {
+    margin: 0 0 8mm 0;
+    padding-bottom: 4mm;
+    border-bottom: 1px solid #d0d0d0;
+  }
+  header.pdf-head h1 {
+    font-size: 18pt;
+    font-weight: 700;
+    margin: 0 0 3mm 0;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+  }
+  header.pdf-head .meta {
+    font-size: 9pt;
+    color: #666;
+  }
+  section.pdf-main h1 { font-size: 16pt; margin: 4mm 0 3mm; line-height: 1.25; }
+  section.pdf-main h2 { font-size: 13pt; margin: 5mm 0 2mm; line-height: 1.3; }
+  section.pdf-main h3 { font-size: 12pt; margin: 4mm 0 2mm; }
+  section.pdf-main p  { margin: 0 0 3mm 0; }
+  section.pdf-main ul, section.pdf-main ol { margin: 2mm 0 3mm 6mm; padding-left: 0; }
+  section.pdf-main li { margin-bottom: 1.5mm; }
+  section.pdf-main strong { font-weight: 600; }
+  section.pdf-main figure { margin: 4mm 0; page-break-inside: avoid; }
+  section.pdf-main figure img { height: auto; display: block; border-radius: 4px; }
+  section.pdf-main figure figcaption {
+    font-size: 9pt;
+    color: #666;
+    font-style: italic;
+    margin-top: 1.5mm;
+    text-align: center;
+  }
+  /* Respectar la mida triada a la UI (S/M/L) i l'alineació (left/center/right).
+     Conversió de px a mm (96 DPI): 240px≈63mm, 480px≈127mm. */
+  .illus-final { display: block; width: fit-content; max-width: 100%; text-align: center; }
+  .illus-final[data-size="small"]  img { max-width: 63mm;  width: 100%; height: auto; }
+  .illus-final[data-size="medium"] img { max-width: 127mm; width: 100%; height: auto; }
+  .illus-final[data-size="large"]  img { max-width: 100%;  width: 100%; height: auto; }
+  .illus-final[data-align="center"] { float: none; margin: 4mm auto; }
+  .illus-final[data-align="left"]   { float: left;  margin: 2mm 4mm 3mm 0; clear: left; }
+  .illus-final[data-align="right"]  { float: right; margin: 2mm 0 3mm 4mm; clear: right; }
+  .illus-final + * { clear: none; }
+  .illus-final figcaption { font-size: 9pt; color: #666; font-style: italic; margin-top: 1mm; }
+  section.pdf-comp {
+    margin-top: 8mm;
+    padding-top: 4mm;
+    border-top: 1px solid #e8e8e8;
+    page-break-inside: avoid;
+  }
+  section.pdf-comp figure { margin: 3mm 0; page-break-inside: avoid; }
+  section.pdf-comp figure img { max-width: 100%; height: auto; display: block; }
+  section.pdf-comp h3, section.pdf-comp h4 { font-size: 11pt; margin: 3mm 0 2mm; }
+  section.pdf-comp .gl-list, section.pdf-comp .q-list { list-style: none; padding: 0; margin: 0; }
+  section.pdf-comp .gl-item, section.pdf-comp .q-item { margin-bottom: 3mm; }
+  /* Reset de classes originals que restringien l'amplada */
+  .doc-read, .cmp-view, .center-body { max-width: none !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+  /* Amagar qualsevol element residual d'edició */
+  .illus-final-actions, .para-handle, .para-menu,
+  .comp-toggle-bar, .comp-back, .gl-edit, .q-edit, .q-actions, .gl-actions,
+  button, input, select, textarea, [role="toolbar"], .toolbar, .edit-bar { display: none !important; }
+  /* Preview d'impressió: botó d'imprimir prominent */
+  #print-cta {
+    position: fixed; top: 12px; right: 12px;
+    background: #1a1a1a; color: #fff; border: 0; padding: 10px 16px;
+    border-radius: 8px; font-size: 13px; cursor: pointer; z-index: 10;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  #print-cta:hover { background: #333; }
+  @media print { #print-cta { display: none !important; } }
+</style>
+</head>
+<body>
+<button id="print-cta" type="button">Imprimeix / Desa com a PDF</button>
+<header class="pdf-head">
+  <h1>${escapeHtml(titleText)}</h1>
+  <div class="meta">Adaptat per a <strong>${escapeHtml(profileName)}</strong> · ATNE · ${today}</div>
+</header>
+<section class="pdf-main">${mainClone.innerHTML}</section>
+${compsHtml.join('\n')}
+<script>
+  (function(){
+    var btn = document.getElementById('print-cta');
+    btn.addEventListener('click', function(){ window.print(); });
+    // Esperar càrrega d'imatges abans d'imprimir automàticament
+    function allImagesLoaded(){
+      var imgs = document.images;
+      for (var i = 0; i < imgs.length; i++) {
+        if (!imgs[i].complete) return false;
+      }
+      return true;
     }
+    function waitImages(cb, timeout){
+      var start = Date.now();
+      (function tick(){
+        if (allImagesLoaded() || Date.now() - start > timeout) return cb();
+        setTimeout(tick, 150);
+      })();
+    }
+    // Dispara el diàleg d'impressió automàticament després de carregar imatges (4s màx)
+    window.addEventListener('load', function(){
+      waitImages(function(){
+        setTimeout(function(){ window.print(); }, 300);
+      }, 4000);
+    });
+    // Tancar la finestra automàticament quan acaba l'impressió
+    window.addEventListener('afterprint', function(){ setTimeout(function(){ window.close(); }, 500); });
+  })();
+<\/script>
+</body>
+</html>`);
+    printWin.document.close();
+    printWin.focus();
   }
 
   function escapeHtml(s) {
