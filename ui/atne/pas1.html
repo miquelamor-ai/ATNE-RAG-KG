@@ -2667,6 +2667,16 @@
   // listeners des d'onclick inline o addEventListener, i perquè altres pàgines
   // puguin obrir la biblioteca.
   window.ATNE_OPEN_LIBRARY = openLibrary;
+  // Auto-obertura via URL param (?biblioteca=1). Permet que pas2 i pas3
+  // —que no tenen el modal— redirigeixin a pas1 i la biblioteca s'obri sola.
+  try {
+    const params = new URLSearchParams(location.search);
+    if (params.get('biblioteca') === '1') {
+      // Neteja la URL perquè un refresh no repeteixi l'auto-obertura.
+      history.replaceState(null, '', location.pathname);
+      setTimeout(openLibrary, 100);
+    }
+  } catch (_) {}
   document.getElementById('library-btn-side')?.addEventListener('click', openLibrary);
   document.getElementById('library-btn-texts')?.addEventListener('click', openLibrary);
   // Drawer mòbil (hamburguesa): dues entrades dirigeixen al mateix modal.

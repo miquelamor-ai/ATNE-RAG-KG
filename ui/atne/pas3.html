@@ -695,7 +695,7 @@
   <a class="drawer-item" href="/ui/atne/pas1.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 12 9-9 9 9"/><path d="M5 10v10h14V10"/></svg>Inici</a>
   <a class="drawer-item" href="/ui/atne/pas1.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>Perfils</a>
   <a class="drawer-item on" href="/ui/atne/pas2.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l4 4v14H6z"/><path d="M9 13h6M9 17h6M9 9h3"/></svg>Textos</a>
-  <a class="drawer-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h4v14H4zM9 5h4v14H9zM15 4l4 1-3 14-4-1z"/></svg>Biblioteca</a>
+  <a class="drawer-item" href="/ui/atne/pas1.html?biblioteca=1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h4v14H4zM9 5h4v14H9zM15 4l4 1-3 14-4-1z"/></svg>Biblioteca</a>
   <div class="drawer-sep"></div>
   <a class="drawer-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Preferències</a>
 </aside>
@@ -707,7 +707,7 @@
     <button class="rb" title="Perfils" onclick="location.href='/ui/atne/pas1.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg></button>
     <button class="rb on" title="Textos" onclick="location.href='/ui/atne/pas2.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l4 4v14H6z"/><path d="M9 13h6M9 17h6M9 9h3"/></svg></button>
     <button class="rb" id="rail-saber" title="Saber-ne+" onclick="location.href='/ui/saber-ne.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></button>
-    <button class="rb" title="Biblioteca" onclick="alert('Biblioteca: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h4v14H4zM9 5h4v14H9zM15 4l4 1-3 14-4-1z"/></svg></button>
+    <button class="rb" title="La meva biblioteca d'adaptacions" onclick="location.href='/ui/atne/pas1.html?biblioteca=1'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h4v14H4zM9 5h4v14H9zM15 4l4 1-3 14-4-1z"/></svg></button>
     <div class="rb sep"></div>
     <button class="rb" title="Preferències" onclick="alert('Preferències: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
   </aside>
@@ -782,6 +782,7 @@
           <div class="chead-row" style="margin-bottom:6px">
             <input class="doc-title" value="La Revolució Industrial">
             <span id="cloud-badge" class="status-badge cloud-idle" title="Desa a la biblioteca del núvol">☁ Desar</span>
+            <span id="new-adaptation-badge" class="status-badge" title="Desvincula aquesta pàgina de la biblioteca. Després, en desar, crearà una entrada nova en lloc d'actualitzar l'existent." style="display:none;background:#f4eaff;color:#6d3aaf"><span>✦ Nova</span></span>
             <span class="doc-meta"><span>adaptat fa 1m</span><span class="dot"></span><span>318 paraules</span></span>
             <div class="urd">
               <button id="btn-undo" title="Desfer (⌘Z)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-4"/></svg></button>
@@ -3669,6 +3670,31 @@ ${compsHtml.join('\n')}
   // Estat inicial segons si hi ha id o no
   if (localStorage.getItem('atne.current_adaptation_id')) {
     _cloudSetState('saved', '☁ Desat');
+  }
+
+  // ── Badge "Nova adaptació": desvincula de la biblioteca ───────────────
+  // Mostra aquest badge només quan la pàgina està enganxada a una entrada
+  // de biblioteca. En clicar, el proper "Desar" crea una entrada nova en
+  // comptes d'actualitzar l'existent. Previn el bug del contingut barrejat
+  // (Península dins d'una entry titulada "Xarxes socials", 2026-04-22).
+  const newAdaptationBadge = document.getElementById('new-adaptation-badge');
+  function _refreshNewAdaptationBadge() {
+    if (!newAdaptationBadge) return;
+    const hasId = !!localStorage.getItem('atne.current_adaptation_id');
+    newAdaptationBadge.style.display = hasId ? '' : 'none';
+  }
+  _refreshNewAdaptationBadge();
+  if (newAdaptationBadge) {
+    newAdaptationBadge.addEventListener('click', () => {
+      const msg = 'Desvincula aquesta pàgina de la biblioteca.\n\nDesprés, en clicar ☁ Desar, es crearà una entrada NOVA en comptes d\'actualitzar l\'existent. Útil si has editat molt el text i no vols sobreescriure la versió original.\n\nContinuar?';
+      if (!confirm(msg)) return;
+      localStorage.removeItem('atne.current_adaptation_id');
+      _refreshNewAdaptationBadge();
+      _cloudSetState('idle', '☁ Sense desar');
+      if (typeof window.atneToast === 'function') {
+        window.atneToast('Desvinculat. El proper Desar crearà una entrada nova.', 'info');
+      }
+    });
   }
 
   // ── Il·lustracions: chooser Wikimedia vs FLUX vs upload ──────────────────
