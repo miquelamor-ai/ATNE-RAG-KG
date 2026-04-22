@@ -29,6 +29,7 @@ from adaptation.post_process import (
     clean_gemini_output,
     post_process_adaptation,
 )
+from adaptation.pricing import estimate_cost_eur
 from adaptation.prompt_builder import build_system_prompt
 
 
@@ -123,6 +124,7 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
         "iso": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "docent_id": docent_id or "",
         "model": active_model,
+        "prompt_version": getattr(server, "ATNE_PROMPT_VERSION", None),
         "profile": profile,
         "context": context,
         "params": params,
@@ -333,6 +335,21 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
     cb(result_ev)
     cb({"type": "done"})
 
+    # Sprint 1C: estimació de cost en EUR per a aquesta crida.
+    # Inclou la crida principal (input system_prompt + user_text → output adapted).
+    # Si verify ha refet, el cost real serà superior; per simplicitat el comptem
+    # només una vegada (l'error és <2× i sempre conservador).
+    try:
+        _cost_eur = estimate_cost_eur(
+            active_model,
+            input_chars=len(system_prompt) + len(user_text),
+            output_chars=len(adapted),
+        )
+    except Exception:
+        _cost_eur = None
+    if _ATNE_LAST_ADAPTATION:
+        _ATNE_LAST_ADAPTATION["cost_estimat_eur"] = _cost_eur
+
     # Telemetria pilot: log asíncron a atne_sessions (fire-and-forget)
     try:
         _raw_conds = profile.get("conditions") or profile.get("caracteristiques") or []
@@ -359,6 +376,8 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
                 "output_chars":    len(adapted),
                 "verify_score":    best_score if verify_enabled and best_score >= 0 else None,
                 "docent_id":       docent_id or None,
+                "prompt_version":  getattr(server, "ATNE_PROMPT_VERSION", None),
+                "cost_estimat_eur": _cost_eur,
             },),
             daemon=True,
         ).start()

@@ -235,6 +235,22 @@
       ...params
     };
 
+    // Pilot 1C: track adapt_started + reset feedback gate per a la nova adaptació
+    try {
+      if (window.ATNE_TRACK) {
+        window.ATNE_TRACK.resetFeedbackGate();
+        window.ATNE_TRACK.event('adapt_started', {
+          mecr_sortida: backendParams.mecr_sortida,
+          levels: backendParams.levels,
+          profile_kind: profile && profile.kind,
+          profile_nom: profile && profile.nom,
+          input_chars: text.length,
+          n_complements: backendParams.complements ? Object.keys(backendParams.complements).length : 0,
+        });
+      }
+    } catch (e) { /* no bloquejant */ }
+
+    const _t0 = Date.now();
     const combinedSignal = combineSignals(signal, SSE_TIMEOUT_MS);
     const resp = await fetch('/api/adapt', {
       method: 'POST',
@@ -290,6 +306,20 @@
           } else if (ev.type === 'done_level' && onStep) {
             onStep(ev);
           } else if (ev.type === 'done') {
+            // Pilot 1C: track adapt_done amb mètriques agregades
+            try {
+              if (window.ATNE_TRACK) {
+                const out_chars = Object.values(versions)
+                  .reduce((a, v) => a + ((v && v.adapted && v.adapted.length) || 0), 0);
+                window.ATNE_TRACK.event('adapt_done', {
+                  duration_ms: Date.now() - _t0,
+                  n_versions: Object.keys(versions).length,
+                  output_chars: out_chars,
+                  models_used: Object.values(versions)
+                    .map(v => v && v.model_used).filter(Boolean),
+                });
+              }
+            } catch (e) { /* */ }
             return { versions, done: true };
           }
         }
@@ -297,6 +327,15 @@
     } catch (e) {
       // Si la cancel·lació arriba enmig (fetch/read llança AbortError) la
       // propaguem; si ja teníem 'done', el break superior ens hauria tret.
+      try {
+        if (window.ATNE_TRACK) {
+          window.ATNE_TRACK.event('adapt_error', {
+            duration_ms: Date.now() - _t0,
+            error: (e && e.name) || 'unknown',
+            message: (e && e.message) || '',
+          });
+        }
+      } catch (_) { /* */ }
       if (e && (e.name === 'AbortError' || e.name === 'TimeoutError')) {
         if (onError) onError(e);
         throw e;
@@ -451,6 +490,17 @@
    */
   async function refineText({ text, preset, instruccio, onError }) {
     if (!text || !text.trim()) throw new Error('Text buit');
+    // Pilot 1C: registra l'inici de refine
+    try {
+      if (window.ATNE_TRACK) {
+        window.ATNE_TRACK.event('refine_started', {
+          preset: preset || null,
+          has_instruccio: !!instruccio,
+          input_chars: text.length,
+        });
+      }
+    } catch (e) { /* */ }
+    const _t0 = Date.now();
     const body = { text };
     if (preset) body.preset = preset;
     // Afegim sempre la instrucció de preservar format (a més de la del docent),
@@ -475,7 +525,17 @@
       if (onError) onError(err);
       throw err;
     }
-    return resp.json();
+    const _result = await resp.json();
+    try {
+      if (window.ATNE_TRACK) {
+        window.ATNE_TRACK.event('refined', {
+          preset: preset || null,
+          duration_ms: Date.now() - _t0,
+          output_chars: (_result && _result.text && _result.text.length) || 0,
+        });
+      }
+    } catch (e) { /* */ }
+    return _result;
   }
 
   /**
@@ -815,6 +875,27 @@
   async function exportDoc({ format, adapted, profile_name = 'adaptacio' }) {
     if (!adapted || !adapted.trim()) throw new Error('No hi ha text per exportar');
     if (!['pdf', 'docx', 'txt'].includes(format)) throw new Error('Format no suportat: ' + format);
+
+    // Pilot 1C: bloquejar amb modal de feedback abans d'exportar.
+    // Si ja s'ha mostrat aquesta sessió, el modal no es torna a obrir.
+    if (window.ATNE_TRACK && window.ATNE_TRACK.requireFeedback) {
+      await new Promise(function (resolve) {
+        window.ATNE_TRACK.requireFeedback({
+          reason: 'export_' + format,
+          onDone: function () { resolve(); },
+        });
+      });
+    }
+
+    try {
+      if (window.ATNE_TRACK) {
+        window.ATNE_TRACK.event('exported', {
+          format: format,
+          chars: adapted.length,
+        });
+      }
+    } catch (e) { /* */ }
+
     const resp = await fetch('/api/export', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

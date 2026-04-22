@@ -49,6 +49,31 @@ from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse, Fil
 
 load_dotenv()
 
+# Versió del prompt — git hash curt + data, identifica la versió del codi
+# que ha generat cada adaptació del pilot. Imprescindible per a comparatives
+# cegues entre setmanes (cada refactor del prompt invalida comparacions).
+# Pot sobreescriure's amb env var ATNE_PROMPT_VERSION (útil a Cloud Run on
+# git no està disponible — el Cloud Build el resol i l'injecta).
+def _resolve_prompt_version() -> str:
+    env_v = os.getenv("ATNE_PROMPT_VERSION", "").strip()
+    if env_v:
+        return env_v
+    try:
+        import subprocess
+        h = subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=Path(__file__).parent,
+            stderr=subprocess.DEVNULL,
+            timeout=2,
+        ).decode().strip()
+        date = time.strftime("%Y-%m-%d")
+        return f"{date}_{h}" if h else f"{date}_unknown"
+    except Exception:
+        return f"{time.strftime('%Y-%m-%d')}_unknown"
+
+ATNE_PROMPT_VERSION = _resolve_prompt_version()
+print(f"[ATNE] prompt_version: {ATNE_PROMPT_VERSION}", flush=True)
+
 # Claus API, àlies de models i resolució estan a `adaptation/llm_clients.py`.
 # Aquí les re-exposem al namespace de `server` per mantenir el contracte amb
 # callers externs (snapshot_contract, generador_lliure, tests).
@@ -780,6 +805,30 @@ def _log_session(session: dict) -> None:
         print(f"[telemetria] error insert atne_sessions: {e}", flush=True)
 
 
+def _log_pilot_event(event: dict) -> None:
+    """Insereix una fila a atne_pilot_events (Supabase). Fire-and-forget."""
+    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+        return
+    try:
+        requests.post(
+            f"{SUPABASE_URL}/rest/v1/atne_pilot_events",
+            headers={**SUPABASE_HEADERS, "Prefer": "return=minimal"},
+            json=event,
+            timeout=5,
+        )
+    except Exception as e:
+        print(f"[pilot_event] error insert: {e}", flush=True)
+
+
+def _docent_hash_from_id(docent_id: str) -> str:
+    """SHA256 truncat del docent_id (email). Estable, no reversible."""
+    if not docent_id:
+        return ""
+    salt = os.getenv("ATNE_DOCENT_SALT", "atne-pilot-2026")
+    h = hashlib.sha256(f"{docent_id.strip().lower()}:{salt}".encode()).hexdigest()
+    return h[:16]
+
+
 # VERIFY_SYSTEM, _verify_adaptation, run_adaptation + estat d'audit
 # (_ATNE_LAST_ADAPTATION, _ATNE_ADAPTATIONS_LOG, _ATNE_ADAPTATIONS_MAX) s'han
 # mogut a adaptation/orchestrator.py. Re-exposem run_adaptation aqui per
@@ -1264,6 +1313,359 @@ async def admin_analytics(_: bool = Depends(_require_admin)):
     }
 
 
+# ── Pilot — events UX granulars + consentiment ─────────────────────────────
+#
+# Sprint 1C (2026-04-22): no podem avaluar el pilot només amb la dada final
+# (rating + adaptat). Cal el procés: refines, edits, complements
+# generats/esborrats, exports, biblioteca, canvis de model. Aquests endpoints
+# són *públics* (no admin) — els frontends els criden a cada acció rellevant.
+#
+# Whitelist d'event_types acceptats. Tot el que no estigui aquí es rebutja
+# (evita pollution de la taula amb events oportunistics o tests).
+_PILOT_EVENT_TYPES = {
+    # Adaptació
+    "adapt_started", "adapt_done", "adapt_error",
+    # Refinaments
+    "refine_started", "refined", "redo", "redo_rubric",
+    # Complements
+    "complement_generated", "complement_deleted", "complement_edited",
+    # Edició / exports
+    "manual_edit", "exported", "copied", "saved",
+    # Navegació / biblioteca
+    "biblioteca_opened", "draft_loaded", "pas_change",
+    # Model / config
+    "model_switch", "preset_applied",
+    # Feedback / rúbrica
+    "rubric_submitted", "feedback_skipped", "feedback_submitted",
+    # Consent flow
+    "consent_shown",
+}
+
+
+@app.post("/api/pilot/event")
+async def pilot_event(payload: dict = Body(...)):
+    """Registra un event UX granular del pilot. Fire-and-forget al backend.
+
+    Payload mínim: { event_type: str }
+    Payload complet: {
+        event_type: str,        # whitelist _PILOT_EVENT_TYPES
+        session_id: str?,       # adapt_id o UUID client
+        history_id: int?,       # FK lògica a history.id
+        step: str?,             # 'pas1' | 'pas2' | 'pas3' | 'pas4'
+        docent_id: str?,        # email (si conegut, sinó backend hash anònim)
+        data: dict?,            # payload específic (preset, target, format…)
+    }
+    """
+    event_type = (payload.get("event_type") or "").strip()
+    if event_type not in _PILOT_EVENT_TYPES:
+        return JSONResponse(
+            {"ok": False, "error": f"event_type desconegut: {event_type!r}"},
+            status_code=400,
+        )
+
+    docent_id = (payload.get("docent_id") or "").strip()
+    docent_hash = _docent_hash_from_id(docent_id) if docent_id else \
+                  (payload.get("docent_hash") or _get_current_docent_hash())
+
+    event = {
+        "event_type": event_type,
+        "step": (payload.get("step") or None),
+        "docent_id": docent_id or None,
+        "docent_hash": docent_hash or None,
+        "session_id": payload.get("session_id") or None,
+        "history_id": payload.get("history_id") or None,
+        "data": payload.get("data") or {},
+        "prompt_version": payload.get("prompt_version") or ATNE_PROMPT_VERSION,
+    }
+
+    # Fire-and-forget perquè cap clic UI mai bloquegi per latència Supabase
+    import threading as _th
+    _th.Thread(target=_log_pilot_event, args=(event,), daemon=True).start()
+    return {"ok": True}
+
+
+@app.post("/api/pilot/consent")
+async def pilot_consent(request: Request, payload: dict = Body(...)):
+    """Registra el consentiment informat del docent (RGPD art. 7 + AI Act).
+
+    Payload: {
+        docent_id: str (email),
+        decision: 'accepted' | 'declined' | 'revoked',
+        consent_text_version: str?  (default ve de system_config)
+    }
+    """
+    docent_id = (payload.get("docent_id") or "").strip().lower()
+    decision = (payload.get("decision") or "").strip().lower()
+    if not docent_id or decision not in ("accepted", "declined", "revoked"):
+        return JSONResponse(
+            {"ok": False, "error": "docent_id obligatori i decision in {accepted,declined,revoked}"},
+            status_code=400,
+        )
+    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+        return {"ok": False, "error": "Supabase no configurat"}
+
+    docent_hash = _docent_hash_from_id(docent_id)
+    ip = request.client.host if request.client else ""
+    ip_hash = hashlib.sha256(f"{ip}:{os.getenv('ATNE_DOCENT_SALT', 'atne-pilot-2026')}".encode()).hexdigest()[:16]
+    user_agent = (request.headers.get("user-agent") or "")[:300]
+
+    row = {
+        "docent_id": docent_id,
+        "docent_hash": docent_hash,
+        "decision": decision,
+        "dpia_version": payload.get("dpia_version") or "2026-04-22",
+        "consent_text_version": payload.get("consent_text_version") or "v1.0",
+        "user_agent": user_agent,
+        "ip_hash": ip_hash,
+    }
+    try:
+        r = requests.post(
+            f"{SUPABASE_URL}/rest/v1/atne_pilot_consent",
+            headers={**SUPABASE_HEADERS, "Prefer": "return=minimal"},
+            json=row,
+            timeout=5,
+        )
+        if r.status_code in (200, 201, 204):
+            return {"ok": True}
+        return {"ok": False, "error": r.text}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+@app.get("/api/pilot/consent/{docent_id}")
+async def pilot_consent_status(docent_id: str):
+    """Retorna l'estat del consentiment d'un docent. Permet al frontend saber
+    si cal redirigir a la pantalla de consent.html o no."""
+    docent_id = docent_id.strip().lower()
+    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+        return {"ok": False, "decision": None}
+    try:
+        r = requests.get(
+            f"{SUPABASE_URL}/rest/v1/atne_pilot_consent"
+            f"?docent_id=eq.{docent_id}&select=decision,ts,dpia_version&order=ts.desc&limit=1",
+            headers=SUPABASE_HEADERS,
+            timeout=5,
+        )
+        rows = r.json() if r.status_code == 200 else []
+        if rows:
+            return {"ok": True, "decision": rows[0].get("decision"), "ts": rows[0].get("ts")}
+        return {"ok": True, "decision": None}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+@app.get("/api/admin/pilot-metrics")
+async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
+    """Mètriques per al dashboard /admin/pilot.
+
+    Combina 4 fonts:
+      - atne_sessions  → sessions, models usats, latency, verify, cost
+      - atne_pilot_events  → funnel UX (refines, complements, exports)
+      - history  → feedback (rating, review_items), edit_manual, copied
+      - atne_pilot_consent  → docents amb consentiment vàlid
+
+    Tot per al pilot 2026-04-20 → 2026-05-08. Limita a 1000 rows per font.
+    """
+    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+        return {"ok": False, "error": "Supabase no configurat"}
+
+    def _get(url):
+        try:
+            r = requests.get(url, headers=SUPABASE_HEADERS, timeout=10)
+            return r.json() if r.status_code == 200 else []
+        except Exception:
+            return []
+
+    base = f"{SUPABASE_URL}/rest/v1"
+    sessions = _get(
+        f"{base}/atne_sessions"
+        f"?select=ts,model,profile_type,conditions,etapa,mecr_sortida,latency_ms,"
+        f"n_instructions,verify_score,docent_id,prompt_version,cost_estimat_eur"
+        f"&order=ts.desc&limit=1000"
+    )
+    events = _get(
+        f"{base}/atne_pilot_events"
+        f"?select=ts,event_type,docent_hash,docent_id,session_id,history_id,step,data,prompt_version"
+        f"&order=ts.desc&limit=2000"
+    )
+    feedback = _get(
+        f"{base}/history"
+        f"?select=created_at,rating,review_items,refine_count,exported,copied,"
+        f"edit_manual,time_on_step4_ms,model_used,prompt_version,docent_hash,cost_estimat_eur"
+        f"&order=created_at.desc&limit=1000"
+    )
+    consents = _get(
+        f"{base}/atne_pilot_consent"
+        f"?select=ts,docent_id,decision&order=ts.desc&limit=500"
+    )
+
+    from collections import Counter, defaultdict
+    import datetime
+
+    today = datetime.date.today().isoformat()
+
+    # ── Sessions agregats ───────────────────────────────────────────────
+    total = len(sessions)
+    sessions_avui = sum(1 for s in sessions if (s.get("ts") or "").startswith(today))
+    docents_actius = len({s["docent_id"] for s in sessions if s.get("docent_id")})
+
+    by_model = dict(Counter(s.get("model", "?") for s in sessions).most_common())
+    by_etapa = dict(Counter(s.get("etapa", "?") for s in sessions if s.get("etapa")).most_common())
+    by_profile = dict(Counter(s.get("profile_type", "?") for s in sessions).most_common())
+    by_prompt_version = dict(Counter(s.get("prompt_version", "?") for s in sessions if s.get("prompt_version")).most_common())
+
+    cond_counter: Counter = Counter()
+    for s in sessions:
+        for c in (s.get("conditions") or []):
+            if c and c != "desconegut":
+                cond_counter[c] += 1
+    by_conditions = dict(cond_counter.most_common(10))
+
+    latencies = [s["latency_ms"] for s in sessions if s.get("latency_ms")]
+    latency_avg = int(sum(latencies) / len(latencies)) if latencies else None
+    latency_p90 = int(sorted(latencies)[int(len(latencies) * 0.9)]) if len(latencies) >= 5 else None
+
+    scores = [s["verify_score"] for s in sessions if s.get("verify_score") is not None]
+    verify_avg = round(sum(scores) / len(scores), 2) if scores else None
+
+    cost_total = round(sum(float(s.get("cost_estimat_eur") or 0) for s in sessions), 4)
+    cost_per_model = defaultdict(float)
+    for s in sessions:
+        cost_per_model[s.get("model", "?")] += float(s.get("cost_estimat_eur") or 0)
+    cost_per_model = {k: round(v, 4) for k, v in cost_per_model.items()}
+
+    # ── Events UX agregats ──────────────────────────────────────────────
+    by_event_type = dict(Counter(e.get("event_type", "?") for e in events).most_common())
+
+    refines_per_session: dict[str, int] = defaultdict(int)
+    complement_actions: Counter = Counter()
+    exports_format: Counter = Counter()
+    presets_used: Counter = Counter()
+    for e in events:
+        et = e.get("event_type")
+        sid = e.get("session_id") or "no_sess"
+        data = e.get("data") or {}
+        if et == "refined":
+            refines_per_session[sid] += 1
+            if data.get("preset"):
+                presets_used[data["preset"]] += 1
+        elif et in ("complement_generated", "complement_deleted", "complement_edited"):
+            ctype = data.get("type") or "?"
+            complement_actions[f"{ctype}:{et.replace('complement_', '')}"] += 1
+        elif et == "exported":
+            exports_format[data.get("format") or "?"] += 1
+
+    refine_dist = Counter(refines_per_session.values())
+    refine_dist_summary = {
+        "0": sum(1 for s in sessions if (s.get("session_id") or "no_sess") not in refines_per_session),
+        "1": refine_dist.get(1, 0),
+        "2": refine_dist.get(2, 0),
+        "3": refine_dist.get(3, 0),
+        "4+": sum(c for n, c in refine_dist.items() if n >= 4),
+    }
+
+    # ── Feedback agregat ────────────────────────────────────────────────
+    rated = [h for h in feedback if h.get("rating") is not None]
+    rating_dist = dict(Counter(h["rating"] for h in rated))
+    rating_avg = round(sum(h["rating"] for h in rated) / len(rated), 2) if rated else None
+    feedback_rate = round(len(rated) / len(feedback), 3) if feedback else None
+
+    # Review items: agregar checkboxes
+    review_items_counter: Counter = Counter()
+    altres_texts: list[str] = []
+    for h in feedback:
+        ri = h.get("review_items") or {}
+        if isinstance(ri, dict):
+            for k, v in ri.items():
+                if k == "altres_text":
+                    if v: altres_texts.append(str(v)[:200])
+                elif v:
+                    review_items_counter[k] += 1
+
+    edit_rate = (sum(1 for h in feedback if h.get("edit_manual"))
+                 / len(feedback)) if feedback else None
+    copied_rate = (sum(1 for h in feedback if h.get("copied"))
+                   / len(feedback)) if feedback else None
+    exported_rate = (sum(1 for h in feedback if h.get("exported"))
+                     / len(feedback)) if feedback else None
+
+    times_step4 = [h["time_on_step4_ms"] for h in feedback if h.get("time_on_step4_ms")]
+    median_time_step4 = sorted(times_step4)[len(times_step4) // 2] if times_step4 else None
+
+    # ── Funnel d'adopció Stanford SCALE ─────────────────────────────────
+    docents_seen = {c["docent_id"] for c in consents if c.get("docent_id")}
+    docents_consented = {c["docent_id"] for c in consents if c.get("decision") == "accepted"}
+    docents_adapted = {s["docent_id"] for s in sessions if s.get("docent_id")}
+    docents_refined = {e["docent_id"] for e in events
+                       if e.get("event_type") == "refined" and e.get("docent_id")}
+    docents_exported = {e["docent_id"] for e in events
+                        if e.get("event_type") == "exported" and e.get("docent_id")}
+
+    funnel = {
+        "consent_seen": len(docents_seen),
+        "consent_accepted": len(docents_consented),
+        "adapt_at_least_one": len(docents_adapted),
+        "refine_at_least_one": len(docents_refined),
+        "export_at_least_one": len(docents_exported),
+    }
+
+    # ── Recents (últimes 20 sessions) ───────────────────────────────────
+    recent = []
+    for s in sessions[:20]:
+        ts = (s.get("ts") or "")[:16].replace("T", " ")
+        recent.append({
+            "ts": ts,
+            "model": s.get("model", "?"),
+            "etapa": s.get("etapa", ""),
+            "mecr": s.get("mecr_sortida", ""),
+            "latency_ms": s.get("latency_ms"),
+            "score": s.get("verify_score"),
+            "prompt_version": s.get("prompt_version"),
+            "cost_eur": s.get("cost_estimat_eur"),
+        })
+
+    return {
+        "ok": True,
+        "prompt_version_actual": ATNE_PROMPT_VERSION,
+        "totals": {
+            "sessions": total,
+            "sessions_avui": sessions_avui,
+            "docents_actius": docents_actius,
+            "events": len(events),
+            "feedback_rebut": len(rated),
+            "consents": len(consents),
+            "cost_eur_total": cost_total,
+        },
+        "by_model": by_model,
+        "by_etapa": by_etapa,
+        "by_profile": by_profile,
+        "by_conditions": by_conditions,
+        "by_prompt_version": by_prompt_version,
+        "by_event_type": by_event_type,
+        "complement_actions": dict(complement_actions.most_common(20)),
+        "presets_used": dict(presets_used),
+        "exports_format": dict(exports_format),
+        "refine_distribution": refine_dist_summary,
+        "latency_avg_ms": latency_avg,
+        "latency_p90_ms": latency_p90,
+        "verify_avg": verify_avg,
+        "feedback": {
+            "rate": feedback_rate,
+            "rating_avg": rating_avg,
+            "rating_dist": rating_dist,
+            "review_items": dict(review_items_counter),
+            "altres_texts": altres_texts[:20],
+            "edit_rate": edit_rate,
+            "copied_rate": copied_rate,
+            "exported_rate": exported_rate,
+            "median_time_step4_ms": median_time_step4,
+        },
+        "cost_per_model_eur": cost_per_model,
+        "funnel": funnel,
+        "recent": recent,
+    }
+
+
 @app.get("/api/audit/last-adaptation")
 async def audit_last_adaptation(_: bool = Depends(_require_admin)):
     """Retorna la darrera adaptació (retrocompatibilitat amb UI antiga)."""
@@ -1555,6 +1957,8 @@ _HISTORY_INSERTABLE_FIELDS = {
     "time_on_step4_ms", "review_items",
     # Sprint B (2026-04-16) — memòria pilot anònima
     "source",  # 'paste' | 'upload' | 'generated'
+    # Sprint 1C (2026-04-22) — versionat del prompt
+    "prompt_version",
 }
 
 _HISTORY_UPDATABLE_FIELDS = {
@@ -1568,6 +1972,8 @@ _HISTORY_UPDATABLE_FIELDS = {
     # Sprint 1B — captures pilot
     "copied", "time_on_step4_ms", "review_items", "cost_estimat_eur",
     "models_per_phase",
+    # Sprint 1C — versionat del prompt
+    "prompt_version",
 }
 
 
@@ -1609,6 +2015,29 @@ async def save_history(payload: dict = Body(...)):
     # Default endpoint
     if "endpoint" not in row:
         row["endpoint"] = payload.get("endpoint") or "/api/adapt"
+    # Sprint 1C: estampar prompt_version automàticament al backend si el client
+    # no l'ha enviat. Permet correlacionar adaptacions amb la versió del codi.
+    if "prompt_version" not in row:
+        row["prompt_version"] = ATNE_PROMPT_VERSION
+
+    # Sprint 1C: estimar cost_estimat_eur al backend (per-token) si el client
+    # no l'ha enviat o ha enviat 0 (estimació per-call coarse). El backend té
+    # informació més precisa: model_used + n_words_in + n_words_out.
+    try:
+        from adaptation.pricing import estimate_cost_eur as _est_cost
+        existing_cost = row.get("cost_estimat_eur")
+        if existing_cost is None or existing_cost == 0:
+            n_in = row.get("n_words_in") or 0
+            n_out = row.get("n_words_out") or 0
+            # Aprox 6 chars/paraula per a català (incloent espais)
+            chars_in = int(n_in) * 6
+            chars_out = int(n_out) * 6
+            model = row.get("model_used")
+            cost = _est_cost(model, chars_in, chars_out)
+            if cost is not None:
+                row["cost_estimat_eur"] = cost
+    except Exception as _e:
+        print(f"[history] error estimant cost: {_e}", flush=True)
 
     try:
         resp = requests.post(
@@ -3420,6 +3849,20 @@ async def admin_page():
             headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
         )
     return HTMLResponse("<h1>Admin no disponible</h1>", status_code=404)
+
+
+@app.get("/admin/pilot", response_class=HTMLResponse)
+async def admin_pilot_page():
+    """Serveix el dashboard `/admin/pilot` — funnel d'adopció + edit-rate +
+    cost per model + feedback agregat per al pilot 2026-04-20→2026-05-08.
+    L'auth es gestiona via JS al navegador (mateix patró que /admin)."""
+    html_path = UI_DIR / "admin-pilot.html"
+    if html_path.exists():
+        return HTMLResponse(
+            html_path.read_text(encoding="utf-8"),
+            headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
+        )
+    return HTMLResponse("<h1>Pilot dashboard no disponible</h1>", status_code=404)
 
 
 # ── Cuina (dashboard intern) ───────────────────────────────────────────────

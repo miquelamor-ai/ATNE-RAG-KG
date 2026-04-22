@@ -662,6 +662,12 @@ function goToStep(n) {
     if (state.step === 3 && n !== 3) {
         sendStep3TimeOnExit();
     }
+    // Pilot 1C: pas_change event (granular) — només si canviem de pas real
+    try {
+        if (state.step && state.step !== n && typeof trackAction === "function") {
+            trackAction("pas_change", { from: state.step, to: n });
+        }
+    } catch { /* no bloquejant */ }
     state.step = n;
     document.querySelectorAll(".step-tab").forEach(tab => {
         tab.classList.toggle("active", parseInt(tab.dataset.step) === n);
@@ -900,6 +906,15 @@ function renderComplementGrid() {
     grid.querySelectorAll('input[data-comp]').forEach(cb => {
         cb.addEventListener('change', () => {
             cb.closest('.complement-item').classList.remove('auto');
+            // Pilot 1C: capturar quan el docent activa/desactiva un complement
+            try {
+                if (typeof trackAction === "function") {
+                    trackAction(
+                        cb.checked ? "complement_generated" : "complement_deleted",
+                        { type: cb.dataset.comp, manual: true }
+                    );
+                }
+            } catch { /* no bloquejant */ }
         });
     });
 
@@ -2334,6 +2349,8 @@ async function copyAdaptedText() {
         alert("No s'ha pogut copiar: " + e.message);
         return;
     }
+    // Pilot events: granular event + agregat history
+    trackAction("copied", { chars: text.length });
     // Feedback visual
     const btn = document.getElementById("btn-copy-adapted");
     if (btn) {
@@ -2472,10 +2489,69 @@ async function redoWithRubric() {
     runAdaptation();
 }
 
+// ── Sprint 1C (2026-04-22): Pilot UX events ─────────────────────────────
+//
+// trackAction registra cada acció rellevant pedagògicament a la taula
+// `atne_pilot_events`. Sense això, només sabíem el resultat final
+// (1 row a `history` per adaptació) i perdíem tot el procés:
+// quants refines, quins presets, quins complements, exports, etc.
+//
+// També actualitza camps agregats a `history` (refine_count, exported,
+// copied, edit_manual…) per al dashboard ràpid d'analítica.
+
+const _PILOT_AGG_FIELDS = {
+    refined: { field: "refine_count", op: "increment" },
+    redo: { field: "refine_count", op: "increment" },
+    redo_rubric: { field: "refine_count", op: "increment" },
+    exported: { field: "exported", op: "set_true" },
+    copied: { field: "copied", op: "set_true" },
+    manual_edit: { field: "edit_manual", op: "set_true" },
+};
+
+let _pilotRefineCount = 0;
+
+function _currentDocentId() {
+    try {
+        if (window.ATNE_AUTH && window.ATNE_AUTH.email) return window.ATNE_AUTH.email;
+        return localStorage.getItem("atne_user_email") || "";
+    } catch { return ""; }
+}
+
+function _currentStep() {
+    try { return state && state.step ? `pas${state.step}` : null; } catch { return null; }
+}
+
 async function trackAction(action, extra) {
+    // 1) Event granular a atne_pilot_events (sempre, fins i tot sense historyId)
+    try {
+        const payload = {
+            event_type: action,
+            session_id: (state && state.adaptId) || null,
+            history_id: (state && state.historyId) || null,
+            step: _currentStep(),
+            docent_id: _currentDocentId(),
+            data: extra || {},
+        };
+        // Fire-and-forget: NO await per no bloquejar la UI
+        fetch("/api/pilot/event", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+            keepalive: true,  // sobreviu si la pàgina es tanca (ex: export)
+        }).catch(() => { /* no bloquejant */ });
+    } catch { /* no bloquejant */ }
+
+    // 2) Camp agregat a history (per a queries ràpides al dashboard)
     if (!state.historyId) return;
-    const body = { pilot_action: action };
-    if (extra) Object.assign(body, extra);
+    const agg = _PILOT_AGG_FIELDS[action];
+    if (!agg) return;
+    const body = {};
+    if (agg.op === "set_true") {
+        body[agg.field] = true;
+    } else if (agg.op === "increment") {
+        _pilotRefineCount += 1;
+        body[agg.field] = _pilotRefineCount;
+    }
     try {
         await fetch(`/api/history/${state.historyId}`, {
             method: "PATCH",

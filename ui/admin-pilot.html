@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ATNE · Pilot Dashboard</title>
+
+<!-- Auth Supabase -->
+<script src="/ui/atne/js/auth.js"></script>
+
+<!-- Tipografia -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- ATNE base global -->
+<link rel="stylesheet" href="/ui/styles/tokens.css">
+<link rel="stylesheet" href="/ui/styles/base.css">
+<link rel="stylesheet" href="/ui/styles/shell.css">
+
+<style>
+  body { background: var(--cream); color: var(--ink-900); font-family: var(--ui); margin: 0; }
+  .container { max-width: 1280px; margin: 0 auto; padding: var(--sp-6); }
+
+  nav.topbar {
+    background: var(--ink-900); padding: 0 var(--sp-6); display: flex; gap: var(--sp-2);
+    align-items: center; height: 48px;
+  }
+  nav.topbar a {
+    color: var(--ink-300); text-decoration: none; padding: .35rem .75rem;
+    font-size: var(--fs-sm); border-radius: var(--r-xs);
+  }
+  nav.topbar a:hover { background: var(--ink-800); color: #fff; }
+  nav.topbar .spacer { margin-left: auto; }
+  nav.topbar .pv { color: var(--ink-400); font-family: var(--mono); font-size: 11px; padding-right: 8px; }
+
+  header.page {
+    background: var(--primary); color: #fff; padding: var(--sp-7) var(--sp-6);
+    border-radius: var(--r-2xl); margin-bottom: var(--sp-6); box-shadow: var(--sh-md);
+  }
+  header.page h1 {
+    font-family: var(--display); font-weight: 700;
+    font-size: var(--fs-2xl); margin: 0 0 var(--sp-2);
+  }
+  header.page .sub {
+    color: rgba(255,255,255,0.85); font-size: var(--fs-sm); margin-top: 4px;
+  }
+  .pilot-status {
+    display: inline-block; padding: 4px 10px; background: var(--ok); color: #fff;
+    border-radius: var(--r-sm); font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.05em; margin-left: var(--sp-2);
+  }
+
+  .grid { display: grid; gap: var(--sp-4); }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 900px) {
+    .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: #fff; border: 1px solid var(--paper-line, #e4e0da);
+    border-radius: var(--r-md); padding: var(--sp-4);
+  }
+  .card h2 {
+    font-family: var(--display); font-weight: 600; font-size: var(--fs-lg);
+    margin: 0 0 var(--sp-2); color: var(--ink-900);
+  }
+  .card p.hint { font-size: var(--fs-xs); color: var(--ink-400); margin: 0 0 var(--sp-3); }
+
+  .kpi { display: flex; flex-direction: column; gap: 4px; }
+  .kpi .v { font-family: var(--display); font-size: 32px; font-weight: 700; color: var(--ink-900); line-height: 1; }
+  .kpi .l { font-size: var(--fs-xs); color: var(--ink-500); text-transform: uppercase; letter-spacing: 0.05em; }
+  .kpi .h { font-size: 11px; color: var(--ink-400); margin-top: 2px; }
+
+  table.lite { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.lite th, table.lite td {
+    padding: 6px 8px; border-bottom: 1px solid var(--paper-line, #eee); text-align: left;
+  }
+  table.lite th { font-weight: 600; color: var(--ink-500); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+  table.lite td.num { text-align: right; font-family: var(--mono); }
+
+  .funnel-row {
+    display: flex; align-items: center; gap: 12px; padding: 6px 0;
+    border-bottom: 1px dashed var(--paper-line, #eee);
+  }
+  .funnel-row:last-child { border-bottom: none; }
+  .funnel-row .stage { flex: 1; font-size: 13px; }
+  .funnel-row .bar { flex: 2; height: 14px; background: var(--ink-100, #eee); border-radius: 7px; overflow: hidden; }
+  .funnel-row .bar > span { display: block; height: 100%; background: var(--primary); border-radius: 7px; }
+  .funnel-row .num { font-family: var(--mono); font-size: 13px; min-width: 60px; text-align: right; }
+
+  .pill {
+    display: inline-block; padding: 2px 8px; background: var(--ink-100, #f0eee9);
+    color: var(--ink-700); border-radius: 999px; font-size: 11px;
+    font-family: var(--mono); margin: 2px;
+  }
+  .pill.warn { background: var(--warn-50, #fff5d9); color: var(--warn, #7a4f00); }
+  .pill.ok { background: var(--ok-50, #d6f3df); color: var(--ok, #1f7a3e); }
+
+  .login-overlay {
+    position: fixed; inset: 0; background: rgba(15,15,25,0.85); z-index: 9999;
+    display: none; align-items: center; justify-content: center;
+  }
+  .login-box {
+    background: #fff; padding: var(--sp-6); border-radius: var(--r-md);
+    max-width: 360px; width: 100%; box-shadow: var(--sh-lg);
+  }
+  .login-box h3 { margin: 0 0 var(--sp-3); font-family: var(--display); }
+  .login-box input { width: 100%; padding: 8px 10px; border: 1px solid var(--ink-200); border-radius: var(--r-sm); font-size: 14px; box-sizing: border-box; margin-bottom: var(--sp-2); }
+  .login-box button { width: 100%; padding: 10px; background: var(--primary); color: #fff; border: none; border-radius: var(--r-sm); font-size: 14px; font-weight: 600; cursor: pointer; }
+  .login-box .err { color: var(--danger); font-size: 12px; margin-top: var(--sp-2); }
+
+  .loading { padding: var(--sp-6); text-align: center; color: var(--ink-400); }
+
+  .review-bar { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
+  .review-bar-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .review-bar-row .label { flex: 1; }
+  .review-bar-row .meter { flex: 2; height: 8px; background: var(--ink-100, #eee); border-radius: 4px; overflow: hidden; }
+  .review-bar-row .meter > span { display: block; height: 100%; background: var(--danger); border-radius: 4px; }
+  .review-bar-row .n { font-family: var(--mono); min-width: 30px; text-align: right; font-size: 11px; color: var(--ink-500); }
+
+  .updated-at { font-size: 11px; color: var(--ink-400); font-family: var(--mono); }
+</style>
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="/admin">← Admin</a>
+  <a href="/admin/pilot" style="color:#fff">Pilot</a>
+  <a href="/cuina">Cuina</a>
+  <a href="/dashboard">Xat 9</a>
+  <span class="spacer"></span>
+  <span class="pv" id="prompt-version-tag">prompt: …</span>
+</nav>
+
+<div class="container">
+
+<header class="page">
+  <h1>Dashboard del pilot ATNE <span class="pilot-status">EN CURS</span></h1>
+  <div class="sub">Pilot 2026-04-20 → 2026-05-08 · 16 docents FJE</div>
+  <div class="updated-at" id="updated-at" style="color:rgba(255,255,255,0.7);margin-top:8px;">Carregant…</div>
+</header>
+
+<!-- KPIs principals -->
+<div class="grid grid-4" id="kpis">
+  <div class="card kpi"><div class="l">Adaptacions</div><div class="v" id="k-sessions">–</div><div class="h" id="k-sessions-today">avui: –</div></div>
+  <div class="card kpi"><div class="l">Docents actius</div><div class="v" id="k-docents">–</div><div class="h" id="k-consents">consents: –</div></div>
+  <div class="card kpi"><div class="l">Feedback rebut</div><div class="v" id="k-feedback">–</div><div class="h" id="k-feedback-rate">cobertura: –%</div></div>
+  <div class="card kpi"><div class="l">Cost acumulat</div><div class="v" id="k-cost">–</div><div class="h">EUR estimat</div></div>
+</div>
+
+<div style="height: var(--sp-4);"></div>
+
+<!-- Funnel d'adopció + qualitat -->
+<div class="grid grid-2">
+  <div class="card">
+    <h2>Funnel d'adopció</h2>
+    <p class="hint">Inspirat en Stanford SCALE × SchoolAI (n=9000): docents que veuen el sistema, accepten, adapten, refinen, exporten.</p>
+    <div id="funnel"></div>
+  </div>
+
+  <div class="card">
+    <h2>Qualitat percebuda</h2>
+    <p class="hint">Rating 1-3 (Pas 4) i autoavaluació LLM (verify Q/P/C).</p>
+    <table class="lite">
+      <tr><th>Mètrica</th><th class="num">Valor</th></tr>
+      <tr><td>Rating mitjà (docent)</td><td class="num" id="m-rating-avg">–</td></tr>
+      <tr><td>Rating distribució</td><td class="num" id="m-rating-dist">–</td></tr>
+      <tr><td>Verify mitjà (LLM autoeval)</td><td class="num" id="m-verify-avg">–</td></tr>
+      <tr><td>Latency mitjana</td><td class="num" id="m-latency-avg">–</td></tr>
+      <tr><td>Latency P90</td><td class="num" id="m-latency-p90">–</td></tr>
+    </table>
+  </div>
+</div>
+
+<div style="height: var(--sp-4);"></div>
+
+<!-- Cost per model + Refinaments + Exports -->
+<div class="grid grid-3">
+  <div class="card">
+    <h2>Cost per model</h2>
+    <p class="hint">EUR estimats per token. Free tier: Gemma.</p>
+    <table class="lite" id="t-cost-model"><tr><th>Model</th><th class="num">EUR</th></tr></table>
+  </div>
+
+  <div class="card">
+    <h2>Refines per adaptació</h2>
+    <p class="hint">Nombre de refinaments abans d'exportar/copiar. >2 = sistema no encerta.</p>
+    <table class="lite" id="t-refines"><tr><th>Refines</th><th class="num">Sessions</th></tr></table>
+  </div>
+
+  <div class="card">
+    <h2>Exports per format</h2>
+    <p class="hint">Format triat per acabar el material a l'aula.</p>
+    <table class="lite" id="t-exports"><tr><th>Format</th><th class="num">N</th></tr></table>
+  </div>
+</div>
+
+<div style="height: var(--sp-4);"></div>
+
+<!-- Distribució per model + etapa + condicions -->
+<div class="grid grid-3">
+  <div class="card">
+    <h2>Per model</h2>
+    <table class="lite" id="t-by-model"><tr><th>Model</th><th class="num">Sessions</th></tr></table>
+  </div>
+  <div class="card">
+    <h2>Per etapa</h2>
+    <table class="lite" id="t-by-etapa"><tr><th>Etapa</th><th class="num">Sessions</th></tr></table>
+  </div>
+  <div class="card">
+    <h2>Per condició</h2>
+    <table class="lite" id="t-by-conditions"><tr><th>Condició</th><th class="num">Sessions</th></tr></table>
+  </div>
+</div>
+
+<div style="height: var(--sp-4);"></div>
+
+<!-- Versions de prompt + presets + complements -->
+<div class="grid grid-3">
+  <div class="card">
+    <h2>Versions del prompt</h2>
+    <p class="hint">Sessions per versió del prompt (git hash).</p>
+    <table class="lite" id="t-prompt-versions"><tr><th>Versió</th><th class="num">N</th></tr></table>
+  </div>
+  <div class="card">
+    <h2>Presets de refine</h2>
+    <p class="hint">Quins presets demanen els docents.</p>
+    <table class="lite" id="t-presets"><tr><th>Preset</th><th class="num">N</th></tr></table>
+  </div>
+  <div class="card">
+    <h2>Complements (top)</h2>
+    <p class="hint">Activats vs esborrats vs editats.</p>
+    <table class="lite" id="t-complements"><tr><th>Complement: acció</th><th class="num">N</th></tr></table>
+  </div>
+</div>
+
+<div style="height: var(--sp-4);"></div>
+
+<!-- Problemes detectats per docents (rúbrica review_items) -->
+<div class="grid grid-2">
+  <div class="card">
+    <h2>Problemes que assenyalen els docents</h2>
+    <p class="hint">Marques a la rúbrica del Pas 4 (mostra el que no quadra).</p>
+    <div id="review-items" class="review-bar"></div>
+  </div>
+
+  <div class="card">
+    <h2>Comportament d'ús</h2>
+    <table class="lite">
+      <tr><th>Indicador</th><th class="num">%</th></tr>
+      <tr><td>Edita manualment l'adaptació</td><td class="num" id="m-edit-rate">–</td></tr>
+      <tr><td>Copia al porta-papers</td><td class="num" id="m-copied-rate">–</td></tr>
+      <tr><td>Exporta (PDF/DOCX/TXT)</td><td class="num" id="m-exported-rate">–</td></tr>
+      <tr><td>Temps mediana al Pas 3</td><td class="num" id="m-time-step4">–</td></tr>
+    </table>
+  </div>
+</div>
+
+<div style="height: var(--sp-4);"></div>
+
+<!-- Recents -->
+<div class="card">
+  <h2>Últimes adaptacions</h2>
+  <table class="lite" id="t-recent">
+    <tr>
+      <th>Hora</th><th>Model</th><th>Etapa</th><th>MECR</th>
+      <th class="num">Latency</th><th class="num">Verify</th>
+      <th>Prompt v.</th><th class="num">Cost</th>
+    </tr>
+  </table>
+</div>
+
+<!-- Comentaris lliures -->
+<div style="height: var(--sp-4);"></div>
+<div class="card">
+  <h2>Comentaris lliures dels docents</h2>
+  <p class="hint">Camp "Altres" de la rúbrica + comentari del feedback.</p>
+  <ul id="altres-texts" style="font-size: 13px; color: var(--ink-700); padding-left: 18px;"></ul>
+</div>
+
+</div>
+
+<!-- Login overlay (apareix si /api/admin/* retorna 401) -->
+<div class="login-overlay" id="login-overlay">
+  <div class="login-box">
+    <h3>Accés admin</h3>
+    <p style="font-size:13px;color:var(--ink-500);margin-bottom:var(--sp-3)">
+      Cal contrasenya per veure el dashboard del pilot.
+    </p>
+    <input type="password" id="pw" placeholder="Contrasenya admin" autocomplete="current-password">
+    <button id="btn-login">Entrar</button>
+    <div class="err" id="err"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  function $(id) { return document.getElementById(id); }
+  function fmt(n) {
+    if (n === null || n === undefined) return '–';
+    if (typeof n !== 'number') return n;
+    if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
+    if (Number.isInteger(n)) return String(n);
+    return n.toFixed(2);
+  }
+  function fmtMs(n) { return n ? Math.round(n) + ' ms' : '–'; }
+  function fmtPct(n) { return n === null || n === undefined ? '–' : (n * 100).toFixed(1) + '%'; }
+  function fmtEur(n) { return n === null || n === undefined ? '–' : '€ ' + n.toFixed(4); }
+
+  function renderTable(tableId, dict, opts) {
+    var el = $(tableId);
+    if (!el) return;
+    opts = opts || {};
+    // mantenir l'encapçalament inicial
+    var header = el.querySelector('tr');
+    el.innerHTML = '';
+    if (header) el.appendChild(header);
+    var entries = Object.entries(dict || {});
+    if (opts.sort !== false) entries.sort(function (a, b) { return b[1] - a[1]; });
+    if (entries.length === 0) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td colspan="2" style="color:var(--ink-400);font-style:italic">Sense dades encara</td>';
+      el.appendChild(tr);
+      return;
+    }
+    entries.forEach(function (kv) {
+      var tr = document.createElement('tr');
+      var v = kv[1];
+      var fmtV = opts.eur ? fmtEur(v) : fmt(v);
+      tr.innerHTML = '<td>' + kv[0] + '</td><td class="num">' + fmtV + '</td>';
+      el.appendChild(tr);
+    });
+  }
+
+  function renderFunnel(funnel) {
+    var el = $('funnel');
+    el.innerHTML = '';
+    var stages = [
+      ['Han vist consent', funnel.consent_seen],
+      ['Han acceptat', funnel.consent_accepted],
+      ['Han adaptat ≥1 text', funnel.adapt_at_least_one],
+      ['Han refinat ≥1 cop', funnel.refine_at_least_one],
+      ['Han exportat ≥1 cop', funnel.export_at_least_one],
+    ];
+    var max = Math.max.apply(null, stages.map(function (s) { return s[1] || 0; })) || 1;
+    stages.forEach(function (s) {
+      var pct = ((s[1] || 0) / max) * 100;
+      var row = document.createElement('div');
+      row.className = 'funnel-row';
+      row.innerHTML =
+        '<span class="stage">' + s[0] + '</span>' +
+        '<span class="bar"><span style="width:' + pct.toFixed(1) + '%"></span></span>' +
+        '<span class="num">' + (s[1] || 0) + '</span>';
+      el.appendChild(row);
+    });
+  }
+
+  function renderReviewItems(items) {
+    var el = $('review-items');
+    el.innerHTML = '';
+    var entries = Object.entries(items || {}).sort(function (a, b) { return b[1] - a[1]; });
+    if (entries.length === 0) {
+      el.innerHTML = '<p style="font-size:12px;color:var(--ink-400);font-style:italic">Cap docent ha marcat encara cap problema.</p>';
+      return;
+    }
+    var max = entries[0][1] || 1;
+    entries.forEach(function (kv) {
+      var pct = (kv[1] / max) * 100;
+      var row = document.createElement('div');
+      row.className = 'review-bar-row';
+      row.innerHTML =
+        '<span class="label">' + kv[0].replace(/_/g, ' ') + '</span>' +
+        '<span class="meter"><span style="width:' + pct.toFixed(1) + '%"></span></span>' +
+        '<span class="n">' + kv[1] + '</span>';
+      el.appendChild(row);
+    });
+  }
+
+  function renderRecent(recent) {
+    var t = $('t-recent');
+    var header = t.querySelector('tr');
+    t.innerHTML = '';
+    if (header) t.appendChild(header);
+    if (!recent || recent.length === 0) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td colspan="8" style="color:var(--ink-400);font-style:italic">Sense adaptacions encara.</td>';
+      t.appendChild(tr);
+      return;
+    }
+    recent.forEach(function (r) {
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td style="white-space:nowrap;font-family:var(--mono);font-size:11px">' + (r.ts || '–') + '</td>' +
+        '<td>' + (r.model || '?') + '</td>' +
+        '<td>' + (r.etapa || '–') + '</td>' +
+        '<td>' + (r.mecr || '–') + '</td>' +
+        '<td class="num">' + fmtMs(r.latency_ms) + '</td>' +
+        '<td class="num">' + (r.score != null ? r.score.toFixed(2) : '–') + '</td>' +
+        '<td><span class="pill">' + (r.prompt_version || '?') + '</span></td>' +
+        '<td class="num">' + (r.cost_eur ? fmtEur(r.cost_eur) : '–') + '</td>';
+      t.appendChild(tr);
+    });
+  }
+
+  function renderAltresTexts(arr) {
+    var el = $('altres-texts');
+    el.innerHTML = '';
+    if (!arr || arr.length === 0) {
+      el.innerHTML = '<li style="color:var(--ink-400);font-style:italic">Cap comentari encara.</li>';
+      return;
+    }
+    arr.forEach(function (t) {
+      var li = document.createElement('li');
+      li.textContent = t;
+      el.appendChild(li);
+    });
+  }
+
+  function paint(d) {
+    if (!d || !d.ok) return;
+
+    document.getElementById('prompt-version-tag').textContent = 'prompt: ' + (d.prompt_version_actual || '?');
+    document.getElementById('updated-at').textContent = 'Actualitzat: ' + new Date().toLocaleTimeString();
+
+    var t = d.totals || {};
+    $('k-sessions').textContent = fmt(t.sessions);
+    $('k-sessions-today').textContent = 'avui: ' + fmt(t.sessions_avui);
+    $('k-docents').textContent = fmt(t.docents_actius);
+    $('k-consents').textContent = 'consents: ' + fmt(t.consents);
+    $('k-feedback').textContent = fmt(t.feedback_rebut);
+    $('k-feedback-rate').textContent = 'cobertura: ' +
+      (d.feedback && d.feedback.rate != null ? fmtPct(d.feedback.rate) : '–');
+    $('k-cost').textContent = fmtEur(t.cost_eur_total || 0);
+
+    renderFunnel(d.funnel || {});
+
+    var fb = d.feedback || {};
+    $('m-rating-avg').textContent = fb.rating_avg != null ? fb.rating_avg.toFixed(2) + ' / 3' : '–';
+    $('m-rating-dist').textContent = Object.entries(fb.rating_dist || {})
+      .map(function (kv) { return kv[0] + '★: ' + kv[1]; }).join(' · ') || '–';
+    $('m-verify-avg').textContent = d.verify_avg != null ? d.verify_avg + ' / 5' : '–';
+    $('m-latency-avg').textContent = fmtMs(d.latency_avg_ms);
+    $('m-latency-p90').textContent = fmtMs(d.latency_p90_ms);
+
+    renderTable('t-cost-model', d.cost_per_model_eur || {}, { eur: true });
+    renderTable('t-refines', d.refine_distribution || {}, { sort: false });
+    renderTable('t-exports', d.exports_format || {});
+    renderTable('t-by-model', d.by_model || {});
+    renderTable('t-by-etapa', d.by_etapa || {});
+    renderTable('t-by-conditions', d.by_conditions || {});
+    renderTable('t-prompt-versions', d.by_prompt_version || {});
+    renderTable('t-presets', d.presets_used || {});
+    renderTable('t-complements', d.complement_actions || {});
+
+    renderReviewItems(fb.review_items || {});
+    $('m-edit-rate').textContent = fb.edit_rate != null ? fmtPct(fb.edit_rate) : '–';
+    $('m-copied-rate').textContent = fb.copied_rate != null ? fmtPct(fb.copied_rate) : '–';
+    $('m-exported-rate').textContent = fb.exported_rate != null ? fmtPct(fb.exported_rate) : '–';
+    $('m-time-step4').textContent = fb.median_time_step4_ms ?
+      Math.round(fb.median_time_step4_ms / 1000) + ' s' : '–';
+
+    renderRecent(d.recent || []);
+    renderAltresTexts(fb.altres_texts || []);
+  }
+
+  function showLogin() { $('login-overlay').style.display = 'flex'; }
+  function hideLogin() { $('login-overlay').style.display = 'none'; }
+
+  async function login(pw) {
+    try {
+      var r = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pw }),
+      });
+      if (!r.ok) {
+        $('err').textContent = 'Contrasenya incorrecta';
+        return false;
+      }
+      hideLogin();
+      return true;
+    } catch (e) {
+      $('err').textContent = 'Error xarxa: ' + e.message;
+      return false;
+    }
+  }
+
+  async function fetchMetrics() {
+    var r = await fetch('/api/admin/pilot-metrics', { credentials: 'include' });
+    if (r.status === 401) {
+      showLogin();
+      return null;
+    }
+    if (!r.ok) {
+      console.error('Error pilot-metrics', r.status);
+      return null;
+    }
+    return r.json();
+  }
+
+  async function refresh() {
+    var d = await fetchMetrics();
+    if (d) paint(d);
+  }
+
+  $('btn-login').addEventListener('click', async function () {
+    var pw = $('pw').value;
+    var ok = await login(pw);
+    if (ok) refresh();
+  });
+  $('pw').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') $('btn-login').click();
+  });
+
+  // Inicial + auto-refresh cada 30 s
+  refresh();
+  setInterval(refresh, 30000);
+})();
+</script>
+
+</body>
+</html>

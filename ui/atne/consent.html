@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<title>ATNE · Consentiment per al pilot</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<!-- Auth Supabase (obligatori: necessitem el docent_id per al consent) -->
+<script src="/ui/atne/js/auth.js"></script>
+
+<!-- Tipografia (mateixa que pas1/pas2/pas3) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- ATNE base global (mateix ordre que la resta de pantalles) -->
+<link rel="stylesheet" href="/ui/styles/tokens.css">
+<link rel="stylesheet" href="/ui/styles/base.css">
+
+<style>
+  /* =========================================================
+     Consent · pantalla autonoma
+     Estil Editorial Cream (alineat amb pas1/pas2/pas3).
+     ========================================================= */
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--cream);
+    color: var(--ink-900);
+    font-family: var(--ui);
+    font-size: var(--fs-base);
+    line-height: var(--lh-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* Capçalera */
+  .head {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .head .brand {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-500);
+    margin-bottom: 14px;
+  }
+  .head h1 {
+    font-family: var(--serif);
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 8px;
+    color: var(--ink-900);
+    line-height: 1.15;
+  }
+  .head .lead {
+    font-size: 15px;
+    color: var(--ink-600);
+    max-width: 540px;
+    margin: 0 auto;
+    line-height: 1.55;
+  }
+
+  /* Targeta principal */
+  .card {
+    background: #fff;
+    border: 1px solid var(--ink-150);
+    border-radius: 14px;
+    padding: 28px 32px;
+    box-shadow: var(--sh-xs);
+    margin-bottom: 18px;
+  }
+
+  /* Seccions */
+  .sec { margin-bottom: 22px; }
+  .sec:last-child { margin-bottom: 0; }
+  .sec h2 {
+    font-family: var(--serif);
+    font-size: 17px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    color: var(--ink-900);
+    letter-spacing: -0.01em;
+  }
+  .sec p {
+    margin: 0 0 8px;
+    font-size: 14px;
+    color: var(--ink-700);
+    line-height: 1.6;
+  }
+  .sec p:last-child { margin-bottom: 0; }
+
+  .sec ul {
+    margin: 6px 0 0;
+    padding-left: 0;
+    list-style: none;
+  }
+  .sec ul li {
+    position: relative;
+    padding: 6px 0 6px 22px;
+    font-size: 14px;
+    color: var(--ink-800);
+    line-height: 1.55;
+    border-bottom: 1px dashed var(--ink-100);
+  }
+  .sec ul li:last-child { border-bottom: 0; }
+  .sec ul li::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 14px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--primary);
+  }
+  .sec ul li b {
+    color: var(--ink-900);
+    font-weight: 600;
+  }
+
+  /* Variant: NO fem (verd mes contingut) */
+  .sec.neg ul li::before {
+    background: var(--ok);
+  }
+  .sec.neg h2 { color: var(--ok); }
+
+  /* Banderoles d'accent */
+  .tag-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .tag {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 4px 10px;
+    border-radius: 99px;
+    background: var(--cream-2);
+    color: var(--ink-700);
+    border: 1px solid var(--paper-line);
+  }
+  .tag.primary { background: var(--primary-50); color: var(--primary); border-color: var(--primary-100); }
+  .tag.warn    { background: var(--warn-50); color: var(--warn); border-color: var(--warn-100); }
+
+  /* Bloc de retencio destacat */
+  .info-box {
+    background: var(--cream-2);
+    border: 1px solid var(--paper-line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 10px;
+    font-size: 13.5px;
+    color: var(--ink-800);
+  }
+  .info-box b { color: var(--ink-900); }
+
+  /* Accions */
+  .actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 24px;
+    padding: 22px 24px;
+    background: #fff;
+    border: 1px solid var(--ink-150);
+    border-radius: 14px;
+    box-shadow: var(--sh-xs);
+  }
+  .actions .question {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--ink-900);
+    margin: 0 0 4px;
+  }
+  .actions .help {
+    font-size: 13px;
+    color: var(--ink-600);
+    margin: 0 0 14px;
+  }
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .btn-c {
+    flex: 1 1 240px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px 18px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font-family: var(--ui);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter 0.15s, background 0.15s, border-color 0.15s;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .btn-accept {
+    background: var(--ok);
+    color: #fff;
+    border-color: var(--ok);
+  }
+  .btn-accept:hover { filter: brightness(1.06); }
+  .btn-decline {
+    background: #fff;
+    color: var(--ink-800);
+    border-color: var(--ink-200);
+  }
+  .btn-decline:hover {
+    background: var(--cream-2);
+    border-color: var(--ink-300);
+  }
+  .btn-c:disabled { opacity: 0.55; cursor: default; }
+
+  /* Peu */
+  .foot {
+    margin-top: 22px;
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--ink-500);
+    line-height: 1.6;
+  }
+  .foot a {
+    color: var(--primary);
+    text-decoration: none;
+    border-bottom: 1px dashed var(--primary-100);
+  }
+  .foot a:hover { border-bottom-color: var(--primary); }
+
+  /* Toast d'estat post-clic */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(40px);
+    background: var(--ink-900);
+    color: #fff;
+    padding: 11px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    box-shadow: var(--sh-lg);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 100;
+  }
+  .toast.on {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .wrap { padding: 28px 16px 60px; }
+    .head h1 { font-size: 24px; }
+    .card { padding: 22px 20px; }
+    .actions { padding: 18px 18px; }
+    .btn-c { flex-basis: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<main class="wrap">
+
+  <header class="head">
+    <div class="brand">ATNE · Pilot 2026</div>
+    <h1>Benvingut/da al pilot d'ATNE</h1>
+    <p class="lead">
+      Abans de comencar, t'expliquem que es aquest pilot, quines dades recollim
+      i com pots decidir si vols participar a la part de recerca.
+    </p>
+  </header>
+
+  <div class="tag-row">
+    <span class="tag primary">Pilot intern FJE</span>
+    <span class="tag">20 d'abril — 8 de maig de 2026</span>
+    <span class="tag">16 docents participants</span>
+  </div>
+
+  <!-- Que es el pilot -->
+  <section class="card">
+    <div class="sec">
+      <h2>Que es aquest pilot</h2>
+      <p>
+        ATNE es un assistent d'IA generativa que t'ajuda a adaptar textos
+        educatius a les diverses necessitats del teu alumnat: nouvinguts,
+        alumnat amb NESE, altes capacitats, configuracions multinivell DUA.
+      </p>
+      <p>
+        Durant aquestes setmanes recollirem com fas servir l'eina i la
+        qualitat de les adaptacions generades. Aixo ens permetra millorar
+        el sistema abans d'estendre'l a tota la xarxa de Jesuites Educacio.
+      </p>
+      <p>
+        El teu us de l'eina per al treball diari es <b>independent</b> de la teva
+        decisio sobre participar al component de recerca.
+      </p>
+    </div>
+  </section>
+
+  <!-- Que recollim -->
+  <section class="card">
+    <div class="sec">
+      <h2>Que recollim</h2>
+      <p>
+        Si participes al pilot, registrem aquestes dades de manera
+        pseudonimitzada (associades a un identificador hash, no al teu nom directe):
+      </p>
+      <ul>
+        <li><b>Dades identificatives</b>: el teu nom i correu <code>@fje.edu</code> (autenticacio Google OAuth) i la teva escola.</li>
+        <li><b>Dades professionals</b>: curs(os) i materia(es) que imparteixes, etapa educativa.</li>
+        <li><b>Us de l'app</b>: clics, durada de sessio, model de llenguatge utilitzat per a cada adaptacio, configuracions triades.</li>
+        <li><b>Textos que adaptes</b>: el text original que enganxes o puges, el text adaptat resultant, els complements generats (preguntes, bastides, glossari) i les configuracions de perfil d'alumnat que crees.</li>
+        <li><b>El teu judici pedagogic</b>: les valoracions de la rubrica, els comentaris i el feedback que escriguis.</li>
+      </ul>
+      <div class="info-box">
+        <b>Important sobre l'alumnat</b>: et demanem que <b>no incloguis noms reals
+        d'alumnes</b> a les descripcions de perfil. Les etiquetes han de ser
+        generiques (per exemple, "Alumne A — 2n ESO B"). El sistema esta
+        dissenyat per funcionar amb pseudonims.
+      </div>
+    </div>
+  </section>
+
+  <!-- Que NO fem -->
+  <section class="card">
+    <div class="sec neg">
+      <h2>Que NO fem</h2>
+      <ul>
+        <li><b>No venem</b> les teves dades a tercers.</li>
+        <li><b>No comerciem</b> ni cedim el teu contingut a anunciants ni a empreses externes.</li>
+        <li><b>No compartim</b> dades identificatives fora de la FJE i del DPO institucional.</li>
+        <li><b>No entrenem</b> models d'IA publics amb el teu contingut. Les crides als models LLM es fan amb compromis de no-entrenament per part dels proveidors.</li>
+        <li><b>No usem</b> les dades d'us per avaluar individualment el teu rendiment professional.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Drets -->
+  <section class="card">
+    <div class="sec">
+      <h2>Els teus drets</h2>
+      <p>
+        En qualsevol moment pots exercir els drets reconeguts pel RGPD:
+      </p>
+      <ul>
+        <li><b>Acces</b>: saber quines dades teves tenim.</li>
+        <li><b>Rectificacio</b>: corregir dades incorrectes.</li>
+        <li><b>Cancel·lacio / supressio</b>: demanar que esborrem les teves dades.</li>
+        <li><b>Oposicio</b>: oposar-te a un tractament concret.</li>
+        <li><b>Portabilitat</b>: rebre les teves dades en un format estandard.</li>
+      </ul>
+      <p style="margin-top:10px">
+        Contacte del DPO de Jesuites Educacio:
+        <code>dpo@fje.edu</code> <span style="color:var(--ink-400);font-size:12px">(adreça pendent de confirmacio institucional)</span>.
+        Contacte del responsable tecnic: <code>miquel.amor@fje.edu</code>.
+      </p>
+    </div>
+  </section>
+
+  <!-- Retencio -->
+  <section class="card">
+    <div class="sec">
+      <h2>Quant temps les conservem</h2>
+      <p>
+        Conservem les teves dades pseudonimitzades durant un maxim de
+        <b>2 anys</b> des de la recollida. Passat aquest periode aplicarem
+        anonimitzacio irreversible (o eliminacio, segons la utilitat residual).
+      </p>
+      <p>
+        Si publiquem resultats — ja sigui en comunicacions internes de la FJE
+        o en publicacions academiques — sempre seran <b>dades agregades</b>
+        o <b>textos anonimitzats</b> de manera que no puguis ser identificat/da.
+      </p>
+    </div>
+  </section>
+
+  <!-- Pots retirar-te -->
+  <section class="card">
+    <div class="sec">
+      <h2>Pots retirar-te quan vulguis</h2>
+      <p>
+        La participacio al pilot es <b>completament voluntaria</b>. Pots retirar
+        el consentiment en qualsevol moment, sense haver de donar explicacions
+        i sense cap penalitzacio. Tampoc afectara el teu us normal de l'eina.
+      </p>
+      <p>
+        Per retirar-te, escriu un correu a <code>miquel.amor@fje.edu</code>
+        o utilitza l'opcio <i>"Retirar consentiment"</i> dins de la pantalla
+        de configuracio del teu compte (disponible des de l'inici del pilot).
+      </p>
+    </div>
+  </section>
+
+  <!-- Accions -->
+  <div class="actions">
+    <p class="question">Vols participar al pilot de recerca?</p>
+    <p class="help">
+      Tant si acceptes com si no, podras utilitzar ATNE amb total normalitat.
+      La diferencia es nomes si recollim dades del teu us per millorar el sistema.
+    </p>
+    <div class="btn-row">
+      <button id="btn-accept" class="btn-c btn-accept" type="button">
+        Accepto participar al pilot
+      </button>
+      <button id="btn-decline" class="btn-c btn-decline" type="button">
+        Usar l'app sense participar al pilot
+      </button>
+    </div>
+  </div>
+
+  <p class="foot">
+    Pots consultar el document complet d'avaluacio d'impacte:
+    <a href="/docs/legal/DPIA_pilot_ATNE.md" target="_blank" rel="noopener">Llegir el DPIA complet</a>.
+    <br>
+    Aquesta decisio es desa al teu navegador. Pots canviar-la mes endavant
+    des de la pantalla de configuracio.
+  </p>
+
+</main>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* =========================================================
+   Logica del consentiment
+   ---------------------------------------------------------
+   Persistencia local (LocalStorage):
+     atne_pilot_consent  →  { decision: "accepted"|"declined", ts: ISO8601 }
+
+   Endpoint d'auditoria (TODO — encara no existeix al backend):
+     POST /api/pilot/consent
+     Body: { docent_id: <email>, decision: "accepted"|"declined", ts: <ISO> }
+
+   Hook de bootstrap (PENDENT):
+     Cal afegir, al principi de pas1.html (o al script d'entrada principal),
+     una comprovacio com la de checkConsentOrRedirect() d'aquest fitxer.
+     Veure la funcio exportada window.atneConsent.checkOrRedirect().
+     Suggerencia d'integracio: pas1.html linia ~9-10 (just despres de carregar
+     auth.js, abans de la resta del bootstrap), perque la pantalla de consent
+     nomes te sentit un cop l'usuari esta autenticat amb @fje.edu.
+   ========================================================= */
+(function () {
+  'use strict';
+
+  var STORAGE_KEY = 'atne_pilot_consent';
+  var REDIRECT_AFTER = '/ui/atne/pas1.html';
+  var CONSENT_ENDPOINT = '/api/pilot/consent'; // TODO: crear al backend
+
+  function nowIso() { return new Date().toISOString(); }
+
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add('on');
+    setTimeout(function () { t.classList.remove('on'); }, 2200);
+  }
+
+  function getDocentEmail() {
+    // ATNE_AUTH és la API real exposada per /ui/atne/js/auth.js (Supabase + Google OAuth).
+    try {
+      if (window.ATNE_AUTH && window.ATNE_AUTH.email) return window.ATNE_AUTH.email;
+      var em = localStorage.getItem('atne_user_email');
+      if (em) return em;
+    } catch (e) { /* silenciem */ }
+    return null;
+  }
+
+  function persistDecision(decision) {
+    var payload = { decision: decision, ts: nowIso() };
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch (e) {
+      // Si no hi ha localStorage (mode privat estricte), continuem igualment.
+      console.warn('[ATNE consent] LocalStorage no disponible:', e);
+    }
+    return payload;
+  }
+
+  function postConsent(payload) {
+    // TODO: l'endpoint /api/pilot/consent encara no existeix al backend.
+    // Quan estigui implementat, aquesta crida quedara registrada per auditoria.
+    var body = {
+      docent_id: getDocentEmail() || 'unknown',
+      decision: payload.decision,
+      ts: payload.ts
+    };
+    try {
+      // Usem fetch amb keepalive perque pugui completar-se durant la navegacio.
+      fetch(CONSENT_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        keepalive: true
+      }).catch(function (err) {
+        console.warn('[ATNE consent] No s\'ha pogut registrar al backend:', err);
+      });
+    } catch (e) {
+      console.warn('[ATNE consent] fetch no disponible:', e);
+    }
+  }
+
+  function handleDecision(decision) {
+    var btnA = document.getElementById('btn-accept');
+    var btnD = document.getElementById('btn-decline');
+    if (btnA) btnA.disabled = true;
+    if (btnD) btnD.disabled = true;
+
+    var payload = persistDecision(decision);
+    postConsent(payload);
+
+    showToast(decision === 'accepted'
+      ? 'Gracies per participar. T\'estem portant a ATNE.'
+      : 'Decisio desada. T\'estem portant a ATNE.');
+
+    setTimeout(function () {
+      window.location.href = REDIRECT_AFTER;
+    }, 700);
+  }
+
+  // Bind dels botons
+  document.addEventListener('DOMContentLoaded', function () {
+    var btnA = document.getElementById('btn-accept');
+    var btnD = document.getElementById('btn-decline');
+    if (btnA) btnA.addEventListener('click', function () { handleDecision('accepted'); });
+    if (btnD) btnD.addEventListener('click', function () { handleDecision('declined'); });
+  });
+
+  // Funcio reutilitzable: comprova si cal redirigir a la pantalla de consent.
+  // (No s'executa aqui; s'exposa perque pas1.html — o el bootstrap principal —
+  // la pugui invocar.)
+  function checkConsentOrRedirect() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        if (location.pathname.indexOf('consent.html') === -1) {
+          location.href = '/ui/atne/consent.html';
+        }
+        return false;
+      }
+      var parsed = JSON.parse(raw);
+      return parsed && (parsed.decision === 'accepted' || parsed.decision === 'declined');
+    } catch (e) {
+      return true; // si no podem comprovar, no bloquegem la navegacio.
+    }
+  }
+
+  window.atneConsent = {
+    checkOrRedirect: checkConsentOrRedirect,
+    get: function () {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); }
+      catch (e) { return null; }
+    },
+    clear: function () {
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    }
+  };
+})();
+</script>
+
+</body>
+</html>
