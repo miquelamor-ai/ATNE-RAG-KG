@@ -972,6 +972,9 @@
                 <span class="dt-sep"></span>
                 <button type="button" class="dt-btn" data-md="ul" title="Llista de vinyetes" aria-label="Llista vinyetes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
                 <button type="button" class="dt-btn" data-md="ol" title="Llista numerada" aria-label="Llista numerada"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 6h11M10 12h11M10 18h11M4 6h1v4M4 10h2M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></button>
+                <span class="dt-sep"></span>
+                <button type="button" class="dt-btn" id="p2-paste" title="Enganxar del porta-retalls" aria-label="Enganxar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg></button>
+                <button type="button" class="dt-btn" id="p2-clear" title="Esborrar tot el text" aria-label="Esborrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
               </div>
               <textarea class="ta" id="write-ta" placeholder="Comença a escriure o enganxa el text aquí.">La Revolució Industrial és el període de transformació profunda de les formes de producció que va començar al Regne Unit cap al 1760 i es va estendre per Europa i Amèrica del Nord durant el segle XIX. Aquest canvi va suposar la transició d'una economia agrària a una industrial, amb l'aparició de les primeres fàbriques i de la màquina de vapor.</textarea>
               <span class="wc" id="wc-card">52 paraules</span>
@@ -2289,6 +2292,64 @@
       e.preventDefault();
       applyMarkdown(b.dataset.md);
     });
+  });
+
+  // Botó "Enganxar": llegeix el porta-retalls i ho insereix al textarea.
+  // La Clipboard API necessita HTTPS (ja el tenim) i permís explícit la
+  // primera vegada; si el navegador el denega, fallback a instrucció Ctrl+V.
+  document.getElementById('p2-paste')?.addEventListener('click', async () => {
+    const ta = document.getElementById('write-ta');
+    if (!ta) return;
+    try {
+      if (!navigator.clipboard || !navigator.clipboard.readText) {
+        throw new Error('API no disponible');
+      }
+      const text = await navigator.clipboard.readText();
+      if (!text) {
+        window.atneToast?.('El porta-retalls és buit', 'info');
+        return;
+      }
+      // Insereix a la posició del cursor si hi ha focus, o a la posició
+      // desada; si no, reemplaça tot.
+      ta.focus();
+      const start = ta.selectionStart ?? ta.value.length;
+      const end = ta.selectionEnd ?? ta.value.length;
+      const before = ta.value.slice(0, start);
+      const after = ta.value.slice(end);
+      ta.value = before + text + after;
+      const caret = start + text.length;
+      ta.setSelectionRange(caret, caret);
+      // Dispara input perquè el comptador + desament automàtic s'actualitzin
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
+      window.atneToast?.('Text enganxat (' + text.length.toLocaleString('ca') + ' caràcters)', 'success');
+    } catch (err) {
+      console.warn('[paste]', err);
+      // Fallback: no podem llegir el porta-retalls programàticament.
+      // Diem al docent que usi Ctrl+V dins el textarea.
+      ta.focus();
+      window.atneToast?.('El navegador no permet enganxar automàticament. Clica al text i prem Ctrl+V.', 'info');
+    }
+  });
+
+  // Botó "Esborrar tot": neteja textarea + títol, amb confirmació perquè
+  // és una acció destructiva no trivialment reversible (tot i que hi ha
+  // Undo natiu a la pila p2Hist, el docent podria no saber-ho).
+  document.getElementById('p2-clear')?.addEventListener('click', () => {
+    const ta = document.getElementById('write-ta');
+    if (!ta) return;
+    const hasText = !!(ta.value && ta.value.trim());
+    if (!hasText) {
+      window.atneToast?.('Ja està buit', 'info');
+      return;
+    }
+    if (!confirm('Esborrar tot el text escrit? (Podràs desfer amb Ctrl+Z si cal.)')) return;
+    ta.value = '';
+    // Neteja també el títol si existeix (al frail dret o al card)
+    const titleInp = document.querySelector('.doc-title-inp, [data-doc-title]');
+    if (titleInp) titleInp.value = '';
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+    ta.focus();
+    window.atneToast?.('Text esborrat', 'success');
   });
   document.addEventListener('click', e => {
     if (!frPopEdit) return;
