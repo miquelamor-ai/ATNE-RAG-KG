@@ -13,10 +13,13 @@
 .wrap {
   display: grid;
   grid-template-columns: 52px 1fr;
-  /* Fallback per navegadors antics; dvh s'ajusta quan Safari iOS mostra/amaga
-     la barra d'URL, eliminant la franja inferior que tallava el contingut. */
-  height: 100vh;
-  height: 100dvh;
+  /* Alçada compensada amb el zoom intern de l'app (botons +/-/100% al
+     capçal). Sense compensació, a zoom<1 la .wrap només omple zoom*viewport
+     i deixa una franja cream al fons; a zoom>1 clipperia el contingut.
+     calc(100dvh / var(--app-zoom, 1)) escala inversament el contenidor.
+     Fallback 100vh per navegadors sense dvh (pre-2022). */
+  height: calc(100vh / var(--app-zoom, 1));
+  height: calc(100dvh / var(--app-zoom, 1));
   background: var(--cream);
 }
 

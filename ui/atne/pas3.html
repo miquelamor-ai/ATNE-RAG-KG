@@ -3534,6 +3534,12 @@ ${compsHtml.join('\n')}
     function apply() {
       document.documentElement.style.zoom = zoom;
       document.documentElement.style.minHeight = (100 / zoom) + 'vh';
+      // Propaga el factor de zoom al shell perquè .wrap (height:100dvh)
+      // s'estiri proporcionalment. Sense això, quan zoom<1 la .wrap es
+      // renderitza escalada i deixa una franja cream al fons del viewport
+      // (el <body> visible per sota de .wrap). Amb var(--app-zoom) el
+      // shell.css pot aplicar calc(100dvh / var(--app-zoom, 1)).
+      document.documentElement.style.setProperty('--app-zoom', zoom);
       localStorage.setItem(KEY, String(zoom));
       const lbl = document.getElementById('zoom-label');
       if (lbl) lbl.textContent = Math.round(zoom * 100) + '%';

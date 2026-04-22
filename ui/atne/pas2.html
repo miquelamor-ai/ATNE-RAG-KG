@@ -2623,6 +2623,9 @@
     function apply() {
       document.documentElement.style.zoom = zoom;
       document.documentElement.style.minHeight = (100 / zoom) + 'vh';
+      // Propaga el factor al shell perquè .wrap compensi l'escalat i no
+      // deixi franja cream a sota a zoom<1 (veure shell.css .wrap).
+      document.documentElement.style.setProperty('--app-zoom', zoom);
       localStorage.setItem(KEY, String(zoom));
       const lbl = document.getElementById('zoom-label');
       if (lbl) lbl.textContent = Math.round(zoom * 100) + '%';
