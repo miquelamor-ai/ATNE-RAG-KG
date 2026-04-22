@@ -255,6 +255,7 @@ def _fix_english_words(text: str) -> str:
 # Catàleg conservador: només errors que hem observat empíricament a les
 # proves del 14-15/04 i que tenen una correcció inequívoca.
 _TYPO_FIXES = {
+    # Errors observats proves 14-15/04
     'possuïen': 'posseïen',
     'possuïa': 'posseïa',
     'possuïr': 'posseir',
@@ -271,7 +272,29 @@ _TYPO_FIXES = {
     'sobrecarga': 'sobrecàrrega',
     'localizar': 'localitzar',
     'localizada': 'localitzada',
+    # Errors detectats a adaptacions Marc Ribera + Yassin Mansour (21/04)
+    # MORFOLOGIK_RULE_CA_ES els detecta però no els auto-aplica (falsos positius
+    # del motor LT). Llista manual conservadora: només errors amb correcció
+    # inequívoca, verificats a context real.
+    'delfí': 'dofí',
+    'delfins': 'dofins',
+    'ratols': 'ratolins',
+    'Escribeu': 'Escriviu',
+    'escribeu': 'escriviu',
+    'veritater': 'vertader',   # pedagògicament: "Vertader o Fals" als exàmens
+    'sencelles': 'senzilles',
+    'estrict': 'estricte',
+    'limited': 'limitat',      # anglicisme
+    'interesants': 'interessants',
 }
+
+
+# Fixes amb caràcters que trenquen \b (apòstrof, guionet, etc.) — tractats
+# per substitució directa sense word boundary, perquè el context és inequívoc.
+_SPECIAL_FIXES = [
+    (r"definint'los", r"definint-los"),
+    (r"Definint'los", r"Definint-los"),
+]
 
 
 def _fix_typos(text: str) -> str:
@@ -281,6 +304,9 @@ def _fix_typos(text: str) -> str:
     for bad, good in _TYPO_FIXES.items():
         text = re.sub(r'\b' + re.escape(bad) + r'\b', good, text)
         text = re.sub(r'\b' + re.escape(bad.capitalize()) + r'\b', good.capitalize(), text)
+    # Fixes especials amb caràcters que trenquen \b (apòstrof, guionet)
+    for pattern, replacement in _SPECIAL_FIXES:
+        text = re.sub(pattern, replacement, text)
     return text
 
 
