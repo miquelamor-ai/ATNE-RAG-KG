@@ -3168,7 +3168,9 @@ async def export_doc(payload: dict = Body(...)):
 
     elif fmt == "docx":
         from docx import Document as DocxDocument
-        from docx.shared import Pt
+        from docx.shared import Pt, Inches
+        import base64
+        import io
         doc = DocxDocument()
         doc.add_heading(f"Adaptació ATNE — {profile_name}", level=1)
 
@@ -3187,8 +3189,47 @@ async def export_doc(payload: dict = Body(...)):
                         elif sub:
                             p.add_run(sub)
 
+        def try_add_image(caption: str, url: str) -> bool:
+            """Descarrega la imatge i l'incrusta. Retorna True si OK, False si falla.
+            Suporta URLs http(s) (Pollinations, Wikimedia, Cloud Storage) i data: URIs."""
+            try:
+                if url.startswith("data:"):
+                    # data:image/png;base64,...
+                    header, b64 = url.split(",", 1)
+                    raw = base64.b64decode(b64)
+                elif url.startswith(("http://", "https://")):
+                    r = requests.get(url, timeout=15, stream=True)
+                    r.raise_for_status()
+                    raw = r.content
+                else:
+                    return False
+                stream = io.BytesIO(raw)
+                # Amplada max 6 polzades (~15cm) perquè càpiga bé dins d'un A4.
+                doc.add_picture(stream, width=Inches(6))
+                if caption:
+                    p = doc.add_paragraph()
+                    run = p.add_run(caption)
+                    run.italic = True
+                    run.font.size = Pt(9)
+                return True
+            except Exception as e:
+                print(f"[export docx] no s'ha pogut incrustar imatge {url[:60]}: {e}")
+                return False
+
+        img_re = re.compile(r'!\[([^\]]*)\]\(([^)]+)\)')
+
         for line in adapted.split("\n"):
             stripped = line.strip()
+            # Imatge markdown ![caption](url) — provem d'incrustar-la.
+            img_match = img_re.match(stripped)
+            if img_match:
+                caption, url = img_match.group(1), img_match.group(2)
+                if not try_add_image(caption, url):
+                    # Fallback: text amb caption
+                    p = doc.add_paragraph()
+                    run = p.add_run(f"[Imatge: {caption}]")
+                    run.italic = True
+                continue
             # H1 (#) → estil Heading 1; H2 (##) → Heading 2; H3 (###) → Heading 3
             if line.startswith("# ") and not line.startswith("## "):
                 doc.add_heading(line[2:].replace("**", ""), level=1)

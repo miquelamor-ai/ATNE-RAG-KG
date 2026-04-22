@@ -315,6 +315,27 @@
   function htmlToMarkdown(html) {
     if (!html) return '';
     let md = html;
+    // Imatges finals seleccionades pel docent (<figure class="illus-final">).
+    // Preservem src i figcaption amb sintaxi markdown estàndard ![alt](url)
+    // perquè el backend docx pugui descarregar-les i incrustar-les.
+    md = md.replace(
+      /<figure[^>]*class="[^"]*illus-final[^"]*"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]*)"[\s\S]*?(?:<figcaption[^>]*>([\s\S]*?)<\/figcaption>)?[\s\S]*?<\/figure>/gi,
+      (_m, src, alt, caption) => {
+        const clean = (caption || '').replace(/<\/?[a-z][^>]*>/gi, '').replace(/\s+/g, ' ').trim();
+        return '\n\n![' + (clean || alt || 'Imatge') + '](' + src + ')\n\n';
+      }
+    );
+    // Choosers de il·lustracions encara no resoltes: els marquem com a text
+    // perquè el docent vegi on havia d'anar una imatge.
+    md = md.replace(
+      /<figure[^>]*class="[^"]*illus-chooser[^"]*"[^>]*data-concept="([^"]*)"[^>]*>[\s\S]*?<\/figure>/gi,
+      (_m, concept) => '\n\n[IMATGE no triada: ' + concept + ']\n\n'
+    );
+    // <img> soltes (no dins figure) — també les preservem.
+    md = md.replace(
+      /<img[^>]*src="([^"]+)"[^>]*alt="([^"]*)"[^>]*\/?>/gi,
+      (_m, src, alt) => '\n\n![' + (alt || 'Imatge') + '](' + src + ')\n\n'
+    );
     md = md.replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, '\n# $1\n');
     md = md.replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, '\n## $1\n');
     md = md.replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, '\n### $1\n');
