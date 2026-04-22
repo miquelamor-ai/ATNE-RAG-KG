@@ -3198,8 +3198,19 @@ async def export_doc(payload: dict = Body(...)):
                     header, b64 = url.split(",", 1)
                     raw = base64.b64decode(b64)
                 elif url.startswith(("http://", "https://")):
-                    r = requests.get(url, timeout=15, stream=True)
+                    # Wikimedia Commons rebutja el User-Agent per defecte de
+                    # python-requests (403). Posem un UA descriptiu com fa
+                    # adaptation/illustrations.py al search.
+                    headers = {
+                        "User-Agent": "ATNE-FJE-EducationalBot/1.0 (https://atne.fje.edu)",
+                        "Accept": "image/*,*/*;q=0.8",
+                    }
+                    r = requests.get(url, timeout=20, headers=headers)
                     r.raise_for_status()
+                    ct = (r.headers.get("Content-Type") or "").lower()
+                    if not ct.startswith("image/"):
+                        print(f"[export docx] resposta no-imatge ({ct}) per {url[:80]}")
+                        return False
                     raw = r.content
                 else:
                     return False
@@ -3213,7 +3224,7 @@ async def export_doc(payload: dict = Body(...)):
                     run.font.size = Pt(9)
                 return True
             except Exception as e:
-                print(f"[export docx] no s'ha pogut incrustar imatge {url[:60]}: {e}")
+                print(f"[export docx] no s'ha pogut incrustar imatge {url[:80]}: {e}")
                 return False
 
         img_re = re.compile(r'!\[([^\]]*)\]\(([^)]+)\)')
