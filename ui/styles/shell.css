@@ -13,7 +13,10 @@
 .wrap {
   display: grid;
   grid-template-columns: 52px 1fr;
+  /* Fallback per navegadors antics; dvh s'ajusta quan Safari iOS mostra/amaga
+     la barra d'URL, eliminant la franja inferior que tallava el contingut. */
   height: 100vh;
+  height: 100dvh;
   background: var(--cream);
 }
 
