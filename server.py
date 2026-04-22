@@ -2979,6 +2979,13 @@ async def adapt_stream(payload: dict = Body(...)):
                 events.append(ev_tagged)
             return _cb
 
+        # Rotació a nivell de GRUP (decisió 2026-04-22): si el config està en
+        # mode "rotate", triem el model UNA sola vegada i el fem servir a totes
+        # les branques del multinivell. Així garantim que les 3 versions del
+        # mateix grup són del mateix LLM (no barregem estils a dins d'un grup).
+        # Si l'usuari ha indicat un model explícit al payload, té prioritat.
+        rotated_model = _model_for("adapt", override=model or "")
+
         loop = asyncio.get_event_loop()
         with concurrent.futures.ThreadPoolExecutor(max_workers=max(3, len(levels))) as pool:
             tasks = []
@@ -2990,7 +2997,7 @@ async def adapt_stream(payload: dict = Body(...)):
                 t = loop.run_in_executor(
                     pool,
                     lambda p=params_lvl, l=level_id: run_adaptation(
-                        text, profile, context, p, make_cb(l), model_override=model or None,
+                        text, profile, context, p, make_cb(l), model_override=rotated_model,
                         docent_id=docent_id
                     ),
                 )
