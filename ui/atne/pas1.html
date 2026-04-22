@@ -1718,12 +1718,18 @@
     if (letraInp) letraInp.value = '';
     if (p.course && cursSel) {
       const raw = String(p.course).trim();
-      const m = raw.match(/^(.*?)\s+([A-Za-zÀ-Ú]{1,3})$/);
-      if (m && Array.from(cursSel.options).some(o => o.value === m[1])) {
-        cursSel.value = m[1];
-        if (letraInp) letraInp.value = m[2].toUpperCase();
-      } else if (Array.from(cursSel.options).some(o => o.value === raw)) {
-        cursSel.value = raw;
+      // Busca qualsevol opció de curs que aparegui dins raw. Més llarga primer
+      // per evitar falsos positius. Gestiona formats antics ("3r ESO A · 14",
+      // "14 anys · 3r ESO A") i el format nou ("3r ESO").
+      const opts = Array.from(cursSel.options).filter(o => o.value);
+      const sorted = [...opts].sort((a, b) => b.value.length - a.value.length);
+      const found = sorted.find(o => raw.includes(o.value));
+      if (found) {
+        cursSel.value = found.value;
+        const idx = raw.indexOf(found.value);
+        const after = raw.slice(idx + found.value.length).trim();
+        const letterMatch = after.match(/^([A-Za-zÀ-Ú]{1,3})\b/);
+        if (letterMatch && letraInp) letraInp.value = letterMatch[1].toUpperCase();
       }
     }
 
