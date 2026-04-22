@@ -1724,14 +1724,17 @@
   // Fase 5 c3 — modes Pujar / Generar / Recuperar connectats al backend
   // ──────────────────────────────────────────────────────
 
-  // Helper: omple el textarea d'Escriure i canvia al mode 'write'
+  // Helper: omple el textarea d'Escriure i canvia al mode 'write'.
+  // 'title' sempre s'aplica (també si és buit) perquè cada nou text
+  // marca l'inici d'una sessió d'adaptació nova: el títol segueix el text,
+  // no arrossega el de la sessió anterior (feedback 2026-04-22).
   function loadTextIntoEditor(text, title) {
     const writeTa = document.getElementById('write-ta');
     const docTitle = document.getElementById('doc-title');
     // Snapshot abans de sobreescriure perquè el docent pugui fer Undo
     if (typeof p2Snapshot === 'function') p2Snapshot();
     if (writeTa) writeTa.value = text;
-    if (title && docTitle) docTitle.value = title;
+    if (docTitle) docTitle.value = title || '';
     // Canvia al tab Escriure
     tabs.forEach(x => x.classList.remove('on'));
     document.querySelector('.mode-tab[data-mode="write"]')?.classList.add('on');
@@ -1740,12 +1743,16 @@
     // Auto-save: si Pujar/Generar/Recuperar aboquen text, el persistim també
     if (text != null) localStorage.setItem('atne.doc_draft', text);
     if (title) localStorage.setItem('atne.doc_title', title);
+    else localStorage.removeItem('atne.doc_title');
     // Desvincula qualsevol draft_id previ: aquest text ve de fora i no té
     // encara correspondència al servidor. El callsite que vulgui preservar
     // el draft_id (p.ex. obrir un draft des de Recuperar) el restaura just
     // després de cridar loadTextIntoEditor.
     localStorage.removeItem('atne.draft_id');
     localStorage.removeItem('atne.draft_saved_at');
+    // Nova adaptació → desvincula també l'entry de biblioteca anterior
+    // perquè el proper "Desar" al pas3 creï una entrada nova.
+    localStorage.removeItem('atne.current_adaptation_id');
     if (typeof updateSavedBadge === 'function') updateSavedBadge();
     if (typeof p2Snapshot === 'function') p2Snapshot();
   }
@@ -2309,8 +2316,9 @@
         window.atneToast?.('El porta-retalls és buit', 'info');
         return;
       }
-      // Insereix a la posició del cursor si hi ha focus, o a la posició
-      // desada; si no, reemplaça tot.
+      // Si el textarea està buit (text nou), desvincula el títol i l'estat
+      // de sessió anterior: el text pegat inicia una adaptació nova.
+      const wasEmpty = !(ta.value && ta.value.trim());
       ta.focus();
       const start = ta.selectionStart ?? ta.value.length;
       const end = ta.selectionEnd ?? ta.value.length;
@@ -2319,6 +2327,19 @@
       ta.value = before + text + after;
       const caret = start + text.length;
       ta.setSelectionRange(caret, caret);
+      if (wasEmpty) {
+        // Netejar títol (no tenim forma fiable de derivar-lo del text pegat)
+        // i estat vinculat a la sessió anterior.
+        const titleEl = document.getElementById('doc-title');
+        if (titleEl) {
+          titleEl.value = '';
+          titleEl.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        localStorage.removeItem('atne.doc_title');
+        localStorage.removeItem('atne.draft_id');
+        localStorage.removeItem('atne.draft_saved_at');
+        localStorage.removeItem('atne.current_adaptation_id');
+      }
       // Dispara input perquè el comptador + desament automàtic s'actualitzin
       ta.dispatchEvent(new Event('input', { bubbles: true }));
       window.atneToast?.('Text enganxat (' + text.length.toLocaleString('ca') + ' caràcters)', 'success');
@@ -2331,25 +2352,36 @@
     }
   });
 
-  // Botó "Esborrar tot": neteja textarea + títol, amb confirmació perquè
-  // és una acció destructiva no trivialment reversible (tot i que hi ha
-  // Undo natiu a la pila p2Hist, el docent podria no saber-ho).
+  // Botó "Esborrar tot": neteja textarea + títol + estat persistit, amb
+  // confirmació. L'Undo (Ctrl+Z o botó) ho recupera via pila p2Hist.
   document.getElementById('p2-clear')?.addEventListener('click', () => {
     const ta = document.getElementById('write-ta');
+    const titleEl = document.getElementById('doc-title');
     if (!ta) return;
     const hasText = !!(ta.value && ta.value.trim());
-    if (!hasText) {
+    const hasTitle = !!(titleEl && titleEl.value && titleEl.value.trim());
+    if (!hasText && !hasTitle) {
       window.atneToast?.('Ja està buit', 'info');
       return;
     }
-    if (!confirm('Esborrar tot el text escrit? (Podràs desfer amb Ctrl+Z si cal.)')) return;
+    if (!confirm('Esborrar tot el text i el títol per començar de nou?\n(Ctrl+Z o el botó Desfer ho recuperen.)')) return;
+    // Snapshot abans perquè Undo ho recuperi
+    if (typeof p2Snapshot === 'function') p2Snapshot();
     ta.value = '';
-    // Neteja també el títol si existeix (al frail dret o al card)
-    const titleInp = document.querySelector('.doc-title-inp, [data-doc-title]');
-    if (titleInp) titleInp.value = '';
+    if (titleEl) titleEl.value = '';
+    // Persistència local: buida les claus relacionades
+    localStorage.removeItem('atne.doc_draft');
+    localStorage.removeItem('atne.doc_title');
+    localStorage.removeItem('atne.draft_id');
+    localStorage.removeItem('atne.draft_saved_at');
+    // Desvincula biblioteca perquè el proper "Desar" al pas3 creï una
+    // entrada nova en lloc d'actualitzar l'anterior.
+    localStorage.removeItem('atne.current_adaptation_id');
     ta.dispatchEvent(new Event('input', { bubbles: true }));
+    if (titleEl) titleEl.dispatchEvent(new Event('input', { bubbles: true }));
+    if (typeof updateSavedBadge === 'function') updateSavedBadge();
     ta.focus();
-    window.atneToast?.('Text esborrat', 'success');
+    window.atneToast?.('Text i títol esborrats', 'success');
   });
   document.addEventListener('click', e => {
     if (!frPopEdit) return;
