@@ -3787,31 +3787,52 @@ ${compsHtml.join('\n')}
     if (!resolution) return;
     const optsContainer = figEl.querySelector('.illus-options');
     const existingUpload = optsContainer.querySelector('.illus-opt-upload');
-    const wiki = resolution.wikimedia;
     const flux = resolution.flux;
 
-    // Desa alternatives Wikimedia al data del figure per al cicle "Una altra"
-    if (wiki) {
-      figEl.dataset.wikimediaOriginal = JSON.stringify(wiki);
-      figEl.dataset.wikimediaAlts = JSON.stringify(resolution.wikimedia_alternatives || []);
-      figEl.dataset.wikimediaIdx = '0';
+    // Carrusel unificat Wikimedia + Pexels: una sola columna al chooser
+    // perquè el docent no hagi de triar "on buscar". Fallback a només
+    // Wikimedia si el backend és d'una versió anterior.
+    let unified = Array.isArray(resolution.search_results) ? resolution.search_results : [];
+    if (unified.length === 0 && resolution.wikimedia) {
+      const w0 = resolution.wikimedia;
+      unified.push({
+        source: 'wikimedia',
+        title: w0.title || '',
+        thumb_url: w0.thumb_url || '',
+        full_url: w0.full_url || w0.thumb_url || '',
+        attribution: 'Wikimedia · ' + ((w0.author || 'anònim').replace(/<[^>]+>/g, '').slice(0, 40)) + ' · ' + (w0.license || '?'),
+        license: w0.license || '',
+      });
+      (resolution.wikimedia_alternatives || []).forEach(w => unified.push({
+        source: 'wikimedia',
+        title: w.title || '',
+        thumb_url: w.thumb_url || '',
+        full_url: w.full_url || w.thumb_url || '',
+        attribution: 'Wikimedia · ' + ((w.author || 'anònim').replace(/<[^>]+>/g, '').slice(0, 40)) + ' · ' + (w.license || '?'),
+        license: w.license || '',
+      }));
     }
+    figEl.dataset.searchResults = JSON.stringify(unified);
+    figEl.dataset.searchIdx = '0';
 
-    const hasAlts = resolution.wikimedia_alternatives && resolution.wikimedia_alternatives.length > 0;
-    const wikiOpt = wiki ? (
-      '<div class="illus-opt" data-kind="wikimedia">' +
-        '<img src="' + wiki.thumb_url + '" alt="' + (wiki.title || '') + '" loading="lazy">' +
-        '<div class="illus-label"><strong>Wikimedia</strong>' +
-        '<div class="illus-attr">' + (wiki.license || '?') + ' · ' + ((wiki.author || 'anònim').replace(/<[^>]+>/g, '').slice(0, 40)) + '</div>' +
-        (hasAlts ? '<div class="illus-counter" data-kind="wikimedia">1 de ' + (resolution.wikimedia_alternatives.length + 1) + '</div>' : '') +
+    const hasAny = unified.length > 0;
+    const current = unified[0] || {};
+    const hasMulti = unified.length > 1;
+    const sourceLabel = (it) => it && it.source === 'pexels' ? 'Pexels' : 'Wikimedia';
+    const searchOpt = hasAny ? (
+      '<div class="illus-opt" data-kind="search">' +
+        '<img src="' + (current.thumb_url || '') + '" alt="' + (current.title || '') + '" loading="lazy">' +
+        '<div class="illus-label"><strong class="illus-source-label">' + sourceLabel(current) + '</strong>' +
+        '<div class="illus-attr">' + (current.attribution || '') + '</div>' +
+        '<div class="illus-counter">1 de ' + unified.length + '</div>' +
         '</div>' +
         '<div class="illus-buttons">' +
-          (hasAlts ? '<button type="button" class="btn-illus-nav" data-dir="prev" data-kind="wikimedia">←</button>' : '') +
-          '<button type="button" class="btn-illus-pick" data-kind="wikimedia">Triar</button>' +
-          (hasAlts ? '<button type="button" class="btn-illus-nav" data-dir="next" data-kind="wikimedia">→</button>' : '') +
+          '<button type="button" class="btn-illus-nav" data-dir="prev" data-kind="search"' + (hasMulti ? '' : ' disabled') + '>←</button>' +
+          '<button type="button" class="btn-illus-pick" data-kind="search">Triar</button>' +
+          '<button type="button" class="btn-illus-nav" data-dir="next" data-kind="search"' + (hasMulti ? '' : ' disabled') + '>→</button>' +
         '</div>' +
       '</div>'
-    ) : '<div class="illus-opt illus-opt-empty"><div class="illus-label">Wikimedia sense resultats</div></div>';
+    ) : '<div class="illus-opt illus-opt-empty"><div class="illus-label">Sense resultats a Wikimedia/Pexels</div></div>';
 
     const fluxOpt = flux ? (
       '<div class="illus-opt" data-kind="flux">' +
@@ -3829,7 +3850,7 @@ ${compsHtml.join('\n')}
       '</div>'
     ) : '<div class="illus-opt illus-opt-empty"><div class="illus-label">FLUX no disponible</div></div>';
 
-    optsContainer.innerHTML = wikiOpt + fluxOpt + existingUpload.outerHTML;
+    optsContainer.innerHTML = searchOpt + fluxOpt + existingUpload.outerHTML;
     figEl.setAttribute('data-status', 'ready');
     bindIllusPicks(figEl);
     bindIllusUploads(figEl);
@@ -3867,14 +3888,15 @@ ${compsHtml.join('\n')}
       btn.dataset.bound = '1';
       btn.addEventListener('click', () => regenFlux(figEl));
     });
-    // Navegació anterior/següent (Wikimedia o FLUX segons data-kind)
+    // Navegació anterior/següent segons data-kind
     figEl.querySelectorAll('.btn-illus-nav').forEach(btn => {
       if (btn.dataset.bound === '1') return;
       btn.dataset.bound = '1';
       btn.addEventListener('click', () => {
         const dir = btn.dataset.dir === 'prev' ? -1 : 1;
-        if (btn.dataset.kind === 'flux') navFlux(figEl, dir);
-        else navWikimedia(figEl, dir);
+        const k = btn.dataset.kind;
+        if (k === 'flux') navFlux(figEl, dir);
+        else if (k === 'search') navSearch(figEl, dir);
       });
     });
     // Inicialitza history FLUX si encara no està
@@ -3967,30 +3989,28 @@ ${compsHtml.join('\n')}
     console.log('[illustracions] navFlux: idx', next, 'seed', hist[next]);
   }
 
-  function navWikimedia(figEl, dir) {
-    const altsRaw = figEl.dataset.wikimediaAlts;
-    if (!altsRaw) return;
-    let alts;
-    try { alts = JSON.parse(altsRaw); } catch (_) { return; }
-    const originalRaw = figEl.dataset.wikimediaOriginal;
-    if (!originalRaw) return;
-    const original = JSON.parse(originalRaw);
-    // Col·lecció completa: [original, alt1, alt2, ...]
-    const all = [original, ...alts];
+  function navSearch(figEl, dir) {
+    // Carrusel unificat Wikimedia + Pexels al primer chooser.
+    const raw = figEl.dataset.searchResults;
+    if (!raw) return;
+    let all;
+    try { all = JSON.parse(raw); } catch (_) { return; }
     if (!all.length) return;
-    const cur = parseInt(figEl.dataset.wikimediaIdx || '0', 10);
+    const cur = parseInt(figEl.dataset.searchIdx || '0', 10);
     const total = all.length;
     const next = (cur + dir + total) % total;
-    figEl.dataset.wikimediaIdx = String(next);
+    figEl.dataset.searchIdx = String(next);
     const hit = all[next];
-    const opt = figEl.querySelector('.illus-opt[data-kind="wikimedia"]');
+    const opt = figEl.querySelector('.illus-opt[data-kind="search"]');
     if (!opt || !hit) return;
     const img = opt.querySelector('img');
     const attr = opt.querySelector('.illus-attr');
     const counter = opt.querySelector('.illus-counter');
+    const label = opt.querySelector('.illus-source-label');
     if (img) { img.src = hit.thumb_url || ''; img.alt = hit.title || ''; }
-    if (attr) attr.textContent = (hit.license || '?') + ' · ' + ((hit.author || 'anònim').replace(/<[^>]+>/g, '').slice(0, 40));
+    if (attr) attr.textContent = hit.attribution || '';
     if (counter) counter.textContent = (next + 1) + ' de ' + total;
+    if (label) label.textContent = hit.source === 'pexels' ? 'Pexels' : 'Wikimedia';
   }
 
   function bindIllusPicks(scope) {
@@ -4000,8 +4020,26 @@ ${compsHtml.join('\n')}
       btn.addEventListener('click', (ev) => {
         const fig = ev.target.closest('.illus-chooser');
         const kind = btn.dataset.kind;
-        const img = fig.querySelector('.illus-opt[data-kind="' + kind + '"] img');
-        if (img) finalizeIllusChooser(fig, img.src, kind, img.alt || '');
+        const opt = fig.querySelector('.illus-opt[data-kind="' + kind + '"]');
+        const img = opt ? opt.querySelector('img') : null;
+        if (!img) return;
+        // Per al carrusel unificat (kind="search"), el kind final depèn de la
+        // imatge concreta seleccionada: pot ser wikimedia o pexels.
+        let finalKind = kind;
+        let finalSrc = img.src;
+        if (kind === 'search') {
+          try {
+            const all = JSON.parse(fig.dataset.searchResults || '[]');
+            const idx = parseInt(fig.dataset.searchIdx || '0', 10);
+            const item = all[idx];
+            if (item) {
+              finalKind = item.source === 'pexels' ? 'pexels' : 'wikimedia';
+              // Utilitza full_url si hi és (millor qualitat per al docx exportat)
+              finalSrc = item.full_url || item.thumb_url || img.src;
+            }
+          } catch (_) {}
+        }
+        finalizeIllusChooser(fig, finalSrc, finalKind, img.alt || '');
       });
     });
   }
@@ -4047,7 +4085,9 @@ ${compsHtml.join('\n')}
       ? ('Il·lustració IA (FLUX) · ' + concept)
       : kind === 'wikimedia'
         ? ('Wikimedia Commons · ' + concept)
-        : ('Imatge pròpia · ' + concept);
+        : kind === 'pexels'
+          ? ('Pexels · ' + concept)
+          : ('Imatge pròpia · ' + concept);
     // Desa l'HTML del chooser original codificat en base64 per poder tornar-hi
     const chooserData = btoa(unescape(encodeURIComponent(figEl.outerHTML)));
     figEl.outerHTML =

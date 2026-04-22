@@ -98,6 +98,21 @@ class WikimediaOption:
 
 
 @dataclass
+class PexelsOption:
+    kind: str = "pexels"
+    title: str = ""
+    thumb_url: str = ""
+    full_url: str = ""
+    photographer: str = ""
+    photographer_url: str = ""
+    license: str = "Pexels License"
+
+    @property
+    def attribution(self) -> str:
+        return f"Pexels · {self.photographer or 'anonim'}"
+
+
+@dataclass
 class FluxOption:
     kind: str = "flux"
     url: str = ""
@@ -111,7 +126,12 @@ class Resolution:
     concept: str
     wikimedia: Optional[WikimediaOption] = None
     wikimedia_alternatives: list[WikimediaOption] = field(default_factory=list)
+    pexels: Optional[PexelsOption] = None
+    pexels_alternatives: list[PexelsOption] = field(default_factory=list)
     flux: Optional[FluxOption] = None
+    # Llista interleavada [wiki0, pexels0, wiki1, pexels1, ...] per al carrusel
+    # unificat del frontend (una sola columna "Imatge trobada").
+    search_results: list[dict] = field(default_factory=list)
     error: Optional[str] = None
     wikimedia_query: str = ""
     flux_brief: str = ""
@@ -123,7 +143,10 @@ class Resolution:
             "flux_brief": self.flux_brief,
             "wikimedia": asdict(self.wikimedia) if self.wikimedia else None,
             "wikimedia_alternatives": [asdict(w) for w in self.wikimedia_alternatives],
+            "pexels": asdict(self.pexels) if self.pexels else None,
+            "pexels_alternatives": [asdict(p) for p in self.pexels_alternatives],
             "flux": asdict(self.flux) if self.flux else None,
+            "search_results": self.search_results,
             "error": self.error,
         }
         return d
@@ -200,6 +223,50 @@ def _gemma_translate(concept: str, context: dict) -> dict:
     if m:
         text = m.group(0)
     return json.loads(text)
+
+
+# ---- Pexels search
+#
+# API gratuïta amb key gratuïta (https://www.pexels.com/api/). Si la variable
+# d'entorn PEXELS_API_KEY no està definida, la funció retorna [] i el frontend
+# cau al carrusel de Wikimedia sol (backward compat, zero trencament).
+
+PEXELS_API = "https://api.pexels.com/v1/search"
+
+
+def search_pexels(query: str, limit: int = 3) -> list[PexelsOption]:
+    """Cerca a Pexels. Retorna [] si no hi ha PEXELS_API_KEY o si falla."""
+    api_key = os.getenv("PEXELS_API_KEY", "").strip()
+    if not api_key or not query:
+        return []
+    try:
+        r = requests.get(
+            PEXELS_API,
+            params={"query": query, "per_page": limit, "orientation": "landscape"},
+            headers={"Authorization": api_key, "User-Agent": USER_AGENT},
+            timeout=12,
+        )
+        r.raise_for_status()
+        data = r.json()
+    except Exception as e:
+        print(f"[pexels] search error: {e}")
+        return []
+    hits: list[PexelsOption] = []
+    for photo in data.get("photos", []):
+        src = photo.get("src", {}) or {}
+        # 'large' ~940x650 (suficient per chooser); 'large2x' ~1880x1300 per al final
+        thumb = src.get("large", "") or src.get("medium", "")
+        full = src.get("large2x", "") or src.get("large", "") or src.get("original", "")
+        if not thumb:
+            continue
+        hits.append(PexelsOption(
+            title=(photo.get("alt") or "")[:120] or (photo.get("photographer") or "")[:120],
+            thumb_url=thumb,
+            full_url=full,
+            photographer=(photo.get("photographer") or "")[:80],
+            photographer_url=photo.get("photographer_url") or "",
+        ))
+    return hits
 
 
 # ---- Wikimedia search
@@ -299,24 +366,61 @@ def resolve_marker(
         result.flux_brief = concept_ca
         result.error = f"gemma_translate: {str(e)[:100]}"
 
-    # 2. Paral·lel: Wikimedia (5 hits per permetre cicle "una altra") + FLUX URL
-    with ThreadPoolExecutor(max_workers=2) as ex:
-        f_wiki = ex.submit(search_wikimedia, result.wikimedia_query, 5)
+    # 2. Paral·lel: Wikimedia (3 hits) + Pexels (3 hits) + FLUX URL
+    with ThreadPoolExecutor(max_workers=3) as ex:
+        f_wiki = ex.submit(search_wikimedia, result.wikimedia_query, 3)
+        f_pex = ex.submit(search_pexels, result.wikimedia_query, 3)
         f_flux = ex.submit(flux_option, result.flux_brief, style, seed)
         try:
-            hits = f_wiki.result(timeout=20)
+            wiki_hits = f_wiki.result(timeout=20)
         except Exception:
-            hits = []
+            wiki_hits = []
+        try:
+            pex_hits = f_pex.result(timeout=15)
+        except Exception:
+            pex_hits = []
         try:
             flux_opt = f_flux.result(timeout=10)
         except Exception:
             flux_opt = None
 
-    if hits:
-        result.wikimedia = hits[0]
-        result.wikimedia_alternatives = hits[1:]  # 4 alternatives si n'hi ha
+    if wiki_hits:
+        result.wikimedia = wiki_hits[0]
+        result.wikimedia_alternatives = wiki_hits[1:]
+    if pex_hits:
+        result.pexels = pex_hits[0]
+        result.pexels_alternatives = pex_hits[1:]
     if flux_opt:
         result.flux = flux_opt
+
+    # 3. Llista unificada interleavada [wiki0, pexels0, wiki1, pexels1, ...]
+    #    El docent la recorre com a un sol carrusel (la primera columna del
+    #    chooser) i veu alternança natural de fonts.
+    unified: list[dict] = []
+    max_len = max(len(wiki_hits), len(pex_hits))
+    for i in range(max_len):
+        if i < len(wiki_hits):
+            w = wiki_hits[i]
+            unified.append({
+                "source": "wikimedia",
+                "title": w.title,
+                "thumb_url": w.thumb_url,
+                "full_url": w.full_url or w.thumb_url,
+                "attribution": w.attribution,
+                "license": w.license,
+            })
+        if i < len(pex_hits):
+            p = pex_hits[i]
+            unified.append({
+                "source": "pexels",
+                "title": p.title,
+                "thumb_url": p.thumb_url,
+                "full_url": p.full_url,
+                "attribution": p.attribution,
+                "license": p.license,
+                "photographer_url": p.photographer_url,
+            })
+    result.search_results = unified
 
     return result
 
