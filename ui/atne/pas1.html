@@ -7,6 +7,7 @@
 
 <!-- Auth Supabase (ha de ser el primer script, sense defer/async) -->
 <script src="/ui/atne/js/auth.js"></script>
+<script src="/ui/atne/js/llm.js"></script>
 
 <!-- Tipografia -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -377,6 +378,42 @@
 </head>
 
 <body>
+  <!-- Modal Biblioteca d'adaptacions -->
+  <div id="library-modal" class="lib-modal">
+    <div class="lib-modal-inner">
+      <div class="lib-modal-head">
+        <h2>La meva biblioteca d'adaptacions</h2>
+        <button class="lib-close" onclick="closeLibrary()" title="Tancar">✕</button>
+      </div>
+      <div class="lib-modal-body">
+        <div id="library-list"></div>
+      </div>
+    </div>
+  </div>
+  <style>
+    .lib-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 10000; align-items: center; justify-content: center; }
+    .lib-modal.on { display: flex; }
+    .lib-modal-inner { background: #fff; border-radius: 12px; width: 90%; max-width: 820px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+    .lib-modal-head { display: flex; justify-content: space-between; align-items: center; padding: 1em 1.4em; border-bottom: 1px solid #e5e5e5; }
+    .lib-modal-head h2 { margin: 0; font-size: 1.2em; color: #1a4b7a; }
+    .lib-close { cursor: pointer; background: transparent; border: none; font-size: 1.3em; color: #888; padding: 0.3em 0.5em; border-radius: 6px; }
+    .lib-close:hover { background: rgba(0,0,0,0.05); color: #222; }
+    .lib-modal-body { overflow-y: auto; padding: 1em 1.4em; flex: 1; }
+    .lib-loading, .lib-empty, .lib-error { text-align: center; padding: 2em 1em; color: #666; font-size: 0.95em; }
+    .lib-error { color: #b00; }
+    .lib-item { border: 1px solid #e5e5e5; border-radius: 8px; padding: 0.9em 1em; margin-bottom: 0.8em; transition: border-color 0.15s; }
+    .lib-item:hover { border-color: #1a4b7a; }
+    .lib-item-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4em; }
+    .lib-item-title { font-weight: 600; color: #1a4b7a; font-size: 1.02em; }
+    .lib-item-meta { font-size: 0.78em; color: #888; font-family: monospace; }
+    .lib-item-preview { font-size: 0.88em; color: #555; line-height: 1.5; margin-bottom: 0.6em; }
+    .lib-item-actions { display: flex; gap: 0.5em; justify-content: flex-end; }
+    .lib-item-actions button { cursor: pointer; padding: 0.4em 0.9em; border-radius: 6px; font-size: 0.85em; border: 1px solid #ccc; background: #fff; }
+    .lib-btn-open { background: #1a4b7a !important; color: #fff !important; border-color: #1a4b7a !important; font-weight: 500; }
+    .lib-btn-open:hover { background: #15355a !important; }
+    .lib-btn-delete { color: #b00 !important; border-color: #e8b8b8 !important; }
+    .lib-btn-delete:hover { background: #ffe8e8 !important; }
+  </style>
 
 <!-- Drawer mòbil (replica del rail desktop) -->
 <div class="drawer-backdrop" id="drawer-backdrop"></div>
@@ -420,6 +457,7 @@
       <button class="icon-btn" id="zoom-in" title="Augmentar mida (Ctrl +)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M8 11h6M11 8v6"/></svg></button>
       <button class="icon-btn" id="fullscreen-btn" title="Pantalla completa (F11)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V3h4M17 3h4v4M21 17v4h-4M7 21H3v-4"/></svg></button>
       <button class="icon-btn" id="help-btn" title="Visita guiada"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg></button>
+      <button class="icon-btn" id="library-btn" title="La meva biblioteca d'adaptacions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></button>
       <button class="icon-btn" title="Compartir" onclick="alert('Compartir: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></button>
       <div style="position:relative">
         <button class="docent-av" id="docent-av" title="El teu compte">E</button>
@@ -2410,6 +2448,98 @@
         }
       }
     }, 300);
+  }
+
+  // ── Biblioteca d'adaptacions (obre modal amb llista) ─────────────────────
+  document.getElementById('library-btn')?.addEventListener('click', openLibrary);
+
+  async function openLibrary() {
+    const modal = document.getElementById('library-modal');
+    if (!modal) return;
+    modal.classList.add('on');
+    const list = document.getElementById('library-list');
+    list.innerHTML = '<div class="lib-loading">Carregant biblioteca...</div>';
+    try {
+      const resp = await window.ATNE_LLM.listAdaptations(50);
+      if (!resp || !resp.ok) throw new Error((resp && resp.error) || 'resposta invàlida');
+      const items = resp.items || [];
+      if (items.length === 0) {
+        list.innerHTML = '<div class="lib-empty">Encara no has desat cap adaptació. Al Pas 3, clica <strong>☁ Desar</strong> a la barra superior.</div>';
+        return;
+      }
+      list.innerHTML = items.map(it => {
+        const dt = new Date(it.updated_at);
+        const dateStr = dt.toLocaleDateString('ca-ES', { day: '2-digit', month: 'short', year: 'numeric' })
+          + ' · ' + dt.toLocaleTimeString('ca-ES', { hour: '2-digit', minute: '2-digit' });
+        const title = (it.title || 'Sense títol').replace(/</g, '&lt;');
+        const preview = (it.preview || '').slice(0, 150).replace(/</g, '&lt;');
+        const profile = (it.profile_snapshot && it.profile_snapshot.name) || '';
+        const materia = (it.context_snapshot && it.context_snapshot.materia) || '';
+        return (
+          '<div class="lib-item" data-id="' + it.id + '">' +
+            '<div class="lib-item-head">' +
+              '<div class="lib-item-title">' + title + '</div>' +
+              '<div class="lib-item-meta">' + dateStr +
+                (profile ? ' · ' + profile : '') +
+                (materia ? ' · ' + materia : '') +
+              '</div>' +
+            '</div>' +
+            '<div class="lib-item-preview">' + preview + (preview.length >= 150 ? '…' : '') + '</div>' +
+            '<div class="lib-item-actions">' +
+              '<button class="lib-btn-open" data-id="' + it.id + '">Obrir</button>' +
+              '<button class="lib-btn-delete" data-id="' + it.id + '">Eliminar</button>' +
+            '</div>' +
+          '</div>'
+        );
+      }).join('');
+      bindLibraryActions();
+    } catch (e) {
+      list.innerHTML = '<div class="lib-error">Error carregant biblioteca: ' + (e.message || 'desconegut') + '</div>';
+    }
+  }
+
+  function closeLibrary() {
+    document.getElementById('library-modal')?.classList.remove('on');
+  }
+
+  function bindLibraryActions() {
+    document.querySelectorAll('.lib-btn-open').forEach(btn => {
+      btn.addEventListener('click', () => openAdaptation(parseInt(btn.dataset.id, 10)));
+    });
+    document.querySelectorAll('.lib-btn-delete').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = parseInt(btn.dataset.id, 10);
+        if (!confirm('Eliminar aquesta adaptació de la biblioteca? No es pot desfer.')) return;
+        try {
+          await window.ATNE_LLM.deleteAdaptation(id);
+          btn.closest('.lib-item').remove();
+        } catch (e) {
+          alert('Error eliminant: ' + (e.message || 'desconegut'));
+        }
+      });
+    });
+  }
+
+  async function openAdaptation(id) {
+    try {
+      const resp = await window.ATNE_LLM.getAdaptation(id);
+      if (!resp || !resp.ok || !resp.item) throw new Error('No trobada');
+      const item = resp.item;
+      // Restaura l'estat a localStorage perquè pas3 el reculli en carregar
+      if (item.adapted_html) localStorage.setItem('atne.adapted_text', item.adapted_html);
+      if (item.original_text) localStorage.setItem('atne.current_original_text', item.original_text);
+      if (item.title) localStorage.setItem('atne.doc_title', item.title);
+      if (item.profile_snapshot) localStorage.setItem('atne.current_profile', JSON.stringify(item.profile_snapshot));
+      if (item.context_snapshot) localStorage.setItem('atne.current_context', JSON.stringify(item.context_snapshot));
+      if (item.complements_snapshot) localStorage.setItem('atne.complements', JSON.stringify(item.complements_snapshot));
+      localStorage.setItem('atne.current_adaptation_id', String(item.id));
+      // Marca cache key forçada perquè pas3 no regeneri
+      localStorage.setItem('atne.adapted_cache_key', 'library::' + item.id);
+      // Redirigeix al Pas 3
+      window.location.href = '/ui/atne/pas3.html';
+    } catch (e) {
+      alert('Error obrint: ' + (e.message || 'desconegut'));
+    }
   }
 </script>
 </body>

@@ -101,8 +101,18 @@
   .doc-title::placeholder{color:var(--ink-400)}
   .doc-meta{font-family:var(--mono);font-size:10.5px;color:var(--ink-500);display:flex;align-items:center;gap:8px}
   .doc-meta .dot{width:4px;height:4px;border-radius:50%;background:var(--ink-300)}
-  .status-badge{background:var(--ok-50);color:var(--ok);padding:3px 8px;border-radius:99px;font-size:10px;font-family:var(--mono);font-weight:600;display:inline-flex;align-items:center;gap:5px}
-  .status-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--ok)}
+  .status-badge{background:var(--ok-50);color:var(--ok);padding:3px 8px;border-radius:99px;font-size:10px;font-family:var(--mono);font-weight:600;display:inline-flex;align-items:center;gap:5px;cursor:pointer;user-select:none;transition:background .15s,color .15s}
+  .status-badge:hover{filter:brightness(0.96)}
+  /* Estats del badge de núvol */
+  .status-badge.cloud-idle{background:#e8eef5;color:#1a4b7a}
+  .status-badge.cloud-idle::before{display:none}
+  .status-badge.cloud-saving{background:#fff3d0;color:#8a6600}
+  .status-badge.cloud-saving::before{background:#b58900;animation:cloud-pulse 0.8s infinite}
+  .status-badge.cloud-saved{background:var(--ok-50);color:var(--ok)}
+  .status-badge.cloud-saved::before{background:var(--ok)}
+  .status-badge.cloud-error{background:#fde8e8;color:#b00}
+  .status-badge.cloud-error::before{background:#b00}
+  @keyframes cloud-pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 
   .chead-row{width:100%;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .cmp-toggle{display:flex;align-items:center;gap:6px;padding:5px 10px 5px 8px;border-radius:8px;background:rgba(255,255,255,.6);border:1px solid var(--paper-line);font-size:12px;font-weight:500;color:var(--ink-700);cursor:pointer;transition:.15s}
@@ -771,7 +781,7 @@
         <div class="center-head">
           <div class="chead-row" style="margin-bottom:6px">
             <input class="doc-title" value="La Revolució Industrial">
-            <span class="status-badge">Desat</span>
+            <span id="cloud-badge" class="status-badge cloud-idle" title="Desa a la biblioteca del núvol">☁ Desar</span>
             <span class="doc-meta"><span>adaptat fa 1m</span><span class="dot"></span><span>318 paraules</span></span>
             <div class="urd">
               <button id="btn-undo" title="Desfer (⌘Z)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-4"/></svg></button>
@@ -3180,14 +3190,18 @@
     const titleText = (document.querySelector('.doc-title')?.value || 'Adaptació').trim();
     const today = new Date().toLocaleDateString('ca-ES', { day: 'numeric', month: 'long', year: 'numeric' });
 
-    // Contenidor oculte off-screen per renderitzar
+    // Contenidor oculte off-screen per renderitzar.
+    // IMPORTANT: `position:absolute; left:-99999px` en comptes de `fixed; top:-10000px`
+    // perquè html2canvas captura pàgina en blanc amb fixed fora del viewport
+    // (no pot resoldre els bounding rects correctament).
     const root = document.createElement('div');
     root.className = 'pdf-export-root ' + activeFontClass;
     root.style.cssText = [
-      'position:fixed', 'top:-10000px', 'left:0',
+      'position:absolute', 'top:0', 'left:-99999px',
       'width:180mm', 'padding:0',
       'background:#fff', 'color:#1a1a1a',
       'font-size:14pt', 'line-height:1.65',
+      'z-index:-1',
     ].join(';');
 
     // Capçalera: títol + metadades
@@ -3340,6 +3354,119 @@
   }
 
   document.getElementById('help-btn')?.addEventListener('click', startTourP3);
+
+  // ── Desar al núvol: biblioteca d'adaptacions ─────────────────────────────
+  // Gestió de l'estat d'auto-save + botó manual.
+  // Id de l'adaptació actual es guarda a localStorage 'atne.current_adaptation_id'.
+  const cloudBadge = document.getElementById('cloud-badge');
+  const CLOUD_AUTOSAVE_MS = 30000; // 30s
+  let _cloudLastSavedAt = 0;
+  let _cloudDirty = false;
+  let _cloudSaving = false;
+
+  function _cloudSetState(state, label) {
+    if (!cloudBadge) return;
+    cloudBadge.classList.remove('cloud-idle', 'cloud-saving', 'cloud-saved', 'cloud-error');
+    cloudBadge.classList.add('cloud-' + state);
+    cloudBadge.textContent = label;
+  }
+
+  function _cloudMarkDirty() {
+    _cloudDirty = true;
+    if (cloudBadge && cloudBadge.classList.contains('cloud-saved')) {
+      _cloudSetState('idle', '☁ Canvis sense desar');
+    }
+  }
+
+  function _cloudBuildPayload() {
+    const adaptedEl = document.getElementById('adapted-text');
+    if (!adaptedEl) return null;
+    const adapted_html = adaptedInnerHtmlClean();
+    const title = (document.querySelector('.doc-title')?.value || '').trim() || 'Sense títol';
+    let profile = null, context = null, complements = null;
+    try { profile = JSON.parse(localStorage.getItem('atne.current_profile') || 'null'); } catch (_) {}
+    try { context = JSON.parse(localStorage.getItem('atne.current_context') || 'null'); } catch (_) {}
+    try { complements = JSON.parse(localStorage.getItem('atne.complements') || 'null'); } catch (_) {}
+    const original_text = localStorage.getItem('atne.current_original_text') || '';
+    const idStr = localStorage.getItem('atne.current_adaptation_id');
+    const id = idStr ? parseInt(idStr, 10) : undefined;
+    return {
+      id,
+      title,
+      adapted_html,
+      original_text,
+      profile_snapshot: profile,
+      context_snapshot: context,
+      complements_snapshot: complements,
+    };
+  }
+
+  async function cloudSaveNow(opts = {}) {
+    if (_cloudSaving) return;
+    const payload = _cloudBuildPayload();
+    if (!payload || !payload.adapted_html.trim()) return;
+    _cloudSaving = true;
+    _cloudSetState('saving', '☁ Desant...');
+    try {
+      const result = await window.ATNE_LLM.saveAdaptation(payload);
+      if (result && result.ok) {
+        if (result.id) localStorage.setItem('atne.current_adaptation_id', String(result.id));
+        _cloudLastSavedAt = Date.now();
+        _cloudDirty = false;
+        _cloudSetState('saved', '☁ Desat fa un instant');
+        setTimeout(() => {
+          if (!_cloudDirty) _cloudSetState('saved', '☁ Desat');
+        }, 3000);
+      } else {
+        throw new Error((result && result.error) || 'resposta invàlida');
+      }
+    } catch (e) {
+      console.error('[cloud] save error:', e);
+      _cloudSetState('error', '☁ Error: ' + (e.message || 'desconegut'));
+    } finally {
+      _cloudSaving = false;
+    }
+  }
+
+  // Click manual al badge → desa immediatament
+  if (cloudBadge) {
+    cloudBadge.addEventListener('click', () => cloudSaveNow({ manual: true }));
+  }
+
+  // Marca "dirty" en qualsevol edició del text adaptat
+  const adaptedRoot = document.getElementById('adapted-text');
+  if (adaptedRoot) {
+    adaptedRoot.addEventListener('input', _cloudMarkDirty);
+  }
+  // El títol també compta
+  document.querySelector('.doc-title')?.addEventListener('input', _cloudMarkDirty);
+
+  // Auto-save cada 30s si hi ha canvis
+  setInterval(() => {
+    if (_cloudDirty && !_cloudSaving) cloudSaveNow();
+  }, CLOUD_AUTOSAVE_MS);
+
+  // Desa també en tancar la pestanya (best-effort via sendBeacon si cal)
+  window.addEventListener('beforeunload', () => {
+    if (!_cloudDirty) return;
+    const payload = _cloudBuildPayload();
+    if (!payload) return;
+    try {
+      const body = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+      navigator.sendBeacon('/api/adaptations', body);
+    } catch (_) {}
+  });
+
+  // Exposa al global per poder cridar des d'altres handlers (ex: finalize imatge)
+  window.ATNE_CLOUD = {
+    markDirty: _cloudMarkDirty,
+    saveNow: cloudSaveNow,
+  };
+
+  // Estat inicial segons si hi ha id o no
+  if (localStorage.getItem('atne.current_adaptation_id')) {
+    _cloudSetState('saved', '☁ Desat');
+  }
 
   // ── Il·lustracions: chooser Wikimedia vs FLUX vs upload ──────────────────
   console.log('%c[illustracions] module v3 loaded', 'color:#1a4b7a;font-weight:bold');
@@ -3682,6 +3809,7 @@
     try {
       localStorage.setItem('atne.adapted_text', adaptedInnerHtmlClean());
     } catch (_) {}
+    try { if (window.ATNE_CLOUD && window.ATNE_CLOUD.markDirty) window.ATNE_CLOUD.markDirty(); } catch (_) {}
   }
 
   function finalizeIllusChooser(figEl, src, kind, alt) {

@@ -704,6 +704,80 @@
     return resp.json();
   }
 
+  // ── Adaptations (biblioteca d'adaptacions finals al núvol) ──────────────
+
+  /**
+   * POST /api/adaptations — desa una adaptació sencera (HTML + snapshots).
+   * @param {Object} args  { id?, title, original_text, adapted_html,
+   *                         profile_snapshot, context_snapshot,
+   *                         complements_snapshot, multinivell_versions }
+   */
+  async function saveAdaptation(args = {}) {
+    if (!args.adapted_html || !args.adapted_html.trim()) {
+      throw new Error('adapted_html buit');
+    }
+    const body = {
+      docent_id: getDocentId(),
+      adapted_html: args.adapted_html,
+      title: args.title || null,
+      original_text: args.original_text || null,
+      profile_snapshot: args.profile_snapshot || null,
+      context_snapshot: args.context_snapshot || null,
+      complements_snapshot: args.complements_snapshot || null,
+      multinivell_versions: args.multinivell_versions || null,
+    };
+    if (args.id) body.id = args.id;
+    const resp = await fetch('/api/adaptations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!resp.ok) {
+      let errMsg = 'HTTP ' + resp.status;
+      try { const e = await resp.json(); if (e && e.error) errMsg = e.error; } catch {}
+      throw new Error(errMsg);
+    }
+    return resp.json();
+  }
+
+  async function listAdaptations(limit = 50) {
+    const qs = 'docent_id=' + encodeURIComponent(getDocentId())
+             + '&limit=' + encodeURIComponent(limit);
+    const resp = await fetch('/api/adaptations?' + qs);
+    if (!resp.ok) {
+      let errMsg = 'HTTP ' + resp.status;
+      try { const e = await resp.json(); if (e && e.error) errMsg = e.error; } catch {}
+      throw new Error(errMsg);
+    }
+    return resp.json();
+  }
+
+  async function getAdaptation(id) {
+    if (!id) throw new Error('Cal id');
+    const qs = 'docent_id=' + encodeURIComponent(getDocentId());
+    const resp = await fetch('/api/adaptations/' + encodeURIComponent(id) + '?' + qs);
+    if (!resp.ok) {
+      let errMsg = 'HTTP ' + resp.status;
+      try { const e = await resp.json(); if (e && e.error) errMsg = e.error; } catch {}
+      throw new Error(errMsg);
+    }
+    return resp.json();
+  }
+
+  async function deleteAdaptation(id) {
+    if (!id) throw new Error('Cal id');
+    const qs = 'docent_id=' + encodeURIComponent(getDocentId());
+    const resp = await fetch('/api/adaptations/' + encodeURIComponent(id) + '?' + qs, {
+      method: 'DELETE',
+    });
+    if (!resp.ok) {
+      let errMsg = 'HTTP ' + resp.status;
+      try { const e = await resp.json(); if (e && e.error) errMsg = e.error; } catch {}
+      throw new Error(errMsg);
+    }
+    return resp.json();
+  }
+
   /**
    * Crida /api/export — genera un fitxer del text adaptat i el descarrega.
    *
@@ -880,6 +954,11 @@
     saveDraft,
     listDrafts,
     getDraft,
-    deleteDraft
+    deleteDraft,
+    // Adaptations (biblioteca al núvol)
+    saveAdaptation,
+    listAdaptations,
+    getAdaptation,
+    deleteAdaptation,
   };
 })();

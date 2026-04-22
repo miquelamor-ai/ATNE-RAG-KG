@@ -520,6 +520,11 @@ async def _atne_startup():
 from routes.drafts import router as _drafts_router  # noqa: E402
 app.include_router(_drafts_router)
 
+# Biblioteca d'adaptacions desades (Pas 3) a `atne_adaptations`.
+# Extret a `routes/adaptations.py` (2026-04-22). 4 endpoints sota /api/adaptations.
+from routes.adaptations import router as _adaptations_router  # noqa: E402
+app.include_router(_adaptations_router)
+
 
 # ── Pàgines HTML ────────────────────────────────────────────────────────────
 
