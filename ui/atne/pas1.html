@@ -2189,6 +2189,32 @@
     });
     if (!levels.length) levels.push('standard');
 
+    // Deriva versions (multinivell v2) perquè pas3 pugui generar N adaptacions
+    // en paral·lel. `_deriveVersionsForGroup` genera {id,type,label,level_mecr}
+    // per cada nivell actiu segons el MECR del grup i el MECR_LADDER.
+    function _deriveVersionsForGroup(levelList, mecrGroup) {
+      const META = {
+        basic:    { avatar:'B',   label:'Bàsic',     sub:'Nivell inferior', offset:-1 },
+        standard: { avatar:'Est', label:'Estàndard', sub:'Nivell del curs', offset: 0 },
+        advanced: { avatar:'A',   label:'Avançat',   sub:'Nivell superior', offset:+1 },
+      };
+      const idx = MECR_LADDER.indexOf(mecrGroup);
+      if (idx < 0) return [];
+      return levelList.map(l => {
+        const m = META[l] || META.standard;
+        const t = Math.max(0, Math.min(MECR_LADDER.length - 1, idx + m.offset));
+        const level_mecr = MECR_LADDER[t];
+        return {
+          id: 'v-' + l,
+          type: 'level',
+          avatar: m.avatar,
+          label: m.label + ' (' + level_mecr + ')',
+          sub: m.sub + ' · MECR ' + level_mecr,
+          level_mecr,
+        };
+      });
+    }
+
     // Perfils afegits al grup (reaprofitem del picker si hi són)
     const memberIds = Array.from(window._atneGroupAdded || []);
     const members = memberIds
@@ -2272,6 +2298,10 @@
       aids,
       members: memberIds,
       levels,
+      // Multinivell v2: versions amb MECR per cada nivell triat, perquè pas3
+      // pugui generar adaptacions paral·leles. Sense aquest camp, pas3 caia
+      // a single encara que hi hagués 2 o 3 nivells marcats.
+      versions: _deriveVersionsForGroup(levels, mecrGroup),
       custom: true,
       lletra,
       curs_id: curs,  // per poder editar i saber què va triar

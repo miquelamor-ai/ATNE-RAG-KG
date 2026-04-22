@@ -1335,10 +1335,49 @@
                     ] }
   };
 
-  // Injecta perfil custom des de localStorage
+  // Deriva `versions` (format multinivell v2) a partir dels `levels` legacy
+  // ('basic'/'standard'/'advanced') i el MECR del grup. Necessari per a
+  // grups creats abans del camp versions (2026-04-22). Sense això, pas3 cau
+  // a single i només genera 1 adaptació en lloc de N.
+  function _deriveVersionsFromLevels(levels, mecrGroup) {
+    const LADDER = ['pre-A1','A1','A2','B1','B2','C1','C2'];
+    const META = {
+      basic:    { avatar:'B',   label:'Bàsic',     sub:'Nivell inferior', offset:-1 },
+      standard: { avatar:'Est', label:'Estàndard', sub:'Nivell del curs', offset: 0 },
+      advanced: { avatar:'A',   label:'Avançat',   sub:'Nivell superior', offset:+1 },
+    };
+    const idx = LADDER.indexOf(mecrGroup);
+    if (idx < 0 || !Array.isArray(levels)) return [];
+    return levels.map(l => {
+      const m = META[l] || META.standard;
+      const targetIdx = Math.max(0, Math.min(LADDER.length - 1, idx + m.offset));
+      const level_mecr = LADDER[targetIdx];
+      return {
+        id: 'v-' + l,
+        type: 'level',
+        avatar: m.avatar,
+        label: m.label + ' (' + level_mecr + ')',
+        sub: m.sub + ' · MECR ' + level_mecr,
+        level_mecr,
+      };
+    });
+  }
+
+  // Injecta perfil custom des de localStorage + migra versions si cal
   try {
     const _cp = localStorage.getItem('atne.custom_profile');
-    if (_cp) { const _p = JSON.parse(_cp); if (_p?.id) window.ATNE_PROFILES[_p.id] = _p; }
+    if (_cp) {
+      const _p = JSON.parse(_cp);
+      if (_p?.id) {
+        // Migració: si és grup amb levels legacy i sense versions (creats abans
+        // del flow multinivell v2), deriva versions perquè pas3 els reconegui.
+        if (_p.type === 'group' && !Array.isArray(_p.versions) && Array.isArray(_p.levels)) {
+          _p.versions = _deriveVersionsFromLevels(_p.levels, _p.mecr);
+          console.log('[pas3] grup migrat amb versions derivades:', _p.versions);
+        }
+        window.ATNE_PROFILES[_p.id] = _p;
+      }
+    }
   } catch(e) {}
 
   // ──────────────────────────────────────────────────────
