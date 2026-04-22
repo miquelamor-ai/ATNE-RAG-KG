@@ -872,7 +872,7 @@
    * @param {string} [args.profile_name]  Nom del perfil (per al nom del fitxer).
    * @returns {Promise<void>}  Dispara la descàrrega al navegador.
    */
-  async function exportDoc({ format, adapted, profile_name = 'adaptacio' }) {
+  async function exportDoc({ format, adapted, profile_name = 'adaptacio', complements = null }) {
     if (!adapted || !adapted.trim()) throw new Error('No hi ha text per exportar');
     if (!['pdf', 'docx', 'txt'].includes(format)) throw new Error('Format no suportat: ' + format);
 
@@ -892,14 +892,19 @@
         window.ATNE_TRACK.event('exported', {
           format: format,
           chars: adapted.length,
+          n_complements: complements ? Object.keys(complements).length : 0,
         });
       }
     } catch (e) { /* */ }
 
+    const body = { format, adapted, profile_name };
+    if (complements && typeof complements === 'object' && Object.keys(complements).length > 0) {
+      body.complements = complements;
+    }
     const resp = await fetch('/api/export', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ format, adapted, profile_name })
+      body: JSON.stringify(body)
     });
     if (!resp.ok) {
       let errMsg = 'HTTP ' + resp.status;

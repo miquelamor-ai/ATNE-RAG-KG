@@ -3537,15 +3537,86 @@ async def export_doc(payload: dict = Body(...)):
     # Opt-in amb include_original=true si algun flux futur el necessita.
     include_original = bool(payload.get("include_original", False))
     profile_name = payload.get("profile_name", "adaptacio")
+    # Sprint 1C (2026-04-22): complements actius seleccionats pel docent.
+    # Format: { backend_key: markdown_string }. Ordre de presentació fix.
+    complements = payload.get("complements") or {}
+
+    # Mapa de títols en català + ordre de presentació al document exportat.
+    # Si afegeixes un complement al catàleg, recorda afegir-lo aquí.
+    _COMP_TITLES: dict[str, str] = {
+        "glossari":                 "Glossari",
+        "esquema_visual":           "Esquema visual",
+        "preguntes_comprensio":     "Preguntes de comprensió",
+        "mapa_conceptual":          "Mapa conceptual",
+        "mapa_mental":              "Mapa mental",
+        "bastides":                 "Bastides (scaffolding)",
+        "activitats_aprofundiment": "Activitats d'aprofundiment",
+        "pictogrames":              "Pictogrames",
+    }
+    _COMP_ORDER: list[str] = [
+        "glossari", "esquema_visual", "mapa_conceptual", "mapa_mental",
+        "bastides", "preguntes_comprensio", "activitats_aprofundiment",
+        "pictogrames",
+    ]
+
+    def _complements_as_markdown() -> str:
+        """Serialitza els complements com a seccions markdown ordenades.
+        Cada secció arrenca amb `## Títol` i separa amb línia en blanc.
+        Retorna string buit si no hi ha cap complement. Ja es neteja d'una
+        possible duplicació del header (alguns prompts retornen el títol
+        inclòs dins del markdown del complement)."""
+        parts: list[str] = []
+        for key in _COMP_ORDER:
+            md = (complements.get(key) or "").strip()
+            if not md:
+                continue
+            title = _COMP_TITLES.get(key, key)
+            # Treu un header duplicat al principi del markdown si apareix
+            # (ex: "## Glossari\n...") perquè no es dupliqui amb el nostre.
+            md_clean = re.sub(
+                r'^\s*#+\s*' + re.escape(title) + r'\s*\n',
+                '', md, count=1, flags=re.IGNORECASE,
+            )
+            parts.append(f"## {title}\n\n{md_clean}")
+        return "\n\n".join(parts)
+
+    # Si el docent ha demanat complements, els afegim al final del markdown
+    # abans de processar-lo per a cada format. Així el pipeline de
+    # PDF/DOCX/TXT els tracta igual que qualsevol secció del text adaptat.
+    complements_md = _complements_as_markdown()
+    if complements_md:
+        adapted = (adapted.rstrip() + "\n\n---\n\n" + complements_md).strip()
 
     import tempfile
     safe_name = re.sub(r'[^\w\s-]', '', profile_name).strip().replace(" ", "_")[:30] or "adaptacio"
     timestamp = time.strftime("%Y%m%d_%H%M")
     base_name = f"ATNE_{safe_name}_{timestamp}"
 
+    # Sprint 1C (2026-04-22): sanititzacions pre-PDF per a complements
+    # específics que el LLM genera amb caràcters box-drawing (mapa_conceptual,
+    # esquema_visual) — es filtrarien a `pdf_safe` i es perdria tota
+    # l'estructura. Substituïm per equivalents ASCII abans del filtre.
+    _BOX_TO_ASCII = {
+        "│": "|", "├": "|-", "└": "`-", "┌": ".-", "┐": "-.", "┘": "-'",
+        "┤": "-|", "┬": "-T-", "┴": "-+-", "┼": "-+-",
+        "─": "-", "━": "-", "═": "=",
+        "╔": "+", "╗": "+", "╚": "+", "╝": "+",
+        "║": "|", "╟": "+", "╢": "+", "╤": "+", "╧": "+",
+        "▶": ">", "▲": "^", "▼": "v", "◆": "*", "●": "*", "■": "*",
+    }
+
+    def _sanitize_for_pdf(text: str) -> str:
+        """Substitueix caràcters box-drawing i altres glifs no-renderitzables
+        per equivalents ASCII abans de pdf_safe. Evita que mapes conceptuals
+        i esquemes visuals es perdin completament."""
+        for src, dst in _BOX_TO_ASCII.items():
+            text = text.replace(src, dst)
+        return text
+
     def pdf_safe(text):
         """Filtra text per PDF: només caràcters que Arial/Liberation pot renderitzar.
         Whitelist: ASCII, Latin Extended, àrab, puntuació general, fletxes, math."""
+        text = _sanitize_for_pdf(text)
         cleaned = []
         for c in text:
             cp = ord(c)

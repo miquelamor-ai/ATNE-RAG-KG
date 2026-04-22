@@ -1195,6 +1195,10 @@
               <div class="exp-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V4h12v5M6 14h12v7H6zM6 9h12l2 5H4z"/></svg></div>
               <div class="exp-nm">Imprimir<div class="exp-s">directament al navegador</div></div>
             </button>
+            <button class="exp-item" data-fmt="copy-md">
+              <div class="exp-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></div>
+              <div class="exp-nm">Copia markdown<div class="exp-s">text + complements al porta-papers</div></div>
+            </button>
           </div>
         </div>
 
@@ -3198,6 +3202,58 @@
         return;
       }
 
+      // Copiar markdown al porta-papers (text + complements actius)
+      if (fmt === 'copy-md') {
+        const adaptedEl = document.getElementById('adapted-text');
+        if (!adaptedEl) return;
+        const adaptedMd = (window.ATNE_LLM?.htmlToMarkdown?.(adaptedEl.innerHTML) ||
+                           adaptedEl.innerText || '').trim();
+        const CHIP_TO_BACKEND_ = {
+          'glossari':'glossari','esquema':'esquema_visual',
+          'preguntes':'preguntes_comprensio','mapa-conc':'mapa_conceptual',
+          'mapa-ment':'mapa_mental','bastides':'bastides',
+          'activitats':'activitats_aprofundiment','pictogrames':'pictogrames',
+        };
+        const TITLES_ = {
+          glossari:'Glossari', esquema_visual:'Esquema visual',
+          preguntes_comprensio:'Preguntes de comprensió',
+          mapa_conceptual:'Mapa conceptual', mapa_mental:'Mapa mental',
+          bastides:'Bastides (scaffolding)',
+          activitats_aprofundiment:"Activitats d'aprofundiment",
+          pictogrames:'Pictogrames',
+        };
+        const ORDER_ = ['glossari','esquema_visual','mapa_conceptual','mapa_mental',
+                        'bastides','preguntes_comprensio','activitats_aprofundiment','pictogrames'];
+        const collected = {};
+        document.querySelectorAll('.comp-card[data-comp]').forEach(card => {
+          const k = card.dataset.comp;
+          if (!k || k === 'text') return;
+          const tg = card.querySelector('input[data-comp-toggle]');
+          if (!tg || !tg.checked) return;
+          const bk = CHIP_TO_BACKEND_[k] || k;
+          const src = card.querySelector('[data-md]') || card.querySelector('.generic-md');
+          let md = '';
+          if (src && src.dataset && src.dataset.md) md = src.dataset.md;
+          else if (src && window.ATNE_LLM?.htmlToMarkdown) md = window.ATNE_LLM.htmlToMarkdown(src.innerHTML).trim();
+          if (md) collected[bk] = md;
+        });
+        let full = adaptedMd;
+        for (const key of ORDER_) {
+          if (collected[key]) full += '\n\n## ' + TITLES_[key] + '\n\n' + collected[key];
+        }
+        try {
+          await navigator.clipboard.writeText(full);
+          const n = Object.keys(collected).length;
+          window.atneToast?.('Copiat al porta-papers' + (n ? ' (amb ' + n + ' complement' + (n===1?'':'s') + ')' : ''), 'success');
+          if (window.ATNE_TRACK) {
+            window.ATNE_TRACK.event('copied', { chars: full.length, n_complements: n, source: 'export_menu' });
+          }
+        } catch (err) {
+          window.atneToast?.('No s\'ha pogut copiar: ' + err.message, 'error');
+        }
+        return;
+      }
+
       const pid = localStorage.getItem('atne.profile_id') || 'marc';
       const profile = window.ATNE_PROFILES?.[pid];
       const profile_name = profile?.name || 'adaptacio';
@@ -3228,7 +3284,7 @@
         return;
       }
 
-      // DOCX / TXT: server-side (format bàsic sense complements, pendent millora #61).
+      // DOCX / TXT: server-side (Sprint 1C — inclou complements actius).
       if (!window.ATNE_LLM || !window.ATNE_LLM.exportDoc) {
         window.atneToast?.('Mòdul d\'exportació no disponible', 'error');
         return;
@@ -3243,10 +3299,62 @@
         return;
       }
 
+      // Recull complements actius del DOM (toggle [data-comp-toggle] checked)
+      // i els serialitza a markdown. Mapeja la clau curta del xip a la clau
+      // llarga que espera el backend. Si el docent ha desactivat un
+      // complement, NO s'inclou a l'export.
+      const CHIP_TO_BACKEND = {
+        'glossari':   'glossari',
+        'esquema':    'esquema_visual',
+        'preguntes':  'preguntes_comprensio',
+        'mapa-conc':  'mapa_conceptual',
+        'mapa-ment':  'mapa_mental',
+        'bastides':   'bastides',
+        'activitats': 'activitats_aprofundiment',
+        'pictogrames':'pictogrames',
+      };
+      const complementsPayload = {};
+      document.querySelectorAll('.comp-card[data-comp]').forEach(card => {
+        const compChipKey = card.dataset.comp;
+        if (!compChipKey || compChipKey === 'text') return;
+        const toggle = card.querySelector('input[data-comp-toggle]');
+        if (!toggle || !toggle.checked) return;
+        const backendKey = CHIP_TO_BACKEND[compChipKey] || compChipKey;
+        // 1) Intenta el node amb dataset.md (glossari, preguntes, esquema, generic)
+        const mdSources = [
+          card.querySelector('[data-md]'),
+          card.querySelector('.generic-md'),
+          card.querySelector('.gl-list'),
+          card.querySelector('.q-list'),
+          card.querySelector('.schema'),
+        ].filter(Boolean);
+        let md = '';
+        for (const src of mdSources) {
+          if (src.dataset && src.dataset.md) { md = src.dataset.md; break; }
+        }
+        // 2) Fallback: converteix l'HTML rendreritzat a markdown
+        if (!md) {
+          const visible = mdSources[0] || card.querySelector('.comp-body, .comp-content');
+          if (visible && window.ATNE_LLM.htmlToMarkdown) {
+            md = window.ATNE_LLM.htmlToMarkdown(visible.innerHTML).trim();
+          }
+        }
+        if (md) complementsPayload[backendKey] = md;
+      });
+
       window.atneToast?.('Preparant ' + fmt.toUpperCase() + '…', 'info');
       try {
-        await window.ATNE_LLM.exportDoc({ format: fmt, adapted, profile_name });
-        window.atneToast?.('Descàrrega iniciada', 'success');
+        await window.ATNE_LLM.exportDoc({
+          format: fmt,
+          adapted,
+          profile_name,
+          complements: complementsPayload,
+        });
+        const nComp = Object.keys(complementsPayload).length;
+        window.atneToast?.(
+          'Descàrrega iniciada' + (nComp ? ' (amb ' + nComp + ' complement' + (nComp === 1 ? '' : 's') + ')' : ''),
+          'success'
+        );
       } catch (err) {
         window.atneToast?.('Error exportant: ' + err.message, 'error');
       }
