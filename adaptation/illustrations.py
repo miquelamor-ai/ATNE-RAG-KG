@@ -335,6 +335,36 @@ def flux_option(brief: str, style: str, seed: int) -> FluxOption:
 
 # ---- Resolutor principal
 
+# Cache in-memory de resolucions per concepte. Evita crides duplicades a
+# Wikimedia/Pexels/FLUX quan un mateix concepte apareix a múltiples versions
+# d'un grup multinivell (típic en 3 versions bàsic/estàndard/avançat del
+# mateix text original). TTL 30 min perquè la sessió típica d'un docent dura
+# menys que això i no volem servir dades caducades entre sessions.
+_RESOLVE_CACHE: dict[str, tuple[float, "Resolution"]] = {}
+_RESOLVE_TTL = 30 * 60.0
+import time as _time_mod
+
+
+def _cache_get(key: str) -> Optional["Resolution"]:
+    entry = _RESOLVE_CACHE.get(key)
+    if not entry:
+        return None
+    expiry, val = entry
+    if _time_mod.time() > expiry:
+        _RESOLVE_CACHE.pop(key, None)
+        return None
+    return val
+
+
+def _cache_put(key: str, val: "Resolution") -> None:
+    # Purga entrades caducades si el cache creix (O(n) però infreqüent)
+    if len(_RESOLVE_CACHE) > 500:
+        now = _time_mod.time()
+        for k in [k for k, (e, _) in _RESOLVE_CACHE.items() if e <= now]:
+            _RESOLVE_CACHE.pop(k, None)
+    _RESOLVE_CACHE[key] = (_time_mod.time() + _RESOLVE_TTL, val)
+
+
 def resolve_marker(
     concept_ca: str,
     context: Optional[dict] = None,
@@ -353,6 +383,14 @@ def resolve_marker(
         Resolution amb up to 2 opcions + metadata. Error si ambdues fallen.
     """
     ctx = context or {}
+    # Cache hit: mateixa (concept, mecr, style, seed) → resposta instantània,
+    # zero crides externes. Crític per a grups multinivell on 3 versions
+    # demanen el mateix concepte.
+    _cache_key = f"{concept_ca}|{ctx.get('mecr') or ''}|{style}|{seed}"
+    _cached = _cache_get(_cache_key)
+    if _cached is not None:
+        return _cached
+
     result = Resolution(concept=concept_ca)
 
     # 1. Traduccio concept -> query + brief (via Gemma 3)
@@ -421,6 +459,11 @@ def resolve_marker(
                 "photographer_url": p.photographer_url,
             })
     result.search_results = unified
+
+    # Desa al cache només si tenim alguna cosa útil (evita cachejar errors
+    # transitoris de API que poden recuperar-se en la següent crida)
+    if wiki_hits or pex_hits or flux_opt:
+        _cache_put(_cache_key, result)
 
     return result
 

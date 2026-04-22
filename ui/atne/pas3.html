@@ -3760,25 +3760,77 @@ ${compsHtml.join('\n')}
     );
   }
 
+  // Store compartit entre versions d'un grup multinivell: concepte → imatge
+  // triada pel docent. Quan una nova versió es renderitza i té marcadors de
+  // conceptes ja resolts, salta directament a illus-final sense re-obrir
+  // el chooser. Decisió UX 2026-04-22: les triïes es propaguen, les eliminacions
+  // són per versió (el docent pot treure una imatge d'una versió concreta sense
+  // afectar les altres).
+  window.ATNE_ILLUS_PICKS = window.ATNE_ILLUS_PICKS || {};
+
+  function _buildIllusFinalHtml(idx, concept, pick) {
+    const kind = pick.kind || 'search';
+    const src = pick.src || '';
+    const alt = (pick.alt || concept || '').replace(/"/g, '&quot;');
+    const caption = pick.caption || concept;
+    const safeConcept = concept.replace(/"/g, '&quot;');
+    return (
+      '<figure class="illus-final" data-kind="' + kind + '" data-concept="' + safeConcept + '" data-size="medium" data-align="center" data-from-pick="1">' +
+        '<img src="' + src + '" alt="' + alt + '">' +
+        '<figcaption>' + caption + '</figcaption>' +
+        '<div class="illus-final-actions" contenteditable="false">' +
+          '<button type="button" class="btn-illus-size" data-size="small" title="Mida petita">S</button>' +
+          '<button type="button" class="btn-illus-size" data-size="medium" title="Mida mitjana">M</button>' +
+          '<button type="button" class="btn-illus-size" data-size="large" title="Mida gran">L</button>' +
+          '<span class="illus-divider">|</span>' +
+          '<button type="button" class="btn-illus-align" data-align="left" title="Alinear a l\'esquerra">⇤</button>' +
+          '<button type="button" class="btn-illus-align" data-align="center" title="Centrar">⇔</button>' +
+          '<button type="button" class="btn-illus-align" data-align="right" title="Alinear a la dreta">⇥</button>' +
+          '<span class="illus-divider">|</span>' +
+          '<button type="button" class="btn-illus-remove" title="Eliminar imatge d\'aquesta versió">✕</button>' +
+        '</div>' +
+      '</figure>'
+    );
+  }
+
   function processIllustrationMarkers(containerEl, rawText) {
     console.log('[illustracions] step 1: entrada', { hasContainer: !!containerEl, rawTextLen: (rawText || '').length });
     const html = containerEl.innerHTML;
     const markers = [];
+    const pendingMarkers = []; // només els que no tenen pick previ
     let idx = 0;
     const newHtml = html.replace(ILLUS_MARKER_RE, (match, concept) => {
-      markers.push({ idx, concept: concept.trim() });
-      const p = buildIllusPlaceholder(idx, concept.trim());
+      const c = concept.trim();
+      const pick = window.ATNE_ILLUS_PICKS[c];
+      markers.push({ idx, concept: c, hasPick: !!pick });
+      let p;
+      if (pick && pick.src) {
+        // Ja triada abans (una altra versió del grup multinivell): salta
+        // directament al illus-final, sense obrir el chooser.
+        p = _buildIllusFinalHtml(idx, c, pick);
+      } else {
+        p = buildIllusPlaceholder(idx, c);
+        pendingMarkers.push({ idx, concept: c });
+      }
       idx += 1;
       return p;
     });
-    console.log('[illustracions] step 2: markers trobats', markers.length);
+    console.log('[illustracions] step 2: markers trobats', markers.length, 'pendents de resoldre:', pendingMarkers.length);
     if (markers.length === 0) return;
 
     containerEl.innerHTML = newHtml;
     console.log('[illustracions] step 3: innerHTML substituit');
+    // Re-enganxem accions sobre les illus-final auto-aplicades (S/M/L, align,
+    // Canviar amagat perquè no hi ha chooser, eliminar).
+    try { if (typeof bindFinalActions === 'function') setTimeout(bindFinalActions, 0); } catch (e) {}
     try { bindIllusUploads(containerEl); } catch (e) { console.error('[illustracions] bindIllusUploads error:', e); }
     try { bindIllusSkips(containerEl); } catch (e) { console.error('[illustracions] bindIllusSkips error:', e); }
     console.log('[illustracions] step 4: binds fets');
+    // Si tots els markers ja tenien pick, no cal cridar batch: avortem.
+    if (pendingMarkers.length === 0) {
+      console.log('[illustracions] tots els marcadors ja tenien imatge des d\'una altra versió; no cal crida batch');
+      return;
+    }
 
     // Context per al backend
     const mecr = (window.ATNE_PROFILE && window.ATNE_PROFILE.mecr_sortida) || localStorage.getItem('atne.mecr') || 'B1';
@@ -4155,6 +4207,20 @@ ${compsHtml.join('\n')}
     setTimeout(bindFinalActions, 0);
     // Desa canvi: la selecció d'imatge queda persistida
     _persistAdaptedChange();
+    // Propaga la tria al store compartit. Quan el docent canviï de vcard
+    // (a una altra versió del grup multinivell), processIllustrationMarkers
+    // detectarà el concepte ja triat i col·locarà directament la imatge
+    // final, sense re-obrir el chooser. Evita triar 3 vegades la mateixa.
+    try {
+      if (concept) {
+        window.ATNE_ILLUS_PICKS = window.ATNE_ILLUS_PICKS || {};
+        window.ATNE_ILLUS_PICKS[concept] = {
+          src, kind,
+          alt: alt || concept,
+          caption,
+        };
+      }
+    } catch (_) {}
   }
 
   // Càrrega esglaonada de les imatges FLUX (Pollinations rebutja paral·lel).
