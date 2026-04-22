@@ -3254,22 +3254,31 @@
     });
 
     document.body.appendChild(root);
+    // Esperar un frame perquè el layout s'hagi calculat abans que html2canvas llegeixi rects.
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
     const safeName = profileName.replace(/[^\w\s-]/g, '').replace(/\s+/g, '_').slice(0, 30) || 'adaptacio';
     const ts = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const filename = `ATNE_${safeName}_${ts}.pdf`;
+
+    // El zoom CSS al documentElement (controls de zoom de l'app) trenca html2canvas:
+    // captura coordenades escalades i pot donar pàgina buida. Neutralitzem durant l'export.
+    const htmlEl = document.documentElement;
+    const prevZoom = htmlEl.style.zoom;
+    htmlEl.style.zoom = '1';
 
     try {
       await window.html2pdf().set({
         margin:     [15, 15, 18, 15],  // mm: top, right, bottom, left
         filename:   filename,
         image:      { type: 'jpeg', quality: 0.96 },
-        html2canvas:{ scale: 2, useCORS: true, letterRendering: true, backgroundColor: '#ffffff' },
+        html2canvas:{ scale: 2, useCORS: true, letterRendering: true, backgroundColor: '#ffffff', windowWidth: root.scrollWidth, windowHeight: root.scrollHeight },
         jsPDF:      { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
         pagebreak:  { mode: ['css', 'legacy'] }
       }).from(root).save();
     } finally {
       root.remove();
+      htmlEl.style.zoom = prevZoom;
     }
   }
 
