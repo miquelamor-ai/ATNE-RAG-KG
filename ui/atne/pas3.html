@@ -2606,7 +2606,14 @@
 
     const adaptedElInit = document.getElementById('adapted-text');
     const docOriginal = localStorage.getItem('atne.doc_original');
-    if (!docOriginal || !docOriginal.trim()) {
+    // Bypass del guard "cap text": si venim de la biblioteca (current_adaptation_id
+    // definit) i ja tenim adapted_text desat, renderitzem directament l'HTML
+    // guardat — no cal doc_original. Això és crític per a adaptacions legacy
+    // desades abans del fix del bug original_text=current_original_text (2026-04-22).
+    const _libAdaptId = localStorage.getItem('atne.current_adaptation_id');
+    const _libAdaptedText = localStorage.getItem('atne.adapted_text');
+    const _fromLibraryFallback = _libAdaptId && _libAdaptedText;
+    if ((!docOriginal || !docOriginal.trim()) && !_fromLibraryFallback) {
       // Cap text real per adaptar. Substituïm el mock hardcoded del HTML per
       // un missatge clar i tornem a Pas 2 al cap d'uns segons.
       if (adaptedElInit) {
@@ -2614,6 +2621,30 @@
       }
       window.atneToast?.('Torna al Pas 2 per escriure o pujar un text', 'info');
       setTimeout(() => { if (!localStorage.getItem('atne.doc_original')) location.href = '/ui/atne/pas2.html'; }, 2500);
+      return;
+    }
+    // Fallback biblioteca: pinta l'HTML desat directament i surt abans de
+    // tocar cap lògica de cacheKey/adapt.
+    if (_fromLibraryFallback && (!docOriginal || !docOriginal.trim())) {
+      if (adaptedElInit) {
+        adaptedElInit.innerHTML = _libAdaptedText;
+        try {
+          if (typeof attachParaHandles === 'function') attachParaHandles();
+          if (typeof pushHistory === 'function') pushHistory();
+          if (typeof updateDocMeta === 'function') updateDocMeta();
+          adaptedElInit.querySelectorAll('[data-actions-bound]').forEach(el => delete el.dataset.actionsBound);
+          adaptedElInit.querySelectorAll('[data-bound]').forEach(el => delete el.dataset.bound);
+          if (typeof bindFinalActions === 'function') bindFinalActions();
+          if (typeof bindIllusPicks === 'function') {
+            adaptedElInit.querySelectorAll('.illus-chooser').forEach(c => {
+              bindIllusPicks(c); bindIllusUploads(c); bindIllusSkips(c); bindIllusRegens(c);
+            });
+          }
+        } catch (_) {}
+      }
+      const _title = localStorage.getItem('atne.doc_title') || 'Sense títol';
+      const _docTitleEl = document.querySelector('.doc-title');
+      if (_docTitleEl) _docTitleEl.value = _title;
       return;
     }
     // Sempre que venim de Pas 2 amb text real, netegem el mock abans de render
@@ -3402,7 +3433,10 @@
     try { profile = JSON.parse(localStorage.getItem('atne.current_profile') || 'null'); } catch (_) {}
     try { context = JSON.parse(localStorage.getItem('atne.current_context') || 'null'); } catch (_) {}
     try { complements = JSON.parse(localStorage.getItem('atne.complements') || 'null'); } catch (_) {}
-    const original_text = localStorage.getItem('atne.current_original_text') || '';
+    // Bug 2026-04-22: abans llegíem 'atne.current_original_text' que cap codi
+    // mai setteja. Per això les adaptacions desades fins ara tenien original_text
+    // buit i en reobrir-les el Pas 3 redirigia a Pas 2.
+    const original_text = localStorage.getItem('atne.doc_original') || '';
     const idStr = localStorage.getItem('atne.current_adaptation_id');
     const id = idStr ? parseInt(idStr, 10) : undefined;
     return {
