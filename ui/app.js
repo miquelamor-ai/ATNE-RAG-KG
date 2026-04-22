@@ -297,6 +297,7 @@ const COMPLEMENTS = {
     definicions_integrades: "Definicions integrades al text",
     traduccio_l1: "Traducció L1 dels termes clau",
     pictogrames: "Pictogrames / icones de suport",
+    illustracions: "Il·lustracions generades per IA (beta)",
     esquema_visual: "Esquema / resum visual",
     bastides: "Bastides (scaffolding guiat)",
     mapa_conceptual: "Mapa conceptual",
@@ -336,6 +337,7 @@ const COMPLEMENT_GROUPS = {
         desc: "Suport icònic i multimodal",
         items: [
             { key: "pictogrames", label: "Pictogrames o icones al costat dels conceptes clau" },
+            { key: "illustracions", label: "Il·lustracions generades per IA (beta · qualitat no garantida · demora 1-3 min)" },
         ],
     },
     "Ajuts estructurals": {
@@ -868,6 +870,26 @@ function renderComplementGrid() {
                     <span class="complement-auto-badge">Automàtic</span>
                 </label>
             `;
+            // Extres per a il·lustracions: selector d'estil (apareix quan s'activa)
+            if (item.key === "illustracions") {
+                list.innerHTML += `
+                    <div class="illus-style-picker" data-for="illustracions" hidden>
+                        <label for="illus-style-select">Estil:</label>
+                        <select id="illus-style-select" data-illus-style>
+                            <option value="aquarela_storybook">🎨 Aquarel·la storybook (primària, contes)</option>
+                            <option value="vectorial_editorial">📐 Vectorial editorial (ESO+, humanitats)</option>
+                            <option value="isometric_infografic">📊 Isomètric infogràfic (STEM, processos)</option>
+                            <option value="icona_minimalista">🔵 Icona minimalista (DUA, vocabulari)</option>
+                            <option value="claymation_plastilina">🟠 Claymation (infantil, STEM lúdic)</option>
+                            <option value="escala_grisos_carbonet">✏️ Escala de grisos (història, B/N)</option>
+                            <option value="fotografia_documental">📷 Fotografia documental (natura, geografia)</option>
+                        </select>
+                        <div class="illus-style-warning">
+                            ⚠️ Feature beta: qualitat no garantida, demora 1-3 min per imatge.
+                        </div>
+                    </div>
+                `;
+            }
         }
 
         groupDiv.appendChild(list);
@@ -880,6 +902,17 @@ function renderComplementGrid() {
             cb.closest('.complement-item').classList.remove('auto');
         });
     });
+
+    // Il·lustracions: mostrar/amagar el selector d'estil segons el checkbox
+    const illusCb = grid.querySelector('input[data-comp="illustracions"]');
+    const illusPicker = grid.querySelector('.illus-style-picker[data-for="illustracions"]');
+    if (illusCb && illusPicker) {
+        const syncIllusPicker = () => {
+            illusPicker.hidden = !illusCb.checked;
+        };
+        syncIllusPicker();
+        illusCb.addEventListener('change', syncIllusPicker);
+    }
 }
 
 
@@ -1902,6 +1935,8 @@ const COMP_ICONS = {
     "definicions integrades": "📎",
     "traducció l1": "🌍",
     "pictogrames": "🖼️",
+    "il·lustracions": "🎨",
+    "illustracions": "🎨",
 };
 
 function getCompIcon(title) {
@@ -1910,6 +1945,195 @@ function getCompIcon(title) {
         if (lower.includes(key)) return icon;
     }
     return "📄";
+}
+
+// ── Il·lustracions: chooser Wikimedia vs FLUX vs upload ────────────────────
+
+const ILLUS_MARKER_RE = /\[IMATGE:\s*([^\]]+)\]/g;
+
+function buildChooserPlaceholder(idx, concept) {
+    const safeConcept = (concept || "").replace(/</g, "&lt;");
+    return `
+      <figure class="illus-chooser" data-idx="${idx}" data-concept="${safeConcept}" data-status="loading">
+        <div class="illus-concept">🎨 <code>[IMATGE: ${safeConcept}]</code></div>
+        <div class="illus-options">
+          <div class="illus-opt illus-opt-loading">
+            <div class="illus-spinner"></div>
+            <div class="illus-label">Cercant a Wikimedia…</div>
+          </div>
+          <div class="illus-opt illus-opt-loading">
+            <div class="illus-spinner"></div>
+            <div class="illus-label">Generant amb FLUX… (pot trigar)</div>
+          </div>
+          <div class="illus-opt illus-opt-upload">
+            <label class="illus-upload-btn">
+              📤 Puja la teva
+              <input type="file" accept="image/*" data-idx="${idx}" hidden>
+            </label>
+          </div>
+        </div>
+        <div class="illus-actions">
+          <button type="button" class="btn-illus-skip" data-idx="${idx}">Sense imatge</button>
+        </div>
+      </figure>`;
+}
+
+function processIllustrationMarkers(containerEl, rawText) {
+    // Col·lecta els marcadors en ordre i substitueix cada un al HTML
+    // per un <figure> placeholder de chooser.
+    const html = containerEl.innerHTML;
+    const markers = [];
+    let idx = 0;
+    const newHtml = html.replace(ILLUS_MARKER_RE, (match, concept) => {
+        markers.push({ idx, concept: concept.trim() });
+        const placeholder = buildChooserPlaceholder(idx, concept.trim());
+        idx += 1;
+        return placeholder;
+    });
+    if (markers.length === 0) return;
+
+    containerEl.innerHTML = newHtml;
+    bindIllustrationUploads(containerEl);
+    bindIllustrationSkips(containerEl);
+
+    // Dispara la resolució asíncrona
+    // Recull el context actual: MECR del formulari + matèria del context
+    let currentMecr = "B1";
+    try {
+        const params = collectParams();
+        currentMecr = params.mecr_sortida || currentMecr;
+    } catch (_) { /* si collectParams falla, fem servir el default */ }
+    const subjectEl = document.querySelector('#context-materia, [name="materia"], [name="subject"]');
+    const ctx = {
+        mecr: currentMecr,
+        subject: (subjectEl && subjectEl.value) || "general",
+    };
+    // Estil escollit pel docent al Pas 2 (selector al costat del checkbox).
+    const styleSel = document.querySelector('[data-illus-style]');
+    const style = (styleSel && styleSel.value) || "aquarela_storybook";
+
+    fetch("/api/illustrations/batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...getAuthHeader() },
+        body: JSON.stringify({ text: rawText, context: ctx, style, seed: 42 }),
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (!data || !data.markers) return;
+        data.markers.forEach((m, i) => {
+            const fig = containerEl.querySelector(`.illus-chooser[data-idx="${i}"]`);
+            if (!fig) return;
+            fillChooser(fig, m.resolution);
+        });
+    })
+    .catch(err => {
+        console.error("[illustracions] batch error:", err);
+        containerEl.querySelectorAll(".illus-chooser").forEach(fig => {
+            fig.setAttribute("data-status", "error");
+            fig.querySelector(".illus-options").innerHTML =
+                '<div class="illus-opt illus-opt-error">⚠️ Error resolent les il·lustracions</div>';
+        });
+    });
+}
+
+function fillChooser(figEl, resolution) {
+    if (!resolution) return;
+    const optsContainer = figEl.querySelector(".illus-options");
+    const existingUpload = optsContainer.querySelector(".illus-opt-upload");
+
+    const wiki = resolution.wikimedia;
+    const flux = resolution.flux;
+
+    const wikiOpt = wiki ? `
+      <div class="illus-opt" data-kind="wikimedia">
+        <img src="${wiki.thumb_url}" alt="${wiki.title}" loading="lazy">
+        <div class="illus-label">
+          <strong>Wikimedia</strong>
+          <div class="illus-attr">${wiki.license || "?"} · ${(wiki.author || "anònim").replace(/<[^>]+>/g, "").slice(0, 40)}</div>
+        </div>
+        <button type="button" class="btn-illus-pick" data-kind="wikimedia">Triar aquesta</button>
+      </div>
+    ` : `
+      <div class="illus-opt illus-opt-empty">
+        <div class="illus-label">Wikimedia sense resultats</div>
+      </div>
+    `;
+
+    const fluxOpt = flux ? `
+      <div class="illus-opt" data-kind="flux">
+        <img src="${flux.url}" alt="FLUX generated" loading="lazy">
+        <div class="illus-label">
+          <strong>FLUX (IA)</strong>
+          <div class="illus-attr">Il·lustració generada · ${flux.style}</div>
+        </div>
+        <button type="button" class="btn-illus-pick" data-kind="flux">Triar aquesta</button>
+      </div>
+    ` : `
+      <div class="illus-opt illus-opt-empty">
+        <div class="illus-label">FLUX no disponible</div>
+      </div>
+    `;
+
+    optsContainer.innerHTML = wikiOpt + fluxOpt + existingUpload.outerHTML;
+    figEl.setAttribute("data-status", "ready");
+
+    bindIllustrationPicks(figEl);
+    bindIllustrationUploads(figEl);
+}
+
+function bindIllustrationPicks(scope) {
+    scope.querySelectorAll(".btn-illus-pick").forEach(btn => {
+        if (btn.dataset.bound === "1") return;
+        btn.dataset.bound = "1";
+        btn.addEventListener("click", (ev) => {
+            const fig = ev.target.closest(".illus-chooser");
+            const kind = btn.dataset.kind;
+            const img = fig.querySelector(`.illus-opt[data-kind="${kind}"] img`);
+            if (!img) return;
+            finalizeChooser(fig, img.src, kind, img.alt || "");
+        });
+    });
+}
+
+function bindIllustrationUploads(scope) {
+    scope.querySelectorAll('input[type="file"][data-idx]').forEach(input => {
+        if (input.dataset.bound === "1") return;
+        input.dataset.bound = "1";
+        input.addEventListener("change", (ev) => {
+            const file = ev.target.files && ev.target.files[0];
+            if (!file) return;
+            const fig = ev.target.closest(".illus-chooser");
+            const reader = new FileReader();
+            reader.onload = () => finalizeChooser(fig, reader.result, "upload", file.name);
+            reader.readAsDataURL(file);
+        });
+    });
+}
+
+function bindIllustrationSkips(scope) {
+    scope.querySelectorAll(".btn-illus-skip").forEach(btn => {
+        if (btn.dataset.bound === "1") return;
+        btn.dataset.bound = "1";
+        btn.addEventListener("click", (ev) => {
+            const fig = ev.target.closest(".illus-chooser");
+            fig.outerHTML = ""; // eliminar el chooser sencer
+        });
+    });
+}
+
+function finalizeChooser(figEl, src, kind, alt) {
+    const concept = figEl.dataset.concept || "";
+    const caption = kind === "flux"
+        ? `Il·lustració IA (FLUX) · ${concept}`
+        : kind === "wikimedia"
+            ? `Wikimedia Commons · ${concept}`
+            : `Imatge pròpia · ${concept}`;
+    figEl.outerHTML = `
+      <figure class="illus-final" data-kind="${kind}" data-concept="${concept}">
+        <img src="${src}" alt="${alt || concept}">
+        <figcaption>${caption}</figcaption>
+      </figure>
+    `;
 }
 
 function showResult() {
@@ -1935,7 +2159,15 @@ function showResult() {
 
     // Parsejar seccions del text adaptat
     const sections = parseAdaptedSections(state.adaptedText);
-    document.getElementById("result-adapted").innerHTML = formatMarkdown(sections.main || state.adaptedText);
+    const adaptedMain = sections.main || state.adaptedText;
+    const adaptedEl = document.getElementById("result-adapted");
+    adaptedEl.innerHTML = formatMarkdown(adaptedMain);
+
+    // Il·lustracions: si hi ha marcadors [IMATGE: ...], els substituïm per
+    // choosers i disparem la resolució en segon pla.
+    if (adaptedMain && /\[IMATGE:\s*[^\]]+\]/.test(adaptedMain)) {
+        processIllustrationMarkers(adaptedEl, adaptedMain);
+    }
 
     // Renderitzar complements amb acordions i icones
     const compDiv = document.getElementById("result-complements");

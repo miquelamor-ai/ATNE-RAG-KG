@@ -101,8 +101,18 @@
   .doc-title::placeholder{color:var(--ink-400)}
   .doc-meta{font-family:var(--mono);font-size:10.5px;color:var(--ink-500);display:flex;align-items:center;gap:8px}
   .doc-meta .dot{width:4px;height:4px;border-radius:50%;background:var(--ink-300)}
-  .status-badge{background:var(--ok-50);color:var(--ok);padding:3px 8px;border-radius:99px;font-size:10px;font-family:var(--mono);font-weight:600;display:inline-flex;align-items:center;gap:5px}
-  .status-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--ok)}
+  .status-badge{background:var(--ok-50);color:var(--ok);padding:3px 8px;border-radius:99px;font-size:10px;font-family:var(--mono);font-weight:600;display:inline-flex;align-items:center;gap:5px;cursor:pointer;user-select:none;transition:background .15s,color .15s}
+  .status-badge:hover{filter:brightness(0.96)}
+  /* Estats del badge de núvol */
+  .status-badge.cloud-idle{background:#e8eef5;color:#1a4b7a}
+  .status-badge.cloud-idle::before{display:none}
+  .status-badge.cloud-saving{background:#fff3d0;color:#8a6600}
+  .status-badge.cloud-saving::before{background:#b58900;animation:cloud-pulse 0.8s infinite}
+  .status-badge.cloud-saved{background:var(--ok-50);color:var(--ok)}
+  .status-badge.cloud-saved::before{background:var(--ok)}
+  .status-badge.cloud-error{background:#fde8e8;color:#b00}
+  .status-badge.cloud-error::before{background:#b00}
+  @keyframes cloud-pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 
   .chead-row{width:100%;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .cmp-toggle{display:flex;align-items:center;gap:6px;padding:5px 10px 5px 8px;border-radius:8px;background:rgba(255,255,255,.6);border:1px solid var(--paper-line);font-size:12px;font-weight:500;color:var(--ink-700);cursor:pointer;transition:.15s}
@@ -621,8 +631,54 @@
   .illus-counter { font-size: 0.72em; color: #888; margin-top: 0.2em; text-align: center; }
   .illus-actions { margin-top: 0.6em; text-align: right; }
   .btn-illus-skip { cursor: pointer; padding: 0.3em 0.8em; background: transparent; color: #888; border: 1px solid #ddd; border-radius: 6px; font-size: 0.78em; }
-  .illus-final { margin: 1.5em auto; text-align: center; }
-  .illus-final img { max-width: 100%; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,0,0,0.12); }
+  /* Figura il·lustració final: es comporta com bloc que ocupa l'amplada necessària */
+  .illus-final { display: block; width: fit-content; max-width: 100%; position: relative; text-align: center; }
+  .illus-final img { display: block; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,0,0,0.12); }
+  .illus-final[data-size="small"] img { max-width: 240px; }
+  .illus-final[data-size="medium"] img { max-width: 480px; }
+  .illus-final[data-size="large"] img { max-width: 100%; width: 100%; }
+  /* Alineacions */
+  .illus-final[data-align="center"] { float: none; margin: 1.5em auto; }
+  .illus-final[data-align="left"] { float: left; margin: 0.5em 1.2em 0.8em 0; clear: left; }
+  .illus-final[data-align="right"] { float: right; margin: 0.5em 0 0.8em 1.2em; clear: right; }
+  /* Wrap: després d'una imatge alineada cal clear perquè el segúent bloc no col·lisioni amb floats */
+  .illus-final + * { clear: none; }
+  /* Barra d'accions: sempre visible, compacta, no depenent del hover */
+  .illus-final-actions {
+    margin-top: 0.5em;
+    display: flex;
+    gap: 0.2em;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 0.3em 0.4em;
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    /* Evitem que contenteditable del pare intercepti els clicks */
+    user-select: none;
+  }
+  .illus-final-actions button {
+    cursor: pointer; padding: 0.28em 0.5em;
+    background: #fff; color: #555; border: 1px solid #ccc;
+    border-radius: 5px; font-size: 0.76em; line-height: 1;
+    min-width: 2em;
+  }
+  .illus-final-actions button:hover { background: rgba(0,0,0,0.05); border-color: #888; color: #222; }
+  .illus-final-actions button:active { background: rgba(0,0,0,0.1); }
+  .illus-divider { color: #bbb; padding: 0 0.15em; align-self: center; font-size: 0.9em; }
+  .btn-illus-align, .btn-illus-size { min-width: 2em; }
+  /* Botó actiu (size o align seleccionat actualment) */
+  .illus-final[data-size="small"] .btn-illus-size[data-size="small"],
+  .illus-final[data-size="medium"] .btn-illus-size[data-size="medium"],
+  .illus-final[data-size="large"] .btn-illus-size[data-size="large"],
+  .illus-final[data-align="left"] .btn-illus-align[data-align="left"],
+  .illus-final[data-align="center"] .btn-illus-align[data-align="center"],
+  .illus-final[data-align="right"] .btn-illus-align[data-align="right"] {
+    background: #1a4b7a; color: #fff; border-color: #1a4b7a; font-weight: 600;
+  }
+  .btn-illus-remove { color: #b00 !important; border-color: #e8b8b8 !important; }
+  .btn-illus-remove:hover { background: #ffe8e8 !important; }
+  .btn-illus-change { background: #eaf2fb !important; border-color: #1a4b7a !important; color: #1a4b7a !important; font-weight: 500; }
   .illus-final figcaption { font-size: 0.82em; color: #666; font-style: italic; margin-top: 0.5em; }
 </style>
 </head>
@@ -725,7 +781,7 @@
         <div class="center-head">
           <div class="chead-row" style="margin-bottom:6px">
             <input class="doc-title" value="La Revolució Industrial">
-            <span class="status-badge">Desat</span>
+            <span id="cloud-badge" class="status-badge cloud-idle" title="Desa a la biblioteca del núvol">☁ Desar</span>
             <span class="doc-meta"><span>adaptat fa 1m</span><span class="dot"></span><span>318 paraules</span></span>
             <div class="urd">
               <button id="btn-undo" title="Desfer (⌘Z)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-4"/></svg></button>
@@ -1939,8 +1995,15 @@
     btnUndo.disabled = history.idx <= 0;
     btnRedo.disabled = history.idx >= history.stack.length - 1;
   }
-  btnUndo.addEventListener('click', () => { if(history.idx>0){ history.idx--; adapted.innerHTML = history.stack[history.idx]; updateUndoRedo(); attachParaHandles(); updateDocMeta(); }});
-  btnRedo.addEventListener('click', () => { if(history.idx<history.stack.length-1){ history.idx++; adapted.innerHTML = history.stack[history.idx]; updateUndoRedo(); attachParaHandles(); updateDocMeta(); }});
+  function _resetBoundFlags(){
+    // Els atributs data-* es serialitzen dins innerHTML però els event
+    // listeners NO. Després d'un undo/redo cal netejar els flags perquè
+    // les funcions de binding tornin a enganxar listeners.
+    adapted.querySelectorAll('[data-actions-bound]').forEach(el => delete el.dataset.actionsBound);
+    adapted.querySelectorAll('[data-bound]').forEach(el => delete el.dataset.bound);
+  }
+  btnUndo.addEventListener('click', () => { if(history.idx>0){ history.idx--; adapted.innerHTML = history.stack[history.idx]; updateUndoRedo(); attachParaHandles(); updateDocMeta(); _resetBoundFlags(); try{ if(typeof bindFinalActions==='function') bindFinalActions(); }catch(_){} try{ if(typeof bindIllusPicks==='function'){ adapted.querySelectorAll('.illus-chooser').forEach(c => { bindIllusPicks(c); bindIllusUploads(c); bindIllusSkips(c); bindIllusRegens(c); }); } }catch(_){} }});
+  btnRedo.addEventListener('click', () => { if(history.idx<history.stack.length-1){ history.idx++; adapted.innerHTML = history.stack[history.idx]; updateUndoRedo(); attachParaHandles(); updateDocMeta(); _resetBoundFlags(); try{ if(typeof bindFinalActions==='function') bindFinalActions(); }catch(_){} try{ if(typeof bindIllusPicks==='function'){ adapted.querySelectorAll('.illus-chooser').forEach(c => { bindIllusPicks(c); bindIllusUploads(c); bindIllusSkips(c); bindIllusRegens(c); }); } }catch(_){} }});
   let typingTimer;
   adapted.addEventListener('input', () => {
     clearTimeout(typingTimer);
@@ -2615,7 +2678,23 @@
       // regeneracions repetides cada vegada que el docent entrava a Pas 3
       // (veure project_complement_preguntes_graduades.md). Si el docent vol
       // forçar una regeneració, té el botó "Regenerar".
-      if (adaptedEl) { adaptedEl.innerHTML = cachedText; attachParaHandles(); pushHistory(); }
+      if (adaptedEl) {
+        adaptedEl.innerHTML = cachedText;
+        attachParaHandles();
+        pushHistory();
+        // Neteja bound flags i re-enganxa listeners (els data-* s'han restaurat
+        // del HTML però els event listeners no es serialitzen).
+        try {
+          adaptedEl.querySelectorAll('[data-actions-bound]').forEach(el => delete el.dataset.actionsBound);
+          adaptedEl.querySelectorAll('[data-bound]').forEach(el => delete el.dataset.bound);
+          if (typeof bindFinalActions === 'function') bindFinalActions();
+          if (typeof bindIllusPicks === 'function') {
+            adaptedEl.querySelectorAll('.illus-chooser').forEach(c => {
+              bindIllusPicks(c); bindIllusUploads(c); bindIllusSkips(c); bindIllusRegens(c);
+            });
+          }
+        } catch (_) {}
+      }
       if (cachedRaw && window.ATNE_LLM?.parseAdaptedSections) {
         const parsed = window.ATNE_LLM.parseAdaptedSections(cachedRaw);
         applyComplementsToViews(parsed.complements);
@@ -3111,14 +3190,18 @@
     const titleText = (document.querySelector('.doc-title')?.value || 'Adaptació').trim();
     const today = new Date().toLocaleDateString('ca-ES', { day: 'numeric', month: 'long', year: 'numeric' });
 
-    // Contenidor oculte off-screen per renderitzar
+    // Contenidor oculte off-screen per renderitzar.
+    // IMPORTANT: `position:absolute; left:-99999px` en comptes de `fixed; top:-10000px`
+    // perquè html2canvas captura pàgina en blanc amb fixed fora del viewport
+    // (no pot resoldre els bounding rects correctament).
     const root = document.createElement('div');
     root.className = 'pdf-export-root ' + activeFontClass;
     root.style.cssText = [
-      'position:fixed', 'top:-10000px', 'left:0',
+      'position:absolute', 'top:0', 'left:-99999px',
       'width:180mm', 'padding:0',
       'background:#fff', 'color:#1a1a1a',
       'font-size:14pt', 'line-height:1.65',
+      'z-index:-1',
     ].join(';');
 
     // Capçalera: títol + metadades
@@ -3171,22 +3254,31 @@
     });
 
     document.body.appendChild(root);
+    // Esperar un frame perquè el layout s'hagi calculat abans que html2canvas llegeixi rects.
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
     const safeName = profileName.replace(/[^\w\s-]/g, '').replace(/\s+/g, '_').slice(0, 30) || 'adaptacio';
     const ts = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const filename = `ATNE_${safeName}_${ts}.pdf`;
+
+    // El zoom CSS al documentElement (controls de zoom de l'app) trenca html2canvas:
+    // captura coordenades escalades i pot donar pàgina buida. Neutralitzem durant l'export.
+    const htmlEl = document.documentElement;
+    const prevZoom = htmlEl.style.zoom;
+    htmlEl.style.zoom = '1';
 
     try {
       await window.html2pdf().set({
         margin:     [15, 15, 18, 15],  // mm: top, right, bottom, left
         filename:   filename,
         image:      { type: 'jpeg', quality: 0.96 },
-        html2canvas:{ scale: 2, useCORS: true, letterRendering: true, backgroundColor: '#ffffff' },
+        html2canvas:{ scale: 2, useCORS: true, letterRendering: true, backgroundColor: '#ffffff', windowWidth: root.scrollWidth, windowHeight: root.scrollHeight },
         jsPDF:      { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
         pagebreak:  { mode: ['css', 'legacy'] }
       }).from(root).save();
     } finally {
       root.remove();
+      htmlEl.style.zoom = prevZoom;
     }
   }
 
@@ -3272,6 +3364,119 @@
 
   document.getElementById('help-btn')?.addEventListener('click', startTourP3);
 
+  // ── Desar al núvol: biblioteca d'adaptacions ─────────────────────────────
+  // Gestió de l'estat d'auto-save + botó manual.
+  // Id de l'adaptació actual es guarda a localStorage 'atne.current_adaptation_id'.
+  const cloudBadge = document.getElementById('cloud-badge');
+  const CLOUD_AUTOSAVE_MS = 30000; // 30s
+  let _cloudLastSavedAt = 0;
+  let _cloudDirty = false;
+  let _cloudSaving = false;
+
+  function _cloudSetState(state, label) {
+    if (!cloudBadge) return;
+    cloudBadge.classList.remove('cloud-idle', 'cloud-saving', 'cloud-saved', 'cloud-error');
+    cloudBadge.classList.add('cloud-' + state);
+    cloudBadge.textContent = label;
+  }
+
+  function _cloudMarkDirty() {
+    _cloudDirty = true;
+    if (cloudBadge && cloudBadge.classList.contains('cloud-saved')) {
+      _cloudSetState('idle', '☁ Canvis sense desar');
+    }
+  }
+
+  function _cloudBuildPayload() {
+    const adaptedEl = document.getElementById('adapted-text');
+    if (!adaptedEl) return null;
+    const adapted_html = adaptedInnerHtmlClean();
+    const title = (document.querySelector('.doc-title')?.value || '').trim() || 'Sense títol';
+    let profile = null, context = null, complements = null;
+    try { profile = JSON.parse(localStorage.getItem('atne.current_profile') || 'null'); } catch (_) {}
+    try { context = JSON.parse(localStorage.getItem('atne.current_context') || 'null'); } catch (_) {}
+    try { complements = JSON.parse(localStorage.getItem('atne.complements') || 'null'); } catch (_) {}
+    const original_text = localStorage.getItem('atne.current_original_text') || '';
+    const idStr = localStorage.getItem('atne.current_adaptation_id');
+    const id = idStr ? parseInt(idStr, 10) : undefined;
+    return {
+      id,
+      title,
+      adapted_html,
+      original_text,
+      profile_snapshot: profile,
+      context_snapshot: context,
+      complements_snapshot: complements,
+    };
+  }
+
+  async function cloudSaveNow(opts = {}) {
+    if (_cloudSaving) return;
+    const payload = _cloudBuildPayload();
+    if (!payload || !payload.adapted_html.trim()) return;
+    _cloudSaving = true;
+    _cloudSetState('saving', '☁ Desant...');
+    try {
+      const result = await window.ATNE_LLM.saveAdaptation(payload);
+      if (result && result.ok) {
+        if (result.id) localStorage.setItem('atne.current_adaptation_id', String(result.id));
+        _cloudLastSavedAt = Date.now();
+        _cloudDirty = false;
+        _cloudSetState('saved', '☁ Desat fa un instant');
+        setTimeout(() => {
+          if (!_cloudDirty) _cloudSetState('saved', '☁ Desat');
+        }, 3000);
+      } else {
+        throw new Error((result && result.error) || 'resposta invàlida');
+      }
+    } catch (e) {
+      console.error('[cloud] save error:', e);
+      _cloudSetState('error', '☁ Error: ' + (e.message || 'desconegut'));
+    } finally {
+      _cloudSaving = false;
+    }
+  }
+
+  // Click manual al badge → desa immediatament
+  if (cloudBadge) {
+    cloudBadge.addEventListener('click', () => cloudSaveNow({ manual: true }));
+  }
+
+  // Marca "dirty" en qualsevol edició del text adaptat
+  const adaptedRoot = document.getElementById('adapted-text');
+  if (adaptedRoot) {
+    adaptedRoot.addEventListener('input', _cloudMarkDirty);
+  }
+  // El títol també compta
+  document.querySelector('.doc-title')?.addEventListener('input', _cloudMarkDirty);
+
+  // Auto-save cada 30s si hi ha canvis
+  setInterval(() => {
+    if (_cloudDirty && !_cloudSaving) cloudSaveNow();
+  }, CLOUD_AUTOSAVE_MS);
+
+  // Desa també en tancar la pestanya (best-effort via sendBeacon si cal)
+  window.addEventListener('beforeunload', () => {
+    if (!_cloudDirty) return;
+    const payload = _cloudBuildPayload();
+    if (!payload) return;
+    try {
+      const body = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+      navigator.sendBeacon('/api/adaptations', body);
+    } catch (_) {}
+  });
+
+  // Exposa al global per poder cridar des d'altres handlers (ex: finalize imatge)
+  window.ATNE_CLOUD = {
+    markDirty: _cloudMarkDirty,
+    saveNow: cloudSaveNow,
+  };
+
+  // Estat inicial segons si hi ha id o no
+  if (localStorage.getItem('atne.current_adaptation_id')) {
+    _cloudSetState('saved', '☁ Desat');
+  }
+
   // ── Il·lustracions: chooser Wikimedia vs FLUX vs upload ──────────────────
   console.log('%c[illustracions] module v3 loaded', 'color:#1a4b7a;font-weight:bold');
   const ILLUS_MARKER_RE = /\[IMATGE:\s*([^\]]+)\]/g;
@@ -3344,6 +3549,8 @@
         }
         fillIllusChooser(fig, m.resolution);
       });
+      // Càrrega esglaonada de les imatges FLUX per evitar 429s de Pollinations
+      staggerFluxLoads(containerEl);
     })
     .catch(err => {
       console.error('[illustracions] batch error:', err);
@@ -3388,15 +3595,16 @@
 
     const fluxOpt = flux ? (
       '<div class="illus-opt" data-kind="flux">' +
-        '<img src="' + flux.url + '" alt="FLUX" loading="lazy" data-kind="flux-img">' +
+        '<img alt="FLUX (en cua)" loading="lazy" data-kind="flux-img" data-pending-src="' + flux.url + '" style="opacity:0.3;min-height:200px;background:#f5f5f5">' +
         '<div class="illus-label"><strong>FLUX (IA)</strong>' +
-        '<div class="illus-attr">Generada · ' + (flux.style || '') + '</div>' +
+        '<div class="illus-attr">En cua · ' + (flux.style || '') + '</div>' +
         '<div class="illus-counter" data-kind="flux">1 de 1</div>' +
         '</div>' +
         '<div class="illus-buttons">' +
           '<button type="button" class="btn-illus-nav" data-dir="prev" data-kind="flux" disabled>←</button>' +
           '<button type="button" class="btn-illus-pick" data-kind="flux">Triar</button>' +
           '<button type="button" class="btn-illus-regen" data-kind="flux">🔄</button>' +
+          '<button type="button" class="btn-illus-nav" data-dir="next" data-kind="flux" disabled>→</button>' +
         '</div>' +
       '</div>'
     ) : '<div class="illus-opt illus-opt-empty"><div class="illus-label">FLUX no disponible</div></div>';
@@ -3410,13 +3618,24 @@
     figEl.querySelectorAll('img[data-kind="flux-img"]').forEach(img => {
       img.addEventListener('load', () => {
         console.log('[illustracions] FLUX img carregada:', img.src.slice(-40));
-        img.closest('.illus-opt').dataset.imgStatus = 'loaded';
+        const opt = img.closest('.illus-opt');
+        opt.dataset.imgStatus = 'loaded';
+        // Reseteja qualsevol error visual residual
+        img.style.background = '';
+        img.style.opacity = '1';
+        img.alt = 'FLUX';
+        const attr = opt.querySelector('.illus-attr');
+        if (attr && attr.textContent.startsWith('En cua')) {
+          attr.textContent = attr.textContent.replace(/^En cua/, 'Generada');
+        }
       });
       img.addEventListener('error', () => {
         console.warn('[illustracions] FLUX img error:', img.src.slice(-60));
-        img.closest('.illus-opt').dataset.imgStatus = 'error';
-        img.alt = '⚠️ FLUX no ha respost';
+        const opt = img.closest('.illus-opt');
+        opt.dataset.imgStatus = 'error';
+        img.alt = '⚠️ FLUX saturat — prova Wikimedia, puja la teva, o torna a regenerar';
         img.style.background = '#ffe8e8';
+        img.style.opacity = '1';
       });
     });
   }
@@ -3444,7 +3663,9 @@
 
   function _fluxCurrentSrc(figEl) {
     const img = figEl.querySelector('.illus-opt[data-kind="flux"] img');
-    return img ? img.src : '';
+    if (!img) return '';
+    // Si src real està buit, usa pending-src
+    return img.src || img.dataset.pendingSrc || '';
   }
 
   function _fluxSeedFromSrc(src) {
@@ -3456,10 +3677,14 @@
     const img = figEl.querySelector('.illus-opt[data-kind="flux"] img');
     if (!img) return;
     img.style.opacity = '0.4';
-    let url = img.src.replace(/([?&])seed=\d+/, '$1seed=' + seed);
+    // Agafa el src vigent o el pending (per si encara no s'ha carregat res)
+    const baseUrl = img.src || img.dataset.pendingSrc || '';
+    if (!baseUrl) { console.warn('[illustracions] _fluxApplySeed: cap URL base'); return; }
+    let url = baseUrl.replace(/([?&])seed=\d+/, '$1seed=' + seed);
     url = url.replace(/[?&]_t=\d+/, '');
     url += (url.includes('?') ? '&' : '?') + '_t=' + Date.now();
     img.src = url;
+    img.removeAttribute('data-pending-src'); // ja no està pending
     img.addEventListener('load', () => { img.style.opacity = '1'; }, { once: true });
     img.addEventListener('error', () => { img.style.opacity = '1'; }, { once: true });
   }
@@ -3473,6 +3698,8 @@
     if (counter) counter.textContent = (idx + 1) + ' de ' + hist.length;
     const prevBtn = opt.querySelector('.btn-illus-nav[data-kind="flux"][data-dir="prev"]');
     if (prevBtn) prevBtn.disabled = (idx === 0);
+    const nextBtn = opt.querySelector('.btn-illus-nav[data-kind="flux"][data-dir="next"]');
+    if (nextBtn) nextBtn.disabled = (idx >= hist.length - 1);
     const attr = opt.querySelector('.illus-attr');
     if (attr && hist.length > 0) {
       attr.textContent = 'Generada · variació #' + hist[idx];
@@ -3500,6 +3727,9 @@
     idx = hist.length - 1;
     figEl.dataset.fluxHistory = JSON.stringify(hist);
     figEl.dataset.fluxIdx = String(idx);
+    // Reseteja qualsevol error visual previ
+    const img = figEl.querySelector('.illus-opt[data-kind="flux"] img');
+    if (img) { img.style.background = ''; img.alt = 'FLUX (regenerant...)'; }
     _fluxApplySeed(figEl, newSeed);
     _fluxUpdateUi(figEl);
     console.log('[illustracions] regenFlux: seed', newSeed, 'idx', idx, 'hist', hist.length);
@@ -3582,6 +3812,15 @@
     });
   }
 
+  // Helper: dispara l'autosave de pas3 (typingTimer + localStorage + history stack)
+  function _persistAdaptedChange() {
+    try { if (typeof pushHistory === 'function') pushHistory(); } catch (_) {}
+    try {
+      localStorage.setItem('atne.adapted_text', adaptedInnerHtmlClean());
+    } catch (_) {}
+    try { if (window.ATNE_CLOUD && window.ATNE_CLOUD.markDirty) window.ATNE_CLOUD.markDirty(); } catch (_) {}
+  }
+
   function finalizeIllusChooser(figEl, src, kind, alt) {
     const concept = figEl.dataset.concept || '';
     const caption = kind === 'flux'
@@ -3589,11 +3828,115 @@
       : kind === 'wikimedia'
         ? ('Wikimedia Commons · ' + concept)
         : ('Imatge pròpia · ' + concept);
+    // Desa l'HTML del chooser original codificat en base64 per poder tornar-hi
+    const chooserData = btoa(unescape(encodeURIComponent(figEl.outerHTML)));
     figEl.outerHTML =
-      '<figure class="illus-final" data-kind="' + kind + '" data-concept="' + concept + '">' +
+      '<figure class="illus-final" data-kind="' + kind + '" data-concept="' + concept + '" data-size="medium" data-align="center" data-chooser="' + chooserData + '">' +
         '<img src="' + src + '" alt="' + (alt || concept) + '">' +
         '<figcaption>' + caption + '</figcaption>' +
+        '<div class="illus-final-actions" contenteditable="false">' +
+          '<button type="button" class="btn-illus-size" data-size="small" title="Mida petita">S</button>' +
+          '<button type="button" class="btn-illus-size" data-size="medium" title="Mida mitjana">M</button>' +
+          '<button type="button" class="btn-illus-size" data-size="large" title="Mida gran">L</button>' +
+          '<span class="illus-divider">|</span>' +
+          '<button type="button" class="btn-illus-align" data-align="left" title="Alinear a l\'esquerra (text al costat)">⇤</button>' +
+          '<button type="button" class="btn-illus-align" data-align="center" title="Centrar (bloc)">⇔</button>' +
+          '<button type="button" class="btn-illus-align" data-align="right" title="Alinear a la dreta (text al costat)">⇥</button>' +
+          '<span class="illus-divider">|</span>' +
+          '<button type="button" class="btn-illus-change" title="Tornar a triar">↶ Canviar</button>' +
+          '<button type="button" class="btn-illus-remove" title="Eliminar imatge">✕</button>' +
+        '</div>' +
       '</figure>';
+    // Bind dels botons nous (esperar 1 tick perquè el DOM s'actualitzi)
+    setTimeout(bindFinalActions, 0);
+    // Desa canvi: la selecció d'imatge queda persistida
+    _persistAdaptedChange();
+  }
+
+  // Càrrega esglaonada de les imatges FLUX (Pollinations rebutja paral·lel).
+  // Cada imatge comença 5s després de l'anterior, seqüencialment.
+  function staggerFluxLoads(containerEl) {
+    const imgs = containerEl.querySelectorAll('img[data-kind="flux-img"][data-pending-src]');
+    console.log('[illustracions] staggerFluxLoads:', imgs.length, 'imatges a carregar seqüencialment');
+    imgs.forEach((img, i) => {
+      const realSrc = img.dataset.pendingSrc;
+      if (!realSrc) return;
+      setTimeout(() => {
+        const attr = img.closest('.illus-opt')?.querySelector('.illus-attr');
+        if (attr) attr.textContent = attr.textContent.replace(/^En cua/, 'Carregant');
+        img.alt = 'FLUX (carregant...)';
+        img.src = realSrc;
+        img.removeAttribute('data-pending-src');
+        console.log('[illustracions] FLUX #' + (i+1) + ' disparant load a t+' + (i*5) + 's');
+      }, i * 5000); // 0, 5, 10, 15s...
+    });
+  }
+
+  function bindFinalActions() {
+    document.querySelectorAll('.illus-final').forEach(fig => {
+      if (fig.dataset.actionsBound === '1') return;
+      fig.dataset.actionsBound = '1';
+      // Assegurem que la figura no és contenteditable (el pare #adapted-text
+      // ho és i això podia interferir amb els clicks als botons).
+      fig.setAttribute('contenteditable', 'false');
+      // Canviar mida
+      fig.querySelectorAll('.btn-illus-size').forEach(btn => {
+        btn.addEventListener('mousedown', (ev) => ev.preventDefault()); // evita perdre focus/selecció
+        btn.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          fig.dataset.size = btn.dataset.size;
+          _persistAdaptedChange();
+        });
+      });
+      // Canviar alineació
+      fig.querySelectorAll('.btn-illus-align').forEach(btn => {
+        btn.addEventListener('mousedown', (ev) => ev.preventDefault());
+        btn.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          fig.dataset.align = btn.dataset.align;
+          _persistAdaptedChange();
+        });
+      });
+      // Tornar al chooser (restaurant l'HTML original)
+      const changeBtn = fig.querySelector('.btn-illus-change');
+      if (changeBtn) {
+        changeBtn.addEventListener('click', () => {
+          try {
+            const raw = fig.dataset.chooser || '';
+            if (!raw) { console.warn('[illustracions] no hi ha chooser a restaurar'); return; }
+            const chooserHtml = decodeURIComponent(escape(atob(raw)));
+            const tpl = document.createElement('template');
+            tpl.innerHTML = chooserHtml.trim();
+            const restored = tpl.content.firstChild;
+            // CRÍTIC: treu els data-bound serialitzats perquè els listeners
+            // nous puguin enganxar-se (addEventListener no es serialitza al HTML).
+            restored.querySelectorAll('[data-bound="1"]').forEach(el => {
+              delete el.dataset.bound;
+            });
+            // Treu també l'actionsBound del fig (no hi és al chooser però per precaució)
+            fig.parentNode.replaceChild(restored, fig);
+            if (restored && restored.classList && restored.classList.contains('illus-chooser')) {
+              bindIllusPicks(restored);
+              bindIllusUploads(restored);
+              bindIllusSkips(restored);
+              bindIllusRegens(restored);
+            }
+          } catch (e) {
+            console.error('[illustracions] error restaurant chooser:', e);
+          }
+        });
+      }
+      // Eliminar la figura
+      const removeBtn = fig.querySelector('.btn-illus-remove');
+      if (removeBtn) {
+        removeBtn.addEventListener('click', () => {
+          fig.remove();
+          _persistAdaptedChange();
+        });
+      }
+    });
   }
 </script>
 </body></html>

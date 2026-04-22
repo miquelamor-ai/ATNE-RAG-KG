@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ca">
+<meta charset="utf-8">
+<title>Smoke · parser de course legacy (pas1)</title>
+<style>
+  body{font:14px/1.4 -apple-system,Segoe UI,sans-serif;padding:20px;max-width:900px}
+  h1{font-size:18px;margin:0 0 12px}
+  table{border-collapse:collapse;width:100%;font-family:ui-monospace,Menlo,monospace}
+  th,td{border:1px solid #ddd;padding:6px 10px;text-align:left;font-size:13px}
+  th{background:#f4f4f4}
+  .ok{color:#0a7a4d;font-weight:600}
+  .fail{color:#b00}
+  .warn{color:#a06000}
+  tr.ok-row{background:#f0fbf5}
+  tr.warn-row{background:#fff6e8}
+  tr.fail-row{background:#fdecec}
+</style>
+<h1>Parser de <code>course</code> legacy — Pas 1 · nou perfil</h1>
+<p>Cada fila és un valor de <code>p.course</code> que podria venir de perfils antics al Supabase. La prova aplica la mateixa lògica que <code>pas1.html</code> i comprova què en surt.</p>
+
+<!-- Mateixes opcions que el <select id="p-curs"> del pas1.html -->
+<select id="p-curs" hidden>
+  <option value="" disabled selected>Tria curs…</option>
+  <option value="I3">I3</option><option value="I4">I4</option><option value="I5">I5</option>
+  <option value="1r Primària">1r Primària</option><option value="2n Primària">2n Primària</option>
+  <option value="3r Primària">3r Primària</option><option value="4t Primària">4t Primària</option>
+  <option value="5è Primària">5è Primària</option><option value="6è Primària">6è Primària</option>
+  <option value="1r ESO">1r ESO</option><option value="2n ESO">2n ESO</option>
+  <option value="3r ESO">3r ESO</option><option value="4t ESO">4t ESO</option>
+  <option value="1r Batxillerat">1r Batxillerat</option><option value="2n Batxillerat">2n Batxillerat</option>
+  <option value="1r FP Grau Bàsic">1r FP Grau Bàsic</option><option value="2n FP Grau Bàsic">2n FP Grau Bàsic</option>
+  <option value="1r FP Grau Mitjà">1r FP Grau Mitjà</option><option value="2n FP Grau Mitjà">2n FP Grau Mitjà</option>
+  <option value="1r FP Grau Superior">1r FP Grau Superior</option><option value="2n FP Grau Superior">2n FP Grau Superior</option>
+</select>
+
+<table>
+  <thead><tr><th>Input <code>p.course</code></th><th>Curs parsejat</th><th>Lletra</th><th>Esperat</th><th>Resultat</th></tr></thead>
+  <tbody id="rows"></tbody>
+</table>
+
+<script>
+// ── La mateixa lògica que pas1.html (copiada per test aïllat) ───────────────
+function parseCourse(raw, selectEl) {
+  if (!raw || !selectEl) return { curs: '', lletra: '' };
+  raw = String(raw).trim();
+  const opts = Array.from(selectEl.options).filter(o => o.value);
+  const sorted = [...opts].sort((a, b) => b.value.length - a.value.length);
+  const found = sorted.find(o => raw.includes(o.value));
+  if (!found) return { curs: '', lletra: '' };
+  const idx = raw.indexOf(found.value);
+  const after = raw.slice(idx + found.value.length).trim();
+  const m = after.match(/^([A-Za-zÀ-Ú]{1,3})\b/);
+  return { curs: found.value, lletra: m ? m[1].toUpperCase() : '' };
+}
+
+const CASES = [
+  // [input, expectedCurs, expectedLletra, comment]
+  ['3r ESO A',              '3r ESO',   'A', 'format canònic nou'],
+  ['3r ESO',                '3r ESO',   '',  'sense lletra'],
+  ['I3',                    'I3',       '',  'infantil sense lletra'],
+  ['I4 B',                  'I4',       'B', 'infantil amb lletra'],
+  ['5è Primària B',         '5è Primària', 'B', 'primària amb unicode'],
+  ['6è Primària',           '6è Primària', '', 'primària sense lletra'],
+  ['1r ESO C',              '1r ESO',   'C', 'canònic'],
+  ['2n Batxillerat A',      '2n Batxillerat', 'A', 'batxillerat'],
+  ['1r FP Grau Mitjà B',    '1r FP Grau Mitjà', 'B', 'FP llarg'],
+  ['2n FP Grau Superior',   '2n FP Grau Superior', '', 'FP sense lletra'],
+  ['3r ESO A · 14',         '3r ESO',   'A', 'LEGACY: sufix · edat'],
+  ['3r ESO A · 14 anys',    '3r ESO',   'A', 'LEGACY: sufix · anys'],
+  ['14 anys · 3r ESO A',    '3r ESO',   'A', 'LEGACY: prefix edat ·'],
+  ['14 · 3r ESO B',         '3r ESO',   'B', 'LEGACY: prefix núm ·'],
+  ['3r ESO a',              '3r ESO',   'A', 'lletra minúscula → upper'],
+  ['',                      '',         '',  'string buit'],
+  [null,                    '',         '',  'null'],
+  [undefined,               '',         '',  'undefined'],
+  ['No sé',                 '',         '',  'text arbitrari sense curs'],
+  ['3r',                    '',         '',  'només nivell sense etapa'],
+  ['4t ESO 2a',             '4t ESO',   '',  'lletra+número: només 1 caràcter vàlid (hem dit 1-3 lletres)'],
+];
+
+const sel = document.getElementById('p-curs');
+const tbody = document.getElementById('rows');
+let pass = 0, fail = 0;
+CASES.forEach(([input, expCurs, expLletra, comment]) => {
+  const { curs, lletra } = parseCourse(input, sel);
+  const ok = (curs === expCurs) && (lletra === expLletra);
+  const cls = ok ? 'ok-row' : (curs || lletra ? 'warn-row' : 'fail-row');
+  const verdict = ok ? '<span class="ok">OK</span>' : '<span class="fail">FALLA</span>';
+  tbody.insertAdjacentHTML('beforeend',
+    '<tr class="' + cls + '">' +
+      '<td>' + (input === null ? 'null' : input === undefined ? 'undefined' : '"' + input + '"') + '<br><small style="color:#888">' + comment + '</small></td>' +
+      '<td>' + (curs || '—') + '</td>' +
+      '<td>' + (lletra || '—') + '</td>' +
+      '<td>' + (expCurs || '—') + ' / ' + (expLletra || '—') + '</td>' +
+      '<td>' + verdict + '</td>' +
+    '</tr>');
+  if (ok) pass++; else fail++;
+});
+document.body.insertAdjacentHTML('beforeend',
+  '<h2 style="margin-top:20px">Resum: <span class="' + (fail === 0 ? 'ok' : 'fail') + '">' +
+  pass + ' OK / ' + fail + ' FALLA (' + CASES.length + ' total)</span></h2>');
+</script>

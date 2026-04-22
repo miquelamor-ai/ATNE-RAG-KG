@@ -388,6 +388,35 @@ Exemples: ☀️ per llum, 💧 per aigua, 🌱 per planta, 🔬 per ciència, e
 Integra'ls directament al text adaptat, no en secció separada.
 """)
 
+    if comp.get("illustracions"):
+        output_sections.append("""
+## Il·lustracions (inline, no secció separada)
+ACTIVAT — Insereix marcadors `[IMATGE: <concepte curt en català>]` al text adaptat
+allà on una il·lustració ajudaria la comprensió.
+
+REGLES ESTRICTES:
+- Format exacte: `[IMATGE: concepte]` amb claudàtors i la paraula IMATGE en majúscules.
+- **Idioma**: català. 3-8 paraules. Concepte nuclear, no descripció d'escena.
+- **En línia pròpia**, abans del paràgraf/secció que introdueix el concepte.
+- **Màxim 3-4 marcadors per document**. Menys és millor.
+- **Un marcador per secció major com a màxim**.
+- Només conceptes **visualitzables i concrets** (llocs, objectes, escenes, processos observables).
+- **NO** conceptes abstractes purs ("la democràcia", "la justícia").
+- **NO** tecnicismes microscòpics ("cloroplasts", "àtoms") — reformula a nivell macroscòpic ("fulla sota el sol").
+- **NO** afegeixis descripcions d'estil dins el marcador (el backend s'encarrega de l'estil).
+- **NO** generis cap secció final `## Il·lustracions`. Els marcadors viuen inline.
+
+Exemples correctes:
+- `[IMATGE: cicle de l'aigua]`
+- `[IMATGE: fàbrica tèxtil del segle XIX]`
+- `[IMATGE: fulla verda al sol]`
+
+Exemples INCORRECTES:
+- `[IMATGE: a beautiful watercolor of...]` (anglès + estil)
+- `[IMATGE: la revolució industrial]` (massa abstracte)
+- `[IMATGE: cloroplasts i mitocondris]` (microscòpic)
+""")
+
     if comp.get("esquema_visual"):
         output_sections.append("""
 ## Esquema visual
@@ -428,8 +457,8 @@ Mostra les relacions jeràrquiques entre els conceptes principals del text.
 
     # Variables de context per als complements pedagògics (MALL/TILC)
     materia_complement = params.get("materia") or context.get("materia") or "la matèria corresponent"
-    etapa_complement = params.get("etapa") or context.get("etapa") or "l'etapa educativa corresponent"
-    mecr_complement = params.get("mecr") or "el nivell MECR indicat"
+    etapa_complement = context.get("etapa") or params.get("etapa") or "l'etapa educativa corresponent"
+    mecr_complement = params.get("mecr_sortida") or params.get("mecr") or "el nivell MECR indicat"
     genere_complement = params.get("genere_discursiu") or "no especificat"
     # Detectar si és text literari o informatiu (heurística a partir del gènere)
     literari_keywords = ("conte", "relat", "poesia", "poema", "llegendari", "fantàstic", "narrativa", "literari")

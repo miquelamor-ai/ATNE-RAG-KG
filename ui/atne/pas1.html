@@ -7,6 +7,7 @@
 
 <!-- Auth Supabase (ha de ser el primer script, sense defer/async) -->
 <script src="/ui/atne/js/auth.js"></script>
+<script src="/ui/atne/js/llm.js"></script>
 
 <!-- Tipografia -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -377,6 +378,42 @@
 </head>
 
 <body>
+  <!-- Modal Biblioteca d'adaptacions -->
+  <div id="library-modal" class="lib-modal">
+    <div class="lib-modal-inner">
+      <div class="lib-modal-head">
+        <h2>La meva biblioteca d'adaptacions</h2>
+        <button class="lib-close" onclick="closeLibrary()" title="Tancar">✕</button>
+      </div>
+      <div class="lib-modal-body">
+        <div id="library-list"></div>
+      </div>
+    </div>
+  </div>
+  <style>
+    .lib-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 10000; align-items: center; justify-content: center; }
+    .lib-modal.on { display: flex; }
+    .lib-modal-inner { background: #fff; border-radius: 12px; width: 90%; max-width: 820px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+    .lib-modal-head { display: flex; justify-content: space-between; align-items: center; padding: 1em 1.4em; border-bottom: 1px solid #e5e5e5; }
+    .lib-modal-head h2 { margin: 0; font-size: 1.2em; color: #1a4b7a; }
+    .lib-close { cursor: pointer; background: transparent; border: none; font-size: 1.3em; color: #888; padding: 0.3em 0.5em; border-radius: 6px; }
+    .lib-close:hover { background: rgba(0,0,0,0.05); color: #222; }
+    .lib-modal-body { overflow-y: auto; padding: 1em 1.4em; flex: 1; }
+    .lib-loading, .lib-empty, .lib-error { text-align: center; padding: 2em 1em; color: #666; font-size: 0.95em; }
+    .lib-error { color: #b00; }
+    .lib-item { border: 1px solid #e5e5e5; border-radius: 8px; padding: 0.9em 1em; margin-bottom: 0.8em; transition: border-color 0.15s; }
+    .lib-item:hover { border-color: #1a4b7a; }
+    .lib-item-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4em; }
+    .lib-item-title { font-weight: 600; color: #1a4b7a; font-size: 1.02em; }
+    .lib-item-meta { font-size: 0.78em; color: #888; font-family: monospace; }
+    .lib-item-preview { font-size: 0.88em; color: #555; line-height: 1.5; margin-bottom: 0.6em; }
+    .lib-item-actions { display: flex; gap: 0.5em; justify-content: flex-end; }
+    .lib-item-actions button { cursor: pointer; padding: 0.4em 0.9em; border-radius: 6px; font-size: 0.85em; border: 1px solid #ccc; background: #fff; }
+    .lib-btn-open { background: #1a4b7a !important; color: #fff !important; border-color: #1a4b7a !important; font-weight: 500; }
+    .lib-btn-open:hover { background: #15355a !important; }
+    .lib-btn-delete { color: #b00 !important; border-color: #e8b8b8 !important; }
+    .lib-btn-delete:hover { background: #ffe8e8 !important; }
+  </style>
 
 <!-- Drawer mòbil (replica del rail desktop) -->
 <div class="drawer-backdrop" id="drawer-backdrop"></div>
@@ -420,6 +457,7 @@
       <button class="icon-btn" id="zoom-in" title="Augmentar mida (Ctrl +)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M8 11h6M11 8v6"/></svg></button>
       <button class="icon-btn" id="fullscreen-btn" title="Pantalla completa (F11)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V3h4M17 3h4v4M21 17v4h-4M7 21H3v-4"/></svg></button>
       <button class="icon-btn" id="help-btn" title="Visita guiada"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg></button>
+      <button class="icon-btn" id="library-btn" title="La meva biblioteca d'adaptacions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></button>
       <button class="icon-btn" title="Compartir" onclick="alert('Compartir: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></button>
       <div style="position:relative">
         <button class="docent-av" id="docent-av" title="El teu compte">E</button>
@@ -597,9 +635,45 @@
           </div>
           <div class="card">
             <div class="card-t">Identificació</div>
-            <div class="two">
-              <div class="f"><div class="f-l">Nom <span class="req">*</span></div><input class="inp" placeholder="Ex: Marc Ribera"></div>
-              <div class="f"><div class="f-l">Curs / Edat</div><input class="inp" placeholder="3r ESO A · 14"></div>
+            <div style="display:grid;grid-template-columns:1fr 200px 80px;gap:10px;align-items:end">
+              <div class="f" style="margin:0"><div class="f-l">Nom <span class="req">*</span></div><input class="inp" id="p-nom" placeholder="Ex: Marc Ribera"></div>
+              <div class="f" style="margin:0"><div class="f-l">Curs</div>
+                <select class="inp" id="p-curs">
+                  <option value="" disabled selected>Tria curs…</option>
+                  <optgroup label="Educació infantil">
+                    <option value="I3">I3</option>
+                    <option value="I4">I4</option>
+                    <option value="I5">I5</option>
+                  </optgroup>
+                  <optgroup label="Primària">
+                    <option value="1r Primària">1r Primària</option>
+                    <option value="2n Primària">2n Primària</option>
+                    <option value="3r Primària">3r Primària</option>
+                    <option value="4t Primària">4t Primària</option>
+                    <option value="5è Primària">5è Primària</option>
+                    <option value="6è Primària">6è Primària</option>
+                  </optgroup>
+                  <optgroup label="ESO">
+                    <option value="1r ESO">1r ESO</option>
+                    <option value="2n ESO">2n ESO</option>
+                    <option value="3r ESO">3r ESO</option>
+                    <option value="4t ESO">4t ESO</option>
+                  </optgroup>
+                  <optgroup label="Batxillerat">
+                    <option value="1r Batxillerat">1r Batxillerat</option>
+                    <option value="2n Batxillerat">2n Batxillerat</option>
+                  </optgroup>
+                  <optgroup label="Formació Professional">
+                    <option value="1r FP Grau Bàsic">FP · 1r Grau Bàsic</option>
+                    <option value="2n FP Grau Bàsic">FP · 2n Grau Bàsic</option>
+                    <option value="1r FP Grau Mitjà">FP · 1r Grau Mitjà</option>
+                    <option value="2n FP Grau Mitjà">FP · 2n Grau Mitjà</option>
+                    <option value="1r FP Grau Superior">FP · 1r Grau Superior</option>
+                    <option value="2n FP Grau Superior">FP · 2n Grau Superior</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div class="f" style="margin:0"><div class="f-l">Lletra</div><input class="inp" id="p-lletra" placeholder="A" maxlength="3" style="text-align:center;text-transform:uppercase"></div>
             </div>
           </div>
 
@@ -1343,22 +1417,72 @@
   const L1_META = {
     'Àrab':['semítica','àrab'],
     'Amazic':['amaziga','tifinag / llatí'],
-    'Urdú':['indoirania','àrab (nasta‘liq)'],
-    'Xinès mandarí':['sinotibetana','xinès'],
-    'Wolof':['níger-congolesa','llatí'],
-    'Mandinka':['níger-congolesa','llatí'],
-    'Ucraïnès':['eslava','ciríl·lic'],
-    'Rus':['eslava','ciríl·lic'],
-    'Romanes':['romance','llatí'],
-    'Panjabi':['indoirania','gurmukhi / shahmukhi'],
-    'Bengalí':['indoirania','bengalí'],
-    'Tagalog':['austronèsia','llatí'],
-    'Portuguès':['romance','llatí'],
-    'Espanyol':['romance','llatí'],
+    'Albanès':['albanesa','llatí'],
+    'Alemany':['germànica','llatí'],
     'Anglès':['germànica','llatí'],
-    'Francès':['romance','llatí']
+    'Bengalí':['indoirania','bengalí'],
+    'Birmà':['sinotibetana','birmà'],
+    'Búlgar':['eslava','ciríl·lic'],
+    'Coreà':['coreana','hangul'],
+    'Croat':['eslava','llatí'],
+    'Diola':['níger-congolesa','llatí'],
+    'Espanyol':['romance','llatí'],
+    'Èuscar':['aïllada','llatí'],
+    'Francès':['romance','llatí'],
+    'Fula (Peul)':['níger-congolesa','llatí'],
+    'Gallec':['romance','llatí'],
+    'Grec':['hel·lènica','grec'],
+    'Guaraní':['tupí','llatí'],
+    'Gujarati':['indoirania','gujarati'],
+    'Hausa':['afroasiàtica','llatí / àrab'],
+    'Hebreu':['semítica','hebreu'],
+    'Hindi':['indoirania','devanagari'],
+    'Hongarès':['uràlica','llatí'],
+    'Igbo':['níger-congolesa','llatí'],
+    'Indonesi':['austronèsia','llatí'],
+    'Italià':['romance','llatí'],
+    'Iorubà':['níger-congolesa','llatí'],
+    'Japonès':['japònica','kanji / kana'],
+    'Kazakh':['túrquica','ciríl·lic / llatí'],
+    'Khmer':['austroasiàtica','khmer'],
+    'Kurd':['indoirania','llatí / àrab'],
+    'Lingala':['níger-congolesa','llatí'],
+    'Malai':['austronèsia','llatí'],
+    'Malgaix':['austronèsia','llatí'],
+    'Mandinka':['níger-congolesa','llatí'],
+    'Marathi':['indoirania','devanagari'],
+    'Neerlandès':['germànica','llatí'],
+    'Nepalí':['indoirania','devanagari'],
+    'Panjabi':['indoirania','gurmukhi / shahmukhi'],
+    'Pastu':['indoirania','àrab'],
+    'Persa (farsi / dari)':['indoirania','àrab'],
+    'Polonès':['eslava','llatí'],
+    'Portuguès':['romance','llatí'],
+    'Quítxua':['quítxua','llatí'],
+    'Romanes':['indoirania','llatí'],
+    'Romanès':['romance','llatí'],
+    'Rus':['eslava','ciríl·lic'],
+    'Serbi':['eslava','ciríl·lic / llatí'],
+    'Singalès':['indoirania','singalès'],
+    'Soninke':['níger-congolesa','llatí'],
+    'Suahili':['níger-congolesa','llatí'],
+    'Tagalog':['austronèsia','llatí'],
+    'Tailandès':['tai-kadai','tailandès'],
+    'Tamazight':['amaziga','tifinag / llatí'],
+    'Tàmil':['dravídica','tàmil'],
+    'Telugu':['dravídica','telugu'],
+    'Tigrinya':['semítica','ge\'ez'],
+    'Turc':['túrquica','llatí'],
+    'Ucraïnès':['eslava','ciríl·lic'],
+    'Urdú':['indoirania','àrab (nasta‘liq)'],
+    'Uzbek':['túrquica','llatí / ciríl·lic'],
+    'Vietnamita':['austroasiàtica','llatí'],
+    'Wolof':['níger-congolesa','llatí'],
+    'Xinès mandarí':['sinotibetana','xinès'],
+    'Xinès cantonès':['sinotibetana','xinès']
   };
-  const L1_OPTS = Object.keys(L1_META).concat(['Altra…']);
+  const L1_OPTS = Object.keys(L1_META).sort((a,b)=>a.localeCompare(b,'ca'));
+  const COUNTRY_OPTS = ['Afganistan','Albània','Alemanya','Algèria','Andorra','Angola','Antigua i Barbuda','Aràbia Saudita','Argentina','Armènia','Austràlia','Àustria','Azerbaidjan','Bahames','Bahrain','Bangla Desh','Barbados','Bèlgica','Belize','Benín','Bhutan','Bielorússia','Bolívia','Bòsnia i Hercegovina','Botswana','Brasil','Brunei','Bulgària','Burkina Faso','Burundi','Cambodja','Camerun','Canadà','Cap Verd','Catalunya','Ciutat del Vaticà','Colòmbia','Comores','Congo','Corea del Nord','Corea del Sud','Costa d\'Ivori','Costa Rica','Croàcia','Cuba','Dinamarca','Djibouti','Dominica','Egipte','El Salvador','Emirats Àrabs Units','Equador','Eritrea','Eslovàquia','Eslovènia','Espanya','Estats Units','Estònia','Eswatini','Etiòpia','Fiji','Filipines','Finlàndia','França','Gabon','Gàmbia','Geòrgia','Ghana','Grècia','Grenada','Guatemala','Guinea','Guinea Bissau','Guinea Equatorial','Guyana','Haití','Hondures','Hongria','Iemen','Illes Marshall','Illes Salomó','Índia','Indonèsia','Iran','Iraq','Irlanda','Islàndia','Israel','Itàlia','Jamaica','Japó','Jordània','Kazakhstan','Kenya','Kirguizstan','Kiribati','Kosovo','Kuwait','Laos','Lesotho','Letònia','Líban','Libèria','Líbia','Liechtenstein','Lituània','Luxemburg','Macedònia del Nord','Madagascar','Malàisia','Malawi','Maldives','Mali','Malta','Marroc','Mauritània','Maurici','Mèxic','Micronèsia','Moçambic','Moldàvia','Mònaco','Mongòlia','Montenegro','Myanmar','Namíbia','Nauru','Nepal','Nicaragua','Níger','Nigèria','Noruega','Nova Zelanda','Oman','Països Baixos','Pakistan','Palau','Palestina','Panamà','Papua Nova Guinea','Paraguai','Perú','Polònia','Portugal','Qatar','Regne Unit','República Centreafricana','República Democràtica del Congo','República Dominicana','República Txeca','Romania','Ruanda','Rússia','Sahara Occidental','Saint Kitts i Nevis','Saint Lucia','Saint Vincent i les Grenadines','Samoa','San Marino','São Tomé i Príncipe','Senegal','Sèrbia','Seychelles','Sierra Leone','Singapur','Síria','Somàlia','Sri Lanka','Sud-àfrica','Sudan','Sudan del Sud','Suècia','Suïssa','Surinam','Tadjikistan','Tailàndia','Taiwan','Tanzània','Timor Oriental','Togo','Tonga','Trinitat i Tobago','Tunísia','Turkmenistan','Turquia','Tuvalu','Ucraïna','Uganda','Uruguai','Uzbekistan','Vanuatu','Veneçuela','Vietnam','Xile','Xina','Xipre','Zàmbia','Zimbàbue'];
   const DX_SUBS = {
     tdah:{type:'tags',items:['Predomini d\'atenció','Predomini d\'hiperactivitat','Combinat','Amb medicació']},
     disl:{type:'tags',items:['Fonològica','Superficial','Mixta','Disgrafia associada']},
@@ -1380,15 +1504,18 @@
       if(sub.type === 'tags'){
         body = `<div class="tags" data-subvar="tags">${sub.items.map(s=>`<button class="tag" type="button" data-val="${s}">${s}</button>`).join('')}</div>`;
       } else if(sub.type === 'l2'){
-        const cOpts = ['Marroc','Pakistan','Xina','Senegal','Hondures','Colòmbia','Bolívia','Equador','Romania','Ucraïna','Filipines','Bangla Desh','Algèria','Nigèria','Sahara Occidental','Altre…'];
         const tOpts = ['Menys de 6 mesos','6-12 mesos','1-2 anys','Més de 2 anys'];
         body = `<div class="sub-grid">
           <label class="sub-f l2-l1" style="grid-column:1/-1">
             <span class="sub-l">Llengua familiar (L1)</span>
-            <select class="inp" data-l2="l1"><option value="">— Tria —</option>${L1_OPTS.map(o=>`<option>${o}</option>`).join('')}</select>
+            <input class="inp" data-l2="l1" list="l1-opts-list" placeholder="Tria o escriu-ne una…" autocomplete="off">
+            <datalist id="l1-opts-list">${L1_OPTS.map(o=>`<option value="${o}">`).join('')}</datalist>
             <span class="l2-meta" data-l2-meta hidden></span>
           </label>
-          <label class="sub-f"><span class="sub-l">País d'origen</span><select class="inp" data-l2="pais"><option value="">— Tria —</option>${cOpts.map(o=>`<option>${o}</option>`).join('')}</select></label>
+          <label class="sub-f"><span class="sub-l">País d'origen</span>
+            <input class="inp" data-l2="pais" list="pais-opts-list" placeholder="Tria o escriu-ne un…" autocomplete="off">
+            <datalist id="pais-opts-list">${COUNTRY_OPTS.map(o=>`<option value="${o}">`).join('')}</datalist>
+          </label>
           <label class="sub-f"><span class="sub-l">Temps a Catalunya</span><select class="inp" data-l2="mesos_range"><option value="">— Tria —</option>${tOpts.map(o=>`<option>${o}</option>`).join('')}</select></label>
           <div class="sub-f" data-l2="alfabet_llati"><span class="sub-l">Coneix l'alfabet llatí</span><div class="toggle"><button class="tg" type="button" data-val="true">Sí</button><button class="tg" type="button" data-val="false">No</button></div></div>
           <div class="sub-f" data-l2="alfabetitzacio_l1"><span class="sub-l">Alfabetització en L1</span><div class="toggle"><button class="tg" type="button" data-val="true">Sí</button><button class="tg" type="button" data-val="false">No</button></div></div>
@@ -1405,12 +1532,16 @@
         b.classList.add('on');
       }));
     });
-    host.querySelectorAll('[data-l2="l1"]').forEach(sel => sel.addEventListener('change', () => {
-      const meta = sel.closest('.sub-f').querySelector('[data-l2-meta]');
-      const m = L1_META[sel.value];
-      if(m){ meta.textContent = `família ${m[0]} · alfabet ${m[1]}`; meta.hidden = false; }
-      else { meta.hidden = true; }
-    }));
+    host.querySelectorAll('[data-l2="l1"]').forEach(sel => {
+      const refresh = () => {
+        const meta = sel.closest('.sub-f').querySelector('[data-l2-meta]');
+        const m = L1_META[sel.value];
+        if(m){ meta.textContent = `família ${m[0]} · alfabet ${m[1]}`; meta.hidden = false; }
+        else { meta.hidden = true; }
+      };
+      sel.addEventListener('change', refresh);
+      sel.addEventListener('input', refresh);
+    });
   }
   document.querySelectorAll('[data-dx]').forEach(b => b.addEventListener('click', e => {
     e.preventDefault();
@@ -1578,10 +1709,29 @@
     dxSel.clear();
     renderDx();
 
-    // Pre-omple nom i curs
-    const inputs = form.querySelectorAll('.inp');
-    if (inputs[0]) inputs[0].value = p.name || '';
-    if (inputs[1]) inputs[1].value = p.course || '';
+    // Pre-omple nom, curs i lletra
+    const nomInp   = document.getElementById('p-nom');
+    const cursSel  = document.getElementById('p-curs');
+    const letraInp = document.getElementById('p-lletra');
+    if (nomInp) nomInp.value = p.name || '';
+    if (cursSel) cursSel.selectedIndex = 0;
+    if (letraInp) letraInp.value = '';
+    if (p.course && cursSel) {
+      const raw = String(p.course).trim();
+      // Busca qualsevol opció de curs que aparegui dins raw. Més llarga primer
+      // per evitar falsos positius. Gestiona formats antics ("3r ESO A · 14",
+      // "14 anys · 3r ESO A") i el format nou ("3r ESO").
+      const opts = Array.from(cursSel.options).filter(o => o.value);
+      const sorted = [...opts].sort((a, b) => b.value.length - a.value.length);
+      const found = sorted.find(o => raw.includes(o.value));
+      if (found) {
+        cursSel.value = found.value;
+        const idx = raw.indexOf(found.value);
+        const after = raw.slice(idx + found.value.length).trim();
+        const letterMatch = after.match(/^([A-Za-zÀ-Ú]{1,3})\b/);
+        if (letterMatch && letraInp) letraInp.value = letterMatch[1].toUpperCase();
+      }
+    }
 
     // MECR
     const mecr = p.mecr || (p.chips?.find(c => c.cat === 'lv')?.label?.split(' ')[0]) || 'B1';
@@ -1824,11 +1974,14 @@
   }
 
   function _buildPersonProfile() {
-    const nameInp  = document.querySelector('.mode[data-m="person"] .inp');
-    const courseInp= document.querySelectorAll('.mode[data-m="person"] .inp')[1];
+    const nameInp  = document.getElementById('p-nom');
+    const cursSel  = document.getElementById('p-curs');
+    const letraInp = document.getElementById('p-lletra');
     const mecr     = document.querySelector('.mode[data-m="person"] .lvl.on .lv-code')?.textContent || 'B1';
     const name     = nameInp?.value.trim() || 'Perfil nou';
-    const course   = courseInp?.value.trim() || '';
+    const curs     = cursSel?.value.trim() || '';
+    const letra    = (letraInp?.value || '').trim().toUpperCase();
+    const course   = [curs, letra].filter(Boolean).join(' ');
 
     // Conductes seleccionades
     const behaviors = [];
@@ -2144,7 +2297,7 @@
   if (personCreateBtn) {
     personCreateBtn.addEventListener('click', async e => {
       e.preventDefault();
-      const nameInp = document.querySelector('.mode[data-m="person"] .inp');
+      const nameInp = document.getElementById('p-nom');
       if (!nameInp?.value.trim()) {
         nameInp?.focus();
         if (typeof window.atneToast === 'function') window.atneToast('El nom és obligatori', 'error');
@@ -2326,7 +2479,7 @@
         onHighlightStarted: () => setMode('person')
       },
       { element: '.mode[data-m="person"] .card:nth-child(1)',
-        popover: { title: 'Identificació', description: '<b>Nom</b> i <b>curs/edat</b> de l\'alumne. Serveixen per identificar el perfil a la llista.' },
+        popover: { title: 'Identificació', description: '<b>Nom</b>, <b>curs</b> i <b>lletra</b> de l\'alumne. Serveixen per identificar el perfil a la llista.' },
         onHighlightStarted: () => setMode('person')
       },
       { element: '.mode[data-m="person"] .levels.mecr',
@@ -2410,6 +2563,98 @@
         }
       }
     }, 300);
+  }
+
+  // ── Biblioteca d'adaptacions (obre modal amb llista) ─────────────────────
+  document.getElementById('library-btn')?.addEventListener('click', openLibrary);
+
+  async function openLibrary() {
+    const modal = document.getElementById('library-modal');
+    if (!modal) return;
+    modal.classList.add('on');
+    const list = document.getElementById('library-list');
+    list.innerHTML = '<div class="lib-loading">Carregant biblioteca...</div>';
+    try {
+      const resp = await window.ATNE_LLM.listAdaptations(50);
+      if (!resp || !resp.ok) throw new Error((resp && resp.error) || 'resposta invàlida');
+      const items = resp.items || [];
+      if (items.length === 0) {
+        list.innerHTML = '<div class="lib-empty">Encara no has desat cap adaptació. Al Pas 3, clica <strong>☁ Desar</strong> a la barra superior.</div>';
+        return;
+      }
+      list.innerHTML = items.map(it => {
+        const dt = new Date(it.updated_at);
+        const dateStr = dt.toLocaleDateString('ca-ES', { day: '2-digit', month: 'short', year: 'numeric' })
+          + ' · ' + dt.toLocaleTimeString('ca-ES', { hour: '2-digit', minute: '2-digit' });
+        const title = (it.title || 'Sense títol').replace(/</g, '&lt;');
+        const preview = (it.preview || '').slice(0, 150).replace(/</g, '&lt;');
+        const profile = (it.profile_snapshot && it.profile_snapshot.name) || '';
+        const materia = (it.context_snapshot && it.context_snapshot.materia) || '';
+        return (
+          '<div class="lib-item" data-id="' + it.id + '">' +
+            '<div class="lib-item-head">' +
+              '<div class="lib-item-title">' + title + '</div>' +
+              '<div class="lib-item-meta">' + dateStr +
+                (profile ? ' · ' + profile : '') +
+                (materia ? ' · ' + materia : '') +
+              '</div>' +
+            '</div>' +
+            '<div class="lib-item-preview">' + preview + (preview.length >= 150 ? '…' : '') + '</div>' +
+            '<div class="lib-item-actions">' +
+              '<button class="lib-btn-open" data-id="' + it.id + '">Obrir</button>' +
+              '<button class="lib-btn-delete" data-id="' + it.id + '">Eliminar</button>' +
+            '</div>' +
+          '</div>'
+        );
+      }).join('');
+      bindLibraryActions();
+    } catch (e) {
+      list.innerHTML = '<div class="lib-error">Error carregant biblioteca: ' + (e.message || 'desconegut') + '</div>';
+    }
+  }
+
+  function closeLibrary() {
+    document.getElementById('library-modal')?.classList.remove('on');
+  }
+
+  function bindLibraryActions() {
+    document.querySelectorAll('.lib-btn-open').forEach(btn => {
+      btn.addEventListener('click', () => openAdaptation(parseInt(btn.dataset.id, 10)));
+    });
+    document.querySelectorAll('.lib-btn-delete').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = parseInt(btn.dataset.id, 10);
+        if (!confirm('Eliminar aquesta adaptació de la biblioteca? No es pot desfer.')) return;
+        try {
+          await window.ATNE_LLM.deleteAdaptation(id);
+          btn.closest('.lib-item').remove();
+        } catch (e) {
+          alert('Error eliminant: ' + (e.message || 'desconegut'));
+        }
+      });
+    });
+  }
+
+  async function openAdaptation(id) {
+    try {
+      const resp = await window.ATNE_LLM.getAdaptation(id);
+      if (!resp || !resp.ok || !resp.item) throw new Error('No trobada');
+      const item = resp.item;
+      // Restaura l'estat a localStorage perquè pas3 el reculli en carregar
+      if (item.adapted_html) localStorage.setItem('atne.adapted_text', item.adapted_html);
+      if (item.original_text) localStorage.setItem('atne.current_original_text', item.original_text);
+      if (item.title) localStorage.setItem('atne.doc_title', item.title);
+      if (item.profile_snapshot) localStorage.setItem('atne.current_profile', JSON.stringify(item.profile_snapshot));
+      if (item.context_snapshot) localStorage.setItem('atne.current_context', JSON.stringify(item.context_snapshot));
+      if (item.complements_snapshot) localStorage.setItem('atne.complements', JSON.stringify(item.complements_snapshot));
+      localStorage.setItem('atne.current_adaptation_id', String(item.id));
+      // Marca cache key forçada perquè pas3 no regeneri
+      localStorage.setItem('atne.adapted_cache_key', 'library::' + item.id);
+      // Redirigeix al Pas 3
+      window.location.href = '/ui/atne/pas3.html';
+    } catch (e) {
+      alert('Error obrint: ' + (e.message || 'desconegut'));
+    }
   }
 </script>
 </body>

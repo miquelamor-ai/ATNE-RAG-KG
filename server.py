@@ -520,6 +520,11 @@ async def _atne_startup():
 from routes.drafts import router as _drafts_router  # noqa: E402
 app.include_router(_drafts_router)
 
+# Biblioteca d'adaptacions desades (Pas 3) a `atne_adaptations`.
+# Extret a `routes/adaptations.py` (2026-04-22). 4 endpoints sota /api/adaptations.
+from routes.adaptations import router as _adaptations_router  # noqa: E402
+app.include_router(_adaptations_router)
+
 
 # ── Pàgines HTML ────────────────────────────────────────────────────────────
 
@@ -3027,6 +3032,65 @@ async def adapt_stream(payload: dict = Body(...)):
             "X-Accel-Buffering": "no",
         },
     )
+
+
+# ── Il·lustracions (complement beta) ────────────────────────────────────────
+
+@app.post("/api/illustration")
+async def resolve_illustration(payload: dict = Body(...)):
+    """Resol un marcador [IMATGE: concept_ca] disparant Wikimedia + FLUX en
+    paral·lel. Retorna les dues opcions perquè el docent en triï.
+
+    Body:
+      concept (str, obligatori): concepte curt en català del marcador.
+      context (dict, opcional): {mecr, subject, ...}.
+      style (str, opcional): preset FLUX (default aquarela_storybook).
+      seed (int, opcional): seed compartida pel document (default 42).
+    """
+    from adaptation.illustrations import resolve_marker, STYLE_SPINES, DEFAULT_STYLE
+
+    concept = (payload.get("concept") or "").strip()
+    if not concept:
+        raise HTTPException(status_code=400, detail="falta concept")
+    context = payload.get("context") or {}
+    style = payload.get("style") or DEFAULT_STYLE
+    if style not in STYLE_SPINES:
+        style = DEFAULT_STYLE
+    seed = int(payload.get("seed") or 42)
+
+    resolution = await asyncio.to_thread(
+        resolve_marker, concept, context, style, seed
+    )
+    return resolution.to_dict()
+
+
+@app.post("/api/illustrations/batch")
+async def resolve_illustrations_batch(payload: dict = Body(...)):
+    """Resol tots els marcadors d'un text en paral·lel.
+
+    Body:
+      text (str, obligatori): text adaptat amb marcadors [IMATGE: ...].
+      context (dict, opcional): {mecr, subject, ...}.
+      style (str, opcional): preset FLUX.
+      seed (int, opcional): seed compartida.
+
+    Retorna: {markers: [{start, end, concept, resolution}, ...]}
+    """
+    from adaptation.illustrations import resolve_all_markers, STYLE_SPINES, DEFAULT_STYLE
+
+    text = payload.get("text") or ""
+    if not text:
+        raise HTTPException(status_code=400, detail="falta text")
+    context = payload.get("context") or {}
+    style = payload.get("style") or DEFAULT_STYLE
+    if style not in STYLE_SPINES:
+        style = DEFAULT_STYLE
+    seed = int(payload.get("seed") or 42)
+
+    results = await asyncio.to_thread(
+        resolve_all_markers, text, context, style, seed
+    )
+    return {"markers": results, "count": len(results), "style": style}
 
 
 # ── Exportació ──────────────────────────────────────────────────────────────
