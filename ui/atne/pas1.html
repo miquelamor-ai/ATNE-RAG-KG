@@ -436,9 +436,9 @@
     <div class="logo">A</div>
     <button class="rb" title="Inici" onclick="location.href='/ui/atne/pas1.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 12 9-9 9 9"/><path d="M5 10v10h14V10"/></svg></button>
     <button class="rb on" title="Perfils" onclick="location.href='/ui/atne/pas1.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></button>
-    <button class="rb" title="Textos" onclick="location.href='/ui/atne/pas2.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16M4 12h10M4 19h16"/></svg></button>
+    <button class="rb" id="library-btn-texts" title="Adaptacions desades (biblioteca)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16M4 12h10M4 19h16"/></svg></button>
     <button class="rb" id="rail-saber" title="Saber-ne+" onclick="location.href='/ui/saber-ne.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></button>
-    <button class="rb" title="Biblioteca" onclick="alert('Biblioteca: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h7v12H4zM13 6h7v5h-7zM13 14h7v4h-7z"/></svg></button>
+    <button class="rb" id="library-btn-side" title="La meva biblioteca d'adaptacions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h7v12H4zM13 6h7v5h-7zM13 14h7v4h-7z"/></svg></button>
     <div class="rb sep"></div>
     <button class="rb" title="Preferències" onclick="alert('Preferències: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg></button>
   </nav>
@@ -2640,22 +2640,35 @@
       const resp = await window.ATNE_LLM.getAdaptation(id);
       if (!resp || !resp.ok || !resp.item) throw new Error('No trobada');
       const item = resp.item;
-      // Restaura l'estat a localStorage perquè pas3 el reculli en carregar
+      // Restaura l'estat a localStorage perquè pas3 el reculli en carregar.
+      // IMPORTANT: 'atne.doc_original' és el que pas3 llegeix com a "text
+      // original del docent"; si no el restaurem mostra "Cap text per adaptar".
       if (item.adapted_html) localStorage.setItem('atne.adapted_text', item.adapted_html);
-      if (item.original_text) localStorage.setItem('atne.current_original_text', item.original_text);
+      if (item.original_text) {
+        localStorage.setItem('atne.doc_original', item.original_text);
+        localStorage.setItem('atne.current_original_text', item.original_text);
+      }
       if (item.title) localStorage.setItem('atne.doc_title', item.title);
       if (item.profile_snapshot) localStorage.setItem('atne.current_profile', JSON.stringify(item.profile_snapshot));
       if (item.context_snapshot) localStorage.setItem('atne.current_context', JSON.stringify(item.context_snapshot));
       if (item.complements_snapshot) localStorage.setItem('atne.complements', JSON.stringify(item.complements_snapshot));
       localStorage.setItem('atne.current_adaptation_id', String(item.id));
-      // Marca cache key forçada perquè pas3 no regeneri
-      localStorage.setItem('atne.adapted_cache_key', 'library::' + item.id);
+      // Netejar qualsevol cache_key previ perquè pas3 detecti el bypass per
+      // current_adaptation_id i no validi una clau obsoleta.
+      localStorage.removeItem('atne.adapted_cache_key');
       // Redirigeix al Pas 3
       window.location.href = '/ui/atne/pas3.html';
     } catch (e) {
       alert('Error obrint: ' + (e.message || 'desconegut'));
     }
   }
+
+  // Exposa al global perquè el botó de la sidebar/capçal hi puguin enganxar
+  // listeners des d'onclick inline o addEventListener, i perquè altres pàgines
+  // puguin obrir la biblioteca.
+  window.ATNE_OPEN_LIBRARY = openLibrary;
+  document.getElementById('library-btn-side')?.addEventListener('click', openLibrary);
+  document.getElementById('library-btn-texts')?.addEventListener('click', openLibrary);
 </script>
 </body>
 </html>

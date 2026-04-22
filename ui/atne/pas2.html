@@ -1614,6 +1614,14 @@
     // Desa a localStorage. 2026-04-20: NO esborrem cache aquí — el Pas 3 ja
     // detecta canvis via cacheKey (perfil+títol+text). Si el docent torna a
     // Pas 3 sense canvis, volem reutilitzar l'adaptació i no cremar crides LLM.
+    const prevOriginal = localStorage.getItem('atne.doc_original') || '';
+    const prevTitle    = localStorage.getItem('atne.doc_title') || '';
+    // Si el text o el títol han canviat, és una adaptació NOVA: invalida el
+    // vincle amb cap entry de la biblioteca oberta prèviament (perquè no
+    // sobreescriguem una adaptació desada en clicar "Desar" al Pas 3).
+    if (text !== prevOriginal || title !== prevTitle) {
+      localStorage.removeItem('atne.current_adaptation_id');
+    }
     localStorage.setItem('atne.doc_original', text);
     localStorage.setItem('atne.doc_title', title);
     localStorage.setItem('atne.doc_materia', materia);

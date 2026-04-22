@@ -2671,7 +2671,13 @@
     } catch {}
     try { syncComplementChips(complements); } catch (_e) { console.error(_e); }
 
-    if (cachedKey === cacheKey && cachedText) {
+    // Bypass de cache_key: si venim d'obrir una adaptació desada des de la
+    // biblioteca (atne.current_adaptation_id definit), respectem sempre
+    // l'adapted_text persistit — encara que el cacheKey no coincideixi. Això
+    // evita que pas3 regeneri el text quan el docent reobre una adaptació que
+    // potser ja tenia edicions manuals.
+    const _fromLibrary = !!localStorage.getItem('atne.current_adaptation_id');
+    if ((cachedKey === cacheKey || _fromLibrary) && cachedText) {
       const cachedRaw = localStorage.getItem('atne.adapted_raw') || '';
       // 2026-04-20: si el cache coincideix (mateix perfil + text + títol),
       // el respectem sempre. La invalidació per complements mancants provocava
