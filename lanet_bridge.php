@@ -16,6 +16,7 @@ define("DIR_LIB_DB", '/site/wwwroot/lib/BD/');
 const ALLOWED_ORIGINS = [
     'https://atne-1050342211642.europe-west1.run.app',
     'https://net5.net.fje.edu',
+    'https://apiserveis5.net.fje.edu',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
 ];

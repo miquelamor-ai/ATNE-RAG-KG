@@ -16,7 +16,7 @@
 
   // URL del bridge PHP desplegat a FJE. Canviar si canvia el path al servidor.
   var BRIDGE_URL = (window.ATNE_CONFIG && window.ATNE_CONFIG.bridgeUrl)
-    || 'https://apinet5.net.fje.edu/atne/lanet_bridge.php';
+    || 'https://apiserveis5.net.fje.edu/atne/lanet_bridge.php';
 
   var LS_TOKEN = 'atne_jwt';
   var LS_LOGIN = 'atne_login';
