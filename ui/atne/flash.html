@@ -32,10 +32,11 @@
   /* ── Topbar ────────────────────────────────────────────────── */
   .brand {
     font-family: var(--serif);
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 700;
     color: var(--ink-900);
     text-decoration: none;
+    letter-spacing: -.01em;
   }
   .tb-sep {
     width: 1px;
@@ -45,28 +46,8 @@
     flex: none;
   }
   .tb-spacer { flex: 1; }
-
-  /* Mode toggle (Flash | Taller) */
-  .mode-toggle {
-    display: flex;
-    background: var(--ink-75);
-    border: 1px solid var(--paper-line);
-    border-radius: var(--r-pill);
-    padding: 3px;
-    gap: 2px;
-  }
-  .mt-btn {
-    padding: 5px 14px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--ink-500);
-    border-radius: var(--r-pill);
-    text-decoration: none;
-    transition: background var(--trans-fast), color var(--trans-fast);
-    white-space: nowrap;
-  }
-  .mt-btn:hover { color: var(--ink-800); }
-  .mt-btn.on { background: var(--ink-900); color: #fff; }
+  /* El toggle Flash/Taller reutilitza exactament .steps/.step de shell.css */
+  .steps a.step { text-decoration: none; }
 
   /* ── Main: dos panells ────────────────────────────────────── */
   .flash-main {
@@ -89,9 +70,10 @@
 
   .form-group { display: flex; flex-direction: column; gap: 6px; }
   .form-label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: .07em;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    font-weight: 500;
+    letter-spacing: .12em;
     text-transform: uppercase;
     color: var(--ink-500);
   }
@@ -101,8 +83,8 @@
     background: #fff;
     border: 1px solid rgba(0,0,0,.1);
     border-radius: var(--r-md);
-    padding: 9px 12px;
-    font-size: 14px;
+    padding: 8px 11px;
+    font-size: 13px;
     font-family: var(--ui);
     color: var(--ink-900);
     width: 100%;
@@ -113,38 +95,35 @@
   .form-select {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a93b0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 32px;
+    background-position: right 11px center;
+    padding-right: 30px;
   }
   .form-select:focus, .form-input:focus { border-color: var(--primary); }
 
-  /* Grup / Alumne */
-  .segmented {
-    display: flex;
-    background: var(--ink-75);
-    border: 1px solid rgba(0,0,0,.08);
-    border-radius: var(--r-md);
-    padding: 3px;
-    gap: 3px;
-  }
-  .seg-btn {
-    flex: 1;
-    padding: 7px 8px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--ink-500);
-    border-radius: var(--r-sm);
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    transition: all var(--trans-fast);
-    text-align: center;
-    font-family: var(--ui);
-  }
-  .seg-btn.on { background: var(--primary); color: #fff; }
+  /* El Grup/Alumne reutilitza .steps/.step de shell.css — no cal CSS addicional */
 
   .l1-group { display: none; flex-direction: column; gap: 6px; }
   .l1-group.show { display: flex; }
+
+  /* Complements Flash — idèntic a .cmp-chip del Pas 3 */
+  .comp-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .comp-chip {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 12px 5px 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: var(--ui);
+    color: var(--ink-700);
+    background: rgba(255,255,255,.65);
+    border: 1px solid var(--paper-line);
+    cursor: pointer;
+    transition: .15s;
+  }
+  .comp-chip:hover { background: #fff; border-color: var(--ink-300); }
+  .comp-chip svg { width: 12px; height: 12px; color: var(--ink-500); flex-shrink: 0; }
+  .comp-chip.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .comp-chip.on svg { color: #fff; }
 
   /* Peu enganxat al fons del formulari (botó adaptar sempre visible) */
   .form-footer {
@@ -287,27 +266,33 @@
     color: var(--primary);
   }
 
-  /* Caixa text adaptat */
+  /* Caixa text adaptat — idèntica a .txt-card + .doc-read del Pas 3 */
   .adapted-box {
     background: #fff;
     border: 1px solid var(--paper-line);
-    border-radius: var(--r-xl);
-    padding: 20px 24px;
-    font-size: 15px;
+    border-radius: 14px;
+    padding: 36px 52px 44px;
+    font-family: var(--serif);
+    font-size: 17px;
     line-height: 1.75;
-    color: var(--ink-900);
+    color: var(--ink-800);
     margin-bottom: 16px;
-    box-shadow: var(--sh-xs);
+    box-shadow: 0 8px 24px -14px rgba(16,24,40,.15), 0 2px 6px -2px rgba(16,24,40,.05);
+    position: relative;
   }
+  @media (max-width: 720px) { .adapted-box { padding: 24px 22px 28px; } }
   .adapted-box h1, .adapted-box h2, .adapted-box h3 {
     font-family: var(--serif);
     color: var(--ink-800);
-    margin: .8em 0 .3em;
+    margin: .9em 0 .3em;
+    line-height: 1.25;
   }
+  .adapted-box h1 { font-size: 1.35em; }
+  .adapted-box h2 { font-size: 1.15em; }
   .adapted-box p { margin: .5em 0; }
-  .adapted-box ul, .adapted-box ol { padding-left: 1.5em; margin: .4em 0; }
-  .adapted-box li { margin-bottom: .3em; }
-  .adapted-box strong { font-weight: 600; }
+  .adapted-box ul, .adapted-box ol { padding-left: 1.5em; margin: .5em 0; }
+  .adapted-box li { margin-bottom: .35em; }
+  .adapted-box strong { font-weight: 700; }
 
   /* Seccions desplegables (glossari / preguntes) */
   .comp-section {
@@ -328,7 +313,15 @@
     transition: background var(--trans-fast);
   }
   .comp-header:hover { background: var(--ink-50); }
-  .comp-icon { font-size: 17px; flex: none; }
+  .comp-icon {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: var(--primary-50);
+    color: var(--primary);
+    display: grid; place-items: center;
+    flex-shrink: 0;
+  }
+  .comp-icon svg { width: 15px; height: 15px; }
   .comp-title {
     font-family: var(--serif);
     font-size: 14px;
@@ -419,9 +412,9 @@
       <span class="brand">ATNE</span>
     </a>
     <div class="tb-sep"></div>
-    <nav class="mode-toggle" aria-label="Mode">
-      <a href="/ui/atne/flash.html" class="mt-btn on">⚡ Flash</a>
-      <a href="/ui/atne/pas1.html" class="mt-btn">🔧 Taller</a>
+    <nav class="steps" aria-label="Mode">
+      <a href="/ui/atne/flash.html" class="step on">Flash</a>
+      <a href="/ui/atne/pas1.html" class="step">Taller</a>
     </nav>
     <div class="tb-spacer"></div>
     <button id="docent-av" class="icon-btn avatar-btn" title="Docent">?</button>
@@ -447,18 +440,18 @@
 
       <div class="form-group">
         <label class="form-label">Per a qui</label>
-        <div class="segmented" role="group" aria-label="Destinatari">
-          <button class="seg-btn on" data-tipus="grup">Grup classe</button>
-          <button class="seg-btn" data-tipus="alumne">Un alumne/a</button>
+        <div class="steps" id="tipus-steps" role="group" aria-label="Destinatari">
+          <button class="step on" data-tipus="grup">Grup classe</button>
+          <button class="step" data-tipus="alumne">Un alumne/a</button>
         </div>
       </div>
 
       <div class="form-group">
-        <label class="form-label" id="car-label">Nivell del grup</label>
+        <label class="form-label" id="car-label">Adaptació del text</label>
         <select class="form-select" id="car-grup-sel">
-          <option value="">Al nivell del curs</option>
-          <option value="suport">Necessiten suport</option>
-          <option value="repte">Vol un repte – altes capacitats</option>
+          <option value="">Nivell estàndard del curs</option>
+          <option value="suport">Versió simplificada (més accessible)</option>
+          <option value="repte">Versió enriquida (més profunditat)</option>
         </select>
         <select class="form-select" id="car-sel" style="display:none">
           <option value="">Al nivell del curs</option>
@@ -476,6 +469,24 @@
         <label class="form-label" for="l1-inp">Llengua materna de l'alumne/a</label>
         <input class="form-input" id="l1-inp" type="text"
                placeholder="p. ex. àrab, amazic, urdú…" maxlength="60">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Complements</label>
+        <div class="comp-chips" id="comp-chips">
+          <button class="comp-chip on" data-comp="glossari">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            Glossari
+          </button>
+          <button class="comp-chip on" data-comp="preguntes">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+            Preguntes
+          </button>
+          <button class="comp-chip" data-comp="resum">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Resum
+          </button>
+        </div>
       </div>
 
       <div class="form-group">
@@ -520,7 +531,7 @@
 
         <div class="comp-section" id="sec-glossari">
           <div class="comp-header" onclick="toggleSection('glossari')">
-            <span class="comp-icon">📖</span>
+            <span class="comp-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
             <span class="comp-title">Glossari</span>
             <span class="comp-status" id="gl-status">Generant…</span>
             <svg class="comp-chevron" viewBox="0 0 16 16" fill="none" width="16" height="16">
@@ -532,7 +543,7 @@
 
         <div class="comp-section" id="sec-preguntes">
           <div class="comp-header" onclick="toggleSection('preguntes')">
-            <span class="comp-icon">❓</span>
+            <span class="comp-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></span>
             <span class="comp-title">Preguntes de comprensió</span>
             <span class="comp-status" id="pr-status">Generant…</span>
             <svg class="comp-chevron" viewBox="0 0 16 16" fill="none" width="16" height="16">
@@ -540,6 +551,18 @@
             </svg>
           </div>
           <div class="comp-body" id="preguntes-body"></div>
+        </div>
+
+        <div class="comp-section" id="sec-resum" style="display:none">
+          <div class="comp-header" onclick="toggleSection('resum')">
+            <span class="comp-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span>
+            <span class="comp-title">Resum</span>
+            <span class="comp-status" id="rs-status">Generant…</span>
+            <svg class="comp-chevron" viewBox="0 0 16 16" fill="none" width="16" height="16">
+              <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="comp-body" id="resum-body"></div>
         </div>
 
       </div>
@@ -646,8 +669,11 @@
   var resultBadge  = document.getElementById('result-badge');
   var glossariBody = document.getElementById('glossari-body');
   var preguntesBody= document.getElementById('preguntes-body');
+  var resumBody    = document.getElementById('resum-body');
   var glStatus     = document.getElementById('gl-status');
   var prStatus     = document.getElementById('pr-status');
+  var rsStatus     = document.getElementById('rs-status');
+  var secResum     = document.getElementById('sec-resum');
   var actionBar    = document.getElementById('action-bar');
 
   // ── Seg toggle Grup/Alumne ───────────────────────────────────────────────────
@@ -667,12 +693,28 @@
     }
   }
 
-  document.querySelectorAll('.seg-btn').forEach(function (btn) {
+  document.querySelectorAll('#tipus-steps .step').forEach(function (btn) {
     btn.addEventListener('click', function () {
-      document.querySelectorAll('.seg-btn').forEach(function (b) { b.classList.remove('on'); });
+      document.querySelectorAll('#tipus-steps .step').forEach(function (b) { b.classList.remove('on'); });
       btn.classList.add('on');
       tipusActual = btn.dataset.tipus;
       updateTipusUI();
+    });
+  });
+
+  // ── Complements ──────────────────────────────────────────────────────────────
+  var activeComps = new Set(['glossari', 'preguntes']);
+
+  document.querySelectorAll('.comp-chip').forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      var comp = chip.dataset.comp;
+      if (activeComps.has(comp)) {
+        activeComps.delete(comp);
+        chip.classList.remove('on');
+      } else {
+        activeComps.add(comp);
+        chip.classList.add('on');
+      }
     });
   });
 
@@ -738,33 +780,16 @@
     if (sec) sec.classList.toggle('open');
   };
 
-  // ── Missatges de càrrega rotatius ────────────────────────────────────────────
-  var LOADING_MSGS = [
-    'Llegint el text…',
-    'Analitzant el perfil…',
-    'Adaptant el contingut…',
-    'Generant el glossari…',
-    'Preparant les preguntes…',
-    'Donant els últims retocs…',
-  ];
-  var loadingInterval = null;
-  var lastModelName   = '';
+  // ── Gestió de càrrega ────────────────────────────────────────────────────────
+  var lastModelName = '';
 
   function startLoadingAnimation() {
-    var idx = 0;
     lastModelName = '';
-    loadingMsg.textContent = LOADING_MSGS[0];
+    loadingMsg.textContent = 'Adaptant el text…';
     loadingSub.textContent = '';
-    if (loadingInterval) clearInterval(loadingInterval);
-    loadingInterval = setInterval(function () {
-      idx = (idx + 1) % LOADING_MSGS.length;
-      loadingMsg.textContent = LOADING_MSGS[idx];
-    }, 2500);
   }
 
-  function stopLoadingAnimation() {
-    if (loadingInterval) { clearInterval(loadingInterval); loadingInterval = null; }
-  }
+  function stopLoadingAnimation() { /* no-op, es manté per compatibilitat */ }
 
   // ── Adaptar ──────────────────────────────────────────────────────────────────
   var currentAbort = null;
@@ -798,14 +823,15 @@
     var docentId = '';
     try { docentId = localStorage.getItem('atne.docent_id') || ''; } catch (e) { /* */ }
 
-    lastPayload = { text: text, curs: curs, adaptacio: adaptacio, perfils: perfils, l1: l1, tipus: tipusActual, docent_id: docentId };
+    lastPayload = { text: text, curs: curs, adaptacio: adaptacio, perfils: perfils, l1: l1, tipus: tipusActual, complements: Array.from(activeComps), docent_id: docentId };
     resultBadge.textContent = badge;
-    glStatus.textContent = 'Generant…';
-    glStatus.className = 'comp-status';
-    prStatus.textContent = 'Generant…';
-    prStatus.className = 'comp-status';
+    glStatus.textContent = 'Generant…'; glStatus.className = 'comp-status';
+    prStatus.textContent = 'Generant…'; prStatus.className = 'comp-status';
+    rsStatus.textContent = 'Generant…'; rsStatus.className = 'comp-status';
+    secResum.style.display = 'none';
     document.getElementById('sec-glossari').classList.remove('open');
     document.getElementById('sec-preguntes').classList.remove('open');
+    document.getElementById('sec-resum').classList.remove('open');
 
     if (currentAbort) currentAbort.abort();
     currentAbort = new AbortController();
@@ -870,15 +896,19 @@
       adaptedEl.innerHTML = md2html(ev.adapted || '');
       if (ev.glossari) {
         glossariBody.innerHTML = md2html(ev.glossari);
-        glStatus.textContent = '✓ Generat';
-        glStatus.className = 'comp-status ok';
+        glStatus.textContent = '✓ Generat'; glStatus.className = 'comp-status ok';
         document.getElementById('sec-glossari').classList.add('open');
       }
       if (ev.preguntes) {
         preguntesBody.innerHTML = md2html(ev.preguntes);
-        prStatus.textContent = '✓ Generat';
-        prStatus.className = 'comp-status ok';
+        prStatus.textContent = '✓ Generat'; prStatus.className = 'comp-status ok';
         document.getElementById('sec-preguntes').classList.add('open');
+      }
+      if (ev.resum) {
+        resumBody.innerHTML = md2html(ev.resum);
+        rsStatus.textContent = '✓ Generat'; rsStatus.className = 'comp-status ok';
+        secResum.style.display = '';
+        document.getElementById('sec-resum').classList.add('open');
       }
       resetBtn();
     } else if (ev.type === 'error') {

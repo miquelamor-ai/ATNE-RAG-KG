@@ -3570,7 +3570,10 @@ def _build_flash_system_prompt(
     nivell: str,
     perfils: list[str],
     l1: str = "",
+    complements: list[str] | None = None,
 ) -> str:
+    if complements is None:
+        complements = ["glossari", "preguntes"]
     p = (
         "Ets un assistent pedagògic especialitzat en adaptació de textos educatius en català.\n"
         "Adapta el text que t'enviaré.\n"
@@ -3584,60 +3587,61 @@ def _build_flash_system_prompt(
         for pf in perfils:
             if pf in _FLASH_PERFIL_MAP:
                 p += f"- {_FLASH_PERFIL_MAP[pf]}\n"
-    # Glossari i preguntes sempre actius al Flash
-    p += "\nCOMPLEMENTS (afegeix al final del text adaptat, separats amb un títol clar en MAJÚSCULES):\n"
-    if "nouvingut" in perfils and l1:
-        p += f"- GLOSSARI: 5-8 termes clau del text, definició breu adaptada al nivell i, entre parèntesis, la traducció a {l1}.\n"
-    else:
-        p += "- GLOSSARI: 5-8 termes clau del text amb definició breu adaptada al nivell indicat.\n"
-    p += "- PREGUNTES DE COMPRENSIÓ: 3-5 preguntes graduades (comprensió literal → aplicació → reflexió crítica).\n"
+    comp_lines = []
+    if "glossari" in complements:
+        if "nouvingut" in perfils and l1:
+            comp_lines.append(
+                f"- GLOSSARI: 5-8 termes clau, definició breu adaptada al nivell "
+                f"i, entre parèntesis, la traducció a {l1}."
+            )
+        else:
+            comp_lines.append("- GLOSSARI: 5-8 termes clau del text amb definició breu adaptada al nivell.")
+    if "preguntes" in complements:
+        comp_lines.append(
+            "- PREGUNTES DE COMPRENSIÓ: 3-5 preguntes graduades "
+            "(comprensió literal → aplicació → reflexió crítica)."
+        )
+    if "resum" in complements:
+        comp_lines.append("- RESUM: 3-5 frases que resumeixin les idees principals del text adaptat.")
+    if comp_lines:
+        p += "\nCOMPLEMENTS (afegeix al final del text adaptat, separats amb un títol clar en MAJÚSCULES):\n"
+        p += "\n".join(comp_lines) + "\n"
     return p
 
 
-def _parse_flash_response(raw: str) -> tuple[str, str, str]:
-    """Separa el text adaptat, glossari i preguntes d'una resposta Flash.
+def _parse_flash_response(raw: str) -> dict:
+    """Separa el text adaptat i els complements (glossari, preguntes, resum).
 
-    El prompt demana que el LLM afegeixi 'GLOSSARI' i 'PREGUNTES DE COMPRENSIÓ'
-    en MAJÚSCULES al final. Busquem els delimitadors i tallem.
-    Retorna (adapted, glossari, preguntes). Qualsevol part pot ser ''.
+    El prompt demana títols en MAJÚSCULES al final. Retorna un dict amb claus
+    adapted, glossari, preguntes, resum. Qualsevol valor pot ser ''.
     """
     import re
     text = raw.strip()
-    glossari = ""
-    preguntes = ""
 
-    # Delimitadors esperats (el LLM pot usar variacions)
-    gl_pat = re.compile(
-        r"\n\s*GLOSSARI[:\s]*\n",
-        re.IGNORECASE,
-    )
-    pr_pat = re.compile(
-        r"\n\s*PREGUNTES\s+DE\s+COMPRENSIÓ[:\s]*\n",
-        re.IGNORECASE,
-    )
+    # Patrons de tall (ordre no garantit pel LLM)
+    patterns = {
+        "glossari":  re.compile(r"\n\s*GLOSSARI[:\s]*\n", re.IGNORECASE),
+        "preguntes": re.compile(r"\n\s*PREGUNTES\s+DE\s+COMPRENSIÓ[:\s]*\n", re.IGNORECASE),
+        "resum":     re.compile(r"\n\s*RESUM[:\s]*\n", re.IGNORECASE),
+    }
 
-    gl_m = gl_pat.search(text)
-    pr_m = pr_pat.search(text)
+    # Troba totes les marques i ordena per posició
+    marks = []  # (pos_start, pos_end, key)
+    for key, pat in patterns.items():
+        m = pat.search(text)
+        if m:
+            marks.append((m.start(), m.end(), key))
+    marks.sort()
 
-    if gl_m and pr_m:
-        if gl_m.start() < pr_m.start():
-            adapted  = text[:gl_m.start()].strip()
-            glossari = text[gl_m.end():pr_m.start()].strip()
-            preguntes = text[pr_m.end():].strip()
-        else:
-            adapted   = text[:pr_m.start()].strip()
-            preguntes = text[pr_m.end():gl_m.start()].strip()
-            glossari  = text[gl_m.end():].strip()
-    elif gl_m:
-        adapted  = text[:gl_m.start()].strip()
-        glossari = text[gl_m.end():].strip()
-    elif pr_m:
-        adapted   = text[:pr_m.start()].strip()
-        preguntes = text[pr_m.end():].strip()
-    else:
-        adapted = text
+    result = {"adapted": text, "glossari": "", "preguntes": "", "resum": ""}
+    if not marks:
+        return result
 
-    return adapted, glossari, preguntes
+    result["adapted"] = text[:marks[0][0]].strip()
+    for i, (start, end, key) in enumerate(marks):
+        next_start = marks[i + 1][0] if i + 1 < len(marks) else len(text)
+        result[key] = text[end:next_start].strip()
+    return result
 
 
 @app.post("/api/adapt-flash")
@@ -3653,20 +3657,21 @@ async def adapt_flash(payload: dict = Body(...)):
       tipus (str):        grup | alumne  (meta-dada)
       docent_id (str):    per desar a history
     """
-    text      = (payload.get("text") or "").strip()
-    curs      = payload.get("curs", "eso_12")
-    adaptacio = payload.get("adaptacio", "al_nivell")
-    perfils   = payload.get("perfils") or []
-    l1        = (payload.get("l1") or "").strip()
-    tipus     = payload.get("tipus", "grup")
-    docent_id = (payload.get("docent_id") or "").strip()
+    text        = (payload.get("text") or "").strip()
+    curs        = payload.get("curs", "eso_12")
+    adaptacio   = payload.get("adaptacio", "al_nivell")
+    perfils     = payload.get("perfils") or []
+    l1          = (payload.get("l1") or "").strip()
+    tipus       = payload.get("tipus", "grup")
+    complements = payload.get("complements") or ["glossari", "preguntes"]
+    docent_id   = (payload.get("docent_id") or "").strip()
 
     if not text:
         return JSONResponse({"error": "El text és buit."}, status_code=400)
 
     nivell        = _FLASH_CURS_MECR.get((curs, adaptacio), "B1")
     model_id      = _model_for("adapt_flash")
-    system_prompt = _build_flash_system_prompt(nivell, perfils, l1)
+    system_prompt = _build_flash_system_prompt(nivell, perfils, l1, complements)
     t0 = __import__("time").time()
 
     async def gen():
@@ -3682,10 +3687,14 @@ async def adapt_flash(payload: dict = Body(...)):
             yield f"data: {json.dumps({'type': 'error', 'msg': str(exc)}, ensure_ascii=False)}\n\n"
             return
 
-        adapted, glossari, preguntes = _parse_flash_response(raw)
+        parts = _parse_flash_response(raw)
+        adapted   = parts["adapted"]
+        glossari  = parts["glossari"]
+        preguntes = parts["preguntes"]
+        resum     = parts.get("resum", "")
         duration_ms = int((__import__("time").time() - t0) * 1000)
 
-        yield f"data: {json.dumps({'type': 'result', 'adapted': adapted, 'glossari': glossari, 'preguntes': preguntes}, ensure_ascii=False)}\n\n"
+        yield f"data: {json.dumps({'type': 'result', 'adapted': adapted, 'glossari': glossari, 'preguntes': preguntes, 'resum': resum}, ensure_ascii=False)}\n\n"
         yield f"data: {json.dumps({'type': 'done'}, ensure_ascii=False)}\n\n"
 
         # Desa a history en background (no bloqueja el SSE)
