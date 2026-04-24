@@ -1,101 +1,82 @@
 /*
- * ATNE — Auth client
+ * ATNE — Auth client (lanet)
  *
- * Gestiona la sessió de Supabase (Google OAuth, restringit a @fje.edu):
- *  - Captura l'access_token del fragment d'URL després del login
- *  - El desa a localStorage i l'envia com Authorization: Bearer a cada fetch /api/*
- *  - Si no hi ha token vàlid, redirigeix a Supabase OAuth
- *  - Si un endpoint retorna 401, forceja re-login
+ * Flux:
+ *  1. Si no hi ha token → redirigeix a lanet_bridge.php (FJE)
+ *  2. El bridge valida el cookie tokenNet i redirigeix de tornada amb
+ *     ?atne_token=XXX&atne_login=mamor a la URL
+ *  3. Guardem token i login a localStorage
+ *  4. Monkey-patching de fetch: afegeix Authorization: Bearer a /api/*
+ *  5. En cas de 401 → redirigeix al bridge de nou
  *
  * Carregar com a primer <script> del <head>, sense defer/async.
  */
 (function () {
   'use strict';
 
-  var SUPABASE_URL = 'https://qlftykfqjwaxucoeqcjv.supabase.co';
+  // URL del bridge PHP desplegat a FJE. Canviar si canvia el path al servidor.
+  var BRIDGE_URL = (window.ATNE_CONFIG && window.ATNE_CONFIG.bridgeUrl)
+    || 'https://apinet5.net.fje.edu/atne/lanet_bridge.php';
+
   var LS_TOKEN = 'atne_jwt';
-  var LS_EMAIL = 'atne_user_email';
-
-  function parseJwt(token) {
-    try {
-      var base = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-      while (base.length % 4) base += '=';
-      return JSON.parse(decodeURIComponent(escape(atob(base))));
-    } catch (e) {
-      return null;
-    }
-  }
-
-  function isValid(token) {
-    if (!token) return false;
-    var p = parseJwt(token);
-    if (!p || !p.exp) return false;
-    return p.exp > Math.floor(Date.now() / 1000) + 30;
-  }
+  var LS_LOGIN = 'atne_login';
 
   function clearSession() {
     try {
       localStorage.removeItem(LS_TOKEN);
-      localStorage.removeItem(LS_EMAIL);
+      localStorage.removeItem(LS_LOGIN);
+      localStorage.removeItem('atne.docent_id');
+      localStorage.removeItem('atne.docent_alias');
     } catch (e) { /* ignore */ }
   }
 
-  function redirectToLogin() {
+  function redirectToBridge() {
     clearSession();
     var back = location.origin + location.pathname + location.search;
-    // prompt=select_account força que Google mostri sempre el selector de
-    // comptes, evitant que auto-triï un Gmail personal obert al navegador
-    // (que seria rebutjat per la restricció Internal @fje.edu).
-    location.href = SUPABASE_URL
-      + '/auth/v1/authorize?provider=google'
-      + '&redirect_to=' + encodeURIComponent(back)
-      + '&prompt=select_account';
+    location.href = BRIDGE_URL + '?back=' + encodeURIComponent(back);
   }
 
-  // 1. Captura el token del fragment d'URL (després del redirect de Supabase)
-  if (location.hash && location.hash.indexOf('access_token=') !== -1) {
-    var params = new URLSearchParams(location.hash.substring(1));
-    var tok = params.get('access_token');
-    if (tok) {
-      var payload = parseJwt(tok);
-      var email = payload && payload.email ? String(payload.email).toLowerCase() : '';
-      if (email.indexOf('@fje.edu') !== -1) {
-        try {
-          localStorage.setItem(LS_TOKEN, tok);
-          localStorage.setItem(LS_EMAIL, email);
-        } catch (e) { /* ignore */ }
-      }
-      // Netegem el hash per no deixar el token exposat a la barra
-      try {
-        history.replaceState(null, '', location.pathname + location.search);
-      } catch (e) { /* ignore */ }
-    }
+  // 1. Captura token retornat pel bridge (?atne_token=...&atne_login=...)
+  var urlParams = new URLSearchParams(location.search);
+  var tokenFromBridge = urlParams.get('atne_token');
+  var loginFromBridge = urlParams.get('atne_login');
+  if (tokenFromBridge && loginFromBridge) {
+    try {
+      localStorage.setItem(LS_TOKEN, tokenFromBridge);
+      localStorage.setItem(LS_LOGIN, loginFromBridge);
+    } catch (e) { /* ignore */ }
+    // Neteja els paràmetres de la URL (no deixar token exposat)
+    try {
+      var clean = new URL(location.href);
+      clean.searchParams.delete('atne_token');
+      clean.searchParams.delete('atne_login');
+      history.replaceState(null, '', clean.pathname + (clean.search || ''));
+    } catch (e) { /* ignore */ }
   }
 
   // 2. Llegim el token actual de localStorage
   var currentToken = null;
-  try { currentToken = localStorage.getItem(LS_TOKEN); } catch (e) { /* ignore */ }
+  var currentLogin = null;
+  try {
+    currentToken = localStorage.getItem(LS_TOKEN);
+    currentLogin = localStorage.getItem(LS_LOGIN);
+  } catch (e) { /* ignore */ }
 
-  // 3. Si no n'hi ha o ha expirat, redirigim a login
-  if (!isValid(currentToken)) {
-    redirectToLogin();
-    // Aturem l'execució de scripts posteriors (ens n'anem de pàgina)
-    throw new Error('ATNE: redirigint a login');
+  // 3. Si no hi ha token, redirigim al bridge
+  if (!currentToken || !currentLogin) {
+    redirectToBridge();
+    throw new Error('ATNE: redirigint a lanet');
   }
 
-  // 4. Exposem l'API d'auth
-  var email = null;
-  try { email = localStorage.getItem(LS_EMAIL); } catch (e) { /* ignore */ }
+  // 4. Exposem l'API d'auth (mateixa interfície que l'anterior per Supabase)
   window.ATNE_AUTH = {
-    token: currentToken,
-    email: email,
-    logout: function () { redirectToLogin(); },
+    token:  currentToken,
+    login:  currentLogin,
+    email:  currentLogin,   // àlies de compatibilitat
+    logout: function () { redirectToBridge(); },
   };
 
-  // 5. Pinta l'avatar del docent (#docent-av) amb la inicial de l'alias i,
-  // si la pàgina no té menú natiu (#admin-menu), l'injecta + estils i lliga
-  // els handlers de toggle i logout. pas1 ja té HTML i CSS propis i la seva
-  // pròpia funció _updateDocentBtn — aquest hook només completa pas2 i pas3.
+  // 5. Pinta l'avatar del docent (#docent-av)
   var MENU_CSS = [
     '.admin-menu{position:absolute;top:calc(100% + 6px);right:0;background:#fff;',
     'border:1px solid var(--paper-line,#e4e0da);border-radius:var(--r-md,8px);',
@@ -138,7 +119,6 @@
   }
 
   function attachMenuHandlers(btn, menu, alias) {
-    // Assegura que el contenidor del botó és posicionat per ancorar el menú.
     var parent = btn.parentElement;
     if (parent && getComputedStyle(parent).position === 'static') {
       parent.style.position = 'relative';
@@ -149,10 +129,6 @@
     if (logout) {
       logout.onclick = function () {
         if (confirm('Estàs identificat/da com a ' + alias + '.\nVols sortir i canviar d\'usuari?')) {
-          try {
-            localStorage.removeItem('atne.docent_id');
-            localStorage.removeItem('atne.docent_alias');
-          } catch (e) { /* ignore */ }
           if (window.ATNE_AUTH && typeof window.ATNE_AUTH.logout === 'function') {
             window.ATNE_AUTH.logout();
           } else {
@@ -161,7 +137,6 @@
         }
       };
     }
-    // Mostra enllaços admin si el docent té rol admin (best-effort).
     var did = '';
     try { did = localStorage.getItem('atne.docent_id') || ''; } catch (e) { /* ignore */ }
     if (did) {
@@ -180,23 +155,21 @@
   function paintAvatar() {
     var btn = document.getElementById('docent-av');
     if (!btn) return;
-    // Si pas1 ja té el seu menú propi (amb lògica _updateDocentBtn), no fem res.
     if (document.getElementById('admin-menu')) return;
 
     var alias = '';
     try { alias = localStorage.getItem('atne.docent_alias') || ''; } catch (e) { /* ignore */ }
-    var em = (window.ATNE_AUTH && window.ATNE_AUTH.email) || '';
-    var displayName = alias || em;
+    var displayName = alias || currentLogin || '';
     if (displayName) {
       btn.textContent = displayName[0].toUpperCase();
-      btn.title = 'Docent · ' + (em || alias);
+      btn.title = 'Docent · ' + displayName;
     }
-    // Injecta menú i handlers per a pas2/pas3.
     ensureMenuStyles();
     var menu = buildMenu(displayName);
     btn.insertAdjacentElement('afterend', menu);
     attachMenuHandlers(btn, menu, displayName);
   }
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', paintAvatar);
   } else {
@@ -219,13 +192,9 @@
     }
     return originalFetch(input, init).then(function (resp) {
       if (isApi && resp.status === 401) {
-        // /api/admin/* i /api/audit/* tenen auth pròpia (HMAC cookie) que
-        // gestiona la mateixa pàgina admin/audit. Un 401 allà NO vol dir
-        // sessió Supabase expirada — és que no hi ha cookie d'admin.
         var isAdminPath = url.indexOf('/api/admin/') >= 0 || url.indexOf('/api/audit/') >= 0;
         if (!isAdminPath) {
-          // Sessió Supabase expirada o invàlida → re-login Google
-          redirectToLogin();
+          redirectToBridge();
         }
       }
       return resp;

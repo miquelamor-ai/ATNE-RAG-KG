@@ -1898,11 +1898,11 @@
 
     if (_docentId()) { _updateDocentBtn(); _loadCustomProfiles(); return; }
 
-    async function doLogin() {
-      const email = (emailInp.value || '').trim().toLowerCase();
+    async function doLogin(loginOverride) {
+      const login = loginOverride || (emailInp.value || '').trim().toLowerCase();
       errEl.textContent = '';
-      if (!FJE_RE.test(email)) {
-        errEl.textContent = "Ha de ser del format nom.cognom@fje.edu";
+      if (!login) {
+        errEl.textContent = "Introdueix el teu identificador";
         return;
       }
       btn.disabled = true;
@@ -1911,7 +1911,7 @@
         const r = await fetch('/api/docent/login', {
           method: 'POST',
           headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({email})
+          body: JSON.stringify({login})
         });
         const d = await r.json();
         if (!d.ok) { errEl.textContent = d.error || 'Error desconegut'; btn.disabled = false; btn.textContent = 'Entrar'; return; }
@@ -1927,13 +1927,12 @@
       }
     }
 
-    btn.addEventListener('click', doLogin);
+    btn.addEventListener('click', () => doLogin());
     emailInp.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
-    // Auto-login si ja tenim l'email verificat de Supabase
-    if (window.ATNE_AUTH && window.ATNE_AUTH.email) {
-      emailInp.value = window.ATNE_AUTH.email;
-      doLogin();
+    // Auto-login amb el login lanet (ja autenticat pel bridge)
+    if (window.ATNE_AUTH && window.ATNE_AUTH.login) {
+      doLogin(window.ATNE_AUTH.login);
     } else {
       overlay.classList.remove('hidden');
       setTimeout(() => emailInp?.focus(), 100);

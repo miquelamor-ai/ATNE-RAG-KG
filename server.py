@@ -340,21 +340,24 @@ print(f"[ATNE] Model actiu: {ATNE_MODEL}")
 
 app = FastAPI(title="ATNE", version="0.1.0")
 
-# ── Auth (Supabase JWT + domini @fje.edu) ──────────────────────────────────
+# ── Auth (lanet — tokenNet via bridge PHP) ─────────────────────────────────
 #
 # Middleware ASGI pur (no BaseHTTPMiddleware) per compatibilitat amb les
-# respostes streaming (SSE del pipeline LLM). Valida el JWT HS256 emès per
-# Supabase a partir del Legacy JWT Secret. Rebutja qui no tingui email
-# acabat en @fje.edu. Els endpoints públics i els /api/admin/* (auth pròpia
-# via HMAC cookie) queden exempts.
+# respostes streaming (SSE del pipeline LLM). Valida el token lanet contra
+# el bridge PHP de FJE (LANET_BRIDGE_URL). Els endpoints públics i els
+# /api/admin/* (auth pròpia via HMAC cookie) queden exempts.
+#
+# Flux:
+#   Frontend → redirigeix a lanet_bridge.php (FJE) → torna amb token a URL
+#   → JS guarda token a localStorage → envia com Authorization: Bearer
+#   → aquest middleware valida el token via POST al bridge PHP
 
-SUPABASE_JWT_SECRET = os.getenv("SUPABASE_JWT_SECRET", "")
+LANET_BRIDGE_URL = os.getenv("LANET_BRIDGE_URL", "")
 
-# Cache simple de tokens validats contra Supabase per evitar una crida HTTP
-# a cada request. Key = hash del token; value = (expires_at_monotonic, email).
-# TTL curt (2 min) perquè en cas de logout/revocació la invalidació arribi.
-_ATNE_AUTH_CACHE: dict[str, tuple[float, str]] = {}
-_ATNE_AUTH_CACHE_TTL = 120.0
+# Cache simple: Key = token; value = (expires_at_monotonic, login).
+# TTL 2 min per limitar crides al bridge sense deixar tokens revocats actius.
+_LANET_AUTH_CACHE: dict[str, tuple[float, str]] = {}
+_LANET_AUTH_CACHE_TTL = 120.0
 
 ATNE_PUBLIC_API_PATHS = {
     "/api/health",
@@ -366,53 +369,46 @@ def _atne_is_public_path(path: str) -> bool:
         return True
     if path in ATNE_PUBLIC_API_PATHS:
         return True
-    # /api/admin/* i /api/audit/* mantenen auth pròpia (cookie HMAC admin)
     if path.startswith("/api/admin/") or path.startswith("/api/audit/"):
         return True
     return False
 
 
-def _atne_validate_token_via_supabase(token: str) -> tuple[int, str]:
-    """Valida el token fent una crida a Supabase /auth/v1/user.
+def _lanet_validate_token(token: str) -> tuple[int, str]:
+    """Valida el token lanet via POST al bridge PHP.
 
-    Retorna (status_code, email_lowercase). status_code:
-      200 → email vàlid (i s'ha retornat)
-      401 → token rebutjat per Supabase
-      503 → no es pot contactar Supabase
+    Retorna (status_code, login). status_code:
+      200 → token vàlid, login retornat
+      401 → token rebutjat pel bridge
+      503 → bridge no configurat o no accessible
     """
-    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+    if not LANET_BRIDGE_URL:
         return 503, ""
+    import time as _time
+    now = _time.monotonic()
+    cached = _LANET_AUTH_CACHE.get(token)
+    if cached and cached[0] > now:
+        return 200, cached[1]
     try:
-        import time as _time
-        now = _time.monotonic()
-        # Cache hit?
-        cached = _ATNE_AUTH_CACHE.get(token)
-        if cached and cached[0] > now:
-            return 200, cached[1]
-        r = requests.get(
-            f"{SUPABASE_URL}/auth/v1/user",
-            headers={
-                "apikey": SUPABASE_ANON_KEY,
-                "Authorization": f"Bearer {token}",
-            },
+        r = requests.post(
+            LANET_BRIDGE_URL,
+            json={"token": token},
             timeout=5,
         )
         if r.status_code != 200:
             return 401, ""
         data = r.json()
-        email = (data.get("email") or "").lower()
-        if not email:
+        login = (data.get("login") or "").strip()
+        if not login:
             return 401, ""
-        _ATNE_AUTH_CACHE[token] = (now + _ATNE_AUTH_CACHE_TTL, email)
-        # Prevenció de fugida de memòria: purga entrades expirades si el cache
-        # creix molt. Operació O(n) però infreqüent.
-        if len(_ATNE_AUTH_CACHE) > 500:
-            expired = [k for k, (exp, _) in _ATNE_AUTH_CACHE.items() if exp <= now]
+        _LANET_AUTH_CACHE[token] = (now + _LANET_AUTH_CACHE_TTL, login)
+        if len(_LANET_AUTH_CACHE) > 500:
+            expired = [k for k, (exp, _) in _LANET_AUTH_CACHE.items() if exp <= now]
             for k in expired:
-                _ATNE_AUTH_CACHE.pop(k, None)
-        return 200, email
+                _LANET_AUTH_CACHE.pop(k, None)
+        return 200, login
     except Exception as e:
-        print(f"[ATNE] Auth: error contactant Supabase: {e}")
+        print(f"[ATNE:auth] Error contactant bridge lanet: {e}")
         return 503, ""
 
 
@@ -426,11 +422,18 @@ class _AtneAuthMiddleware:
             return
         path = scope.get("path", "")
         method = scope.get("method", "GET")
-        # Preflight CORS (OPTIONS) el gestiona CORSMiddleware; passa de llarg.
         if method == "OPTIONS" or _atne_is_public_path(path):
             await self.app(scope, receive, send)
             return
-        if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+        # Bypass per a tests locals automatitzats (ATNE_TEST_BYPASS_AUTH=1).
+        if os.getenv("ATNE_TEST_BYPASS_AUTH") == "1":
+            client_ip = (scope.get("client") or ("", 0))[0]
+            if client_ip in ("127.0.0.1", "::1"):
+                scope.setdefault("state", {})
+                scope["state"]["user_login"] = "test_docent"
+                await self.app(scope, receive, send)
+                return
+        if not LANET_BRIDGE_URL:
             await self._send_error(send, 503, "Auth no configurada al servidor")
             return
         auth_header = ""
@@ -442,22 +445,18 @@ class _AtneAuthMiddleware:
             await self._send_error(send, 401, "No autenticat")
             return
         token = auth_header[7:].strip()
-        # Validació delegada a Supabase (compatible amb HS256 i claus
-        # asimètriques modernes). Inclou cache de 2 min per reduir latència.
-        status, email = _atne_validate_token_via_supabase(token)
+        status, login = _lanet_validate_token(token)
         if status == 503:
             await self._send_error(send, 503, "No es pot validar sessió")
             return
         if status != 200:
             await self._send_error(send, 401, "Token invàlid o expirat")
             return
-        if not email.endswith("@fje.edu"):
-            await self._send_error(send, 403, "Accés restringit a comptes @fje.edu")
-            return
         scope.setdefault("state", {})
-        scope["state"]["user_email"] = email
-        # Traçabilitat del pilot: qui fa cada crida (stdout → Cloud Logging)
-        print(f"[ATNE:auth] {email} {method} {path}", flush=True)
+        scope["state"]["user_login"] = login
+        # Mantenim user_email com a àlies per compatibilitat amb codi existent
+        scope["state"]["user_email"] = login
+        print(f"[ATNE:auth] {login} {method} {path}", flush=True)
         await self.app(scope, receive, send)
 
     async def _send_error(self, send, status: int, msg: str):
@@ -4711,33 +4710,32 @@ async def eval_v2debug():
 
 # ── Docents i perfils personalitzats ────────────────────────────────────────
 
-def _docent_id_from_email(email: str) -> str:
-    """SHA256(email lowercase) → 16 hex chars."""
-    import hashlib
-    return hashlib.sha256(email.lower().encode()).hexdigest()[:16]
+def _docent_id_from_login(login: str) -> str:
+    """SHA256(login lowercase) → 16 hex chars."""
+    return hashlib.sha256(login.lower().encode()).hexdigest()[:16]
 
 
-def _alias_from_email(email: str) -> str:
-    """'nom.cognom@fje.edu' → 'Nom'."""
-    local = email.split("@")[0]
+def _alias_from_login(login: str) -> str:
+    """'miquel.amor' → 'Miquel' | 'mamor' → 'Mamor'."""
+    local = login.split("@")[0]   # treu domini si ve amb @
     return local.split(".")[0].capitalize()
-
-
-_FJE_EMAIL_RE = re.compile(r"^[a-zA-ZàáâãäåèéêëìíîïòóôõöùúûüçñÀ-ÖØ-öø-ÿ]+\.[a-zA-ZàáâãäåèéêëìíîïòóôõöùúûüçñÀ-ÖØ-öø-ÿ]+@fje\.edu$", re.IGNORECASE)
 
 
 @app.post("/api/docent/login")
 async def docent_login(payload: dict = Body(...)):
-    """Identifica el docent per email FJE. Crea o recupera el registre a atne_docents.
+    """Identifica el docent per login lanet. Crea o recupera el registre a atne_docents.
 
     Retorna {ok, docent_id, alias, is_new}.
     """
-    email = (payload.get("email") or "").strip().lower()
-    if not _FJE_EMAIL_RE.match(email):
-        return JSONResponse({"ok": False, "error": "L'email ha de ser del format nom.cognom@fje.edu"}, status_code=400)
+    # Accepta 'login' (lanet) o 'email' (compatibilitat)
+    login = (payload.get("login") or payload.get("email") or "").strip().lower()
+    if not login:
+        return JSONResponse({"ok": False, "error": "Login obligatori"}, status_code=400)
 
-    docent_id = _docent_id_from_email(email)
-    alias = _alias_from_email(email)
+    email = login  # guardem el login al camp email per coherència amb la taula
+
+    docent_id = _docent_id_from_login(login)
+    alias = _alias_from_login(login)
 
     # Comprova si ja existeix
     resp = requests.get(
