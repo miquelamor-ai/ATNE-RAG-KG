@@ -724,6 +724,13 @@
     PDF
   </button>
   <div class="ab-sep"></div>
+  <button class="ab-btn" id="btn-save" title="Desa a la biblioteca">
+    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M3 2h10v13l-5-3-5 3z"/>
+    </svg>
+    Desa
+  </button>
+  <div class="ab-sep"></div>
   <button class="ab-btn" id="btn-refer" title="Genera una nova versió">
     <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">
       <path d="M13.5 2.5v4h-4"/>
@@ -1109,6 +1116,74 @@
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
     }).from(el).save();
+  });
+
+  // ── Desa a la biblioteca ─────────────────────────────────────────────────────
+  document.getElementById('btn-save').addEventListener('click', function () {
+    if (!lastPayload || !adaptedEl.innerHTML.trim()) return;
+    var btn = this;
+    var origHTML = btn.innerHTML;
+
+    var docentId = '';
+    try { docentId = localStorage.getItem('atne.docent_id') || ''; } catch (e) { /* */ }
+    if (!docentId) {
+      btn.textContent = 'Cal iniciar sessió';
+      setTimeout(function () { btn.innerHTML = origHTML; }, 2500);
+      return;
+    }
+
+    // Construeix l'HTML de l'adaptació amb els complements
+    var glHtml  = glossariBody.innerHTML.trim();
+    var prHtml  = preguntesBody.innerHTML.trim();
+    var rsHtml  = resumBody ? resumBody.innerHTML.trim() : '';
+    var html = '<div class="flash-adaptation">'
+      + '<div class="adapted-text">' + (adaptedEl.innerHTML || '') + '</div>';
+    if (glHtml)  html += '<h3>Glossari</h3><div class="comp-glossari">' + glHtml + '</div>';
+    if (prHtml)  html += '<h3>Preguntes de comprensió</h3><div class="comp-preguntes">' + prHtml + '</div>';
+    if (rsHtml)  html += '<h3>Resum</h3><div class="comp-resum">' + rsHtml + '</div>';
+    html += '</div>';
+
+    // Títol: primera línia de text de l'adaptació (màx 80 cars)
+    var titleText = (adaptedEl.innerText || '').split('\n')[0].trim().slice(0, 80);
+    var title = titleText || ('Flash · ' + new Date().toLocaleDateString('ca'));
+
+    btn.disabled = true;
+    btn.textContent = 'Desant…';
+
+    fetch('/api/adaptations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        docent_id:            docentId,
+        adapted_html:         html,
+        title:                title,
+        original_text:        lastPayload.text,
+        profile_snapshot:     { perfils: lastPayload.perfils, curs: lastPayload.curs, adaptacio: lastPayload.adaptacio, l1: lastPayload.l1, tipus: lastPayload.tipus },
+        context_snapshot:     { curs: lastPayload.curs },
+        complements_snapshot: {
+          glossari:  glossariBody.innerText.trim(),
+          preguntes: preguntesBody.innerText.trim(),
+          resum:     resumBody ? resumBody.innerText.trim() : '',
+        },
+      })
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      btn.disabled = false;
+      if (d.ok) {
+        btn.textContent = '✓ Desat';
+        btn.style.color = 'var(--primary)';
+        setTimeout(function () { btn.innerHTML = origHTML; btn.style.color = ''; }, 3000);
+      } else {
+        btn.textContent = 'Error al desar';
+        setTimeout(function () { btn.innerHTML = origHTML; }, 2500);
+      }
+    })
+    .catch(function () {
+      btn.disabled = false;
+      btn.textContent = 'Error de connexió';
+      setTimeout(function () { btn.innerHTML = origHTML; }, 2500);
+    });
   });
 
   // ── Refer ─────────────────────────────────────────────────────────────────────
