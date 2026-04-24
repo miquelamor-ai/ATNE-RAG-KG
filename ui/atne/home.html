@@ -269,41 +269,29 @@
     return false;
   }
 
-  function openSavedAdaptation(item, divEl) {
-    var did = '';
-    try { did = localStorage.getItem('atne.docent_id') || ''; } catch(e) {}
-    if (divEl) divEl.style.opacity = '0.5';
-
-    // El llistat no inclou adapted_html (massa gran); el fem servir del GET individual
-    fetch('/api/adaptations/' + item.id + '?docent_id=' + encodeURIComponent(did))
-      .then(function(r) { return r.ok ? r.json() : null; })
-      .then(function(d) {
-        var full = (d && d.ok && d.item) ? d.item : item;
-        try {
-          if (isFlashAdaptation(full)) {
-            // Obre a Flash: guarda el resultat i navega
-            localStorage.setItem('atne.flash_restore', JSON.stringify({
-              adapted_html:         full.adapted_html || '',
-              complements_snapshot: full.complements_snapshot || {},
-            }));
-            location.href = '/ui/atne/flash.html';
-          } else {
-            // Obre a Taller (pas3)
-            localStorage.setItem('atne.current_adaptation_id', String(full.id));
-            localStorage.setItem('atne.adapted_text', full.adapted_html || '');
-            localStorage.setItem('atne.adapted_raw',  full.adapted_html || '');
-            if (full.original_text) localStorage.setItem('atne.doc_original', full.original_text);
-            else                    localStorage.removeItem('atne.doc_original');
-            if (full.title) localStorage.setItem('atne.doc_title', full.title);
-            localStorage.removeItem('atne.adapt_cache_key');
-            location.href = '/ui/atne/pas3.html';
-          }
-        } catch (e) { /* ignore */ }
-      })
-      .catch(function() {
-        if (divEl) divEl.style.opacity = '';
-        alert('No s\'ha pogut obrir l\'adaptació. Torna-ho a provar.');
-      });
+  function openSavedAdaptation(item) {
+    if (isFlashAdaptation(item)) {
+      // Obre a Flash: restaura el resultat directament
+      try {
+        localStorage.setItem('atne.flash_restore', JSON.stringify({
+          adapted_html:         item.adapted_html || '',
+          complements_snapshot: item.complements_snapshot || {},
+        }));
+      } catch (e) { /* ignore */ }
+      location.href = '/ui/atne/flash.html';
+    } else {
+      // Obre a Taller (pas3)
+      try {
+        localStorage.setItem('atne.current_adaptation_id', String(item.id));
+        localStorage.setItem('atne.adapted_text', item.adapted_html || '');
+        localStorage.setItem('atne.adapted_raw',  item.adapted_html || '');
+        if (item.original_text) localStorage.setItem('atne.doc_original', item.original_text);
+        else                    localStorage.removeItem('atne.doc_original');
+        if (item.title) localStorage.setItem('atne.doc_title', item.title);
+        localStorage.removeItem('atne.adapt_cache_key');
+      } catch (e) { /* ignore */ }
+      location.href = '/ui/atne/pas3.html';
+    }
   }
 
   function renderHistory(items) {
@@ -332,9 +320,9 @@
           '</div>' +
         '</div>' +
         '<svg style="flex-shrink:0;color:var(--ink-400)" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 12l4-4-4-4"/></svg>';
-      (function(item, el) {
-        el.addEventListener('click', function() { openSavedAdaptation(item, el); });
-      })(it, div);
+      (function(item) {
+        div.addEventListener('click', function() { openSavedAdaptation(item); });
+      })(it);
       list.appendChild(div);
     });
   }

@@ -147,6 +147,8 @@ async def list_adaptations(docent_id: str = "", limit: int = 50):
                     "profile_snapshot": row.get("profile_snapshot"),
                     "context_snapshot": row.get("context_snapshot"),
                     "complements_snapshot": row.get("complements_snapshot"),
+                    "adapted_html": html,          # inclòs per a la home (màx 5 ítems)
+                    "original_text": row.get("original_text"),
                     "preview": text[:200],
                     "created_at": row.get("created_at"),
                     "updated_at": row.get("updated_at"),
