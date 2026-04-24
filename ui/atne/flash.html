@@ -401,9 +401,20 @@
   }
 
   /* ── Selector de tipografia ───────────────────────────────── */
-  .adapted-box.font-inter     { font-family: var(--ui); }
-  .adapted-box.font-atkinson  { font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; }
-  .adapted-box.font-lexend    { font-family: 'Lexend', system-ui, sans-serif; }
+  @font-face {
+    font-family: 'OpenDyslexic';
+    src: url('https://cdn.jsdelivr.net/gh/antijingoist/opendyslexic@0.91.12/compiled/OpenDyslexic-Regular.woff2') format('woff2');
+    font-weight: 400; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: 'OpenDyslexic';
+    src: url('https://cdn.jsdelivr.net/gh/antijingoist/opendyslexic@0.91.12/compiled/OpenDyslexic-Bold.woff2') format('woff2');
+    font-weight: 700; font-style: normal; font-display: swap;
+  }
+  .adapted-box.font-inter        { font-family: var(--ui); }
+  .adapted-box.font-atkinson     { font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; }
+  .adapted-box.font-lexend       { font-family: 'Lexend', system-ui, sans-serif; }
+  .adapted-box.font-opendyslexic { font-family: 'OpenDyslexic', system-ui, sans-serif; letter-spacing: .02em; }
 
   .font-selector { position: relative; display: inline-flex; }
   .font-btn {
@@ -441,10 +452,11 @@
   .font-opt.active { background: var(--primary-50); }
   .font-opt-name { font-size: 12px; font-weight: 600; color: var(--ink-900); font-family: var(--ui); }
   .font-opt-sample { font-size: 13px; color: var(--ink-600); margin-top: 2px; }
-  .font-opt-sample.font-fraunces  { font-family: var(--serif); }
-  .font-opt-sample.font-inter     { font-family: var(--ui); }
-  .font-opt-sample.font-atkinson  { font-family: 'Atkinson Hyperlegible', sans-serif; }
-  .font-opt-sample.font-lexend    { font-family: 'Lexend', sans-serif; }
+  .font-opt-sample.font-fraunces      { font-family: var(--serif); }
+  .font-opt-sample.font-inter        { font-family: var(--ui); }
+  .font-opt-sample.font-atkinson     { font-family: 'Atkinson Hyperlegible', sans-serif; }
+  .font-opt-sample.font-lexend       { font-family: 'Lexend', sans-serif; }
+  .font-opt-sample.font-opendyslexic { font-family: 'OpenDyslexic', sans-serif; }
 
   /* ── Desar perfil ─────────────────────────────────────────── */
   .save-profile-wrap { margin-top: 10px; }
@@ -638,6 +650,10 @@
               <button class="font-opt" data-font="lexend">
                 <span class="font-opt-name">Lexend</span>
                 <span class="font-opt-sample font-lexend">La fotosíntesi és un procés</span>
+              </button>
+              <button class="font-opt" data-font="opendyslexic">
+                <span class="font-opt-name">OpenDyslexic</span>
+                <span class="font-opt-sample font-opendyslexic">La fotosíntesi és un procés</span>
               </button>
             </div>
           </div>
@@ -1089,7 +1105,7 @@
   });
 
   // ── Selector de tipografia ────────────────────────────────────────────────────
-  var FONT_LABELS = { fraunces: 'Fraunces', inter: 'Inter', atkinson: 'Atkinson', lexend: 'Lexend' };
+  var FONT_LABELS = { fraunces: 'Fraunces', inter: 'Inter', atkinson: 'Atkinson', lexend: 'Lexend', opendyslexic: 'OpenDyslexic' };
   var currentFont = 'fraunces';
   try { currentFont = localStorage.getItem('atne.flash_font') || 'fraunces'; } catch (e) { /* */ }
 
