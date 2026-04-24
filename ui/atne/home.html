@@ -258,6 +258,17 @@
     return d === 1 ? 'fa 1 dia' : 'fa ' + d + ' dies';
   }
 
+  function isFlashAdaptation(item) {
+    // Detecta Flash via context_snapshot.mode (saves nous)
+    var cs = item.context_snapshot;
+    if (cs && cs.mode === 'flash') return true;
+    // Fallback per saves anteriors: si profile_snapshot té 'tipus' (Flash-specific)
+    // i complements_snapshot té estructura Flash
+    var ps = item.profile_snapshot;
+    if (ps && typeof ps.tipus !== 'undefined' && item.complements_snapshot) return true;
+    return false;
+  }
+
   function openSavedAdaptation(item, divEl) {
     var did = '';
     try { did = localStorage.getItem('atne.docent_id') || ''; } catch(e) {}
@@ -269,16 +280,25 @@
       .then(function(d) {
         var full = (d && d.ok && d.item) ? d.item : item;
         try {
-          localStorage.setItem('atne.current_adaptation_id', String(full.id));
-          localStorage.setItem('atne.adapted_text', full.adapted_html || '');
-          localStorage.setItem('atne.adapted_raw',  full.adapted_html || '');
-          if (full.original_text) localStorage.setItem('atne.doc_original', full.original_text);
-          else                    localStorage.removeItem('atne.doc_original');
-          if (full.title) localStorage.setItem('atne.doc_title', full.title);
-          // Neteja cache prèvia per evitar conflictes amb el nou text
-          localStorage.removeItem('atne.adapt_cache_key');
+          if (isFlashAdaptation(full)) {
+            // Obre a Flash: guarda el resultat i navega
+            localStorage.setItem('atne.flash_restore', JSON.stringify({
+              adapted_html:         full.adapted_html || '',
+              complements_snapshot: full.complements_snapshot || {},
+            }));
+            location.href = '/ui/atne/flash.html';
+          } else {
+            // Obre a Taller (pas3)
+            localStorage.setItem('atne.current_adaptation_id', String(full.id));
+            localStorage.setItem('atne.adapted_text', full.adapted_html || '');
+            localStorage.setItem('atne.adapted_raw',  full.adapted_html || '');
+            if (full.original_text) localStorage.setItem('atne.doc_original', full.original_text);
+            else                    localStorage.removeItem('atne.doc_original');
+            if (full.title) localStorage.setItem('atne.doc_title', full.title);
+            localStorage.removeItem('atne.adapt_cache_key');
+            location.href = '/ui/atne/pas3.html';
+          }
         } catch (e) { /* ignore */ }
-        location.href = '/ui/atne/pas3.html';
       })
       .catch(function() {
         if (divEl) divEl.style.opacity = '';

@@ -938,6 +938,35 @@
   }
   showState('empty');
 
+  // ── Restore des de la biblioteca (home → Flash) ───────────────────────────────
+  (function () {
+    var raw = '';
+    try { raw = localStorage.getItem('atne.flash_restore') || ''; } catch (e) { /* */ }
+    if (!raw) return;
+    try { localStorage.removeItem('atne.flash_restore'); } catch (e) { /* */ }
+    try {
+      var data = JSON.parse(raw);
+      var html = data.adapted_html || '';
+      var cs   = data.complements_snapshot || {};
+
+      // Extreu el text adaptat del wrapper <div class="flash-adaptation">
+      var parser = new DOMParser();
+      var doc    = parser.parseFromString(html, 'text/html');
+      var textDiv = doc.querySelector('.adapted-text');
+      adaptedEl.innerHTML = textDiv ? textDiv.innerHTML : html;
+
+      if (cs.glossari)  { glossariBody.innerHTML  = md2html(cs.glossari);  glStatus.textContent = '✓'; glStatus.className = 'comp-status ok'; document.getElementById('sec-glossari').classList.add('open'); }
+      if (cs.preguntes) { preguntesBody.innerHTML = md2html(cs.preguntes); prStatus.textContent = '✓'; prStatus.className = 'comp-status ok'; document.getElementById('sec-preguntes').classList.add('open'); }
+      if (cs.resum && resumBody) {
+        resumBody.innerHTML = md2html(cs.resum);
+        rsStatus.textContent = '✓'; rsStatus.className = 'comp-status ok';
+        secResum.style.display = '';
+        document.getElementById('sec-resum').classList.add('open');
+      }
+      showState('result');
+    } catch (e) { /* ignore */ }
+  })();
+
   // ── Seccions desplegables ────────────────────────────────────────────────────
   window.toggleSection = function (id) {
     var sec = document.getElementById('sec-' + id);
@@ -1159,7 +1188,7 @@
         title:                title,
         original_text:        lastPayload.text,
         profile_snapshot:     { perfils: lastPayload.perfils, curs: lastPayload.curs, adaptacio: lastPayload.adaptacio, l1: lastPayload.l1, tipus: lastPayload.tipus },
-        context_snapshot:     { curs: lastPayload.curs },
+        context_snapshot:     { curs: lastPayload.curs, mode: 'flash' },
         complements_snapshot: {
           glossari:  glossariBody.innerText.trim(),
           preguntes: preguntesBody.innerText.trim(),
