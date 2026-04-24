@@ -113,9 +113,68 @@
         '<a href="/ui/cuina.html" target="_blank" rel="noopener">Cuina (dev)</a>' +
         '<div class="sep"></div>' +
       '</div>' +
+      '<button id="admin-rename-btn" style="gap:8px">✏️ Canviar nom</button>' +
       '<div class="sep"></div>' +
       '<button id="admin-logout-btn">Canviar d\'usuari</button>';
     return div;
+  }
+
+  function showRenameModal(currentAlias) {
+    var overlay = document.createElement('div');
+    overlay.id = 'atne-rename-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9999;display:flex;align-items:center;justify-content:center';
+    overlay.innerHTML =
+      '<div style="background:#fff;border-radius:12px;padding:24px;width:320px;max-width:90vw;font-family:Inter,sans-serif">' +
+        '<div style="font-size:16px;font-weight:600;color:#121a2b;margin-bottom:6px">Com et diem?</div>' +
+        '<div style="font-size:13px;color:#6a7392;margin-bottom:16px">El nom que apareixerà a l\'app</div>' +
+        '<input id="atne-rename-input" type="text" value="' + (currentAlias || '') + '" ' +
+          'style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #d7dce9;border-radius:8px;font-size:15px;outline:none;margin-bottom:16px" ' +
+          'placeholder="El teu nom" maxlength="60">' +
+        '<div style="display:flex;gap:8px;justify-content:flex-end">' +
+          '<button id="atne-rename-cancel" style="padding:8px 16px;border:1px solid #d7dce9;border-radius:8px;background:#fff;cursor:pointer;font-size:14px">Cancel·la</button>' +
+          '<button id="atne-rename-save" style="padding:8px 16px;border:none;border-radius:8px;background:#3337a6;color:#fff;cursor:pointer;font-size:14px;font-weight:500">Desa</button>' +
+        '</div>' +
+        '<div id="atne-rename-err" style="color:#c64a4a;font-size:12px;margin-top:8px;display:none"></div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+
+    var inp = overlay.querySelector('#atne-rename-input');
+    inp.focus(); inp.select();
+
+    overlay.querySelector('#atne-rename-cancel').onclick = function() { overlay.remove(); };
+    overlay.querySelector('#atne-rename-save').onclick = function() { doRename(overlay); };
+    inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') doRename(overlay); });
+  }
+
+  function doRename(overlay) {
+    var inp = overlay.querySelector('#atne-rename-input');
+    var err = overlay.querySelector('#atne-rename-err');
+    var alias = inp.value.trim();
+    if (!alias) { err.textContent = 'El nom no pot ser buit'; err.style.display = ''; return; }
+    var did = '';
+    try { did = localStorage.getItem('atne.docent_id') || ''; } catch(e) {}
+    if (!did) { err.textContent = 'Sessió no trobada'; err.style.display = ''; return; }
+
+    fetch('/api/docent/alias', {
+      method: 'PATCH',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({docent_id: did, alias: alias})
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (!d.ok) { err.textContent = d.error || 'Error'; err.style.display = ''; return; }
+      try { localStorage.setItem('atne.docent_alias', alias); } catch(e) {}
+      // Actualitza avatar i menú
+      var btn = document.getElementById('docent-av');
+      if (btn) { btn.textContent = alias[0].toUpperCase(); btn.title = 'Docent · ' + alias; }
+      var top = document.getElementById('admin-menu-top');
+      if (top) top.textContent = alias;
+      // Actualitza salutació si existeix a la home
+      var greet = document.getElementById('atne-greeting-name');
+      if (greet) greet.textContent = alias;
+      overlay.remove();
+    })
+    .catch(function() { err.textContent = 'Error de connexió'; err.style.display = ''; });
   }
 
   function attachMenuHandlers(btn, menu, alias) {
@@ -125,6 +184,17 @@
     }
     btn.onclick = function (e) { e.stopPropagation(); menu.classList.toggle('on'); };
     document.addEventListener('click', function () { menu.classList.remove('on'); });
+    var renameBtn = menu.querySelector('#admin-rename-btn');
+    if (renameBtn) {
+      renameBtn.onclick = function(e) {
+        e.stopPropagation();
+        menu.classList.remove('on');
+        var cur = '';
+        try { cur = localStorage.getItem('atne.docent_alias') || ''; } catch(ex) {}
+        showRenameModal(cur);
+      };
+    }
+
     var logout = menu.querySelector('#admin-logout-btn');
     if (logout) {
       logout.onclick = function () {

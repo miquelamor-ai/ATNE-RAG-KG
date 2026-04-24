@@ -778,7 +778,7 @@ async function loadConfig() {
     configCache = data;
 
     // Generar phase-cards dinàmicament
-    const phases = ["generate", "adapt", "refine", "complements", "auditor"];
+    const phases = ["generate", "adapt", "adapt_flash", "refine", "complements", "auditor"];
     const grid = document.getElementById("phase-config-grid");
     grid.innerHTML = phases.map(p =>
       renderPhaseCard(p, data.models_available, data.model_costs_eur_per_call, data.model_config[p])
@@ -826,7 +826,7 @@ async function saveConfig() {
   status.innerHTML = '<div class="status info">Guardant…</div>';
 
   // Validació client: cap fase en mode rotate pot estar buida
-  const phases = ["generate", "adapt", "refine", "complements", "auditor"];
+  const phases = ["generate", "adapt", "adapt_flash", "refine", "complements", "auditor"];
   for (const p of phases) {
     const cfg = collectPhaseConfig(p);
     if (cfg && cfg.mode === "rotate" && (!cfg.models || cfg.models.length === 0)) {
@@ -839,6 +839,7 @@ async function saveConfig() {
   const payload = {
     atne_model_generate: collectPhaseConfig("generate"),
     atne_model_adapt: collectPhaseConfig("adapt"),
+    atne_model_adapt_flash: collectPhaseConfig("adapt_flash"),
     atne_model_refine: collectPhaseConfig("refine"),
     atne_model_complements: collectPhaseConfig("complements"),
     atne_model_auditor: collectPhaseConfig("auditor"),

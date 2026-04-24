@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<title>ATNE · Inici</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<script src="/ui/atne/js/auth.js"></script>
+<script src="/ui/atne/js/pilot-tracker.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/ui/styles/tokens.css">
+<link rel="stylesheet" href="/ui/styles/base.css">
+<link rel="stylesheet" href="/ui/styles/shell.css">
+
+<style>
+  body { background: var(--cream, #f4f1e8); min-height: 100dvh; }
+
+  .home-wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* Salutació */
+  .greeting-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(28px, 6vw, 40px);
+    font-weight: 700;
+    color: var(--ink-900, #121a2b);
+    margin: 0 0 6px;
+    line-height: 1.15;
+  }
+  .greeting-sub {
+    font-size: 16px;
+    color: var(--ink-500, #6a7392);
+    margin: 0 0 40px;
+  }
+
+  /* Targetes mode */
+  .mode-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+  @media (max-width: 420px) {
+    .mode-grid { grid-template-columns: 1fr; }
+  }
+
+  .mode-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 28px 24px;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    border: 2px solid transparent;
+    transition: border-color .15s, box-shadow .15s, transform .1s;
+    box-shadow: 0 2px 8px rgba(18,26,43,.06);
+  }
+  .mode-card:hover {
+    border-color: var(--primary, #3337a6);
+    box-shadow: 0 4px 20px rgba(51,55,166,.12);
+    transform: translateY(-2px);
+  }
+  .mode-card:active { transform: translateY(0); }
+
+  .mode-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: var(--cream-2, #ece8db);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    margin-bottom: 16px;
+  }
+  .mode-title {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink-900, #121a2b);
+    margin: 0 0 6px;
+  }
+  .mode-desc {
+    font-size: 14px;
+    color: var(--ink-500, #6a7392);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* Historial recent */
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--ink-400, #8a93b0);
+  }
+  .section-link {
+    font-size: 13px;
+    color: var(--primary, #3337a6);
+    text-decoration: none;
+  }
+  .section-link:hover { text-decoration: underline; }
+
+  .history-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .history-item {
+    background: #fff;
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    border: 1px solid var(--paper-line, rgba(0,0,0,.06));
+    transition: border-color .12s;
+  }
+  .history-item:hover { border-color: var(--primary, #3337a6); }
+
+  .history-icon {
+    width: 36px; height: 36px; flex-shrink: 0;
+    border-radius: 8px;
+    background: var(--cream-2, #ece8db);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .history-info { flex: 1; min-width: 0; }
+  .history-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink-900, #121a2b);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 3px;
+  }
+  .history-meta {
+    font-size: 12px;
+    color: var(--ink-400, #8a93b0);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .mode-badge {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 99px;
+  }
+  .mode-badge.flash {
+    background: #fce7d5;
+    color: #c64a4a;
+  }
+  .mode-badge.taller {
+    background: #e7dcf4;
+    color: #6d3aa3;
+  }
+
+  .history-empty {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--ink-400, #8a93b0);
+    font-size: 14px;
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid var(--paper-line, rgba(0,0,0,.06));
+  }
+</style>
+</head>
+<body>
+
+<!-- Topbar reutilitzada del shell -->
+<header class="topbar">
+  <div class="topbar-left" style="display:flex;align-items:center;gap:8px;flex:1">
+    <div class="logo" style="margin-bottom:0;flex-shrink:0"><img src="/logo-fje.jpg" alt="FJE"></div>
+    <span class="brand" style="font-family:var(--serif);font-size:18px;font-weight:700;color:var(--ink-900)">ATNE</span>
+  </div>
+  <div class="topbar-right" style="display:flex;align-items:center;gap:8px">
+    <button id="docent-av" class="icon-btn avatar-btn" title="Docent">?</button>
+  </div>
+</header>
+
+<main class="home-wrap">
+
+  <!-- Salutació -->
+  <h1 class="greeting-title">
+    <span id="atne-greeting-prefix">Benvingut/da</span><span id="atne-greeting-name"></span><span id="atne-greeting-dot">.</span>
+  </h1>
+  <p class="greeting-sub">Com vols adaptar avui?</p>
+
+  <!-- Selector de mode -->
+  <div class="mode-grid">
+    <a href="/ui/atne/flash.html" class="mode-card" id="btn-flash">
+      <div class="mode-icon">⚡</div>
+      <div class="mode-title">Flash</div>
+      <p class="mode-desc">Ràpid i directe. Un text, una adaptació en pocs clics.</p>
+    </a>
+    <a href="/ui/atne/pas1.html" class="mode-card" id="btn-taller">
+      <div class="mode-icon">🔧</div>
+      <div class="mode-title">Taller</div>
+      <p class="mode-desc">Complet i precís. Perfil detallat, complements i multinivell.</p>
+    </a>
+  </div>
+
+  <!-- Historial recent -->
+  <div class="section-header">
+    <span class="section-title">Adaptacions recents</span>
+    <a href="#" class="section-link" id="link-veure-tot" style="display:none">Veure tot</a>
+  </div>
+  <div class="history-list" id="history-list">
+    <div class="history-empty">Encara no hi ha adaptacions. Comença amb Flash o Taller.</div>
+  </div>
+
+</main>
+
+<script>
+(function () {
+  // ── Salutació personalitzada ───────────────────────────────────────────────
+  function buildGreeting() {
+    var alias = '';
+    try { alias = localStorage.getItem('atne.docent_alias') || ''; } catch(e) {}
+
+    var h = new Date().getHours();
+    var salut = h < 13 ? 'Bon dia' : h < 20 ? 'Bona tarda' : 'Bona nit';
+
+    var prefix = document.getElementById('atne-greeting-prefix');
+    var name   = document.getElementById('atne-greeting-name');
+
+    if (alias) {
+      prefix.textContent = salut + ', ';
+      name.textContent   = alias;
+    } else {
+      prefix.textContent = salut;
+      name.textContent   = '';
+    }
+  }
+  buildGreeting();
+
+  // ── Historial recent ───────────────────────────────────────────────────────
+  function timeAgo(iso) {
+    var diff = Math.floor((Date.now() - new Date(iso)) / 1000);
+    if (diff < 60)    return 'ara mateix';
+    if (diff < 3600)  return 'fa ' + Math.floor(diff/60) + ' min';
+    if (diff < 86400) return 'fa ' + Math.floor(diff/3600) + 'h';
+    var d = Math.floor(diff/86400);
+    return d === 1 ? 'fa 1 dia' : 'fa ' + d + ' dies';
+  }
+
+  function renderHistory(items) {
+    var list = document.getElementById('history-list');
+    if (!items || !items.length) return;
+
+    document.getElementById('link-veure-tot').style.display = '';
+    list.innerHTML = '';
+    items.slice(0, 5).forEach(function(it) {
+      var mode  = it.mode || 'taller';
+      var title = it.profile_name || it.title || 'Adaptació';
+      var ago   = timeAgo(it.created_at || it.updated_at);
+      var div = document.createElement('div');
+      div.className = 'history-item';
+      div.innerHTML =
+        '<div class="history-icon">📄</div>' +
+        '<div class="history-info">' +
+          '<div class="history-name">' + title + '</div>' +
+          '<div class="history-meta">' +
+            '<span class="mode-badge ' + mode + '">' + mode.toUpperCase() + '</span>' +
+            '<span>' + ago + '</span>' +
+          '</div>' +
+        '</div>';
+      list.appendChild(div);
+    });
+  }
+
+  function loadHistory() {
+    var did = '';
+    try { did = localStorage.getItem('atne.docent_id') || ''; } catch(e) {}
+    if (!did) return;
+
+    fetch('/api/history/recent?docent_id=' + encodeURIComponent(did) + '&limit=5')
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(d) { if (d && d.items) renderHistory(d.items); })
+      .catch(function() {});
+  }
+  loadHistory();
+
+})();
+</script>
+
+</body>
+</html>

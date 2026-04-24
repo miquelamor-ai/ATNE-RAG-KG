@@ -1,0 +1,949 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<title>ATNE · Flash</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<script src="/ui/atne/js/auth.js"></script>
+<script src="/ui/atne/js/pilot-tracker.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/ui/styles/tokens.css">
+<link rel="stylesheet" href="/ui/styles/base.css">
+<link rel="stylesheet" href="/ui/styles/shell.css">
+
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.2/dist/html2pdf.bundle.min.js" defer></script>
+
+<style>
+  html, body { height: 100%; margin: 0; }
+  body { background: var(--cream); font-family: var(--ui); }
+
+  /* ── Wrap ──────────────────────────────────────────────────── */
+  .flash-wrap {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+  }
+
+  /* ── Topbar ────────────────────────────────────────────────── */
+  .brand {
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink-900);
+    text-decoration: none;
+  }
+  .tb-sep {
+    width: 1px;
+    height: 18px;
+    background: var(--paper-line);
+    margin: 0 2px;
+    flex: none;
+  }
+  .tb-spacer { flex: 1; }
+
+  /* Mode toggle (Flash | Taller) */
+  .mode-toggle {
+    display: flex;
+    background: var(--ink-75);
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-pill);
+    padding: 3px;
+    gap: 2px;
+  }
+  .mt-btn {
+    padding: 5px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-500);
+    border-radius: var(--r-pill);
+    text-decoration: none;
+    transition: background var(--trans-fast), color var(--trans-fast);
+    white-space: nowrap;
+  }
+  .mt-btn:hover { color: var(--ink-800); }
+  .mt-btn.on { background: var(--ink-900); color: #fff; }
+
+  /* ── Main: dos panells ────────────────────────────────────── */
+  .flash-main {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* ── Panell formulari ─────────────────────────────────────── */
+  .flash-form {
+    background: var(--cream-2);
+    border-right: 1px solid var(--paper-line);
+    padding: 20px 18px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--ink-500);
+  }
+
+  .form-select, .form-input {
+    appearance: none;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,.1);
+    border-radius: var(--r-md);
+    padding: 9px 12px;
+    font-size: 14px;
+    font-family: var(--ui);
+    color: var(--ink-900);
+    width: 100%;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color var(--trans-fast);
+  }
+  .form-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a93b0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+  .form-select:focus, .form-input:focus { border-color: var(--primary); }
+
+  /* Grup / Alumne */
+  .segmented {
+    display: flex;
+    background: var(--ink-75);
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: var(--r-md);
+    padding: 3px;
+    gap: 3px;
+  }
+  .seg-btn {
+    flex: 1;
+    padding: 7px 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-500);
+    border-radius: var(--r-sm);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: all var(--trans-fast);
+    text-align: center;
+    font-family: var(--ui);
+  }
+  .seg-btn.on { background: var(--primary); color: #fff; }
+
+  .l1-group { display: none; flex-direction: column; gap: 6px; }
+  .l1-group.show { display: flex; }
+
+  /* Peu enganxat al fons del formulari (botó adaptar sempre visible) */
+  .form-footer {
+    position: sticky;
+    bottom: 0;
+    background: var(--cream-2);
+    padding: 14px 0 6px;
+    border-top: 1px solid var(--paper-line);
+    margin-top: 4px;
+  }
+
+  /* Textarea */
+  .flash-textarea {
+    resize: vertical;
+    min-height: 160px;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,.1);
+    border-radius: var(--r-lg);
+    padding: 12px 14px;
+    font-size: 14px;
+    font-family: var(--ui);
+    color: var(--ink-900);
+    width: 100%;
+    box-sizing: border-box;
+    outline: none;
+    line-height: 1.6;
+    transition: border-color var(--trans-fast);
+  }
+  .flash-textarea:focus { border-color: var(--primary); }
+  .flash-textarea::placeholder { color: var(--ink-400); }
+
+  .word-count {
+    font-size: 11px;
+    color: var(--ink-400);
+    text-align: right;
+    margin-top: -10px;
+  }
+
+  /* Botó Adaptar */
+  .btn-adaptar {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--r-md);
+    padding: 12px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--ui);
+    cursor: pointer;
+    width: 100%;
+    transition: background var(--trans-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-adaptar:hover:not(:disabled) { background: var(--primary-600); }
+  .btn-adaptar:disabled { opacity: .6; cursor: not-allowed; }
+
+  /* ── Panell resultat ──────────────────────────────────────── */
+  .flash-result {
+    overflow-y: auto;
+    padding: 28px 32px 100px;
+    position: relative;
+  }
+
+  /* Estat buit */
+  .result-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100dvh - 100px);
+    gap: 12px;
+    color: var(--ink-400);
+    text-align: center;
+  }
+  .empty-icon { font-size: 48px; opacity: .35; }
+  .empty-text { font-size: 15px; }
+
+  /* Estat carregant */
+  .result-loading {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100dvh - 100px);
+    gap: 10px;
+    color: var(--ink-500);
+  }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--primary-100);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+    margin-bottom: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-msg { font-size: 15px; font-weight: 500; color: var(--ink-800); }
+  .loading-sub { font-size: 12px; color: var(--ink-400); }
+
+  /* Estat error */
+  .result-error {
+    display: none;
+    background: var(--danger-50);
+    border: 1px solid rgba(180,61,61,.2);
+    border-radius: var(--r-xl);
+    padding: 16px 20px;
+    color: var(--danger);
+    font-size: 14px;
+    margin-top: 20px;
+  }
+
+  /* Estat resultat */
+  .result-content { display: none; }
+
+  .result-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .result-title {
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink-800);
+    flex: 1;
+  }
+  .profile-badge {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: var(--r-pill);
+    background: var(--primary-100);
+    color: var(--primary);
+  }
+
+  /* Caixa text adaptat */
+  .adapted-box {
+    background: #fff;
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-xl);
+    padding: 20px 24px;
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--ink-900);
+    margin-bottom: 16px;
+    box-shadow: var(--sh-xs);
+  }
+  .adapted-box h1, .adapted-box h2, .adapted-box h3 {
+    font-family: var(--serif);
+    color: var(--ink-800);
+    margin: .8em 0 .3em;
+  }
+  .adapted-box p { margin: .5em 0; }
+  .adapted-box ul, .adapted-box ol { padding-left: 1.5em; margin: .4em 0; }
+  .adapted-box li { margin-bottom: .3em; }
+  .adapted-box strong { font-weight: 600; }
+
+  /* Seccions desplegables (glossari / preguntes) */
+  .comp-section {
+    background: #fff;
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-xl);
+    margin-bottom: 12px;
+    overflow: hidden;
+    box-shadow: var(--sh-xs);
+  }
+  .comp-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 18px;
+    cursor: pointer;
+    user-select: none;
+    transition: background var(--trans-fast);
+  }
+  .comp-header:hover { background: var(--ink-50); }
+  .comp-icon { font-size: 17px; flex: none; }
+  .comp-title {
+    font-family: var(--serif);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink-800);
+    flex: 1;
+  }
+  .comp-status { font-size: 11px; color: var(--ink-400); }
+  .comp-status.ok { color: var(--ok); }
+  .comp-chevron {
+    color: var(--ink-400);
+    transition: transform var(--trans-med);
+    flex: none;
+  }
+  .comp-section.open .comp-chevron { transform: rotate(180deg); }
+  .comp-body {
+    display: none;
+    padding: 2px 20px 16px;
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--ink-700);
+    border-top: 1px solid var(--paper-line);
+  }
+  .comp-section.open .comp-body { display: block; }
+  .comp-body p { margin: .5em 0; }
+  .comp-body ul, .comp-body ol { padding-left: 1.4em; margin: .4em 0; }
+  .comp-body li { margin-bottom: .25em; }
+
+  /* ── Barra d'accions flotant ──────────────────────────────── */
+  .action-bar {
+    position: fixed;
+    bottom: 24px;
+    right: 28px;
+    background: var(--ink-900);
+    border-radius: var(--r-pill);
+    padding: 6px 10px;
+    display: none;
+    align-items: center;
+    gap: 2px;
+    box-shadow: var(--sh-lg);
+    z-index: 50;
+  }
+  .action-bar.show { display: flex; }
+  .ab-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 13px;
+    border: none;
+    border-radius: var(--r-pill);
+    background: transparent;
+    color: rgba(255,255,255,.75);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--ui);
+    cursor: pointer;
+    transition: background var(--trans-fast), color var(--trans-fast);
+    white-space: nowrap;
+  }
+  .ab-btn:hover { background: rgba(255,255,255,.12); color: #fff; }
+  .ab-sep { width: 1px; height: 18px; background: rgba(255,255,255,.15); margin: 0 3px; }
+
+  /* ── Responsive: mòbil/tablet ─────────────────────────────── */
+  @media (max-width: 720px) {
+    .flash-main {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr;
+    }
+    .flash-form {
+      border-right: none;
+      border-bottom: 1px solid var(--paper-line);
+      max-height: 52vh;
+    }
+    .result-empty, .result-loading { min-height: 200px; }
+    .flash-result { padding: 20px 18px 90px; }
+    .action-bar { bottom: 16px; right: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="flash-wrap">
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <a href="/ui/atne/home.html" style="display:flex;align-items:center;gap:8px;text-decoration:none">
+      <div class="logo" style="margin-bottom:0;flex-shrink:0"><img src="/logo-fje.jpg" alt="FJE"></div>
+      <span class="brand">ATNE</span>
+    </a>
+    <div class="tb-sep"></div>
+    <nav class="mode-toggle" aria-label="Mode">
+      <a href="/ui/atne/flash.html" class="mt-btn on">⚡ Flash</a>
+      <a href="/ui/atne/pas1.html" class="mt-btn">🔧 Taller</a>
+    </nav>
+    <div class="tb-spacer"></div>
+    <button id="docent-av" class="icon-btn avatar-btn" title="Docent">?</button>
+  </header>
+
+  <!-- Contingut principal -->
+  <div class="flash-main">
+
+    <!-- Panell formulari -->
+    <section class="flash-form">
+
+      <div class="form-group">
+        <label class="form-label" for="curs-sel">Curs</label>
+        <select class="form-select" id="curs-sel">
+          <option value="primaria_12">Primària 1r – 2n</option>
+          <option value="primaria_34">Primària 3r – 4t</option>
+          <option value="primaria_56">Primària 5è – 6è</option>
+          <option value="eso_12" selected>ESO 1r – 2n</option>
+          <option value="eso_34">ESO 3r – 4t</option>
+          <option value="batxillerat">Batxillerat</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Per a qui</label>
+        <div class="segmented" role="group" aria-label="Destinatari">
+          <button class="seg-btn on" data-tipus="grup">Grup classe</button>
+          <button class="seg-btn" data-tipus="alumne">Un alumne/a</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" id="car-label">Nivell del grup</label>
+        <select class="form-select" id="car-grup-sel">
+          <option value="">Al nivell del curs</option>
+          <option value="suport">Necessiten suport</option>
+          <option value="repte">Vol un repte – altes capacitats</option>
+        </select>
+        <select class="form-select" id="car-sel" style="display:none">
+          <option value="">Al nivell del curs</option>
+          <option value="costa_llegir">Li costa llegir (dislèxia)</option>
+          <option value="costa_atencio">Li costa l'atenció i la concentració (TDAH)</option>
+          <option value="instruccions_concretes">Necessita instruccions molt concretes (TEA)</option>
+          <option value="nouvingut">Nouvingut/da – no parla bé el català</option>
+          <option value="vol_repte">Vol un repte – altes capacitats</option>
+          <option value="dificultats_generals">Dificultats generals d'aprenentatge</option>
+          <option value="no_sap">Té dificultats, però no sé quines</option>
+        </select>
+      </div>
+
+      <div class="form-group l1-group" id="l1-group">
+        <label class="form-label" for="l1-inp">Llengua materna de l'alumne/a</label>
+        <input class="form-input" id="l1-inp" type="text"
+               placeholder="p. ex. àrab, amazic, urdú…" maxlength="60">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="text-area">Text a adaptar</label>
+        <textarea class="flash-textarea" id="text-area"
+                  placeholder="Enganxa aquí el text que vols adaptar…"
+                  maxlength="12000"></textarea>
+        <div class="word-count" id="word-count">0 paraules</div>
+      </div>
+
+      <div class="form-footer">
+        <button class="btn-adaptar" id="btn-adaptar">
+          <span id="btn-label">Adaptar text →</span>
+        </button>
+      </div>
+
+    </section>
+
+    <!-- Panell resultat -->
+    <section class="flash-result" id="flash-result">
+
+      <div class="result-empty" id="state-empty">
+        <div class="empty-icon">⚡</div>
+        <div class="empty-text">Enganxa un text i prem <strong>Adaptar text</strong></div>
+      </div>
+
+      <div class="result-loading" id="state-loading">
+        <div class="spinner"></div>
+        <div class="loading-msg" id="loading-msg">Llegint el text…</div>
+        <div class="loading-sub" id="loading-sub"></div>
+      </div>
+
+      <div class="result-error" id="state-error"></div>
+
+      <div class="result-content" id="state-result">
+        <div class="result-header">
+          <span class="result-title">✦ Text adaptat</span>
+          <span class="profile-badge" id="result-badge"></span>
+        </div>
+
+        <div class="adapted-box" id="adapted-text"></div>
+
+        <div class="comp-section" id="sec-glossari">
+          <div class="comp-header" onclick="toggleSection('glossari')">
+            <span class="comp-icon">📖</span>
+            <span class="comp-title">Glossari</span>
+            <span class="comp-status" id="gl-status">Generant…</span>
+            <svg class="comp-chevron" viewBox="0 0 16 16" fill="none" width="16" height="16">
+              <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="comp-body" id="glossari-body"></div>
+        </div>
+
+        <div class="comp-section" id="sec-preguntes">
+          <div class="comp-header" onclick="toggleSection('preguntes')">
+            <span class="comp-icon">❓</span>
+            <span class="comp-title">Preguntes de comprensió</span>
+            <span class="comp-status" id="pr-status">Generant…</span>
+            <svg class="comp-chevron" viewBox="0 0 16 16" fill="none" width="16" height="16">
+              <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="comp-body" id="preguntes-body"></div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </div>
+
+</div>
+
+<!-- Barra flotant d'accions (apareix quan hi ha resultat) -->
+<div class="action-bar" id="action-bar">
+  <button class="ab-btn" id="btn-copy" title="Copia el text al porta-papers">
+    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">
+      <rect x="5" y="5" width="9" height="9" rx="1.5"/>
+      <path d="M11 5V3a1.5 1.5 0 0 0-1.5-1.5H3A1.5 1.5 0 0 0 1.5 3v6.5A1.5 1.5 0 0 0 3 11H5"/>
+    </svg>
+    Copia
+  </button>
+  <div class="ab-sep"></div>
+  <button class="ab-btn" id="btn-pdf" title="Descarrega com a PDF">
+    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M9 1.5H4a1.5 1.5 0 0 0-1.5 1.5v10A1.5 1.5 0 0 0 4 14.5h8A1.5 1.5 0 0 0 13.5 13V6z"/>
+      <path d="M9 1.5V6H13.5"/>
+      <path d="M5.5 10.5h5M5.5 8h5"/>
+    </svg>
+    PDF
+  </button>
+  <div class="ab-sep"></div>
+  <button class="ab-btn" id="btn-refer" title="Genera una nova versió">
+    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M13.5 2.5v4h-4"/>
+      <path d="M2 8A6 6 0 0 1 13.5 4.5"/>
+      <path d="M2.5 13.5v-4h4"/>
+      <path d="M14 8a6 6 0 0 1-11.5 3.5"/>
+    </svg>
+    Refer
+  </button>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ── Mapes behavioral → clínic ────────────────────────────────────────────────
+  var BEHAVIORAL_TO_PERFILS = {
+    'costa_llegir':           ['dislexia'],
+    'costa_atencio':          ['tdah'],
+    'instruccions_concretes': ['tea'],
+    'nouvingut':              ['nouvingut'],
+    'vol_repte':              ['altes_capacitats'],
+    'dificultats_generals':   ['di'],
+    'no_sap':                 ['vulnerabilitat'],
+    '':                       [],
+  };
+
+  var BEHAVIORAL_TO_ADAPTACIO = {
+    'costa_llegir':           'simplificat',
+    'costa_atencio':          'simplificat',
+    'instruccions_concretes': 'simplificat',
+    'nouvingut':              'molt_simplificat',
+    'vol_repte':              'enriquiment',
+    'dificultats_generals':   'molt_simplificat',
+    'no_sap':                 'simplificat',
+    '':                       'al_nivell',
+  };
+
+  var BEHAVIORAL_LABEL = {
+    'costa_llegir':           'Dislèxia',
+    'costa_atencio':          'TDAH',
+    'instruccions_concretes': 'TEA',
+    'nouvingut':              'Nouvingut',
+    'vol_repte':              'Altes cap.',
+    'dificultats_generals':   'Dif. apren.',
+    'no_sap':                 'Vulnerabilitat',
+    '':                       'Al nivell',
+  };
+
+  var GRUP_MAP = {
+    '':       { adaptacio: 'al_nivell',   perfils: [],                  badge: 'Al nivell' },
+    'suport': { adaptacio: 'simplificat', perfils: ['vulnerabilitat'],   badge: 'Suport' },
+    'repte':  { adaptacio: 'enriquiment', perfils: ['altes_capacitats'], badge: 'Repte' },
+  };
+
+  // ── Refs UI ──────────────────────────────────────────────────────────────────
+  var cursSel      = document.getElementById('curs-sel');
+  var carSel       = document.getElementById('car-sel');
+  var carGrupSel   = document.getElementById('car-grup-sel');
+  var carLabel     = document.getElementById('car-label');
+  var l1Group      = document.getElementById('l1-group');
+  var l1Inp        = document.getElementById('l1-inp');
+  var textArea     = document.getElementById('text-area');
+  var wordCount    = document.getElementById('word-count');
+  var btnAdaptar   = document.getElementById('btn-adaptar');
+  var btnLabel     = document.getElementById('btn-label');
+
+  var stateEmpty   = document.getElementById('state-empty');
+  var stateLoading = document.getElementById('state-loading');
+  var stateError   = document.getElementById('state-error');
+  var stateResult  = document.getElementById('state-result');
+  var loadingMsg   = document.getElementById('loading-msg');
+  var loadingSub   = document.getElementById('loading-sub');
+  var adaptedEl    = document.getElementById('adapted-text');
+  var resultBadge  = document.getElementById('result-badge');
+  var glossariBody = document.getElementById('glossari-body');
+  var preguntesBody= document.getElementById('preguntes-body');
+  var glStatus     = document.getElementById('gl-status');
+  var prStatus     = document.getElementById('pr-status');
+  var actionBar    = document.getElementById('action-bar');
+
+  // ── Seg toggle Grup/Alumne ───────────────────────────────────────────────────
+  var tipusActual = 'grup';
+
+  function updateTipusUI() {
+    if (tipusActual === 'grup') {
+      carGrupSel.style.display = '';
+      carSel.style.display     = 'none';
+      carLabel.textContent     = 'Nivell del grup';
+      l1Group.classList.remove('show');
+    } else {
+      carGrupSel.style.display = 'none';
+      carSel.style.display     = '';
+      carLabel.textContent     = 'Característica (opcional)';
+      if (carSel.value === 'nouvingut') l1Group.classList.add('show');
+    }
+  }
+
+  document.querySelectorAll('.seg-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.seg-btn').forEach(function (b) { b.classList.remove('on'); });
+      btn.classList.add('on');
+      tipusActual = btn.dataset.tipus;
+      updateTipusUI();
+    });
+  });
+
+  // ── Mostrar/ocultar L1 ───────────────────────────────────────────────────────
+  carSel.addEventListener('change', function () {
+    if (tipusActual === 'alumne' && carSel.value === 'nouvingut') {
+      l1Group.classList.add('show');
+      l1Inp.focus();
+    } else {
+      l1Group.classList.remove('show');
+    }
+  });
+
+  // ── Comptador de paraules ────────────────────────────────────────────────────
+  textArea.addEventListener('input', function () {
+    var n = textArea.value.trim().split(/\s+/).filter(Boolean).length;
+    wordCount.textContent = n + (n === 1 ? ' paraula' : ' paraules');
+  });
+
+  // ── Renderitzador Markdown mínim ─────────────────────────────────────────────
+  function md2html(md) {
+    if (!md) return '';
+    var lines = md.split('\n'), out = [], inList = false, listTag = 'ul';
+    function inline(s) {
+      return s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+              .replace(/(^|[\s(])_([^_]+)_/g, '$1<em>$2</em>');
+    }
+    lines.forEach(function (raw) {
+      var line = raw.trim(), m;
+      if ((m = line.match(/^###\s+(.+)$/))) { if (inList) { out.push('</' + listTag + '>'); inList = false; } out.push('<h3>' + inline(m[1]) + '</h3>'); return; }
+      if ((m = line.match(/^##\s+(.+)$/)))  { if (inList) { out.push('</' + listTag + '>'); inList = false; } out.push('<h2>' + inline(m[1]) + '</h2>'); return; }
+      if ((m = line.match(/^#\s+(.+)$/)))   { if (inList) { out.push('</' + listTag + '>'); inList = false; } out.push('<h1>' + inline(m[1]) + '</h1>'); return; }
+      if ((m = line.match(/^-\s+(.+)$/))) {
+        if (!inList || listTag === 'ol') { if (inList) out.push('</' + listTag + '>'); out.push('<ul>'); listTag = 'ul'; inList = true; }
+        out.push('<li>' + inline(m[1]) + '</li>'); return;
+      }
+      if ((m = line.match(/^(\d+)\.\s+(.+)$/))) {
+        if (!inList || listTag === 'ul') { if (inList) out.push('</' + listTag + '>'); out.push('<ol>'); listTag = 'ol'; inList = true; }
+        out.push('<li>' + inline(m[2]) + '</li>'); return;
+      }
+      if (inList) { out.push('</' + listTag + '>'); inList = false; }
+      if (!line) return;
+      out.push('<p>' + inline(line) + '</p>');
+    });
+    if (inList) out.push('</' + listTag + '>');
+    return out.join('\n');
+  }
+
+  // ── Gestió d'estats ──────────────────────────────────────────────────────────
+  function showState(name) {
+    stateEmpty.style.display   = name === 'empty'   ? 'flex'  : 'none';
+    stateLoading.style.display = name === 'loading' ? 'flex'  : 'none';
+    stateError.style.display   = name === 'error'   ? 'block' : 'none';
+    stateResult.style.display  = name === 'result'  ? 'block' : 'none';
+    if (name === 'result') { actionBar.classList.add('show'); }
+    else { actionBar.classList.remove('show'); }
+  }
+  showState('empty');
+
+  // ── Seccions desplegables ────────────────────────────────────────────────────
+  window.toggleSection = function (id) {
+    var sec = document.getElementById('sec-' + id);
+    if (sec) sec.classList.toggle('open');
+  };
+
+  // ── Missatges de càrrega rotatius ────────────────────────────────────────────
+  var LOADING_MSGS = [
+    'Llegint el text…',
+    'Analitzant el perfil…',
+    'Adaptant el contingut…',
+    'Generant el glossari…',
+    'Preparant les preguntes…',
+    'Donant els últims retocs…',
+  ];
+  var loadingInterval = null;
+  var lastModelName   = '';
+
+  function startLoadingAnimation() {
+    var idx = 0;
+    lastModelName = '';
+    loadingMsg.textContent = LOADING_MSGS[0];
+    loadingSub.textContent = '';
+    if (loadingInterval) clearInterval(loadingInterval);
+    loadingInterval = setInterval(function () {
+      idx = (idx + 1) % LOADING_MSGS.length;
+      loadingMsg.textContent = LOADING_MSGS[idx];
+    }, 2500);
+  }
+
+  function stopLoadingAnimation() {
+    if (loadingInterval) { clearInterval(loadingInterval); loadingInterval = null; }
+  }
+
+  // ── Adaptar ──────────────────────────────────────────────────────────────────
+  var currentAbort = null;
+  var lastPayload  = null;
+
+  btnAdaptar.addEventListener('click', runAdapt);
+  textArea.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) runAdapt();
+  });
+
+  function runAdapt() {
+    var text = textArea.value.trim();
+    if (!text) { textArea.focus(); return; }
+
+    var curs = cursSel.value;
+    var adaptacio, perfils, badge, l1 = '';
+
+    if (tipusActual === 'grup') {
+      var g = GRUP_MAP[carGrupSel.value] || GRUP_MAP[''];
+      adaptacio = g.adaptacio;
+      perfils   = g.perfils;
+      badge     = g.badge;
+    } else {
+      var caracteristica = carSel.value;
+      l1        = (caracteristica === 'nouvingut') ? l1Inp.value.trim() : '';
+      adaptacio = BEHAVIORAL_TO_ADAPTACIO[caracteristica] || 'al_nivell';
+      perfils   = BEHAVIORAL_TO_PERFILS[caracteristica] || [];
+      badge     = BEHAVIORAL_LABEL[caracteristica] || 'Al nivell';
+    }
+
+    var docentId = '';
+    try { docentId = localStorage.getItem('atne.docent_id') || ''; } catch (e) { /* */ }
+
+    lastPayload = { text: text, curs: curs, adaptacio: adaptacio, perfils: perfils, l1: l1, tipus: tipusActual, docent_id: docentId };
+    resultBadge.textContent = badge;
+    glStatus.textContent = 'Generant…';
+    glStatus.className = 'comp-status';
+    prStatus.textContent = 'Generant…';
+    prStatus.className = 'comp-status';
+    document.getElementById('sec-glossari').classList.remove('open');
+    document.getElementById('sec-preguntes').classList.remove('open');
+
+    if (currentAbort) currentAbort.abort();
+    currentAbort = new AbortController();
+
+    showState('loading');
+    startLoadingAnimation();
+    btnAdaptar.disabled = true;
+    btnLabel.textContent = 'Generant…';
+
+    streamAdaptFlash(lastPayload, currentAbort.signal);
+  }
+
+  async function streamAdaptFlash(payload, signal) {
+    try {
+      var resp = await fetch('/api/adapt-flash', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: signal,
+      });
+
+      if (!resp.ok) {
+        var errBody = {};
+        try { errBody = await resp.json(); } catch (e) { /* */ }
+        throw new Error(errBody.error || 'Error ' + resp.status);
+      }
+
+      var reader  = resp.body.getReader();
+      var decoder = new TextDecoder();
+      var buffer  = '';
+
+      while (true) {
+        var chunk = await reader.read();
+        if (chunk.done) break;
+        buffer += decoder.decode(chunk.value, { stream: true });
+        var lines = buffer.split('\n');
+        buffer = lines.pop();
+        for (var i = 0; i < lines.length; i++) {
+          if (!lines[i].startsWith('data: ')) continue;
+          var ev;
+          try { ev = JSON.parse(lines[i].slice(6)); } catch (e) { continue; }
+          handleSSEEvent(ev);
+        }
+      }
+    } catch (err) {
+      if (err && err.name === 'AbortError') return;
+      showState('error');
+      stateError.textContent = 'Error: ' + (err && err.message ? err.message : 'Error de connexió');
+      resetBtn();
+    }
+  }
+
+  function handleSSEEvent(ev) {
+    if (ev.type === 'step') {
+      if (ev.model) {
+        lastModelName = ev.model.replace(/^.*\//, '').replace(/-it$/, '');
+        loadingSub.textContent = 'Model: ' + lastModelName;
+      }
+    } else if (ev.type === 'result') {
+      stopLoadingAnimation();
+      showState('result');
+      adaptedEl.innerHTML = md2html(ev.adapted || '');
+      if (ev.glossari) {
+        glossariBody.innerHTML = md2html(ev.glossari);
+        glStatus.textContent = '✓ Generat';
+        glStatus.className = 'comp-status ok';
+        document.getElementById('sec-glossari').classList.add('open');
+      }
+      if (ev.preguntes) {
+        preguntesBody.innerHTML = md2html(ev.preguntes);
+        prStatus.textContent = '✓ Generat';
+        prStatus.className = 'comp-status ok';
+        document.getElementById('sec-preguntes').classList.add('open');
+      }
+      resetBtn();
+    } else if (ev.type === 'error') {
+      stopLoadingAnimation();
+      showState('error');
+      stateError.textContent = 'Error: ' + (ev.msg || 'Error inesperat');
+      resetBtn();
+    }
+  }
+
+  function resetBtn() {
+    stopLoadingAnimation();
+    btnAdaptar.disabled = false;
+    btnLabel.textContent = 'Adaptar text →';
+  }
+
+  // ── Copia ─────────────────────────────────────────────────────────────────────
+  document.getElementById('btn-copy').addEventListener('click', function () {
+    var parts = [adaptedEl.innerText || ''];
+    var glTxt = glossariBody.innerText.trim();
+    var prTxt = preguntesBody.innerText.trim();
+    if (glTxt) parts.push('\n\nGLOSSARI\n\n' + glTxt);
+    if (prTxt) parts.push('\n\nPREGUNTES DE COMPRENSIÓ\n\n' + prTxt);
+    var btn = document.getElementById('btn-copy');
+    navigator.clipboard.writeText(parts.join('')).then(function () {
+      btn.innerHTML = '✓ Copiat';
+      setTimeout(function () {
+        btn.innerHTML = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M11 5V3a1.5 1.5 0 0 0-1.5-1.5H3A1.5 1.5 0 0 0 1.5 3v6.5A1.5 1.5 0 0 0 3 11H5"/></svg> Copia';
+      }, 2000);
+    }).catch(function () {});
+  });
+
+  // ── PDF ───────────────────────────────────────────────────────────────────────
+  document.getElementById('btn-pdf').addEventListener('click', function () {
+    if (typeof html2pdf === 'undefined') return;
+    var el = document.getElementById('state-result');
+    html2pdf().set({
+      margin: [15, 20],
+      filename: 'adaptacio-flash.pdf',
+      image: { type: 'jpeg', quality: 0.95 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    }).from(el).save();
+  });
+
+  // ── Refer ─────────────────────────────────────────────────────────────────────
+  document.getElementById('btn-refer').addEventListener('click', function () {
+    if (!lastPayload) return;
+    if (currentAbort) currentAbort.abort();
+    currentAbort = new AbortController();
+    var docentId = '';
+    try { docentId = localStorage.getItem('atne.docent_id') || ''; } catch (e) { /* */ }
+    glStatus.textContent = 'Generant…'; glStatus.className = 'comp-status';
+    prStatus.textContent = 'Generant…'; prStatus.className = 'comp-status';
+    document.getElementById('sec-glossari').classList.remove('open');
+    document.getElementById('sec-preguntes').classList.remove('open');
+    showState('loading');
+    startLoadingAnimation();
+    btnAdaptar.disabled = true;
+    btnLabel.textContent = 'Generant…';
+    streamAdaptFlash(Object.assign({}, lastPayload, { docent_id: docentId }), currentAbort.signal);
+  });
+
+})();
+</script>
+
+</body>
+</html>

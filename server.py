@@ -102,6 +102,7 @@ from adaptation.llm_clients import (
 _MODEL_CONFIG: dict[str, str] = {
     "generate": ATNE_MODEL,
     "adapt": ATNE_MODEL,
+    "adapt_flash": ATNE_MODEL,   # mode Flash (prompt MVP)
     "refine": ATNE_MODEL,
     "complements": ATNE_MODEL,
     "auditor": "gpt-4o-mini",
@@ -231,11 +232,12 @@ def _load_system_config() -> dict:
 
     # Mapa: clau de DB → clau de _MODEL_CONFIG
     model_key_map = {
-        "atne_model_generate":    "generate",
-        "atne_model_adapt":       "adapt",
-        "atne_model_refine":      "refine",
-        "atne_model_complements": "complements",
-        "atne_model_auditor":     "auditor",
+        "atne_model_generate":      "generate",
+        "atne_model_adapt":         "adapt",
+        "atne_model_adapt_flash":   "adapt_flash",
+        "atne_model_refine":        "refine",
+        "atne_model_complements":   "complements",
+        "atne_model_auditor":       "auditor",
     }
     for row in rows:
         key = row.get("key")
@@ -560,10 +562,7 @@ async def favicon():
 
 @app.get("/")
 async def index():
-    # Bug 4 (2026-04-19): l'arrel portava a `ui/index.html` (UI antic). Ara
-    # redirigim al flux del pilot (pas1). L'UI antic continua accessible a
-    # `/legacy` per a debug / admin si cal comparar visualment.
-    return RedirectResponse(url="/ui/atne/pas1.html")
+    return RedirectResponse(url="/ui/atne/home.html")
 
 
 @app.get("/legacy", response_class=HTMLResponse)
@@ -573,6 +572,15 @@ async def index_legacy():
         (UI_DIR / "index.html").read_text(encoding="utf-8"),
         headers={"Cache-Control": "no-store"},
     )
+
+
+@app.get("/logo-fje.jpg")
+async def serve_logo_fje():
+    """Serveix el logo FJE des del directori arrel."""
+    logo = Path(__file__).parent / "logo fje.jpg"
+    if logo.exists():
+        return FileResponse(str(logo), media_type="image/jpeg")
+    raise HTTPException(404, "Logo no trobat")
 
 
 @app.get("/ui/{path:path}")
@@ -931,11 +939,12 @@ async def health():
 # dashboard /admin. Protegits per password via cookie signada.
 
 _ALLOWED_MODEL_KEYS = {
-    "atne_model_generate":    "generate",
-    "atne_model_adapt":       "adapt",
-    "atne_model_refine":      "refine",
-    "atne_model_complements": "complements",
-    "atne_model_auditor":     "auditor",
+    "atne_model_generate":      "generate",
+    "atne_model_adapt":         "adapt",
+    "atne_model_adapt_flash":   "adapt_flash",
+    "atne_model_refine":        "refine",
+    "atne_model_complements":   "complements",
+    "atne_model_auditor":       "auditor",
 }
 
 _ALLOWED_MODELS = [
@@ -1984,6 +1993,26 @@ def _get_current_docent_hash() -> str:
     salt = os.getenv("ATNE_DOCENT_SALT", "atne-pilot-2026")
     h = hashlib.sha256(f"{email}:{salt}".encode()).hexdigest()
     return h[:16]
+
+
+@app.get("/api/history/recent")
+async def history_recent(docent_id: str = "", limit: int = 5):
+    """Últimes adaptacions del docent per a la home (Flash + Taller)."""
+    if not docent_id:
+        return {"ok": True, "items": []}
+    try:
+        resp = requests.get(
+            f"{SUPABASE_URL}/rest/v1/history"
+            f"?docent_hash=eq.{docent_id}"
+            f"&select=id,created_at,profile_name,mode"
+            f"&order=created_at.desc&limit={limit}",
+            headers=SUPABASE_HEADERS, timeout=5,
+        )
+        if resp.status_code == 200:
+            return {"ok": True, "items": resp.json()}
+        return {"ok": True, "items": []}
+    except Exception:
+        return {"ok": True, "items": []}
 
 
 @app.post("/api/history")
@@ -3462,6 +3491,246 @@ async def adapt_stream(payload: dict = Body(...)):
     )
 
 
+# ── Flash (mode ràpid amb prompt MVP) ───────────────────────────────────────
+
+# Mapping (curs, adaptacio) → MECR — idèntic al de mpv/server_mpv.py
+_FLASH_CURS_MECR: dict[tuple[str, str], str] = {
+    ("primaria_12", "molt_simplificat"): "A1",
+    ("primaria_12", "simplificat"):      "A1",
+    ("primaria_12", "al_nivell"):        "A1",
+    ("primaria_12", "enriquiment"):      "A2",
+    ("primaria_34", "molt_simplificat"): "A1",
+    ("primaria_34", "simplificat"):      "A1",
+    ("primaria_34", "al_nivell"):        "A2",
+    ("primaria_34", "enriquiment"):      "B1",
+    ("primaria_56", "molt_simplificat"): "A1",
+    ("primaria_56", "simplificat"):      "A2",
+    ("primaria_56", "al_nivell"):        "B1",
+    ("primaria_56", "enriquiment"):      "B2",
+    ("eso_12",      "molt_simplificat"): "A2",
+    ("eso_12",      "simplificat"):      "B1",
+    ("eso_12",      "al_nivell"):        "B2",
+    ("eso_12",      "enriquiment"):      "C1",
+    ("eso_34",      "molt_simplificat"): "B1",
+    ("eso_34",      "simplificat"):      "B1",
+    ("eso_34",      "al_nivell"):        "B2",
+    ("eso_34",      "enriquiment"):      "C1",
+    ("batxillerat", "molt_simplificat"): "B1",
+    ("batxillerat", "simplificat"):      "B2",
+    ("batxillerat", "al_nivell"):        "C1",
+    ("batxillerat", "enriquiment"):      "enriquiment",
+}
+
+_FLASH_NIVELL_MAP: dict[str, str] = {
+    "A1":          "A1 — Lectura Fàcil estricta (AENOR UNE 153101:2018): frases ≤10 paraules, "
+                   "vocabulari bàsic, veu activa, una idea per frase, sense subordinades.",
+    "A2":          "A2 — Lectura Fàcil adaptada: frases curtes i directes, vocabulari freqüent, "
+                   "estructura simple, explica termes amb paraules conegudes.",
+    "B1":          "B1 — Llenguatge planer: frases clares, vocabulari estàndard, "
+                   "explica termes tècnics entre parèntesis.",
+    "B2":          "B2 — Rigor curricular: vocabulari tècnic quan cal, estructura clara, frases fluides.",
+    "C1":          "C1 — Text acadèmic estàndard: vocabulari tècnic precís, estructures complexes admeses.",
+    "enriquiment": "Enriquiment — Taxonomia de Bloom (anàlisi, síntesi, avaluació): "
+                   "aprofundeix conceptes, afegeix connexions interdisciplinàries, invita a la reflexió crítica.",
+}
+
+_FLASH_PERFIL_MAP: dict[str, str] = {
+    "nouvingut":        "Nouvingut: vocabulari d'alta freqüència, frases curtes, "
+                        "explica referents culturals no universals.",
+    "tdah":             "TDAH (principis UDL): paràgrafs de 2-3 línies màxim, paraules clau en **negreta**, "
+                        "idea principal al principi de cada bloc. "
+                        "Defineix els termes tècnics la primera vegada entre parèntesis: terme (definició breu). "
+                        "Afegeix una línia de progrés [Secció X de N] entre blocs. "
+                        "Inclou una pregunta breu de verificació al final de cada bloc. "
+                        "Afegeix un resum curt al final. "
+                        "IMPORTANT: no allarguis el text — manté la mateixa extensió que l'original.",
+    "dislexia":         "Dislèxia: paraules curtes i freqüents, frases simples (màx. 12 paraules), "
+                        "evita sigles i abreviatures, evita encadenar prefixos i sufixos.",
+    "tea":              "TEA: llenguatge literal i directe, evita metàfores i ironies, "
+                        "estructura previsible i ordenada amb passos numerats, frases afirmatives.",
+    "tdl":              "TDL: redueix la densitat lèxica al mínim. "
+                        "Estructura SVO estricta (Subjecte-Verb-Object): evita passives i subordinades. "
+                        "Cada terme tècnic apareix en 2-3 contextos lleugerament diferents.",
+    "di":               "Discapacitat intel·lectual: frases de màxim 8 paraules, una sola idea per frase. "
+                        "Cada concepte abstracte amb un exemple tangible i quotidià immediat. "
+                        "Vocabulari d'ús quotidià, evita tecnicismes llevat que siguin imprescindibles.",
+    "altes_capacitats": "ALERTA — Altes capacitats: PROHIBIT SIMPLIFICAR. "
+                        "Mantén o augmenta la complexitat lingüística i conceptual original. "
+                        "Afegeix profunditat: excepcions, fronteres del coneixement, debats oberts, "
+                        "connexions interdisciplinàries i pensament crític.",
+    "vulnerabilitat":   "Vulnerabilitat socioeconòmica: evita supòsits culturals implícits. "
+                        "Utilitza exemples i referents accessibles i universals. "
+                        "Tona propera i acollidora, sense condescendència.",
+    "trastorn_emocional": "Trastorn emocional / ansietat: evita llenguatge que generi pressió o urgència. "
+                        "Tona tranquil·la i neutral. Divideix la informació en passos petits.",
+}
+
+
+def _build_flash_system_prompt(
+    nivell: str,
+    perfils: list[str],
+    l1: str = "",
+) -> str:
+    p = (
+        "Ets un assistent pedagògic especialitzat en adaptació de textos educatius en català.\n"
+        "Adapta el text que t'enviaré.\n"
+        "IMPORTANT: comença directament amb el text adaptat. "
+        "No escriguis cap frase introductòria, cap títol genèric, "
+        "cap explicació de què has fet ni cap comentari final.\n\n"
+    )
+    p += "NIVELL:\n" + _FLASH_NIVELL_MAP.get(nivell, _FLASH_NIVELL_MAP["B1"]) + "\n"
+    if perfils:
+        p += "\nPERFILS DE L'ALUMNAT:\n"
+        for pf in perfils:
+            if pf in _FLASH_PERFIL_MAP:
+                p += f"- {_FLASH_PERFIL_MAP[pf]}\n"
+    # Glossari i preguntes sempre actius al Flash
+    p += "\nCOMPLEMENTS (afegeix al final del text adaptat, separats amb un títol clar en MAJÚSCULES):\n"
+    if "nouvingut" in perfils and l1:
+        p += f"- GLOSSARI: 5-8 termes clau del text, definició breu adaptada al nivell i, entre parèntesis, la traducció a {l1}.\n"
+    else:
+        p += "- GLOSSARI: 5-8 termes clau del text amb definició breu adaptada al nivell indicat.\n"
+    p += "- PREGUNTES DE COMPRENSIÓ: 3-5 preguntes graduades (comprensió literal → aplicació → reflexió crítica).\n"
+    return p
+
+
+def _parse_flash_response(raw: str) -> tuple[str, str, str]:
+    """Separa el text adaptat, glossari i preguntes d'una resposta Flash.
+
+    El prompt demana que el LLM afegeixi 'GLOSSARI' i 'PREGUNTES DE COMPRENSIÓ'
+    en MAJÚSCULES al final. Busquem els delimitadors i tallem.
+    Retorna (adapted, glossari, preguntes). Qualsevol part pot ser ''.
+    """
+    import re
+    text = raw.strip()
+    glossari = ""
+    preguntes = ""
+
+    # Delimitadors esperats (el LLM pot usar variacions)
+    gl_pat = re.compile(
+        r"\n\s*GLOSSARI[:\s]*\n",
+        re.IGNORECASE,
+    )
+    pr_pat = re.compile(
+        r"\n\s*PREGUNTES\s+DE\s+COMPRENSIÓ[:\s]*\n",
+        re.IGNORECASE,
+    )
+
+    gl_m = gl_pat.search(text)
+    pr_m = pr_pat.search(text)
+
+    if gl_m and pr_m:
+        if gl_m.start() < pr_m.start():
+            adapted  = text[:gl_m.start()].strip()
+            glossari = text[gl_m.end():pr_m.start()].strip()
+            preguntes = text[pr_m.end():].strip()
+        else:
+            adapted   = text[:pr_m.start()].strip()
+            preguntes = text[pr_m.end():gl_m.start()].strip()
+            glossari  = text[gl_m.end():].strip()
+    elif gl_m:
+        adapted  = text[:gl_m.start()].strip()
+        glossari = text[gl_m.end():].strip()
+    elif pr_m:
+        adapted   = text[:pr_m.start()].strip()
+        preguntes = text[pr_m.end():].strip()
+    else:
+        adapted = text
+
+    return adapted, glossari, preguntes
+
+
+@app.post("/api/adapt-flash")
+async def adapt_flash(payload: dict = Body(...)):
+    """Mode Flash: adapta amb el prompt MVP (senzill) i SSE.
+
+    Payload:
+      text (str):         text original
+      curs (str):         primaria_12 | primaria_34 | primaria_56 | eso_12 | eso_34 | batxillerat
+      adaptacio (str):    al_nivell | simplificat | molt_simplificat | enriquiment
+      perfils (list[str]):clínics: dislexia | tdah | tea | nouvingut | altes_capacitats | di | vulnerabilitat
+      l1 (str):           llengua materna (si nouvingut)
+      tipus (str):        grup | alumne  (meta-dada)
+      docent_id (str):    per desar a history
+    """
+    text      = (payload.get("text") or "").strip()
+    curs      = payload.get("curs", "eso_12")
+    adaptacio = payload.get("adaptacio", "al_nivell")
+    perfils   = payload.get("perfils") or []
+    l1        = (payload.get("l1") or "").strip()
+    tipus     = payload.get("tipus", "grup")
+    docent_id = (payload.get("docent_id") or "").strip()
+
+    if not text:
+        return JSONResponse({"error": "El text és buit."}, status_code=400)
+
+    nivell        = _FLASH_CURS_MECR.get((curs, adaptacio), "B1")
+    model_id      = _model_for("adapt_flash")
+    system_prompt = _build_flash_system_prompt(nivell, perfils, l1)
+    t0 = __import__("time").time()
+
+    async def gen():
+        yield f"data: {json.dumps({'type': 'step', 'msg': 'Generant adaptació…', 'model': model_id}, ensure_ascii=False)}\n\n"
+
+        try:
+            loop = asyncio.get_event_loop()
+            raw = await loop.run_in_executor(
+                None,
+                lambda: _call_llm(model_id, system_prompt, text),
+            )
+        except Exception as exc:
+            yield f"data: {json.dumps({'type': 'error', 'msg': str(exc)}, ensure_ascii=False)}\n\n"
+            return
+
+        adapted, glossari, preguntes = _parse_flash_response(raw)
+        duration_ms = int((__import__("time").time() - t0) * 1000)
+
+        yield f"data: {json.dumps({'type': 'result', 'adapted': adapted, 'glossari': glossari, 'preguntes': preguntes}, ensure_ascii=False)}\n\n"
+        yield f"data: {json.dumps({'type': 'done'}, ensure_ascii=False)}\n\n"
+
+        # Desa a history en background (no bloqueja el SSE)
+        try:
+            n_in  = len(text.split())
+            n_out = len(adapted.split())
+            row = {
+                "profile_name":  ", ".join(perfils) if perfils else "al_nivell",
+                "profile_json":  {"perfils": perfils, "curs": curs, "adaptacio": adaptacio, "l1": l1, "tipus": tipus},
+                "context_json":  {"curs": curs, "etapa": curs.split("_")[0] if "_" in curs else curs},
+                "params_json":   {"nivell": nivell, "adaptacio": adaptacio},
+                "original_text": text,
+                "adapted_text":  adapted,
+                "model_used":    model_id,
+                "endpoint":      "/api/adapt-flash",
+                "duration_ms":   duration_ms,
+                "etapa":         curs.split("_")[0] if "_" in curs else curs,
+                "curs":          curs,
+                "n_words_in":    n_in,
+                "n_words_out":   n_out,
+                "via":           "flash",
+                "mode":          "flash",
+                "prompt_version": ATNE_PROMPT_VERSION,
+            }
+            if docent_id:
+                row["docent_hash"] = docent_id
+            requests.post(
+                f"{SUPABASE_URL}/rest/v1/history",
+                headers={**SUPABASE_HEADERS, "Prefer": "return=minimal"},
+                json=row,
+                timeout=8,
+            )
+        except Exception:
+            pass  # No bloquejar el SSE per error de desa
+
+    return StreamingResponse(
+        gen(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
+
 # ── Il·lustracions (complement beta) ────────────────────────────────────────
 
 @app.post("/api/illustration")
@@ -4755,6 +5024,30 @@ async def docent_login(payload: dict = Body(...)):
     if ins.status_code not in (200, 201):
         return JSONResponse({"ok": False, "error": "Error creant docent"}, status_code=500)
     return {"ok": True, "docent_id": docent_id, "alias": alias, "is_new": True}
+
+
+@app.patch("/api/docent/alias")
+async def update_docent_alias(payload: dict = Body(...)):
+    """Actualitza el nom visible del docent (alias).
+
+    Retorna {ok, alias}.
+    """
+    docent_id = (payload.get("docent_id") or "").strip()
+    alias = (payload.get("alias") or "").strip()
+    if not docent_id or not alias:
+        return JSONResponse({"ok": False, "error": "docent_id i alias obligatoris"}, status_code=400)
+    if len(alias) > 60:
+        return JSONResponse({"ok": False, "error": "Nom massa llarg"}, status_code=400)
+
+    resp = requests.patch(
+        f"{SUPABASE_URL}/rest/v1/atne_docents?id=eq.{docent_id}",
+        headers={**SUPABASE_HEADERS, "Prefer": "return=minimal"},
+        json={"alias": alias},
+        timeout=5,
+    )
+    if resp.status_code not in (200, 204):
+        return JSONResponse({"ok": False, "error": "Error actualitzant alias"}, status_code=500)
+    return {"ok": True, "alias": alias}
 
 
 @app.get("/api/docent/profiles")
