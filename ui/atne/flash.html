@@ -739,6 +739,31 @@
 (function () {
   'use strict';
 
+  // ── Init sessió docent (garanteix atne.docent_id + atne.docent_alias) ─────────
+  // Necessari perquè: (a) el desar perfils funcioni, (b) l'avatar al Taller sigui
+  // correcte quan l'usuari navega des de Flash sense haver passat per Taller.
+  (function initDocentSession() {
+    var did = '';
+    try { did = localStorage.getItem('atne.docent_id') || ''; } catch (e) { /* */ }
+    if (did) return;
+    if (window.ATNE_AUTH && window.ATNE_AUTH.login) {
+      fetch('/api/docent/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ login: window.ATNE_AUTH.login })
+      })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d.ok) return;
+        try { localStorage.setItem('atne.docent_id', d.docent_id); } catch (e) { /* */ }
+        try { localStorage.setItem('atne.docent_alias', d.alias); } catch (e) { /* */ }
+        var btn = document.getElementById('docent-av');
+        if (btn && d.alias) { btn.textContent = d.alias[0].toUpperCase(); btn.title = 'Docent · ' + d.alias; }
+      })
+      .catch(function () { /* silent */ });
+    }
+  })();
+
   // ── Mapes behavioral → clínic ────────────────────────────────────────────────
   var BEHAVIORAL_TO_PERFILS = {
     'costa_llegir':           ['dislexia'],

@@ -532,6 +532,7 @@
     /* Topbar compacta: help/compartir/avatar segueixen visibles (mida reduïda) */
     .topbar { padding: 10px 14px; gap: 6px; flex-wrap: wrap; }
     .steps { order: 3; flex-basis: 100%; overflow-x: auto; padding: 3px; }
+    .mode-nav { order: 1; flex-basis: auto !important; overflow-x: visible !important; }
     .step { padding: 5px 10px; font-size: 10.5px; white-space: nowrap; }
     .tb-title { font-size: 14px; flex: 1; min-width: 0; }
     .icon-btn { width: 28px; height: 28px; flex-shrink: 0; }
@@ -720,7 +721,10 @@
   <div class="canvas">
     <div class="topbar">
       <button class="hamb" id="hamb" title="Menú"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
-      <div class="tb-title">ATNE</div>
+      <nav class="steps mode-nav" aria-label="Mode" style="margin:0;flex-shrink:0">
+        <a href="/ui/atne/flash.html" class="step" style="text-decoration:none">Flash</a>
+        <a href="/ui/atne/pas1.html" class="step on" style="text-decoration:none">Taller</a>
+      </nav>
       <button class="mob-profile-chip" id="mob-profile-chip" onclick="location.href='/ui/atne/pas1.html'" title="Canviar perfil">
         <span class="mpc-av" id="mpc-av">M</span>
         <span class="mpc-n" id="mpc-n">Marc</span>
