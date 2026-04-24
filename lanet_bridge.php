@@ -57,16 +57,15 @@ if (!in_array($backOrigin, ALLOWED_ORIGINS, true)) {
 
 $token = trim($_COOKIE['tokenNet'] ?? '');
 if (!$token) {
-    // Sense sessió lanet → redirigir a login lanet i tornar aquí
     $selfUrl = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-    header('Location: /login?redirect=' . urlencode($selfUrl));
+    header('Location: https://www.fje.edu/login?redirect=' . urlencode($selfUrl));
     exit;
 }
 
 $sessio = _validaToken($token);
 if (!$sessio) {
     $selfUrl = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-    header('Location: /login?redirect=' . urlencode($selfUrl));
+    header('Location: https://www.fje.edu/login?redirect=' . urlencode($selfUrl));
     exit;
 }
 
@@ -78,19 +77,21 @@ $location = $back . $sep
 header('Location: ' . $location);
 exit;
 
-// ── Funció shared de validació ────────────────────────────────────────────────
+// ── Funció shared de validació (idèntica a NETSecure.php original) ────────────
 function _validaToken(string $token) {
     include DIR_LIB_DB . 'connexio.net.php';
     try {
-        $conn = new PDO("sqlsrv:server=$server;Database=$database", $user, $pwd);
-        $conn->exec('SET ANSI_WARNINGS ON');
-        $conn->exec('SET ANSI_NULLS ON');
-        $sql = $conn->prepare("EXEC NET2.[dbo].[ValidaToken] :token");
+        $conn = new PDO("sqlsrv:server=$server;Database=$database", $user, $pwd, $options ?? []);
+        $sql = $conn->prepare('SET ANSI_WARNINGS ON');
+        $sql->execute();
+        $sql = $conn->prepare('SET ANSI_NULLS ON');
+        $sql->execute();
+        $sql = $conn->prepare("NET2.[dbo].[ValidaToken] :token");
         $sql->execute(['token' => $token]);
         $row = $sql->fetch(PDO::FETCH_OBJ);
-        return ($row && isset($row->token) && $row->token === $token) ? $row : false;
-    } catch (\Throwable $e) {
+    } catch (PDOException $e) {
         error_log('[ATNE bridge] Error validaToken: ' . $e->getMessage());
         return false;
     }
+    return (!empty($row->token) && $row->token == $token) ? $row : false;
 }
