@@ -10,7 +10,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="/ui/styles/tokens.css">
 <link rel="stylesheet" href="/ui/styles/base.css">
@@ -399,6 +399,86 @@
     .flash-result { padding: 20px 18px 90px; }
     .action-bar { bottom: 16px; right: 16px; }
   }
+
+  /* ── Selector de tipografia ───────────────────────────────── */
+  .adapted-box.font-inter     { font-family: var(--ui); }
+  .adapted-box.font-atkinson  { font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; }
+  .adapted-box.font-lexend    { font-family: 'Lexend', system-ui, sans-serif; }
+
+  .font-selector { position: relative; display: inline-flex; }
+  .font-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 10px 5px 8px;
+    border-radius: var(--r-md);
+    font-size: 12px; font-family: var(--ui); font-weight: 500;
+    color: var(--ink-600);
+    background: rgba(255,255,255,.65);
+    border: 1px solid var(--paper-line);
+    cursor: pointer;
+    transition: background var(--trans-fast);
+  }
+  .font-btn:hover { background: #fff; }
+  .font-btn .font-ic { font-family: var(--serif); font-weight: 700; font-size: 13px; width: 14px; text-align: center; }
+  .font-btn .font-current { color: var(--ink-900); }
+  .font-btn svg.caret { width: 11px; height: 11px; color: var(--ink-500); transition: transform var(--trans-fast); }
+  .font-selector.open .font-btn svg.caret { transform: rotate(180deg); }
+  .font-menu {
+    position: absolute; top: calc(100% + 6px); right: 0;
+    background: #fff;
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-lg);
+    box-shadow: var(--sh-lg);
+    z-index: 35; display: none; min-width: 210px; overflow: hidden;
+  }
+  .font-selector.open .font-menu { display: block; }
+  .font-opt {
+    display: flex; flex-direction: column;
+    padding: 9px 14px; cursor: pointer;
+    border: none; background: transparent; text-align: left; width: 100%;
+    transition: background var(--trans-fast);
+  }
+  .font-opt:hover { background: var(--cream); }
+  .font-opt.active { background: var(--primary-50); }
+  .font-opt-name { font-size: 12px; font-weight: 600; color: var(--ink-900); font-family: var(--ui); }
+  .font-opt-sample { font-size: 13px; color: var(--ink-600); margin-top: 2px; }
+  .font-opt-sample.font-fraunces  { font-family: var(--serif); }
+  .font-opt-sample.font-inter     { font-family: var(--ui); }
+  .font-opt-sample.font-atkinson  { font-family: 'Atkinson Hyperlegible', sans-serif; }
+  .font-opt-sample.font-lexend    { font-family: 'Lexend', sans-serif; }
+
+  /* ── Desar perfil ─────────────────────────────────────────── */
+  .save-profile-wrap { margin-top: 10px; }
+  .save-trigger {
+    background: transparent; border: none;
+    font-size: 12px; font-family: var(--ui); font-weight: 500;
+    color: var(--ink-400); cursor: pointer;
+    display: flex; align-items: center; gap: 5px; padding: 2px 0;
+    transition: color var(--trans-fast);
+  }
+  .save-trigger:hover { color: var(--primary); }
+  .save-trigger svg { width: 12px; height: 12px; }
+  .save-pf-form { display: none; gap: 6px; margin-top: 8px; }
+  .save-pf-form.show { display: flex; }
+  .save-pf-form input {
+    flex: 1; appearance: none;
+    background: #fff; border: 1px solid rgba(0,0,0,.1);
+    border-radius: var(--r-md); padding: 7px 10px;
+    font-size: 13px; font-family: var(--ui); color: var(--ink-900); outline: none;
+    transition: border-color var(--trans-fast);
+  }
+  .save-pf-form input:focus { border-color: var(--primary); }
+  .save-pf-confirm {
+    background: var(--primary); color: #fff; border: none;
+    border-radius: var(--r-md); padding: 7px 14px;
+    font-size: 13px; font-weight: 600; font-family: var(--ui); cursor: pointer; white-space: nowrap;
+    transition: background var(--trans-fast);
+  }
+  .save-pf-confirm:hover { background: var(--primary-600); }
+  .save-pf-ok {
+    font-size: 12px; color: var(--ok); display: none;
+    align-items: center; gap: 4px; margin-top: 6px; font-weight: 500;
+  }
+  .save-pf-ok.show { display: flex; }
 </style>
 </head>
 <body>
@@ -501,6 +581,17 @@
         <button class="btn-adaptar" id="btn-adaptar">
           <span id="btn-label">Adaptar text →</span>
         </button>
+        <div class="save-profile-wrap">
+          <button class="save-trigger" id="save-trigger">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Desa com a perfil
+          </button>
+          <div class="save-pf-form" id="save-pf-form">
+            <input id="save-pf-name" type="text" placeholder="Nom del perfil (p. ex. Marc 3r ESO)">
+            <button class="save-pf-confirm" id="save-pf-btn">Desa</button>
+          </div>
+          <div class="save-pf-ok" id="save-pf-ok">✓ Perfil desat</div>
+        </div>
       </div>
 
     </section>
@@ -525,6 +616,31 @@
         <div class="result-header">
           <span class="result-title">✦ Text adaptat</span>
           <span class="profile-badge" id="result-badge"></span>
+          <div class="font-selector" id="font-selector">
+            <button class="font-btn" onclick="document.getElementById('font-selector').classList.toggle('open')">
+              <span class="font-ic">Aa</span>
+              <span class="font-current" id="font-current">Fraunces</span>
+              <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="font-menu">
+              <button class="font-opt active" data-font="fraunces">
+                <span class="font-opt-name">Fraunces</span>
+                <span class="font-opt-sample font-fraunces">La fotosíntesi és un procés</span>
+              </button>
+              <button class="font-opt" data-font="inter">
+                <span class="font-opt-name">Inter</span>
+                <span class="font-opt-sample font-inter">La fotosíntesi és un procés</span>
+              </button>
+              <button class="font-opt" data-font="atkinson">
+                <span class="font-opt-name">Atkinson Hyperlegible</span>
+                <span class="font-opt-sample font-atkinson">La fotosíntesi és un procés</span>
+              </button>
+              <button class="font-opt" data-font="lexend">
+                <span class="font-opt-name">Lexend</span>
+                <span class="font-opt-sample font-lexend">La fotosíntesi és un procés</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         <div class="adapted-box" id="adapted-text"></div>
@@ -970,6 +1086,80 @@
     btnAdaptar.disabled = true;
     btnLabel.textContent = 'Generant…';
     streamAdaptFlash(Object.assign({}, lastPayload, { docent_id: docentId }), currentAbort.signal);
+  });
+
+  // ── Selector de tipografia ────────────────────────────────────────────────────
+  var FONT_LABELS = { fraunces: 'Fraunces', inter: 'Inter', atkinson: 'Atkinson', lexend: 'Lexend' };
+  var currentFont = 'fraunces';
+  try { currentFont = localStorage.getItem('atne.flash_font') || 'fraunces'; } catch (e) { /* */ }
+
+  function applyDocFont(name) {
+    var box = document.getElementById('adapted-text');
+    Object.keys(FONT_LABELS).forEach(function (f) { box.classList.remove('font-' + f); });
+    if (name !== 'fraunces') box.classList.add('font-' + name);
+    var cur = document.getElementById('font-current');
+    if (cur) cur.textContent = FONT_LABELS[name] || name;
+    document.querySelectorAll('.font-opt').forEach(function (o) {
+      o.classList.toggle('active', o.dataset.font === name);
+    });
+    currentFont = name;
+    try { localStorage.setItem('atne.flash_font', name); } catch (e) { /* */ }
+  }
+
+  document.querySelectorAll('.font-opt').forEach(function (o) {
+    o.addEventListener('click', function () {
+      applyDocFont(o.dataset.font);
+      var sel = document.getElementById('font-selector');
+      if (sel) sel.classList.remove('open');
+    });
+  });
+  document.addEventListener('click', function (e) {
+    var sel = document.getElementById('font-selector');
+    if (sel && !sel.contains(e.target)) sel.classList.remove('open');
+  });
+  applyDocFont(currentFont);
+
+  // ── Desar perfil ──────────────────────────────────────────────────────────────
+  document.getElementById('save-trigger').addEventListener('click', function () {
+    var form = document.getElementById('save-pf-form');
+    form.classList.toggle('show');
+    if (form.classList.contains('show')) document.getElementById('save-pf-name').focus();
+  });
+
+  document.getElementById('save-pf-btn').addEventListener('click', function () {
+    var name = document.getElementById('save-pf-name').value.trim();
+    if (!name) { document.getElementById('save-pf-name').focus(); return; }
+    var docentId = '';
+    try { docentId = localStorage.getItem('atne.docent_id') || ''; } catch (e) { /* */ }
+    if (!docentId) {
+      stateError.style.display = 'block';
+      stateError.textContent = 'Cal estar identificat per desar perfils.';
+      return;
+    }
+    var profile = {
+      name: name,
+      source: 'flash',
+      curs: cursSel.value,
+      tipus: tipusActual,
+      adaptacio: lastPayload ? lastPayload.adaptacio : 'al_nivell',
+      perfils: lastPayload ? lastPayload.perfils : [],
+      l1: lastPayload ? (lastPayload.l1 || '') : '',
+    };
+    fetch('/api/docent/profiles', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ docent_id: docentId, profile: profile }),
+    }).then(function (r) {
+      if (r.ok) {
+        document.getElementById('save-pf-form').classList.remove('show');
+        document.getElementById('save-pf-name').value = '';
+        var ok = document.getElementById('save-pf-ok');
+        ok.classList.add('show');
+        setTimeout(function () { ok.classList.remove('show'); }, 3000);
+      } else {
+        alert('Error desant el perfil.');
+      }
+    }).catch(function () { alert('Error de connexió.'); });
   });
 
 })();
