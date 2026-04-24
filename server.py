@@ -3612,20 +3612,33 @@ def _build_flash_system_prompt(
 def _parse_flash_response(raw: str) -> dict:
     """Separa el text adaptat i els complements (glossari, preguntes, resum).
 
-    El prompt demana títols en MAJÚSCULES al final. Retorna un dict amb claus
-    adapted, glossari, preguntes, resum. Qualsevol valor pot ser ''.
+    Patrons robustos: admeten markdown (##, **), accent variat (COMPRENSIO/COMPRENSIÓ),
+    i capçaleres sense línia en blanc prèvia. Retorna dict: adapted, glossari, preguntes, resum.
     """
     import re
     text = raw.strip()
 
-    # Patrons de tall (ordre no garantit pel LLM)
+    # Prefix markdown opcional: ## / ** (amb espais addicionals possibles)
+    _MD = r"(?:\*{1,2}|#{1,3}[ \t]*)?"
+    # Suffix: qualsevol combinació de *, : i espais fins a fi de línia
+    # Cobreix: "GLOSSARI", "GLOSSARI:", "**GLOSSARI**", "**GLOSSARI:**", etc.
+    _SUF = r"[ \t:*]*"
+
     patterns = {
-        "glossari":  re.compile(r"\n\s*GLOSSARI[:\s]*\n", re.IGNORECASE),
-        "preguntes": re.compile(r"\n\s*PREGUNTES\s+DE\s+COMPRENSIÓ[:\s]*\n", re.IGNORECASE),
-        "resum":     re.compile(r"\n\s*RESUM[:\s]*\n", re.IGNORECASE),
+        "glossari":  re.compile(
+            rf"^[ \t]*{_MD}GLOSSARI{_SUF}$",
+            re.IGNORECASE | re.MULTILINE,
+        ),
+        "preguntes": re.compile(
+            rf"^[ \t]*{_MD}PREGUNTES(?:[ \t]+DE[ \t]+COMPRENS(?:[IÍ][ÓO]|IO))?{_SUF}$",
+            re.IGNORECASE | re.MULTILINE,
+        ),
+        "resum": re.compile(
+            rf"^[ \t]*{_MD}RESUM{_SUF}$",
+            re.IGNORECASE | re.MULTILINE,
+        ),
     }
 
-    # Troba totes les marques i ordena per posició
     marks = []  # (pos_start, pos_end, key)
     for key, pat in patterns.items():
         m = pat.search(text)
@@ -3637,7 +3650,7 @@ def _parse_flash_response(raw: str) -> dict:
     if not marks:
         return result
 
-    result["adapted"] = text[:marks[0][0]].strip()
+    result["adapted"] = text[: marks[0][0]].strip()
     for i, (start, end, key) in enumerate(marks):
         next_start = marks[i + 1][0] if i + 1 < len(marks) else len(text)
         result[key] = text[end:next_start].strip()
