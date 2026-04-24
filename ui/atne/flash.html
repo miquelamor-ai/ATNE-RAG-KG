@@ -1203,6 +1203,19 @@
     }).catch(function () { alert('Error de connexió.'); });
   });
 
+  // ── Handoff Flash → Taller: porta el text original al Pas 2 ─────────────────
+  document.querySelector('nav[aria-label="Mode"] a[href*="pas1"]')
+    ?.addEventListener('click', function (e) {
+      var text = textArea ? textArea.value.trim() : '';
+      if (!text) return; // sense text: navegació normal
+      e.preventDefault();
+      try {
+        localStorage.setItem('atne.doc_draft', text);
+        localStorage.setItem('atne.flash_handoff', '1');
+      } catch (ex) { /* ignore */ }
+      location.href = '/ui/atne/pas1.html';
+    });
+
 })();
 </script>
 

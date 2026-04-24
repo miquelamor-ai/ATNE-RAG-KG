@@ -1392,6 +1392,12 @@
   const savedTitle = localStorage.getItem('atne.doc_title');
   if (savedTitle && docTitleEl) docTitleEl.value = savedTitle;
 
+  // Handoff des de Flash: avisa el docent que el text ve de Flash
+  if (localStorage.getItem('atne.flash_handoff') === '1') {
+    localStorage.removeItem('atne.flash_handoff');
+    setTimeout(() => window.atneToast?.('Text importat des de Flash — selecciona un perfil al Pas 1 i adapta', 'info'), 400);
+  }
+
   // ──────────────────────────────────────────────────────
   // Undo/Redo del Pas 2 (pila manual amb debounce + snapshots explícits)
   // Snapshots: abans de Pujar/Generar/Refinar/Clear, i a l'input amb debounce 600ms.
