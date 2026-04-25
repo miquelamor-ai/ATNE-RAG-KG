@@ -613,6 +613,39 @@
   .fr-b.primary { background: var(--primary); color: #fff; margin-top: 3px; }
   .fr-b.primary:hover { background: var(--primary-600); color: #fff; }
   .fr-b.disabled { opacity: .4; pointer-events: none; }
+  .fr-lang-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .fr-lang-lbl {
+    font-family: var(--mono);
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--ink-400);
+  }
+  .fr-lang-sel {
+    width: 40px;
+    height: 28px;
+    border-radius: 7px;
+    border: 1px solid var(--paper-line);
+    background: var(--cream);
+    font-size: 10px;
+    font-family: var(--mono);
+    font-weight: 600;
+    color: var(--ink-700);
+    text-align: center;
+    cursor: pointer;
+    padding: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    text-align-last: center;
+    transition: border-color var(--trans-fast), background var(--trans-fast);
+  }
+  .fr-lang-sel:hover { border-color: var(--primary); background: var(--primary-50); }
+  .fr-lang-sel.noca { border-color: var(--primary); color: var(--primary); background: var(--primary-50); }
 
   /* Popover Refinar del Pas 2 (ancorat al frail) */
   .fr-pop {
@@ -1155,6 +1188,17 @@
           <button class="fr-b" data-tip="Desar al servidor" id="fr-save-draft"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg></button>
           <button class="fr-b" data-tip="Accions" id="fr-actions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></button>
           <div class="fr-sep"></div>
+          <div class="fr-lang-wrap" title="Llengua de sortida de l'adaptació">
+            <span class="fr-lang-lbl">Llengua</span>
+            <select id="fr-lang-sel" class="fr-lang-sel">
+              <option value="ca">CA</option>
+              <option value="es">ES</option>
+              <option value="en">EN</option>
+              <option value="fr">FR</option>
+              <option value="gl">GL</option>
+              <option value="eu">EU</option>
+            </select>
+          </div>
           <button class="fr-b primary" data-tip="Adaptar → Pas 3" id="adapt-frail">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
           </button>
@@ -1660,6 +1704,26 @@
   // El stepper "3 Adaptacions" també dispara Adaptar (no navega directe). Així
   // el Pas 3 sempre rep el text actualitzat del Pas 2, no un d'antic.
   document.getElementById('step-to-pas3')?.addEventListener('click', onAdaptClick);
+
+  // Selector de llengua de sortida
+  (function () {
+    const LANGS = { ca: 'Català', es: 'Castellà', en: 'Anglès', fr: 'Francès', gl: 'Gallec (beta)', eu: 'Euskera (beta)' };
+    const sel = document.getElementById('fr-lang-sel');
+    if (!sel) return;
+    const saved = localStorage.getItem('atne.lang') || 'ca';
+    sel.value = saved;
+    sel.classList.toggle('noca', saved !== 'ca');
+    sel.title = 'Llengua de sortida: ' + (LANGS[saved] || saved);
+    sel.addEventListener('change', () => {
+      const v = sel.value;
+      localStorage.setItem('atne.lang', v);
+      sel.classList.toggle('noca', v !== 'ca');
+      sel.title = 'Llengua de sortida: ' + (LANGS[v] || v);
+      if (v !== 'ca') {
+        window.atneToast?.('L\'adaptació es generarà en ' + (LANGS[v] || v), 'info');
+      }
+    });
+  })();
 
   // Badge de 3 estats: reflecteix on viu el text actual.
   //   - "Adaptat" (verd): hi ha atne.adapted_text I doc_original coincideix

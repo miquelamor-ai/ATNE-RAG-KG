@@ -2525,18 +2525,19 @@ ATNE_AUDITOR_MODEL = os.getenv("ATNE_AUDITOR_MODEL", "gpt-4o-mini")
 ATNE_AUDITOR_ENABLED = os.getenv("ATNE_AUDITOR_ENABLED", "false").lower() == "true"
 
 
-def _languagetool_correct(text: str) -> tuple[str, int, list[dict]]:
+def _languagetool_correct(text: str, lang: str = "ca") -> tuple[str, int, list[dict]]:
     """
     Corregeix un text via LanguageTool API pública (determinista, no LLM).
     Retorna: (text_corregit, n_canvis, llista_canvis).
     Si LanguageTool falla, retorna (text, 0, []).
     """
+    from adaptation.lang_config import get_lt_code
     try:
         resp = requests.post(
             LANGUAGETOOL_URL,
             data={
                 "text": text,
-                "language": "ca",
+                "language": get_lt_code(lang),
                 "level": "picky",
                 "enabledOnly": "false",
             },
@@ -2760,7 +2761,7 @@ def _lt_splice(text: str, offset_u16: int, length_u16: int, new_value: str) -> s
     return prefix + new_value + suffix
 
 
-def _languagetool_full_analysis(text: str) -> dict:
+def _languagetool_full_analysis(text: str, lang: str = "ca") -> dict:
     """
     Crida LanguageTool i separa matches en 3 categories:
     - correccions automàtiques (ortografia, gramàtica amb suggeriment clar)
@@ -2768,6 +2769,7 @@ def _languagetool_full_analysis(text: str) -> dict:
     - avisos d'estil (info, no crítics)
     Retorna un dict amb text corregit i les 3 llistes.
     """
+    from adaptation.lang_config import get_lt_code
     result = {
         "text_original": text,
         "text_corregit": text,
@@ -2782,7 +2784,7 @@ def _languagetool_full_analysis(text: str) -> dict:
             LANGUAGETOOL_URL,
             data={
                 "text": text,
-                "language": "ca",
+                "language": get_lt_code(lang),
                 "level": "picky",
                 "enabledOnly": "false",
             },
@@ -3172,7 +3174,8 @@ TEXT A AUDITAR:
 
 
 def post_process_catalan(text: str, target_mecr: str = "", enable_lt: bool = True,
-                         enable_auditor: bool = None, etapa: str = "") -> dict:
+                         enable_auditor: bool = None, etapa: str = "",
+                         lang: str = "ca") -> dict:
     """
     Pipeline complet de qualitat català per a un text generat o adaptat.
 
@@ -3220,7 +3223,7 @@ def post_process_catalan(text: str, target_mecr: str = "", enable_lt: bool = Tru
     audit_result = {"avisos": [], "disponible": False, "model": ATNE_AUDITOR_MODEL}
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
-        lt_future = pool.submit(_languagetool_full_analysis, text) if enable_lt else None
+        lt_future = pool.submit(_languagetool_full_analysis, text, lang) if enable_lt else None
         audit_future = pool.submit(_llm_audit, text, target_mecr, etapa) if enable_auditor else None
 
         if lt_future is not None:

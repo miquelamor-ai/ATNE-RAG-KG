@@ -2844,6 +2844,9 @@
     // regles crítiques específiques del gènere al system prompt.
     const savedGenere = localStorage.getItem('atne.genere_discursiu');
     if (savedGenere) adaptParams.genere_discursiu = savedGenere;
+    // Llengua de sortida (selector del Pas 2). Default: "ca".
+    const savedLang = localStorage.getItem('atne.lang') || 'ca';
+    if (savedLang !== 'ca') adaptParams.lang = savedLang;
     window.ATNE_LLM.adaptText({
       text: docOriginal,
       profile: profile,
@@ -2979,6 +2982,8 @@
       };
       const savedGenere = localStorage.getItem('atne.genere_discursiu');
       if (savedGenere) adaptParams.genere_discursiu = savedGenere;
+      const savedLang2 = localStorage.getItem('atne.lang') || 'ca';
+      if (savedLang2 !== 'ca') adaptParams.lang = savedLang2;
 
       window.ATNE_LLM.adaptText({
         text: docOriginal,

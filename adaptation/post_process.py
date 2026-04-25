@@ -18,7 +18,7 @@ MECR_MAX_WORDS = {"pre-A1": 5, "A1": 8, "A2": 12, "B1": 18, "B2": 25}
 FORBIDDEN_WORDS = ["cosa", "coses", "allò", "el que fa que", "serveix per", "un tipus de"]
 
 
-def post_process_adaptation(text: str, mecr: str) -> dict:
+def post_process_adaptation(text: str, mecr: str, lang: str = "ca") -> dict:
     """Verificació post-LLM amb Python. Retorna warnings i mètriques."""
     warnings = []
     max_words = MECR_MAX_WORDS.get(mecr, 25)
@@ -37,11 +37,12 @@ def post_process_adaptation(text: str, mecr: str) -> dict:
         warnings.append(
             f"⚠ {len(long_sentences)} frases superen {max_words} paraules (MECR {mecr})")
 
-    # 2. Paraules prohibides
-    text_lower = text.lower()
-    found_forbidden = [w for w in FORBIDDEN_WORDS if w in text_lower]
-    if found_forbidden:
-        warnings.append(f"⚠ Paraules prohibides detectades: {', '.join(found_forbidden)}")
+    # 2. Paraules prohibides (CAT only — llista en català)
+    if lang == "ca":
+        text_lower = text.lower()
+        found_forbidden = [w for w in FORBIDDEN_WORDS if w in text_lower]
+        if found_forbidden:
+            warnings.append(f"⚠ Paraules prohibides detectades: {', '.join(found_forbidden)}")
 
     # 3. Mètriques bàsiques
     words = len(text.split())
@@ -306,26 +307,19 @@ _SPECIAL_FIXES = [
 ]
 
 
-def _fix_typos(text: str) -> str:
-    """Corregeix typos del LLM a partir d'un catàleg conservador observat empíricament.
-
-    ⚠ CAT only — quan ATNE s'escali a multi-llengua cal refactor.
-    Veure memory/project_i18n_postprocess.md
-    """
+def _fix_typos(text: str, lang: str = "ca") -> str:
+    """Corregeix typos del LLM a partir d'un catàleg conservador observat empíricament."""
     if not text:
         return text
-    for bad, good in _TYPO_FIXES.items():
-        text = re.sub(r'\b' + re.escape(bad) + r'\b', good, text)
-        text = re.sub(r'\b' + re.escape(bad.capitalize()) + r'\b', good.capitalize(), text)
-    # Fixes especials amb caràcters que trenquen \b (apòstrof, guionet)
-    for pattern, replacement in _SPECIAL_FIXES:
-        text = re.sub(pattern, replacement, text)
-    # Interrogant invertit castellà `¿...?` → `...?` (català no el porta)
-    # CAT only: a castellà SÍ el requereix. Quan s'implementi multi-llengua,
-    # condicionar aquest fix a lang=="ca".
-    text = re.sub(r'¿', '', text)
-    # Admiració invertida castellana `¡...!` → `...!` (mateix raonament)
-    text = re.sub(r'¡', '', text)
+    if lang == "ca":
+        for bad, good in _TYPO_FIXES.items():
+            text = re.sub(r'\b' + re.escape(bad) + r'\b', good, text)
+            text = re.sub(r'\b' + re.escape(bad.capitalize()) + r'\b', good.capitalize(), text)
+        for pattern, replacement in _SPECIAL_FIXES:
+            text = re.sub(pattern, replacement, text)
+        # ¿ i ¡ no existeixen en català
+        text = re.sub(r'¿', '', text)
+        text = re.sub(r'¡', '', text)
     return text
 
 
@@ -365,21 +359,12 @@ def _fix_word_concatenations(text: str) -> str:
     return _CONCAT_WORD_RE.sub(repl, text)
 
 
-def _post_process_llm_output(text: str) -> str:
-    """Pipeline complet de neteja post-LLM abans del Quality Report.
-
-    Aplica en ordre:
-    1. Strip artefactes LaTeX
-    2. Fix concatenacions de prefix (Revolrevolució → revolució)
-    3. Substitució de paraules angleses (owners → propietaris)
-    4. Correcció de typos coneguts (possuïen → posseïen)
-
-    Ordre crític: el LaTeX primer (pot contenir fragments que trenquin els
-    altres regex), concatenacions abans que typos (una concatenació pot
-    contenir un typo com a substring).
-    """
+def _post_process_llm_output(text: str, lang: str = "ca") -> str:
+    """Pipeline complet de neteja post-LLM abans del Quality Report."""
     text = _strip_latex_artifacts(text)
     text = _fix_word_concatenations(text)
-    text = _fix_english_words(text)
-    text = _fix_typos(text)
+    if lang == "ca":
+        # Fix anglicismes: només rellevant per a sortida en català
+        text = _fix_english_words(text)
+    text = _fix_typos(text, lang=lang)
     return text

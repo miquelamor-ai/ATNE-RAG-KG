@@ -11,6 +11,8 @@ Referència: docs/decisions/arquitectura_prompt_v2.md
 import re
 from pathlib import Path
 
+from adaptation.lang_config import get_lang_label
+
 CORPUS_DIR = Path(__file__).parent / "corpus"
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -232,10 +234,17 @@ SEGURETAT:
 # API pública
 # ═══════════════════════════════════════════════════════════════════════════════
 
-def get_identity() -> str:
+def get_identity(lang: str = "ca") -> str:
     if not _cache:
         load_corpus()
-    return _cache.get("identity", "")
+    identity = _cache.get("identity", "")
+    if lang != "ca":
+        lang_label = get_lang_label(lang)
+        identity = identity.replace(
+            "LLENGUA: Català (o la llengua vehicular indicada).",
+            f"LLENGUA: {lang_label.capitalize()}.",
+        )
+    return identity
 
 
 def get_universal_rules() -> str:

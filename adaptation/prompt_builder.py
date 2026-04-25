@@ -13,6 +13,7 @@ generador_lliure i els tests.
 
 import corpus_reader
 import instruction_filter
+from adaptation.lang_config import get_lang_label
 from adaptation.post_process import MECR_MAX_WORDS
 
 
@@ -224,9 +225,19 @@ def build_system_prompt(profile: dict, context: dict, params: dict, rag_context:
     parts = []
     mecr = params.get("mecr_sortida", "B2")
     dua = params.get("dua", "Core")
+    lang = params.get("lang", "ca")
+    lang_label = get_lang_label(lang)
 
     # ═══ CAPA 1: IDENTITAT (fixa) ═══
-    parts.append(corpus_reader.get_identity())
+    parts.append(corpus_reader.get_identity(lang))
+
+    # Directiva de llengua explícita per a idiomes no-catalans
+    if lang != "ca":
+        parts.append(
+            f"⚠️ LLENGUA DE SORTIDA: genera TOT el contingut (text adaptat, glossari, "
+            f"preguntes, esquemes, bastides, argumentació pedagògica i notes d'auditoria) "
+            f"EN {lang_label.upper()}. Cap secció en català ni en cap altra llengua."
+        )
 
     # T-05: Role prompting docent (si hi ha matèria definida)
     materia = params.get("materia") or context.get("materia", "")
@@ -351,15 +362,15 @@ ACTIVAT — Genera una TAULA MARKDOWN amb 3 columnes:
 | Terme | Traducció ({l1_display}) | Explicació simple |
 Inclou tots els termes tècnics o difícils del text adaptat (mínim 8-12 termes).
 La columna de traducció ha de contenir la traducció REAL al/a la {l1_display} (en el seu alfabet original si escau: àrab, xinès, urdú, etc.).
-L'explicació ha de ser en català molt senzill (nivell A1).
+L'explicació ha de ser en {lang_label} molt senzill (nivell A1).
 """)
         else:
-            output_sections.append("""
+            output_sections.append(f"""
 ## Glossari
 ACTIVAT — Genera una TAULA MARKDOWN amb 2 columnes:
 | Terme | Explicació simple |
 Inclou tots els termes tècnics o difícils del text adaptat (mínim 8-12 termes).
-L'explicació ha de ser en català molt senzill.
+L'explicació ha de ser en {lang_label} molt senzill.
 """)
 
     if comp.get("negretes"):
@@ -389,14 +400,14 @@ Integra'ls directament al text adaptat, no en secció separada.
 """)
 
     if comp.get("illustracions"):
-        output_sections.append("""
+        output_sections.append(f"""
 ## Il·lustracions (inline, no secció separada)
-ACTIVAT — Insereix marcadors `[IMATGE: <concepte curt en català>]` al text adaptat
+ACTIVAT — Insereix marcadors `[IMATGE: <concepte curt en {lang_label}>]` al text adaptat
 allà on una il·lustració ajudaria la comprensió.
 
 REGLES ESTRICTES:
 - Format exacte: `[IMATGE: concepte]` amb claudàtors i la paraula IMATGE en majúscules.
-- **Idioma**: català. 3-8 paraules. Concepte nuclear, no descripció d'escena.
+- **Idioma**: {lang_label}. 3-8 paraules. Concepte nuclear, no descripció d'escena.
 - **En línia pròpia**, abans del paràgraf/secció que introdueix el concepte.
 - **Màxim 3-4 marcadors per document**. Menys és millor.
 - **Un marcador per secció major com a màxim**.

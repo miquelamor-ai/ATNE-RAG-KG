@@ -106,6 +106,8 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
     # (configurable des de /admin) amb override puntual via payload.model.
     active_model = server._model_for("adapt", override=model_override or "")
 
+    lang = params.get("lang", "ca")
+
     # System prompt — sense RAG, les instruccions graduades són el motor
     cb({"type": "step", "step": "search", "msg": "Preparant instruccions d'adaptació..."})
     system_prompt = build_system_prompt(profile, context, params, rag_context="")
@@ -188,7 +190,7 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
         try:
             adapted_raw = _call_llm(active_model, system_prompt, user_text)
             adapted = clean_gemini_output(adapted_raw)
-            adapted = _post_process_llm_output(adapted)
+            adapted = _post_process_llm_output(adapted, lang=lang)
             # Diagnòstic verbós
             try:
                 _comp_active = params.get("complements", {}) if isinstance(params, dict) else {}
@@ -255,7 +257,7 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
 
     # 6. Post-processament Python
     mecr = params.get("mecr_sortida", "B2")
-    pp = post_process_adaptation(adapted, mecr)
+    pp = post_process_adaptation(adapted, mecr, lang=lang)
     for w in pp.get("warnings", []):
         cb({"type": "step", "step": "warning", "msg": w})
 
@@ -276,6 +278,7 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
                 enable_lt=True,
                 enable_auditor=bool(use_auditor),
                 etapa=etapa_pp,
+                lang=lang,
             )
             if quality["n_correccions"] > 0:
                 adapted = quality["text"]
