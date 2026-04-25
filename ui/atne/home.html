@@ -63,10 +63,14 @@
     box-shadow: 0 2px 8px rgba(18,26,43,.06);
   }
   .mode-card:hover {
-    border-color: var(--primary, #3337a6);
-    box-shadow: 0 4px 20px rgba(51,55,166,.12);
+    background: var(--primary, #3337a6);
+    box-shadow: 0 8px 24px rgba(51,55,166,.3);
     transform: translateY(-2px);
+    border-color: transparent;
   }
+  .mode-card:hover .mode-icon { background: rgba(255,255,255,.18); }
+  .mode-card:hover .mode-title { color: #fff; }
+  .mode-card:hover .mode-sub   { color: rgba(255,255,255,.6); }
   .mode-card:active { transform: translateY(0); }
 
   .mode-icon {

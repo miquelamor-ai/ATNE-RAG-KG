@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<title>ATNE · Sistema de Cards — Final</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #f4f1e8; font-family: 'Inter', sans-serif; padding: 32px 20px 80px; max-width: 480px; margin: 0 auto; }
+
+.page-title { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 700; color: #121a2b; margin-bottom: 4px; }
+.page-sub   { font-size: 12px; color: #6a7392; margin-bottom: 48px; line-height: 1.5; }
+
+.family-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .12em;
+  color: #8a93b0; margin-bottom: 8px;
+}
+.family-block { margin-bottom: 40px; }
+
+/* ── 1. ACCIÓ ── */
+.action-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.mode-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px 20px;
+  box-shadow: 0 2px 8px rgba(18,26,43,.07);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: background .18s, box-shadow .18s, transform .1s;
+  text-decoration: none;
+  display: flex; flex-direction: column;
+}
+.mode-card:hover {
+  background: #3337a6;
+  box-shadow: 0 8px 24px rgba(51,55,166,.3);
+  transform: translateY(-2px);
+  border-color: transparent;
+}
+.mode-card:hover .mode-icon { background: rgba(255,255,255,.18); }
+.mode-card:hover .mode-title { color: #fff; }
+.mode-card:hover .mode-sub   { color: rgba(255,255,255,.6); }
+.mode-card:hover .mode-icon svg { color: #fff; }
+
+.mode-icon {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: #3337a6; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+  transition: background .18s;
+}
+.mode-icon svg { width: 24px; height: 24px; }
+.mode-title { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; color: #121a2b; margin-bottom: 5px; transition: color .18s; }
+.mode-sub   { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: .1em; color: #6a7392; transition: color .18s; }
+
+/* ── 2. PERFIL ── */
+.profile-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px 16px;
+  border: 1px solid rgba(0,0,0,.06);
+  box-shadow: 0 1px 3px rgba(16,24,40,.04);
+  display: flex; align-items: center; gap: 12px;
+}
+.avatar {
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fraunces', serif; font-size: 15px; font-weight: 700;
+}
+.pinfo { flex: 1; min-width: 0; }
+.pname { font-weight: 600; font-size: 14px; color: #121a2b; margin-bottom: 2px; }
+.pmeta { font-size: 11px; color: #6a7392; margin-bottom: 6px; }
+.chips { display: flex; gap: 5px; flex-wrap: wrap; }
+.chip  { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; padding: 2px 8px; border-radius: 9999px; }
+.arr   { color: #b5bdd4; flex-shrink: 0; }
+
+/* ── 3. HISTORIAL ── */
+.history-list { display: flex; flex-direction: column; gap: 6px; }
+.history-item {
+  background: #fff;
+  border-radius: 10px;
+  padding: 13px 16px;
+  border: 1px solid rgba(0,0,0,.06);
+  display: flex; align-items: center; gap: 12px;
+}
+.hinfo { flex: 1; min-width: 0; }
+.hmeta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.hdate { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #8a93b0; }
+.htitle{ font-family: 'Fraunces', serif; font-size: 15px; font-weight: 600; color: #121a2b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── 4. TEXT ADAPTAT ── */
+.text-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 28px 32px 32px;
+  box-shadow: 0 12px 40px -16px rgba(16,24,40,.18), 0 3px 10px -4px rgba(16,24,40,.08);
+}
+.tbadge { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: .14em; color: #8a93b0; margin-bottom: 16px; display: block; }
+.tbody  { font-family: 'Fraunces', serif; font-size: 16px; line-height: 1.78; color: #1b2440; }
+.tfooter{ margin-top: 20px; padding-top: 14px; border-top: 1px solid rgba(0,0,0,.06); display: flex; justify-content: flex-end; gap: 8px; }
+.taction{ font-size: 12px; font-weight: 500; color: #3337a6; background: #eef0ff; border: none; border-radius: 6px; padding: 5px 12px; cursor: pointer; font-family: 'Inter', sans-serif; }
+
+/* ── Separador ── */
+.sep { height: 1px; background: rgba(0,0,0,.07); margin: 8px 0 40px; }
+</style>
+</head>
+<body>
+
+<p class="page-title">Sistema de Cards</p>
+<p class="page-sub">Les 4 famílies amb les opcions finals triades. Obre directament al Chrome, sense servidor.</p>
+
+<!-- 1. ACCIÓ -->
+<div class="family-block">
+  <p class="family-label">1 · Acció — Flash / Taller (passa per sobre per veure hover)</p>
+  <div class="action-grid">
+    <a class="mode-card" href="#">
+      <div class="mode-icon">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 13h7l-1 9 9-12h-7z"/></svg>
+      </div>
+      <div class="mode-title">Flash</div>
+      <div class="mode-sub">Ràpid i directe</div>
+    </a>
+    <a class="mode-card" href="#">
+      <div class="mode-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      </div>
+      <div class="mode-title">Taller</div>
+      <div class="mode-sub">Complet i precís</div>
+    </a>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- 2. PERFIL -->
+<div class="family-block">
+  <p class="family-label">2 · Perfil — alumne individual</p>
+  <div style="display:flex;flex-direction:column;gap:8px">
+
+    <div class="profile-card">
+      <div class="avatar" style="background:#fce7d5;color:#c64a4a;border:1.5px solid #c64a4a">M</div>
+      <div class="pinfo">
+        <div class="pname">Marc Ribera</div>
+        <div class="pmeta">3r ESO A · 14 anys</div>
+        <div class="chips">
+          <span class="chip" style="background:#fce7d5;color:#c64a4a">TDAH</span>
+          <span class="chip" style="background:#f4f6fb;color:#6a7392">Comp. moderada</span>
+        </div>
+      </div>
+      <svg class="arr" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 12l4-4-4-4"/></svg>
+    </div>
+
+    <div class="profile-card">
+      <div class="avatar" style="background:#fbe9c2;color:#b77400;border:1.5px solid #b77400">A</div>
+      <div class="pinfo">
+        <div class="pname">Aïda Ferrer</div>
+        <div class="pmeta">3r ESO A · 13 anys</div>
+        <div class="chips">
+          <span class="chip" style="background:#fbe9c2;color:#b77400">Dislèxia</span>
+          <span class="chip" style="background:#f4f6fb;color:#6a7392">Gr. lleugera</span>
+        </div>
+      </div>
+      <svg class="arr" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 12l4-4-4-4"/></svg>
+    </div>
+
+    <div class="profile-card">
+      <div class="avatar" style="background:#d3ece9;color:#0f7a7a;border:1.5px solid #0f7a7a">K</div>
+      <div class="pinfo">
+        <div class="pname">Karim Benali</div>
+        <div class="pmeta">3r ESO A · 14 anys</div>
+        <div class="chips">
+          <span class="chip" style="background:#d3ece9;color:#0f7a7a">Nouvingut</span>
+          <span class="chip" style="background:#f4f6fb;color:#6a7392">A2 MECR</span>
+        </div>
+      </div>
+      <svg class="arr" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 12l4-4-4-4"/></svg>
+    </div>
+
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- 3. HISTORIAL -->
+<div class="family-block">
+  <p class="family-label">3 · Historial / Biblioteca</p>
+  <div class="history-list">
+
+    <div class="history-item">
+      <div class="hinfo">
+        <div class="hmeta">
+          <span class="chip" style="background:#e7dcf4;color:#6d3aa3">Taller</span>
+          <span class="hdate">fa 2 dies</span>
+        </div>
+        <div class="htitle">La Revolució Industrial</div>
+      </div>
+      <svg class="arr" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 12l4-4-4-4"/></svg>
+    </div>
+
+    <div class="history-item">
+      <div class="hinfo">
+        <div class="hmeta">
+          <span class="chip" style="background:#fce7d5;color:#c64a4a">Flash</span>
+          <span class="hdate">fa 1 setmana</span>
+        </div>
+        <div class="htitle">El cicle de l'aigua</div>
+      </div>
+      <svg class="arr" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 12l4-4-4-4"/></svg>
+    </div>
+
+    <div class="history-item">
+      <div class="hinfo">
+        <div class="hmeta">
+          <span class="chip" style="background:#e7dcf4;color:#6d3aa3">Taller</span>
+          <span class="hdate">fa 2 setmanes</span>
+        </div>
+        <div class="htitle">Les cèl·lules</div>
+      </div>
+      <svg class="arr" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 12l4-4-4-4"/></svg>
+    </div>
+
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- 4. TEXT ADAPTAT -->
+<div class="family-block">
+  <p class="family-label">4 · Text adaptat</p>
+  <div class="text-card">
+    <span class="tbadge">· Adaptat · A2 MECR · Karim Benali</span>
+    <div class="tbody">
+      <p style="margin-bottom:.9em">La <strong style="font-weight:700">fotosíntesi</strong> és el procés que fan les plantes per fabricar el seu propi menjar.</p>
+      <p style="margin-bottom:.9em">Ho fan amb tres coses: la llum del sol, l'aigua i l'aire. Les fulles de les plantes agafen la llum i la transformen en energia.</p>
+      <p>Amb aquesta energia, la planta fabrica sucre. El sucre és el seu menjar. A més, la planta allibera <strong style="font-weight:700">oxigen</strong> — l'aire que nosaltres respirem.</p>
+    </div>
+    <div class="tfooter">
+      <button class="taction">Copiar</button>
+      <button class="taction">PDF</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

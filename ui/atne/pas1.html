@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="ca">
 <head>
 <meta charset="utf-8">
@@ -121,21 +121,21 @@
   .subhead-c{font-family:var(--mono);font-size:10.5px;color:var(--ink-400)}
 
   .list{background:#fff;border:1px solid var(--ink-150);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--sh-xs)}
-  .row{display:grid;grid-template-columns:40px 1fr 200px 160px 90px 110px;gap:14px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--ink-100);cursor:pointer;transition:.1s;position:relative;border-left:3px solid transparent}
+  .row{display:grid;grid-template-columns:40px 1fr 200px 160px 90px 110px;gap:14px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--ink-100);cursor:pointer;transition:.1s;position:relative}
   .row:last-child{border-bottom:0}
   .row:hover{background:var(--ink-75)}
   .row.person{background:#fff}
-  .row.group{background:#faf7ff;border-left-color:var(--primary)}
+  .row.group{background:#faf7ff}
   .row.group:hover{background:#f3eeff}
   .row.group .row-name::before{content:"GRUP · ";font-family:var(--mono);font-size:9.5px;font-weight:600;letter-spacing:.08em;color:var(--primary);background:var(--primary-50);padding:2px 6px;border-radius:var(--r-xs);margin-right:6px;vertical-align:2px}
   .row-av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:12.5px;font-family:var(--serif)}
   .row-av.grp{border-radius:9px;background:repeating-linear-gradient(135deg,var(--primary-50) 0 5px,var(--primary-100) 5px 10px);color:var(--primary);border:1px solid var(--primary-100);font-size:var(--fs-xs)}
   .row-av.grp-ac{background:repeating-linear-gradient(135deg,var(--ac-bg) 0 5px,#dcc7f0 5px 10px);color:var(--ac);border-color:#dcc7f0}
   .row-av.grp-cat{background:repeating-linear-gradient(135deg,var(--cat-bg) 0 5px,#b9dcd7 5px 10px);color:var(--cat);border-color:#b9dcd7}
-  .av-tdah{background:var(--tdah-bg);color:#8a4617}
-  .av-disl{background:var(--disl-bg);color:#7a4a00}
-  .av-cat{background:var(--cat-bg);color:#0a4f4f}
-  .av-ac{background:var(--ac-bg);color:#4a1e7a}
+  .av-tdah{background:var(--tdah-bg);color:#8a4617;border:1.5px solid var(--tdah)}
+  .av-disl{background:var(--disl-bg);color:#7a4a00;border:1.5px solid var(--disl)}
+  .av-cat{background:var(--cat-bg);color:#0a4f4f;border:1.5px solid var(--cat)}
+  .av-ac{background:var(--ac-bg);color:#4a1e7a;border:1.5px solid var(--ac)}
   .av-neu{background:var(--ink-100);color:var(--ink-600)}
   .row-name{font-family:var(--serif);font-weight:700;font-size:var(--fs-base);letter-spacing:-0.01em;line-height:1.2}
   .row-sub{font-size:var(--fs-xs);color:var(--ink-500);font-family:var(--mono);margin-top:2px}
@@ -440,13 +440,10 @@
 <div class="wrap">
   <nav class="rail">
     <a href="/ui/atne/home.html" class="logo" title="Torna a l'inici"><img src="/logo-fje.jpg" alt="FJE"></a>
-    <button class="rb" title="Inici" onclick="location.href='/ui/atne/pas1.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 12 9-9 9 9"/><path d="M5 10v10h14V10"/></svg></button>
-    <button class="rb on" title="Perfils" onclick="location.href='/ui/atne/pas1.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></button>
-    <button class="rb" id="library-btn-texts" title="Adaptacions desades (biblioteca)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16M4 12h10M4 19h16"/></svg></button>
-    <button class="rb" id="rail-saber" title="Saber-ne+" onclick="location.href='/ui/saber-ne.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></button>
-    <button class="rb" id="library-btn-side" title="La meva biblioteca d'adaptacions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h7v12H4zM13 6h7v5h-7zM13 14h7v4h-7z"/></svg></button>
-    <div class="rb sep"></div>
-    <button class="rb" title="Preferències" onclick="alert('Preferències: pendent d\u0027implementar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg></button>
+    <button class="rb" title="Inici" onclick="location.href='/ui/atne/home.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 12 9-9 9 9"/><path d="M5 10v10h14V10"/></svg></button>
+    <button class="rb" title="Flash" onclick="location.href='/ui/atne/flash.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 13h7l-1 9 9-12h-7z"/></svg></button>
+    <button class="rb on" title="Taller" onclick="location.href='/ui/atne/pas1.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button>
+    <button class="rb" id="library-btn-side" title="Biblioteca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></button>
   </nav>
 
   <main class="canvas">
