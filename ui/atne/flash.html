@@ -1469,6 +1469,16 @@
       try {
         localStorage.setItem('atne.doc_draft', text);
         localStorage.setItem('atne.flash_handoff', '1');
+        // Extrau títol del text adaptat si existeix, sinó neteja l'antic
+        var titleFromAdapted = '';
+        var adaptedEl = document.getElementById('state-result');
+        if (adaptedEl) {
+          var titleEl = adaptedEl.querySelector('h1, h2, h3');
+          titleFromAdapted = titleEl ? titleEl.innerText.trim() : '';
+        }
+        localStorage.setItem('atne.doc_title', titleFromAdapted);
+        // Invalida cache d'adaptació anterior per evitar que Pas 3 reutilitzi
+        localStorage.removeItem('atne.current_adaptation_id');
       } catch (ex) { /* ignore */ }
       location.href = '/ui/atne/pas1.html';
     });
