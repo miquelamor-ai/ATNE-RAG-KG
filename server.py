@@ -3574,12 +3574,15 @@ def _build_flash_system_prompt(
     perfils: list[str],
     l1: str = "",
     complements: list[str] | None = None,
+    lang: str = "ca",
 ) -> str:
+    from adaptation.lang_config import get_lang_label
     if complements is None:
         complements = ["glossari", "preguntes"]
+    lang_label = get_lang_label(lang)
     p = (
-        "Ets un assistent pedagògic especialitzat en adaptació de textos educatius en català.\n"
-        "Adapta el text que t'enviaré.\n"
+        f"Ets un assistent pedagògic especialitzat en adaptació de textos educatius.\n"
+        f"Adapta el text que t'enviaré EN {lang_label.upper()}.\n"
         "IMPORTANT: comença directament amb el text adaptat. "
         "No escriguis cap frase introductòria, cap títol genèric, "
         "cap explicació de què has fet ni cap comentari final.\n\n"
@@ -3594,20 +3597,23 @@ def _build_flash_system_prompt(
     if "glossari" in complements:
         if "nouvingut" in perfils and l1:
             comp_lines.append(
-                f"- GLOSSARI: 5-8 termes clau, definició breu adaptada al nivell "
+                f"- GLOSSARI: 5-8 termes clau, definició breu en {lang_label} adaptada al nivell "
                 f"i, entre parèntesis, la traducció a {l1}."
             )
         else:
-            comp_lines.append("- GLOSSARI: 5-8 termes clau del text amb definició breu adaptada al nivell.")
+            comp_lines.append(f"- GLOSSARI: 5-8 termes clau del text amb definició breu en {lang_label} adaptada al nivell.")
     if "preguntes" in complements:
         comp_lines.append(
-            "- PREGUNTES DE COMPRENSIÓ: 3-5 preguntes graduades "
+            f"- PREGUNTES DE COMPRENSIÓ: 3-5 preguntes graduades en {lang_label} "
             "(comprensió literal → aplicació → reflexió crítica)."
         )
     if "resum" in complements:
-        comp_lines.append("- RESUM: 3-5 frases que resumeixin les idees principals del text adaptat.")
+        comp_lines.append(f"- RESUM: 3-5 frases en {lang_label} que resumeixin les idees principals del text adaptat.")
     if comp_lines:
-        p += "\nCOMPLEMENTS (afegeix al final del text adaptat, separats amb un títol clar en MAJÚSCULES):\n"
+        p += (
+            "\nCOMPLEMENTS (afegeix al final del text adaptat, separats amb EXACTAMENT "
+            "aquests títols en majúscules: GLOSSARI / PREGUNTES DE COMPRENSIÓ / RESUM):\n"
+        )
         p += "\n".join(comp_lines) + "\n"
     return p
 
@@ -3628,16 +3634,19 @@ def _parse_flash_response(raw: str) -> dict:
     _SUF = r"[ \t:*]*"
 
     patterns = {
-        "glossari":  re.compile(
-            rf"^[ \t]*{_MD}GLOSSARI{_SUF}$",
+        # ca: GLOSSARI | es: GLOSARIO | en: GLOSSARY | fr: GLOSSAIRE | eu: HIZTEGIA | gl: GLOSARIO
+        "glossari": re.compile(
+            rf"^[ \t]*{_MD}(?:GLOSSARI|GLOSARIO|GLOSSARY|GLOSSAIRE|HIZTEGIA){_SUF}$",
             re.IGNORECASE | re.MULTILINE,
         ),
+        # ca: PREGUNTES (DE COMPRENSIÓ) | es: PREGUNTAS | en: QUESTIONS | fr: QUESTIONS | eu: GALDERAK
         "preguntes": re.compile(
-            rf"^[ \t]*{_MD}PREGUNTES(?:[ \t]+DE[ \t]+COMPRENS(?:[IÍ][ÓO]|IO))?{_SUF}$",
+            rf"^[ \t]*{_MD}(?:PREGUNTES(?:[ \t]+DE[ \t]+COMPRENS(?:[IÍ][ÓO]|IO))?|PREGUNTAS(?:[ \t]+DE[ \t]+COMPRENSI[OÓ]N)?|QUESTIONS?(?:[ \t]+(?:OF|DE)[ \t]+\w+)?|GALDERAK){_SUF}$",
             re.IGNORECASE | re.MULTILINE,
         ),
+        # ca: RESUM | es: RESUMEN | en: SUMMARY | fr: RÉSUMÉ/RESUME | eu: LABURPENA | gl: RESUMO
         "resum": re.compile(
-            rf"^[ \t]*{_MD}RESUM{_SUF}$",
+            rf"^[ \t]*{_MD}(?:RESUM(?:EN|O)?|SUMMARY|R[EÉ]SUM[EÉ]?|LABURPENA){_SUF}$",
             re.IGNORECASE | re.MULTILINE,
         ),
     }
@@ -3681,13 +3690,14 @@ async def adapt_flash(payload: dict = Body(...)):
     tipus       = payload.get("tipus", "grup")
     complements = payload.get("complements") or ["glossari", "preguntes"]
     docent_id   = (payload.get("docent_id") or "").strip()
+    lang        = (payload.get("lang") or "ca").strip()
 
     if not text:
         return JSONResponse({"error": "El text és buit."}, status_code=400)
 
     nivell        = _FLASH_CURS_MECR.get((curs, adaptacio), "B1")
     model_id      = _model_for("adapt_flash")
-    system_prompt = _build_flash_system_prompt(nivell, perfils, l1, complements)
+    system_prompt = _build_flash_system_prompt(nivell, perfils, l1, complements, lang=lang)
     t0 = __import__("time").time()
 
     async def gen():

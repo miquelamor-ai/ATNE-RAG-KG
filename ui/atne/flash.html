@@ -602,6 +602,18 @@
       </div>
 
       <div class="form-group">
+        <label class="form-label" for="lang-sel">Llengua de sortida</label>
+        <select class="form-select" id="lang-sel">
+          <option value="ca">Català</option>
+          <option value="es">Castellà</option>
+          <option value="en">Anglès</option>
+          <option value="fr">Francès</option>
+          <option value="gl">Gallec (beta)</option>
+          <option value="eu">Euskera (beta)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
         <label class="form-label" for="text-area">Text a adaptar</label>
         <textarea class="flash-textarea" id="text-area"
                   placeholder="Enganxa aquí el text que vols adaptar…"
@@ -833,6 +845,7 @@
 
   // ── Refs UI ──────────────────────────────────────────────────────────────────
   var cursSel      = document.getElementById('curs-sel');
+  var langSel      = document.getElementById('lang-sel');
   var carSel       = document.getElementById('car-sel');
   var carGrupSel   = document.getElementById('car-grup-sel');
   var carLabel     = document.getElementById('car-label');
@@ -859,6 +872,15 @@
   var rsStatus     = document.getElementById('rs-status');
   var secResum     = document.getElementById('sec-resum');
   var actionBar    = document.getElementById('action-bar');
+
+  // ── Selector de llengua ──────────────────────────────────────────────────────
+  if (langSel) {
+    var _savedLang = localStorage.getItem('atne.lang') || 'ca';
+    langSel.value = _savedLang;
+    langSel.addEventListener('change', function () {
+      localStorage.setItem('atne.lang', langSel.value);
+    });
+  }
 
   // ── Seg toggle Grup/Alumne ───────────────────────────────────────────────────
   var tipusActual = 'grup';
@@ -1036,7 +1058,8 @@
     var docentId = '';
     try { docentId = localStorage.getItem('atne.docent_id') || ''; } catch (e) { /* */ }
 
-    lastPayload = { text: text, curs: curs, adaptacio: adaptacio, perfils: perfils, l1: l1, tipus: tipusActual, complements: Array.from(activeComps), docent_id: docentId };
+    var langVal = document.getElementById('lang-sel')?.value || 'ca';
+    lastPayload = { text: text, curs: curs, adaptacio: adaptacio, perfils: perfils, l1: l1, tipus: tipusActual, complements: Array.from(activeComps), docent_id: docentId, lang: langVal };
     resultBadge.textContent = badge;
     glStatus.textContent = 'Generant…'; glStatus.className = 'comp-status';
     prStatus.textContent = 'Generant…'; prStatus.className = 'comp-status';
