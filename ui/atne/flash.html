@@ -48,6 +48,22 @@
   .tb-spacer { flex: 1; }
   /* El toggle Flash/Taller reutilitza exactament .steps/.step de shell.css */
   .steps a.step { text-decoration: none; }
+  /* Avatar docent (idèntic a pas2/pas3) */
+  .docent-av {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--ac-bg);
+    color: var(--ac);
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 13.5px;
+    display: grid; place-items: center;
+    border: 1px solid var(--ac);
+    cursor: pointer;
+    transition: transform .1s;
+    flex-shrink: 0;
+  }
+  .docent-av:hover { transform: scale(1.05); }
 
   /* ── Main: dos panells ────────────────────────────────────── */
   .flash-main {
@@ -509,7 +525,7 @@
       <a href="/ui/atne/pas1.html" class="step">Taller</a>
     </nav>
     <div class="tb-spacer"></div>
-    <button id="docent-av" class="icon-btn avatar-btn" title="Docent">?</button>
+    <button id="docent-av" class="docent-av" title="El teu compte">?</button>
   </header>
 
   <!-- Contingut principal -->

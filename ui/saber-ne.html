@@ -13,6 +13,9 @@
 <!-- Material Symbols -->
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 
+<!-- Auth ATNE (lanet bridge) — ha de ser el primer script -->
+<script src="/ui/atne/js/auth.js"></script>
+
 <!-- ATNE base global (ordre obligatori: tokens → base → shell) -->
 <link rel="stylesheet" href="/ui/styles/tokens.css">
 <link rel="stylesheet" href="/ui/styles/base.css">
@@ -121,6 +124,22 @@
     color: var(--ink-500);
     transition: color var(--trans-fast);
   }
+  /* Avatar docent (idèntic a pas2/pas3) */
+  .docent-av {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--ac-bg);
+    color: var(--ac);
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 13.5px;
+    display: grid; place-items: center;
+    border: 1px solid var(--ac);
+    cursor: pointer;
+    transition: transform .1s;
+    flex-shrink: 0;
+  }
+  .docent-av:hover { transform: scale(1.05); }
   .topnav-back:hover { color: var(--primary); }
 
   .icon-btn {
@@ -1018,7 +1037,8 @@
     <a href="/ui/avaluacio.html">Avaluació i decisions</a>
   </div>
   <div class="topnav-right">
-    <a class="topnav-back" href="/ui/atne/pas1.html">← Tornar a ATNE</a>
+    <a class="topnav-back" href="/ui/atne/home.html">← Tornar a ATNE</a>
+    <button id="docent-av" class="docent-av" title="El teu compte">?</button>
   </div>
 </nav>
 
