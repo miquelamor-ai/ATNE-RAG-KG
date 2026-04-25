@@ -515,6 +515,36 @@
     align-items: center; gap: 4px; margin-top: 6px; font-weight: 500;
   }
   .save-pf-ok.show { display: flex; }
+
+  /* ── PDF print container (off-screen, net, sense chrome UI) ── */
+  .pdf-print-wrap {
+    background: #fff;
+    font-size: 11pt;
+    line-height: 1.65;
+    color: #111;
+    width: 170mm;
+  }
+  .pdf-print-wrap .adapted-box {
+    background: none;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+    margin: 0;
+  }
+  .pdf-comp-block {
+    page-break-inside: avoid;
+    margin-top: 1.8em;
+    border-top: 1.5px solid #ddd;
+    padding-top: 1em;
+  }
+  .pdf-comp-block h2 {
+    font-family: var(--serif);
+    font-size: 13pt;
+    font-weight: 700;
+    margin: 0 0 .6em;
+    color: #222;
+  }
 </style>
 </head>
 <body>
@@ -1230,14 +1260,44 @@
   // ── PDF ───────────────────────────────────────────────────────────────────────
   document.getElementById('btn-pdf').addEventListener('click', function () {
     if (typeof html2pdf === 'undefined') return;
-    var el = document.getElementById('state-result');
+    var adaptedHtml = (adaptedEl || {}).innerHTML || '';
+    if (!adaptedHtml.trim()) return;
+
+    // Complements amb contingut
+    var glHtml = glossariBody ? glossariBody.innerHTML.trim() : '';
+    var prHtml = preguntesBody ? preguntesBody.innerHTML.trim() : '';
+    var rsHtml = resumBody ? resumBody.innerHTML.trim() : '';
+
+    // Títol per al nom del fitxer (primera capçalera o primera línia)
+    var titleEl = adaptedEl.querySelector('h1, h2, h3');
+    var titleText = (titleEl ? titleEl.innerText : (adaptedEl.innerText || '').split('\n')[0])
+      .trim().slice(0, 80);
+    var filename = (titleText || 'adaptacio-flash')
+      .replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, '-').toLowerCase() || 'adaptacio-flash';
+
+    // Blocs de complements (page-break-inside: avoid)
+    var compsHtml = '';
+    if (glHtml) compsHtml += '<div class="pdf-comp-block"><h2>Glossari</h2>' + glHtml + '</div>';
+    if (prHtml) compsHtml += '<div class="pdf-comp-block"><h2>Preguntes de comprensió</h2>' + prHtml + '</div>';
+    if (rsHtml) compsHtml += '<div class="pdf-comp-block"><h2>Resum</h2>' + rsHtml + '</div>';
+
+    // Contenidor temporal off-screen (net, sense chrome UI)
+    var wrap = document.createElement('div');
+    wrap.className = 'pdf-print-wrap';
+    if (currentFont && currentFont !== 'fraunces') wrap.classList.add('font-' + currentFont);
+    wrap.style.cssText = 'position:fixed;left:-9999px;top:0;z-index:-1';
+    wrap.innerHTML = '<div class="adapted-box">' + adaptedHtml + '</div>' + compsHtml;
+    document.body.appendChild(wrap);
+
     html2pdf().set({
       margin: [15, 20],
-      filename: 'adaptacio-flash.pdf',
+      filename: filename + '.pdf',
       image: { type: 'jpeg', quality: 0.95 },
-      html2canvas: { scale: 2 },
+      html2canvas: { scale: 2, useCORS: true },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    }).from(el).save();
+    }).from(wrap).save().then(function () {
+      document.body.removeChild(wrap);
+    });
   });
 
   // ── Desa a la biblioteca ─────────────────────────────────────────────────────

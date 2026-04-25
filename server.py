@@ -3583,9 +3583,9 @@ def _build_flash_system_prompt(
     p = (
         f"Ets un assistent pedagògic especialitzat en adaptació de textos educatius.\n"
         f"Adapta el text que t'enviaré EN {lang_label.upper()}.\n"
-        "IMPORTANT: comença directament amb el text adaptat. "
-        "No escriguis cap frase introductòria, cap títol genèric, "
-        "cap explicació de què has fet ni cap comentari final.\n\n"
+        "IMPORTANT: si el text original té títol, conserva'l com a primera línia en format `## Títol`. "
+        "Si no en té, no n'inventis cap. "
+        "No escriguis cap frase introductòria, cap comentari sobre el que has fet ni cap text de tancament.\n\n"
     )
     p += "NIVELL:\n" + _FLASH_NIVELL_MAP.get(nivell, _FLASH_NIVELL_MAP["B1"]) + "\n"
     if perfils:
