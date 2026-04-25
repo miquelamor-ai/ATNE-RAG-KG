@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html class="light" lang="ca">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ATNE · Entendre els LLM</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+<script src="/ui/atne/js/auth.js"></script>
+<link rel="stylesheet" href="/ui/styles/tokens.css">
+<link rel="stylesheet" href="/ui/styles/base.css">
+<link rel="stylesheet" href="/ui/styles/shell.css">
+
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    vertical-align: middle; line-height: 1;
+  }
+
+  html { scroll-behavior: smooth; }
+  body { min-height: 100vh; display: flex; flex-direction: column; background: var(--cream); color: var(--ink-900); }
+
+  /* Topbar */
+  .topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 50; background: rgba(244,241,232,.92); backdrop-filter: blur(10px); }
+  .docent-av { width:32px;height:32px;border-radius:50%;background:var(--ac-bg);color:var(--ac);font-family:var(--serif);font-weight:700;font-size:13.5px;display:grid;place-items:center;border:1px solid var(--ac);cursor:pointer;transition:transform .1s;flex-shrink:0; }
+  .docent-av:hover { transform:scale(1.05); }
+
+  /* Layout */
+  .page-wrap { display:flex; padding-top:57px; min-height:100vh; }
+
+  /* Sidebar */
+  .sidebar { width:256px;background:#fff;border-right:1px solid var(--paper-line);position:fixed;left:0;height:calc(100vh - 57px);overflow-y:auto;display:none;z-index:30; }
+  @media (min-width:1024px) { .sidebar { display:block; } }
+  .sidebar-inner { padding:var(--sp-6); }
+  .sidebar-heading { font-family:var(--mono);font-size:var(--fs-xs);font-weight:var(--fw-bold);text-transform:uppercase;letter-spacing:.12em;color:var(--ink-400);margin-bottom:var(--sp-6); }
+  .sidebar-nav { display:flex;flex-direction:column;gap:var(--sp-1); }
+  .sidebar-link { display:flex;align-items:center;gap:var(--sp-3);padding:10px var(--sp-4);font-size:var(--fs-md);font-weight:var(--fw-semi);color:var(--ink-700);border-radius:var(--r-lg);transition:background var(--trans-fast),color var(--trans-fast); }
+  .sidebar-link:hover { background:var(--cream-2);color:var(--ink-900); }
+  .sidebar-num { width:20px;height:20px;border-radius:50%;background:var(--primary-50);color:var(--primary);display:grid;place-items:center;font-family:var(--mono);font-size:10px;font-weight:var(--fw-bold);flex-shrink:0; }
+
+  /* Main */
+  .main-content { flex:1;background:var(--cream);padding:var(--sp-8); }
+  @media (min-width:1024px) { .main-content { margin-left:256px; } }
+  .content-wrap { max-width:1400px;margin:0 auto; }
+
+  /* Doc header */
+  .doc-header { margin-bottom:var(--sp-9); }
+  .doc-title { font-family:var(--serif);font-size:var(--fs-3xl);font-weight:var(--fw-bold);color:var(--ink-900);line-height:var(--lh-tight);letter-spacing:-.02em;margin-bottom:var(--sp-3); }
+  .doc-subtitle { font-size:var(--fs-lg);color:var(--ink-600);line-height:var(--lh-body);max-width:680px; }
+
+  /* Seccions */
+  .section { margin-bottom:var(--sp-9);scroll-margin-top:80px; }
+  .section-header { display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-6); }
+  .section-badge { width:32px;height:32px;border-radius:var(--r-md);background:var(--primary);color:#fff;display:grid;place-items:center;font-weight:var(--fw-bold);font-size:var(--fs-md);font-family:var(--mono);flex-shrink:0; }
+  .section-title { font-family:var(--serif);font-size:var(--fs-2xl);font-weight:var(--fw-bold);color:var(--ink-900);line-height:var(--lh-tight); }
+  .section-intro { color:var(--ink-600);line-height:var(--lh-read);margin-bottom:var(--sp-6); }
+
+  /* Cards */
+  .card { background:#fff;border:1px solid var(--paper-line);border-radius:var(--r-xl);box-shadow:var(--sh-sm); }
+  .card:hover { border-color:rgba(51,55,166,.25); }
+  .card-p { padding:var(--sp-7); }
+  .card-p-sm { padding:var(--sp-5); }
+  .card-cream { background:var(--primary-50);border:1px solid var(--primary-100);border-radius:var(--r-xl); }
+
+  /* Grid */
+  .grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-5); }
+  @media (max-width:768px) { .grid-2 { grid-template-columns:1fr; } }
+  .grid-3 { display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-5); }
+  @media (max-width:1024px) { .grid-3 { grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:640px)  { .grid-3 { grid-template-columns:1fr; } }
+
+  /* Overline */
+  .overline { font-family:var(--mono);font-size:var(--fs-xs);font-weight:var(--fw-bold);text-transform:uppercase;letter-spacing:.1em;color:var(--primary);margin-bottom:var(--sp-2); }
+
+  /* ─── §1 Hero analogia ──────────────────────────────────────── */
+  .analogy-box {
+    background: var(--primary-50);
+    border: 2px solid var(--primary-100);
+    border-radius: var(--r-xl);
+    padding: var(--sp-7);
+    display: flex;
+    gap: var(--sp-6);
+    align-items: flex-start;
+  }
+  .analogy-icon {
+    font-size: 48px;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .analogy-text { flex: 1; }
+  .analogy-title { font-family:var(--serif);font-size:var(--fs-xl);font-weight:700;color:var(--primary);margin-bottom:var(--sp-3); }
+  .analogy-body { font-size:var(--fs-md);color:var(--ink-700);line-height:var(--lh-read); }
+
+  .step-list { display:flex;flex-direction:column;gap:var(--sp-4); }
+  .step-row { display:flex;gap:var(--sp-4);align-items:flex-start; }
+  .step-num { width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:grid;place-items:center;font-family:var(--mono);font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px; }
+  .step-text { font-size:var(--fs-md);color:var(--ink-700);line-height:var(--lh-body); }
+  .step-text strong { color:var(--ink-900); }
+
+  /* ─── §2 Glossari de termes ─────────────────────────────────── */
+  .term-card {
+    background: #fff;
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-xl);
+    padding: var(--sp-5);
+    box-shadow: var(--sh-sm);
+    transition: border-color var(--trans-fast), box-shadow var(--trans-fast);
+  }
+  .term-card:hover { border-color:rgba(51,55,166,.3);box-shadow:var(--sh-md); }
+  .term-icon-row { display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-3); }
+  .term-icon { width:36px;height:36px;border-radius:var(--r-md);background:var(--primary-50);display:grid;place-items:center;flex-shrink:0; }
+  .term-icon .material-symbols-outlined { font-size:20px;color:var(--primary); }
+  .term-label { font-family:var(--mono);font-size:var(--fs-xs);font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--primary); }
+  .term-name { font-family:var(--serif);font-size:var(--fs-lg);font-weight:700;color:var(--ink-900);margin-bottom:var(--sp-2); }
+  .term-def { font-size:var(--fs-md);color:var(--ink-600);line-height:var(--lh-body); }
+  .term-example { margin-top:var(--sp-3);padding:var(--sp-3) var(--sp-4);background:var(--ink-50);border-radius:var(--r-lg);font-size:var(--fs-xs);color:var(--ink-600);line-height:var(--lh-body); }
+  .term-example strong { color:var(--primary); }
+
+  /* ─── §3 Local vs Cloud ─────────────────────────────────────── */
+  .deploy-card {
+    border-radius:var(--r-xl);
+    overflow:hidden;
+    border:2px solid var(--paper-line);
+  }
+  .deploy-header {
+    padding:var(--sp-5) var(--sp-6);
+    display:flex;
+    align-items:center;
+    gap:var(--sp-4);
+  }
+  .deploy-header.local { background:#1e293b;color:#fff; }
+  .deploy-header.cloud { background:var(--primary);color:#fff; }
+  .deploy-title { font-family:var(--serif);font-size:var(--fs-xl);font-weight:700; }
+  .deploy-sub { font-size:var(--fs-xs);opacity:.75;margin-top:2px; }
+  .deploy-body { padding:var(--sp-5) var(--sp-6);background:#fff; }
+  .deploy-item { display:flex;gap:var(--sp-3);align-items:flex-start;padding:var(--sp-3) 0;border-bottom:1px solid var(--paper-line); }
+  .deploy-item:last-child { border-bottom:none; }
+  .deploy-dot { width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:6px; }
+  .deploy-dot.ok { background:var(--ok); }
+  .deploy-dot.warn { background:#f59e0b; }
+  .deploy-dot.err { background:var(--err); }
+  .deploy-item-text { font-size:var(--fs-md);color:var(--ink-700);line-height:var(--lh-body); }
+  .deploy-item-text strong { color:var(--ink-900); }
+
+  .free-banner {
+    background: #dcfce7;
+    border: 1px solid #86efac;
+    border-radius: var(--r-xl);
+    padding: var(--sp-5) var(--sp-6);
+    display: flex;
+    gap: var(--sp-4);
+    align-items: flex-start;
+  }
+  .free-banner-icon { font-size:28px;flex-shrink:0; }
+  .free-banner-title { font-family:var(--serif);font-size:var(--fs-lg);font-weight:700;color:#15803d;margin-bottom:var(--sp-2); }
+  .free-banner-text { font-size:var(--fs-md);color:#166534;line-height:var(--lh-body); }
+  .free-tier-list { display:flex;flex-direction:column;gap:var(--sp-2);margin-top:var(--sp-3); }
+  .free-tier-item { display:flex;gap:var(--sp-3);align-items:center;font-size:var(--fs-md);color:#166534; }
+  .free-tier-badge { font-family:var(--mono);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;background:#86efac;color:#14532d;padding:2px 6px;border-radius:99px;flex-shrink:0; }
+
+  /* ─── §4 Taula mercat ───────────────────────────────────────── */
+  .market-table-wrap { background:#fff;border:1px solid var(--paper-line);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--sh-sm); }
+  .market-table { width:100%;border-collapse:collapse;font-size:var(--fs-md); }
+  .market-table thead { background:var(--ink-50);border-bottom:2px solid var(--primary-100); }
+  .market-table th { padding:var(--sp-4) var(--sp-5);font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-500);text-align:left;white-space:nowrap; }
+  .market-table tbody tr { border-bottom:1px solid var(--paper-line);transition:background var(--trans-fast); }
+  .market-table tbody tr:hover { background:var(--primary-50); }
+  .market-table td { padding:var(--sp-4) var(--sp-5);vertical-align:middle; }
+  .model-name { font-weight:700;color:var(--ink-900); }
+  .model-provider { font-family:var(--mono);font-size:10px;color:var(--ink-400);margin-top:2px; }
+  .mida-badge { display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;background:var(--ink-50);border:1px solid var(--paper-line);border-radius:99px;padding:2px 8px;color:var(--ink-600); }
+  .preu-cell { font-family:var(--mono);font-size:var(--fs-xs);color:var(--ink-700); }
+  .preu-zero { color:#15803d;font-weight:700; }
+  .cat-dot { display:inline-flex;align-items:center;gap:4px;font-size:var(--fs-xs); }
+  .dot-yes { color:var(--primary);font-size:16px;font-weight:700; }
+  .dot-part { color:#f59e0b;font-size:16px; }
+  .dot-no { color:var(--ink-300);font-size:16px; }
+  .row-highlight { background:rgba(51,55,166,.04) !important; }
+  .atne-badge { font-family:var(--mono);font-size:9px;font-weight:700;text-transform:uppercase;background:var(--primary);color:#fff;padding:2px 7px;border-radius:99px;letter-spacing:.06em; }
+
+  /* ─── §5 Per quin motiu ─────────────────────────────────────── */
+  .crit-card {
+    background:#fff;
+    border:1px solid var(--paper-line);
+    border-radius:var(--r-xl);
+    padding:var(--sp-5);
+  }
+  .crit-header { display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-3); }
+  .crit-num { width:24px;height:24px;border-radius:50%;background:var(--primary);color:#fff;display:grid;place-items:center;font-family:var(--mono);font-size:11px;font-weight:700;flex-shrink:0; }
+  .crit-title { font-weight:700;font-size:var(--fs-md);color:var(--ink-900); }
+  .crit-body { font-size:var(--fs-md);color:var(--ink-600);line-height:var(--lh-body); }
+  .crit-body strong { color:var(--primary); }
+
+  /* ─── §6 Roster ATNE ────────────────────────────────────────── */
+  .roster-card {
+    background:#fff;
+    border:1px solid var(--paper-line);
+    border-radius:var(--r-xl);
+    overflow:hidden;
+    box-shadow:var(--sh-sm);
+    transition:border-color var(--trans-fast),box-shadow var(--trans-fast);
+  }
+  .roster-card:hover { border-color:rgba(51,55,166,.3);box-shadow:var(--sh-md); }
+  .roster-header {
+    padding:var(--sp-4) var(--sp-5);
+    display:flex;
+    align-items:center;
+    gap:var(--sp-3);
+    border-bottom:1px solid var(--paper-line);
+    background:var(--ink-50);
+  }
+  .roster-logo { width:36px;height:36px;border-radius:var(--r-md);display:grid;place-items:center;font-size:20px;flex-shrink:0; }
+  .roster-model-name { font-family:var(--serif);font-size:var(--fs-lg);font-weight:700;color:var(--ink-900); }
+  .roster-provider { font-family:var(--mono);font-size:10px;color:var(--ink-400);margin-top:2px; }
+  .roster-body { padding:var(--sp-5); }
+  .roster-role { display:inline-block;font-family:var(--mono);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:var(--sp-3); }
+  .roster-role.default { background:var(--primary);color:#fff;padding:3px 8px;border-radius:99px; }
+  .roster-role.quality { background:#7c3aed;color:#fff;padding:3px 8px;border-radius:99px; }
+  .roster-role.candidate { background:#d97706;color:#fff;padding:3px 8px;border-radius:99px; }
+  .roster-role.available { background:var(--ink-200);color:var(--ink-700);padding:3px 8px;border-radius:99px; }
+  .roster-why { font-size:var(--fs-md);color:var(--ink-700);line-height:var(--lh-body);margin-bottom:var(--sp-4); }
+  .roster-stats { display:flex;flex-wrap:wrap;gap:var(--sp-3); }
+  .stat-pill { display:flex;flex-direction:column;background:var(--cream);border:1px solid var(--paper-line);border-radius:var(--r-lg);padding:var(--sp-2) var(--sp-3); }
+  .stat-label { font-family:var(--mono);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-400); }
+  .stat-val { font-family:var(--mono);font-size:var(--fs-xs);font-weight:700;color:var(--ink-800); }
+  .stat-val.green { color:#15803d; }
+
+  /* Footer */
+  .page-footer { background:#fff;border-top:1px solid var(--paper-line);padding:var(--sp-7) var(--sp-8); }
+  @media (min-width:1024px) { .page-footer { margin-left:256px; } }
+  .footer-inner { max-width:1400px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:var(--sp-6); }
+  @media (min-width:768px) { .footer-inner { flex-direction:row;justify-content:space-between; } }
+  .footer-links { display:flex;gap:var(--sp-6); }
+  .footer-links a { font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-500);transition:color var(--trans-fast); }
+  .footer-links a:hover { color:var(--primary); }
+  .footer-copy { font-family:var(--mono);font-size:10px;color:var(--ink-400); }
+
+  /* Utils */
+  .space-5 { display:flex;flex-direction:column;gap:var(--sp-5); }
+  .space-6 { display:flex;flex-direction:column;gap:var(--sp-6); }
+  .max-w-3xl { max-width:680px; }
+  .mt-6 { margin-top:var(--sp-6); }
+  .mb-4 { margin-bottom:var(--sp-4); }
+  .divider { border:none;border-top:1px solid var(--paper-line);margin:var(--sp-6) 0; }
+
+  ::-webkit-scrollbar { width:6px;height:6px; }
+  ::-webkit-scrollbar-thumb { background:var(--ink-200);border-radius:99px; }
+  ::-webkit-scrollbar-thumb:hover { background:var(--ink-300); }
+  ::-webkit-scrollbar-track { background:transparent; }
+</style>
+</head>
+<body>
+
+<!-- TopNavBar -->
+<header class="topbar">
+  <a href="/ui/atne/home.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0">
+    <div class="logo" style="margin-bottom:0;flex-shrink:0"><img src="/logo-fje.jpg" alt="FJE"></div>
+    <span class="brand" style="font-family:var(--serif);font-size:18px;font-weight:700;color:var(--ink-900)">ATNE</span>
+  </a>
+  <nav class="steps" aria-label="Mode" style="margin:0 auto">
+    <a href="/ui/atne/flash.html" class="step" style="text-decoration:none">Flash</a>
+    <a href="/ui/atne/pas1.html" class="step" style="text-decoration:none">Taller</a>
+  </nav>
+  <button id="docent-av" class="docent-av" title="El teu compte">?</button>
+</header>
+
+<div class="page-wrap">
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-inner">
+    <p class="sidebar-heading">En aquesta pàgina</p>
+    <nav class="sidebar-nav">
+      <a class="sidebar-link" href="#que-es">
+        <span class="sidebar-num">01</span>Que és un LLM?
+      </a>
+      <a class="sidebar-link" href="#capacitats">
+        <span class="sidebar-num">02</span>Que pot fer i que no
+      </a>
+      <a class="sidebar-link" href="#termes">
+        <span class="sidebar-num">03</span>Termes clau
+      </a>
+      <a class="sidebar-link" href="#local-cloud">
+        <span class="sidebar-num">04</span>Local vs Cloud
+      </a>
+      <a class="sidebar-link" href="#mercat">
+        <span class="sidebar-num">05</span>El mercat 2026
+      </a>
+      <a class="sidebar-link" href="#criteris">
+        <span class="sidebar-num">06</span>Criteris per ATNE
+      </a>
+      <a class="sidebar-link" href="#roster">
+        <span class="sidebar-num">07</span>Els models d'ATNE
+      </a>
+    </nav>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
+<div class="content-wrap">
+
+<header class="doc-header">
+  <p class="overline">Intel·ligència Artificial · Models de Llengua</p>
+  <h1 class="doc-title">Entendre els LLM</h1>
+  <p class="doc-subtitle">Una guia per a docents i equips educatius: que és un model de llengua, com funciona, quins existeixen, i per quin motiu ATNE tria els que tria.</p>
+</header>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- §1 Que és un LLM?                                           -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="que-es">
+  <div class="section-header">
+    <span class="section-badge">01</span>
+    <h2 class="section-title">Que és un LLM?</h2>
+  </div>
+  <p class="section-intro max-w-3xl">LLM significa <em>Large Language Model</em>, en català «Model de Llengua Gran». Darrere d'un nom tècnic, hi ha una idea relativament senzilla.</p>
+
+  <!-- Analogia central -->
+  <div class="analogy-box mb-4">
+    <div class="analogy-icon">📚</div>
+    <div class="analogy-text">
+      <p class="analogy-title">L'analogia del lector universal</p>
+      <p class="analogy-body">Imagina algú que ha llegit i estudiat <strong>milers de milions de pàgines</strong>: llibres, articles científics, pàgines web, converses, receptes, codi de programació… en centenars d'idiomes. Ha après, sense que ningú li ho expliqués explícitament, com funciona el llenguatge: la gramàtica, el vocabulari, el to, el context, la coherència.<br><br>
+      Ara li demanes que reescrigui un text de biologia per a un alumne nouvingut de 5è de primària. Consulta tot el que ha llegit i genera una proposta en qüestió de segons. Aixó és un LLM.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Com ha après -->
+    <div class="card card-p-sm">
+      <p class="overline">Com ha après</p>
+      <p style="font-family:var(--serif);font-size:var(--fs-lg);font-weight:700;color:var(--ink-900);margin-bottom:var(--sp-4)">Entrenament: la fase d'aprenentatge</p>
+      <div class="step-list">
+        <div class="step-row">
+          <span class="step-num">1</span>
+          <p class="step-text"><strong>Recollida de dades.</strong> Milers de milions de paraules de text de tot Internet, llibres digitalitzats, Wikipedia, etc.</p>
+        </div>
+        <div class="step-row">
+          <span class="step-num">2</span>
+          <p class="step-text"><strong>Predicció massiva.</strong> El model aprèn a predir la paraula següent. Bilions de vegades. Cada error ajusta els seus paràmetres interns.</p>
+        </div>
+        <div class="step-row">
+          <span class="step-num">3</span>
+          <p class="step-text"><strong>Refinament amb feedback humà.</strong> Persones avaluen respostes i el model aprèn a ser més útil i menys incorrecte.</p>
+        </div>
+        <div class="step-row">
+          <span class="step-num">4</span>
+          <p class="step-text"><strong>Resultat.</strong> Un fitxer matemàtic (de milers de milions de «paràmetres») que encapsula tot el que ha après.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Com funciona quan l'usem -->
+    <div class="card card-p-sm">
+      <p class="overline">Com funciona quan l'usem</p>
+      <p style="font-family:var(--serif);font-size:var(--fs-lg);font-weight:700;color:var(--ink-900);margin-bottom:var(--sp-4)">Inferència: la fase de generació</p>
+      <div class="step-list">
+        <div class="step-row">
+          <span class="step-num">1</span>
+          <p class="step-text"><strong>Rep la instrucció.</strong> ATNE li envia el text original, el perfil de l'alumne i 100+ instruccions pedagògiques.</p>
+        </div>
+        <div class="step-row">
+          <span class="step-num">2</span>
+          <p class="step-text"><strong>Processa el context.</strong> Llegeix tot el que ha rebut i «consulta» els seus paràmetres per decidir quina paraula ve a continuació.</p>
+        </div>
+        <div class="step-row">
+          <span class="step-num">3</span>
+          <p class="step-text"><strong>Genera token a token.</strong> Produeix el text adaptat paraula per paraula, de manera que va apareixent en pantalla a mesura que s'escriu.</p>
+        </div>
+        <div class="step-row">
+          <span class="step-num">4</span>
+          <p class="step-text"><strong>S'atura quan ha acabat.</strong> Quan detecta que la resposta és completa, deixa de generar.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Qué no és -->
+  <div class="card card-p-sm mt-6" style="background:#fff7ed;border-color:#fed7aa;">
+    <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+      <span style="font-size:24px;flex-shrink:0">⚠️</span>
+      <div>
+        <p style="font-weight:700;color:#9a3412;margin-bottom:var(--sp-2)">Importants limitacions</p>
+        <p style="font-size:var(--fs-md);color:#7c2d12;line-height:var(--lh-body)">Un LLM <strong>no pensa</strong>, no entén ni raona com una persona. Genera text estadísticament probable basant-se en el que ha vist. Pot cometre errors, inventar dades, tenir biaixos dels textos d'entrenament, i no actualitza el seu coneixement en temps real. Per ATNE, el docent sempre revisa i valida la proposta: la IA suggereix, el docent decideix.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- §2 Que pot fer i que no                                     -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="capacitats">
+  <div class="section-header">
+    <span class="section-badge">02</span>
+    <h2 class="section-title">Que pot fer un LLM (i que no)</h2>
+  </div>
+  <p class="section-intro max-w-3xl">Entendre les capacitats reals d'un LLM és clau per usar ATNE bé i gestionar expectatives. Hi ha coses que fa excel·lentment, coses que intenta però no sempre encerta, i coses que simplement no pot fer — i cal que les faci el codi o el docent.</p>
+
+  <div class="grid-3" style="align-items:start">
+
+    <!-- Ho fa bé -->
+    <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:var(--r-xl);overflow:hidden;">
+      <div style="padding:var(--sp-4) var(--sp-5);background:#dcfce7;border-bottom:1px solid #86efac;display:flex;align-items:center;gap:var(--sp-3)">
+        <span style="font-size:20px">✅</span>
+        <p style="font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#15803d">Ho fa bé · Alta fiabilitat</p>
+      </div>
+      <div style="padding:var(--sp-4) var(--sp-5);display:flex;flex-direction:column;gap:var(--sp-3)">
+        <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+          <span style="color:#15803d;font-size:14px;margin-top:2px;flex-shrink:0">●</span>
+          <div><p style="font-weight:600;font-size:var(--fs-md);color:#14532d">Simplificació de vocabulari</p><p style="font-size:var(--fs-xs);color:#166534;margin-top:2px;line-height:var(--lh-body)">Substituir paraules difícils per sinònims freqüents. La tasca més natural per als LLMs.</p></div>
+        </div>
+        <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+          <span style="color:#15803d;font-size:14px;margin-top:2px;flex-shrink:0">●</span>
+          <div><p style="font-weight:600;font-size:var(--fs-md);color:#14532d">Simplificació de frases</p><p style="font-size:var(--fs-xs);color:#166534;margin-top:2px;line-height:var(--lh-body)">Descompondre frases complexes, trencar subordinades, ordenar SVC (Subjecte-Verb-Complement).</p></div>
+        </div>
+        <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+          <span style="color:#15803d;font-size:14px;margin-top:2px;flex-shrink:0">●</span>
+          <div><p style="font-weight:600;font-size:var(--fs-md);color:#14532d">Terminologia amb definició</p><p style="font-size:var(--fs-xs);color:#166534;margin-top:2px;line-height:var(--lh-body)">Mantenir els termes tècnics importants i afegir una definició breu la primera vegada que apareixen.</p></div>
+        </div>
+        <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+          <span style="color:#15803d;font-size:14px;margin-top:2px;flex-shrink:0">●</span>
+          <div><p style="font-weight:600;font-size:var(--fs-md);color:#14532d">Glossaris monolingües</p><p style="font-size:var(--fs-xs);color:#166534;margin-top:2px;line-height:var(--lh-body)">Generar un glossari dels termes clau del text. Fiable en català. Menys fiable en L1 minoritzades (amazic, wòlof, bangla).</p></div>
+        </div>
+        <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+          <span style="color:#15803d;font-size:14px;margin-top:2px;flex-shrink:0">●</span>
+          <div><p style="font-weight:600;font-size:var(--fs-md);color:#14532d">Preguntes de comprensió</p><p style="font-size:var(--fs-xs);color:#166534;margin-top:2px;line-height:var(--lh-body)">Generar preguntes graduades per nivell. Alta qualitat si s'indica que usin vocabulari del text adaptat.</p></div>
+        </div>
+        <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+          <span style="color:#15803d;font-size:14px;margin-top:2px;flex-shrink:0">●</span>
+          <div><p style="font-weight:600;font-size:var(--fs-md);color:#14532d">Bastides i exemples</p><p style="font-size:var(--fs-xs);color:#166534;margin-top:2px;line-height:var(--lh-body)">Proposar analogies, exemples propers, connexions amb l'experiència quotidiana de l'alumne.</p></div>
+        </div>
+        <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+          <span style="color:#15803d;font-size:14px;margin-top:2px;flex-shrink:0">●</span>
+          <div><p style="font-weight:600;font-size:var(--fs-md);color:#14532d">Esquemes en text</p><p style="font-size:var(--fs-xs);color:#166534;margin-top:2px;line-height:var(--lh-body)">Estructurar informació en forma d'esquema o llista jeràrquica de fins a 3 nivells.</p></div>
+        </div>
+        <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+          <span style="color:#15803d;font-size:14px;margin-top:2px;flex-shrink:0">●</span>
+          <div><p style="font-weight:600;font-size:var(--fs-md);color:#14532d">Veu passiva → activa</p><p style="font-size:var(--fs-xs);color:#166534;margin-top:2px;line-height:var(--lh-body)">Transformar construccions passives en actives, posant el subjecte davant. Consistentment fiable.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Intenta però no és fiable -->
+    <div style="background:#fffbeb;border:1.5px solid #fcd34d;border-radius:var(--r-xl);overflow:hidden;">
+      <div style="padding:var(--sp-4) var(--sp-5);background:#fef9c3;border-bottom:1px solid #fcd34d;display:flex;align-items:center;gap:var(--sp-3)">
+        <span style="font-size:20px">⚠️</span>
+        <p style="font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#92400e">Ho intenta · Fiabilitat baixa</p>
+      </div>
+      <div style="padding:var(--sp-4) var(--sp-5);display:flex;flex-direction:column;gap:var(--sp-3)">
+        <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+          <span style="color:#d97706;font-size:14px;margin-top:2px;flex-shrink:0">●</span>
+          <div><p style="font-weight:600;font-size:var(--fs-md);color:#78350f">Comptar paraules per frase</p><p style="font-size:var(--fs-xs);color:#92400e;margin-top:2px;line-height:var(--lh-body)">Els LLMs no compten paraules: «intueixen» la longitud. ATNE ho verifica amb codi Python a posteriori.</p></div>
+        </div>
+        <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+          <span style="color:#d97706;font-size:14px;margin-top:2px;flex-shrink:0">●</span>
+          <div><p style="font-weight:600;font-size:var(--fs-md);color:#78350f">Controlar longitud del text</p><p style="font-size:var(--fs-xs);color:#92400e;margin-top:2px;line-height:var(--lh-body)">Demanar «200 paraules» pot donar 150 o 300. La longitud és orientativa, no una promesa.</p></div>
+        </div>
+        <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+          <span style="color:#d97706;font-size:14px;margin-top:2px;flex-shrink:0">●</span>
+          <div><p style="font-weight:600;font-size:var(--fs-md);color:#78350f">Màxim N conceptes per paràgraf</p><p style="font-size:var(--fs-xs);color:#92400e;margin-top:2px;line-height:var(--lh-body)">L'LLM no té una definició operacional consistent de «concepte». Guia la tendència, però no garanteix el nombre exacte.</p></div>
+        </div>
+        <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+          <span style="color:#d97706;font-size:14px;margin-top:2px;flex-shrink:0">●</span>
+          <div><p style="font-weight:600;font-size:var(--fs-md);color:#78350f">Evitar paraules al 100%</p><p style="font-size:var(--fs-xs);color:#92400e;margin-top:2px;line-height:var(--lh-body)">Es pot demanar que eviti cert vocabulari, però no amb garantia total. ATNE detecta les paraules problemàtiques i avisa.</p></div>
+        </div>
+        <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+          <span style="color:#d97706;font-size:14px;margin-top:2px;flex-shrink:0">●</span>
+          <div><p style="font-weight:600;font-size:var(--fs-md);color:#78350f">Glossaris bilingües amb L1 rares</p><p style="font-size:var(--fs-xs);color:#92400e;margin-top:2px;line-height:var(--lh-body)">Català-castellà/anglès és fiable. Català-amazic, wòlof o bangla: les traduccions poden ser incorrectes. Cal validació humana.</p></div>
+        </div>
+        <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+          <span style="color:#d97706;font-size:14px;margin-top:2px;flex-shrink:0">●</span>
+          <div><p style="font-weight:600;font-size:var(--fs-md);color:#78350f">Consistència en textos molt llargs</p><p style="font-size:var(--fs-xs);color:#92400e;margin-top:2px;line-height:var(--lh-body)">En textos de &gt;2.000 paraules, les instruccions del final del prompt «pesen menys» i la coherència pot degradar-se.</p></div>
+        </div>
+        <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+          <span style="color:#d97706;font-size:14px;margin-top:2px;flex-shrink:0">●</span>
+          <div><p style="font-weight:600;font-size:var(--fs-md);color:#78350f">Respectar un nivell MECR exacte</p><p style="font-size:var(--fs-xs);color:#92400e;margin-top:2px;line-height:var(--lh-body)">El MECR guia la complexitat, però no és una promesa matemàtica. El docent ha de revisar si el to és adequat al nivell indicat.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No pot fer-ho -->
+    <div style="background:#fff1f2;border:1.5px solid #fca5a5;border-radius:var(--r-xl);overflow:hidden;">
+      <div style="padding:var(--sp-4) var(--sp-5);background:#fee2e2;border-bottom:1px solid #fca5a5;display:flex;align-items:center;gap:var(--sp-3)">
+        <span style="font-size:20px">🚫</span>
+        <p style="font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#991b1b">No pot fer-ho · Cal codi o docent</p>
+      </div>
+      <div style="padding:var(--sp-4) var(--sp-5);display:flex;flex-direction:column;gap:var(--sp-3)">
+        <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+          <span style="color:#dc2626;font-size:14px;margin-top:2px;flex-shrink:0">●</span>
+          <div><p style="font-weight:600;font-size:var(--fs-md);color:#7f1d1d">Canviar tipografia</p><p style="font-size:var(--fs-xs);color:#991b1b;margin-top:2px;line-height:var(--lh-body)">OpenDyslexic, mida de lletra, interlineat… Això ho fa el CSS del frontend. L'LLM genera text, no format visual.</p></div>
+        </div>
+        <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+          <span style="color:#dc2626;font-size:14px;margin-top:2px;flex-shrink:0">●</span>
+          <div><p style="font-weight:600;font-size:var(--fs-md);color:#7f1d1d">Pictogrames reals</p><p style="font-size:var(--fs-xs);color:#991b1b;margin-top:2px;line-height:var(--lh-body)">L'LLM pot marcar «[PICTO: fotosíntesi]» on hauria d'anar una imatge, però no la genera. ATNE usa emojis com a substitut provisional.</p></div>
+        </div>
+        <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+          <span style="color:#dc2626;font-size:14px;margin-top:2px;flex-shrink:0">●</span>
+          <div><p style="font-weight:600;font-size:var(--fs-md);color:#7f1d1d">Àudio / text a veu</p><p style="font-size:var(--fs-xs);color:#991b1b;margin-top:2px;line-height:var(--lh-body)">La lectura en veu alta requereix síntesi de veu (TTS), que és una tecnologia separada no integrada encara a ATNE.</p></div>
+        </div>
+        <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+          <span style="color:#dc2626;font-size:14px;margin-top:2px;flex-shrink:0">●</span>
+          <div><p style="font-weight:600;font-size:var(--fs-md);color:#7f1d1d">Detectar el nivell del text original</p><p style="font-size:var(--fs-xs);color:#991b1b;margin-top:2px;line-height:var(--lh-body)">Mesurar objectivament la dificultat del text d'entrada requereix mètriques de llegibilitat (Flesch, etc.) calculades amb codi. L'LLM en té una percepció, però no és precisa.</p></div>
+        </div>
+        <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+          <span style="color:#dc2626;font-size:14px;margin-top:2px;flex-shrink:0">●</span>
+          <div><p style="font-weight:600;font-size:var(--fs-md);color:#7f1d1d">Verificar precisió científica</p><p style="font-size:var(--fs-xs);color:#991b1b;margin-top:2px;line-height:var(--lh-body)">L'LLM pot inventar dades o simplificar de forma incorrecta un concepte científic complex. La revisió docent és irrenunciable.</p></div>
+        </div>
+        <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+          <span style="color:#dc2626;font-size:14px;margin-top:2px;flex-shrink:0">●</span>
+          <div><p style="font-weight:600;font-size:var(--fs-md);color:#7f1d1d">Maquetació i disseny visual</p><p style="font-size:var(--fs-xs);color:#991b1b;margin-top:2px;line-height:var(--lh-body)">Columnes, posició d'imatges, format de taula complex… Això és feina del frontend, no del model de llengua.</p></div>
+        </div>
+        <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+          <span style="color:#dc2626;font-size:14px;margin-top:2px;flex-shrink:0">●</span>
+          <div><p style="font-weight:600;font-size:var(--fs-md);color:#7f1d1d">Diagnosticar l'alumne</p><p style="font-size:var(--fs-xs);color:#991b1b;margin-top:2px;line-height:var(--lh-body)">Un LLM no pot ni ha de fer diagnòstics educatius o clínics. ATNE treballa amb perfils que el docent ja coneix; l'IA adapta, no diagnostica.</p></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Nota per al docent -->
+  <div class="card card-p-sm mt-6" style="background:#f8fafc;border-color:var(--paper-line)">
+    <div style="display:flex;gap:var(--sp-4);align-items:flex-start">
+      <span style="font-size:22px;flex-shrink:0">👨‍🏫</span>
+      <div>
+        <p style="font-weight:700;color:var(--ink-900);margin-bottom:var(--sp-2)">El docent sempre té l'última paraula</p>
+        <p style="font-size:var(--fs-md);color:var(--ink-600);line-height:var(--lh-body)">ATNE és una eina d'assistència, no de substitució. L'LLM genera una proposta pedagògicament informada; el docent la revisa, la corregeix i decideix si és adequada per al seu alumne concret. El coneixement contextual del docent — la relació amb l'alumne, la dinàmica d'aula, l'historial — és irrenunciable i no el pot tenir cap model.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- §3 Termes clau                                              -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="termes">
+  <div class="section-header">
+    <span class="section-badge">03</span>
+    <h2 class="section-title">Termes clau</h2>
+  </div>
+  <p class="section-intro max-w-3xl">Quan comparem models o llegim les seves especificacions tècniques, apareixen sempre els mateixos conceptes. Aquí els expliquem de forma pràctica, sense tecnicismes innecessaris.</p>
+
+  <div class="grid-3">
+
+    <div class="term-card">
+      <div class="term-icon-row">
+        <div class="term-icon"><span class="material-symbols-outlined">text_fields</span></div>
+        <span class="term-label">Token</span>
+      </div>
+      <p class="term-name">Token: la unitat mínima</p>
+      <p class="term-def">Un LLM no llegeix paraules senceres, sinó fragments: «tokens». Una paraula llarga pot ser 2-3 tokens; una curta, 1. En català, aproximadament 1 token ≈ 0,75 paraules.</p>
+      <div class="term-example"><strong>Per qué importa:</strong> els proveïdors cobren per tokens processats. El cost d'adaptar un text depèn directament del nombre de tokens del text i de les instruccions.</div>
+    </div>
+
+    <div class="term-card">
+      <div class="term-icon-row">
+        <div class="term-icon"><span class="material-symbols-outlined">memory</span></div>
+        <span class="term-label">Context Window</span>
+      </div>
+      <p class="term-name">Finestra de context: la memòria</p>
+      <p class="term-def">És la «memòria de treball» del model: la quantitat màxima de text que pot processar en una sola crida. S'expressa en tokens. ATNE usa contextos de 32K-256K tokens.</p>
+      <div class="term-example"><strong>Analogia:</strong> com un full de paper on es pot escriure tot el que el model veu alhora. Si el text és massa llarg, no hi cap tot.</div>
+    </div>
+
+    <div class="term-card">
+      <div class="term-icon-row">
+        <div class="term-icon"><span class="material-symbols-outlined">tune</span></div>
+        <span class="term-label">Temperatura</span>
+      </div>
+      <p class="term-name">Temperatura: creativitat vs precisió</p>
+      <p class="term-def">Un paràmetre entre 0 i 2 que controla quant «arrisca» el model en les seves tries. 0 = molt determinista i repetitiu. 2 = molt creatiu i imprevisible.</p>
+      <div class="term-example"><strong>ATNE:</strong> usa 0.4 per a adaptació (precis i fidel) i 1.0 per a generació lliure (més creatiu).</div>
+    </div>
+
+    <div class="term-card">
+      <div class="term-icon-row">
+        <div class="term-icon"><span class="material-symbols-outlined">rule</span></div>
+        <span class="term-label">Instruction Following</span>
+      </div>
+      <p class="term-name">Seguiment d'instruccions</p>
+      <p class="term-def">La capacitat del model de seguir instruccions complexes i específiques de forma fidel. Un model pot ser molt intel·ligent però poc obedient: fa el que vol, no el que se li demana.</p>
+      <div class="term-example"><strong>Crític per ATNE:</strong> ATNE envia 100+ instruccions pedagògiques (MECR, perfil, DUA, gènere…). Un model que no les segueixi bé genera adaptacions deficients.</div>
+    </div>
+
+    <div class="term-card">
+      <div class="term-icon-row">
+        <div class="term-icon"><span class="material-symbols-outlined">translate</span></div>
+        <span class="term-label">Multilingüe</span>
+      </div>
+      <p class="term-name">Suport multilingüe</p>
+      <p class="term-def">La qualitat del model en idiomes diferents de l'anglès. Depèn de quanta dada en aquell idioma hi havia en l'entrenament. El català, com a llengua minoritzada, sovint no té la mateixa cobertura que l'espanyol o el francès.</p>
+      <div class="term-example"><strong>ATNE:</strong> el català és la llengua principal. Cal verificar empíricament la qualitat de cada model, no fiar-se de les promeses generals del proveïdor.</div>
+    </div>
+
+    <div class="term-card">
+      <div class="term-icon-row">
+        <div class="term-icon"><span class="material-symbols-outlined">speed</span></div>
+        <span class="term-label">Streaming</span>
+      </div>
+      <p class="term-name">Streaming: generació en directe</p>
+      <p class="term-def">La capacitat de mostrar el text a mesura que es genera, paraula per paraula, en lloc d'esperar que acabi tot. Fa que l'experiència sigui molt més fluïda per a l'usuari.</p>
+      <div class="term-example"><strong>ATNE:</strong> usa streaming per a totes les adaptacions. El docent veu el text aparèixer de forma progressiva en lloc d'esperar 30-60 segons amb la pantalla buida.</div>
+    </div>
+
+    <div class="term-card">
+      <div class="term-icon-row">
+        <div class="term-icon"><span class="material-symbols-outlined">developer_board</span></div>
+        <span class="term-label">Paràmetres (B)</span>
+      </div>
+      <p class="term-name">Mida: milers de milions de paràmetres</p>
+      <p class="term-def">Els «paràmetres» són els valors numèrics interns que el model ha après durant l'entrenament. S'expressen en bilions (B). Més paràmetres ≈ més capacitat, però també més cost i lentitud.</p>
+      <div class="term-example"><strong>Rang actual:</strong> 7B (petit, ràpid, barat) → 31B (mitjà, bon equilibri) → 400B (gran, molt potent, car). ATNE usa principalment 31B.</div>
+    </div>
+
+    <div class="term-card">
+      <div class="term-icon-row">
+        <div class="term-icon"><span class="material-symbols-outlined">hub</span></div>
+        <span class="term-label">MoE</span>
+      </div>
+      <p class="term-name">Mixture-of-Experts: eficiència intel·ligent</p>
+      <p class="term-def">Una arquitectura on el model no activa tots els seus paràmetres per a cada petició, sinó que selecciona quins «experts» interns són rellevants. Permet tenir molts paràmetres totals però usar-ne pocs a la pràctica.</p>
+      <div class="term-example"><strong>Exemple:</strong> Llama 4 Scout té 109B paràmetres totals però n'activa només 17B per crida. És tan ràpid i barat com un model de 17B però tan capac com un de molt més gran.</div>
+    </div>
+
+    <div class="term-card">
+      <div class="term-icon-row">
+        <div class="term-icon"><span class="material-symbols-outlined">lock_open</span></div>
+        <span class="term-label">Open Source</span>
+      </div>
+      <p class="term-name">Obert vs propietari</p>
+      <p class="term-def">Un model <em>open source</em> publica els seus pesos (el fitxer matemàtic entrenat) perquè qualsevol el pugui descarregar i executar. Un model propietari és un servei tancat que cal consumir via API.</p>
+      <div class="term-example"><strong>Exemples:</strong> Gemma 4, Llama 4, Qwen3 = open source. GPT-4o, Gemini 2.5 = propietaris. Open source no implica gratuït, però sí més flexibilitat.</div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- §3 Local vs Cloud                                           -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="local-cloud">
+  <div class="section-header">
+    <span class="section-badge">04</span>
+    <h2 class="section-title">Local vs Cloud: on corre el model?</h2>
+  </div>
+  <p class="section-intro max-w-3xl">Hi ha dues maneres fonamentalment diferents de desplegar un LLM. Cadascuna té un perfil de cost, complexitat i flexibilitat molt distint.</p>
+
+  <div class="grid-2" style="align-items:start">
+    <!-- Local -->
+    <div class="deploy-card">
+      <div class="deploy-header local">
+        <span style="font-size:28px">🖥️</span>
+        <div>
+          <p class="deploy-title">LLM Local</p>
+          <p class="deploy-sub">El model corre als teus servidors propis</p>
+        </div>
+      </div>
+      <div class="deploy-body">
+        <div class="deploy-item">
+          <span class="deploy-dot warn"></span>
+          <p class="deploy-item-text"><strong>Hardware GPU obligatori.</strong> Executar un model de 31B paràmetres requereix una GPU potent (NVIDIA A100: €12.000) o un servidor cloud amb GPU (€2-5/hora).</p>
+        </div>
+        <div class="deploy-item">
+          <span class="deploy-dot ok"></span>
+          <p class="deploy-item-text"><strong>Cost per crida: zero.</strong> Un cop tens el hardware, cada adaptació no té cost directe addicional.</p>
+        </div>
+        <div class="deploy-item">
+          <span class="deploy-dot warn"></span>
+          <p class="deploy-item-text"><strong>Electricitat i manteniment.</strong> Una GPU de producció consumeix 300-400W. En ús continu: €50-200/mes d'electricitat + manteniment tècnic.</p>
+        </div>
+        <div class="deploy-item">
+          <span class="deploy-dot err"></span>
+          <p class="deploy-item-text"><strong>Incompatible amb Cloud Run.</strong> ATNE es desplega a Google Cloud Run, que no té GPU. Caldria un servidor separat, duplicant la infraestructura.</p>
+        </div>
+        <div class="deploy-item">
+          <span class="deploy-dot ok"></span>
+          <p class="deploy-item-text"><strong>Privacitat màxima.</strong> Les dades no surten de la teva infraestructura. Ideal per a dades molt sensibles.</p>
+        </div>
+        <div class="deploy-item">
+          <span class="deploy-dot err"></span>
+          <p class="deploy-item-text"><strong>Rendiment limitat.</strong> Models locals petits (7B) no segueixen bé instruccions complexes. Models grans locals necessiten hardware car.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cloud -->
+    <div class="deploy-card">
+      <div class="deploy-header cloud">
+        <span style="font-size:28px">☁️</span>
+        <div>
+          <p class="deploy-title">LLM Cloud API</p>
+          <p class="deploy-sub">El model corre als servidors del proveïdor</p>
+        </div>
+      </div>
+      <div class="deploy-body">
+        <div class="deploy-item">
+          <span class="deploy-dot ok"></span>
+          <p class="deploy-item-text"><strong>Zero infraestructura pròpia.</strong> No cal GPU ni servidor dedicat. S'accedeix via API (una crida de xarxa).</p>
+        </div>
+        <div class="deploy-item">
+          <span class="deploy-dot ok"></span>
+          <p class="deploy-item-text"><strong>Cost zero real amb free tiers.</strong> Google AI Studio, OpenRouter i Groq ofereixen accés gratuït dins d'uns límits. ATNE en fa ús actiu.</p>
+        </div>
+        <div class="deploy-item">
+          <span class="deploy-dot ok"></span>
+          <p class="deploy-item-text"><strong>Escala automàtica.</strong> Si avui hi ha 10 adaptacions o 10.000, la infraestructura s'adapta sense cap configuració.</p>
+        </div>
+        <div class="deploy-item">
+          <span class="deploy-dot ok"></span>
+          <p class="deploy-item-text"><strong>Models de primera línia.</strong> Accés als millors models del mercat (Gemma 4 31B, GPT-4o…) sense gestionar-los.</p>
+        </div>
+        <div class="deploy-item">
+          <span class="deploy-dot warn"></span>
+          <p class="deploy-item-text"><strong>Cost quan s'escala.</strong> A partir de certs volums (>1.500 req/dia o velocitat alta), cal passar al tier de pagament: però a €0.10-0.50/M tokens és molt barat.</p>
+        </div>
+        <div class="deploy-item">
+          <span class="deploy-dot warn"></span>
+          <p class="deploy-item-text"><strong>Les dades passen per tercers.</strong> Els textos s'envien als servidors del proveïdor. Cal verificar les seves polítiques de privacitat i no incloure dades personals d'alumnes.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Free tiers explicació -->
+  <div class="free-banner mt-6">
+    <div class="free-banner-icon">🆓</div>
+    <div>
+      <p class="free-banner-title">Cost zero és real: els free tiers que ATNE aprofita</p>
+      <p class="free-banner-text">Diversos proveïdors ofereixen accés gratuït als seus models per a volums baixos o mitjans. Per al pilot d'ATNE (unes desenes de docents) i fins i tot per a un desplegament FJE inicial, els free tiers cobreixen el 100% de les necessitats.</p>
+      <div class="free-tier-list">
+        <div class="free-tier-item">
+          <span class="free-tier-badge">Google AI Studio</span>
+          <span>Gemma 4 31B → fins a 1.500 req/dia gratuïtes. <strong>Model per defecte d'ATNE.</strong></span>
+        </div>
+        <div class="free-tier-item">
+          <span class="free-tier-badge">OpenRouter Free</span>
+          <span>DeepSeek V3, Qwen3, Llama 4 Scout → cost zero, límit de velocitat però no de volum diari.</span>
+        </div>
+        <div class="free-tier-item">
+          <span class="free-tier-badge">Groq</span>
+          <span>Llama 4 Scout → gratuït i extremament ràpid (fins a 10× més veloç que la majoria).</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- §4 El mercat 2026                                           -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="mercat">
+  <div class="section-header">
+    <span class="section-badge">05</span>
+    <h2 class="section-title">El mercat 2026: panorama de models</h2>
+  </div>
+  <p class="section-intro max-w-3xl">El camp dels LLM evoluciona molt ràpidament. Cada dos o tres mesos apareix un model nou que supera els anteriors. A continuació, els principals candidats actuals, amb les seves especificacions.</p>
+
+  <div class="market-table-wrap" style="overflow-x:auto">
+    <table class="market-table">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>Mida</th>
+          <th>Preu input / output<br><span style="font-weight:400;font-size:9px">per milió de tokens</span></th>
+          <th>Free tier</th>
+          <th>Català</th>
+          <th>ATNE</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- Google Gemma -->
+        <tr class="row-highlight">
+          <td>
+            <p class="model-name">Gemma 4 31B</p>
+            <p class="model-provider">Google DeepMind · open source</p>
+          </td>
+          <td><span class="mida-badge">31B</span></td>
+          <td class="preu-cell"><span class="preu-zero">€0</span><br><span style="font-size:10px;color:var(--ink-400)">AI Studio free tier</span></td>
+          <td><span class="cat-dot"><span class="dot-yes">●</span> Sí</span></td>
+          <td><span class="cat-dot"><span class="dot-yes">●</span> Bo</span></td>
+          <td><span class="atne-badge">Per defecte</span></td>
+        </tr>
+
+        <tr>
+          <td>
+            <p class="model-name">Gemini 2.5 Flash</p>
+            <p class="model-provider">Google · propietari</p>
+          </td>
+          <td><span class="mida-badge">—</span></td>
+          <td class="preu-cell">$0.30 / $2.50</td>
+          <td><span class="cat-dot"><span class="dot-part">●</span> Limitat</span></td>
+          <td><span class="cat-dot"><span class="dot-yes">●</span> Bo</span></td>
+          <td><span class="atne-badge" style="background:var(--ink-300);color:var(--ink-800)">Disponible</span></td>
+        </tr>
+
+        <tr>
+          <td>
+            <p class="model-name">Gemini 2.5 Pro</p>
+            <p class="model-provider">Google · propietari</p>
+          </td>
+          <td><span class="mida-badge">—</span></td>
+          <td class="preu-cell">$1.00 / $10.00</td>
+          <td><span class="cat-dot"><span class="dot-no">●</span> No</span></td>
+          <td><span class="cat-dot"><span class="dot-yes">●</span> Excel·lent</span></td>
+          <td><span class="cat-dot"><span class="dot-no">●</span> Massa car</span></td>
+        </tr>
+
+        <tr style="border-top:2px solid var(--paper-line)">
+          <td>
+            <p class="model-name">GPT-4o mini</p>
+            <p class="model-provider">OpenAI · propietari</p>
+          </td>
+          <td><span class="mida-badge">—</span></td>
+          <td class="preu-cell">$0.15 / $0.60</td>
+          <td><span class="cat-dot"><span class="dot-no">●</span> No</span></td>
+          <td><span class="cat-dot"><span class="dot-yes">●</span> Bo</span></td>
+          <td><span class="atne-badge" style="background:#7c3aed">Màxima qualitat</span></td>
+        </tr>
+
+        <tr>
+          <td>
+            <p class="model-name">GPT-4.1 mini</p>
+            <p class="model-provider">OpenAI · propietari</p>
+          </td>
+          <td><span class="mida-badge">—</span></td>
+          <td class="preu-cell">$0.40 / $1.60</td>
+          <td><span class="cat-dot"><span class="dot-no">●</span> No</span></td>
+          <td><span class="cat-dot"><span class="dot-yes">●</span> Bo</span></td>
+          <td><span class="atne-badge" style="background:var(--ink-300);color:var(--ink-800)">Disponible</span></td>
+        </tr>
+
+        <tr style="border-top:2px solid var(--paper-line)">
+          <td>
+            <p class="model-name">Llama 4 Scout</p>
+            <p class="model-provider">Meta · open source</p>
+          </td>
+          <td><span class="mida-badge">17B act / 109B total</span></td>
+          <td class="preu-cell">$0.08 / $0.30<br><span style="font-size:10px;color:var(--ink-400)">o gratis (OpenRouter/Groq)</span></td>
+          <td><span class="cat-dot"><span class="dot-yes">●</span> Sí</span></td>
+          <td><span class="cat-dot"><span class="dot-part">●</span> No verificat</span></td>
+          <td><span class="atne-badge" style="background:#d97706">Candidat</span></td>
+        </tr>
+
+        <tr>
+          <td>
+            <p class="model-name">Llama 4 Maverick</p>
+            <p class="model-provider">Meta · open source</p>
+          </td>
+          <td><span class="mida-badge">17B act / 400B total</span></td>
+          <td class="preu-cell">$0.15 / $0.60<br><span style="font-size:10px;color:var(--ink-400)">o gratis (OpenRouter)</span></td>
+          <td><span class="cat-dot"><span class="dot-yes">●</span> Sí</span></td>
+          <td><span class="cat-dot"><span class="dot-part">●</span> No verificat</span></td>
+          <td><span class="atne-badge" style="background:#d97706">Candidat</span></td>
+        </tr>
+
+        <tr style="border-top:2px solid var(--paper-line)">
+          <td>
+            <p class="model-name">Qwen3 32B</p>
+            <p class="model-provider">Alibaba Cloud · open source</p>
+          </td>
+          <td><span class="mida-badge">32B</span></td>
+          <td class="preu-cell">$0.10–0.30 / var.<br><span style="font-size:10px;color:var(--ink-400)">o gratis (OpenRouter)</span></td>
+          <td><span class="cat-dot"><span class="dot-yes">●</span> Sí</span></td>
+          <td><span class="cat-dot"><span class="dot-part">●</span> No verificat</span></td>
+          <td><span class="atne-badge" style="background:#d97706">Candidat</span></td>
+        </tr>
+
+        <tr>
+          <td>
+            <p class="model-name">Qwen3.6 Plus</p>
+            <p class="model-provider">Alibaba Cloud · propietari</p>
+          </td>
+          <td><span class="mida-badge">gran</span></td>
+          <td class="preu-cell">$0.33 / $1.95<br><span style="font-size:10px;color:var(--ink-400)">Preview: gratis (OpenRouter)</span></td>
+          <td><span class="cat-dot"><span class="dot-yes">●</span> Sí (preview)</span></td>
+          <td><span class="cat-dot"><span class="dot-part">●</span> No verificat</span></td>
+          <td><span class="atne-badge" style="background:#d97706">Candidat</span></td>
+        </tr>
+
+        <tr style="border-top:2px solid var(--paper-line)">
+          <td>
+            <p class="model-name">DeepSeek V3.2</p>
+            <p class="model-provider">DeepSeek AI · open source</p>
+          </td>
+          <td><span class="mida-badge">gran MoE</span></td>
+          <td class="preu-cell">$0.25 / $0.38<br><span style="font-size:10px;color:var(--ink-400)">o gratis (OpenRouter)</span></td>
+          <td><span class="cat-dot"><span class="dot-yes">●</span> Sí</span></td>
+          <td><span class="cat-dot"><span class="dot-part">●</span> No verificat</span></td>
+          <td><span class="atne-badge" style="background:#d97706">Candidat</span></td>
+        </tr>
+
+        <tr style="border-top:2px solid var(--paper-line)">
+          <td>
+            <p class="model-name">Mistral Small</p>
+            <p class="model-provider">Mistral AI · propietari</p>
+          </td>
+          <td><span class="mida-badge">petit</span></td>
+          <td class="preu-cell">$0.20 / var.</td>
+          <td><span class="cat-dot"><span class="dot-no">●</span> No</span></td>
+          <td><span class="cat-dot"><span class="dot-part">●</span> Acceptable</span></td>
+          <td><span class="atne-badge" style="background:var(--ink-300);color:var(--ink-800)">Disponible</span></td>
+        </tr>
+
+        <tr style="border-top:2px solid var(--paper-line)">
+          <td>
+            <p class="model-name">Salamandra 7B</p>
+            <p class="model-provider">BSC · open source · Catalunya</p>
+          </td>
+          <td><span class="mida-badge">7B</span></td>
+          <td class="preu-cell"><span class="preu-zero">€0</span><br><span style="font-size:10px;color:var(--ink-400)">self-hosted (GPU pròpia)</span></td>
+          <td><span class="cat-dot"><span class="dot-no">●</span> Cal GPU</span></td>
+          <td><span class="cat-dot"><span class="dot-yes">●</span> Natiu</span></td>
+          <td><span class="cat-dot" style="color:var(--err)"><span class="dot-no">●</span> Cal fine-tuning</span></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <p style="font-size:var(--fs-xs);color:var(--ink-400);margin-top:var(--sp-4);font-style:italic">Preus orientatius abril 2026. «No verificat» per al català significa que el model no ha estat provat amb textos educatius catalans reals. La qualitat en català es verifica sempre empíricament, no per les afirmacions del proveïdor.</p>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- §5 Criteris per ATNE                                        -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="criteris">
+  <div class="section-header">
+    <span class="section-badge">06</span>
+    <h2 class="section-title">Per quin motiu triem un model o un altre</h2>
+  </div>
+  <p class="section-intro max-w-3xl">No tots els models serveixen per a tot. ATNE té un cas d'ús molt específic: adaptar textos educatius en català seguint instruccions pedagògiques detallades. Aquí els criteris que apliquem.</p>
+
+  <div class="grid-3">
+
+    <div class="crit-card">
+      <div class="crit-header">
+        <span class="crit-num">1</span>
+        <p class="crit-title">Qualitat del català</p>
+      </div>
+      <p class="crit-body">El model ha de generar català natural, correcte gramaticalment i adequat al context educatiu. No n'hi ha prou que un model digui que suporta «100 idiomes»: cal provar-ho amb textos reals de biologia, història o matemàtiques. <strong>Verifiquem empíricament, no confiem en les promeses dels proveïdors.</strong></p>
+    </div>
+
+    <div class="crit-card">
+      <div class="crit-header">
+        <span class="crit-num">2</span>
+        <p class="crit-title">Seguiment d'instruccions complexes</p>
+      </div>
+      <p class="crit-body">ATNE envia al model entre 80 i 110 instruccions simultànies: MECR, perfil de l'alumne, DUA, gènere discursiu, complements (glossari, esquema, preguntes)… Un model que n'oblidi algunes o les interpreti malament produeix adaptacions inadequades. <strong>El seguiment d'instruccions és el criteri més diferenciador.</strong></p>
+    </div>
+
+    <div class="crit-card">
+      <div class="crit-header">
+        <span class="crit-num">3</span>
+        <p class="crit-title">Cost: tendència a zero</p>
+      </div>
+      <p class="crit-body">El principi rector d'ATNE és que l'eina sigui gratuïta o de cost mínim per als centres. Prioritzem models amb free tier robust. Per al pilot actual, el cost és <strong>€0</strong>. Per a producció FJE, l'estimació és €15/mes. Descartarem models que facin el cost inassumible.</p>
+    </div>
+
+    <div class="crit-card">
+      <div class="crit-header">
+        <span class="crit-num">4</span>
+        <p class="crit-title">Velocitat i streaming</p>
+      </div>
+      <p class="crit-body">Un docent que espera 90 segons mirant una pantalla buida té una experiència molt pitjor que un que veu el text aparèixer en 10 segons. Requerim streaming SSE i preferim models que generin a ≥30 tokens/segon. <strong>La percepció de velocitat impacta directament en l'adopció.</strong></p>
+    </div>
+
+    <div class="crit-card">
+      <div class="crit-header">
+        <span class="crit-num">5</span>
+        <p class="crit-title">Integració senzilla</p>
+      </div>
+      <p class="crit-body">ATNE usa Python + FastAPI. Requerim que el model tingui una API compatible amb l'SDK d'OpenAI (la majoria) o amb el SDK de Google (per Gemma/Gemini), amb suport per streaming. Afegir un model nou ha de costar menys d'1 hora de treball tècnic.</p>
+    </div>
+
+    <div class="crit-card">
+      <div class="crit-header">
+        <span class="crit-num">6</span>
+        <p class="crit-title">Estabilitat i disponibilitat</p>
+      </div>
+      <p class="crit-body">Un model que fallen sovint o que té límits de quota agressius no serveix per a un context docent. Per això <strong>rotem entre múltiples claus API</strong> i tenim models de fallback. Si un proveïdor té problemes, ATNE commuta automàticament a un altre.</p>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- §6 Els models d'ATNE                                        -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="roster">
+  <div class="section-header">
+    <span class="section-badge">07</span>
+    <h2 class="section-title">Els models que ATNE fa servir</h2>
+  </div>
+  <p class="section-intro max-w-3xl">ATNE manté un roster de models que roten automàticament o que es poden triar manualment des del panell d'administració. Aquí el seu rol i per quin motiu han estat seleccionats.</p>
+
+  <div class="space-5">
+
+    <!-- Gemma 4 31B — per defecte -->
+    <div class="roster-card">
+      <div class="roster-header">
+        <div class="roster-logo">🤖</div>
+        <div>
+          <p class="roster-model-name">Gemma 4 31B</p>
+          <p class="roster-provider">Google DeepMind · open source · via AI Studio</p>
+        </div>
+      </div>
+      <div class="roster-body">
+        <span class="roster-role default">Model per defecte</span>
+        <p class="roster-why">És el model que ATNE usa per a totes les adaptacions si no s'especifica cap altre. Llançat per Google el 2026, és el <strong>#3 open model del món</strong> al leaderboard Arena. El principal avantatge per ATNE és que és completament <strong>gratuït via Google AI Studio</strong> (fins a 1.500 peticions diàries), cosa que fa que el cost del pilot sigui €0. Ha superat proves empíriques de qualitat en català i seguiment d'instruccions. L'accedim via el SDK de Google (no suporta system prompt separat, per la qual cosa concatenem les instruccions al text de forma especial).</p>
+        <div class="roster-stats">
+          <div class="stat-pill"><span class="stat-label">Mida</span><span class="stat-val">31B paràmetres</span></div>
+          <div class="stat-pill"><span class="stat-label">Context</span><span class="stat-val">256K tokens</span></div>
+          <div class="stat-pill"><span class="stat-label">Cost</span><span class="stat-val green">€0 (free tier)</span></div>
+          <div class="stat-pill"><span class="stat-label">Puntuació ATNE</span><span class="stat-val">4.23 / 5</span></div>
+          <div class="stat-pill"><span class="stat-label">Temperatura</span><span class="stat-val">0.4 (adaptació)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GPT-4o mini — màxima qualitat -->
+    <div class="roster-card">
+      <div class="roster-header">
+        <div class="roster-logo">✨</div>
+        <div>
+          <p class="roster-model-name">GPT-4o mini</p>
+          <p class="roster-provider">OpenAI · propietari · via API directa</p>
+        </div>
+      </div>
+      <div class="roster-body">
+        <span class="roster-role quality">Màxima qualitat</span>
+        <p class="roster-why">El model que ha obtingut <strong>la puntuació més alta en els tests d'ATNE (4.44/5)</strong>, superant tots els altres. Destaca especialment en etapes de primària i en el seguiment fidel d'instruccions complexes. El seu cost és molt baix ($0.15/M tokens d'entrada), però no té free tier. S'usa quan la qualitat és prioritària o quan Gemma 4 no respon bé a un cas específic. Per a la producció FJE, seria l'opció de referència per a centres amb pressupost.</p>
+        <div class="roster-stats">
+          <div class="stat-pill"><span class="stat-label">Mida</span><span class="stat-val">—</span></div>
+          <div class="stat-pill"><span class="stat-label">Context</span><span class="stat-val">128K tokens</span></div>
+          <div class="stat-pill"><span class="stat-label">Cost</span><span class="stat-val">$0.15 + $0.60/M</span></div>
+          <div class="stat-pill"><span class="stat-label">Puntuació ATNE</span><span class="stat-val">4.44 / 5</span></div>
+          <div class="stat-pill"><span class="stat-label">Millor en</span><span class="stat-val">Primària, instruccions</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gemini 2.5 Flash — alternativa Google -->
+    <div class="roster-card">
+      <div class="roster-header">
+        <div class="roster-logo">⚡</div>
+        <div>
+          <p class="roster-model-name">Gemini 2.5 Flash</p>
+          <p class="roster-provider">Google · propietari · via AI Studio</p>
+        </div>
+      </div>
+      <div class="roster-body">
+        <span class="roster-role available">Disponible</span>
+        <p class="roster-why">L'alternativa de Google al Gemma 4 per a casos que requereixen més capacitat de raonament. A diferència de Gemma, suporta <strong>system instruction separat</strong> (arquitectura més neta per a ATNE). Pensament desactivat (thinking_budget=0) per mantenir el cost sota control: cada token de «pensament» d'aquest model costa com a output. Per a produccions de gran escala, val la pena avaluar si el seu cost addicional respecte a Gemma 4 free s'amortitza amb millor qualitat.</p>
+        <div class="roster-stats">
+          <div class="stat-pill"><span class="stat-label">Context</span><span class="stat-val">fins 1M tokens</span></div>
+          <div class="stat-pill"><span class="stat-label">Cost</span><span class="stat-val">$0.30 + $2.50/M</span></div>
+          <div class="stat-pill"><span class="stat-label">Puntuació ATNE</span><span class="stat-val">3.93 / 5</span></div>
+          <div class="stat-pill"><span class="stat-label">Nota</span><span class="stat-val">Thinking desactivat</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Qwen3 / DeepSeek — candidats -->
+    <div class="roster-card">
+      <div class="roster-header">
+        <div class="roster-logo">🔬</div>
+        <div>
+          <p class="roster-model-name">Qwen3 i DeepSeek V3.2</p>
+          <p class="roster-provider">Alibaba · DeepSeek AI · via OpenRouter (gratuïts)</p>
+        </div>
+      </div>
+      <div class="roster-body">
+        <span class="roster-role candidate">Candidats a provar</span>
+        <p class="roster-why">Dos models emergents d'alt potencial que ATNE té integrats tècnicament però pendents d'avaluació empírica en català. <strong>Qwen3</strong> (llançat abril 2026) representa una millora significativa de la família Qwen en seguiment d'instruccions. <strong>DeepSeek V3.2</strong> sorprèn pel seu rendiment competitiu a preus molt baixos. Tots dos accessibles via OpenRouter de forma gratuïta per a tests. La pregunta clau: quin català generen? Sense proves reals amb textos educatius, no podem afirmar-ne la qualitat.</p>
+        <div class="roster-stats">
+          <div class="stat-pill"><span class="stat-label">Cost</span><span class="stat-val green">€0 (OpenRouter free)</span></div>
+          <div class="stat-pill"><span class="stat-label">Integració</span><span class="stat-val">OpenAI-compatible</span></div>
+          <div class="stat-pill"><span class="stat-label">Avaluació català</span><span class="stat-val">Pendent</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Llama 4 Scout -->
+    <div class="roster-card">
+      <div class="roster-header">
+        <div class="roster-logo">🦙</div>
+        <div>
+          <p class="roster-model-name">Llama 4 Scout</p>
+          <p class="roster-provider">Meta · open source · via OpenRouter / Groq</p>
+        </div>
+      </div>
+      <div class="roster-body">
+        <span class="roster-role candidate">Candidat a provar</span>
+        <p class="roster-why">El model de Meta de l'abril 2025 amb una arquitectura MoE: <strong>el més barat del mercat</strong> ($0.08/M tokens) i accessible de forma totalment gratuïta via Groq, on és a més molt ràpid. El seu context de <strong>10 milions de tokens</strong> és el més gran del mercat. Ideal si es volgués incloure materials de referència molt extensos. Cal verificar la qualitat en català i el seguiment d'instruccions pedagògiques complexes, que és on els models petits/MoE sovint fallen.</p>
+        <div class="roster-stats">
+          <div class="stat-pill"><span class="stat-label">Mida</span><span class="stat-val">17B act / 109B total</span></div>
+          <div class="stat-pill"><span class="stat-label">Context</span><span class="stat-val">10M tokens</span></div>
+          <div class="stat-pill"><span class="stat-label">Cost</span><span class="stat-val green">€0 (Groq)</span></div>
+          <div class="stat-pill"><span class="stat-label">Avaluació català</span><span class="stat-val">Pendent</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Salamandra — descartat -->
+    <div class="roster-card" style="opacity:.65">
+      <div class="roster-header" style="background:var(--ink-50)">
+        <div class="roster-logo">🦎</div>
+        <div>
+          <p class="roster-model-name">Salamandra 7B (BSC)</p>
+          <p class="roster-provider">Barcelona Supercomputing Center · open source · català natiu</p>
+        </div>
+      </div>
+      <div class="roster-body">
+        <span class="roster-role available" style="background:var(--err);color:#fff">Fora d'abast ara</span>
+        <p class="roster-why">El model del BSC és l'únic entrenat específicament amb dades en català (1.97% del corpus, 2× sobremostreig). En teoria hauria de ser el millor per ATNE. En la pràctica, les proves empíriques van mostrar que el <strong>model de 7B no segueix instruccions complexes</strong>: ignora les consignes i genera text lliure sense estructura. Necessitaria fine-tuning específic per a la tasca d'adaptació, que és un projecte de recerca en si mateix. <strong>No té API gestionada</strong> — cal GPU pròpia per executar-lo.</p>
+        <div class="roster-stats">
+          <div class="stat-pill"><span class="stat-label">Mida</span><span class="stat-val">7B</span></div>
+          <div class="stat-pill"><span class="stat-label">Català</span><span class="stat-val">Natiu</span></div>
+          <div class="stat-pill"><span class="stat-label">Instruccions</span><span class="stat-val" style="color:var(--err)">Falla</span></div>
+          <div class="stat-pill"><span class="stat-label">API</span><span class="stat-val" style="color:var(--err)">No disponible</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Nota final -->
+  <div class="card-cream card-p-sm mt-6">
+    <div style="display:flex;gap:var(--sp-4);align-items:flex-start">
+      <span class="material-symbols-outlined" style="color:var(--primary);font-size:24px;flex-shrink:0">info</span>
+      <div>
+        <p style="font-weight:700;color:var(--primary);margin-bottom:var(--sp-2)">El panorama canvia molt ràpidament</p>
+        <p style="font-size:var(--fs-md);color:var(--ink-700);line-height:var(--lh-body)">El model que avui és la millor opció pot ser superat en dos o tres mesos. Per això ATNE no es lliga a un model únic sinó que manté un roster flexible, amb rotació de claus i fallback automàtic. La decisió pedagògica (quin perfil, quines instruccions, quina qualitat s'espera) és independent del model que executa la tasca. Quan surti un model millor, ATNE el pot incorporar sense canviar ni una sola línia de la lògica pedagògica.</p>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+</div>
+</main>
+</div>
+
+<!-- Footer -->
+<footer class="page-footer">
+  <div class="footer-inner">
+    <div style="font-family:var(--serif);font-size:var(--fs-lg);font-weight:700;color:var(--ink-800)">
+      <a href="/ui/atne/home.html" style="color:inherit;text-decoration:none">ATNE</a>
+    </div>
+    <div class="footer-links">
+      <a href="/ui/atne/home.html">Inici</a>
+      <a href="/ui/saber-ne.html">Saber-ne+</a>
+      <a href="/ui/llms.html">Entendre els LLM</a>
+      <a href="/ui/atne/flash.html">Flash</a>
+    </div>
+    <div class="footer-copy">© 2026 ATNE · Jesuïtes Educació</div>
+  </div>
+</footer>
+
+<script>
+// Avatar docent
+(function () {
+  const av = document.getElementById('docent-av');
+  if (!av) return;
+  const user = window.__ATNE_USER__;
+  if (user && user.email) {
+    av.textContent = user.email[0].toUpperCase();
+    av.title = user.email;
+  }
+})();
+</script>
+</body>
+</html>

@@ -35,7 +35,7 @@
     line-height: 1.15;
   }
   .greeting-sub {
-    font-size: 16px;
+    font-size: var(--fs-lg);
     color: var(--ink-500, #6a7392);
     margin: 0 0 40px;
   }
@@ -53,7 +53,7 @@
 
   .mode-card {
     background: #fff;
-    border-radius: 16px;
+    border-radius: var(--r-2xl);
     padding: 28px 24px;
     cursor: pointer;
     text-decoration: none;
@@ -71,21 +71,21 @@
 
   .mode-icon {
     width: 44px; height: 44px;
-    border-radius: 12px;
+    border-radius: var(--r-xl);
     background: var(--cream-2, #ece8db);
     display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
+    font-size: var(--fs-2xl);
     margin-bottom: 16px;
   }
   .mode-title {
     font-family: 'Fraunces', serif;
-    font-size: 22px;
+    font-size: var(--fs-2xl);
     font-weight: 700;
     color: var(--ink-900, #121a2b);
     margin: 0 0 6px;
   }
   .mode-desc {
-    font-size: 14px;
+    font-size: var(--fs-base);
     color: var(--ink-500, #6a7392);
     margin: 0;
     line-height: 1.5;
@@ -99,14 +99,14 @@
     margin-bottom: 12px;
   }
   .section-title {
-    font-size: 13px;
+    font-size: var(--fs-md);
     font-weight: 600;
     letter-spacing: .06em;
     text-transform: uppercase;
     color: var(--ink-400, #8a93b0);
   }
   .section-link {
-    font-size: 13px;
+    font-size: var(--fs-md);
     color: var(--primary, #3337a6);
     text-decoration: none;
   }
@@ -116,7 +116,7 @@
 
   .history-item {
     background: #fff;
-    border-radius: 10px;
+    border-radius: var(--r-lg);
     padding: 14px 16px;
     display: flex;
     align-items: center;
@@ -129,14 +129,14 @@
 
   .history-icon {
     width: 36px; height: 36px; flex-shrink: 0;
-    border-radius: 8px;
+    border-radius: var(--r-md);
     background: var(--cream-2, #ece8db);
     display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
+    font-size: var(--fs-lg);
   }
   .history-info { flex: 1; min-width: 0; }
   .history-name {
-    font-size: 14px;
+    font-size: var(--fs-base);
     font-weight: 500;
     color: var(--ink-900, #121a2b);
     white-space: nowrap;
@@ -145,7 +145,7 @@
     margin-bottom: 3px;
   }
   .history-meta {
-    font-size: 12px;
+    font-size: var(--fs-sm);
     color: var(--ink-400, #8a93b0);
     display: flex;
     align-items: center;
@@ -157,7 +157,7 @@
     letter-spacing: .05em;
     text-transform: uppercase;
     padding: 2px 7px;
-    border-radius: 99px;
+    border-radius: var(--r-pill);
   }
   .mode-badge.flash {
     background: #fce7d5;
@@ -172,9 +172,9 @@
     text-align: center;
     padding: 32px 16px;
     color: var(--ink-400, #8a93b0);
-    font-size: 14px;
+    font-size: var(--fs-base);
     background: #fff;
-    border-radius: 10px;
+    border-radius: var(--r-lg);
     border: 1px solid var(--paper-line, rgba(0,0,0,.06));
   }
 
@@ -205,7 +205,7 @@
 <header class="topbar">
   <a href="/ui/atne/home.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0">
     <div class="logo" style="margin-bottom:0;flex-shrink:0"><img src="/logo-fje.jpg" alt="FJE"></div>
-    <span class="brand" style="font-family:var(--serif);font-size:18px;font-weight:700;color:var(--ink-900)">ATNE</span>
+    <span class="brand" style="font-family:var(--serif);font-size:var(--fs-xl);font-weight:700;color:var(--ink-900)">ATNE</span>
   </a>
   <nav class="steps" aria-label="Mode" style="margin:0 auto">
     <a href="/ui/atne/flash.html" class="step" style="text-decoration:none">Flash</a>
@@ -243,6 +243,27 @@
   </div>
   <div class="history-list" id="history-list">
     <div class="history-empty">Encara no hi ha adaptacions. Comença amb Flash o Taller.</div>
+  </div>
+
+  <!-- Recursos -->
+  <div style="margin-top:40px;padding-top:32px;border-top:1px solid var(--paper-line,rgba(0,0,0,.06))">
+    <p style="font-family:var(--mono,monospace);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-400);margin-bottom:12px">Recursos</p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <a href="/ui/saber-ne.html" style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:#fff;border:1px solid var(--paper-line,rgba(0,0,0,.06));border-radius:var(--r-xl);text-decoration:none;transition:border-color .15s" onmouseover="this.style.borderColor='rgba(51,55,166,.3)'" onmouseout="this.style.borderColor='rgba(0,0,0,.06)'">
+        <span style="font-size:20px;flex-shrink:0">📖</span>
+        <div>
+          <p style="font-weight:600;color:var(--ink-900);font-size:var(--fs-base);margin:0 0 2px">Saber-ne+</p>
+          <p style="font-size:var(--fs-sm);color:var(--ink-500);margin:0">Marcs pedagògics, condicions de l'alumnat, MECR, ajuts</p>
+        </div>
+      </a>
+      <a href="/ui/llms.html" style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:#fff;border:1px solid var(--paper-line,rgba(0,0,0,.06));border-radius:var(--r-xl);text-decoration:none;transition:border-color .15s" onmouseover="this.style.borderColor='rgba(51,55,166,.3)'" onmouseout="this.style.borderColor='rgba(0,0,0,.06)'">
+        <span style="font-size:20px;flex-shrink:0">🤖</span>
+        <div>
+          <p style="font-weight:600;color:var(--ink-900);font-size:var(--fs-base);margin:0 0 2px">Entendre els LLM</p>
+          <p style="font-size:var(--fs-sm);color:var(--ink-500);margin:0">Que són els models d'IA, com funcionen i quins fa servir ATNE</p>
+        </div>
+      </a>
+    </div>
   </div>
 
 </main>

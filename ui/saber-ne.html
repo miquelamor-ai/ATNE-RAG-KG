@@ -43,88 +43,16 @@
     color: var(--ink-900);
   }
 
-  /* ─── TopNavBar ──────────────────────────────────────────── */
-  .topnav {
+  /* ─── Topbar fix (shell.css no és fixed per defecte) ────── */
+  .topbar {
     position: fixed;
-    top: 0;
-    width: 100%;
+    top: 0; left: 0; right: 0;
     z-index: 50;
     background: rgba(244, 241, 232, 0.92);
     backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--paper-line);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 var(--sp-6);
-    height: 57px;
-    gap: var(--sp-4);
   }
 
-  .topnav-left {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-4);
-  }
-
-  .brand-logo {
-    font-family: var(--serif);
-    font-size: var(--fs-xl);
-    font-weight: var(--fw-bold);
-    color: var(--primary);
-    letter-spacing: -0.02em;
-  }
-  .brand-logo a:hover { opacity: .8; }
-
-  .nav-divider {
-    width: 1px;
-    height: 24px;
-    background: var(--paper-line);
-    margin: 0 var(--sp-2);
-    flex-shrink: 0;
-  }
-
-  .nav-label {
-    font-family: var(--mono);
-    font-size: var(--fs-xs);
-    font-weight: var(--fw-bold);
-    text-transform: uppercase;
-    letter-spacing: .12em;
-    color: var(--ink-500);
-  }
-
-  .topnav-links {
-    display: none;
-    align-items: center;
-    gap: var(--sp-6);
-  }
-  @media (min-width: 768px) { .topnav-links { display: flex; } }
-
-  .topnav-links a {
-    font-size: var(--fs-md);
-    font-weight: var(--fw-med);
-    color: var(--ink-600);
-    transition: color var(--trans-fast);
-  }
-  .topnav-links a:hover { color: var(--primary); }
-  .topnav-links a.active {
-    color: var(--primary);
-    font-weight: var(--fw-semi);
-  }
-
-  .topnav-right {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-4);
-  }
-
-  .topnav-back {
-    font-family: var(--mono);
-    font-size: var(--fs-xs);
-    font-weight: var(--fw-semi);
-    color: var(--ink-500);
-    transition: color var(--trans-fast);
-  }
-  /* Avatar docent (idèntic a pas2/pas3) */
+  /* Avatar docent */
   .docent-av {
     width: 32px; height: 32px;
     border-radius: 50%;
@@ -140,17 +68,6 @@
     flex-shrink: 0;
   }
   .docent-av:hover { transform: scale(1.05); }
-  .topnav-back:hover { color: var(--primary); }
-
-  .icon-btn {
-    width: 32px; height: 32px;
-    border-radius: var(--r-md);
-    display: grid;
-    place-items: center;
-    color: var(--primary);
-    transition: background var(--trans-fast);
-  }
-  .icon-btn:hover { background: var(--cream-2); }
 
   /* ─── Layout principal ───────────────────────────────────── */
   .page-wrap {
@@ -1027,20 +944,17 @@
 <!-- ═══════════════════════════════════════════════════════════ -->
 <!-- TopNavBar                                                   -->
 <!-- ═══════════════════════════════════════════════════════════ -->
-<nav class="topnav">
-  <div class="topnav-left">
-    <div class="brand-logo"><a href="/ui/saber-ne.html">Saber-ne+</a></div>
-  </div>
-  <div class="topnav-links">
-    <a class="active" href="/ui/saber-ne.html">Marc pedagògic</a>
-    <a href="/ui/com-funciona.html">Com funciona</a>
-    <a href="/ui/avaluacio.html">Avaluació i decisions</a>
-  </div>
-  <div class="topnav-right">
-    <a class="topnav-back" href="/ui/atne/home.html">← Tornar a ATNE</a>
-    <button id="docent-av" class="docent-av" title="El teu compte">?</button>
-  </div>
-</nav>
+<header class="topbar">
+  <a href="/ui/atne/home.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0">
+    <div class="logo" style="margin-bottom:0;flex-shrink:0"><img src="/logo-fje.jpg" alt="FJE"></div>
+    <span class="brand" style="font-family:var(--serif);font-size:18px;font-weight:700;color:var(--ink-900)">ATNE</span>
+  </a>
+  <nav class="steps" aria-label="Mode" style="margin:0 auto">
+    <a href="/ui/atne/flash.html" class="step" style="text-decoration:none">Flash</a>
+    <a href="/ui/atne/pas1.html" class="step" style="text-decoration:none">Taller</a>
+  </nav>
+  <button id="docent-av" class="docent-av" title="El teu compte">?</button>
+</header>
 
 <div class="page-wrap">
 
@@ -1965,11 +1879,12 @@
 <!-- ═══════════════════════════════════════════════════════════ -->
 <footer class="page-footer">
   <div class="footer-inner">
-    <div class="brand-logo"><a href="/">Saber-ne+</a></div>
+    <div style="font-family:var(--serif);font-size:var(--fs-lg);font-weight:700;color:var(--ink-800)"><a href="/ui/atne/home.html" style="color:inherit;text-decoration:none">ATNE</a></div>
     <div class="footer-links">
-      <a href="/">Adaptador</a>
-      <a href="/cuina">Com funciona</a>
-      <a href="/avaluacio">Avaluació</a>
+      <a href="/ui/atne/home.html">Inici</a>
+      <a href="/ui/saber-ne.html">Saber-ne+</a>
+      <a href="/ui/llms.html">Entendre els LLM</a>
+      <a href="/ui/atne/flash.html">Flash</a>
     </div>
     <div class="footer-copy">© 2026 ATNE · Jesuïtes Educació</div>
   </div>
