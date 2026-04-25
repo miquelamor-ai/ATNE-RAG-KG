@@ -287,14 +287,17 @@
       <a class="sidebar-link" href="#local-cloud">
         <span class="sidebar-num">04</span>Local vs Cloud
       </a>
+      <a class="sidebar-link" href="#acces">
+        <span class="sidebar-num">05</span>Com s'accedeix
+      </a>
       <a class="sidebar-link" href="#mercat">
-        <span class="sidebar-num">05</span>El mercat 2026
+        <span class="sidebar-num">06</span>El mercat 2026
       </a>
       <a class="sidebar-link" href="#criteris">
-        <span class="sidebar-num">06</span>Criteris per ATNE
+        <span class="sidebar-num">07</span>Criteris per ATNE
       </a>
       <a class="sidebar-link" href="#roster">
-        <span class="sidebar-num">07</span>Els models d'ATNE
+        <span class="sidebar-num">08</span>Els models d'ATNE
       </a>
     </nav>
   </div>
@@ -757,11 +760,130 @@
 
 
 <!-- ═══════════════════════════════════════════════════════════ -->
-<!-- §4 El mercat 2026                                           -->
+<!-- §5 Com s'accedeix a un LLM                                  -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="acces">
+  <div class="section-header">
+    <span class="section-badge">05</span>
+    <h2 class="section-title">Tres maneres d'accedir a un LLM</h2>
+  </div>
+  <p class="section-intro max-w-3xl">No tots els LLM s'accedeixen igual. Hi ha tres vies molt diferents, amb models, costos i limitacions distints. Entendre-les és clau per comprendre per què ATNE no fa servir els mateixos models que ChatGPT o Gemini.</p>
+
+  <div class="deploy-grid">
+
+    <!-- Via 1: Compte gratuït -->
+    <div class="deploy-card">
+      <div class="deploy-header local" style="background:var(--ink-100)">
+        <span style="font-size:28px">🆓</span>
+        <div>
+          <p class="deploy-title">Compte gratuït</p>
+          <p class="deploy-subtitle">L'app de consum, sense pagar</p>
+        </div>
+      </div>
+      <div class="deploy-body">
+        <div class="deploy-item">
+          <span class="deploy-dot ok"></span>
+          <p class="deploy-item-text"><strong>Models molt potents, però versió lleugera.</strong> Les plataformes t'ofereixen accés als seus models però en versió reduïda o amb menys prioritat que els usuaris de pagament.</p>
+        </div>
+        <div class="deploy-item">
+          <span class="deploy-dot warn"></span>
+          <p class="deploy-item-text"><strong>Límit de missatges per hora.</strong> Quan s'esgota la quota, el model es degrada a una versió més petita o simplement bloqueja fins al cap d'un temps.</p>
+        </div>
+        <div class="deploy-item">
+          <span class="deploy-dot err"></span>
+          <p class="deploy-item-text"><strong>Sense accés als models de raonament.</strong> Els models que «pensen» (o3, o4, Gemini 2.5 Pro amb <em>thinking</em>) estan reservats per a subscriptors de pagament.</p>
+        </div>
+        <div class="deploy-item">
+          <span class="deploy-dot err"></span>
+          <p class="deploy-item-text"><strong>Sense accés a l'API.</strong> El compte gratuït és per a ús personal via interfície. No permet integrar el model en aplicacions com ATNE.</p>
+        </div>
+        <div style="margin-top:var(--sp-4);padding:var(--sp-3);background:var(--cream-2);border-radius:var(--r-md)">
+          <p style="font-size:var(--fs-xs);font-weight:var(--fw-semi);color:var(--ink-500);margin-bottom:var(--sp-2);text-transform:uppercase;letter-spacing:.08em">Exemples · abril 2026</p>
+          <p style="font-size:var(--fs-sm);color:var(--ink-700);line-height:var(--lh-body)"><strong>ChatGPT.com</strong> — accés a versions lleugeres de GPT-4o / GPT-5, límit de missatges per hora.<br><strong>Gemini.com</strong> — Gemini 2.5 Flash sense límit base; accés diari limitat a 2.5 Pro.<br><strong>Copilot.com</strong> — GPT-4o, sense generació d'imatges ni integració amb M365.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Via 2: Subscripció -->
+    <div class="deploy-card">
+      <div class="deploy-header cloud">
+        <span style="font-size:28px">💳</span>
+        <div>
+          <p class="deploy-title">Subscripció de pagament</p>
+          <p class="deploy-subtitle">~€20/mes · accés prioritari</p>
+        </div>
+      </div>
+      <div class="deploy-body">
+        <div class="deploy-item">
+          <span class="deploy-dot ok"></span>
+          <p class="deploy-item-text"><strong>Els models més potents del mercat.</strong> Inclou els models de raonament (o3, o4, Gemini 2.5 Pro amb <em>thinking</em>…), que abans de respondre generen centenars de tokens de «pensament» intern per resoldre tasques complexes.</p>
+        </div>
+        <div class="deploy-item">
+          <span class="deploy-dot ok"></span>
+          <p class="deploy-item-text"><strong>Cost per consulta invisible.</strong> Pagues una mensualitat fixa i la plataforma absorbeix el cost real de cada crida. A escala de milions d'usuaris, és el model de negoci viable per a ells.</p>
+        </div>
+        <div class="deploy-item">
+          <span class="deploy-dot warn"></span>
+          <p class="deploy-item-text"><strong>Límits encara existents.</strong> Fins i tot amb subscripció hi ha quotes diàries, especialment per als models de raonament més cars.</p>
+        </div>
+        <div class="deploy-item">
+          <span class="deploy-dot err"></span>
+          <p class="deploy-item-text"><strong>Sense accés a l'API.</strong> La subscripció és per a ús personal. L'accés programàtic (API) és un producte separat, de pagament per token.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Via 3: API -->
+    <div class="deploy-card">
+      <div class="deploy-header" style="background:var(--primary-50);border-bottom:1px solid var(--primary-100)">
+        <span style="font-size:28px">🔌</span>
+        <div>
+          <p class="deploy-title" style="color:var(--primary)">API · accés programàtic</p>
+          <p class="deploy-subtitle" style="color:var(--primary-600)">La via que fa servir ATNE</p>
+        </div>
+      </div>
+      <div class="deploy-body">
+        <div class="deploy-item">
+          <span class="deploy-dot ok"></span>
+          <p class="deploy-item-text"><strong>El teu codi crida el model directament.</strong> Sense interfície d'usuari: un programa (com ATNE) envia el text i les instruccions i rep la resposta. Cada crida es paga per tokens consumits.</p>
+        </div>
+        <div class="deploy-item">
+          <span class="deploy-dot ok"></span>
+          <p class="deploy-item-text"><strong>Free tiers d'API disponibles.</strong> Google AI Studio ofereix Gemma 4 i Gemini 2.5 Flash gratuïtament fins a 1.500 crides/dia. OpenRouter i Groq ofereixen Llama 4, Qwen3 i DeepSeek de forma gratuïta amb límit de crides per minut.</p>
+        </div>
+        <div class="deploy-item">
+          <span class="deploy-dot warn"></span>
+          <p class="deploy-item-text"><strong>OpenAI i Anthropic no tenen free tier d'API.</strong> Cal targeta de crèdit des de la primera crida. Per això ATNE no usa GPT-4o via API com a model per defecte: el cost a escala (500 crides/dia × €0.016) no és sostenible per a un pilot educatiu.</p>
+        </div>
+        <div class="deploy-item">
+          <span class="deploy-dot ok"></span>
+          <p class="deploy-item-text"><strong>Control total sobre les instruccions.</strong> A diferència de l'app de consum, via API pots enviar qualsevol system prompt. Aquí és on ATNE injecta les 80–110 instruccions pedagògiques que fan que l'adaptació sigui específica per a cada alumne.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bloc resum -->
+  <div class="card-cream card-p-sm mt-6">
+    <div style="display:flex;gap:var(--sp-4);align-items:flex-start">
+      <span class="material-symbols-outlined" style="color:var(--primary);font-size:24px;flex-shrink:0">info</span>
+      <div>
+        <p style="font-weight:700;color:var(--primary);margin-bottom:var(--sp-2)">Per què ATNE no usa els mateixos models que ChatGPT?</p>
+        <p style="font-size:var(--fs-md);color:var(--ink-700);line-height:var(--lh-body)">Quan un usuari veu que ATNE genera text de manera similar a ChatGPT, assumeix que és «el mateix». No ho és. ChatGPT ofereix els seus models més potents via subscripció, absorbint el cost. ATNE accedeix als models via API, on cada adaptació té un cost real per token. Usar GPT-4.1 o els models de raonament per a cada adaptació de cada usuari no és sostenible econòmicament. Per això ATNE fa servir <strong>Gemma 4 31B via el free tier de Google AI Studio (€0)</strong> com a model per defecte, i models de baix cost com GPT-4o mini quan cal qualitat addicional.</p>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- §6 El mercat 2026                                           -->
 <!-- ═══════════════════════════════════════════════════════════ -->
 <section class="section" id="mercat">
   <div class="section-header">
-    <span class="section-badge">05</span>
+    <span class="section-badge">06</span>
     <h2 class="section-title">El mercat 2026: panorama de models</h2>
   </div>
   <p class="section-intro max-w-3xl">El camp dels LLM evoluciona molt ràpidament. Cada dos o tres mesos apareix un model nou que supera els anteriors. A continuació, els principals candidats actuals, amb les seves especificacions.</p>
@@ -961,11 +1083,11 @@
 
 
 <!-- ═══════════════════════════════════════════════════════════ -->
-<!-- §5 Criteris per ATNE                                        -->
+<!-- §7 Criteris per ATNE                                        -->
 <!-- ═══════════════════════════════════════════════════════════ -->
 <section class="section" id="criteris">
   <div class="section-header">
-    <span class="section-badge">06</span>
+    <span class="section-badge">07</span>
     <h2 class="section-title">Per quin motiu triem un model o un altre</h2>
   </div>
   <p class="section-intro max-w-3xl">No tots els models serveixen per a tot. ATNE té un cas d'ús molt específic: adaptar textos educatius en català seguint instruccions pedagògiques detallades. Aquí els criteris que apliquem.</p>
@@ -1025,11 +1147,11 @@
 
 
 <!-- ═══════════════════════════════════════════════════════════ -->
-<!-- §6 Els models d'ATNE                                        -->
+<!-- §8 Els models d'ATNE                                        -->
 <!-- ═══════════════════════════════════════════════════════════ -->
 <section class="section" id="roster">
   <div class="section-header">
-    <span class="section-badge">07</span>
+    <span class="section-badge">08</span>
     <h2 class="section-title">Els models que ATNE fa servir</h2>
   </div>
   <p class="section-intro max-w-3xl">ATNE manté un roster de models que roten automàticament o que es poden triar manualment des del panell d'administració. Aquí el seu rol i per quin motiu han estat seleccionats.</p>
