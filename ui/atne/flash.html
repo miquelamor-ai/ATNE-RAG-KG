@@ -836,6 +836,14 @@
         try { localStorage.setItem('atne.docent_alias', d.alias); } catch (e) { /* */ }
         var btn = document.getElementById('docent-av');
         if (btn && d.alias) { btn.textContent = d.alias[0].toUpperCase(); btn.title = 'Docent · ' + d.alias; }
+        // Re-comprova admin: auth.js pot haver-se executat abans que aquest fetch acabés
+        var links = document.getElementById('admin-links');
+        if (links && d.docent_id) {
+          fetch('/api/docent/is-admin?docent_id=' + encodeURIComponent(d.docent_id))
+            .then(function (r) { return r.ok ? r.json() : {}; })
+            .then(function (ad) { if (ad && ad.is_admin) links.style.display = ''; })
+            .catch(function () { /* silent */ });
+        }
       })
       .catch(function () { /* silent */ });
     }

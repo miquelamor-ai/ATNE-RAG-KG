@@ -291,6 +291,10 @@ UI_DIR = Path(__file__).parent / "ui"
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
 ADMIN_SESSION_SECRET = os.getenv("ADMIN_SESSION_SECRET") or secrets.token_hex(32)
 ADMIN_SESSION_TTL_SEC = 8 * 3600  # 8h
+# Logins lanet separats per comes que sempre tindran rol admin (sense necessitat de BD).
+# Ex: ATNE_ADMIN_LOGINS=claudeai.je,miquel.amor
+_ADMIN_LOGINS_RAW = os.getenv("ATNE_ADMIN_LOGINS", "")
+_ADMIN_DOCENT_IDS: set[str] = set()
 
 
 def _admin_sign(payload: str) -> str:
@@ -5019,6 +5023,14 @@ def _docent_id_from_login(login: str) -> str:
     return hashlib.sha256(login.lower().encode()).hexdigest()[:16]
 
 
+# Inicialitza el set de docent_ids admin a partir de ATNE_ADMIN_LOGINS
+if _ADMIN_LOGINS_RAW:
+    for _login in _ADMIN_LOGINS_RAW.split(","):
+        _login = _login.strip()
+        if _login:
+            _ADMIN_DOCENT_IDS.add(_docent_id_from_login(_login))
+
+
 def _alias_from_login(login: str) -> str:
     """'miquel.amor' → 'Miquel' | 'mamor' → 'Mamor'."""
     local = login.split("@")[0]   # treu domini si ve amb @
@@ -5163,9 +5175,13 @@ async def delete_docent_profile(profile_id: str, docent_id: str = ""):
 
 @app.get("/api/docent/is-admin")
 async def check_is_admin(docent_id: str = ""):
-    """Comprova si el docent té rol admin (camp is_admin a atne_docents)."""
+    """Comprova si el docent té rol admin (ATNE_ADMIN_LOGINS env o is_admin a atne_docents)."""
     docent_id = docent_id.strip()
-    if not docent_id or not SUPABASE_URL:
+    if not docent_id:
+        return {"ok": True, "is_admin": False}
+    if docent_id in _ADMIN_DOCENT_IDS:
+        return {"ok": True, "is_admin": True}
+    if not SUPABASE_URL:
         return {"ok": True, "is_admin": False}
     resp = requests.get(
         f"{SUPABASE_URL}/rest/v1/atne_docents?id=eq.{docent_id}&select=is_admin",
