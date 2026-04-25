@@ -33,9 +33,12 @@
   }
 
   /* ─── Pàgina general ────────────────────────────────────── */
-  html { scroll-behavior: smooth; }
+  /* base.css té html,body{height:100%} per a les pàgines app-like (flash/taller).
+     Aquí el sobreescrivim perquè saber-ne és una pàgina document llarga. */
+  html { scroll-behavior: smooth; height: auto; }
 
   body {
+    height: auto;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
