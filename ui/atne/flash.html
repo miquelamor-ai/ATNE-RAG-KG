@@ -1346,11 +1346,6 @@
     var adaptedHtml = (adaptedEl || {}).innerHTML || '';
     if (!adaptedHtml.trim()) return;
 
-    // Complements amb contingut
-    var glHtml = glossariBody ? glossariBody.innerHTML.trim() : '';
-    var prHtml = preguntesBody ? preguntesBody.innerHTML.trim() : '';
-    var rsHtml = resumBody ? resumBody.innerHTML.trim() : '';
-
     // Títol per al nom del fitxer (primera capçalera o primera línia)
     var titleEl = adaptedEl.querySelector('h1, h2, h3');
     var titleText = (titleEl ? titleEl.innerText : (adaptedEl.innerText || '').split('\n')[0])
@@ -1358,19 +1353,9 @@
     var filename = (titleText || 'adaptacio-flash')
       .replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, '-').toLowerCase() || 'adaptacio-flash';
 
-    // Blocs de complements (page-break-inside: avoid)
-    var compsHtml = '';
-    if (glHtml) compsHtml += '<div class="pdf-comp-block"><h2>Glossari</h2>' + glHtml + '</div>';
-    if (prHtml) compsHtml += '<div class="pdf-comp-block"><h2>Preguntes de comprensió</h2>' + prHtml + '</div>';
-    if (rsHtml) compsHtml += '<div class="pdf-comp-block"><h2>Resum</h2>' + rsHtml + '</div>';
-
-    // Contenidor temporal off-screen (net, sense chrome UI)
-    var wrap = document.createElement('div');
-    wrap.className = 'pdf-print-wrap';
-    if (currentFont && currentFont !== 'fraunces') wrap.classList.add('font-' + currentFont);
-    wrap.style.cssText = 'position:fixed;left:-9999px;top:0;z-index:-1';
-    wrap.innerHTML = '<div class="adapted-box">' + adaptedHtml + '</div>' + compsHtml;
-    document.body.appendChild(wrap);
+    // Oculta temporalment el header (no al PDF) i els títols de complements tancats
+    var header = stateResult.querySelector('.result-header');
+    if (header) header.style.display = 'none';
 
     html2pdf().set({
       margin: [15, 20],
@@ -1378,8 +1363,8 @@
       image: { type: 'jpeg', quality: 0.95 },
       html2canvas: { scale: 2, useCORS: true },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    }).from(wrap).save().then(function () {
-      document.body.removeChild(wrap);
+    }).from(stateResult).save().then(function () {
+      if (header) header.style.removeProperty('display');
     });
   });
 
