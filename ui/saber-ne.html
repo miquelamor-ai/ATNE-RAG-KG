@@ -120,8 +120,8 @@
     transition: background var(--trans-fast), color var(--trans-fast);
   }
   .sidebar-link:hover {
-    background: var(--cream-2);
-    color: var(--ink-900);
+    background: var(--primary);
+    color: #fff;
   }
 
   .sidebar-num {
@@ -133,9 +133,11 @@
     place-items: center;
     font-family: var(--mono);
     font-size: 10px;
+    transition: background var(--trans-fast), color var(--trans-fast);
     font-weight: var(--fw-bold);
     flex-shrink: 0;
   }
+  .sidebar-link:hover .sidebar-num { background: rgba(255,255,255,.22); color: #fff; }
 
   /* ─── Contingut principal ────────────────────────────────── */
   .main-content {

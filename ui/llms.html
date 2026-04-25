@@ -39,8 +39,9 @@
   .sidebar-heading { font-family:var(--mono);font-size:var(--fs-xs);font-weight:var(--fw-bold);text-transform:uppercase;letter-spacing:.12em;color:var(--ink-400);margin-bottom:var(--sp-6); }
   .sidebar-nav { display:flex;flex-direction:column;gap:var(--sp-1); }
   .sidebar-link { display:flex;align-items:center;gap:var(--sp-3);padding:10px var(--sp-4);font-size:var(--fs-md);font-weight:var(--fw-semi);color:var(--ink-700);border-radius:var(--r-lg);transition:background var(--trans-fast),color var(--trans-fast); }
-  .sidebar-link:hover { background:var(--cream-2);color:var(--ink-900); }
-  .sidebar-num { width:20px;height:20px;border-radius:50%;background:var(--primary-50);color:var(--primary);display:grid;place-items:center;font-family:var(--mono);font-size:10px;font-weight:var(--fw-bold);flex-shrink:0; }
+  .sidebar-link:hover { background:var(--primary);color:#fff; }
+  .sidebar-num { width:20px;height:20px;border-radius:50%;background:var(--primary-50);color:var(--primary);display:grid;place-items:center;font-family:var(--mono);font-size:10px;font-weight:var(--fw-bold);flex-shrink:0;transition:background var(--trans-fast),color var(--trans-fast); }
+  .sidebar-link:hover .sidebar-num { background:rgba(255,255,255,.22);color:#fff; }
 
   /* Main */
   .main-content { flex:1;background:var(--cream);padding:var(--sp-8); }
