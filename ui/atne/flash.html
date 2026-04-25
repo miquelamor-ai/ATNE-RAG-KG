@@ -545,27 +545,102 @@
     margin: 0 0 .6em;
     color: #222;
   }
+
+  /* ── Topbar: hamburger + Saber-ne+ text link ────────────────── */
+  .hamb {
+    display: none;
+    width: 36px; height: 36px;
+    background: none; border: none;
+    border-radius: var(--r-md);
+    cursor: pointer; color: var(--ink-700);
+    place-items: center; flex-shrink: 0;
+  }
+  .hamb svg { width: 20px; height: 20px; }
+  .hamb:hover { background: var(--cream-2); }
+  .sbn-link {
+    font-family: var(--mono);
+    font-size: 11px; font-weight: 600;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink-500); text-decoration: none;
+    padding: 4px 8px; border-radius: var(--r-md);
+    transition: background .12s, color .12s;
+    white-space: nowrap;
+  }
+  .sbn-link:hover { background: var(--cream-2); color: var(--primary); }
+
+  /* ── Nav drawer mòbil (Flash) ───────────────────────────────── */
+  .nav-backdrop {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.4); z-index: 90;
+  }
+  .nav-backdrop.on { display: block; }
+  .nav-drawer {
+    position: fixed; top: 0; left: 0; bottom: 0;
+    width: 240px; background: var(--cream, #f4f1e8);
+    z-index: 100;
+    transform: translateX(-100%); transition: transform .2s ease;
+    display: flex; flex-direction: column;
+    box-shadow: 4px 0 20px rgba(0,0,0,.15);
+  }
+  .nav-drawer.on { transform: translateX(0); }
+  .nav-drawer-head {
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid var(--paper-line);
+  }
+  .nav-drawer-head img { height: 26px; }
+  .nd-brand { font-family: var(--serif); font-weight: 700; font-size: 16px; color: var(--ink-900); flex: 1; }
+  .nd-close { width: 32px; height: 32px; background: none; border: none; border-radius: var(--r-md); cursor: pointer; display: grid; place-items: center; color: var(--ink-500); flex-shrink: 0; }
+  .nd-close:hover { background: rgba(0,0,0,.06); }
+  .nd-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 13px 16px; font-size: var(--fs-base);
+    font-weight: 500; color: var(--ink-700);
+    text-decoration: none; transition: background .1s, color .1s;
+  }
+  .nd-item:hover, .nd-item.on { background: rgba(76,63,196,.08); color: var(--primary); }
+  .nd-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .nd-sep { height: 1px; background: var(--paper-line); margin: 6px 0; }
+
+  @media (max-width: 640px) {
+    .hamb { display: grid; }
+    .tb-sep, .flash-mode-nav, .sbn-link { display: none; }
+  }
 </style>
 </head>
 <body>
+
+<!-- Nav drawer mòbil Flash -->
+<div class="nav-backdrop" id="ham-backdrop"></div>
+<nav class="nav-drawer" id="ham-drawer" aria-label="Navegació">
+  <div class="nav-drawer-head">
+    <img src="/logo-fje.jpg" alt="FJE">
+    <span class="nd-brand">ATNE</span>
+    <button class="nd-close" id="ham-close" title="Tancar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  </div>
+  <a class="nd-item on" href="/ui/atne/flash.html"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4.09 12.26c-.34.43-.05 1.06.49 1.06H11l-1 8.74 8.91-10.26c.34-.43.05-1.06-.49-1.06H13Z"/></svg>Flash</a>
+  <a class="nd-item" href="/ui/atne/pas1.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Taller</a>
+  <div class="nd-sep"></div>
+  <a class="nd-item" href="/ui/saber-ne.html" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6"/><path d="M12 3a6 6 0 0 1 6 6c0 2.22-1.2 4.16-3 5.2V17H9v-2.8C7.2 13.16 6 11.22 6 9a6 6 0 0 1 6-6z"/></svg>Saber-ne+</a>
+  <a class="nd-item" href="/ui/atne/home.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 12 9-9 9 9"/><path d="M5 10v10h14V10"/></svg>Inici</a>
+</nav>
 
 <div class="flash-wrap">
 
   <!-- Topbar -->
   <header class="topbar">
+    <button class="hamb" id="ham-btn" title="Menú"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
     <a href="/ui/atne/home.html" style="display:flex;align-items:center;gap:8px;text-decoration:none">
       <div class="logo" style="margin-bottom:0;flex-shrink:0"><img src="/logo-fje.jpg" alt="FJE"></div>
       <span class="brand">ATNE</span>
     </a>
     <div class="tb-sep"></div>
-    <nav class="steps" aria-label="Mode">
+    <nav class="steps flash-mode-nav" aria-label="Mode">
       <a href="/ui/atne/flash.html" class="step on">Flash</a>
       <a href="/ui/atne/pas1.html" class="step">Taller</a>
     </nav>
     <div class="tb-spacer"></div>
-    <a href="/ui/saber-ne.html" target="_blank" class="icon-btn" title="Saber-ne+" style="text-decoration:none">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6"/><path d="M12 3a6 6 0 0 1 6 6c0 2.22-1.2 4.16-3 5.2V17H9v-2.8C7.2 13.16 6 11.22 6 9a6 6 0 0 1 6-6z"/></svg>
-    </a>
+    <a href="/ui/saber-ne.html" target="_blank" class="sbn-link" title="Saber-ne+">Saber-ne+</a>
     <button id="docent-av" class="docent-av" title="El teu compte">?</button>
   </header>
 
@@ -1491,6 +1566,19 @@
       location.href = '/ui/atne/pas1.html';
     });
 
+})();
+
+// ── Nav drawer mòbil ────────────────────────────────────────────────────────
+(function () {
+  var btn = document.getElementById('ham-btn');
+  var drawer = document.getElementById('ham-drawer');
+  var backdrop = document.getElementById('ham-backdrop');
+  function close() { drawer.classList.remove('on'); backdrop.classList.remove('on'); }
+  if (btn) btn.addEventListener('click', function () { drawer.classList.add('on'); backdrop.classList.add('on'); });
+  if (backdrop) backdrop.addEventListener('click', close);
+  var closeBtn = document.getElementById('ham-close');
+  if (closeBtn) closeBtn.addEventListener('click', close);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
 })();
 </script>
 

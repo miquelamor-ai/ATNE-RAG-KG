@@ -1,0 +1,33 @@
+# gpt-4.1-mini · nouvingut_A2 · MVP
+
+**Nivell:** A2 | **Curs:** primaria_56 | **Adaptació:** simplificat
+**Perfils:** ['nouvingut']
+
+---
+
+La fotosíntesi és un procés que fan les plantes, les algues i alguns organismes petits. Amb la llum del sol, fan menjar per elles mateixes. Aquest procés passa dins de les cèl·lules de les plantes, en unes parts que es diuen cloroplasts.
+
+Les plantes prenen aire, que té un gas que es diu diòxid de carboni (CO₂), per les fulles. També prenen aigua del terra amb les arrels. La clorofil·la, que és el color verd de les fulles, agafa la llum del sol i ajuda a fer la glucosa, que és un tipus de sucre.
+
+La fórmula és:
+6 CO₂ + 6 H₂O + llum del sol → glucosa + 6 O₂
+
+La glucosa és el menjar que la planta fa servir per créixer i tenir energia. L’oxigen (O₂) que surt és bo per nosaltres i per altres animals, perquè el necessitem per respirar. La fotosíntesi és molt important perquè ajuda a tenir oxigen a l’aire i alimenta moltes plantes i animals.
+
+---
+
+<details><summary>Prompt MVP</summary>
+
+```
+Ets un assistent pedagògic especialitzat en adaptació de textos educatius en català.
+Adapta el text que t'enviaré.
+IMPORTANT: comença directament amb el text adaptat. No escriguis cap frase introductòria, cap títol genèric, cap explicació de què has fet ni cap comentari final.
+
+NIVELL:
+A2 — Lectura Fàcil adaptada: frases curtes i directes, vocabulari freqüent, estructura simple, explica termes amb paraules conegudes.
+
+PERFILS DE L'ALUMNAT:
+- Nouvingut: vocabulari d'alta freqüència, frases curtes, explica referents culturals no universals.
+
+```
+</details>

@@ -1,0 +1,13 @@
+{
+  "elements_obligatoris": [
+    "Fulla vegetal (secció transversal)",
+    "Cloroplasts (dins les cel·lules de la fulla)",
+    "Clorofil·la (molècules dins dels cloroplasts, representades visualment)",
+    "Fotons de llum solar (rajos de llum entrant a la fulla)",
+    "Cel·lules vegetals (dins la fulla)"
+  ],
+  "relacio_entre_elements": "Els fotons de llum incideixen sobre la fulla, que conté cel·lules amb cloroplasts. Dins dels cloroplasts hi ha la clorofil·la, que absorbeix la llum. Fletxes que indiquin la direcció de la llum i la seva absorció per la clorofil·la.",
+  "emfasi_pedagogic": "Mostrar la clorofil·la com l'element clau que 'captura' la llum, visualment destacada (color, grandària relativa). La secció transversal de la fulla ha de ser clara per veure la ubicació dels cloroplasts.",
+  "misconception_a_evitar": "No mostrar la fotosintesi com un procés que ocorre a tota la fulla de manera uniforme. Cal deixar clar que passa dins de les cel·lules i, més específicament, dins dels cloroplasts.",
+  "brief_final_angles": "Illustrate a leaf cross-section showing cells containing chloroplasts. Highlight chlorophyll molecules within the chloroplasts actively absorbing sunlight (photons). Emphasize chlorophyll as the key element capturing light energy. Avoid depicting the process happening uniformly across the entire leaf; focus on the cellular level. Show light rays interacting with the chlorophyll."
+}

@@ -1,0 +1,59 @@
+## Text adaptat
+
+# **La revolució industrial**
+
+[Secció 1 de 3]
+
+### Què va ser la revolució industrial?
+En aquest bloc aprendràs la definició d'aquest procés i on va començar.
+
+La **revolució industrial** (canvi gran en la manera de produir productes) va ser un procés de transformació. Aquest procés va canviar l'economia i la societat. La revolució industrial va començar a Gran Bretanya. Va començar durant el segle XVIII (entre l'any 1701 i l'any 1800).
+
+*Pregunta ràpida: En quin país va començar la revolució industrial?*
+
+[Secció 2 de 3]
+
+### Com va canviar l'economia?
+En aquest bloc aprendràs el canvi de models econòmics i la tecnologia.
+
+Abans, la gent tenia una **economia agrícola** (sistema basat en el cultiu de la terra). Després, la gent va passar a una **economia industrial** (sistema basat en la fabricació de productes a fàbriques). La **màquina de vapor** (invent que usa el vapor per moure màquines) va ser el motor d'aquest canvi. Aquesta màquina va permetre produir més productes més ràpidament.
+
+*Pregunta ràpida: Quina màquina va permetre aquest canvi econòmic?*
+
+[Secció 3 de 3]
+
+### Quines classes socials van aparèixer?
+En aquest bloc aprendràs sobre els nous grups de persones.
+
+La revolució industrial va crear dues classes socials noves. La primera va ser la **burgesia industrial** (persones riques que posseïen les fàbriques). La segona va ser el **proletariat urbà** (trevalladors que vivien a la ciutat i treballaven a la fàbrica). Aquests dos grups tenien condicions de vida molt diferents.
+
+## Glossari
+
+| Terme | Explicació simple |
+| :--- | :--- |
+| **Revolució industrial** | Canvi gran en la manera de fabricar coses |
+| **Economia agrícola** | Producció basada en la terra i els cultius |
+| **Economia industrial** | Producció basada en el treball a fàbriques |
+| **Màquina de vapor** | Invent que usa vapor per moure màquines |
+| **Burgesia industrial** | Persones riques que són propietaris de les fàbriques |
+| **Proletariat urbà** | Persones pobres que treballen a la fàbrica a la ciutat |
+| **Segle XVIII** | El període d'anys entre 1701 i 1800 |
+| **Transformació** | Un canvi molt important |
+
+## Argumentació pedagògica
+
+1. **Adaptació lingüística**: S'ha aplicat un nivell de simplificació per a alumnat nouvingut (pre-A1/A1), utilitzant frases de màxim 15-20 paraules i eliminant tota subordinació complexa.
+2. **Atenció a la diversitat**: Per al perfil TDAH, s'han implementat micro-blocs amb objectius explícits, indicadors de progrés [X de Y] i preguntes intercalades per mantenir l'atenció i la monitorització.
+3. **Suport multimodal**: S'ha utilitzat el *chunking* per dividir la informació en tres blocs temàtics clars, facilitant la càrrega de la memòria de treball.
+4. **Gradació cognitiva**: La informació progressa des de la definició general (què i on), passant per la causa tecnològica (com), fins a l'efecte social (qui).
+5. **Rigor curricular**: Es conserven tots els termes tècnics (burgesia, proletariat, economia industrial) perquè són conceptes clau de 3r d'ESO, però s'hi afegeixen definicions immediates.
+
+## Notes d'auditoria
+
+| Aspecte | Original | Adaptat | Motiu |
+| :--- | :--- | :--- | :--- |
+| **Sintaxi** | Frases llargues i complexes | Frases curtes (una idea per frase) | Accessibilitat MECR A1/A2 i TDAH |
+| **Dates** | "segle XVIII" | "segle XVIII (entre l'any 1701 i l'any 1800)" | Contextualització per a nouvinguts |
+| **Terminologia** | Termes sense definició | Termes en **negreta** + definició | Rigor curricular i suport cognitiu |
+| **Estructura** | Paràgraf únic | 3 blocs amb títols i objectius | Segmentació per TDAH (chunking) |
+| **Lèxic** | "originar", "suposar" | "començar", "va ser" | Substitució per vocabulari d'alta freqüència |

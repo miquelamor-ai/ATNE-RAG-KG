@@ -1,0 +1,62 @@
+# Test Perfils Nous — 20260424_061819
+
+**Resultat:** 56/56 correctes
+
+| Cas | Nivell | Model | Versió | Temps | Estat |
+|-----|--------|-------|--------|-------|-------|
+| tdl_B1 | B1 | gpt-4o | MVP | 5.6s | OK |
+| tdl_B1 | B1 | gpt-4o | CREAM | 17.3s | OK |
+| tdl_B1 | B1 | gpt-4.1-mini | MVP | 5.4s | OK |
+| tdl_B1 | B1 | gpt-4.1-mini | CREAM | 16.3s | OK |
+| di_B1 | B1 | gpt-4o | MVP | 10.4s | OK |
+| di_B1 | B1 | gpt-4o | CREAM | 13.7s | OK |
+| di_B1 | B1 | gpt-4.1-mini | MVP | 3.8s | OK |
+| di_B1 | B1 | gpt-4.1-mini | CREAM | 16.7s | OK |
+| aacc_B2 | B2 | gpt-4o | MVP | 6.1s | OK |
+| aacc_B2 | B2 | gpt-4o | CREAM | 16.0s | OK |
+| aacc_B2 | B2 | gpt-4.1-mini | MVP | 6.7s | OK |
+| aacc_B2 | B2 | gpt-4.1-mini | CREAM | 17.6s | OK |
+| tdah_dislexia_B1 | B1 | gpt-4o | MVP | 4.1s | OK |
+| tdah_dislexia_B1 | B1 | gpt-4o | CREAM | 15.6s | OK |
+| tdah_dislexia_B1 | B1 | gpt-4.1-mini | MVP | 6.4s | OK |
+| tdah_dislexia_B1 | B1 | gpt-4.1-mini | CREAM | 19.9s | OK |
+| tea_tdl_B1 | B1 | gpt-4o | MVP | 5.4s | OK |
+| tea_tdl_B1 | B1 | gpt-4o | CREAM | 14.7s | OK |
+| tea_tdl_B1 | B1 | gpt-4.1-mini | MVP | 3.9s | OK |
+| tea_tdl_B1 | B1 | gpt-4.1-mini | CREAM | 17.1s | OK |
+| tdah_aacc_B2 | B2 | gpt-4o | MVP | 6.0s | OK |
+| tdah_aacc_B2 | B2 | gpt-4o | CREAM | 14.1s | OK |
+| tdah_aacc_B2 | B2 | gpt-4.1-mini | MVP | 6.5s | OK |
+| tdah_aacc_B2 | B2 | gpt-4.1-mini | CREAM | 16.1s | OK |
+| vulnerabilitat_B1 | B1 | gpt-4o | MVP | 4.5s | OK |
+| vulnerabilitat_B1 | B1 | gpt-4o | CREAM | 15.2s | OK |
+| vulnerabilitat_B1 | B1 | gpt-4.1-mini | MVP | 4.1s | OK |
+| vulnerabilitat_B1 | B1 | gpt-4.1-mini | CREAM | 14.6s | OK |
+| trastorn_emocional_B1 | B1 | gpt-4o | MVP | 3.2s | OK |
+| trastorn_emocional_B1 | B1 | gpt-4o | CREAM | 15.5s | OK |
+| trastorn_emocional_B1 | B1 | gpt-4.1-mini | MVP | 4.3s | OK |
+| trastorn_emocional_B1 | B1 | gpt-4.1-mini | CREAM | 18.2s | OK |
+| vuln_nouvingut_B1 | B1 | gpt-4o | MVP | 4.1s | OK |
+| vuln_nouvingut_B1 | B1 | gpt-4o | CREAM | 14.7s | OK |
+| vuln_nouvingut_B1 | B1 | gpt-4.1-mini | MVP | 4.5s | OK |
+| vuln_nouvingut_B1 | B1 | gpt-4.1-mini | CREAM | 16.2s | OK |
+| grup_A1 | A1 | gpt-4o | MVP | 3.1s | OK |
+| grup_A1 | A1 | gpt-4o | CREAM | 15.0s | OK |
+| grup_A1 | A1 | gpt-4.1-mini | MVP | 2.9s | OK |
+| grup_A1 | A1 | gpt-4.1-mini | CREAM | 19.1s | OK |
+| grup_A2 | A2 | gpt-4o | MVP | 6.8s | OK |
+| grup_A2 | A2 | gpt-4o | CREAM | 14.6s | OK |
+| grup_A2 | A2 | gpt-4.1-mini | MVP | 3.7s | OK |
+| grup_A2 | A2 | gpt-4.1-mini | CREAM | 16.0s | OK |
+| grup_B1 | B1 | gpt-4o | MVP | 4.3s | OK |
+| grup_B1 | B1 | gpt-4o | CREAM | 14.7s | OK |
+| grup_B1 | B1 | gpt-4.1-mini | MVP | 6.4s | OK |
+| grup_B1 | B1 | gpt-4.1-mini | CREAM | 19.3s | OK |
+| grup_B2 | B2 | gpt-4o | MVP | 8.4s | OK |
+| grup_B2 | B2 | gpt-4o | CREAM | 18.2s | OK |
+| grup_B2 | B2 | gpt-4.1-mini | MVP | 3.3s | OK |
+| grup_B2 | B2 | gpt-4.1-mini | CREAM | 20.1s | OK |
+| grup_C1 | C1 | gpt-4o | MVP | 4.9s | OK |
+| grup_C1 | C1 | gpt-4o | CREAM | 16.8s | OK |
+| grup_C1 | C1 | gpt-4.1-mini | MVP | 4.2s | OK |
+| grup_C1 | C1 | gpt-4.1-mini | CREAM | 16.2s | OK |

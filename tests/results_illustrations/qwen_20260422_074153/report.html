@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ca"><head><meta charset="UTF-8">
+<title>Qwen-Image vs FLUX — proves ATNE</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 1400px; margin: 2em auto; padding: 1em; }
+  h1 { color: #1a4b7a; }
+  h2 { color: #1a4b7a; border-bottom: 2px solid #e0e0e0; padding-bottom: 0.3em; margin-top: 2em; }
+  .note { background: #fffae5; border-left: 4px solid #f0c040; padding: 0.8em 1em; margin: 1em 0; font-size: 0.92em; }
+  .block { margin: 1.5em 0; }
+  .prompt { font-size: 0.82em; color: #555; background: #f8f8f8; padding: 0.6em; border-radius: 4px; }
+  img { max-width: 100%; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); display: block; margin-top: 0.5em; }
+  .caption { font-family: monospace; color: #666; text-align: center; margin-top: 0.3em; }
+  .verdict { font-weight: bold; color: #1a4b7a; margin-top: 0.5em; }
+</style></head><body>
+
+<h1>Qwen-Image (HF Space oficial) — proves 2026-04-22</h1>
+
+<div class="note">
+<strong>Metode</strong>: Qwen/Qwen-Image HF Space via gradio_client amb HF_API_TOKEN,
+aspect 4:3, guidance 4.0, 30 steps, seed 42. Temps generacio: ~48-60s per imatge.
+Cua ZeroGPU saturada a hora pic europea, cal retry.
+</div>
+
+<h2>Scene 1 — Escena d'evaporacio (mateix subjecte que proves FLUX)</h2>
+
+<p class="prompt"><code>soft watercolor storybook illustration, gentle wet-edge washes, warm palette of ochre sap green and dusty blue, hand-drawn feel, cozy lighting, loose brushwork, paper texture background, children book aesthetic. A warm morning sun shining over a calm sea, water vapour rising gently from the surface towards the sky, three-quarter view, eye-level, soft horizon line. single clear focal point, clean composition, soft cream background. No text, no letters.</code></p>
+
+<img src="01_sense_text.png" alt="Qwen scene 1">
+<div class="caption">Qwen-Image - watercolor storybook</div>
+
+<p class="verdict">Per comparar directament amb FLUX-schnell: obre el report de la iteracio 2 a <a href="../20260421_221651/report.html">qwen_20260421_221651/report.html</a> (mateix estil spine, mateix subjecte).</p>
+
+<h2>Scene 2 — Infografia del cicle de l'aigua amb etiquetes en catala (la prova clau)</h2>
+
+<div class="note">
+Aquesta es la prova que FLUX <strong>no pot fer</strong>. FLUX genera text gargot dins les imatges. Qwen-Image es l'unic model obert que renderitza text Unicode (catala inclos) amb precisio.
+</div>
+
+<p class="prompt"><code>Educational textbook infographic poster showing the water cycle with four clearly labeled stages. The labels are written in Catalan in clean readable typography: 'EVAPORACIO' above the sea with rising vapour, 'CONDENSACIO' above the clouds, 'PRECIPITACIO' next to the falling rain, and 'ESCOLAMENT' next to a river flowing back to the sea. Arrows connect the four stages in a circular flow. Flat editorial vector illustration, soft pastel palette of blues and creams, clean geometric shapes, bold outlines, title 'EL CICLE DE L'AIGUA' at the top in large letters. Soft cream paper background.</code></p>
+
+<img src="02_infografia_catala.webp" alt="Qwen infografia catala">
+<div class="caption">Qwen-Image - infografia amb text catala integrat</div>
+
+<p class="verdict">Veredicte: avalua si el text es llegible i correcte. Errors tipografics comuns de Qwen-Image: falta accent (EVAPORACIO en lloc d'EVAPORACIO), lletres duplicades, ordre invertit en paraules poc frequents.</p>
+
+</body></html>

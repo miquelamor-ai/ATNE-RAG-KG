@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ca"><head><meta charset="UTF-8">
+<title>Comparativa estils FLUX-schnell</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 1400px; margin: 2em auto; padding: 1em; }
+  h1 { color: #1a4b7a; }
+  .subject { background: #f4f4f4; padding: 0.8em; border-radius: 6px; font-size: 0.9em; }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5em; margin-top: 1.5em; }
+  .block { border: 1px solid #ddd; border-radius: 8px; padding: 1em; }
+  .block h3 { margin-top: 0; font-family: monospace; color: #1a4b7a; }
+  .spine { font-size: 0.8em; color: #555; min-height: 4em; }
+  img { width: 100%; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+  .err { color: #b00; padding: 3em; text-align: center; }
+</style></head><body>
+<h1>Comparativa d'estils FLUX.1-schnell</h1>
+<p><strong>Subjecte comu</strong> (mateix per a tots, seed=42):</p>
+<div class="subject"><code>a warm morning sun shining over a calm sea, water vapour rising gently from the surface towards the sky, three-quarter view, eye-level, soft horizon line</code></div>
+<div class="grid">
+        <div class="block">
+          <h3>01_vectorial_editorial</h3>
+          <p class="spine">flat vector illustration, clean geometric shapes, bold simple outlines, limited flat color palette, smooth shapes, friendly editorial style, no gradients, no texture, centered composition</p>
+          <img src="01_vectorial_editorial.png" alt="01_vectorial_editorial">
+        </div>
+        
+        <div class="block">
+          <h3>02_isometric_infografic</h3>
+          <p class="spine">isometric 3D illustration, 30 degree angle, clean geometric shapes, crisp edges, limited color palette with soft pastels, subtle shading, infographic textbook style, high clarity</p>
+          <img src="02_isometric_infografic.png" alt="02_isometric_infografic">
+        </div>
+        
+        <div class="block">
+          <h3>03_aquarela_storybook</h3>
+          <p class="spine">soft watercolor storybook illustration, gentle wet-edge washes, warm palette of ochre sap green and dusty blue, hand-drawn feel, cozy lighting, loose brushwork, paper texture background, children book aesthetic</p>
+          <img src="03_aquarela_storybook.png" alt="03_aquarela_storybook">
+        </div>
+        
+        <div class="block">
+          <h3>04_icona_minimalista</h3>
+          <p class="spine">minimalist flat icon, single concept, centered, thick rounded outlines, two or three flat colors, solid shapes, no gradient, generous padding, pictogram style, high legibility</p>
+          <img src="04_icona_minimalista.png" alt="04_icona_minimalista">
+        </div>
+        
+        <div class="block">
+          <h3>05_claymation_plastilina</h3>
+          <p class="spine">handmade claymation style, stop-motion plasticine figures, soft studio lighting, visible fingerprint texture, saturated but warm colors, shallow depth of field, tabletop scene, cheerful children's educational look</p>
+          <img src="05_claymation_plastilina.png" alt="05_claymation_plastilina">
+        </div>
+        </div>
+</body></html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ca"><head><meta charset="UTF-8">
+<title>A/B brief simple vs brief enriquit</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 1400px; margin: 2em auto; padding: 1em; }
+  h1 { color: #1a4b7a; }
+  .context { background: #f4f4f4; padding: 0.8em; border-radius: 6px; font-size: 0.88em; margin: 0.5em 0; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5em; margin-top: 1.5em; }
+  .col { border: 1px solid #ddd; border-radius: 8px; padding: 1em; }
+  .col h2 { margin-top: 0; color: #1a4b7a; }
+  .brief { font-size: 0.82em; background: #fffae5; padding: 0.6em; border-radius: 4px; min-height: 6em; }
+  img { width: 100%; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.12); }
+  .rubric { background: #eaf5ff; padding: 0.8em; border-radius: 6px; font-size: 0.88em; }
+  .rubric ul { margin: 0.4em 0; padding-left: 1.2em; }
+</style></head><body>
+
+<h1>A/B — brief simple vs brief enriquit amb Gemma 3</h1>
+<p>Concepte: "les fulles capten la llum gracies a la clorofil·la". Estil FLUX idèntic (isomètric), seed 42.</p>
+
+<h3>Text original (referencia)</h3>
+<div class="context">La fotosintesi es el proces mitjancant el qual les plantes, les algues i
+alguns bacteris transformen l'energia luminosa en energia quimica. Aquest
+proces ocorre principalment als cloroplasts de les cel·lules vegetals, on es
+troba la clorofil·la, un pigment verd que absorbeix la llum solar.
+
+A la primera etapa (fase luminosa), la clorofil·la capta fotons de la llum
+solar. L'energia captada trenca molecules d'aigua (H2O) en hidrogen i oxigen,
+alliberant O2 com a subproducte. A la segona etapa (cicle de Calvin),
+l'energia acumulada s'utilitza per fixar el CO2 atmosferic i convertir-lo en
+glucosa (C6H12O6), que servira d'aliment a la planta.</div>
+
+<h3>Text adaptat (B1-ESO)</h3>
+<div class="context">Les plantes fabriquen el seu propi aliment. Aquest proces s'anomena
+fotosintesi. Per fer-la, necessiten tres coses: llum del sol, aigua i dioxid
+de carboni. Les fulles capten la llum gracies a la clorofil·la, un pigment
+verd.</div>
+
+<h3>Rubrica pedagogica aplicada per Gemma 3</h3>
+<div class="rubric">
+<strong>Elements obligatoris:</strong>
+<ul><li>fulla</li><li>raigs de sol</li><li>energia (llum)</li><li>aigua (gotes)</li><li>aire (CO2)</li></ul>
+<strong>Relacio entre elements:</strong> La fulla central rep els raigs de sol, que la il·luminen. Gota d'aigua a la base de la fulla. L'aire envolta la fulla, amb petites partícules que representen el CO2. La llum emana de la fulla, simbolitzant l'energia captada.<br>
+<strong>Emfasi pedagogic:</strong> La fulla ha de ser el focus principal, brillant i vibrant. Els raigs de sol han de ser clars i direccionals. La llum que emana de la fulla ha de ser visible i atractiva.<br>
+<strong>Misconception a evitar:</strong> Mostrar la fulla com un objecte passiu. Representar-la com un element actiu que absorbeix i transforma l'energia.
+</div>
+
+<div class="cols">
+  <div class="col">
+    <h2>A. Brief actual (simulat pel LLM adaptador)</h2>
+    <div class="brief"><code>A single green leaf seen up close on a tree branch, bright sunlight rays shining on the leaf surface, three-quarter view, warm morning light, faint outlines of chloroplasts visible as tiny green dots inside the leaf, no people</code></div>
+    <img src="a_brief_actual.png" alt="brief actual">
+  </div>
+  <div class="col">
+    <h2>B. Brief enriquit (Gemma 3 + rubrica)</h2>
+    <div class="brief"><code>Show a vibrant green leaf bathed in warm sunlight. Rays of light are directed towards the leaf, and glowing energy emanates from it. Include small water droplets at the base of the leaf and subtle particles in the air representing carbon dioxide. The leaf appears active and full of energy. Focus on the leaf as the central element.</code></div>
+    <img src="b_brief_enriquit.png" alt="brief enriquit">
+  </div>
+</div>
+
+</body></html>

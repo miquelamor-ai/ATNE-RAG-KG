@@ -1,0 +1,4 @@
+CREAM TEA instruccions activades:
+[PERFIL] H-01: TEA: estructura predictible i fixa — sempre: títol → definició → exemple → activitat.
+[PERFIL] H-02: TEA: zero implicitura — tota metàfora, ironia o sentit figurat → literal explícit. No generis ironia, sarcasme ni inferències socials implícites als exemples o complements.
+[PERFIL] H-03: TEA: anticipació de canvis — avisa sempre: 'Ara canviem de tema.', 'A continuació veurem...'
