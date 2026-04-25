@@ -404,15 +404,23 @@
   @media (max-width: 720px) {
     .flash-main {
       grid-template-columns: 1fr;
-      grid-template-rows: auto 1fr;
+      grid-template-rows: auto auto;
     }
     .flash-form {
       border-right: none;
       border-bottom: 1px solid var(--paper-line);
-      max-height: 52vh;
+      max-height: none;
+      overflow-y: visible;
     }
-    .result-empty, .result-loading { min-height: 200px; }
-    .flash-result { padding: 20px 18px 90px; }
+    .form-footer {
+      position: static;
+      border-top: none;
+      padding: 10px 0 4px;
+      margin-top: 0;
+    }
+    .result-empty, .result-loading { min-height: 120px; padding: 20px 0; }
+    .empty-icon { font-size: 36px; }
+    .flash-result { padding: 18px 18px 80px; }
     .action-bar { bottom: 16px; right: 16px; }
   }
 
