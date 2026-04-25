@@ -534,23 +534,24 @@
     <!-- Panell formulari -->
     <section class="flash-form">
 
-      <div class="form-group">
-        <label class="form-label" for="curs-sel">Curs</label>
-        <select class="form-select" id="curs-sel">
-          <option value="primaria_12">Primària 1r – 2n</option>
-          <option value="primaria_34">Primària 3r – 4t</option>
-          <option value="primaria_56">Primària 5è – 6è</option>
-          <option value="eso_12" selected>ESO 1r – 2n</option>
-          <option value="eso_34">ESO 3r – 4t</option>
-          <option value="batxillerat">Batxillerat</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Per a qui</label>
-        <div class="steps" id="tipus-steps" role="group" aria-label="Destinatari">
-          <button class="step on" data-tipus="grup">Grup classe</button>
-          <button class="step" data-tipus="alumne">Un alumne/a</button>
+      <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
+        <div class="form-group" style="flex:1;min-width:0">
+          <label class="form-label" for="curs-sel">Curs</label>
+          <select class="form-select" id="curs-sel">
+            <option value="primaria_12">Primària 1r – 2n</option>
+            <option value="primaria_34">Primària 3r – 4t</option>
+            <option value="primaria_56">Primària 5è – 6è</option>
+            <option value="eso_12" selected>ESO 1r – 2n</option>
+            <option value="eso_34">ESO 3r – 4t</option>
+            <option value="batxillerat">Batxillerat</option>
+          </select>
+        </div>
+        <div class="form-group" style="flex:none">
+          <label class="form-label">Per a qui</label>
+          <div class="steps" id="tipus-steps" role="group" aria-label="Destinatari">
+            <button class="step on" data-tipus="grup">Grup</button>
+            <button class="step" data-tipus="alumne">Alumne</button>
+          </div>
         </div>
       </div>
 
