@@ -70,25 +70,30 @@
   .mode-card:active { transform: translateY(0); }
 
   .mode-icon {
-    width: 44px; height: 44px;
-    border-radius: var(--r-xl);
-    background: var(--cream-2, #ece8db);
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--primary, #3337a6);
     display: flex; align-items: center; justify-content: center;
-    font-size: var(--fs-2xl);
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+    color: #fff;
+    flex-shrink: 0;
   }
+  .mode-icon svg { width: 26px; height: 26px; }
   .mode-title {
     font-family: 'Fraunces', serif;
     font-size: var(--fs-2xl);
     font-weight: 700;
     color: var(--ink-900, #121a2b);
-    margin: 0 0 6px;
+    margin: 0 0 8px;
   }
   .mode-desc {
-    font-size: var(--fs-base);
+    font-family: var(--mono);
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-transform: uppercase;
     color: var(--ink-500, #6a7392);
     margin: 0;
-    line-height: 1.5;
   }
 
   /* Historial recent */
@@ -99,11 +104,11 @@
     margin-bottom: 12px;
   }
   .section-title {
-    font-size: var(--fs-md);
-    font-weight: 600;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    color: var(--ink-400, #8a93b0);
+    font-family: var(--serif);
+    font-size: var(--fs-2xl);
+    font-weight: 700;
+    color: var(--ink-900, #121a2b);
+    letter-spacing: -0.01em;
   }
   .section-link {
     font-size: var(--fs-md);
@@ -117,39 +122,33 @@
   .history-item {
     background: #fff;
     border-radius: var(--r-lg);
-    padding: 14px 16px;
+    padding: 16px;
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
     cursor: pointer;
     border: 1px solid var(--paper-line, rgba(0,0,0,.06));
     transition: border-color .12s;
   }
   .history-item:hover { border-color: var(--primary, #3337a6); }
 
-  .history-icon {
-    width: 36px; height: 36px; flex-shrink: 0;
-    border-radius: var(--r-md);
-    background: var(--cream-2, #ece8db);
-    display: flex; align-items: center; justify-content: center;
-    font-size: var(--fs-lg);
-  }
   .history-info { flex: 1; min-width: 0; }
+  .history-meta {
+    font-size: var(--fs-xs);
+    color: var(--ink-400, #8a93b0);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
   .history-name {
-    font-size: var(--fs-base);
-    font-weight: 500;
+    font-family: var(--serif);
+    font-size: var(--fs-lg);
+    font-weight: 600;
     color: var(--ink-900, #121a2b);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-bottom: 3px;
-  }
-  .history-meta {
-    font-size: var(--fs-sm);
-    color: var(--ink-400, #8a93b0);
-    display: flex;
-    align-items: center;
-    gap: 6px;
   }
   .mode-badge {
     font-size: 10px;
@@ -197,6 +196,53 @@
 
   /* Toggle Flash/Taller a la topbar */
   .steps a.step { text-decoration: none; }
+
+  /* Mòbil: amaga el toggle de la topbar (la home JA és el selector de mode) */
+  @media (max-width: 640px) {
+    .home-wrap { padding: 32px 20px 100px; }
+    .topbar .steps { display: none; }
+    .mode-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .mode-card { padding: 24px 18px; }
+  }
+
+  /* Bottom tab bar (mòbil) */
+  .bottom-tab {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 68px;
+    background: #fff;
+    border-top: 1px solid var(--paper-line, rgba(0,0,0,.06));
+    z-index: 40;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .bottom-tab-inner {
+    display: flex;
+    height: 100%;
+    align-items: stretch;
+  }
+  .tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: var(--ink-400, #8a93b0);
+    text-decoration: none;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: var(--mono, monospace);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    transition: color .12s;
+  }
+  .tab-item svg { width: 22px; height: 22px; }
+  .tab-item.on { color: var(--primary, #3337a6); }
+  .tab-item:active { opacity: .7; }
+  @media (max-width: 640px) {
+    .bottom-tab { display: block; }
+  }
 </style>
 </head>
 <body>
@@ -225,14 +271,14 @@
   <!-- Selector de mode -->
   <div class="mode-grid">
     <a href="/ui/atne/flash.html" class="mode-card" id="btn-flash">
-      <div class="mode-icon">⚡</div>
+      <div class="mode-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4.09 12.26c-.34.43-.05 1.06.49 1.06H11l-1 8.74 8.91-10.26c.34-.43.05-1.06-.49-1.06H13Z"/></svg></div>
       <div class="mode-title">Flash</div>
-      <p class="mode-desc">Ràpid i directe. Un text, una adaptació en pocs clics.</p>
+      <p class="mode-desc">Ràpid i directe</p>
     </a>
     <a href="/ui/atne/pas1.html" class="mode-card" id="btn-taller">
-      <div class="mode-icon">🔧</div>
+      <div class="mode-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
       <div class="mode-title">Taller</div>
-      <p class="mode-desc">Complet i precís. Perfil detallat, complements i multinivell.</p>
+      <p class="mode-desc">Complet i precís</p>
     </a>
   </div>
 
@@ -267,6 +313,27 @@
   </div>
 
 </main>
+
+<nav class="bottom-tab" aria-label="Navegació principal">
+  <div class="bottom-tab-inner">
+    <a href="/ui/atne/home.html" class="tab-item on">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Inici
+    </a>
+    <a href="/ui/atne/flash.html" class="tab-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nou
+    </a>
+    <a href="#biblioteca" class="tab-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+      Biblioteca
+    </a>
+    <a href="#perfil" class="tab-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Perfil
+    </a>
+  </div>
+</nav>
 
 <script>
 (function () {
@@ -344,23 +411,21 @@
     document.getElementById('link-veure-tot').style.display = '';
     list.innerHTML = '';
     items.slice(0, 5).forEach(function(it) {
-      var ps = it.profile_snapshot || {};
-      var mode  = ps.tipus === 'grup' ? 'flash-grup' : (it.title ? '' : 'taller');
-      // Detectem Flash si el context_snapshot no té perfil complet del Taller
-      var modeLabel = (it.original_text && !it.profile_snapshot) ? 'TALLER' : 'FLASH';
-      var title = it.title || 'Adaptació';
-      var ago   = timeAgo(it.updated_at || it.created_at);
+      var flash  = isFlashAdaptation(it);
+      var badge  = flash ? 'flash' : 'taller';
+      var label  = flash ? 'FLASH' : 'TALLER';
+      var title  = it.title || 'Adaptació';
+      var ago    = timeAgo(it.updated_at || it.created_at);
 
       var div = document.createElement('div');
       div.className = 'history-item';
-      div.style.cursor = 'pointer';
       div.innerHTML =
-        '<div class="history-icon">📄</div>' +
         '<div class="history-info">' +
-          '<div class="history-name">' + title + '</div>' +
           '<div class="history-meta">' +
+            '<span class="mode-badge ' + badge + '">' + label + '</span>' +
             '<span>' + ago + '</span>' +
           '</div>' +
+          '<div class="history-name">' + title + '</div>' +
         '</div>' +
         '<svg style="flex-shrink:0;color:var(--ink-400)" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 12l4-4-4-4"/></svg>';
       (function(item) {

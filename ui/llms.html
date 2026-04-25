@@ -587,7 +587,7 @@
         <span class="term-label">Instruction Following</span>
       </div>
       <p class="term-name">Seguiment d'instruccions</p>
-      <p class="term-def">La capacitat del model de seguir instruccions complexes i específiques de forma fidel. Un model pot ser molt intel·ligent però poc obedient: fa el que vol, no el que se li demana.</p>
+      <p class="term-def">La capacitat del model d'executar consignes complexes i específiques de forma fidel. Un model pot tenir molt bones capacitats generals però un alineament baix amb les consignes: genera text plausible en lloc d'executar exactament el que se li ha demanat.</p>
       <div class="term-example"><strong>Crític per ATNE:</strong> ATNE envia 100+ instruccions pedagògiques (MECR, perfil, DUA, gènere…). Un model que no les segueixi bé genera adaptacions deficients.</div>
     </div>
 
@@ -680,7 +680,7 @@
         </div>
         <div class="deploy-item">
           <span class="deploy-dot err"></span>
-          <p class="deploy-item-text"><strong>Incompatible amb Cloud Run.</strong> ATNE es desplega a Google Cloud Run, que no té GPU. Caldria un servidor separat, duplicant la infraestructura.</p>
+          <p class="deploy-item-text"><strong>Infraestructura complexa.</strong> Un model local de 31B requereix una màquina dedicada amb GPU. Integrar-lo amb el backend web implica gestionar dos servidors separats, cosa que duplica la infraestructura.</p>
         </div>
         <div class="deploy-item">
           <span class="deploy-dot ok"></span>
@@ -773,6 +773,7 @@
           <th>Model</th>
           <th>Mida</th>
           <th>Preu input / output<br><span style="font-weight:400;font-size:9px">per milió de tokens</span></th>
+          <th>Cost/adapt.†<br><span style="font-weight:400;font-size:9px">400p text + complements</span></th>
           <th>Free tier</th>
           <th>Català</th>
           <th>ATNE</th>
@@ -788,6 +789,7 @@
           </td>
           <td><span class="mida-badge">31B</span></td>
           <td class="preu-cell"><span class="preu-zero">€0</span><br><span style="font-size:10px;color:var(--ink-400)">AI Studio free tier</span></td>
+          <td class="preu-cell"><span class="preu-zero">€0</span></td>
           <td><span class="cat-dot"><span class="dot-yes">●</span> Sí</span></td>
           <td><span class="cat-dot"><span class="dot-yes">●</span> Bo</span></td>
           <td><span class="atne-badge">Per defecte</span></td>
@@ -800,6 +802,7 @@
           </td>
           <td><span class="mida-badge">—</span></td>
           <td class="preu-cell">$0.30 / $2.50</td>
+          <td class="preu-cell">~$0.003</td>
           <td><span class="cat-dot"><span class="dot-part">●</span> Limitat</span></td>
           <td><span class="cat-dot"><span class="dot-yes">●</span> Bo</span></td>
           <td><span class="atne-badge" style="background:var(--ink-300);color:var(--ink-800)">Disponible</span></td>
@@ -812,6 +815,7 @@
           </td>
           <td><span class="mida-badge">—</span></td>
           <td class="preu-cell">$1.00 / $10.00</td>
+          <td class="preu-cell">~$0.011</td>
           <td><span class="cat-dot"><span class="dot-no">●</span> No</span></td>
           <td><span class="cat-dot"><span class="dot-yes">●</span> Excel·lent</span></td>
           <td><span class="cat-dot"><span class="dot-no">●</span> Massa car</span></td>
@@ -819,11 +823,25 @@
 
         <tr style="border-top:2px solid var(--paper-line)">
           <td>
+            <p class="model-name">GPT-4o</p>
+            <p class="model-provider">OpenAI · propietari</p>
+          </td>
+          <td><span class="mida-badge">—</span></td>
+          <td class="preu-cell">$2.50 / $10.00</td>
+          <td class="preu-cell">~$0.016</td>
+          <td><span class="cat-dot"><span class="dot-no">●</span> No</span></td>
+          <td><span class="cat-dot"><span class="dot-yes">●</span> Excel·lent</span></td>
+          <td><span class="atne-badge" style="background:var(--ink-300);color:var(--ink-800)">Disponible</span></td>
+        </tr>
+
+        <tr>
+          <td>
             <p class="model-name">GPT-4o mini</p>
             <p class="model-provider">OpenAI · propietari</p>
           </td>
           <td><span class="mida-badge">—</span></td>
           <td class="preu-cell">$0.15 / $0.60</td>
+          <td class="preu-cell">~$0.001</td>
           <td><span class="cat-dot"><span class="dot-no">●</span> No</span></td>
           <td><span class="cat-dot"><span class="dot-yes">●</span> Bo</span></td>
           <td><span class="atne-badge" style="background:#7c3aed">Màxima qualitat</span></td>
@@ -836,6 +854,7 @@
           </td>
           <td><span class="mida-badge">—</span></td>
           <td class="preu-cell">$0.40 / $1.60</td>
+          <td class="preu-cell">~$0.002</td>
           <td><span class="cat-dot"><span class="dot-no">●</span> No</span></td>
           <td><span class="cat-dot"><span class="dot-yes">●</span> Bo</span></td>
           <td><span class="atne-badge" style="background:var(--ink-300);color:var(--ink-800)">Disponible</span></td>
@@ -848,6 +867,7 @@
           </td>
           <td><span class="mida-badge">17B act / 109B total</span></td>
           <td class="preu-cell">$0.08 / $0.30<br><span style="font-size:10px;color:var(--ink-400)">o gratis (OpenRouter/Groq)</span></td>
+          <td class="preu-cell"><span class="preu-zero">€0</span><br><span style="font-size:10px;color:var(--ink-400)">o ~$0.001</span></td>
           <td><span class="cat-dot"><span class="dot-yes">●</span> Sí</span></td>
           <td><span class="cat-dot"><span class="dot-part">●</span> No verificat</span></td>
           <td><span class="atne-badge" style="background:#d97706">Candidat</span></td>
@@ -860,6 +880,7 @@
           </td>
           <td><span class="mida-badge">17B act / 400B total</span></td>
           <td class="preu-cell">$0.15 / $0.60<br><span style="font-size:10px;color:var(--ink-400)">o gratis (OpenRouter)</span></td>
+          <td class="preu-cell"><span class="preu-zero">€0</span><br><span style="font-size:10px;color:var(--ink-400)">o ~$0.001</span></td>
           <td><span class="cat-dot"><span class="dot-yes">●</span> Sí</span></td>
           <td><span class="cat-dot"><span class="dot-part">●</span> No verificat</span></td>
           <td><span class="atne-badge" style="background:#d97706">Candidat</span></td>
@@ -872,6 +893,7 @@
           </td>
           <td><span class="mida-badge">32B</span></td>
           <td class="preu-cell">$0.10–0.30 / var.<br><span style="font-size:10px;color:var(--ink-400)">o gratis (OpenRouter)</span></td>
+          <td class="preu-cell"><span class="preu-zero">€0</span><br><span style="font-size:10px;color:var(--ink-400)">o ~$0.001</span></td>
           <td><span class="cat-dot"><span class="dot-yes">●</span> Sí</span></td>
           <td><span class="cat-dot"><span class="dot-part">●</span> No verificat</span></td>
           <td><span class="atne-badge" style="background:#d97706">Candidat</span></td>
@@ -884,6 +906,7 @@
           </td>
           <td><span class="mida-badge">gran</span></td>
           <td class="preu-cell">$0.33 / $1.95<br><span style="font-size:10px;color:var(--ink-400)">Preview: gratis (OpenRouter)</span></td>
+          <td class="preu-cell"><span class="preu-zero">€0</span><br><span style="font-size:10px;color:var(--ink-400)">o ~$0.003</span></td>
           <td><span class="cat-dot"><span class="dot-yes">●</span> Sí (preview)</span></td>
           <td><span class="cat-dot"><span class="dot-part">●</span> No verificat</span></td>
           <td><span class="atne-badge" style="background:#d97706">Candidat</span></td>
@@ -896,6 +919,7 @@
           </td>
           <td><span class="mida-badge">gran MoE</span></td>
           <td class="preu-cell">$0.25 / $0.38<br><span style="font-size:10px;color:var(--ink-400)">o gratis (OpenRouter)</span></td>
+          <td class="preu-cell"><span class="preu-zero">€0</span><br><span style="font-size:10px;color:var(--ink-400)">o ~$0.001</span></td>
           <td><span class="cat-dot"><span class="dot-yes">●</span> Sí</span></td>
           <td><span class="cat-dot"><span class="dot-part">●</span> No verificat</span></td>
           <td><span class="atne-badge" style="background:#d97706">Candidat</span></td>
@@ -908,6 +932,7 @@
           </td>
           <td><span class="mida-badge">petit</span></td>
           <td class="preu-cell">$0.20 / var.</td>
+          <td class="preu-cell">~$0.001</td>
           <td><span class="cat-dot"><span class="dot-no">●</span> No</span></td>
           <td><span class="cat-dot"><span class="dot-part">●</span> Acceptable</span></td>
           <td><span class="atne-badge" style="background:var(--ink-300);color:var(--ink-800)">Disponible</span></td>
@@ -920,6 +945,7 @@
           </td>
           <td><span class="mida-badge">7B</span></td>
           <td class="preu-cell"><span class="preu-zero">€0</span><br><span style="font-size:10px;color:var(--ink-400)">self-hosted (GPU pròpia)</span></td>
+          <td class="preu-cell"><span class="preu-zero">€0</span></td>
           <td><span class="cat-dot"><span class="dot-no">●</span> Cal GPU</span></td>
           <td><span class="cat-dot"><span class="dot-yes">●</span> Natiu</span></td>
           <td><span class="cat-dot" style="color:var(--err)"><span class="dot-no">●</span> Cal fine-tuning</span></td>
@@ -930,6 +956,7 @@
   </div>
 
   <p style="font-size:var(--fs-xs);color:var(--ink-400);margin-top:var(--sp-4);font-style:italic">Preus orientatius abril 2026. «No verificat» per al català significa que el model no ha estat provat amb textos educatius catalans reals. La qualitat en català es verifica sempre empíricament, no per les afirmacions del proveïdor.</p>
+  <p style="font-size:var(--fs-xs);color:var(--ink-400);margin-top:var(--sp-2);font-style:italic">† Cost/adapt. calculat per ~3.000 tokens d'entrada (text de 400 paraules + catàleg d'instruccions pedagògiques) i ~800 tokens de sortida (adaptació + complements de ~200 paraules). Conversió orientativa: 1 USD ≈ 0,92 €.</p>
 </section>
 
 
@@ -1024,9 +1051,31 @@
         <div class="roster-stats">
           <div class="stat-pill"><span class="stat-label">Mida</span><span class="stat-val">31B paràmetres</span></div>
           <div class="stat-pill"><span class="stat-label">Context</span><span class="stat-val">256K tokens</span></div>
-          <div class="stat-pill"><span class="stat-label">Cost</span><span class="stat-val green">€0 (free tier)</span></div>
+          <div class="stat-pill"><span class="stat-label">Cost/M</span><span class="stat-val green">€0 (free tier)</span></div>
+          <div class="stat-pill"><span class="stat-label">Cost/adapt.</span><span class="stat-val green">€0</span></div>
           <div class="stat-pill"><span class="stat-label">Puntuació ATNE</span><span class="stat-val">4.23 / 5</span></div>
           <div class="stat-pill"><span class="stat-label">Temperatura</span><span class="stat-val">0.4 (adaptació)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GPT-4o — disponible -->
+    <div class="roster-card">
+      <div class="roster-header">
+        <div class="roster-logo">🧠</div>
+        <div>
+          <p class="roster-model-name">GPT-4o</p>
+          <p class="roster-provider">OpenAI · propietari · via API directa</p>
+        </div>
+      </div>
+      <div class="roster-body">
+        <span class="roster-role available">Disponible</span>
+        <p class="roster-why">La versió completa de GPT-4o, amb capacitats superiors al mini en comprensió de consignes complexes i generació de text amb registre acadèmic ric. S'usa quan es necessita la màxima capacitat del model OpenAI sense restriccions de mida. El cost és notablement superior ($2.50/M entrada, $10.00/M sortida), cosa que el fa adequat per a usos puntuals de referència o per a avaluació de qualitat, no per a producció a escala.</p>
+        <div class="roster-stats">
+          <div class="stat-pill"><span class="stat-label">Context</span><span class="stat-val">128K tokens</span></div>
+          <div class="stat-pill"><span class="stat-label">Cost/M</span><span class="stat-val">$2.50 + $10.00</span></div>
+          <div class="stat-pill"><span class="stat-label">Cost/adapt.</span><span class="stat-val">~$0.016</span></div>
+          <div class="stat-pill"><span class="stat-label">Ús recomanat</span><span class="stat-val">Avaluació, referència</span></div>
         </div>
       </div>
     </div>
@@ -1041,12 +1090,12 @@
         </div>
       </div>
       <div class="roster-body">
-        <span class="roster-role quality">Màxima qualitat</span>
+        <span class="roster-role quality">Màxima qualitat provada</span>
         <p class="roster-why">El model que ha obtingut <strong>la puntuació més alta en els tests d'ATNE (4.44/5)</strong>, superant tots els altres. Destaca especialment en etapes de primària i en el seguiment fidel d'instruccions complexes. El seu cost és molt baix ($0.15/M tokens d'entrada), però no té free tier. S'usa quan la qualitat és prioritària o quan Gemma 4 no respon bé a un cas específic. Per a la producció FJE, seria l'opció de referència per a centres amb pressupost.</p>
         <div class="roster-stats">
-          <div class="stat-pill"><span class="stat-label">Mida</span><span class="stat-val">—</span></div>
           <div class="stat-pill"><span class="stat-label">Context</span><span class="stat-val">128K tokens</span></div>
-          <div class="stat-pill"><span class="stat-label">Cost</span><span class="stat-val">$0.15 + $0.60/M</span></div>
+          <div class="stat-pill"><span class="stat-label">Cost/M</span><span class="stat-val">$0.15 + $0.60</span></div>
+          <div class="stat-pill"><span class="stat-label">Cost/adapt.</span><span class="stat-val">~$0.001</span></div>
           <div class="stat-pill"><span class="stat-label">Puntuació ATNE</span><span class="stat-val">4.44 / 5</span></div>
           <div class="stat-pill"><span class="stat-label">Millor en</span><span class="stat-val">Primària, instruccions</span></div>
         </div>
@@ -1067,7 +1116,8 @@
         <p class="roster-why">L'alternativa de Google al Gemma 4 per a casos que requereixen més capacitat de raonament. A diferència de Gemma, suporta <strong>system instruction separat</strong> (arquitectura més neta per a ATNE). Pensament desactivat (thinking_budget=0) per mantenir el cost sota control: cada token de «pensament» d'aquest model costa com a output. Per a produccions de gran escala, val la pena avaluar si el seu cost addicional respecte a Gemma 4 free s'amortitza amb millor qualitat.</p>
         <div class="roster-stats">
           <div class="stat-pill"><span class="stat-label">Context</span><span class="stat-val">fins 1M tokens</span></div>
-          <div class="stat-pill"><span class="stat-label">Cost</span><span class="stat-val">$0.30 + $2.50/M</span></div>
+          <div class="stat-pill"><span class="stat-label">Cost/M</span><span class="stat-val">$0.30 + $2.50</span></div>
+          <div class="stat-pill"><span class="stat-label">Cost/adapt.</span><span class="stat-val">~$0.003</span></div>
           <div class="stat-pill"><span class="stat-label">Puntuació ATNE</span><span class="stat-val">3.93 / 5</span></div>
           <div class="stat-pill"><span class="stat-label">Nota</span><span class="stat-val">Thinking desactivat</span></div>
         </div>
@@ -1087,7 +1137,7 @@
         <span class="roster-role candidate">Candidats a provar</span>
         <p class="roster-why">Dos models emergents d'alt potencial que ATNE té integrats tècnicament però pendents d'avaluació empírica en català. <strong>Qwen3</strong> (llançat abril 2026) representa una millora significativa de la família Qwen en seguiment d'instruccions. <strong>DeepSeek V3.2</strong> sorprèn pel seu rendiment competitiu a preus molt baixos. Tots dos accessibles via OpenRouter de forma gratuïta per a tests. La pregunta clau: quin català generen? Sense proves reals amb textos educatius, no podem afirmar-ne la qualitat.</p>
         <div class="roster-stats">
-          <div class="stat-pill"><span class="stat-label">Cost</span><span class="stat-val green">€0 (OpenRouter free)</span></div>
+          <div class="stat-pill"><span class="stat-label">Cost/adapt.</span><span class="stat-val green">€0 (OpenRouter free)</span></div>
           <div class="stat-pill"><span class="stat-label">Integració</span><span class="stat-val">OpenAI-compatible</span></div>
           <div class="stat-pill"><span class="stat-label">Avaluació català</span><span class="stat-val">Pendent</span></div>
         </div>
@@ -1109,7 +1159,7 @@
         <div class="roster-stats">
           <div class="stat-pill"><span class="stat-label">Mida</span><span class="stat-val">17B act / 109B total</span></div>
           <div class="stat-pill"><span class="stat-label">Context</span><span class="stat-val">10M tokens</span></div>
-          <div class="stat-pill"><span class="stat-label">Cost</span><span class="stat-val green">€0 (Groq)</span></div>
+          <div class="stat-pill"><span class="stat-label">Cost/adapt.</span><span class="stat-val green">€0 (Groq)</span></div>
           <div class="stat-pill"><span class="stat-label">Avaluació català</span><span class="stat-val">Pendent</span></div>
         </div>
       </div>
