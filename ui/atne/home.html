@@ -390,6 +390,8 @@
         localStorage.setItem('atne.flash_restore', JSON.stringify({
           adapted_html:         item.adapted_html || '',
           complements_snapshot: item.complements_snapshot || {},
+          original_text:        item.original_text || '',
+          profile_snapshot:     item.profile_snapshot || {},
         }));
       } catch (e) { /* ignore */ }
       location.href = '/ui/atne/flash.html';

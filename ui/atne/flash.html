@@ -998,6 +998,46 @@
       var data = JSON.parse(raw);
       var html = data.adapted_html || '';
       var cs   = data.complements_snapshot || {};
+      var ps   = data.profile_snapshot || {};
+
+      // Restaura el text original al textarea
+      if (data.original_text && textArea) {
+        textArea.value = data.original_text;
+        if (wordCount) {
+          var w = data.original_text.trim().split(/\s+/).filter(Boolean).length;
+          wordCount.textContent = w + ' paraules';
+        }
+      }
+
+      // Restaura el formulari (curs, tipus, característica, L1)
+      if (ps.curs && cursSel) cursSel.value = ps.curs;
+      if (ps.tipus) {
+        tipusActual = ps.tipus;
+        document.querySelectorAll('#tipus-steps .step').forEach(function (b) {
+          b.classList.toggle('on', b.dataset.tipus === ps.tipus);
+        });
+        updateTipusUI();
+      }
+      if (typeof ps.caracteristica === 'string') {
+        if (ps.tipus === 'grup' && carGrupSel) carGrupSel.value = ps.caracteristica;
+        else if (ps.tipus === 'alumne' && carSel) {
+          carSel.value = ps.caracteristica;
+          if (ps.caracteristica === 'nouvingut') l1Group.classList.add('show');
+        }
+      }
+      if (ps.l1 && l1Inp) l1Inp.value = ps.l1;
+
+      // Reconstrueix lastPayload per permetre Refer/Desa sense haver de regenerar
+      lastPayload = {
+        text: data.original_text || '',
+        curs: ps.curs || '',
+        adaptacio: ps.adaptacio || 'al_nivell',
+        perfils: ps.perfils || [],
+        l1: ps.l1 || '',
+        tipus: ps.tipus || 'grup',
+        complements: Object.keys(cs),
+        caracteristica: ps.caracteristica || '',
+      };
 
       // Extreu el text adaptat del wrapper <div class="flash-adaptation">
       var parser = new DOMParser();
@@ -1049,14 +1089,16 @@
 
     var curs = cursSel.value;
     var adaptacio, perfils, badge, l1 = '';
+    var caracteristica = '';
 
     if (tipusActual === 'grup') {
-      var g = GRUP_MAP[carGrupSel.value] || GRUP_MAP[''];
+      caracteristica = carGrupSel.value;
+      var g = GRUP_MAP[caracteristica] || GRUP_MAP[''];
       adaptacio = g.adaptacio;
       perfils   = g.perfils;
       badge     = g.badge;
     } else {
-      var caracteristica = carSel.value;
+      caracteristica = carSel.value;
       l1        = (caracteristica === 'nouvingut') ? l1Inp.value.trim() : '';
       adaptacio = BEHAVIORAL_TO_ADAPTACIO[caracteristica] || 'al_nivell';
       perfils   = BEHAVIORAL_TO_PERFILS[caracteristica] || [];
@@ -1067,7 +1109,7 @@
     try { docentId = localStorage.getItem('atne.docent_id') || ''; } catch (e) { /* */ }
 
     var langVal = document.getElementById('lang-sel')?.value || 'ca';
-    lastPayload = { text: text, curs: curs, adaptacio: adaptacio, perfils: perfils, l1: l1, tipus: tipusActual, complements: Array.from(activeComps), docent_id: docentId, lang: langVal };
+    lastPayload = { text: text, curs: curs, adaptacio: adaptacio, perfils: perfils, l1: l1, tipus: tipusActual, complements: Array.from(activeComps), docent_id: docentId, lang: langVal, caracteristica: caracteristica };
     resultBadge.textContent = badge;
     glStatus.textContent = 'Generant…'; glStatus.className = 'comp-status';
     prStatus.textContent = 'Generant…'; prStatus.className = 'comp-status';
@@ -1238,7 +1280,7 @@
         adapted_html:         html,
         title:                title,
         original_text:        lastPayload.text,
-        profile_snapshot:     { perfils: lastPayload.perfils, curs: lastPayload.curs, adaptacio: lastPayload.adaptacio, l1: lastPayload.l1, tipus: lastPayload.tipus },
+        profile_snapshot:     { perfils: lastPayload.perfils, curs: lastPayload.curs, adaptacio: lastPayload.adaptacio, l1: lastPayload.l1, tipus: lastPayload.tipus, caracteristica: lastPayload.caracteristica || '' },
         context_snapshot:     { curs: lastPayload.curs, mode: 'flash' },
         complements_snapshot: {
           glossari:  glossariBody.innerText.trim(),
