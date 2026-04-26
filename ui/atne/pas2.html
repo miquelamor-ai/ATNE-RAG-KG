@@ -529,41 +529,15 @@
     color: var(--ink-500);
   }
   .opt .opt-v { font-weight: 600; color: var(--ink-900); }
-  /* Opts editables: ara són botons clicables (Bug 1) */
-  button.opt { cursor: pointer; transition: background var(--trans-fast), border-color var(--trans-fast); }
-  button.opt:hover { background: var(--cream-2); border-color: var(--primary-100); }
-  button.opt .caret { width: 9px; height: 9px; color: var(--ink-400); margin-left: 2px; }
-
-  /* Popover d'edició d'opcions (Matèria / Nivell) — ancorat a body */
-  .opt-pop {
-    position: fixed;
-    background: #fff;
-    border: 1px solid var(--paper-line);
-    border-radius: var(--r-md);
-    box-shadow: var(--sh-lg);
-    padding: 8px;
-    z-index: 150;
-    display: none;
-    min-width: 200px;
-    max-height: 320px;
-    overflow-y: auto;
+  /* Input text per Matèria (substitueix el popover) */
+  .opt-materia { cursor: text; }
+  .opt-materia:hover { background: var(--cream-2); border-color: var(--primary-100); }
+  .doc-materia-inp {
+    border: none; outline: none; background: transparent;
+    font-family: inherit; font-size: 12.5px; font-weight: 600;
+    color: var(--ink-900); width: 110px; min-width: 60px; max-width: 160px;
   }
-  .opt-pop.on { display: block; }
-  .opt-pop .opt-pop-item {
-    display: block;
-    width: 100%;
-    text-align: left;
-    padding: 7px 10px;
-    border: 0;
-    background: transparent;
-    font-size: 12.5px;
-    color: var(--ink-800);
-    border-radius: var(--r-sm);
-    cursor: pointer;
-    font-family: inherit;
-  }
-  .opt-pop .opt-pop-item:hover { background: var(--cream-2); color: var(--primary); }
-  .opt-pop .opt-pop-item.sel { background: var(--primary-50); color: var(--primary); font-weight: 600; }
+  .doc-materia-inp::placeholder { font-weight: 400; color: var(--ink-400); }
 
   /* ─── Frail dret (floating rail) ─────────────────────── */
   .frail {
@@ -1019,9 +993,7 @@
               <p style="margin:4px 0 0;font-size:11px;color:var(--ink-400);display:flex;align-items:center;gap:4px"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="12" height="12" style="flex-shrink:0"><path d="M8 1.5C5.5 1.5 4 3.5 4 5.5V7H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-1V5.5C12 3.5 10.5 1.5 8 1.5zm0 1C10 2.5 11 4 11 5.5V7H5V5.5C5 4 6 2.5 8 2.5z"/></svg>No incloguis noms ni dades identificatives al text.</p>
             </div>
             <div class="opts">
-              <!-- Bug 1: pills Matèria/Nivell ara són editables (obren popover) -->
-              <button type="button" class="opt" data-opt="materia"><span class="opt-k">Matèria</span><span class="opt-v" data-field="materia">Història</span><svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
-              <button type="button" class="opt" data-opt="nivell"><span class="opt-k">Nivell</span><span class="opt-v" data-field="nivell">ESO 4</span><svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+              <span class="opt opt-materia"><span class="opt-k">Matèria</span><input type="text" class="doc-materia-inp" placeholder="Ex. Història"></span>
               <span class="opt"><span class="opt-k">Complements</span><span class="opt-v">Cap</span></span>
             </div>
           </div>
@@ -1036,8 +1008,7 @@
               <div class="drop-s">PDF · DOCX · MD · TXT · Màx 5 MB</div>
             </div>
             <div class="opts">
-              <button type="button" class="opt" data-opt="materia"><span class="opt-k">Matèria</span><span class="opt-v" data-field="materia">Història</span><svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
-              <button type="button" class="opt" data-opt="nivell"><span class="opt-k">Nivell</span><span class="opt-v" data-field="nivell">ESO 4</span><svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+              <span class="opt opt-materia"><span class="opt-k">Matèria</span><input type="text" class="doc-materia-inp" placeholder="Ex. Història"></span>
               <span class="opt"><span class="opt-k">Complements</span><span class="opt-v">Cap</span></span>
             </div>
           </div>
@@ -1101,6 +1072,8 @@
                   <option value="empatic">Empàtic</option>
                   <option value="humoristic">Humorístic</option>
                   <option value="solemne">Solemne</option>
+                  <option value="academic">Acadèmic</option>
+                  <option value="tecnic">Tècnic</option>
                 </select></div>
                 <div><div class="mp-l">Extensió</div><select class="sel">
                   <option value="micro">Micro (50-100)</option>
@@ -1122,8 +1095,7 @@
               </div>
             </div>
             <div class="opts">
-              <button type="button" class="opt" data-opt="materia"><span class="opt-k">Matèria</span><span class="opt-v" data-field="materia">Història</span><svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
-              <button type="button" class="opt" data-opt="nivell"><span class="opt-k">Nivell</span><span class="opt-v" data-field="nivell">ESO 4</span><svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+              <span class="opt opt-materia"><span class="opt-k">Matèria</span><input type="text" class="doc-materia-inp" placeholder="Ex. Història"></span>
               <span class="opt"><span class="opt-k">Complements</span><span class="opt-v">Cap</span></span>
             </div>
           </div>
@@ -1258,9 +1230,6 @@
     </nav>
   </main>
 </div>
-
-<!-- Bug 1: popover compartit per seleccionar Matèria / Nivell -->
-<div class="opt-pop" id="opt-pop"></div>
 
 <script>
   // ──────────────────────────────────────────────────────
@@ -1552,15 +1521,9 @@
   updateWC();
 
   // ──────────────────────────────────────────────────────
-  // Bug 1 — pills editables Matèria / Nivell
-  // Els pills ara són botons que obren un popover amb opcions.
-  // El valor seleccionat es persisteix a localStorage i el llegeix onAdaptClick.
+  // Matèria: input text lliure (el docent escriu el que necessita)
+  // Nivell: calculat silenciosament des del perfil via nivellFromCourse
   // ──────────────────────────────────────────────────────
-  const MATERIA_OPTIONS = [
-    'Història','Ciències','Literatura catalana','Matemàtiques','Biologia',
-    'Física','Química','Filosofia','Llengua catalana','Tecnologia',
-    'Educació física','Música','Dibuix','Economia'
-  ];
   const NIVELL_OPTIONS = [
     'Infantil','1r Primària','2r Primària','3r Primària','4t Primària','5è Primària','6è Primària',
     '1r ESO','2n ESO','3r ESO','4t ESO','1r Batxillerat','2n Batxillerat','FP'
@@ -1594,75 +1557,21 @@
     return '3r ESO';
   }
 
-  // Inicialitza els valors (localStorage → fallback perfil → defaults)
-  const initialMateria = localStorage.getItem('atne.doc_materia') || 'Història';
-  const initialNivell  = localStorage.getItem('atne.doc_nivell')  || nivellFromCourse(profile?.course);
-  // Persistim els defaults perquè onAdaptClick els trobi si l'usuari no els toca
-  localStorage.setItem('atne.doc_materia', initialMateria);
-  localStorage.setItem('atne.doc_nivell', initialNivell);
-
-  // Pinta els valors actuals a tots els pills
-  function paintOptPills() {
-    document.querySelectorAll('.opt-v[data-field="materia"]').forEach(el => el.textContent = localStorage.getItem('atne.doc_materia') || 'Història');
-    document.querySelectorAll('.opt-v[data-field="nivell"]').forEach(el => el.textContent = localStorage.getItem('atne.doc_nivell') || '3r ESO');
-  }
-  paintOptPills();
-
-  // Popover compartit
-  const optPop = document.getElementById('opt-pop');
-  let optPopOpenFor = null; // 'materia' | 'nivell' | null
-
-  function openOptPop(kind, anchorBtn) {
-    if (!optPop || !anchorBtn) return;
-    const opts = kind === 'materia' ? MATERIA_OPTIONS : NIVELL_OPTIONS;
-    const currentVal = localStorage.getItem(kind === 'materia' ? 'atne.doc_materia' : 'atne.doc_nivell');
-    optPop.innerHTML = opts.map(o =>
-      '<button type="button" class="opt-pop-item' + (o === currentVal ? ' sel' : '') + '" data-val="' + escapeHtml(o) + '">' + escapeHtml(o) + '</button>'
-    ).join('');
-    // Posicionar-lo: per defecte sota, però si no hi ha espai, obre cap amunt
-    const r = anchorBtn.getBoundingClientRect();
-    optPop.style.left = Math.min(r.left, window.innerWidth - 220) + 'px';
-    optPop.style.top = '';
-    optPop.style.bottom = '';
-    const popH = Math.min(optPop.scrollHeight || 200, 320);
-    const spaceBelow = window.innerHeight - r.bottom - 8;
-    if (spaceBelow >= popH || spaceBelow >= 120) {
-      optPop.style.top = (r.bottom + 6) + 'px';
-    } else {
-      optPop.style.bottom = (window.innerHeight - r.top + 6) + 'px';
-    }
-    optPop.classList.add('on');
-    optPopOpenFor = kind;
-
-    optPop.querySelectorAll('.opt-pop-item').forEach(b => {
-      b.addEventListener('click', () => {
-        const val = b.dataset.val;
-        localStorage.setItem(kind === 'materia' ? 'atne.doc_materia' : 'atne.doc_nivell', val);
-        paintOptPills();
-        optPop.classList.remove('on');
-        optPopOpenFor = null;
+  // Inicialitza els inputs de Matèria (localStorage → default)
+  const initialMateria = localStorage.getItem('atne.doc_materia') || '';
+  document.querySelectorAll('.doc-materia-inp').forEach(inp => {
+    inp.value = initialMateria;
+    inp.addEventListener('input', () => {
+      localStorage.setItem('atne.doc_materia', inp.value);
+      // Sincronitza els altres inputs de Matèria
+      document.querySelectorAll('.doc-materia-inp').forEach(other => {
+        if (other !== inp) other.value = inp.value;
       });
     });
-  }
-  function closeOptPop() { optPop?.classList.remove('on'); optPopOpenFor = null; }
-
-  // Click handlers sobre tots els botons .opt (delegació amb querySelectorAll)
-  document.querySelectorAll('button.opt[data-opt]').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      const kind = btn.dataset.opt;
-      if (optPopOpenFor === kind) { closeOptPop(); return; }
-      openOptPop(kind, btn);
-    });
   });
-  // Tancar en clicar fora
-  document.addEventListener('click', e => {
-    if (!optPop || !optPop.classList.contains('on')) return;
-    if (optPop.contains(e.target)) return;
-    if (e.target.closest('button.opt[data-opt]')) return;
-    closeOptPop();
-  });
-  window.addEventListener('resize', closeOptPop);
+  // Nivell: calculat del perfil, sense UI (usat silenciosament a onAdaptClick)
+  const initialNivell = nivellFromCourse(profile?.course);
+  localStorage.setItem('atne.doc_nivell', initialNivell);
 
   // ──────────────────────────────────────────────────────
   // Handler "Adaptar" — desa text + opcions a localStorage i navega a Pas 3
@@ -1679,9 +1588,8 @@
       return;
     }
 
-    // Bug 1 — Llegim les opcions editades pel docent (persistides pels pills clicables)
-    const materia = localStorage.getItem('atne.doc_materia') || 'Història';
-    const nivell  = localStorage.getItem('atne.doc_nivell')  || nivellFromCourse(profile?.course);
+    const materia = document.querySelector('.doc-materia-inp')?.value?.trim() || localStorage.getItem('atne.doc_materia') || '';
+    const nivell  = localStorage.getItem('atne.doc_nivell') || nivellFromCourse(profile?.course);
 
     // Desa a localStorage. 2026-04-20: NO esborrem cache aquí — el Pas 3 ja
     // detecta canvis via cacheKey (perfil+títol+text). Si el docent torna a
