@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>ATNE · Flash</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 
 <script src="/ui/atne/js/auth.js"></script>
 <script src="/ui/atne/js/pilot-tracker.js"></script>
@@ -369,7 +369,7 @@
   /* ── Barra d'accions flotant ──────────────────────────────── */
   .action-bar {
     position: fixed;
-    bottom: 24px;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
     right: 28px;
     background: var(--ink-900);
     border-radius: var(--r-pill);
@@ -421,7 +421,7 @@
     .result-empty, .result-loading { min-height: 120px; padding: 20px 0; }
     .empty-icon { font-size: 36px; }
     .flash-result { padding: 18px 18px 80px; }
-    .action-bar { bottom: 16px; right: 16px; }
+    .action-bar { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: 16px; right: 16px; overflow-x: auto; justify-content: center; }
   }
 
   /* ── Selector de tipografia ───────────────────────────────── */
@@ -703,6 +703,24 @@
   }
 
   /* ── Mòbil: toggle formulari ↔ resultat ─────────────────────── */
+  .mob-return-btn {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    margin-bottom: 14px;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--primary);
+    background: rgba(var(--primary-rgb, 67,97,238),.08);
+    border: 1px solid rgba(var(--primary-rgb, 67,97,238),.2);
+    border-radius: var(--r-pill);
+    cursor: pointer;
+    font-family: var(--ui);
+    width: 100%;
+    justify-content: center;
+  }
+  .mob-return-btn svg { width: 14px; height: 14px; }
   .mob-back-btn {
     display: none;
     align-items: center;
@@ -727,6 +745,9 @@
     /* Quan hi ha resultat actiu: amaga formulari, mostra resultat */
     .flash-main.mob-result .flash-form { display: none; }
     .flash-main.mob-result .flash-result { display: block; }
+
+    /* Quan hi ha resultat pendent: mostra botó "Torna al resultat" al formulari */
+    .flash-main.mob-has-result .mob-return-btn { display: flex; }
   }
 </style>
 </head>
@@ -771,6 +792,11 @@
 
     <!-- Panell formulari -->
     <section class="flash-form">
+
+      <button class="mob-return-btn" id="mob-return-btn">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4l4 4-4 4"/></svg>
+        Torna al resultat
+      </button>
 
       <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
         <div class="form-group" style="flex:1;min-width:0">
@@ -1311,6 +1337,8 @@
     else { actionBar.classList.remove('show'); }
     // Mòbil: mostra panell resultat per a loading/result/error; torna al form per a empty
     setMobilePanel(name === 'empty' ? 'form' : 'result');
+    // Marca que hi ha un resultat disponible (permet botó "Torna al resultat")
+    if (name === 'result' && flashMain) flashMain.classList.add('mob-has-result');
   }
   showState('empty');
 
@@ -1327,7 +1355,7 @@
       var ps   = data.profile_snapshot || {};
 
       // Restaura el text original al textarea i al panell de resultat
-      var origTxt = data.original_text || '';
+      var origTxt = data.original_text || cs._orig || '';
       if (textArea) {
         textArea.value = origTxt;
         if (wordCount) {
@@ -1359,7 +1387,7 @@
 
       // Reconstrueix lastPayload per permetre Refer/Desa sense haver de regenerar
       lastPayload = {
-        text: data.original_text || '',
+        text: data.original_text || cs._orig || '',
         curs: ps.curs || '',
         adaptacio: ps.adaptacio || 'al_nivell',
         perfils: ps.perfils || [],
@@ -1686,6 +1714,7 @@
           glossari:  glossariBody.innerText.trim(),
           preguntes: preguntesBody.innerText.trim(),
           resum:     resumBody ? resumBody.innerText.trim() : '',
+          _orig:     lastPayload.text || '',
         },
       })
     })
@@ -1959,12 +1988,16 @@
 
 })();
 
-// ── Botó "Modifica els paràmetres" (mòbil) ──────────────────────────────────
+// ── Botons mòbil form↔resultat ───────────────────────────────────────────────
 (function () {
-  var btn = document.getElementById('mob-back-btn');
-  if (btn) btn.addEventListener('click', function () {
-    var fm = document.querySelector('.flash-main');
+  var backBtn   = document.getElementById('mob-back-btn');
+  var returnBtn = document.getElementById('mob-return-btn');
+  var fm = document.querySelector('.flash-main');
+  if (backBtn) backBtn.addEventListener('click', function () {
     if (fm) fm.classList.remove('mob-result');
+  });
+  if (returnBtn) returnBtn.addEventListener('click', function () {
+    if (fm) fm.classList.add('mob-result');
   });
 })();
 
