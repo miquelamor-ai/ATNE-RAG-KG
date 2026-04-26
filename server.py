@@ -169,7 +169,7 @@ _MODEL_COST_EUR_PER_CALL: dict[str, float] = {
     "qwen/qwen3-235b-a22b:free":     0.0,      # Qwen 3 235B MoE — gratuït OpenRouter
     "qwen/qwen3-30b-a3b:free":       0.0,      # Qwen 3 30B MoE — gratuït OpenRouter
     "deepseek/deepseek-chat-v3-0324:free": 0.0,# DeepSeek V3 — gratuït OpenRouter
-    "deepseek/deepseek-r1:free":     0.0,      # DeepSeek R1 raonament — gratuït OpenRouter
+    "deepseek/deepseek-r1-distill-llama-70b:free": 0.0, # DeepSeek R1 70B distil·lat — gratuït OpenRouter
 }
 
 
@@ -971,7 +971,7 @@ _ALLOWED_MODELS = [
     "qwen/qwen3-235b-a22b:free",
     "qwen/qwen3-30b-a3b:free",
     "deepseek/deepseek-chat-v3-0324:free",
-    "deepseek/deepseek-r1:free",
+    "deepseek/deepseek-r1-distill-llama-70b:free",
 ]
 
 
