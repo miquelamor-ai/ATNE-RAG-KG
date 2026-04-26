@@ -81,9 +81,7 @@ _MODEL_ALIASES: dict[str, tuple[str, str]] = {
     "qwen/qwen3-235b-a22b:free":          ("openrouter", "qwen/qwen3-235b-a22b:free"),
     "qwen/qwen3-30b-a3b:free":            ("openrouter", "qwen/qwen3-30b-a3b:free"),
     "deepseek/deepseek-chat-v3-0324:free":("openrouter", "deepseek/deepseek-chat-v3-0324:free"),
-    "deepseek/deepseek-r1-distill-llama-70b:free": ("openrouter", "deepseek/deepseek-r1-distill-llama-70b:free"),
     "deepseek":          ("openrouter", "deepseek/deepseek-chat-v3-0324:free"),
-    "deepseek-r1":       ("openrouter", "deepseek/deepseek-r1-distill-llama-70b:free"),
 }
 
 
