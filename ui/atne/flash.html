@@ -643,6 +643,53 @@
     .tb-sep, .flash-mode-nav { display: none; }
   }
 
+  /* ── Text original expandible al resultat ───────────────────── */
+  .orig-section { margin-bottom: 10px; }
+  .orig-toggle {
+    display: flex; align-items: center; gap: 7px;
+    padding: 7px 13px;
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-lg);
+    background: rgba(255,255,255,.55);
+    color: var(--ink-500);
+    font-size: var(--fs-sm); font-weight: 500; font-family: var(--ui);
+    cursor: pointer; width: 100%; text-align: left;
+    transition: background var(--trans-fast), color var(--trans-fast);
+  }
+  .orig-toggle:hover { background: #fff; color: var(--ink-700); }
+  .orig-toggle svg { flex-shrink: 0; }
+  .orig-chevron { margin-left: auto; transition: transform var(--trans-med); }
+  .orig-section.open .orig-chevron { transform: rotate(180deg); }
+  .orig-body {
+    display: none; margin-top: 8px;
+    padding: 12px 16px;
+    background: var(--cream-2);
+    border: 1px solid var(--paper-line);
+    border-radius: var(--r-lg);
+    font-size: var(--fs-sm); color: var(--ink-600);
+    line-height: 1.6; white-space: pre-wrap; word-break: break-word;
+    max-height: 180px; overflow-y: auto;
+  }
+  .orig-section.open .orig-body { display: block; }
+
+  /* ── Perfil carregat: estat inline del botó ─────────────────── */
+  .load-profile-btn.has-profile {
+    color: var(--primary); font-weight: 600;
+    display: flex; align-items: center; width: 100%; gap: 0;
+  }
+  .lpf-name-inline {
+    flex: 1; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    text-align: left;
+  }
+  .lpf-x {
+    flex-shrink: 0; width: 16px; height: 16px;
+    border-radius: 50%; background: var(--primary-100);
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-left: 6px; font-size: 11px; line-height: 1;
+    color: var(--primary);
+  }
+
   /* ── Text adaptat editable ────────────────────────────────────── */
   .adapted-box[contenteditable="true"] {
     outline: 2px solid var(--primary);
@@ -771,10 +818,6 @@
           <div class="load-profile-wrap">
             <button class="load-profile-btn" id="btn-load-profile">Carrega un perfil desat</button>
             <div class="load-pf-dropdown" id="load-pf-dropdown"></div>
-            <div id="loaded-profile-chip" style="display:none;margin-top:5px;font-size:11px;background:var(--primary-50);color:var(--primary);border:1px solid var(--primary-100);border-radius:var(--r-pill);padding:3px 9px;font-weight:500;font-family:var(--ui);display:none;align-items:center;gap:5px">
-              <svg viewBox="0 0 12 12" width="11" height="11" fill="currentColor"><path d="M10 3.5 5 8.5 2 5.5"/><path d="M10 3.5 5 8.5 2 5.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              <span id="loaded-profile-label"></span>
-            </div>
           </div>
         </div>
       </div>
@@ -918,6 +961,16 @@
               </button>
             </div>
           </div>
+        </div>
+
+        <!-- Text original expandible (accessible des del resultat, sense tornar al formulari) -->
+        <div class="orig-section" id="orig-section" style="display:none">
+          <button class="orig-toggle" onclick="window._toggleOrig()">
+            <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 2h7l3 3v9a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z"/><path d="M10 2v4h3"/></svg>
+            Text original
+            <svg class="orig-chevron" viewBox="0 0 16 16" fill="none" width="12" height="12"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+          <div class="orig-body" id="orig-body"></div>
         </div>
 
         <div class="adapted-box" id="adapted-text"></div>
@@ -1273,14 +1326,16 @@
       var cs   = data.complements_snapshot || {};
       var ps   = data.profile_snapshot || {};
 
-      // Restaura el text original al textarea
-      if (data.original_text && textArea) {
-        textArea.value = data.original_text;
+      // Restaura el text original al textarea i al panell de resultat
+      var origTxt = data.original_text || '';
+      if (textArea) {
+        textArea.value = origTxt;
         if (wordCount) {
-          var w = data.original_text.trim().split(/\s+/).filter(Boolean).length;
-          wordCount.textContent = w + ' paraules';
+          var wOrig = origTxt.trim() ? origTxt.trim().split(/\s+/).filter(Boolean).length : 0;
+          wordCount.textContent = wOrig > 0 ? (wOrig + (wOrig === 1 ? ' paraula' : ' paraules')) : '0 paraules';
         }
       }
+      showOriginalText(origTxt);
 
       // Restaura el formulari (curs, tipus, característica, L1)
       // cursUI = valor llegible del select; curs = valor API. Preferim cursUI.
@@ -1337,6 +1392,25 @@
     var sec = document.getElementById('sec-' + id);
     if (sec) sec.classList.toggle('open');
   };
+
+  // ── Text original expandible ──────────────────────────────────────────────────
+  window._toggleOrig = function () {
+    var sec = document.getElementById('orig-section');
+    if (sec) sec.classList.toggle('open');
+  };
+
+  function showOriginalText(text) {
+    var sec  = document.getElementById('orig-section');
+    var body = document.getElementById('orig-body');
+    if (!sec || !body) return;
+    if (text && text.trim()) {
+      body.textContent = text;
+      sec.style.display = '';
+    } else {
+      sec.style.display = 'none';
+      sec.classList.remove('open');
+    }
+  }
 
   // ── Gestió de càrrega ────────────────────────────────────────────────────────
   var lastModelName = '';
@@ -1461,6 +1535,7 @@
       stopLoadingAnimation();
       showState('result');
       adaptedEl.innerHTML = md2html(ev.adapted || '');
+      showOriginalText(lastPayload ? lastPayload.text : '');
       if (ev.glossari) {
         glossariBody.innerHTML = md2html(ev.glossari);
         glStatus.textContent = '✓ Generat'; glStatus.className = 'comp-status ok';
@@ -1511,79 +1586,58 @@
   // ── PDF ───────────────────────────────────────────────────────────────────────
   document.getElementById('btn-pdf').addEventListener('click', function () {
     if (typeof html2pdf === 'undefined') return;
-    var adaptedHtml = (adaptedEl || {}).innerHTML || '';
-    if (!adaptedHtml.trim()) return;
+    if (!adaptedEl.innerHTML.trim()) return;
 
-    // Nom del fitxer
-    var titleEl = adaptedEl.querySelector('h1, h2, h3');
-    var titleText = (titleEl ? titleEl.innerText : (adaptedEl.innerText || '').split('\n')[0])
+    var titleEl2 = adaptedEl.querySelector('h1, h2, h3');
+    var titleText = (titleEl2 ? titleEl2.innerText : adaptedEl.innerText.split('\n')[0])
       .trim().slice(0, 80);
     var filename = (titleText || 'adaptacio-flash')
       .replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, '-').toLowerCase() || 'adaptacio-flash';
 
-    // Mapping font seleccionada
     var fontFamilyMap = {
-      fraunces:     "Fraunces, Georgia, serif",
-      inter:        "Inter, system-ui, sans-serif",
+      fraunces:     "var(--serif)",
+      inter:        "var(--ui)",
       atkinson:     "'Atkinson Hyperlegible', system-ui, sans-serif",
       lexend:       "'Lexend', system-ui, sans-serif",
       opendyslexic: "'OpenDyslexic', system-ui, sans-serif",
     };
-    var pdfFont = fontFamilyMap[currentFont || 'fraunces'] || "Fraunces, Georgia, serif";
+    var pdfFont = fontFamilyMap[currentFont || 'fraunces'] || '';
 
-    // Construeix un node net fora del DOM per al PDF
-    var wrap = document.createElement('div');
-    wrap.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:170mm;background:#fff;font-size:11pt;line-height:1.65;color:#111;font-family:' + pdfFont;
+    // Amaga el chrome UI (no el contingut)
+    var toHide = Array.from(stateResult.querySelectorAll(
+      '.result-header, .orig-section, .comp-status, .comp-chevron, .comp-icon, .comp-section:not(.open)'
+    ));
+    toHide.forEach(function (el) { el.style.display = 'none'; });
 
-    // Estils per a salts de pàgina correctes
-    var style = document.createElement('style');
-    style.textContent =
+    // Aplica font als cossos dels complements
+    var compBodies = Array.from(stateResult.querySelectorAll('.comp-body'));
+    if (pdfFont) compBodies.forEach(function (el) { el.style.fontFamily = pdfFont; });
+
+    // Afegeix CSS de salts de pàgina al head (temporal)
+    var pStyle = document.createElement('style');
+    pStyle.id = 'atne-pdf-style';
+    pStyle.textContent =
       'p,li{page-break-inside:avoid!important;orphans:3;widows:3}' +
       'h1,h2,h3{page-break-after:avoid!important}' +
-      '.comp-section-pdf{page-break-inside:avoid}' +
-      '.adapted-box{border:none!important;box-shadow:none!important;padding:0!important;margin:0!important;font-family:' + pdfFont + '}' +
-      'body{font-family:' + pdfFont + '}';
-    wrap.appendChild(style);
+      '.adapted-box{border:none!important;box-shadow:none!important}' +
+      '.comp-section.open{page-break-inside:avoid}';
+    document.head.appendChild(pStyle);
 
-    // Text adaptat
-    var adaptBox = document.createElement('div');
-    adaptBox.className = 'adapted-box';
-    adaptBox.innerHTML = adaptedEl.innerHTML;
-    wrap.appendChild(adaptBox);
-
-    // Complements oberts (ometre els tancats completament)
-    stateResult.querySelectorAll('.comp-section.open').forEach(function (sec) {
-      var titleEl2 = sec.querySelector('.comp-title');
-      var bodyEl   = sec.querySelector('.comp-body');
-      if (!bodyEl) return;
-      var block = document.createElement('div');
-      block.className = 'comp-section-pdf';
-      block.style.cssText = 'margin-top:1.6em;border-top:1.5px solid #ddd;padding-top:.8em;page-break-inside:avoid';
-      var h2 = document.createElement('h2');
-      h2.style.cssText = 'font-size:13pt;font-weight:700;margin:0 0 .5em;color:#222;font-family:' + pdfFont;
-      h2.textContent = titleEl2 ? titleEl2.textContent.trim() : '';
-      block.appendChild(h2);
-      var content = document.createElement('div');
-      content.style.fontFamily = pdfFont;
-      content.innerHTML = bodyEl.innerHTML;
-      block.appendChild(content);
-      wrap.appendChild(block);
-    });
-
-    document.body.appendChild(wrap);
+    function restorePdf() {
+      toHide.forEach(function (el) { el.style.removeProperty('display'); });
+      if (pdfFont) compBodies.forEach(function (el) { el.style.removeProperty('font-family'); });
+      var s = document.getElementById('atne-pdf-style');
+      if (s) s.remove();
+    }
 
     html2pdf().set({
       margin: [15, 20],
       filename: filename + '.pdf',
       image: { type: 'jpeg', quality: 0.95 },
-      html2canvas: { scale: 2, useCORS: true },
+      html2canvas: { scale: 2, useCORS: true, logging: false },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       pagebreak: { mode: ['css', 'legacy'] },
-    }).from(wrap).save().then(function () {
-      document.body.removeChild(wrap);
-    }).catch(function () {
-      if (wrap.parentNode) document.body.removeChild(wrap);
-    });
+    }).from(stateResult).save().then(restorePdf).catch(restorePdf);
   });
 
   // ── Desa a la biblioteca ─────────────────────────────────────────────────────
@@ -1674,7 +1728,8 @@
 
   // ── Historial ─────────────────────────────────────────────────────────────────
   document.getElementById('btn-historial').addEventListener('click', function () {
-    window.location.href = '/ui/atne/home.html#biblioteca';
+    try { sessionStorage.setItem('atne.nav_to', 'biblioteca'); } catch (e) { /* */ }
+    window.location.href = '/ui/atne/home.html';
   });
 
   // ── Selector de tipografia ────────────────────────────────────────────────────
@@ -1767,7 +1822,22 @@
       'vulnerabilitat':   'no_sap',
     };
 
+    var BTN_DEFAULT_TEXT = 'Carrega un perfil desat';
+
+    function clearLoadedProfile() {
+      btn.innerHTML = BTN_DEFAULT_TEXT;
+      btn.classList.remove('has-profile');
+      btn.title = '';
+    }
+
     btn.addEventListener('click', async function (e) {
+      // Clic al ✕: neteja el perfil carregat
+      if (e.target && e.target.dataset && e.target.dataset.clear) {
+        e.stopPropagation();
+        clearLoadedProfile();
+        dd.classList.remove('show');
+        return;
+      }
       e.stopPropagation();
       if (dd.classList.contains('show')) { dd.classList.remove('show'); return; }
 
@@ -1839,20 +1909,19 @@
 
             if (p.l1 && l1Inp) l1Inp.value = p.l1;
 
-            // Mostra el chip de perfil carregat
-            var chip = document.getElementById('loaded-profile-chip');
-            var label = document.getElementById('loaded-profile-label');
-            if (chip && label) {
-              var condLbl = '';
-              if (p.tipus === 'alumne') {
-                var pfPrimary = (p.perfils || [])[0] || '';
-                condLbl = CAR_LABEL_PF[pfPrimary] || '';
-              } else {
-                condLbl = ADAPT_LABEL_PF[p.adaptacio] || '';
-              }
-              label.textContent = (p.name || 'Perfil') + (condLbl ? ' · ' + condLbl : '');
-              chip.style.display = 'flex';
+            // Transforma el botó per mostrar el perfil carregat (inline, amb ✕ per esborrar)
+            var condLbl2 = '';
+            if (p.tipus === 'alumne') {
+              var pfPrimary = (p.perfils || [])[0] || '';
+              condLbl2 = CAR_LABEL_PF[pfPrimary] || '';
+            } else {
+              condLbl2 = ADAPT_LABEL_PF[p.adaptacio] || '';
             }
+            var profileLabel = (p.name || 'Perfil') + (condLbl2 ? ' · ' + condLbl2 : '');
+            btn.innerHTML = '<span class="lpf-name-inline">' + profileLabel + '</span>' +
+              '<span class="lpf-x" data-clear="1">✕</span>';
+            btn.classList.add('has-profile');
+            btn.title = 'Clic per canviar · ✕ per netejar';
 
             dd.classList.remove('show');
           });

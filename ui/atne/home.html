@@ -455,10 +455,12 @@
   }
   loadHistory();
 
-  // Scroll automàtic a #biblioteca si ve des de Flash → Historial
-  if (window.location.hash === '#biblioteca') {
+  // Scroll automàtic a la secció biblioteca si ve des de Flash → Historial
+  var _navTo = '';
+  try { _navTo = sessionStorage.getItem('atne.nav_to') || ''; sessionStorage.removeItem('atne.nav_to'); } catch (e) { /* */ }
+  if (_navTo === 'biblioteca' || window.location.hash === '#biblioteca') {
     var bibEl = document.getElementById('biblioteca');
-    if (bibEl) setTimeout(function () { bibEl.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200);
+    if (bibEl) setTimeout(function () { bibEl.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 350);
   }
 
 })();
