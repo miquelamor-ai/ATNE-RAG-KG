@@ -164,8 +164,12 @@ _MODEL_COST_EUR_PER_CALL: dict[str, float] = {
     "gpt-4.1-mini":         0.006,    # high-tier OpenAI preu contingut
     "mistral-small-latest": 0.012,
     "mistral-large-latest": 0.048,
-    "qwen/qwen3.5-27b":     0.0003,   # OpenRouter pay-per-use ultra-baix
-    "qwen/qwen3.5-9b":      0.0001,   # idem, més petit i barat
+    "qwen/qwen3.5-27b":              0.0003,   # OpenRouter pay-per-use ultra-baix
+    "qwen/qwen3.5-9b":               0.0001,   # idem, més petit i barat
+    "qwen/qwen3-235b-a22b:free":     0.0,      # Qwen 3 235B MoE — gratuït OpenRouter
+    "qwen/qwen3-30b-a3b:free":       0.0,      # Qwen 3 30B MoE — gratuït OpenRouter
+    "deepseek/deepseek-chat-v3-0324:free": 0.0,# DeepSeek V3 — gratuït OpenRouter
+    "deepseek/deepseek-r1:free":     0.0,      # DeepSeek R1 raonament — gratuït OpenRouter
 }
 
 
@@ -964,6 +968,10 @@ _ALLOWED_MODELS = [
     "mistral-large-latest",
     "qwen/qwen3.5-27b",
     "qwen/qwen3.5-9b",
+    "qwen/qwen3-235b-a22b:free",
+    "qwen/qwen3-30b-a3b:free",
+    "deepseek/deepseek-chat-v3-0324:free",
+    "deepseek/deepseek-r1:free",
 ]
 
 

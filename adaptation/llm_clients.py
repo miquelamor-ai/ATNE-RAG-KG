@@ -78,6 +78,12 @@ _MODEL_ALIASES: dict[str, tuple[str, str]] = {
     "gpt-4.1-mini-latest": ("gpt",    "gpt-4.1-mini"),
     "qwen/qwen3.5-27b":  ("openrouter", "qwen/qwen3.5-27b"),
     "qwen/qwen3.5-9b":   ("openrouter", "qwen/qwen3.5-9b"),
+    "qwen/qwen3-235b-a22b:free":          ("openrouter", "qwen/qwen3-235b-a22b:free"),
+    "qwen/qwen3-30b-a3b:free":            ("openrouter", "qwen/qwen3-30b-a3b:free"),
+    "deepseek/deepseek-chat-v3-0324:free":("openrouter", "deepseek/deepseek-chat-v3-0324:free"),
+    "deepseek/deepseek-r1:free":          ("openrouter", "deepseek/deepseek-r1:free"),
+    "deepseek":          ("openrouter", "deepseek/deepseek-chat-v3-0324:free"),
+    "deepseek-r1":       ("openrouter", "deepseek/deepseek-r1:free"),
 }
 
 
@@ -97,6 +103,10 @@ def _resolve_model(model_id: str) -> tuple[str, str]:
         return ("openrouter", model_id.strip())
     if key.startswith("qwen"):
         return ("openrouter", "qwen/qwen3.5-27b")
+    if key.startswith("deepseek/"):
+        return ("openrouter", model_id.strip())
+    if key.startswith("deepseek"):
+        return ("openrouter", "deepseek/deepseek-chat-v3-0324:free")
     if key.startswith("gemma-3"):
         return ("gemma4", "gemma-3-12b-it")
     if key.startswith("gemma"):
