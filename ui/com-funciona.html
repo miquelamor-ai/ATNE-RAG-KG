@@ -2,7 +2,7 @@
 <html lang="ca">
 <head>
 <meta charset="utf-8">
-<title>Com funciona ATNE · Saber-ne+</title>
+<title>Com funciona ATNE · Guia d'ús</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -46,7 +46,22 @@
   .section h2 { font-family: var(--serif); font-size: var(--fs-2xl); font-weight: 700; color: var(--ink-900); margin: 0 0 var(--sp-4); }
   .section p { font-size: var(--fs-base); color: var(--ink-700); line-height: 1.7; margin-bottom: var(--sp-4); }
 
-  /* ─── Cards dels 3 passos ───────────────────────── */
+  /* ─── Cards de mode ─────────────────────────────── */
+  .mode-compare { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); margin: var(--sp-6) 0; }
+  @media (max-width: 560px) { .mode-compare { grid-template-columns: 1fr; } }
+  .mode-card-cf { background: #fff; border: 1px solid var(--paper-line); border-radius: var(--r-xl); padding: var(--sp-5); box-shadow: var(--sh-sm); }
+  .mode-card-cf.flash { border-top: 3px solid #f59e0b; }
+  .mode-card-cf.taller { border-top: 3px solid var(--primary); }
+  .mode-badge { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: var(--fs-xs); font-weight: var(--fw-bold); text-transform: uppercase; letter-spacing: .1em; margin-bottom: var(--sp-3); }
+  .mode-badge.flash { color: #92400e; }
+  .mode-badge.taller { color: var(--primary); }
+  .mode-card-cf h3 { font-family: var(--serif); font-size: var(--fs-lg); font-weight: 700; margin: 0 0 var(--sp-2); color: var(--ink-900); }
+  .mode-card-cf p { font-size: var(--fs-sm); color: var(--ink-600); line-height: 1.55; margin: 0 0 var(--sp-3); }
+  .mode-card-cf ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+  .mode-card-cf ul li { font-size: var(--fs-xs); color: var(--ink-600); display: flex; gap: 6px; }
+  .mode-card-cf ul li::before { content: '–'; color: var(--ink-300); flex-shrink: 0; }
+
+  /* ─── Steps grid (3 passos) ─────────────────────── */
   .steps-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: var(--sp-4); margin: var(--sp-6) 0; }
   @media (max-width: 600px) { .steps-grid { grid-template-columns: 1fr; } }
   .step-card { background: #fff; border: 1px solid var(--paper-line); border-radius: var(--r-xl); padding: var(--sp-5); box-shadow: var(--sh-sm); }
@@ -64,9 +79,6 @@
   .highlight-card p { color: var(--ink-800); margin: 0; font-size: var(--fs-base); line-height: 1.65; }
   .highlight-card strong { color: var(--primary); }
 
-  .ok-card { background: var(--ok-50); border: 1px solid var(--ok-100); border-radius: var(--r-xl); padding: var(--sp-5) var(--sp-6); margin: var(--sp-6) 0; }
-  .ok-card p { color: var(--ink-800); margin: 0; font-size: var(--fs-base); line-height: 1.65; }
-
   /* ─── Condicions (chips) ────────────────────────── */
   .chips { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: var(--sp-4) 0; }
   .chip { padding: 5px 12px; border-radius: var(--r-pill); font-size: var(--fs-sm); font-weight: var(--fw-semi); background: #fff; border: 1px solid var(--paper-line); color: var(--ink-700); }
@@ -75,15 +87,6 @@
   .chip.l2   { background: #f0fff4; border-color: #70c080; color: #1a5c2a; }
   .chip.aacc { background: #f4f0ff; border-color: #a080d0; color: #4a2080; }
   .chip.tea  { background: #e8f4ff; border-color: #80b0e0; color: #1a3a6a; }
-
-  /* ─── Pipeline visual ───────────────────────────── */
-  .pipeline { display: flex; flex-direction: column; gap: var(--sp-3); margin: var(--sp-5) 0; }
-  .pipe-step { display: flex; align-items: center; gap: var(--sp-4); background: #fff; border: 1px solid var(--paper-line); border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4); }
-  .pipe-step .ps-icon { width: 36px; height: 36px; border-radius: var(--r-md); background: var(--cream-2); display: grid; place-items: center; flex-shrink: 0; font-size: 18px; }
-  .pipe-step .ps-body { flex: 1; }
-  .pipe-step .ps-title { font-size: var(--fs-sm); font-weight: var(--fw-semi); color: var(--ink-900); margin-bottom: 2px; }
-  .pipe-step .ps-desc { font-size: var(--fs-xs); color: var(--ink-500); line-height: 1.45; }
-  .pipe-arrow { text-align: center; color: var(--ink-300); font-size: 18px; line-height: 1; }
 
   /* ─── Complements grid ──────────────────────────── */
   .compl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); margin: var(--sp-5) 0; }
@@ -95,27 +98,6 @@
 
   /* ─── Divider ───────────────────────────────────── */
   .divider { height: 1px; background: var(--paper-line); margin: var(--sp-8) 0; }
-
-  /* ─── Catàleg instruccions ──────────────────────── */
-  .catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--sp-4); margin: var(--sp-6) 0; }
-  .cat-card { background: #fff; border: 1px solid var(--paper-line); border-radius: var(--r-xl); padding: var(--sp-5); box-shadow: var(--sh-sm); }
-  .cat-card-header { display: flex; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-3); }
-  .cat-letter { width: 36px; height: 36px; border-radius: var(--r-md); background: var(--primary); color: #fff; font-family: var(--mono); font-size: var(--fs-md); font-weight: var(--fw-bold); display: grid; place-items: center; flex-shrink: 0; }
-  .cat-letter.b { background: #059669; }
-  .cat-letter.c { background: #d97706; }
-  .cat-letter.d { background: #7c3aed; }
-  .cat-letter.e { background: #dc2626; }
-  .cat-letter.f { background: #0891b2; }
-  .cat-letter.g { background: #65a30d; }
-  .cat-letter.h { background: #9333ea; }
-  .cat-letter.i { background: var(--ink-600); }
-  .cat-title { font-family: var(--serif); font-size: var(--fs-md); font-weight: 700; color: var(--ink-900); line-height: 1.25; }
-  .cat-subs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: var(--sp-3); }
-  .cat-sub { font-family: var(--mono); font-size: 10px; font-weight: var(--fw-bold); color: var(--ink-500); background: var(--cream-2); border-radius: var(--r-sm); padding: 2px 7px; }
-  .cat-desc { font-size: var(--fs-xs); color: var(--ink-600); line-height: 1.5; margin: 0; }
-  .sources-bar { background: var(--cream-2); border-radius: var(--r-lg); padding: var(--sp-4) var(--sp-5); margin-top: var(--sp-6); display: flex; flex-wrap: wrap; gap: var(--sp-3) var(--sp-5); align-items: center; }
-  .source-tag { font-family: var(--mono); font-size: var(--fs-xs); font-weight: var(--fw-semi); color: var(--ink-600); }
-  .source-tag strong { color: var(--primary); font-weight: var(--fw-bold); }
 
   /* ─── Privacitat grid ──────────────────────────── */
   .privacy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); margin: var(--sp-6) 0; }
@@ -131,7 +113,7 @@
   /* ─── Footer ────────────────────────────────────── */
   .page-footer { text-align: center; padding: var(--sp-8) 0 var(--sp-4); border-top: 1px solid var(--paper-line); }
   .page-footer p { font-size: var(--fs-sm); color: var(--ink-400); margin: 0 0 var(--sp-4); }
-  .footer-btn { display: inline-flex; align-items: center; gap: var(--sp-2); background: var(--primary); color: #fff; padding: 10px 22px; border-radius: var(--r-pill); font-size: var(--fs-sm); font-weight: var(--fw-semi); transition: filter var(--trans-fast); }
+  .footer-btn { display: inline-flex; align-items: center; gap: var(--sp-2); background: var(--primary); color: #fff; padding: 10px 22px; border-radius: var(--r-pill); font-size: var(--fs-sm); font-weight: var(--fw-semi); transition: filter var(--trans-fast); text-decoration: none; }
   .footer-btn:hover { filter: brightness(1.08); }
 </style>
 </head>
@@ -163,56 +145,61 @@
 <div class="page-wrap">
 
   <div class="hero">
-    <div class="hero-label">Com funciona ATNE</div>
-    <h1>De text curricular a material adaptat, en 3 passos</h1>
-    <p>ATNE és un assistent que adapta textos educatius al perfil de cada alumne. Entendre com funciona ajuda a treure-li el màxim partit.</p>
+    <div class="hero-label">Guia d'ús</div>
+    <h1>Com funciona ATNE</h1>
+    <p>Tot el que necessites per adaptar textos des del primer dia: els dos modes, els perfils, com entrar el text, revisar i exportar.</p>
   </div>
 
-  <!-- ── Secció 1: Els 3 passos ── -->
+  <!-- §01 Els dos modes -->
   <div class="section">
     <div class="section-num">01</div>
-    <h2>El flux de treball</h2>
-    <p>ATNE s'organitza en tres passos seqüencials. Cada pas té una funció clara i es pot repetir tantes vegades com calgui.</p>
+    <h2>Els dos modes: Flash i Taller</h2>
+    <p>ATNE té dos modes de treball. Tries el mode en funció del temps disponible i la complexitat de l'adaptació.</p>
 
-    <div class="steps-grid">
-      <div class="step-card">
-        <div class="step-n">1</div>
-        <h3>Per a qui</h3>
-        <p>Selecciones o crees el perfil de l'alumne o grup. El perfil defineix el nivell lingüístic, les condicions i els ajuts que s'aplicaran.</p>
+    <div class="mode-compare">
+      <div class="mode-card-cf flash">
+        <div class="mode-badge flash">⚡ Flash</div>
+        <h3>Ràpid, tot en una pantalla</h3>
+        <p>El formulari a l'esquerra, el resultat a la dreta. Sense passos intermedis.</p>
+        <ul>
+          <li>Ideal quan ja tens el perfil desat</li>
+          <li>Selecciona perfil, enganxa text, adapta</li>
+          <li>Menys opcions de configuració</li>
+          <li>Recomanat per a usos diaris</li>
+        </ul>
       </div>
-      <div class="step-card">
-        <div class="step-n">2</div>
-        <h3>El text</h3>
-        <p>Enganxes, puges o generes el text que vols adaptar. Configures la matèria, el nivell educatiu i els complements opcionals.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-n">3</div>
-        <h3>Adaptacions</h3>
-        <p>Reps el text adaptat amb tots els ajuts activats. Pots refinar-lo, corregir-lo, comparar-lo amb l'original i exportar-lo.</p>
+      <div class="mode-card-cf taller">
+        <div class="mode-badge taller">✏️ Taller</div>
+        <h3>Tres passos, control total</h3>
+        <p>Per a qui · Text · Adaptació. Cada pas en la seva pantalla.</p>
+        <ul>
+          <li>Crea o edita perfils d'alumne o grup</li>
+          <li>Grups multinivell (Bàsic · Estàndard · Avançat)</li>
+          <li>Generació de text amb IA integrada</li>
+          <li>Accés a la biblioteca d'adaptacions</li>
+        </ul>
       </div>
     </div>
 
     <div class="highlight-card">
-      <p>Els perfils es desen al teu compte i es recuperen des de qualsevol dispositiu. Un cop creat el perfil d'un alumne, el reutilitzes en totes les adaptacions futures.</p>
+      <p>Ambdós modes comparteixen els mateixos perfils i el mateix motor d'adaptació. La diferència és el flux de treball, no la qualitat del resultat.</p>
     </div>
   </div>
 
   <div class="divider"></div>
 
-  <!-- ── Secció 2: Els perfils ── -->
+  <!-- §02 Els perfils -->
   <div class="section">
     <div class="section-num">02</div>
-    <h2>Els perfils: qui és l'alumne</h2>
-    <p>El perfil és la peça clau d'ATNE. Com més precís sigui, millor serà l'adaptació. Es construeix a partir del que <strong>observes a l'aula</strong>, no necessàriament d'un diagnòstic formal.</p>
+    <h2>Els perfils — crear, recuperar i editar</h2>
+    <p>El perfil és la peça clau d'ATNE. Es construeix a partir del que <strong>observes a l'aula</strong>, no necessàriament d'un diagnòstic formal.</p>
 
     <ul class="feature-list">
-      <li><span class="fi">✓</span><span><strong>Nivell MECR:</strong> Del A1 (inicial) al C1 (competent). Defineix la complexitat lingüística de l'adaptació.</span></li>
-      <li><span class="fi">✓</span><span><strong>Conductes observades:</strong> Es distreu amb textos llargs, fatiga lectora, dificultats amb connectors… L'app activa els ajuts adequats automàticament.</span></li>
-      <li><span class="fi">✓</span><span><strong>Condicions i diagnòstics:</strong> Opcional. Si tens informe o PI, pots afegir TDAH, dislèxia, L2, AACC, TEA, etc.</span></li>
-      <li><span class="fi">✓</span><span><strong>Sub-variables:</strong> Per a cada condició apareixen camps addicionals: per a L2, la llengua familiar i el temps a Catalunya; per a AACC, el tipus de superdotació.</span></li>
+      <li><span class="fi">👤</span><span><strong>Alumne individual:</strong> Nom, curs, nivell MECR (A1–C1), conductes observades i condicions opcionals. Cada condició desplega sub-variables específiques (p.ex. per L2: llengua familiar, país, mesos a Catalunya).</span></li>
+      <li><span class="fi">👥</span><span><strong>Grup-classe:</strong> Activa els nivells presents (Bàsic · Estàndard · Avançat) i, opcionalment, afegeix perfils individuals. ATNE genera una versió per a cada nivell activat.</span></li>
     </ul>
 
-    <p>Les condicions disponibles:</p>
+    <p>Condicions disponibles:</p>
     <div class="chips">
       <span class="chip tdah">TDAH</span>
       <span class="chip disl">Dislèxia / DEA</span>
@@ -224,60 +211,76 @@
       <span class="chip">Discapacitat visual</span>
     </div>
 
-    <p>També pots crear <strong>perfils de grup</strong> per adaptar un text a tota la classe amb múltiples nivells simultàniament (Bàsic · Estàndard · Avançat).</p>
+    <ul class="feature-list" style="margin-top: var(--sp-5);">
+      <li><span class="fi">+</span><span><strong>Crear:</strong> Botó "Nova persona" o "Nou grup" al Pas 1 del Taller. El perfil es desa automàticament vinculat al teu compte @fje.edu.</span></li>
+      <li><span class="fi">🔍</span><span><strong>Recuperar:</strong> La llista mostra tots els perfils desats ordenats per data. Pots filtrar per condició o cercar per nom. A Flash, selecciona'l al desplegable de la capçalera.</span></li>
+      <li><span class="fi">✏️</span><span><strong>Editar:</strong> Torna al Pas 1 del Taller, selecciona el perfil i modifica'l. Els canvis s'apliquen a les properes adaptacions.</span></li>
+    </ul>
   </div>
 
   <div class="divider"></div>
 
-  <!-- ── Secció 3: Com treballa la IA ── -->
+  <!-- §03 Entrar el text -->
   <div class="section">
     <div class="section-num">03</div>
-    <h2>Com treballa la intel·ligència artificial</h2>
-    <p>ATNE usa un model de llenguatge gran (LLM) —Gemma 4 31B— guiat per un catàleg de <strong>més de 90 instruccions pedagògiques</strong> específiques per a cada condició i nivell. No és un xat lliure: cada instrucció ha estat validada amb el marc FJE.</p>
+    <h2>Entrar el text</h2>
+    <p>Al Pas 2 (Taller) o al panell esquerre (Flash) tens quatre maneres d'entrar el text:</p>
 
-    <div class="pipeline">
-      <div class="pipe-step">
-        <div class="ps-icon">👤</div>
-        <div class="ps-body">
-          <div class="ps-title">Filtratge d'instruccions</div>
-          <div class="ps-desc">A partir del perfil i el MECR, el sistema selecciona automàticament les instruccions rellevants del catàleg (unes 40 de 90+).</div>
-        </div>
+    <div class="compl-grid">
+      <div class="compl-card">
+        <div class="cc-icon">📝</div>
+        <h4>Escriure o enganxar</h4>
+        <p>Enganxa text des de qualsevol font: web, PDF obert, Word, llibre de text digitalitzat…</p>
       </div>
-      <div class="pipe-arrow">↓</div>
-      <div class="pipe-step">
-        <div class="ps-icon">🤖</div>
-        <div class="ps-body">
-          <div class="ps-title">Generació (LLM)</div>
-          <div class="ps-desc">L'LLM adapta el text seguint les instruccions seleccionades. Típicament tarda 15-30 segons.</div>
-        </div>
+      <div class="compl-card">
+        <div class="cc-icon">📎</div>
+        <h4>Pujar fitxer</h4>
+        <p>Arrossega o selecciona un fitxer PDF o Word. ATNE extreu el text automàticament.</p>
       </div>
-      <div class="pipe-arrow">↓</div>
-      <div class="pipe-step">
-        <div class="ps-icon">🔍</div>
-        <div class="ps-body">
-          <div class="ps-title">Verificació automàtica</div>
-          <div class="ps-desc">Un segon pas de l'LLM avalua si l'adaptació compleix els criteris. Si la puntuació és baixa, es regenera.</div>
-        </div>
+      <div class="compl-card">
+        <div class="cc-icon">✨</div>
+        <h4>Generar amb IA</h4>
+        <p>Descriu el tema i el curs. ATNE crea un text de partida adequat al nivell i el adapta al perfil en un sol pas.</p>
       </div>
-      <div class="pipe-arrow">↓</div>
-      <div class="pipe-step">
-        <div class="ps-icon">📝</div>
-        <div class="ps-body">
-          <div class="ps-title">Pipeline de qualitat</div>
-          <div class="ps-desc">LanguageTool corregeix ortografia i gramàtica catalana. Es detecten paraules sospitoses i caràcters exòtics.</div>
-        </div>
+      <div class="compl-card">
+        <div class="cc-icon">🕐</div>
+        <h4>Texts recents</h4>
+        <p>Recupera un text que has usat en sessions anteriors. Disponible al Taller.</p>
       </div>
     </div>
 
+    <p>Abans d'adaptar, configures tres paràmetres:</p>
+    <ul class="feature-list">
+      <li><span class="fi">📚</span><span><strong>Matèria:</strong> Matemàtiques, Llengua, Ciències naturals, Socials, etc. Condiciona la terminologia que l'IA respecta intocable.</span></li>
+      <li><span class="fi">📄</span><span><strong>Gènere discursiu:</strong> Explicatiu, narratiu, argumentatiu, procediment, notícia… (22 gèneres disponibles). L'IA adapta l'estructura del text al gènere, no només el vocabulari.</span></li>
+      <li><span class="fi">⚙️</span><span><strong>Complements:</strong> Glossari, preguntes de comprensió, esquema visual, bastides lingüístiques. Activa els que necessites (veure §05).</span></li>
+    </ul>
   </div>
 
   <div class="divider"></div>
 
-  <!-- ── Secció 4: Els complements ── -->
+  <!-- §04 L'adaptació -->
   <div class="section">
     <div class="section-num">04</div>
+    <h2>L'adaptació — veure, editar i refinar</h2>
+    <p>Un cop llançada l'adaptació, el text apareix en temps real (streaming). Quan acaba, tens accés a totes les eines de revisió:</p>
+
+    <ul class="feature-list">
+      <li><span class="fi">Aa</span><span><strong>Tipografia:</strong> Canvia la font (Atkinson Hyperlegible, OpenDyslexic, Arial…) per a alumnat amb dislèxia o necessitats visuals. El canvi és instantani i no modifica el text.</span></li>
+      <li><span class="fi">⟺</span><span><strong>Vista comparativa:</strong> Original i adaptat costat a costat. Comprova que no s'ha perdut contingut curricular.</span></li>
+      <li><span class="fi">✓</span><span><strong>LanguageTool:</strong> Revisió ortogràfica i gramatical automàtica en català. Les correccions s'apliquen en un sol clic.</span></li>
+      <li><span class="fi">✏️</span><span><strong>Refinar:</strong> Escriu una instrucció concreta ("Simplifica el segon paràgraf", "Afegeix un exemple numèric") i l'IA reescriu el text incorporant la indicació.</span></li>
+      <li><span class="fi">📋</span><span><strong>Rúbrica pedagògica:</strong> Avalua l'adaptació en criteris de claredat, rigor, adequació al perfil… i permet demanar a l'IA que millori els aspectes febles.</span></li>
+    </ul>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- §05 Els complements -->
+  <div class="section">
+    <div class="section-num">05</div>
     <h2>Els complements</h2>
-    <p>A més del text adaptat, pots activar complements opcionals que l'LLM genera simultàniament:</p>
+    <p>Fins a quatre complements que l'IA genera simultàniament amb l'adaptació del text principal:</p>
 
     <div class="compl-grid">
       <div class="compl-card">
@@ -305,175 +308,24 @@
 
   <div class="divider"></div>
 
-  <!-- ── Secció 5: Eines de revisió ── -->
+  <!-- §06 Desar i exportar -->
   <div class="section">
-    <div class="section-num">05</div>
-    <h2>Eines de revisió i exportació</h2>
-    <p>Un cop tens l'adaptació, el Pas 3 ofereix diverses eines per revisar i distribuir el material:</p>
+    <div class="section-num">06</div>
+    <h2>Desar i exportar</h2>
+    <p>ATNE desa les adaptacions automàticament. Desde qualsevol dispositiu pots recuperar el teu historial de feina.</p>
 
     <ul class="feature-list">
-      <li><span class="fi">Aa</span><span><strong>Tipografia:</strong> Canvia la font (Atkinson, OpenDyslexic, Arial…) per a alumnat amb dislèxia o necessitats visuals.</span></li>
-      <li><span class="fi">⟺</span><span><strong>Vista comparativa:</strong> Original i adaptat costat a costat. Útil per verificar que no s'ha perdut contingut curricular.</span></li>
-      <li><span class="fi">✏️</span><span><strong>Refinar:</strong> Escriu instruccions concretes i l'IA reescriu el text incorporant les teves indicacions.</span></li>
-      <li><span class="fi">📋</span><span><strong>Rúbrica pedagògica:</strong> Avalua l'adaptació i demana a l'IA que millori els aspectes febles.</span></li>
-      <li><span class="fi">⬇</span><span><strong>Exportació:</strong> PDF (llest per imprimir), Word (.docx, editable) o text pla.</span></li>
+      <li><span class="fi">💾</span><span><strong>Autodesat:</strong> Cada adaptació es desa amb el perfil, el text original i la data. Accessible des de la icona de Biblioteca a la barra lateral del Taller.</span></li>
+      <li><span class="fi">📄</span><span><strong>PDF:</strong> Exporta el text adaptat (amb complements si n'has activats) com a document llest per imprimir o compartir digitalment.</span></li>
+      <li><span class="fi">📝</span><span><strong>Word (.docx):</strong> Format editable per continuar treballant al processador de text.</span></li>
+      <li><span class="fi">📋</span><span><strong>Còpia al porta-retalls:</strong> Per enganxar directament en un correu, Google Docs o qualsevol eina digital.</span></li>
+      <li><span class="fi">👥</span><span><strong>Multinivell compartit:</strong> Quan treballes amb un grup-classe, exporta les tres versions (Bàsic · Estàndard · Avançat) en un únic document per distribuir a l'aula.</span></li>
     </ul>
   </div>
 
   <div class="divider"></div>
 
-  <!-- ── Secció 6: Catàleg d'instruccions ── -->
-  <div class="section">
-    <div class="section-num">06</div>
-    <h2>El catàleg d'instruccions pedagògiques</h2>
-    <p>Les adaptacions d'ATNE es guien per un catàleg de <strong>més de 90 instruccions pedagògiques</strong> organitzades en 9 àrees temàtiques. Cada instrucció indica quina transformació cal fer, en quina graduació (de mínima a màxima), i per a quins perfils s'activa. El catàleg s'ha construït a partir de marcs internacionals de referència en accessibilitat i aprenentatge.</p>
-    <p>Quan el docent omple el perfil d'un alumne, el sistema selecciona automàticament les instruccions rellevants (típicament unes 40 de les 90+) i les envia al model d'IA per a cada adaptació.</p>
-
-    <div class="catalog-grid">
-
-      <div class="cat-card">
-        <div class="cat-card-header">
-          <div class="cat-letter">A</div>
-          <div class="cat-title">Adaptació Lingüística</div>
-        </div>
-        <div class="cat-subs">
-          <span class="cat-sub">A1 Lèxic</span>
-          <span class="cat-sub">A2 Sintaxi</span>
-          <span class="cat-sub">A3 Cohesió</span>
-          <span class="cat-sub">A4 Registre</span>
-        </div>
-        <p class="cat-desc">Com es tria el vocabulari, es construeixen les frases, s'organitzen els connectors i s'ajusta el to. L'àrea més activa en qualsevol adaptació.</p>
-      </div>
-
-      <div class="cat-card">
-        <div class="cat-card-header">
-          <div class="cat-letter b">B</div>
-          <div class="cat-title">Estructura i Organització</div>
-        </div>
-        <div class="cat-subs">
-          <span class="cat-sub">B1 Segmentació</span>
-          <span class="cat-sub">B2 Jerarquia</span>
-          <span class="cat-sub">B3 Ordre</span>
-          <span class="cat-sub">B4 Senyalització</span>
-        </div>
-        <p class="cat-desc">Com es divideix el text en blocs, s'usen títols i llistes, i s'estableix si la informació va de general a particular o a la inversa.</p>
-      </div>
-
-      <div class="cat-card">
-        <div class="cat-card-header">
-          <div class="cat-letter c">C</div>
-          <div class="cat-title">Suport Cognitiu</div>
-        </div>
-        <div class="cat-subs">
-          <span class="cat-sub">C1 Càrrega cognitiva</span>
-          <span class="cat-sub">C2 Scaffolding</span>
-          <span class="cat-sub">C3 Coneixements previs</span>
-          <span class="cat-sub">C4 Metacognició</span>
-        </div>
-        <p class="cat-desc">Com es redueix la sobrecàrrega mental: bastides, exemples progressius, preguntes guia per activar el que l'alumne ja sap.</p>
-      </div>
-
-      <div class="cat-card">
-        <div class="cat-card-header">
-          <div class="cat-letter d">D</div>
-          <div class="cat-title">Multimodalitat</div>
-        </div>
-        <div class="cat-subs">
-          <span class="cat-sub">D1 Suport visual</span>
-          <span class="cat-sub">D2 Organitzadors gràfics</span>
-          <span class="cat-sub">D3 Redundància de canals</span>
-        </div>
-        <p class="cat-desc">Indicacions per complementar el text amb pictogrames, esquemes, taules o diagrames que faciliten la comprensió per múltiples vies.</p>
-      </div>
-
-      <div class="cat-card">
-        <div class="cat-card-header">
-          <div class="cat-letter e">E</div>
-          <div class="cat-title">Contingut Curricular</div>
-        </div>
-        <div class="cat-subs">
-          <span class="cat-sub">E1 Terminologia</span>
-          <span class="cat-sub">E2 Rigor conceptual</span>
-          <span class="cat-sub">E3 Exemples</span>
-          <span class="cat-sub">E4 Contextualització</span>
-        </div>
-        <p class="cat-desc">Qu&egrave; del contingut curricular es pot simplificar i qu&egrave; no. Com mantenir el rigor de la matèria mentre es fa el text accessible.</p>
-      </div>
-
-      <div class="cat-card">
-        <div class="cat-card-header">
-          <div class="cat-letter f">F</div>
-          <div class="cat-title">Avaluació i Comprensió</div>
-        </div>
-        <div class="cat-subs">
-          <span class="cat-sub">F1 Preguntes</span>
-          <span class="cat-sub">F2 Activitats</span>
-          <span class="cat-sub">F3 Autoavaluació</span>
-        </div>
-        <p class="cat-desc">Com es construeixen les preguntes de comprensió graduades (bàsic, estàndard, avançat) i les activitats d'aprofundiment per a cada nivell.</p>
-      </div>
-
-      <div class="cat-card">
-        <div class="cat-card-header">
-          <div class="cat-letter g">G</div>
-          <div class="cat-title">Personalització Lingüística</div>
-        </div>
-        <div class="cat-subs">
-          <span class="cat-sub">G1 Suport L1</span>
-          <span class="cat-sub">G2 Adaptació cultural</span>
-        </div>
-        <p class="cat-desc">Per a alumnat nouvingut: glossaris bilingües, adequació de referents culturals i exemples propers a l'experiència de l'alumne.</p>
-      </div>
-
-      <div class="cat-card">
-        <div class="cat-card-header">
-          <div class="cat-letter h">H</div>
-          <div class="cat-title">Adaptacions per Perfil</div>
-        </div>
-        <div class="cat-subs">
-          <span class="cat-sub">H1 TEA</span>
-          <span class="cat-sub">H2 TDAH</span>
-          <span class="cat-sub">H3 Dislèxia</span>
-          <span class="cat-sub">H4 DI</span>
-          <span class="cat-sub">H5 Vis.</span>
-          <span class="cat-sub">H6 Aud.</span>
-          <span class="cat-sub">H7 TDL</span>
-          <span class="cat-sub">H8 AACC</span>
-          <span class="cat-sub">H9 2e</span>
-        </div>
-        <p class="cat-desc">Instruccions específiques per a cada condició. Les més extenses del catàleg: cada perfil té entre 5 i 12 instruccions pròpies.</p>
-      </div>
-
-      <div class="cat-card">
-        <div class="cat-card-header">
-          <div class="cat-letter i">I</div>
-          <div class="cat-title">Meta-regles Transversals</div>
-        </div>
-        <div class="cat-subs">
-          <span class="cat-sub">I1 Qualitat</span>
-          <span class="cat-sub">I2 Integració de perfils</span>
-        </div>
-        <p class="cat-desc">Regles que s'apliquen sempre, independentment del perfil: com combinar instruccions de condicions múltiples, quines prevalen, com evitar contradiccions.</p>
-      </div>
-
-    </div>
-
-    <div class="sources-bar">
-      <span style="font-size:var(--fs-xs);color:var(--ink-400);font-weight:var(--fw-semi);text-transform:uppercase;letter-spacing:.1em">Fonts acadèmiques</span>
-      <span class="source-tag"><strong>UDL</strong> CAST 2024</span>
-      <span class="source-tag"><strong>LF-IFLA</strong> 2010</span>
-      <span class="source-tag"><strong>UNE 153101</strong> 2018</span>
-      <span class="source-tag"><strong>MECR-CV</strong> 2020</span>
-      <span class="source-tag"><strong>WCAG 2.2</strong> 2023</span>
-      <span class="source-tag"><strong>Plain Language</strong> 2011</span>
-      <span class="source-tag"><strong>Clarity Intl.</strong> 2020</span>
-    </div>
-
-  </div>
-
-  <div class="divider"></div>
-
-  <!-- ── Secció 7: Privacitat i IA ── -->
+  <!-- §07 Privacitat -->
   <div class="section" id="privacitat">
     <div class="section-num">07</div>
     <h2>Privacitat i IA</h2>
@@ -532,7 +384,7 @@
 
   <div class="page-footer">
     <p>Ara que saps com funciona, prova-ho amb el teu primer text.</p>
-    <a href="/ui/atne/pas1.html" class="footer-btn">Començar amb ATNE →</a>
+    <a href="/ui/atne/flash.html" class="footer-btn">Comença amb Flash →</a>
   </div>
 
 </div>

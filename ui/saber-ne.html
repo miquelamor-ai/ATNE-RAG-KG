@@ -961,6 +961,7 @@
       <a href="/ui/llms.html" class="topbar-nav-link">Els LLM</a>
       <a href="/ui/avaluacio.html" class="topbar-nav-link">Avaluació</a>
     </nav>
+    <a href="/ui/com-funciona.html" target="_blank" class="icon-btn" title="Com funciona ATNE" style="text-decoration:none;display:flex;align-items:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg></a>
     <button id="docent-av" class="docent-av" title="El teu compte">?</button>
   </div>
 </header>
@@ -1006,8 +1007,20 @@
         <span class="sidebar-num">08</span>
         Exemples
       </a>
-      <a class="sidebar-link" href="#bibliografia">
+      <a class="sidebar-link" href="#com-treballa-ia">
         <span class="sidebar-num">09</span>
+        Com treballa la IA
+      </a>
+      <a class="sidebar-link" href="#cataleg-instruccions">
+        <span class="sidebar-num">10</span>
+        Catàleg instruccions
+      </a>
+      <a class="sidebar-link" href="#els-llm">
+        <span class="sidebar-num">11</span>
+        Els LLM
+      </a>
+      <a class="sidebar-link" href="#bibliografia">
+        <span class="sidebar-num">12</span>
         Bibliografia
       </a>
     </nav>
@@ -1806,11 +1819,233 @@
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════ -->
-<!-- §9 Bibliografia                                              -->
+<!-- §9 Com treballa la IA                                        -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="section" style="margin-bottom:6rem" id="com-treballa-ia">
+  <div class="section-header">
+    <span class="section-badge">09</span>
+    <h2 class="section-title">Com treballa la intel·ligència artificial</h2>
+  </div>
+  <p class="section-intro max-w-3xl">ATNE no és un xat lliure. Cada adaptació passa per un pipeline estructurat que combina un model de llenguatge guiat per instruccions pedagògiques validades amb el marc FJE.</p>
+
+  <div class="grid-2" style="margin-bottom:var(--sp-6)">
+    <div class="card card-p-sm" style="display:flex;gap:var(--sp-4);align-items:flex-start">
+      <div style="width:40px;height:40px;border-radius:var(--r-md);background:var(--primary-50);display:grid;place-items:center;flex-shrink:0;font-size:20px">👤</div>
+      <div>
+        <div style="font-weight:var(--fw-semi);color:var(--ink-900);margin-bottom:4px">1 · Filtratge d'instruccions</div>
+        <div style="font-size:var(--fs-sm);color:var(--ink-600);line-height:1.55">A partir del perfil i el MECR, el sistema selecciona automàticament les instruccions rellevants del catàleg (unes 40 de 90+). Les instruccions de tipus SEMPRE s'activen sempre; les de PERFIL i NIVELL, condicionalment.</div>
+      </div>
+    </div>
+    <div class="card card-p-sm" style="display:flex;gap:var(--sp-4);align-items:flex-start">
+      <div style="width:40px;height:40px;border-radius:var(--r-md);background:var(--primary-50);display:grid;place-items:center;flex-shrink:0;font-size:20px">🤖</div>
+      <div>
+        <div style="font-weight:var(--fw-semi);color:var(--ink-900);margin-bottom:4px">2 · Generació (LLM)</div>
+        <div style="font-size:var(--fs-sm);color:var(--ink-600);line-height:1.55">L'LLM adapta el text seguint les instruccions seleccionades i el gènere discursiu triat. El model per defecte és Gemma 4 31B, amb rotació opcional a GPT-4o i GPT-4.1-mini. Típicament tarda 15–30 segons.</div>
+      </div>
+    </div>
+    <div class="card card-p-sm" style="display:flex;gap:var(--sp-4);align-items:flex-start">
+      <div style="width:40px;height:40px;border-radius:var(--r-md);background:var(--primary-50);display:grid;place-items:center;flex-shrink:0;font-size:20px">🔍</div>
+      <div>
+        <div style="font-weight:var(--fw-semi);color:var(--ink-900);margin-bottom:4px">3 · Pipeline de qualitat</div>
+        <div style="font-size:var(--fs-sm);color:var(--ink-600);line-height:1.55">LanguageTool corregeix ortografia i gramàtica catalana. Es detecten i eliminen caràcters exòtics, fragments en altres idiomes i marques tipogràfiques de l'LLM (asteriscs, guions decoratius).</div>
+      </div>
+    </div>
+    <div class="card card-p-sm" style="display:flex;gap:var(--sp-4);align-items:flex-start">
+      <div style="width:40px;height:40px;border-radius:var(--r-md);background:var(--primary-50);display:grid;place-items:center;flex-shrink:0;font-size:20px">📊</div>
+      <div>
+        <div style="font-weight:var(--fw-semi);color:var(--ink-900);margin-bottom:4px">4 · Complements simultanis</div>
+        <div style="font-size:var(--fs-sm);color:var(--ink-600);line-height:1.55">Si el docent ha activat complements (glossari, preguntes, esquema, bastides), l'LLM els genera en el mateix pas de generació. Es mostren com a pestanyes al Pas 3.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-cream" style="padding:var(--sp-5) var(--sp-6)">
+    <p style="margin:0;font-size:var(--fs-sm);color:var(--ink-700);line-height:1.65"><strong>Nota tècnica:</strong> El catàleg d'instruccions és codi Python (<code style="font-family:var(--mono);font-size:.85em;background:rgba(255,255,255,.7);padding:1px 5px;border-radius:3px">instruction_catalog.py</code>) mantingut al repositori. L'arquitectura RAG-KG dinàmic (vector store + knowledge graph) és infraestructura reservada per a fases posteriors i no s'activa en el pilot actual.</p>
+  </div>
+</section>
+
+<!-- §10 El catàleg d'instruccions pedagògiques                  -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="section" style="margin-bottom:6rem" id="cataleg-instruccions">
+  <div class="section-header">
+    <span class="section-badge">10</span>
+    <h2 class="section-title">El catàleg d'instruccions pedagògiques</h2>
+  </div>
+  <p class="section-intro max-w-3xl">Més de 90 instruccions organitzades en 9 àrees temàtiques. Cada instrucció indica la transformació a fer, la graduació (mínima a màxima) i els perfils que l'activen. El catàleg s'ha construït a partir de marcs internacionals d'accessibilitat i aprenentatge.</p>
+
+  <div class="grid-3">
+
+    <div class="card card-p-sm">
+      <div style="display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-3)">
+        <div style="width:32px;height:32px;border-radius:var(--r-md);background:var(--primary);color:#fff;font-family:var(--mono);font-size:var(--fs-sm);font-weight:var(--fw-bold);display:grid;place-items:center;flex-shrink:0">A</div>
+        <div style="font-family:var(--serif);font-size:var(--fs-md);font-weight:700;color:var(--ink-900)">Adaptació Lingüística</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:var(--sp-3)">
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">A1 Lèxic</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">A2 Sintaxi</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">A3 Cohesió</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">A4 Registre</span>
+      </div>
+      <p style="font-size:var(--fs-xs);color:var(--ink-600);line-height:1.5;margin:0">Com es tria el vocabulari, es construeixen les frases, s'organitzen els connectors i s'ajusta el to. L'àrea més activa en qualsevol adaptació.</p>
+    </div>
+
+    <div class="card card-p-sm">
+      <div style="display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-3)">
+        <div style="width:32px;height:32px;border-radius:var(--r-md);background:#059669;color:#fff;font-family:var(--mono);font-size:var(--fs-sm);font-weight:var(--fw-bold);display:grid;place-items:center;flex-shrink:0">B</div>
+        <div style="font-family:var(--serif);font-size:var(--fs-md);font-weight:700;color:var(--ink-900)">Estructura i Organització</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:var(--sp-3)">
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">B1 Segmentació</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">B2 Jerarquia</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">B3 Ordre</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">B4 Senyalització</span>
+      </div>
+      <p style="font-size:var(--fs-xs);color:var(--ink-600);line-height:1.5;margin:0">Com es divideix el text en blocs, s'usen títols i llistes, i s'estableix si la informació va de general a particular o a la inversa.</p>
+    </div>
+
+    <div class="card card-p-sm">
+      <div style="display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-3)">
+        <div style="width:32px;height:32px;border-radius:var(--r-md);background:#d97706;color:#fff;font-family:var(--mono);font-size:var(--fs-sm);font-weight:var(--fw-bold);display:grid;place-items:center;flex-shrink:0">C</div>
+        <div style="font-family:var(--serif);font-size:var(--fs-md);font-weight:700;color:var(--ink-900)">Suport Cognitiu</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:var(--sp-3)">
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">C1 Càrrega cognitiva</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">C2 Scaffolding</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">C3 Coneixements previs</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">C4 Metacognició</span>
+      </div>
+      <p style="font-size:var(--fs-xs);color:var(--ink-600);line-height:1.5;margin:0">Com es redueix la sobrecàrrega mental: bastides, exemples progressius, preguntes guia per activar el que l'alumne ja sap.</p>
+    </div>
+
+    <div class="card card-p-sm">
+      <div style="display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-3)">
+        <div style="width:32px;height:32px;border-radius:var(--r-md);background:#7c3aed;color:#fff;font-family:var(--mono);font-size:var(--fs-sm);font-weight:var(--fw-bold);display:grid;place-items:center;flex-shrink:0">D</div>
+        <div style="font-family:var(--serif);font-size:var(--fs-md);font-weight:700;color:var(--ink-900)">Multimodalitat</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:var(--sp-3)">
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">D1 Suport visual</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">D2 Organitzadors gràfics</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">D3 Redundància canals</span>
+      </div>
+      <p style="font-size:var(--fs-xs);color:var(--ink-600);line-height:1.5;margin:0">Indicacions per complementar el text amb pictogrames, esquemes, taules o diagrames que faciliten la comprensió per múltiples vies.</p>
+    </div>
+
+    <div class="card card-p-sm">
+      <div style="display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-3)">
+        <div style="width:32px;height:32px;border-radius:var(--r-md);background:#dc2626;color:#fff;font-family:var(--mono);font-size:var(--fs-sm);font-weight:var(--fw-bold);display:grid;place-items:center;flex-shrink:0">E</div>
+        <div style="font-family:var(--serif);font-size:var(--fs-md);font-weight:700;color:var(--ink-900)">Contingut Curricular</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:var(--sp-3)">
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">E1 Terminologia</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">E2 Rigor conceptual</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">E3 Exemples</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">E4 Contextualització</span>
+      </div>
+      <p style="font-size:var(--fs-xs);color:var(--ink-600);line-height:1.5;margin:0">Què del contingut curricular es pot simplificar i què no. Com mantenir el rigor de la matèria mentre es fa el text accessible.</p>
+    </div>
+
+    <div class="card card-p-sm">
+      <div style="display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-3)">
+        <div style="width:32px;height:32px;border-radius:var(--r-md);background:#0891b2;color:#fff;font-family:var(--mono);font-size:var(--fs-sm);font-weight:var(--fw-bold);display:grid;place-items:center;flex-shrink:0">F</div>
+        <div style="font-family:var(--serif);font-size:var(--fs-md);font-weight:700;color:var(--ink-900)">Avaluació i Comprensió</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:var(--sp-3)">
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">F1 Preguntes</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">F2 Activitats</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">F3 Autoavaluació</span>
+      </div>
+      <p style="font-size:var(--fs-xs);color:var(--ink-600);line-height:1.5;margin:0">Com es construeixen les preguntes de comprensió graduades (bàsic, estàndard, avançat) i les activitats d'aprofundiment per a cada nivell.</p>
+    </div>
+
+    <div class="card card-p-sm">
+      <div style="display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-3)">
+        <div style="width:32px;height:32px;border-radius:var(--r-md);background:#65a30d;color:#fff;font-family:var(--mono);font-size:var(--fs-sm);font-weight:var(--fw-bold);display:grid;place-items:center;flex-shrink:0">G</div>
+        <div style="font-family:var(--serif);font-size:var(--fs-md);font-weight:700;color:var(--ink-900)">Personalització Lingüística</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:var(--sp-3)">
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">G1 Suport L1</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">G2 Adaptació cultural</span>
+      </div>
+      <p style="font-size:var(--fs-xs);color:var(--ink-600);line-height:1.5;margin:0">Per a alumnat nouvingut: glossaris bilingües, adequació de referents culturals i exemples propers a l'experiència de l'alumne.</p>
+    </div>
+
+    <div class="card card-p-sm">
+      <div style="display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-3)">
+        <div style="width:32px;height:32px;border-radius:var(--r-md);background:#9333ea;color:#fff;font-family:var(--mono);font-size:var(--fs-sm);font-weight:var(--fw-bold);display:grid;place-items:center;flex-shrink:0">H</div>
+        <div style="font-family:var(--serif);font-size:var(--fs-md);font-weight:700;color:var(--ink-900)">Adaptacions per Perfil</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:var(--sp-3)">
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">TEA</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">TDAH</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">Dislèxia</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">DI</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">TDL</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">AACC</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">2e</span>
+      </div>
+      <p style="font-size:var(--fs-xs);color:var(--ink-600);line-height:1.5;margin:0">Instruccions específiques per a cada condició. Les més extenses del catàleg: cada perfil té entre 5 i 12 instruccions pròpies.</p>
+    </div>
+
+    <div class="card card-p-sm">
+      <div style="display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-3)">
+        <div style="width:32px;height:32px;border-radius:var(--r-md);background:var(--ink-600);color:#fff;font-family:var(--mono);font-size:var(--fs-sm);font-weight:var(--fw-bold);display:grid;place-items:center;flex-shrink:0">I</div>
+        <div style="font-family:var(--serif);font-size:var(--fs-md);font-weight:700;color:var(--ink-900)">Meta-regles Transversals</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:var(--sp-3)">
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">I1 Qualitat</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-500);background:var(--cream-2);border-radius:3px;padding:2px 6px">I2 Integració de perfils</span>
+      </div>
+      <p style="font-size:var(--fs-xs);color:var(--ink-600);line-height:1.5;margin:0">Regles que s'apliquen sempre: com combinar instruccions de condicions múltiples, quines prevalen, com evitar contradiccions entre perfils.</p>
+    </div>
+
+  </div>
+
+  <div style="background:var(--cream-2);border-radius:var(--r-lg);padding:var(--sp-4) var(--sp-5);margin-top:var(--sp-6);display:flex;flex-wrap:wrap;gap:var(--sp-3) var(--sp-5);align-items:center">
+    <span style="font-size:var(--fs-xs);color:var(--ink-400);font-weight:var(--fw-semi);text-transform:uppercase;letter-spacing:.1em">Fonts acadèmiques</span>
+    <span style="font-family:var(--mono);font-size:var(--fs-xs);font-weight:var(--fw-semi);color:var(--ink-600)"><strong style="color:var(--primary)">UDL</strong> CAST 2024</span>
+    <span style="font-family:var(--mono);font-size:var(--fs-xs);font-weight:var(--fw-semi);color:var(--ink-600)"><strong style="color:var(--primary)">LF-IFLA</strong> 2010</span>
+    <span style="font-family:var(--mono);font-size:var(--fs-xs);font-weight:var(--fw-semi);color:var(--ink-600)"><strong style="color:var(--primary)">UNE 153101</strong> 2018</span>
+    <span style="font-family:var(--mono);font-size:var(--fs-xs);font-weight:var(--fw-semi);color:var(--ink-600)"><strong style="color:var(--primary)">MECR-CV</strong> 2020</span>
+    <span style="font-family:var(--mono);font-size:var(--fs-xs);font-weight:var(--fw-semi);color:var(--ink-600)"><strong style="color:var(--primary)">WCAG 2.2</strong> 2023</span>
+  </div>
+</section>
+
+<!-- §11 Els LLM                                                  -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="section" style="margin-bottom:6rem" id="els-llm">
+  <div class="section-header">
+    <span class="section-badge">11</span>
+    <h2 class="section-title">Els models de llenguatge (LLM)</h2>
+  </div>
+  <p class="section-intro max-w-3xl">ATNE no s'ha dissenyat per a un únic model. La selecció del model és configurable perquè cada model té punts forts diferents segons el perfil de l'alumne i el nivell educatiu.</p>
+
+  <div class="grid-2" style="margin-bottom:var(--sp-6)">
+    <div class="card card-p-sm">
+      <div style="font-family:var(--mono);font-size:var(--fs-xs);font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--primary);margin-bottom:var(--sp-2)">Per defecte</div>
+      <div style="font-family:var(--serif);font-size:var(--fs-lg);font-weight:700;color:var(--ink-900);margin-bottom:var(--sp-2)">Gemma 4 31B</div>
+      <p style="font-size:var(--fs-sm);color:var(--ink-600);line-height:1.55;margin:0">Model open-source de Google. Excel·lent en català, cost zero en el pilot. Resultat d'una avaluació empírica amb 200+ casos i avaluació humana.</p>
+    </div>
+    <div class="card card-p-sm">
+      <div style="font-family:var(--mono);font-size:var(--fs-xs);font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-400);margin-bottom:var(--sp-2)">Rotació opcional</div>
+      <div style="font-family:var(--serif);font-size:var(--fs-lg);font-weight:700;color:var(--ink-900);margin-bottom:var(--sp-2)">GPT-4o · GPT-4.1-mini</div>
+      <p style="font-size:var(--fs-sm);color:var(--ink-600);line-height:1.55;margin:0">Preferits per a Primària (GPT-4o-mini guanya en textos simples). Disponibles amb clau API de la institució. Afegeixen cost marginal.</p>
+    </div>
+  </div>
+
+  <div class="card card-p-sm" style="display:flex;align-items:center;justify-content:space-between;gap:var(--sp-4)">
+    <div>
+      <div style="font-weight:var(--fw-semi);color:var(--ink-900);margin-bottom:4px">Veure la comparativa completa de models</div>
+      <div style="font-size:var(--fs-sm);color:var(--ink-500)">Avaluació empírica, resultats del pilot, criteris de selecció i filosofia d'elecció de model.</div>
+    </div>
+    <a href="/ui/llms.html" style="display:inline-flex;align-items:center;gap:6px;background:var(--primary);color:#fff;padding:8px 18px;border-radius:var(--r-pill);font-size:var(--fs-sm);font-weight:var(--fw-semi);text-decoration:none;white-space:nowrap;flex-shrink:0">Els LLM →</a>
+  </div>
+</section>
+
+<!-- §12 Bibliografia                                              -->
 <!-- ═══════════════════════════════════════════════════════════ -->
 <section class="section" style="margin-bottom:6rem" id="bibliografia">
   <div class="section-header">
-    <span class="section-badge">09</span>
+    <span class="section-badge">12</span>
     <h2 class="section-title">Per anar més lluny</h2>
   </div>
   <p class="section-intro max-w-3xl">Fonts i marcs teòrics en què es fonamenta l'adaptació de materials a ATNE.</p>
