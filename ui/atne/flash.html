@@ -421,7 +421,10 @@
     .result-empty, .result-loading { min-height: 120px; padding: 20px 0; }
     .empty-icon { font-size: 36px; }
     .flash-result { padding: 18px 18px 80px; }
-    .action-bar { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: 16px; right: 16px; overflow-x: auto; justify-content: center; }
+    .action-bar { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: 16px; right: 16px; justify-content: center; }
+    .ab-label { display: none; }
+    .ab-btn { padding: 9px 11px; gap: 0; }
+    .ab-sep { margin: 0 1px; }
   }
 
   /* ── Selector de tipografia ───────────────────────────────── */
@@ -1052,7 +1055,7 @@
       <rect x="5" y="5" width="9" height="9" rx="1.5"/>
       <path d="M11 5V3a1.5 1.5 0 0 0-1.5-1.5H3A1.5 1.5 0 0 0 1.5 3v6.5A1.5 1.5 0 0 0 3 11H5"/>
     </svg>
-    Copia
+    <span class="ab-label">Copia</span>
   </button>
   <div class="ab-sep"></div>
   <button class="ab-btn" id="btn-pdf" title="Descarrega com a PDF">
@@ -1061,7 +1064,7 @@
       <path d="M9 1.5V6H13.5"/>
       <path d="M5.5 10.5h5M5.5 8h5"/>
     </svg>
-    PDF
+    <span class="ab-label">PDF</span>
   </button>
   <div class="ab-sep"></div>
   <button class="ab-btn" id="btn-refer" title="Torna a generar l'adaptació">
@@ -1069,21 +1072,21 @@
       <path d="M13.5 8A5.5 5.5 0 1 1 10 3.07"/>
       <path d="M10 1v3h3"/>
     </svg>
-    Refer
+    <span class="ab-label">Refer</span>
   </button>
   <div class="ab-sep"></div>
   <button class="ab-btn" id="btn-save" title="Desa a la biblioteca">
     <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">
       <path d="M3 2h10v13l-5-3-5 3z"/>
     </svg>
-    Desa
+    <span class="ab-label">Desa</span>
   </button>
   <div class="ab-sep"></div>
   <button class="ab-btn" id="btn-edit" title="Edita el text adaptat">
     <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">
       <path d="M11.5 2.5a1.414 1.414 0 0 1 2 2L5 13H3v-2z"/>
     </svg>
-    Edita
+    <span class="ab-label">Edita</span>
   </button>
   <div class="ab-sep"></div>
   <button class="ab-btn" id="btn-historial" title="Veure la biblioteca d'adaptacions">
@@ -1091,7 +1094,7 @@
       <circle cx="8" cy="8" r="6.5"/>
       <path d="M8 4.5V8l2.5 2"/>
     </svg>
-    Historial
+    <span class="ab-label">Historial</span>
   </button>
 </div>
 
@@ -1606,7 +1609,7 @@
     navigator.clipboard.writeText(parts.join('')).then(function () {
       btn.innerHTML = '✓ Copiat';
       setTimeout(function () {
-        btn.innerHTML = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M11 5V3a1.5 1.5 0 0 0-1.5-1.5H3A1.5 1.5 0 0 0 1.5 3v6.5A1.5 1.5 0 0 0 3 11H5"/></svg> Copia';
+        btn.innerHTML = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M11 5V3a1.5 1.5 0 0 0-1.5-1.5H3A1.5 1.5 0 0 0 1.5 3v6.5A1.5 1.5 0 0 0 3 11H5"/></svg><span class="ab-label">Copia</span>';
       }, 2000);
     }).catch(function () {});
   });
@@ -2014,7 +2017,8 @@
       editBtn.classList.remove('editing');
       editBtn.innerHTML =
         '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">' +
-        '<path d="M11.5 2.5a1.414 1.414 0 0 1 2 2L5 13H3v-2z"/></svg> Edita';
+        '<path d="M11.5 2.5a1.414 1.414 0 0 1 2 2L5 13H3v-2z"/></svg>' +
+        '<span class="ab-label">Edita</span>';
     } else {
       box.contentEditable = 'true';
       box.focus();
@@ -2029,7 +2033,8 @@
       editBtn.innerHTML =
         '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">' +
         '<path d="M13 3L6 10l-3 1 1-3 7-7z" fill="currentColor" stroke="none"/>' +
-        '<path d="M2 14h12" stroke-linecap="round"/></svg> Fet';
+        '<path d="M2 14h12" stroke-linecap="round"/></svg>' +
+        '<span class="ab-label">Fet</span>';
     }
   });
 })();
