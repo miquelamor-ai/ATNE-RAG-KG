@@ -546,6 +546,43 @@
     color: #222;
   }
 
+  /* ── Flash/Taller: actiu indigo ────────────────────────────────── */
+  .flash-mode-nav .step.on { background: var(--primary); color: #fff; }
+
+  /* ── Grup/Alumne: fons crema fosc, actiu blanc ─────────────────── */
+  #tipus-steps { background: var(--cream-3); }
+  #tipus-steps .step { color: var(--ink-500); }
+  #tipus-steps .step.on { background: #fff; color: var(--ink-900); box-shadow: 0 1px 3px rgba(0,0,0,.10); }
+
+  /* ── Complements: una sola fila ────────────────────────────────── */
+  .comp-chips { flex-wrap: nowrap; overflow-x: auto; }
+
+  /* ── Inputs: vora transparent, blava en focus ───────────────────── */
+  .form-select, .form-input { border: 1.5px solid transparent !important; }
+  .form-select:focus, .form-input:focus { border-color: var(--primary) !important; }
+  .flash-textarea { border: 1.5px solid transparent !important; }
+  .flash-textarea:focus { border-color: var(--primary) !important; }
+
+  /* ── Llengua + Adaptar: mateixa fila ────────────────────────────── */
+  .lang-adaptar-row { display: flex; gap: 8px; align-items: stretch; }
+  .lang-adaptar-row select { flex: 0 0 110px; }
+  .lang-adaptar-row .btn-adaptar { flex: 1; }
+
+  /* ── Panell form: mateix fons que resultat (sense contrast) ─────── */
+  .flash-form { background: var(--cream); }
+  .form-footer { background: var(--cream); border-top: none; }
+
+  /* ── Carregar perfil: icona topbar ──────────────────────────────── */
+  .load-profile-btn {
+    width: 32px; height: 32px;
+    display: grid; place-items: center;
+    border: none; background: transparent; cursor: pointer;
+    color: var(--ink-500); border-radius: var(--r-md); flex-shrink: 0;
+    transition: color var(--trans-fast);
+  }
+  .load-profile-btn:hover { color: var(--ink-900); }
+  .load-profile-btn svg { width: 18px; height: 18px; }
+
   /* ── Topbar: hamburger ────────────────────────────────────────── */
   .hamb {
     display: none;
@@ -630,6 +667,12 @@
     </nav>
     <div class="tb-spacer"></div>
     <a href="/ui/saber-ne.html" target="_blank" class="icon-btn sbn-link" title="Saber-ne+" style="text-decoration:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6"/><path d="M12 3a6 6 0 0 1 6 6c0 2.22-1.2 4.16-3 5.2V17H9v-2.8C7.2 13.16 6 11.22 6 9a6 6 0 0 1 6-6z"/></svg></a>
+    <button class="load-profile-btn" id="btn-load-profile" title="Carrega un perfil desat">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+    </button>
     <button id="docent-av" class="docent-av" title="El teu compte">?</button>
   </header>
 
@@ -668,7 +711,7 @@
           <option value="repte">Versió enriquida (més profunditat)</option>
         </select>
         <select class="form-select" id="car-sel" style="display:none">
-          <option value="">Al nivell del curs</option>
+          <option value="">Selecciona una condició…</option>
           <option value="costa_llegir">Li costa llegir (dislèxia)</option>
           <option value="costa_atencio">Li costa l'atenció i la concentració (TDAH)</option>
           <option value="instruccions_concretes">Necessita instruccions molt concretes (TEA)</option>
@@ -704,18 +747,6 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="lang-sel">Llengua de sortida</label>
-        <select class="form-select" id="lang-sel">
-          <option value="ca">Català</option>
-          <option value="es">Castellà</option>
-          <option value="en">Anglès</option>
-          <option value="fr">Francès</option>
-          <option value="gl">Gallec (beta)</option>
-          <option value="eu">Euskera (beta)</option>
-        </select>
-      </div>
-
-      <div class="form-group">
         <label class="form-label" for="text-area">Text a adaptar</label>
         <textarea class="flash-textarea" id="text-area"
                   placeholder="Enganxa aquí el text que vols adaptar…"
@@ -728,9 +759,20 @@
       </div>
 
       <div class="form-footer">
-        <button class="btn-adaptar" id="btn-adaptar">
-          <span id="btn-label">Adaptar text →</span>
-        </button>
+        <label class="form-label" for="lang-sel" style="margin-bottom:6px;display:block">Llengua de sortida</label>
+        <div class="lang-adaptar-row">
+          <select class="form-select" id="lang-sel">
+            <option value="ca">Català</option>
+            <option value="es">Castellà</option>
+            <option value="en">Anglès</option>
+            <option value="fr">Francès</option>
+            <option value="gl">Gallec (beta)</option>
+            <option value="eu">Euskera (beta)</option>
+          </select>
+          <button class="btn-adaptar" id="btn-adaptar">
+            <span id="btn-label">Adaptar text →</span>
+          </button>
+        </div>
         <div class="save-profile-wrap">
           <button class="save-trigger" id="save-trigger">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -869,14 +911,12 @@
     Desa
   </button>
   <div class="ab-sep"></div>
-  <button class="ab-btn" id="btn-refer" title="Genera una nova versió">
+  <button class="ab-btn" id="btn-historial" title="Historial d'adaptacions">
     <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">
-      <path d="M13.5 2.5v4h-4"/>
-      <path d="M2 8A6 6 0 0 1 13.5 4.5"/>
-      <path d="M2.5 13.5v-4h4"/>
-      <path d="M14 8a6 6 0 0 1-11.5 3.5"/>
+      <circle cx="8" cy="8" r="6.5"/>
+      <path d="M8 4.5V8l2.5 2"/>
     </svg>
-    Refer
+    Historial
   </button>
 </div>
 
