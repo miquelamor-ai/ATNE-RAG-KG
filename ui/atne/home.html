@@ -287,6 +287,7 @@
   </div>
 
   <!-- Historial recent -->
+  <div id="biblioteca" style="scroll-margin-top:16px"></div>
   <div class="section-header">
     <span class="section-title">Adaptacions recents</span>
     <a href="#" class="section-link" id="link-veure-tot" style="display:none">Veure tot</a>
@@ -453,6 +454,12 @@
       .catch(function() {});
   }
   loadHistory();
+
+  // Scroll automàtic a #biblioteca si ve des de Flash → Historial
+  if (window.location.hash === '#biblioteca') {
+    var bibEl = document.getElementById('biblioteca');
+    if (bibEl) setTimeout(function () { bibEl.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200);
+  }
 
 })();
 </script>

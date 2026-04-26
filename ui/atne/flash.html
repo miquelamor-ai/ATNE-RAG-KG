@@ -642,6 +642,45 @@
     .hamb { display: grid; }
     .tb-sep, .flash-mode-nav { display: none; }
   }
+
+  /* ── Text adaptat editable ────────────────────────────────────── */
+  .adapted-box[contenteditable="true"] {
+    outline: 2px solid var(--primary);
+    outline-offset: 4px;
+    cursor: text;
+    user-select: text;
+  }
+  .ab-btn.editing {
+    background: rgba(39,174,96,.18) !important;
+    color: #1e9650 !important;
+  }
+
+  /* ── Mòbil: toggle formulari ↔ resultat ─────────────────────── */
+  .mob-back-btn {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 0 0 14px;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--ink-500);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--ui);
+  }
+  .mob-back-btn svg { width: 14px; height: 14px; }
+  .mob-back-btn:hover { color: var(--primary); }
+
+  @media (max-width: 720px) {
+    /* Per defecte mòbil: formulari visible, resultat amagat */
+    .flash-result { display: none; }
+    .mob-back-btn { display: flex; }
+
+    /* Quan hi ha resultat actiu: amaga formulari, mostra resultat */
+    .flash-main.mob-result .flash-form { display: none; }
+    .flash-main.mob-result .flash-result { display: block; }
+  }
 </style>
 </head>
 <body>
@@ -690,12 +729,37 @@
         <div class="form-group" style="flex:1;min-width:0">
           <label class="form-label" for="curs-sel">Curs</label>
           <select class="form-select" id="curs-sel">
-            <option value="primaria_12">Primària 1r – 2n</option>
-            <option value="primaria_34">Primària 3r – 4t</option>
-            <option value="primaria_56">Primària 5è – 6è</option>
-            <option value="eso_12" selected>ESO 1r – 2n</option>
-            <option value="eso_34">ESO 3r – 4t</option>
-            <option value="batxillerat">Batxillerat</option>
+            <optgroup label="Educació infantil">
+              <option value="I3">I3</option>
+              <option value="I4">I4</option>
+              <option value="I5">I5</option>
+            </optgroup>
+            <optgroup label="Primària">
+              <option value="1r Primària">1r Primària</option>
+              <option value="2n Primària">2n Primària</option>
+              <option value="3r Primària">3r Primària</option>
+              <option value="4t Primària">4t Primària</option>
+              <option value="5è Primària">5è Primària</option>
+              <option value="6è Primària">6è Primària</option>
+            </optgroup>
+            <optgroup label="ESO">
+              <option value="1r ESO">1r ESO</option>
+              <option value="2n ESO" selected>2n ESO</option>
+              <option value="3r ESO">3r ESO</option>
+              <option value="4t ESO">4t ESO</option>
+            </optgroup>
+            <optgroup label="Batxillerat">
+              <option value="1r Batxillerat">1r Batxillerat</option>
+              <option value="2n Batxillerat">2n Batxillerat</option>
+            </optgroup>
+            <optgroup label="FP">
+              <option value="1r FP Grau Bàsic">FP Grau Bàsic 1r</option>
+              <option value="2n FP Grau Bàsic">FP Grau Bàsic 2n</option>
+              <option value="1r FP Grau Mitjà">FP Grau Mitjà 1r</option>
+              <option value="2n FP Grau Mitjà">FP Grau Mitjà 2n</option>
+              <option value="1r FP Grau Superior">FP Grau Superior 1r</option>
+              <option value="2n FP Grau Superior">FP Grau Superior 2n</option>
+            </optgroup>
           </select>
         </div>
         <div class="form-group" style="flex:none">
@@ -707,6 +771,10 @@
           <div class="load-profile-wrap">
             <button class="load-profile-btn" id="btn-load-profile">Carrega un perfil desat</button>
             <div class="load-pf-dropdown" id="load-pf-dropdown"></div>
+            <div id="loaded-profile-chip" style="display:none;margin-top:5px;font-size:11px;background:var(--primary-50);color:var(--primary);border:1px solid var(--primary-100);border-radius:var(--r-pill);padding:3px 9px;font-weight:500;font-family:var(--ui);display:none;align-items:center;gap:5px">
+              <svg viewBox="0 0 12 12" width="11" height="11" fill="currentColor"><path d="M10 3.5 5 8.5 2 5.5"/><path d="M10 3.5 5 8.5 2 5.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span id="loaded-profile-label"></span>
+            </div>
           </div>
         </div>
       </div>
@@ -798,6 +866,11 @@
 
     <!-- Panell resultat -->
     <section class="flash-result" id="flash-result">
+
+      <button class="mob-back-btn" id="mob-back-btn">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 12l-4-4 4-4"/></svg>
+        Modifica els paràmetres
+      </button>
 
       <div class="result-empty" id="state-empty">
         <div class="empty-icon">⚡</div>
@@ -927,7 +1000,14 @@
     Desa
   </button>
   <div class="ab-sep"></div>
-  <button class="ab-btn" id="btn-historial" title="Historial d'adaptacions">
+  <button class="ab-btn" id="btn-edit" title="Edita el text adaptat">
+    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M11.5 2.5a1.414 1.414 0 0 1 2 2L5 13H3v-2z"/>
+    </svg>
+    Edita
+  </button>
+  <div class="ab-sep"></div>
+  <button class="ab-btn" id="btn-historial" title="Veure la biblioteca d'adaptacions">
     <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">
       <circle cx="8" cy="8" r="6.5"/>
       <path d="M8 4.5V8l2.5 2"/>
@@ -974,6 +1054,26 @@
   })();
 
   // ── Mapes behavioral → clínic ────────────────────────────────────────────────
+  // ── Mapping curs UI → curs API (Flash backend) ──────────────────────────────
+  // Retrocompatibilitat: perfils antics guarden valors API directament
+  var API_TO_CURS_FALLBACK = {
+    'primaria_12':'1r Primària','primaria_34':'3r Primària','primaria_56':'5è Primària',
+    'eso_12':'1r ESO','eso_34':'3r ESO','batxillerat':'1r Batxillerat',
+  };
+
+  var CURS_TO_API = {
+    'I3':'primaria_12','I4':'primaria_12','I5':'primaria_12',
+    '1r Primària':'primaria_12','2n Primària':'primaria_12',
+    '3r Primària':'primaria_34','4t Primària':'primaria_34',
+    '5è Primària':'primaria_56','6è Primària':'primaria_56',
+    '1r ESO':'eso_12','2n ESO':'eso_12',
+    '3r ESO':'eso_34','4t ESO':'eso_34',
+    '1r Batxillerat':'batxillerat','2n Batxillerat':'batxillerat',
+    '1r FP Grau Bàsic':'batxillerat','2n FP Grau Bàsic':'batxillerat',
+    '1r FP Grau Mitjà':'batxillerat','2n FP Grau Mitjà':'batxillerat',
+    '1r FP Grau Superior':'batxillerat','2n FP Grau Superior':'batxillerat',
+  };
+
   var BEHAVIORAL_TO_PERFILS = {
     'costa_llegir':           ['dislexia'],
     'costa_atencio':          ['tdah'],
@@ -1140,6 +1240,15 @@
   }
 
   // ── Gestió d'estats ──────────────────────────────────────────────────────────
+  var flashMain = document.querySelector('.flash-main');
+
+  function setMobilePanel(panel) {
+    if (!flashMain) return;
+    if (window.innerWidth > 720) return;
+    if (panel === 'result') flashMain.classList.add('mob-result');
+    else flashMain.classList.remove('mob-result');
+  }
+
   function showState(name) {
     stateEmpty.style.display   = name === 'empty'   ? 'flex'  : 'none';
     stateLoading.style.display = name === 'loading' ? 'flex'  : 'none';
@@ -1147,6 +1256,8 @@
     stateResult.style.display  = name === 'result'  ? 'block' : 'none';
     if (name === 'result') { actionBar.classList.add('show'); }
     else { actionBar.classList.remove('show'); }
+    // Mòbil: mostra panell resultat per a loading/result/error; torna al form per a empty
+    setMobilePanel(name === 'empty' ? 'form' : 'result');
   }
   showState('empty');
 
@@ -1172,7 +1283,9 @@
       }
 
       // Restaura el formulari (curs, tipus, característica, L1)
-      if (ps.curs && cursSel) cursSel.value = ps.curs;
+      // cursUI = valor llegible del select; curs = valor API. Preferim cursUI.
+      var cursRestore = ps.cursUI || ps.curs || '';
+      if (cursRestore && cursSel) cursSel.value = cursRestore;
       if (ps.tipus) {
         tipusActual = ps.tipus;
         document.querySelectorAll('#tipus-steps .step').forEach(function (b) {
@@ -1247,9 +1360,15 @@
 
   function runAdapt() {
     var text = textArea.value.trim();
-    if (!text) { textArea.focus(); return; }
+    if (!text) {
+      // En mòbil, torna al formulari per mostrar el textarea buit
+      setMobilePanel('form');
+      textArea.focus();
+      return;
+    }
 
-    var curs = cursSel.value;
+    var cursUI = cursSel.value;
+    var curs = CURS_TO_API[cursUI] || cursUI;
     var adaptacio, perfils, badge, l1 = '';
     var caracteristica = '';
 
@@ -1271,7 +1390,7 @@
     try { docentId = localStorage.getItem('atne.docent_id') || ''; } catch (e) { /* */ }
 
     var langVal = document.getElementById('lang-sel')?.value || 'ca';
-    lastPayload = { text: text, curs: curs, adaptacio: adaptacio, perfils: perfils, l1: l1, tipus: tipusActual, complements: Array.from(activeComps), docent_id: docentId, lang: langVal, caracteristica: caracteristica };
+    lastPayload = { text: text, curs: curs, cursUI: cursUI, adaptacio: adaptacio, perfils: perfils, l1: l1, tipus: tipusActual, complements: Array.from(activeComps), docent_id: docentId, lang: langVal, caracteristica: caracteristica };
     resultBadge.textContent = badge;
     glStatus.textContent = 'Generant…'; glStatus.className = 'comp-status';
     prStatus.textContent = 'Generant…'; prStatus.className = 'comp-status';
@@ -1395,30 +1514,63 @@
     var adaptedHtml = (adaptedEl || {}).innerHTML || '';
     if (!adaptedHtml.trim()) return;
 
-    // Títol per al nom del fitxer (primera capçalera o primera línia)
+    // Nom del fitxer
     var titleEl = adaptedEl.querySelector('h1, h2, h3');
     var titleText = (titleEl ? titleEl.innerText : (adaptedEl.innerText || '').split('\n')[0])
       .trim().slice(0, 80);
     var filename = (titleText || 'adaptacio-flash')
       .replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, '-').toLowerCase() || 'adaptacio-flash';
 
-    // Elements a ocultar durant la captura PDF
-    var toHide = Array.from(stateResult.querySelectorAll(
-      '.result-header, .comp-status, .comp-chevron, .comp-icon'
-    ));
-    toHide.forEach(function (el) { el.style.display = 'none'; });
-
-    // Aplica la font seleccionada als cossos dels complements (unifica tipografia)
-    var compBodies = Array.from(stateResult.querySelectorAll('.comp-body'));
+    // Mapping font seleccionada
     var fontFamilyMap = {
-      fraunces:     "var(--serif)",
-      inter:        "var(--ui)",
+      fraunces:     "Fraunces, Georgia, serif",
+      inter:        "Inter, system-ui, sans-serif",
       atkinson:     "'Atkinson Hyperlegible', system-ui, sans-serif",
       lexend:       "'Lexend', system-ui, sans-serif",
       opendyslexic: "'OpenDyslexic', system-ui, sans-serif",
     };
-    var pdfFont = fontFamilyMap[currentFont || 'fraunces'] || '';
-    if (pdfFont) compBodies.forEach(function (el) { el.style.fontFamily = pdfFont; });
+    var pdfFont = fontFamilyMap[currentFont || 'fraunces'] || "Fraunces, Georgia, serif";
+
+    // Construeix un node net fora del DOM per al PDF
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:170mm;background:#fff;font-size:11pt;line-height:1.65;color:#111;font-family:' + pdfFont;
+
+    // Estils per a salts de pàgina correctes
+    var style = document.createElement('style');
+    style.textContent =
+      'p,li{page-break-inside:avoid!important;orphans:3;widows:3}' +
+      'h1,h2,h3{page-break-after:avoid!important}' +
+      '.comp-section-pdf{page-break-inside:avoid}' +
+      '.adapted-box{border:none!important;box-shadow:none!important;padding:0!important;margin:0!important;font-family:' + pdfFont + '}' +
+      'body{font-family:' + pdfFont + '}';
+    wrap.appendChild(style);
+
+    // Text adaptat
+    var adaptBox = document.createElement('div');
+    adaptBox.className = 'adapted-box';
+    adaptBox.innerHTML = adaptedEl.innerHTML;
+    wrap.appendChild(adaptBox);
+
+    // Complements oberts (ometre els tancats completament)
+    stateResult.querySelectorAll('.comp-section.open').forEach(function (sec) {
+      var titleEl2 = sec.querySelector('.comp-title');
+      var bodyEl   = sec.querySelector('.comp-body');
+      if (!bodyEl) return;
+      var block = document.createElement('div');
+      block.className = 'comp-section-pdf';
+      block.style.cssText = 'margin-top:1.6em;border-top:1.5px solid #ddd;padding-top:.8em;page-break-inside:avoid';
+      var h2 = document.createElement('h2');
+      h2.style.cssText = 'font-size:13pt;font-weight:700;margin:0 0 .5em;color:#222;font-family:' + pdfFont;
+      h2.textContent = titleEl2 ? titleEl2.textContent.trim() : '';
+      block.appendChild(h2);
+      var content = document.createElement('div');
+      content.style.fontFamily = pdfFont;
+      content.innerHTML = bodyEl.innerHTML;
+      block.appendChild(content);
+      wrap.appendChild(block);
+    });
+
+    document.body.appendChild(wrap);
 
     html2pdf().set({
       margin: [15, 20],
@@ -1426,10 +1578,11 @@
       image: { type: 'jpeg', quality: 0.95 },
       html2canvas: { scale: 2, useCORS: true },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak: { mode: 'avoid-all' },
-    }).from(stateResult).save().then(function () {
-      toHide.forEach(function (el) { el.style.removeProperty('display'); });
-      if (pdfFont) compBodies.forEach(function (el) { el.style.removeProperty('font-family'); });
+      pagebreak: { mode: ['css', 'legacy'] },
+    }).from(wrap).save().then(function () {
+      document.body.removeChild(wrap);
+    }).catch(function () {
+      if (wrap.parentNode) document.body.removeChild(wrap);
     });
   });
 
@@ -1473,8 +1626,8 @@
         adapted_html:         html,
         title:                title,
         original_text:        lastPayload.text,
-        profile_snapshot:     { perfils: lastPayload.perfils, curs: lastPayload.curs, adaptacio: lastPayload.adaptacio, l1: lastPayload.l1, tipus: lastPayload.tipus, caracteristica: lastPayload.caracteristica || '' },
-        context_snapshot:     { curs: lastPayload.curs, mode: 'flash' },
+        profile_snapshot:     { perfils: lastPayload.perfils, curs: lastPayload.curs, cursUI: lastPayload.cursUI || lastPayload.curs, adaptacio: lastPayload.adaptacio, l1: lastPayload.l1, tipus: lastPayload.tipus, caracteristica: lastPayload.caracteristica || '' },
+        context_snapshot:     { curs: lastPayload.curs, cursUI: lastPayload.cursUI || lastPayload.curs, mode: 'flash' },
         complements_snapshot: {
           glossari:  glossariBody.innerText.trim(),
           preguntes: preguntesBody.innerText.trim(),
@@ -1636,8 +1789,17 @@
           dd.innerHTML = '<div class="load-pf-empty">Cap perfil desat encara.</div>';
           return;
         }
+        var CAR_LABEL_PF = { dislexia:'Dislèxia', tdah:'TDAH', tea:'TEA', nouvingut:'Nouvingut', altes_capacitats:'Altes cap.', di:'Dif. gral.', vulnerabilitat:'Vulnerable' };
+        var ADAPT_LABEL_PF = { enriquiment:'Grup repte', simplificat:'Grup suport', al_nivell:'Grup estàndard', molt_simplificat:'Grup reforç' };
         dd.innerHTML = data.profiles.map(function (p, i) {
-          var sub = [p.curs || '', p.tipus === 'alumne' ? 'Alumne' : 'Grup'].filter(Boolean).join(' · ');
+          var condLabel = '';
+          if (p.tipus === 'alumne') {
+            var pf = (p.perfils || [])[0] || '';
+            condLabel = CAR_LABEL_PF[pf] || '';
+          } else {
+            condLabel = ADAPT_LABEL_PF[p.adaptacio] || '';
+          }
+          var sub = [p.curs || '', condLabel].filter(Boolean).join(' · ');
           return '<div class="load-pf-item" data-idx="' + i + '">' +
             '<div class="lpf-name">' + (p.name || 'Perfil') + '</div>' +
             '<div class="lpf-sub">' + sub + '</div></div>';
@@ -1648,7 +1810,13 @@
             var p = data.profiles[+this.dataset.idx];
             if (!p) return;
 
-            if (p.curs && cursSel) cursSel.value = p.curs;
+            if (p.curs && cursSel) {
+              cursSel.value = p.curs;
+              // Retrocompatibilitat: si el valor és en format API antic, fes el lookup
+              if (cursSel.value !== p.curs && API_TO_CURS_FALLBACK[p.curs]) {
+                cursSel.value = API_TO_CURS_FALLBACK[p.curs];
+              }
+            }
 
             if (p.tipus) {
               tipusActual = p.tipus;
@@ -1670,6 +1838,21 @@
             }
 
             if (p.l1 && l1Inp) l1Inp.value = p.l1;
+
+            // Mostra el chip de perfil carregat
+            var chip = document.getElementById('loaded-profile-chip');
+            var label = document.getElementById('loaded-profile-label');
+            if (chip && label) {
+              var condLbl = '';
+              if (p.tipus === 'alumne') {
+                var pfPrimary = (p.perfils || [])[0] || '';
+                condLbl = CAR_LABEL_PF[pfPrimary] || '';
+              } else {
+                condLbl = ADAPT_LABEL_PF[p.adaptacio] || '';
+              }
+              label.textContent = (p.name || 'Perfil') + (condLbl ? ' · ' + condLbl : '');
+              chip.style.display = 'flex';
+            }
 
             dd.classList.remove('show');
           });
@@ -1705,6 +1888,48 @@
       location.href = '/ui/atne/pas1.html';
     });
 
+})();
+
+// ── Botó "Modifica els paràmetres" (mòbil) ──────────────────────────────────
+(function () {
+  var btn = document.getElementById('mob-back-btn');
+  if (btn) btn.addEventListener('click', function () {
+    var fm = document.querySelector('.flash-main');
+    if (fm) fm.classList.remove('mob-result');
+  });
+})();
+
+// ── Editar text adaptat ──────────────────────────────────────────────────────
+(function () {
+  var editBtn = document.getElementById('btn-edit');
+  var box     = document.getElementById('adapted-text');
+  if (!editBtn || !box) return;
+
+  editBtn.addEventListener('click', function () {
+    var editing = box.contentEditable === 'true';
+    if (editing) {
+      box.contentEditable = 'false';
+      editBtn.classList.remove('editing');
+      editBtn.innerHTML =
+        '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">' +
+        '<path d="M11.5 2.5a1.414 1.414 0 0 1 2 2L5 13H3v-2z"/></svg> Edita';
+    } else {
+      box.contentEditable = 'true';
+      box.focus();
+      // Mou el cursor al final
+      var range = document.createRange();
+      var sel   = window.getSelection();
+      range.selectNodeContents(box);
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      editBtn.classList.add('editing');
+      editBtn.innerHTML =
+        '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">' +
+        '<path d="M13 3L6 10l-3 1 1-3 7-7z" fill="currentColor" stroke="none"/>' +
+        '<path d="M2 14h12" stroke-linecap="round"/></svg> Fet';
+    }
+  });
 })();
 
 // ── Nav drawer mòbil ────────────────────────────────────────────────────────
