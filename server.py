@@ -5192,20 +5192,64 @@ async def check_is_admin(docent_id: str = ""):
     return {"ok": True, "is_admin": False}
 
 
+@app.get("/api/docent/list-admins")
+async def list_admins(_: bool = Depends(_require_admin)):
+    """Retorna la llista d'admins: env var (permanents) + Supabase (is_admin=true)."""
+    result: list[dict] = []
+    env_ids: set[str] = set()
+
+    if _ADMIN_LOGINS_RAW:
+        for _lg in _ADMIN_LOGINS_RAW.split(","):
+            _lg = _lg.strip()
+            if _lg:
+                did = _docent_id_from_login(_lg)
+                env_ids.add(did)
+                result.append({"docent_id": did, "alias": _alias_from_login(_lg),
+                                "email": _lg, "permanent": True})
+
+    if SUPABASE_URL:
+        resp = requests.get(
+            f"{SUPABASE_URL}/rest/v1/atne_docents?is_admin=eq.true&select=id,alias,email",
+            headers=SUPABASE_HEADERS, timeout=5,
+        )
+        if resp.status_code == 200:
+            for row in resp.json():
+                if row["id"] not in env_ids:
+                    result.append({"docent_id": row["id"],
+                                   "alias": row.get("alias") or row["id"],
+                                   "email": row.get("email") or "",
+                                   "permanent": False})
+
+    return {"ok": True, "admins": result}
+
+
 @app.post("/api/docent/set-admin")
 async def set_admin(payload: dict = Body(...), _: bool = Depends(_require_admin)):
-    """Concedeix o revoca rol admin a un docent (requereix sessió admin)."""
+    """Concedeix o revoca rol admin a un docent (requereix sessió admin).
+    Accepta {login} (lanet) o {docent_id}. Fa upsert per si el docent no existeix encara."""
+    login = (payload.get("login") or "").strip().lower()
     docent_id = (payload.get("docent_id") or "").strip()
-    is_admin = bool(payload.get("is_admin", False))
+    is_admin = bool(payload.get("is_admin", True))
+
+    if not docent_id and login:
+        docent_id = _docent_id_from_login(login)
     if not docent_id:
-        return JSONResponse({"ok": False, "error": "docent_id buit"}, status_code=400)
-    resp = requests.patch(
-        f"{SUPABASE_URL}/rest/v1/atne_docents?id=eq.{docent_id}",
-        headers={**SUPABASE_HEADERS, "Prefer": "return=minimal"},
-        json={"is_admin": is_admin},
+        return JSONResponse({"ok": False, "error": "login o docent_id obligatori"}, status_code=400)
+
+    upsert: dict = {"id": docent_id, "is_admin": is_admin}
+    if login:
+        upsert["email"] = login
+        upsert["alias"] = _alias_from_login(login)
+
+    resp = requests.post(
+        f"{SUPABASE_URL}/rest/v1/atne_docents",
+        headers={**SUPABASE_HEADERS, "Prefer": "resolution=merge-duplicates,return=minimal"},
+        json=upsert,
         timeout=5,
     )
-    return {"ok": resp.status_code in (200, 204)}
+    return {"ok": resp.status_code in (200, 201, 204),
+            "docent_id": docent_id,
+            "alias": upsert.get("alias", docent_id)}
 
 
 # ── Main ────────────────────────────────────────────────────────────────────

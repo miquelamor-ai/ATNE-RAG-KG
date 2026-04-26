@@ -546,6 +546,29 @@
     </div>
   </section>
 
+  <!-- Gestió d'admins -->
+  <section class="card" id="admins-card">
+    <h2>Gestió d'administradors</h2>
+    <p class="hint">Els admins marcats com a «Permanent» vénen de la variable d'entorn <code>ATNE_ADMIN_LOGINS</code> i no es poden revocar des d'aquí.</p>
+    <table id="admins-table" style="width:100%;border-collapse:collapse;margin-bottom:var(--sp-4)">
+      <thead>
+        <tr>
+          <th style="text-align:left;padding:6px 8px;border-bottom:2px solid var(--paper-line);font-size:var(--fs-sm)">Nom / Login</th>
+          <th style="text-align:left;padding:6px 8px;border-bottom:2px solid var(--paper-line);font-size:var(--fs-sm)">ID</th>
+          <th style="text-align:left;padding:6px 8px;border-bottom:2px solid var(--paper-line);font-size:var(--fs-sm)">Origen</th>
+          <th style="padding:6px 8px;border-bottom:2px solid var(--paper-line)"></th>
+        </tr>
+      </thead>
+      <tbody id="admins-tbody"><tr><td colspan="4" style="padding:12px 8px;color:var(--ink-400)">Carregant…</td></tr></tbody>
+    </table>
+    <form id="add-admin-form" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <input id="new-admin-login" type="text" placeholder="Login lanet (ex: miquel.amor)"
+             style="flex:1;min-width:200px;padding:7px 10px;border:1px solid var(--paper-line);border-radius:var(--r-md);font-family:var(--mono);font-size:var(--fs-sm)">
+      <button type="submit" style="padding:7px 16px;background:var(--primary);color:#fff;border:none;border-radius:var(--r-md);font-family:var(--ui);font-size:var(--fs-sm);cursor:pointer;white-space:nowrap">+ Fer admin</button>
+      <span id="add-admin-msg" style="font-size:var(--fs-sm);color:var(--ink-500)"></span>
+    </form>
+  </section>
+
   <!-- Activitat recent -->
   <section class="card">
     <h2>Activitat recent</h2>
@@ -1004,10 +1027,83 @@ async function loadAnalytics() {
   }
 }
 
+// ── Gestió d'admins ────────────────────────────────────────────
+async function loadAdmins() {
+  const tbody = document.getElementById('admins-tbody');
+  try {
+    const r = await fetch('/api/docent/list-admins', { credentials: 'same-origin' });
+    const d = await r.json();
+    if (!d.ok || !d.admins.length) {
+      tbody.innerHTML = '<tr><td colspan="4" style="padding:12px 8px;color:var(--ink-400)">Cap admin registrat.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = d.admins.map(a => `
+      <tr style="border-bottom:1px solid var(--paper-line)">
+        <td style="padding:8px 8px">
+          <strong style="font-size:var(--fs-sm)">${escHtml(a.alias)}</strong>
+          ${a.email ? `<span style="display:block;font-size:var(--fs-xs);color:var(--ink-400);font-family:var(--mono)">${escHtml(a.email)}</span>` : ''}
+        </td>
+        <td style="padding:8px 8px;font-family:var(--mono);font-size:var(--fs-xs);color:var(--ink-500)">${escHtml(a.docent_id)}</td>
+        <td style="padding:8px 8px;font-size:var(--fs-xs)">
+          ${a.permanent
+            ? '<span style="background:#fef3c7;color:#92400e;padding:2px 7px;border-radius:99px;font-weight:600">Permanent</span>'
+            : '<span style="background:#dcfce7;color:#166534;padding:2px 7px;border-radius:99px">BD</span>'}
+        </td>
+        <td style="padding:8px 8px;text-align:right">
+          ${a.permanent ? '' : `<button onclick="revokeAdmin('${escHtml(a.docent_id)}', this)"
+            style="padding:4px 10px;font-size:var(--fs-xs);background:#fee2e2;color:#dc2626;border:none;border-radius:var(--r-sm);cursor:pointer;font-family:var(--ui)">Revoca</button>`}
+        </td>
+      </tr>`).join('');
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="4" style="color:var(--danger);padding:8px">Error: ${e.message}</td></tr>`;
+  }
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function revokeAdmin(docentId, btn) {
+  if (!confirm('Segur que vols revocar l\'accés admin?')) return;
+  btn.disabled = true; btn.textContent = '…';
+  const r = await fetch('/api/docent/set-admin', {
+    method: 'POST', credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ docent_id: docentId, is_admin: false }),
+  });
+  const d = await r.json();
+  if (d.ok) loadAdmins();
+  else { btn.disabled = false; btn.textContent = 'Revoca'; alert('Error revocant: ' + (d.error || '')); }
+}
+
+document.getElementById('add-admin-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const login = document.getElementById('new-admin-login').value.trim().toLowerCase();
+  const msg = document.getElementById('add-admin-msg');
+  if (!login) return;
+  msg.textContent = 'Afegint…'; msg.style.color = 'var(--ink-500)';
+  const r = await fetch('/api/docent/set-admin', {
+    method: 'POST', credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ login, is_admin: true }),
+  });
+  const d = await r.json();
+  if (d.ok) {
+    msg.textContent = `✓ ${d.alias || login} és admin`;
+    msg.style.color = 'var(--ok)';
+    document.getElementById('new-admin-login').value = '';
+    loadAdmins();
+  } else {
+    msg.textContent = 'Error: ' + (d.error || 'desconegut');
+    msg.style.color = 'var(--danger)';
+  }
+  setTimeout(() => { msg.textContent = ''; }, 4000);
+});
+
 // ── Boot ───────────────────────────────────────────────────────
 (async function init() {
   const authed = await checkAuth();
-  if (authed) { showDashboard(); loadAnalytics(); }
+  if (authed) { showDashboard(); loadAnalytics(); loadAdmins(); }
   else showLogin();
 })();
 </script>
