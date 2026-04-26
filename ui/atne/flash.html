@@ -546,7 +546,7 @@
     color: #222;
   }
 
-  /* ── Topbar: hamburger + Saber-ne+ text link ────────────────── */
+  /* ── Topbar: hamburger ────────────────────────────────────────── */
   .hamb {
     display: none;
     width: 36px; height: 36px;
@@ -557,17 +557,6 @@
   }
   .hamb svg { width: 20px; height: 20px; }
   .hamb:hover { background: var(--cream-2); }
-  .sbn-link {
-    font-family: var(--mono);
-    font-size: 11px; font-weight: 600;
-    letter-spacing: .06em; text-transform: uppercase;
-    color: var(--ink-500); text-decoration: none;
-    padding: 4px 8px; border-radius: var(--r-md);
-    transition: background .12s, color .12s;
-    white-space: nowrap;
-  }
-  .sbn-link:hover { background: var(--cream-2); color: var(--primary); }
-
   /* ── Nav drawer mòbil (Flash) ───────────────────────────────── */
   .nav-backdrop {
     display: none; position: fixed; inset: 0;
@@ -604,7 +593,7 @@
 
   @media (max-width: 640px) {
     .hamb { display: grid; }
-    .tb-sep, .flash-mode-nav, .sbn-link { display: none; }
+    .tb-sep, .flash-mode-nav { display: none; }
   }
 </style>
 </head>
@@ -640,7 +629,7 @@
       <a href="/ui/atne/pas1.html" class="step">Taller</a>
     </nav>
     <div class="tb-spacer"></div>
-    <a href="/ui/saber-ne.html" target="_blank" class="sbn-link" title="Saber-ne+">Saber-ne+</a>
+    <a href="/ui/saber-ne.html" target="_blank" class="icon-btn sbn-link" title="Saber-ne+" style="text-decoration:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6"/><path d="M12 3a6 6 0 0 1 6 6c0 2.22-1.2 4.16-3 5.2V17H9v-2.8C7.2 13.16 6 11.22 6 9a6 6 0 0 1 6-6z"/></svg></a>
     <button id="docent-av" class="docent-av" title="El teu compte">?</button>
   </header>
 
