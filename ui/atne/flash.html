@@ -570,6 +570,7 @@
   .form-footer { background: var(--cream); border-top: none; }
 
   /* ── Carregar perfil: link discret sota Grup/Alumne ─────────────── */
+  .load-profile-wrap { position: relative; }
   .load-profile-btn {
     background: transparent; border: none; cursor: pointer;
     font-size: var(--fs-sm); font-family: var(--ui); font-weight: 500;
@@ -578,6 +579,19 @@
     transition: color var(--trans-fast);
   }
   .load-profile-btn:hover { color: var(--primary); }
+  .load-pf-dropdown {
+    display: none; position: absolute; top: calc(100% + 4px); left: 0;
+    min-width: 220px; background: #fff; border: 1px solid var(--paper-line);
+    border-radius: var(--r-lg); box-shadow: 0 4px 16px rgba(0,0,0,.10);
+    z-index: 200; overflow: hidden;
+  }
+  .load-pf-dropdown.show { display: block; }
+  .load-pf-item { padding: 9px 14px; cursor: pointer; border-bottom: 1px solid var(--paper-line); transition: background var(--trans-fast); }
+  .load-pf-item:last-child { border-bottom: 0; }
+  .load-pf-item:hover { background: var(--cream-2); }
+  .lpf-name { font-size: var(--fs-sm); font-weight: var(--fw-semi); color: var(--ink-800); }
+  .lpf-sub { font-size: 11px; font-family: var(--mono); color: var(--ink-400); margin-top: 2px; }
+  .load-pf-empty { padding: 14px; text-align: center; font-size: var(--fs-sm); color: var(--ink-400); }
 
   /* ── Topbar: hamburger ────────────────────────────────────────── */
   .hamb {
@@ -690,7 +704,10 @@
             <button class="step on" data-tipus="grup">Grup</button>
             <button class="step" data-tipus="alumne">Alumne</button>
           </div>
-          <button class="load-profile-btn" id="btn-load-profile">Carrega un perfil desat</button>
+          <div class="load-profile-wrap">
+            <button class="load-profile-btn" id="btn-load-profile">Carrega un perfil desat</button>
+            <div class="load-pf-dropdown" id="load-pf-dropdown"></div>
+          </div>
         </div>
       </div>
 
@@ -1580,6 +1597,90 @@
       }
     }).catch(function () { alert('Error de connexió.'); });
   });
+
+  // ── Carregar perfil desat ────────────────────────────────────────────────────
+  (function () {
+    var btn = document.getElementById('btn-load-profile');
+    var dd  = document.getElementById('load-pf-dropdown');
+    if (!btn || !dd) return;
+
+    var PERFILS_TO_CAR = {
+      'dislexia':         'costa_llegir',
+      'tdah':             'costa_atencio',
+      'tea':              'instruccions_concretes',
+      'nouvingut':        'nouvingut',
+      'altes_capacitats': 'vol_repte',
+      'di':               'dificultats_generals',
+      'vulnerabilitat':   'no_sap',
+    };
+
+    btn.addEventListener('click', async function (e) {
+      e.stopPropagation();
+      if (dd.classList.contains('show')) { dd.classList.remove('show'); return; }
+
+      var did = '';
+      try { did = localStorage.getItem('atne.docent_id') || ''; } catch (ex) {}
+      if (!did) {
+        stateError.style.display = 'block';
+        stateError.textContent = 'Cal estar identificat per carregar perfils desats.';
+        return;
+      }
+
+      dd.innerHTML = '<div class="load-pf-empty">Carregant…</div>';
+      dd.classList.add('show');
+
+      try {
+        var r = await fetch('/api/docent/profiles?docent_id=' + encodeURIComponent(did));
+        var data = await r.json();
+        if (!data.ok || !data.profiles || !data.profiles.length) {
+          dd.innerHTML = '<div class="load-pf-empty">Cap perfil desat encara.</div>';
+          return;
+        }
+        dd.innerHTML = data.profiles.map(function (p, i) {
+          var sub = [p.curs || '', p.tipus === 'alumne' ? 'Alumne' : 'Grup'].filter(Boolean).join(' · ');
+          return '<div class="load-pf-item" data-idx="' + i + '">' +
+            '<div class="lpf-name">' + (p.name || 'Perfil') + '</div>' +
+            '<div class="lpf-sub">' + sub + '</div></div>';
+        }).join('');
+
+        dd.querySelectorAll('.load-pf-item').forEach(function (item) {
+          item.addEventListener('click', function () {
+            var p = data.profiles[+this.dataset.idx];
+            if (!p) return;
+
+            if (p.curs && cursSel) cursSel.value = p.curs;
+
+            if (p.tipus) {
+              tipusActual = p.tipus;
+              document.querySelectorAll('#tipus-steps .step').forEach(function (b) {
+                b.classList.toggle('on', b.dataset.tipus === p.tipus);
+              });
+              updateTipusUI();
+            }
+
+            if (p.tipus === 'grup') {
+              var car = p.adaptacio === 'enriquiment' ? 'repte' : p.adaptacio === 'al_nivell' ? '' : 'suport';
+              if (carGrupSel) carGrupSel.value = car;
+            } else {
+              var primePerfil = (p.perfils || [])[0] || '';
+              var car = PERFILS_TO_CAR[primePerfil] || '';
+              if (carSel) carSel.value = car;
+              if (car === 'nouvingut') l1Group.classList.add('show');
+              else l1Group.classList.remove('show');
+            }
+
+            if (p.l1 && l1Inp) l1Inp.value = p.l1;
+
+            dd.classList.remove('show');
+          });
+        });
+      } catch (ex) {
+        dd.innerHTML = '<div class="load-pf-empty">Error de connexió.</div>';
+      }
+    });
+
+    document.addEventListener('click', function () { dd.classList.remove('show'); });
+  })();
 
   // ── Handoff Flash → Taller: porta el text original al Pas 2 ─────────────────
   document.querySelector('nav[aria-label="Mode"] a[href*="pas1"]')
