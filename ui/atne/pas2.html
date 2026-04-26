@@ -264,12 +264,14 @@
   .center-body {
     flex: 1;
     overflow-y: auto;
+    scrollbar-width: none;
     padding: 24px 32px 80px;
     display: flex;
     flex-direction: column;
     gap: 16px;
     align-items: center;
   }
+  .center-body::-webkit-scrollbar { display: none; }
   .mode-panel {
     width: 100%;
     max-width: 820px;
