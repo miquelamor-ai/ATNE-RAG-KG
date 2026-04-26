@@ -1502,6 +1502,11 @@
     streamAdaptFlash(Object.assign({}, lastPayload, { docent_id: docentId }), currentAbort.signal);
   });
 
+  // ── Historial ─────────────────────────────────────────────────────────────────
+  document.getElementById('btn-historial').addEventListener('click', function () {
+    window.location.href = '/ui/atne/home.html#biblioteca';
+  });
+
   // ── Selector de tipografia ────────────────────────────────────────────────────
   var FONT_LABELS = { fraunces: 'Fraunces', inter: 'Inter', atkinson: 'Atkinson', lexend: 'Lexend', opendyslexic: 'OpenDyslexic' };
   var currentFont = 'fraunces';
