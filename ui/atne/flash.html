@@ -546,12 +546,13 @@
     color: #222;
   }
 
-  /* ── Flash/Taller: actiu indigo ────────────────────────────────── */
+  /* ── Flash/Taller: fons crema fosc, actiu indigo ───────────────── */
+  .flash-mode-nav { background: var(--cream-3); }
   .flash-mode-nav .step.on { background: var(--primary); color: #fff; }
 
-  /* ── Grup/Alumne: fons crema fosc, actiu blanc ─────────────────── */
-  #tipus-steps { background: var(--cream-3); }
-  #tipus-steps .step { color: var(--ink-500); }
+  /* ── Grup/Alumne: quadrat, fons crema fosc, actiu blanc ─────────── */
+  #tipus-steps { background: var(--cream-3); border-radius: var(--r-sm); border: none; }
+  #tipus-steps .step { color: var(--ink-500); border-radius: calc(var(--r-sm) - 2px); }
   #tipus-steps .step.on { background: #fff; color: var(--ink-900); box-shadow: 0 1px 3px rgba(0,0,0,.10); }
 
   /* ── Complements: una sola fila ────────────────────────────────── */
