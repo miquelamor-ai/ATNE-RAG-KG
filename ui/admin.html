@@ -668,6 +668,7 @@ function showDashboard() {
 const PHASE_META = {
   generate:    { title: "Generació de text (Pas 2)",    desc: "POST /api/generate-text · generar text nou des de zero" },
   adapt:       { title: "Adaptació (Pas 3)",            desc: "POST /api/adapt · el motor principal del pilot" },
+  adapt_flash: { title: "Adaptació Flash",               desc: "POST /api/adapt-flash · mode ràpid sense configuració" },
   refine:      { title: "Refinament (Pas 4)",           desc: "POST /api/refine-text · correccions post-adaptació" },
   complements: { title: "Complements",                   desc: "Preguntes de comprensió, glossari, bastides" },
   auditor:     { title: "Auditor LLM (opt-in)",         desc: "Quality Report post-generació" },
