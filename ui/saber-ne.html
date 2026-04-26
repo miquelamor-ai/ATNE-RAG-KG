@@ -1007,6 +1007,10 @@
         <span class="sidebar-num">09</span>
         Bibliografia
       </a>
+      <a class="sidebar-link" href="#privacitat">
+        <span class="sidebar-num">10</span>
+        Privacitat i IA
+      </a>
     </nav>
   </div>
 </aside>
@@ -1869,6 +1873,68 @@
         <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">Council of Europe (2020).</strong> MECR — Common European Framework.</span></li>
         <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">Decret 175/2022.</strong> Normativa educativa catalana.</span></li>
         <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">LOE/LOMLOE.</strong> Marc normatiu NESE estatal.</span></li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- §10 Privacitat i IA                                         -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="section" style="margin-bottom:6rem" id="privacitat">
+  <div class="section-header">
+    <span class="section-badge">10</span>
+    <h2 class="section-title">Privacitat i IA</h2>
+  </div>
+  <p class="section-intro max-w-3xl">Quines dades s'envien als models d'IA i com protegim la privacitat de l'alumnat.</p>
+
+  <div class="grid-2" style="gap:var(--sp-6)">
+
+    <div class="biblio-card" style="border-left:4px solid var(--accent)">
+      <h3 class="biblio-title" style="display:flex;align-items:center;gap:8px">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18"><path d="M10 2C7 2 5.5 4 5.5 6V8H4a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1h-1.5V6C14.5 4 13 2 10 2zm0 1.2C12.2 3.2 13.3 4.6 13.3 6V8H6.7V6C6.7 4.6 7.8 3.2 10 3.2z"/></svg>
+        Què s'envia al model
+      </h3>
+      <ul class="biblio-list">
+        <li class="biblio-item"><span class="biblio-dot" style="color:var(--accent)">●</span><span>El <strong>text original</strong> que el docent enganxa o escriu</span></li>
+        <li class="biblio-item"><span class="biblio-dot" style="color:var(--accent)">●</span><span>Les <strong>condicions de l'alumne o grup</strong> (p.ex. TDAH, nouvingut, A2) — sense nom ni cognoms</span></li>
+        <li class="biblio-item"><span class="biblio-dot" style="color:var(--accent)">●</span><span>La <strong>matèria, el gènere discursiu i els complements</strong> triats pel docent</span></li>
+        <li class="biblio-item"><span class="biblio-dot" style="color:var(--accent)">●</span><span>Per a alumnes nouvinguts: <strong>L1, país d'origen i mesos a Catalunya</strong> (sense nom)</span></li>
+      </ul>
+    </div>
+
+    <div class="biblio-card" style="border-left:4px solid #16a34a">
+      <h3 class="biblio-title" style="display:flex;align-items:center;gap:8px">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18"><circle cx="10" cy="10" r="8"/><path d="M7 10l2 2 4-4"/></svg>
+        Què NO s'envia mai
+      </h3>
+      <ul class="biblio-list">
+        <li class="biblio-item"><span class="biblio-dot" style="color:#16a34a">●</span><span><strong>Noms, cognoms ni identificadors</strong> de cap alumne</span></li>
+        <li class="biblio-item"><span class="biblio-dot" style="color:#16a34a">●</span><span><strong>Dades mèdiques</strong> ni diagnòstics clínics (ATNE usa termes pedagògics, no clínics)</span></li>
+        <li class="biblio-item"><span class="biblio-dot" style="color:#16a34a">●</span><span><strong>Credencials del docent</strong> (el model no veu l'email ni el login)</span></li>
+        <li class="biblio-item"><span class="biblio-dot" style="color:#16a34a">●</span><span><strong>Historial d'adaptacions</strong> anteriors</span></li>
+      </ul>
+    </div>
+
+    <div class="biblio-card">
+      <h3 class="biblio-title">Proveïdors externs</h3>
+      <p style="font-size:var(--fs-sm);color:var(--ink-600);margin-bottom:var(--sp-3)">Depenent del model seleccionat, el text i el perfil pedagògic s'envien a un d'aquests proveïdors:</p>
+      <ul class="biblio-list">
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">Google (Gemma / Gemini)</strong> — política de privacitat de Google Cloud AI</span></li>
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">OpenAI (GPT-4o, GPT-4.1-mini)</strong> — política de privacitat d'OpenAI</span></li>
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">Mistral AI</strong> — política de privacitat de Mistral</span></li>
+        <li class="biblio-item"><span class="biblio-dot">●</span><span><strong style="color:var(--ink-800)">OpenRouter (Qwen, DeepSeek)</strong> — enrutador que remet a tercers; consulta la seva política</span></li>
+      </ul>
+    </div>
+
+    <div class="biblio-card">
+      <h3 class="biblio-title">Recomanació als docents</h3>
+      <ul class="biblio-list">
+        <li class="biblio-item"><span class="biblio-dot">●</span><span>Mai incloguis el <strong>nom de l'alumne</strong> al text que enganxes</span></li>
+        <li class="biblio-item"><span class="biblio-dot">●</span><span>Si el text original conté dades personals (exàmens, dictats), <strong>anonimitza'l</strong> abans d'enganxar</span></li>
+        <li class="biblio-item"><span class="biblio-dot">●</span><span>Les condicions pedagògiques (TDAH, nouvingut…) es tracten com a <strong>categories educatives</strong>, no clíniques</span></li>
+        <li class="biblio-item"><span class="biblio-dot">●</span><span>Per a dubtes sobre RGPD, adreça't al <strong>DPO de Jesuïtes Educació</strong></span></li>
       </ul>
     </div>
 
