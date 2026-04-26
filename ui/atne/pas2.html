@@ -962,7 +962,7 @@
       <!-- Center -->
       <section class="center">
         <div class="center-head">
-          <input class="doc-title" id="doc-title" placeholder="Sense títol" value="La Revolució Industrial">
+          <input class="doc-title" id="doc-title" placeholder="Sense títol">
           <span class="saved-pill" id="saved-pill" title="Esborrany al navegador. Clica el botó 'Desar' per desar-lo al servidor i poder recuperar-lo des de qualsevol dispositiu.">
             <span class="dot-ok"></span><span id="saved-label">Esborrany local</span><span class="saved-sub" id="saved-sub"></span>
           </span>
@@ -1012,7 +1012,7 @@
                 <button type="button" class="dt-btn" id="p2-paste" title="Enganxar del porta-retalls" aria-label="Enganxar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg></button>
                 <button type="button" class="dt-btn" id="p2-clear" title="Esborrar tot el text" aria-label="Esborrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
               </div>
-              <textarea class="ta" id="write-ta" placeholder="Comença a escriure o enganxa el text aquí.">La Revolució Industrial és el període de transformació profunda de les formes de producció que va començar al Regne Unit cap al 1760 i es va estendre per Europa i Amèrica del Nord durant el segle XIX. Aquest canvi va suposar la transició d'una economia agrària a una industrial, amb l'aparició de les primeres fàbriques i de la màquina de vapor.</textarea>
+              <textarea class="ta" id="write-ta" placeholder="Comença a escriure o enganxa el text aquí."></textarea>
               <span class="wc" id="wc-card">52 paraules</span>
               <p style="margin:4px 0 0;font-size:11px;color:var(--ink-400);display:flex;align-items:center;gap:4px"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="12" height="12" style="flex-shrink:0"><path d="M8 1.5C5.5 1.5 4 3.5 4 5.5V7H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-1V5.5C12 3.5 10.5 1.5 8 1.5zm0 1C10 2.5 11 4 11 5.5V7H5V5.5C5 4 6 2.5 8 2.5z"/></svg>No incloguis noms ni dades identificatives al text.</p>
             </div>
@@ -1430,10 +1430,19 @@
   }
 
   // Auto-save: recupera draft si existeix (evita perdre feina en navegar a Pas 1/3 i tornar)
-  const savedDraft = localStorage.getItem('atne.doc_draft');
-  if (savedDraft !== null) ta.value = savedDraft;
-  const savedTitle = localStorage.getItem('atne.doc_title');
-  if (savedTitle && docTitleEl) docTitleEl.value = savedTitle;
+  // Si ve de Pas 1 amb ?new=1, comença net (nova adaptació).
+  const urlParams = new URLSearchParams(location.search);
+  const isNew = urlParams.get('new') === '1';
+  if (isNew) {
+    localStorage.removeItem('atne.doc_draft');
+    localStorage.removeItem('atne.doc_title');
+    history.replaceState(null, '', location.pathname);
+  } else {
+    const savedDraft = localStorage.getItem('atne.doc_draft');
+    if (savedDraft !== null) ta.value = savedDraft;
+    const savedTitle = localStorage.getItem('atne.doc_title');
+    if (savedTitle && docTitleEl) docTitleEl.value = savedTitle;
+  }
 
   // Handoff des de Flash: avisa el docent que el text ve de Flash
   if (localStorage.getItem('atne.flash_handoff') === '1') {
