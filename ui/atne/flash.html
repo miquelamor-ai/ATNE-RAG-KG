@@ -1893,7 +1893,8 @@
         }
         var CAR_LABEL_PF = { dislexia:'Dislèxia', tdah:'TDAH', tea:'TEA', nouvingut:'Nouvingut', altes_capacitats:'Altes cap.', di:'Dif. gral.', vulnerabilitat:'Vulnerable' };
         var ADAPT_LABEL_PF = { enriquiment:'Grup repte', simplificat:'Grup suport', al_nivell:'Grup estàndard', molt_simplificat:'Grup reforç' };
-        dd.innerHTML = data.profiles.map(function (p, i) {
+        var profiles = data.profiles.slice().reverse();
+        dd.innerHTML = profiles.map(function (p, i) {
           var condLabel = '';
           if (p.tipus === 'alumne') {
             var pf = (p.perfils || [])[0] || '';
@@ -1909,7 +1910,7 @@
 
         dd.querySelectorAll('.load-pf-item').forEach(function (item) {
           item.addEventListener('click', function () {
-            var p = data.profiles[+this.dataset.idx];
+            var p = profiles[+this.dataset.idx];
             if (!p) return;
 
             if (p.curs && cursSel) {
