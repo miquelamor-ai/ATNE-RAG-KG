@@ -1128,11 +1128,14 @@ async def admin_logout():
 async def admin_whoami(request: Request):
     """Check lleuger per al frontend: retorna si hi ha sessió activa (200) o no (401).
     Útil per saber si cal mostrar pantalla de login.
+    Accepta tant la cookie admin HMAC com la sessió lanet si el login és admin.
     """
-    token = request.cookies.get("atne_admin", "")
-    if not _admin_verify(token):
-        raise HTTPException(401, "No autenticat")
-    return {"ok": True}
+    if _admin_verify(request.cookies.get("atne_admin", "")):
+        return {"ok": True}
+    session_login = _verify_session(request.cookies.get("atne_session", ""))
+    if session_login and _is_admin_login(session_login):
+        return {"ok": True}
+    raise HTTPException(401, "No autenticat")
 
 
 @app.get("/api/runtime-config")
