@@ -41,11 +41,29 @@
   var tokenFromBridge = urlParams.get('atne_token');
   var loginFromBridge = urlParams.get('atne_login');
   if (tokenFromBridge && loginFromBridge) {
+    // Intercanvi síncron: backend valida el token i emet cookie httpOnly.
+    // Així el token brut no queda mai a localStorage.
+    var exchanged = false;
     try {
-      localStorage.setItem(LS_TOKEN, tokenFromBridge);
-      localStorage.setItem(LS_LOGIN, loginFromBridge);
-    } catch (e) { /* ignore */ }
-    // Neteja els paràmetres de la URL (no deixar token exposat)
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/auth/exchange', false); // sync — intencionat (setup inicial)
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.send(JSON.stringify({ token: tokenFromBridge }));
+      if (xhr.status === 200) {
+        localStorage.setItem(LS_LOGIN, loginFromBridge);
+        localStorage.removeItem(LS_TOKEN); // no guardar el token brut
+        exchanged = true;
+      }
+    } catch (e) { /* fall through */ }
+
+    if (!exchanged) {
+      // Fallback si el backend no respon: mode legacy amb token a localStorage
+      try {
+        localStorage.setItem(LS_TOKEN, tokenFromBridge);
+        localStorage.setItem(LS_LOGIN, loginFromBridge);
+      } catch (e) { /* ignore */ }
+    }
+    // Neteja els paràmetres de la URL (token mai visible al historial)
     try {
       var clean = new URL(location.href);
       clean.searchParams.delete('atne_token');
@@ -54,7 +72,7 @@
     } catch (e) { /* ignore */ }
   }
 
-  // 2. Llegim el token actual de localStorage
+  // 2. Llegim l'estat de sessió de localStorage
   var currentToken = null;
   var currentLogin = null;
   try {
@@ -62,8 +80,9 @@
     currentLogin = localStorage.getItem(LS_LOGIN);
   } catch (e) { /* ignore */ }
 
-  // 3. Si no hi ha token, redirigim al bridge
-  if (!currentToken || !currentLogin) {
+  // 3. Si no hi ha ni login, redirigim al bridge.
+  // Sense token però amb login = mode cookie (cookie httpOnly enviada automàticament).
+  if (!currentLogin) {
     redirectToBridge();
     throw new Error('ATNE: redirigint a lanet');
   }
@@ -106,8 +125,15 @@
     var div = document.createElement('div');
     div.className = 'admin-menu';
     div.id = 'admin-menu';
-    div.innerHTML =
-      '<div id="admin-menu-top" style="padding:6px 10px 4px;font-size:11px;color:var(--ink-500,#6b6b6b);border-bottom:1px solid var(--paper-line,#e4e0da);margin-bottom:4px">' + alias + '</div>' +
+    // Alias és dada de l'usuari → textContent (mai innerHTML)
+    var top = document.createElement('div');
+    top.id = 'admin-menu-top';
+    top.style.cssText = 'padding:6px 10px 4px;font-size:11px;color:var(--ink-500,#6b6b6b);border-bottom:1px solid var(--paper-line,#e4e0da);margin-bottom:4px';
+    top.textContent = alias;
+    div.appendChild(top);
+    // Resta: contingut estàtic (sense dades de l'usuari)
+    var rest = document.createElement('div');
+    rest.innerHTML =
       '<div id="admin-links" style="display:none">' +
         '<a href="/admin" target="_blank" rel="noopener">Admin <span class="admin-badge">ADMIN</span></a>' +
         '<a href="/ui/cuina.html" target="_blank" rel="noopener">Cuina (dev)</a>' +
@@ -116,6 +142,7 @@
       '<button id="admin-rename-btn" style="gap:8px">✏️ Canviar nom</button>' +
       '<div class="sep"></div>' +
       '<button id="admin-logout-btn">Canviar d\'usuari</button>';
+    while (rest.firstChild) div.appendChild(rest.firstChild);
     return div;
   }
 
@@ -127,7 +154,7 @@
       '<div style="background:#fff;border-radius:12px;padding:24px;width:320px;max-width:90vw;font-family:Inter,sans-serif">' +
         '<div style="font-size:16px;font-weight:600;color:#121a2b;margin-bottom:6px">Com et diem?</div>' +
         '<div style="font-size:13px;color:#6a7392;margin-bottom:16px">El nom que apareixerà a l\'app</div>' +
-        '<input id="atne-rename-input" type="text" value="' + (currentAlias || '') + '" ' +
+        '<input id="atne-rename-input" type="text" ' +
           'style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #d7dce9;border-radius:8px;font-size:15px;outline:none;margin-bottom:16px" ' +
           'placeholder="El teu nom" maxlength="60">' +
         '<div style="display:flex;gap:8px;justify-content:flex-end">' +
@@ -139,6 +166,7 @@
     document.body.appendChild(overlay);
 
     var inp = overlay.querySelector('#atne-rename-input');
+    inp.value = currentAlias || ''; // valor via JS, mai via innerHTML (XSS)
     inp.focus(); inp.select();
 
     overlay.querySelector('#atne-rename-cancel').onclick = function() { overlay.remove(); };
@@ -255,7 +283,9 @@
                 url.indexOf(location.origin + '/api/') === 0;
     if (isApi) {
       var headers = new Headers(init.headers || (typeof input !== 'string' ? input.headers : undefined));
-      if (!headers.has('Authorization')) {
+      // Mode cookie: si no hi ha token (intercanviat per cookie httpOnly),
+      // no afegim Authorization — el navegador envia la cookie automàticament.
+      if (!headers.has('Authorization') && window.ATNE_AUTH.token) {
         headers.set('Authorization', 'Bearer ' + window.ATNE_AUTH.token);
       }
       init.headers = headers;

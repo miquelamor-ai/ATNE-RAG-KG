@@ -305,6 +305,11 @@
   'use strict';
 
   function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
   function fmt(n) {
     if (n === null || n === undefined) return '–';
     if (typeof n !== 'number') return n;
@@ -336,7 +341,7 @@
       var tr = document.createElement('tr');
       var v = kv[1];
       var fmtV = opts.eur ? fmtEur(v) : fmt(v);
-      tr.innerHTML = '<td>' + kv[0] + '</td><td class="num">' + fmtV + '</td>';
+      tr.innerHTML = '<td>' + esc(kv[0]) + '</td><td class="num">' + fmtV + '</td>';
       el.appendChild(tr);
     });
   }
@@ -378,7 +383,7 @@
       var row = document.createElement('div');
       row.className = 'review-bar-row';
       row.innerHTML =
-        '<span class="label">' + kv[0].replace(/_/g, ' ') + '</span>' +
+        '<span class="label">' + esc(kv[0]).replace(/_/g, ' ') + '</span>' +
         '<span class="meter"><span style="width:' + pct.toFixed(1) + '%"></span></span>' +
         '<span class="n">' + kv[1] + '</span>';
       el.appendChild(row);
@@ -399,13 +404,13 @@
     recent.forEach(function (r) {
       var tr = document.createElement('tr');
       tr.innerHTML =
-        '<td style="white-space:nowrap;font-family:var(--mono);font-size:11px">' + (r.ts || '–') + '</td>' +
-        '<td>' + (r.model || '?') + '</td>' +
-        '<td>' + (r.etapa || '–') + '</td>' +
-        '<td>' + (r.mecr || '–') + '</td>' +
+        '<td style="white-space:nowrap;font-family:var(--mono);font-size:11px">' + esc(r.ts || '–') + '</td>' +
+        '<td>' + esc(r.model || '?') + '</td>' +
+        '<td>' + esc(r.etapa || '–') + '</td>' +
+        '<td>' + esc(r.mecr || '–') + '</td>' +
         '<td class="num">' + fmtMs(r.latency_ms) + '</td>' +
         '<td class="num">' + (r.score != null ? r.score.toFixed(2) : '–') + '</td>' +
-        '<td><span class="pill">' + (r.prompt_version || '?') + '</span></td>' +
+        '<td><span class="pill">' + esc(r.prompt_version || '?') + '</span></td>' +
         '<td class="num">' + (r.cost_eur ? fmtEur(r.cost_eur) : '–') + '</td>';
       t.appendChild(tr);
     });

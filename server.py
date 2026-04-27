@@ -8,6 +8,7 @@ Obre:     http://localhost:8000
 
 import asyncio
 import concurrent.futures
+from collections import defaultdict, deque
 import hashlib
 import hmac
 import json
@@ -18,6 +19,7 @@ import secrets
 import sys
 import time
 from pathlib import Path
+from urllib.parse import quote as _urlquote
 
 # ── BUG FIX Sprint B (2026-04-16) ───────────────────────────────────────────
 # Quan arrenquem amb `python server.py`, aquest mòdul s'executa com a
@@ -333,12 +335,60 @@ def _admin_verify(token: str) -> bool:
         return False
 
 
+def _verify_session(token: str) -> str | None:
+    """Retorna el login si la cookie de sessió és vàlida, o None."""
+    if not token or "." not in token:
+        return None
+    try:
+        payload, sig = token.rsplit(".", 1)
+        expected = hmac.new(
+            ADMIN_SESSION_SECRET.encode(),
+            payload.encode(),
+            hashlib.sha256,
+        ).hexdigest()
+        if not hmac.compare_digest(sig, expected):
+            return None
+        parts = payload.split(":", 2)  # session:login:ts
+        if len(parts) != 3 or parts[0] != "session":
+            return None
+        ts = int(parts[2])
+        if time.time() - ts > 8 * 3600:
+            return None
+        return parts[1]  # login
+    except Exception:
+        return None
+
+
+def _is_admin_login(login: str) -> bool:
+    """True si el login és a la llista ATNE_ADMIN_LOGINS."""
+    if not login or not _ADMIN_LOGINS_RAW:
+        return False
+    return login in {l.strip() for l in _ADMIN_LOGINS_RAW.split(",") if l.strip()}
+
+
 def _require_admin(request: Request) -> bool:
-    """Dependency FastAPI. 401 si no hi ha cookie vàlida."""
-    token = request.cookies.get("atne_admin", "")
-    if not _admin_verify(token):
-        raise HTTPException(status_code=401, detail="Admin auth required")
-    return True
+    """Dependency FastAPI. Accepta: (1) cookie admin HMAC, (2) sessió de login admin."""
+    if _admin_verify(request.cookies.get("atne_admin", "")):
+        return True
+    session_login = _verify_session(request.cookies.get("atne_session", ""))
+    if session_login and _is_admin_login(session_login):
+        return True
+    raise HTTPException(status_code=401, detail="Admin auth required")
+
+
+# Rate limiter en memòria — clau: string, valor: deque de timestamps
+_rate_limits: dict[str, deque] = defaultdict(deque)
+
+
+def _rate_check(key: str, limit: int, window_sec: int) -> None:
+    """Llança 429 si key ha superat limit peticions en window_sec segons."""
+    now = time.monotonic()
+    q = _rate_limits[key]
+    while q and now - q[0] > window_sec:
+        q.popleft()
+    if len(q) >= limit:
+        raise HTTPException(status_code=429, detail="Massa peticions, espera un moment")
+    q.append(now)
 
 # Client Gemini compartit per al health-check — definit a adaptation/llm_clients.
 from adaptation.llm_clients import gemini_client
@@ -371,6 +421,7 @@ _LANET_AUTH_CACHE_TTL = 120.0
 ATNE_PUBLIC_API_PATHS = {
     "/api/health",
     "/api/runtime-config",
+    "/api/auth/exchange",   # intercanvi token LaNet → cookie httpOnly (sense auth prèvia)
 }
 
 def _atne_is_public_path(path: str) -> bool:
@@ -442,6 +493,24 @@ class _AtneAuthMiddleware:
                 scope["state"]["user_login"] = "test_docent"
                 await self.app(scope, receive, send)
                 return
+        # 1. Cookie de sessió httpOnly (intercanviada via /api/auth/exchange)
+        cookie_login = None
+        for k, v in scope.get("headers", []):
+            if k == b"cookie":
+                for part in v.decode("latin-1", errors="replace").split(";"):
+                    part = part.strip()
+                    if part.startswith("atne_session="):
+                        cookie_login = _verify_session(part[len("atne_session="):].strip())
+                break
+        if cookie_login:
+            scope.setdefault("state", {})
+            scope["state"]["user_login"] = cookie_login
+            scope["state"]["user_email"] = cookie_login
+            print(f"[ATNE:auth] {cookie_login} {method} {path} (cookie)", flush=True)
+            await self.app(scope, receive, send)
+            return
+
+        # 2. Fallback: Authorization: Bearer (token LaNet directe)
         if not LANET_BRIDGE_URL:
             await self._send_error(send, 503, "Auth no configurada al servidor")
             return
@@ -973,8 +1042,39 @@ _ALLOWED_MODELS = [
 ]
 
 
+@app.post("/api/auth/exchange")
+async def auth_exchange(request: Request, payload: dict = Body(...)):
+    """Intercanvia token LaNet per cookie httpOnly ATNE (endpoint públic).
+
+    El frontend crida aquest endpoint just després del redirect del bridge.
+    A partir d'aquí les peticions autenticen via cookie (no Bearer header).
+    """
+    _rate_check(f"exchange:{request.client.host}", 20, 60)
+    token = (payload.get("token") or "").strip()
+    if not token:
+        raise HTTPException(400, "Token manquant")
+    status, login = _lanet_validate_token(token)
+    if status == 503:
+        raise HTTPException(503, "Bridge no disponible")
+    if status != 200:
+        raise HTTPException(401, "Token invàlid")
+    session_val = _admin_sign(f"session:{login}:{int(time.time())}")
+    is_prod = bool(os.getenv("K_SERVICE"))  # Cloud Run seta K_SERVICE automàticament
+    resp = JSONResponse({"ok": True, "login": login})
+    resp.set_cookie(
+        "atne_session", session_val,
+        httponly=True,
+        secure=is_prod,
+        samesite="strict",
+        max_age=8 * 3600,
+        path="/",
+    )
+    return resp
+
+
 @app.post("/api/admin/login")
-async def admin_login(payload: dict = Body(...)):
+async def admin_login(request: Request, payload: dict = Body(...)):
+    _rate_check(f"adminlogin:{request.client.host}", 5, 300)
     password = (payload.get("password") or "").strip()
     if not ADMIN_PASSWORD:
         raise HTTPException(500, "ADMIN_PASSWORD no configurat al servidor")
@@ -1739,7 +1839,7 @@ def _get_adaptation_from_supabase(adapt_id: str) -> dict:
     try:
         r = requests.get(
             f"{SUPABASE_URL}/rest/v1/atne_prompt_debug"
-            f"?adapt_id=eq.{adapt_id}&select=data&limit=1",
+            f"?adapt_id=eq.{_urlquote(str(adapt_id), safe='')}&select=data&limit=1",
             headers=SUPABASE_HEADERS, timeout=5,
         )
         if r.status_code == 200:
@@ -2388,7 +2488,7 @@ async def generate_text(payload: dict = Body(...)):
 
 
 @app.post("/api/generate-text-stream")
-async def generate_text_stream(payload: dict = Body(...)):
+async def generate_text_stream(request: Request, payload: dict = Body(...)):
     """Variant streaming (SSE) de `/api/generate-text`.
 
     Emet events Server-Sent Events a mesura que el LLM produeix tokens.
@@ -2404,6 +2504,7 @@ async def generate_text_stream(payload: dict = Body(...)):
 
     Payload idèntic a /api/generate-text.
     """
+    _rate_check(f"gen:{request.client.host}", 15, 60)
     from generador_lliure import generar_stream as generar_text_stream_lliure
 
     # Bug 2 (2026-04-19): mateix mapping que /api/generate-text perquè el
@@ -3419,7 +3520,8 @@ LEVEL_SHIFTS = {
 
 
 @app.post("/api/adapt")
-async def adapt_stream(payload: dict = Body(...)):
+async def adapt_stream(request: Request, payload: dict = Body(...)):
+    _rate_check(f"adapt:{request.client.host}", 15, 60)
     text = payload.get("text", "")
     profile = payload.get("profile", {})
     context = payload.get("context", {})
