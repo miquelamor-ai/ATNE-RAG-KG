@@ -344,7 +344,7 @@ Genera NOMÉS les seccions indicades com ACTIVADES.
 
 ## Text adaptat
 El text complet adaptat segons tots els paràmetres indicats.
-- **Conserva el títol** del text original com a primera línia (en **negreta** o com a `# Títol`). Si el text original no en té, no n'inventis cap.
+- La primera línia ha de ser sempre un **títol** en format `# Títol`. Si el text original ja en té, conserva'l. Si no en té, crea'n un de breu i descriptiu del contingut.
 - **Conserva l'estructura original del text**: si el text original té apartats (qualsevol nivell de títol), **reprodueix-los com a `### Apartat` DINS de `## Text adaptat`** (mai com a `##`, reservat per a seccions top-level com «## Glossari»). Les llistes numerades (`1.` `2.` `3.`) i les llistes amb bullets (`- item`) es mantenen igual. **No les converteixis a prosa** ni les reformulis amb connectors ("Primer... Segon... Tercer...").
 - **Textos llargs** (més de 150 paraules sense apartats): organitza'ls en 2-4 sub-apartats descriptius amb `### Apartat` (tres hashes, com a subseccions dins de «## Text adaptat») seguint l'estructura canònica del gènere indicat. No inventis subtítols per a textos curts.
 - Estructura clara amb salts de línia entre idees
