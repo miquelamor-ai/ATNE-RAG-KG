@@ -16,8 +16,9 @@ Contracte (4 endpoints):
     DELETE /api/adaptations/{id}         — esborra
 """
 
+import hashlib
 import requests
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, Request
 from fastapi.responses import JSONResponse
 
 
@@ -107,8 +108,19 @@ async def save_adaptation(payload: dict = Body(...)):
         return _err(str(e) or type(e).__name__)
 
 
+def _expected_docent_id(request: Request) -> str:
+    """Calcula el docent_id esperat per l'usuari autenticat (SHA256[:16])."""
+    login = getattr(request.state, "user_login", "") or ""
+    return hashlib.sha256(login.lower().encode()).hexdigest()[:16]
+
+
+def _check_ownership(request: Request, docent_id: str) -> bool:
+    """Retorna True si el docent_id coincideix amb l'usuari autenticat."""
+    return docent_id == _expected_docent_id(request)
+
+
 @router.get("")
-async def list_adaptations(docent_id: str = "", limit: int = 50):
+async def list_adaptations(request: Request, docent_id: str = "", limit: int = 50):
     """Llista les adaptacions del docent (per a la biblioteca).
 
     Retorna {ok, items: [{id, title, profile_snapshot, context_snapshot,
@@ -119,6 +131,8 @@ async def list_adaptations(docent_id: str = "", limit: int = 50):
     docent_id = (docent_id or "").strip()
     if not docent_id:
         return _err("docent_id buit", 400)
+    if not _check_ownership(request, docent_id):
+        return _err("No autoritzat", 403)
     try:
         limit = max(1, min(int(limit), 200))
     except Exception:
@@ -162,12 +176,14 @@ async def list_adaptations(docent_id: str = "", limit: int = 50):
 
 
 @router.get("/{adaptation_id}")
-async def get_adaptation(adaptation_id: int, docent_id: str = ""):
+async def get_adaptation(request: Request, adaptation_id: int, docent_id: str = ""):
     """Recupera una adaptacio completa (amb tot l'estat)."""
     SUPABASE_URL, SUPABASE_HEADERS = _supabase_conf()
     docent_id = (docent_id or "").strip()
     if not docent_id:
         return _err("docent_id buit", 400)
+    if not _check_ownership(request, docent_id):
+        return _err("No autoritzat", 403)
     try:
         resp = requests.get(
             f"{SUPABASE_URL}/rest/v1/atne_adaptations"
@@ -189,12 +205,14 @@ async def get_adaptation(adaptation_id: int, docent_id: str = ""):
 
 
 @router.delete("/{adaptation_id}")
-async def delete_adaptation(adaptation_id: int, docent_id: str = ""):
+async def delete_adaptation(request: Request, adaptation_id: int, docent_id: str = ""):
     """Esborra una adaptacio (verifica docent_id)."""
     SUPABASE_URL, SUPABASE_HEADERS = _supabase_conf()
     docent_id = (docent_id or "").strip()
     if not docent_id:
         return _err("docent_id buit", 400)
+    if not _check_ownership(request, docent_id):
+        return _err("No autoritzat", 403)
     try:
         resp = requests.delete(
             f"{SUPABASE_URL}/rest/v1/atne_adaptations"

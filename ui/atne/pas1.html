@@ -751,6 +751,8 @@
                   <button class="tag" data-dx="di">Discapacitat intel·lectual</button>
                   <button class="tag" data-dx="au">Discapacitat auditiva</button>
                   <button class="tag" data-dx="vi">Discapacitat visual</button>
+                  <button class="tag" data-dx="tdl">TDL</button>
+                  <button class="tag" data-dx="discalculia">Discalcúlia</button>
                 </div>
                 <div id="dx-subs"></div>
               </div>
@@ -1418,7 +1420,7 @@
   updateAids();
 
   // Multi-selecció de diagnòstics amb subvariables
-  const DX_NAMES = {tdah:'TDAH',disl:'Dislèxia',l2:'Català L2',ac:'AACC',tea:'TEA',di:'DI',au:'Aud.',vi:'Vis.'};
+  const DX_NAMES = {tdah:'TDAH',disl:'Dislèxia',l2:'Català L2',ac:'AACC',tea:'TEA',di:'DI',au:'Aud.',vi:'Vis.',tdl:'TDL',discalculia:'Discalcúlia'};
   const L1_META = {
     'Àrab':['semítica','àrab'],
     'Amazic':['amaziga','tifinag / llatí'],
@@ -1496,7 +1498,9 @@
     tea:{type:'tags',items:['Suport nivell 1','Nivell 2','Nivell 3','Sensibilitat sensorial']},
     di:{type:'tags',items:['Lleu','Moderada','Significativa']},
     au:{type:'tags',items:['Lleu','Moderada','Severa','LSC']},
-    vi:{type:'tags',items:['Baixa visió','Ceguesa','Braille']}
+    vi:{type:'tags',items:['Baixa visió','Ceguesa','Braille']},
+    tdl:{type:'tags',items:['Receptiu','Semàntica afectada','Morfosintaxi afectada','Pragmàtica afectada']},
+    discalculia:{type:'tags',items:['Lleu','Moderada','Amb dificultat d\'orientació espacial']}
   };
   const dxSel = new Set();
   function renderDx(){

@@ -3733,6 +3733,9 @@ _FLASH_PERFIL_MAP: dict[str, str] = {
                         "Tona propera i acollidora, sense condescendència.",
     "trastorn_emocional": "Trastorn emocional / ansietat: evita llenguatge que generi pressió o urgència. "
                         "Tona tranquil·la i neutral. Divideix la informació en passos petits.",
+    "discalculia":      "Discalcúlia: substitueix nombres abstractes per representacions concretes. "
+                        "Desglossa qualsevol seqüència numèrica pas a pas sense saltar-ne cap. "
+                        "Per a mesures o estadístiques, afegeix una analogia quotidiana tangible.",
 }
 
 

@@ -835,6 +835,18 @@ CATALOG = {
         "profiles": ["tdl"],
         "subvar_conditions": {"tdl_pragmatica": True},
     },
+    "H-27": {
+        "text": "Discalcúlia: substitueix els nombres abstractes per representacions concretes o visuals. Quan hi hagi mesures, quantitats o estadístiques, afegeix una analogia quotidiana tangible (p.ex. '100 metres → la longitud d'un camp de futbol').",
+        "activation": "PERFIL",
+        "macro": "PERFIL",
+        "profiles": ["discalculia"],
+    },
+    "H-28": {
+        "text": "Discalcúlia: desglossa qualsevol seqüència numèrica o procediment pas a pas, sense saltar-ne cap. Evita que l'alumne hagi de fer càlculs mentals implícits per seguir el text.",
+        "activation": "PERFIL",
+        "macro": "PERFIL",
+        "profiles": ["discalculia"],
+    },
     "H-19": {
         "text": "Discapacitat visual: estructura semàntica amb encapçalaments (H1-H3) per lector de pantalla. NO dependre de colors o posicions.",
         "activation": "PERFIL",
@@ -958,6 +970,10 @@ PROFILE_INSTRUCTION_MAP = {
     },
     "disc_motora": {
         "1_estructura": ["B-02", "H-19"],
+    },
+    "discalculia": {
+        "1_numerica": ["H-27"],
+        "2_procedural": ["H-28"],
     },
 }
 

@@ -25,9 +25,17 @@
     cat:  'nouvingut',
     ac:   'altes_capacitats'
   };
+  // Mapeig complet data-dx → clau canònica del backend (instruction_filter)
+  const DX_TO_CHAR = {
+    tdah: 'tdah', disl: 'dislexia', l2: 'nouvingut', cat: 'nouvingut',
+    ac: 'altes_capacitats', tea: 'tea', di: 'di',
+    au: 'discapacitat_auditiva', vi: 'discapacitat_visual',
+    tdl: 'tdl', discalculia: 'discalculia'
+  };
   const ALL_CHAR_KEYS = [
     'tdah', 'dislexia', 'nouvingut', 'altes_capacitats',
-    'tea', 'di', 'discapacitat_auditiva', 'discapacitat_visual'
+    'tea', 'di', 'discapacitat_auditiva', 'discapacitat_visual',
+    'tdl', 'discalculia'
   ];
 
   // Timeout per defecte de les crides SSE (3 min). Si el backend no respon
@@ -180,6 +188,15 @@
       for (const chip of p.chips) {
         const c = CAT_TO_CHAR[chip && chip.cat];
         if (c) caracteristiques[c] = { actiu: true };
+      }
+    }
+    // Perfils custom (pas1): activa totes les condicions seleccionades (TDL, Discalcúlia, etc.)
+    if (p.custom && Array.isArray(p.conditions)) {
+      for (const dx of p.conditions) {
+        const charKey = DX_TO_CHAR[dx] || dx;
+        if (caracteristiques.hasOwnProperty(charKey)) {
+          caracteristiques[charKey] = { ...(caracteristiques[charKey] || {}), actiu: true };
+        }
       }
     }
     // Propaga subvariables al format backend (caracteristiques.{condicio}.{subvar}).
