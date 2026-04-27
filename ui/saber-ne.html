@@ -975,9 +975,8 @@
     <button id="zoom-label" title="Restablir mida (Ctrl 0)" style="font-size:var(--fs-xs);font-weight:600;color:var(--ink-500);background:none;border:none;cursor:pointer;padding:0 2px;min-width:34px;text-align:center;font-family:var(--mono)">100%</button>
     <button class="icon-btn" id="zoom-in" title="Augmentar mida (Ctrl +)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M8 11h6M11 8v6"/></svg></button>
     <button class="icon-btn" id="fullscreen-btn" title="Pantalla completa (F11)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V3h4M17 3h4v4M21 17v4h-4M7 21H3v-4"/></svg></button>
-    <a href="/ui/saber-ne.html" target="_blank" class="icon-btn" title="Saber-ne+" style="text-decoration:none" onclick="if(window.ATNE_TRACK)ATNE_TRACK.event('help_opened',{page:'saber-ne',origin:'saber-ne'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6"/><path d="M12 3a6 6 0 0 1 6 6c0 2.22-1.2 4.16-3 5.2V17H9v-2.8C7.2 13.16 6 11.22 6 9a6 6 0 0 1 6-6z"/></svg></a>
     <a href="/ui/com-funciona.html" target="_blank" class="icon-btn" title="Com funciona ATNE" style="text-decoration:none" onclick="if(window.ATNE_TRACK)ATNE_TRACK.event('help_opened',{page:'com-funciona',origin:'saber-ne'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg></a>
-    <button id="btn-suggest" class="icon-btn" title="Tens un suggeriment?" onclick="if(window.ATNE_TRACK)ATNE_TRACK.openSuggestionBox({page:'saber-ne'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+    <button id="btn-suggest" class="icon-btn" title="Tens un suggeriment?"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
 
     <button id="docent-av" class="docent-av" title="El teu compte">?</button>
   </div>
@@ -1946,17 +1945,6 @@
     </div>
   </div>
 
-  <div class="card-cream" style="padding:var(--sp-5) var(--sp-6)">
-    <p style="margin:0;font-size:var(--fs-sm);color:var(--ink-700);line-height:1.65"><strong>Nota tècnica:</strong> El catàleg d'instruccions és codi Python (<code style="font-family:var(--mono);font-size:.85em;background:rgba(255,255,255,.7);padding:1px 5px;border-radius:3px">instruction_catalog.py</code>) mantingut al repositori. A més, un sistema de <em>skills</em> complementàries (fitxers SKILL.md amb triggers declaratius) enriqueix el prompt per a casos específics com gèneres discursius concrets, perfils complexos o el mode d'adaptació de documents estructurats. L'arquitectura RAG-KG dinàmic (vector store + knowledge graph) és infraestructura reservada per a fases posteriors i no s'activa en el pilot actual.</p>
-  </div>
-
-  <div class="card card-p-sm" style="margin-top:var(--sp-4);display:flex;gap:var(--sp-4);align-items:flex-start">
-    <div style="width:40px;height:40px;border-radius:var(--r-md);background:var(--primary-50);display:grid;place-items:center;flex-shrink:0;font-size:20px">📄</div>
-    <div>
-      <div style="font-weight:var(--fw-semi);color:var(--ink-900);margin-bottom:4px">Mode document (PDF · PPTX)</div>
-      <div style="font-size:var(--fs-sm);color:var(--ink-600);line-height:1.55">El docent pot pujar una fitxa d'exercicis PDF o una presentació PPTX. El sistema extreu cada bloc de text (títol, paràgraf, enunciat, pregunta), els adapta individualment preservant la funció estructural de cadascun, i reinjecta el text al fitxer original. El resultat és el document amb el layout intacte (columnes, taules, espais per omplir, numeració) però el text adaptat al perfil. Imatges i gràfics vectorials no es toquen.</div>
-    </div>
-  </div>
 </section>
 
 <!-- §10 El catàleg d'instruccions pedagògiques                  -->
@@ -2401,6 +2389,14 @@
 <script>
   // Tracking pilot: page_view + page_leave (durada) per a saber-ne+
   if (window.ATNE_TRACK) ATNE_TRACK.pageView('saber-ne');
+
+  // Binding explícit del botó de suggeriments (no depèn del onclick inline)
+  document.addEventListener('DOMContentLoaded', function () {
+    var btn = document.getElementById('btn-suggest');
+    if (btn) btn.addEventListener('click', function () {
+      if (window.ATNE_TRACK) ATNE_TRACK.openSuggestionBox({ page: 'saber-ne' });
+    });
+  });
 </script>
 
 </body>
