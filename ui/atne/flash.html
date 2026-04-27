@@ -7,6 +7,7 @@
 
 <script src="/ui/atne/js/auth.js"></script>
 <script src="/ui/atne/js/topbar.js"></script>
+<script src="/ui/atne/js/help-mode.js" defer></script>
 <script src="/ui/atne/js/pilot-tracker.js"></script>
   <link rel="stylesheet" href="/ui/fonts/fonts.css">
 <link rel="stylesheet" href="/ui/styles/tokens.css">
@@ -788,7 +789,7 @@
     <button class="icon-btn" id="zoom-in" title="Augmentar mida (Ctrl +)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M8 11h6M11 8v6"/></svg></button>
     <button class="icon-btn" id="fullscreen-btn" title="Pantalla completa (F11)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V3h4M17 3h4v4M21 17v4h-4M7 21H3v-4"/></svg></button>
     <a href="/ui/saber-ne.html" target="_blank" class="icon-btn sbn-link" title="Saber-ne+" style="text-decoration:none" onclick="if(window.ATNE_TRACK)ATNE_TRACK.event('help_opened',{page:'saber-ne',origin:'flash'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6"/><path d="M12 3a6 6 0 0 1 6 6c0 2.22-1.2 4.16-3 5.2V17H9v-2.8C7.2 13.16 6 11.22 6 9a6 6 0 0 1 6-6z"/></svg></a>
-    <a href="/ui/com-funciona.html" target="_blank" class="icon-btn" title="Com funciona ATNE" style="text-decoration:none" onclick="if(window.ATNE_TRACK)ATNE_TRACK.event('help_opened',{page:'com-funciona',origin:'flash'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg></a>
+    <button class="icon-btn" id="help-mode-btn" title="Ajuda contextual: clica qualsevol element" onclick="window.helpMode&&helpMode.toggle()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg></button>
     <button id="btn-suggest" class="icon-btn" title="Tens un suggeriment?" onclick="if(window.ATNE_TRACK)ATNE_TRACK.openSuggestionBox({page:'flash'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
     <button id="docent-av" class="docent-av" title="El teu compte">?</button>
   </header>
@@ -863,13 +864,13 @@
         </select>
         <select class="form-select" id="car-sel" style="display:none">
           <option value="">Selecciona una condició…</option>
-          <option value="costa_llegir">Li costa llegir (dislèxia)</option>
-          <option value="costa_atencio">Li costa l'atenció i la concentració (TDAH)</option>
-          <option value="instruccions_concretes">Necessita instruccions molt concretes (TEA)</option>
+          <option value="dislexia">Li costa llegir (dislèxia)</option>
+          <option value="tdah">Li costa l'atenció i la concentració (TDAH)</option>
+          <option value="tea">Necessita instruccions molt concretes (TEA)</option>
           <option value="nouvingut">Nouvingut/da – no parla bé el català</option>
-          <option value="vol_repte">Vol un repte – altes capacitats</option>
-          <option value="dificultats_generals">Dificultats generals d'aprenentatge</option>
-          <option value="no_sap">Té dificultats, però no sé quines</option>
+          <option value="altes_capacitats">Vol un repte – altes capacitats</option>
+          <option value="di">Dificultats generals d'aprenentatge</option>
+          <option value="vulnerabilitat">Té dificultats, però no sé quines</option>
         </select>
       </div>
 
@@ -1160,36 +1161,36 @@
   };
 
   var BEHAVIORAL_TO_PERFILS = {
-    'costa_llegir':           ['dislexia'],
-    'costa_atencio':          ['tdah'],
-    'instruccions_concretes': ['tea'],
-    'nouvingut':              ['nouvingut'],
-    'vol_repte':              ['altes_capacitats'],
-    'dificultats_generals':   ['di'],
-    'no_sap':                 ['vulnerabilitat'],
-    '':                       [],
+    'dislexia':         ['dislexia'],
+    'tdah':             ['tdah'],
+    'tea':              ['tea'],
+    'nouvingut':        ['nouvingut'],
+    'altes_capacitats': ['altes_capacitats'],
+    'di':               ['di'],
+    'vulnerabilitat':   ['vulnerabilitat'],
+    '':                 [],
   };
 
   var BEHAVIORAL_TO_ADAPTACIO = {
-    'costa_llegir':           'simplificat',
-    'costa_atencio':          'simplificat',
-    'instruccions_concretes': 'simplificat',
-    'nouvingut':              'molt_simplificat',
-    'vol_repte':              'enriquiment',
-    'dificultats_generals':   'molt_simplificat',
-    'no_sap':                 'simplificat',
-    '':                       'al_nivell',
+    'dislexia':         'simplificat',
+    'tdah':             'simplificat',
+    'tea':              'simplificat',
+    'nouvingut':        'molt_simplificat',
+    'altes_capacitats': 'enriquiment',
+    'di':               'molt_simplificat',
+    'vulnerabilitat':   'simplificat',
+    '':                 'al_nivell',
   };
 
   var BEHAVIORAL_LABEL = {
-    'costa_llegir':           'Dislèxia',
-    'costa_atencio':          'TDAH',
-    'instruccions_concretes': 'TEA',
-    'nouvingut':              'Nouvingut',
-    'vol_repte':              'Altes cap.',
-    'dificultats_generals':   'Dif. apren.',
-    'no_sap':                 'Vulnerabilitat',
-    '':                       'Al nivell',
+    'dislexia':         'Dislèxia',
+    'tdah':             'TDAH',
+    'tea':              'TEA',
+    'nouvingut':        'Nouvingut',
+    'altes_capacitats': 'Altes cap.',
+    'di':               'Dif. apren.',
+    'vulnerabilitat':   'Vulnerabilitat',
+    '':                 'Al nivell',
   };
 
   var GRUP_MAP = {
@@ -1396,8 +1397,10 @@
       if (typeof ps.caracteristica === 'string') {
         if (ps.tipus === 'grup' && carGrupSel) carGrupSel.value = ps.caracteristica;
         else if (ps.tipus === 'alumne' && carSel) {
-          carSel.value = ps.caracteristica;
-          if (ps.caracteristica === 'nouvingut') l1Group.classList.add('show');
+          // Backward compat: behavioral antic → canònic
+          var carVal = OLD_CAR_TO_NEW[ps.caracteristica] || ps.caracteristica;
+          carSel.value = carVal;
+          if (carVal === 'nouvingut') l1Group.classList.add('show');
         }
       }
       if (ps.l1 && l1Inp) l1Inp.value = ps.l1;
@@ -1868,19 +1871,25 @@
     var dd  = document.getElementById('load-pf-dropdown');
     if (!btn || !dd) return;
 
+    // Clau canònica → valor de carSel (ara coincideixen; excepcions: tdl/au/vi)
     var PERFILS_TO_CAR = {
-      'dislexia':         'costa_llegir',
-      'tdah':             'costa_atencio',
-      'tea':              'instruccions_concretes',
+      'dislexia':         'dislexia',
+      'tdah':             'tdah',
+      'tea':              'tea',
       'nouvingut':        'nouvingut',
-      'altes_capacitats': 'vol_repte',
-      'di':               'dificultats_generals',
-      'vulnerabilitat':   'no_sap',
-      // condicions Taller sense equivalent directe a Flash → aproximació més propera
-      'tdl':              'costa_llegir',
-      'discalculia':      'dificultats_generals',
-      'au':               'instruccions_concretes',
-      'vi':               'no_sap',
+      'altes_capacitats': 'altes_capacitats',
+      'di':               'di',
+      'vulnerabilitat':   'vulnerabilitat',
+      'tdl':              'dislexia',
+      'discalculia':      'di',
+      'au':               'tea',
+      'vi':               'vulnerabilitat',
+    };
+    // Backward compat: carSel.value antic (behavioral) → nou (canònic)
+    var OLD_CAR_TO_NEW = {
+      'costa_llegir':'dislexia', 'costa_atencio':'tdah',
+      'instruccions_concretes':'tea', 'vol_repte':'altes_capacitats',
+      'dificultats_generals':'di', 'no_sap':'vulnerabilitat',
     };
 
     var BTN_DEFAULT_TEXT = 'Carrega un perfil desat';

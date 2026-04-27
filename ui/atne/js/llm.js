@@ -26,11 +26,16 @@
     ac:   'altes_capacitats'
   };
   // Mapeig complet data-dx → clau canònica del backend (instruction_filter)
+  // Inclou claus curtes (legacy) i llargues (nou format) per a backward compat.
   const DX_TO_CHAR = {
+    // Claus curtes legacy
     tdah: 'tdah', disl: 'dislexia', l2: 'nouvingut', cat: 'nouvingut',
     ac: 'altes_capacitats', tea: 'tea', di: 'di',
     au: 'discapacitat_auditiva', vi: 'discapacitat_visual',
-    tdl: 'tdl', discalculia: 'discalculia'
+    tdl: 'tdl', discalculia: 'discalculia',
+    // Claus llargues (nou format unificat)
+    dislexia: 'dislexia', nouvingut: 'nouvingut', altes_capacitats: 'altes_capacitats',
+    discapacitat_auditiva: 'discapacitat_auditiva', discapacitat_visual: 'discapacitat_visual',
   };
   const ALL_CHAR_KEYS = [
     'tdah', 'dislexia', 'nouvingut', 'altes_capacitats',
@@ -85,8 +90,9 @@
     }
 
     // Dislèxia: tags → tipus_dislexia (fonologica/superficial/mixta) i grau.
-    if (sv.disl && Array.isArray(sv.disl.tags)) {
-      const tags = sv.disl.tags.map(t => String(t).toLowerCase());
+    const svDisl = sv.dislexia || sv.disl;
+    if (svDisl && Array.isArray(svDisl.tags)) {
+      const tags = svDisl.tags.map(t => String(t).toLowerCase());
       chars.dislexia = chars.dislexia || { actiu: true };
       if (tags.some(t => t.includes('fono'))) chars.dislexia.tipus_dislexia = 'fonologica';
       else if (tags.some(t => t.includes('mixta'))) chars.dislexia.tipus_dislexia = 'mixta';
@@ -94,9 +100,10 @@
     }
 
     // Altes capacitats: tags informatius (creativa/acadèmica/doble excep.).
-    if (sv.ac && Array.isArray(sv.ac.tags)) {
+    const svAc = sv.altes_capacitats || sv.ac;
+    if (svAc && Array.isArray(svAc.tags)) {
       chars.altes_capacitats = chars.altes_capacitats || { actiu: true };
-      chars.altes_capacitats.tipus = sv.ac.tags[0] || '';
+      chars.altes_capacitats.tipus = svAc.tags[0] || '';
     }
 
     // TEA: tags → suport_nivell (1/2/3) + sensibilitat sensorial flag.
@@ -137,34 +144,33 @@
       if (tags.some(t => t.includes('braille'))) chars.discapacitat_visual.usa_braille = true;
     }
 
-    // L2 / Nouvingut: L1, país, mesos_catalunya, alfabet_llati, alfabetitzacio_l1.
-    if (sv.l2 && typeof sv.l2 === 'object') {
+    // Nouvingut/L2: L1, país, mesos_catalunya, alfabet_llati, alfabetitzacio_l1.
+    const svNou = sv.nouvingut || sv.l2;
+    if (svNou && typeof svNou === 'object') {
       chars.nouvingut = chars.nouvingut || { actiu: true };
-      if (sv.l2.l1) chars.nouvingut.l1 = sv.l2.l1;
-      if (sv.l2.pais) chars.nouvingut.pais = sv.l2.pais;
-      if (sv.l2.mesos_range) {
-        chars.nouvingut.mesos_catalunya_range = sv.l2.mesos_range;
-        // Mapeig rang → punt mitjà en mesos (per a computeMECRSortida)
+      if (svNou.l1) chars.nouvingut.l1 = svNou.l1;
+      if (svNou.pais) chars.nouvingut.pais = svNou.pais;
+      if (svNou.mesos_range) {
+        chars.nouvingut.mesos_catalunya_range = svNou.mesos_range;
         const mesosMap = {
           'Menys de 6 mesos': 3,
           '6-12 mesos': 9,
           '1-2 anys': 18,
           'Més de 2 anys': 30,
         };
-        if (mesosMap[sv.l2.mesos_range] !== undefined) {
-          chars.nouvingut.mesos_catalunya = mesosMap[sv.l2.mesos_range];
+        if (mesosMap[svNou.mesos_range] !== undefined) {
+          chars.nouvingut.mesos_catalunya = mesosMap[svNou.mesos_range];
         }
       }
-      if (sv.l2.alfabet_llati !== undefined) {
-        chars.nouvingut.alfabet_llati = !!sv.l2.alfabet_llati;
+      if (svNou.alfabet_llati !== undefined) {
+        chars.nouvingut.alfabet_llati = !!svNou.alfabet_llati;
       }
-      if (sv.l2.alfabetitzacio_l1 !== undefined) {
-        chars.nouvingut.alfabetitzacio_l1 = !!sv.l2.alfabetitzacio_l1;
+      if (svNou.alfabetitzacio_l1 !== undefined) {
+        chars.nouvingut.alfabetitzacio_l1 = !!svNou.alfabetitzacio_l1;
       }
-      if (sv.l2.escolaritzacio) chars.nouvingut.escolaritzacio = sv.l2.escolaritzacio;
-      // Família lingüística i L1_romanica (per a l'instrucció E-11)
+      if (svNou.escolaritzacio) chars.nouvingut.escolaritzacio = svNou.escolaritzacio;
       const ROMANCE = ['català','castellà','espanyol','portuguès','italià','francès','romanès','gallec','occità','romanes'];
-      const l1Norm = String(sv.l2.l1 || '').toLowerCase();
+      const l1Norm = String(svNou.l1 || '').toLowerCase();
       if (ROMANCE.some(r => l1Norm.includes(r))) chars.nouvingut.familia_linguistica = 'romanica';
     }
   }
