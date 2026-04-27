@@ -1249,14 +1249,22 @@
     '1r FP Grau Superior':'B2','2n FP Grau Superior':'B2',
   };
   const pCursEl = document.getElementById('p-curs');
-  if (pCursEl) {
-    pCursEl.addEventListener('change', () => {
-      const mecr = _PCURS_TO_MECR[pCursEl.value];
-      if (!mecr) return;
-      document.querySelectorAll('.levels.mecr .lvl').forEach(btn => {
-        btn.classList.toggle('on', btn.querySelector('.lv-code')?.textContent === mecr);
-      });
+  const _MECR_SCALE = ['pre-A1','A1','A2','B1','B2','C1'];
+  function _applyMecrBtn(mecr) {
+    document.querySelectorAll('.levels.mecr .lvl').forEach(btn => {
+      btn.classList.toggle('on', btn.querySelector('.lv-code')?.textContent === mecr);
     });
+  }
+  function _recomputeMecr() {
+    if (!pCursEl) return;
+    const base = _PCURS_TO_MECR[pCursEl.value];
+    if (!base) return;
+    let idx = _MECR_SCALE.indexOf(base);
+    if (dxSel.has('ac')) idx = Math.min(idx + 1, _MECR_SCALE.length - 1);
+    _applyMecrBtn(_MECR_SCALE[idx]);
+  }
+  if (pCursEl) {
+    pCursEl.addEventListener('change', _recomputeMecr);
   }
 
   // Afegir perfils al grup (el picker s'obre automàticament en focus del search)
@@ -1507,6 +1515,7 @@
     const k = b.dataset.dx;
     if(dxSel.has(k)) dxSel.delete(k); else dxSel.add(k);
     renderDx();
+    _recomputeMecr();
   }));
 
   // ──────────────────────────────────────────────────────
