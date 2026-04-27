@@ -237,8 +237,9 @@
     }
     var did = '';
     try { did = localStorage.getItem('atne.docent_id') || ''; } catch (e) { /* ignore */ }
-    if (did) {
-      fetch('/api/docent/is-admin?docent_id=' + encodeURIComponent(did))
+
+    function checkAdmin(docent_id) {
+      fetch('/api/docent/is-admin?docent_id=' + encodeURIComponent(docent_id))
         .then(function (r) { return r.ok ? r.json() : {}; })
         .then(function (d) {
           if (d && d.is_admin) {
@@ -247,6 +248,30 @@
           }
         })
         .catch(function () { /* ignore */ });
+    }
+
+    if (did) {
+      checkAdmin(did);
+    } else if (currentLogin) {
+      fetch('/api/docent/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ login: currentLogin })
+      })
+      .then(function (r) { return r.ok ? r.json() : {}; })
+      .then(function (d) {
+        if (!d.ok || !d.docent_id) return;
+        try { localStorage.setItem('atne.docent_id', d.docent_id); } catch(e) {}
+        if (d.alias) {
+          try { localStorage.setItem('atne.docent_alias', d.alias); } catch(e) {}
+          var avBtn = document.getElementById('docent-av');
+          if (avBtn) { avBtn.textContent = d.alias[0].toUpperCase(); avBtn.title = 'Docent · ' + d.alias; }
+          var menuTop = document.getElementById('admin-menu-top');
+          if (menuTop) menuTop.textContent = d.alias;
+        }
+        checkAdmin(d.docent_id);
+      })
+      .catch(function () { /* ignore */ });
     }
   }
 
