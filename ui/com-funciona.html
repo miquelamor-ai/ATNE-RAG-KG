@@ -113,7 +113,7 @@
 
   /* ─── Sidebar esquerre ──────────────────────────── */
   .sidebar { width:256px; background:#fff; border-right:1px solid var(--paper-line); position:fixed; top:57px; left:0; height:calc(100vh - 57px); overflow-y:auto; display:none; z-index:30; }
-  @media (min-width:1024px) { .sidebar { display:block; } .page-wrap { margin-left:256px; max-width:none; padding-left:var(--sp-10); } }
+  @media (min-width:1024px) { .sidebar { display:block; } .page-wrap { margin-left:256px; max-width:860px; padding-left:var(--sp-10); } }
   .sidebar-inner { padding:var(--sp-6); }
   .sidebar-heading { font-family:var(--mono); font-size:var(--fs-xs); font-weight:var(--fw-bold); text-transform:uppercase; letter-spacing:.12em; color:var(--ink-400); margin-bottom:var(--sp-6); }
   .sidebar-nav { display:flex; flex-direction:column; gap:var(--sp-1); }
@@ -188,7 +188,6 @@
 
   <!-- §01 Els dos modes -->
   <div class="section" id="modes">
-    <div class="section-num">01</div>
     <h2>Els dos modes: Flash i Taller</h2>
     <p>ATNE té dos modes de treball. Tries el mode en funció del temps disponible i la complexitat de l'adaptació.</p>
 
@@ -226,7 +225,6 @@
 
   <!-- §02 Els perfils -->
   <div class="section" id="perfils">
-    <div class="section-num">02</div>
     <h2>Els perfils — crear, recuperar i editar</h2>
     <p>El perfil és la peça clau d'ATNE. Es construeix a partir del que <strong>observes a l'aula</strong>, no necessàriament d'un diagnòstic formal.</p>
 
@@ -258,7 +256,6 @@
 
   <!-- §03 Entrar el text -->
   <div class="section" id="text">
-    <div class="section-num">03</div>
     <h2>Entrar el text</h2>
     <p>Al Pas 2 (Taller) o al panell esquerre (Flash) tens quatre maneres d'entrar el text:</p>
 
@@ -298,7 +295,6 @@
 
   <!-- §04 L'adaptació -->
   <div class="section" id="adaptacio">
-    <div class="section-num">04</div>
     <h2>L'adaptació — veure, editar i refinar</h2>
     <p>Un cop llançada l'adaptació, el text apareix en temps real (streaming). Quan acaba, tens accés a totes les eines de revisió:</p>
 
@@ -315,7 +311,6 @@
 
   <!-- §05 Els complements -->
   <div class="section" id="complements">
-    <div class="section-num">05</div>
     <h2>Els complements</h2>
     <p>Fins a quatre complements que l'IA genera simultàniament amb l'adaptació del text principal:</p>
 
@@ -352,7 +347,6 @@
 
   <!-- §06 Desar i exportar -->
   <div class="section" id="exportar">
-    <div class="section-num">06</div>
     <h2>Desar i exportar</h2>
     <p>ATNE desa les adaptacions automàticament. Desde qualsevol dispositiu pots recuperar el teu historial de feina.</p>
 
@@ -370,7 +364,6 @@
 
   <!-- §07 Privacitat -->
   <div class="section" id="privacitat">
-    <div class="section-num">07</div>
     <h2>Privacitat i IA</h2>
     <p>Quines dades s'envien als models d'IA i com protegim la privacitat de l'alumnat.</p>
 
@@ -424,13 +417,65 @@
 
       <div class="priv-card" style="grid-column:1/-1;border-left:3px solid var(--primary)">
         <h3>🔒 Com anomenar els perfils dels alumnes</h3>
-        <p style="font-size:var(--fs-sm);color:var(--ink-600);margin-bottom:var(--sp-3);line-height:1.6">El nom d'un perfil no s'envia al model, però nom + condició guardat a l'app ja és <strong>dada personal sensible</strong> (RGPD, art. 9). Inicials i nom de pila sovint també identifiquen en un grup petit.</p>
-        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:var(--sp-4)">
-          <div style="display:flex;align-items:baseline;gap:8px;font-size:var(--fs-sm)"><span style="color:#c64a4a;font-weight:700">✗</span><span style="color:var(--ink-600)">"Marc Garcia" + TDAH &mdash; <em>identificable</em></span></div>
-          <div style="display:flex;align-items:baseline;gap:8px;font-size:var(--fs-sm)"><span style="color:#c64a4a;font-weight:700">✗</span><span style="color:var(--ink-600)">"M.G." + TDAH &mdash; <em>identificable en grup petit</em></span></div>
-          <div style="display:flex;align-items:baseline;gap:8px;font-size:var(--fs-sm)"><span style="color:#16a34a;font-weight:700">✓</span><span style="color:var(--ink-700);font-weight:500">"El Pilot" + TDAH &mdash; <em>sols vosaltres sabeu qui és</em></span></div>
+        <p style="font-size:var(--fs-sm);color:var(--ink-600);margin-bottom:var(--sp-4);line-height:1.6">El nom d'un perfil no s'envia al model, però nom + condició guardat a l'app ja és <strong>dada personal sensible</strong> (RGPD, art. 9). Inicials i noms de pila sovint també identifiquen en un grup petit.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);margin-bottom:var(--sp-5)">
+          <div style="background:var(--cream-2,#f5f1ea);border-radius:var(--r-md);padding:var(--sp-4)">
+            <div style="font-size:var(--fs-sm);font-weight:700;color:var(--ink-700);margin-bottom:var(--sp-3)">Per què no n'hi ha prou amb les inicials</div>
+            <p style="font-size:var(--fs-sm);color:var(--ink-600);line-height:1.6;margin-bottom:var(--sp-3)">En un grup de 25 alumnes, sovint hi ha <em>un sol</em> alumne amb TDAH. La combinació <strong>inicial + condició + curs</strong> és suficient per identificar la persona.</p>
+            <div style="display:flex;flex-direction:column;gap:var(--sp-2)">
+              <div style="display:flex;align-items:baseline;gap:8px;font-size:var(--fs-sm)"><span style="color:#c64a4a;font-weight:700">✗</span><span style="color:var(--ink-600)">"Marc Garcia" + TDAH &mdash; <em>nom complet: identificable</em></span></div>
+              <div style="display:flex;align-items:baseline;gap:8px;font-size:var(--fs-sm)"><span style="color:#c64a4a;font-weight:700">✗</span><span style="color:var(--ink-600)">"M.G." + TDAH &mdash; <em>inicials: identificable en grup petit</em></span></div>
+              <div style="display:flex;align-items:baseline;gap:8px;font-size:var(--fs-sm)"><span style="color:#c64a4a;font-weight:700">✗</span><span style="color:var(--ink-600)">"Marc" + TDAH &mdash; <em>nom de pila: sovint identificable</em></span></div>
+              <div style="display:flex;align-items:baseline;gap:8px;font-size:var(--fs-sm)"><span style="color:#16a34a;font-weight:700">✓</span><span style="color:var(--ink-700);font-weight:500">"El Pilot" + TDAH &mdash; <em>sols vosaltres sabeu qui és</em></span></div>
+            </div>
+          </div>
+          <div style="background:var(--primary-50,rgba(51,55,166,.06));border-radius:var(--r-md);padding:var(--sp-4);border:1px solid rgba(51,55,166,.12)">
+            <div style="font-size:var(--fs-sm);font-weight:700;color:var(--primary);margin-bottom:var(--sp-3)">Pseudoanonimització funcional positiva</div>
+            <p style="font-size:var(--fs-sm);color:var(--ink-600);line-height:1.6;margin-bottom:var(--sp-3)">Un <strong>sobrenom inventat</strong> —no derivat del nom real— que sols el docent sap a qui correspon. Tercers que accedissin a les dades no podrien fer la connexió. És el que el RGPD anomena <em>pseudonimització</em>.</p>
+            <p style="font-size:var(--fs-sm);color:var(--ink-600);line-height:1.6;margin:0">A ATNE optem per sobrenoms <strong>positius i afirmatius</strong>: que celebrin una qualitat de la persona, no que etiquetin la dificultat. Seguint la tradició ignasiana de la <em>cura personalis</em>, el sobrenom és una microacció de dignitat.</p>
+          </div>
         </div>
-        <p style="font-size:var(--fs-sm);color:var(--ink-600);line-height:1.6;margin:0">Useu un <strong>sobrenom positiu inventat</strong> que no derivi del nom real: L'Exploradora, El Pilot, La Lluna, El Roure… Un sobrenom que celebri la persona, no que etiqueti la dificultat. <a href="/ui/saber-ne.html#pseudoanonimitat" target="_blank" style="color:var(--primary)">Llegiu-ne més a Saber-ne+ →</a></p>
+
+        <div style="margin-bottom:var(--sp-4)">
+          <div style="font-size:var(--fs-sm);font-weight:600;color:var(--ink-700);margin-bottom:var(--sp-3)">Exemples de sobrenoms que ATNE usa als perfils de demostració</div>
+          <div style="display:flex;flex-wrap:wrap;gap:var(--sp-2)">
+            <div style="background:var(--cream-2,#f5f1ea);border-radius:var(--r-lg);padding:var(--sp-2) var(--sp-3);display:flex;align-items:center;gap:var(--sp-2)">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--tdah-bg,#fce7d5);color:var(--tdah,#c64a4a);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0">Pi</div>
+              <div><div style="font-size:var(--fs-sm);font-weight:600;color:var(--ink-800)">El Pilot</div><div style="font-size:10px;color:var(--ink-400)">TDAH · energia i acció</div></div>
+            </div>
+            <div style="background:var(--cream-2,#f5f1ea);border-radius:var(--r-lg);padding:var(--sp-2) var(--sp-3);display:flex;align-items:center;gap:var(--sp-2)">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--disl-bg,#e8f4ff);color:var(--disl,#1d6fa4);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0">Na</div>
+              <div><div style="font-size:var(--fs-sm);font-weight:600;color:var(--ink-800)">La Narradora</div><div style="font-size:10px;color:var(--ink-400)">Dislèxia · força oral</div></div>
+            </div>
+            <div style="background:var(--cream-2,#f5f1ea);border-radius:var(--r-lg);padding:var(--sp-2) var(--sp-3);display:flex;align-items:center;gap:var(--sp-2)">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--cat-bg,#fef3c7);color:var(--cat,#b45309);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0">Vi</div>
+              <div><div style="font-size:var(--fs-sm);font-weight:600;color:var(--ink-800)">El Viatger</div><div style="font-size:10px;color:var(--ink-400)">Català L2 · descoberta</div></div>
+            </div>
+            <div style="background:var(--cream-2,#f5f1ea);border-radius:var(--r-lg);padding:var(--sp-2) var(--sp-3);display:flex;align-items:center;gap:var(--sp-2)">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--tea-bg,#f0fdf4);color:var(--tea,#16a34a);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0">As</div>
+              <div><div style="font-size:var(--fs-sm);font-weight:600;color:var(--ink-800)">L'Astrònom</div><div style="font-size:10px;color:var(--ink-400)">TEA · precisió i detall</div></div>
+            </div>
+            <div style="background:var(--cream-2,#f5f1ea);border-radius:var(--r-lg);padding:var(--sp-2) var(--sp-3);display:flex;align-items:center;gap:var(--sp-2)">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--ac-bg,#f5f0ff);color:var(--ac,#6d28d9);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0">Ex</div>
+              <div><div style="font-size:var(--fs-sm);font-weight:600;color:var(--ink-800)">L'Exploradora</div><div style="font-size:10px;color:var(--ink-400)">Altes cap. · curiositat</div></div>
+            </div>
+            <div style="background:var(--cream-2,#f5f1ea);border-radius:var(--r-lg);padding:var(--sp-2) var(--sp-3);display:flex;align-items:center;gap:var(--sp-2)">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--primary-50,rgba(51,55,166,.1));color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0">Ll</div>
+              <div><div style="font-size:var(--fs-sm);font-weight:600;color:var(--ink-800)">La Lluna</div><div style="font-size:10px;color:var(--ink-400)">lliure · poètic</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:var(--cream-2,#f5f1ea);border-radius:var(--r-md);padding:var(--sp-4);border-left:3px solid var(--primary)">
+          <div style="font-size:var(--fs-sm);font-weight:700;color:var(--ink-700);margin-bottom:var(--sp-2)">Com triar un bon sobrenom</div>
+          <ul style="font-size:var(--fs-sm);color:var(--ink-600);line-height:1.6;margin:0;padding-left:var(--sp-5);display:flex;flex-direction:column;gap:var(--sp-2)">
+            <li><strong>Que no derivi del nom real</strong> — ni abreviatura ni anagrama. Genuïnament inventat.</li>
+            <li><strong>Que sigui memorable per vosaltres</strong> — heu de saber ràpidament a qui correspon sense consultar cap llista.</li>
+            <li><strong>Que celebri alguna cosa positiva</strong> — una qualitat, una passió, una manera de ser. Mai una dificultat.</li>
+            <li><strong>Que el docent sigui l'únic que en conegui el significat</strong> — si l'alumne el coneix i li agrada, millor.</li>
+          </ul>
+        </div>
       </div>
 
     </div>
