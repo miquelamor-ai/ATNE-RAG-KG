@@ -3722,6 +3722,7 @@ def _build_flash_system_prompt(
         f"Adapta el text que t'enviaré EN {lang_label.upper()}.\n"
         "IMPORTANT: la primera línia ha de ser sempre un títol en format `## Títol`. "
         "Si el text original ja en té, conserva'l. Si no en té, crea'n un de breu i descriptiu del contingut. "
+        "Si el text adaptat supera 100 paraules sense apartats, organitza'l en 2-3 subapartats `### Apartat`. "
         "No escriguis cap frase introductòria, cap comentari sobre el que has fet ni cap text de tancament.\n\n"
     )
     p += "NIVELL:\n" + _FLASH_NIVELL_MAP.get(nivell, _FLASH_NIVELL_MAP["B1"]) + "\n"
@@ -3734,15 +3735,19 @@ def _build_flash_system_prompt(
     if "glossari" in complements:
         if "nouvingut" in perfils and l1:
             comp_lines.append(
-                f"- GLOSSARI: 5-8 termes clau, definició breu en {lang_label} adaptada al nivell "
-                f"i, entre parèntesis, la traducció a {l1}."
+                f"- GLOSSARI: taula markdown 3 columnes | Terme | Traducció ({l1}, alfabet original) | Explicació (màx. 8 paraules en {lang_label}) |. "
+                f"6-10 termes: prioritza termes curriculars del text, paraules ambigues pel nivell i col·locacions clau."
             )
         else:
-            comp_lines.append(f"- GLOSSARI: 5-8 termes clau del text amb definició breu en {lang_label} adaptada al nivell.")
+            comp_lines.append(
+                f"- GLOSSARI: taula markdown 2 columnes | Terme | Explicació (màx. 8 paraules en {lang_label}) |. "
+                f"6-10 termes: prioritza termes curriculars del text, paraules ambigues pel nivell i col·locacions clau."
+            )
     if "preguntes" in complements:
         comp_lines.append(
-            f"- PREGUNTES DE COMPRENSIÓ: 3-5 preguntes graduades en {lang_label} "
-            "(comprensió literal → aplicació → reflexió crítica)."
+            f"- PREGUNTES DE COMPRENSIÓ: 5-6 preguntes en {lang_label} en 3 moments — "
+            "1 abans de llegir (hipòtesi o connexió prèvia), 1 durant (inferència o lèxic en context), "
+            "3-4 després (1 literal, 1-2 inferencials, 1 crítica). Cada pregunta comença amb «- »."
         )
     if "resum" in complements:
         comp_lines.append(f"- RESUM: 3-5 frases en {lang_label} que resumeixin les idees principals del text adaptat.")
