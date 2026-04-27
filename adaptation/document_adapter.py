@@ -171,28 +171,34 @@ def inject_pptx_adapted(pptx_bytes: bytes, adapted: dict) -> bytes:
 
 # ── DOCX output ─────────────────────────────────────────────────────────────
 
+# XML 1.0 no permet caràcters de control (excepte tab, LF, CR).
+# PyMuPDF de vegades els extreu de PDFs mal formats.
+_XML_ILLEGAL = re.compile(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]')
+
+def _sanitize(text: str) -> str:
+    return _XML_ILLEGAL.sub('', text)
+
+
 def build_docx_from_adapted(text_map: list, adapted: dict) -> bytes:
     """
     Crea un DOCX editable a partir del text_map i el diccionari de textos adaptats.
-    Preserva l'ordre de lectura i aplica estils bàsics (títols, cos, línies per omplir).
+    Preserva l'ordre de lectura i aplica estils bàsics (títols, cos).
     """
     from docx import Document
-    from docx.shared import Pt, RGBColor
-    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.shared import Pt, Inches, RGBColor
 
     doc = Document()
-    # Marges normals per fitxes escolars
     for section in doc.sections:
-        section.top_margin    = Pt(72)
-        section.bottom_margin = Pt(72)
-        section.left_margin   = Pt(72)
-        section.right_margin  = Pt(72)
+        section.top_margin    = Inches(1)
+        section.bottom_margin = Inches(1)
+        section.left_margin   = Inches(1)
+        section.right_margin  = Inches(1)
 
-    # Ordenar per pàgina i posició vertical
     ordered = sorted(text_map, key=lambda x: (x["page"], x["bbox"][1]))
 
     for item in ordered:
-        text = adapted.get(item["id"], item["text"]).strip()
+        raw = adapted.get(item["id"], item["text"]) or ""
+        text = _sanitize(raw.strip())
         if not text:
             continue
 
@@ -201,21 +207,21 @@ def build_docx_from_adapted(text_map: list, adapted: dict) -> bytes:
         r = (color_int >> 16) & 0xFF
         g = (color_int >> 8)  & 0xFF
         b = color_int & 0xFF
+        is_colored = (r, g, b) != (0, 0, 0)
 
-        # Heurística d'estil per mida de font
         if fontsize >= 16:
-            p = doc.add_heading(text, level=1)
+            p = doc.add_heading(level=1)
+            run = p.add_run(text)
         elif fontsize >= 13:
-            p = doc.add_heading(text, level=2)
+            p = doc.add_heading(level=2)
+            run = p.add_run(text)
         else:
-            p = doc.add_paragraph(text)
-            # Aplicar color original si no és negre
-            if (r, g, b) != (0, 0, 0):
-                for run in p.runs:
-                    run.font.color.rgb = RGBColor(r, g, b)
+            p = doc.add_paragraph()
+            run = p.add_run(text)
+            if is_colored:
+                run.font.color.rgb = RGBColor(r, g, b)
             if fontsize < 9:
-                for run in p.runs:
-                    run.font.size = Pt(fontsize)
+                run.font.size = Pt(max(fontsize, 7))
 
     out = io.BytesIO()
     doc.save(out)
