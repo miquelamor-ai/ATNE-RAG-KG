@@ -173,6 +173,7 @@
   .f-l{font-size:var(--fs-sm);color:var(--ink-700);margin-bottom:6px;font-weight:500;display:flex;gap:6px;align-items:center}
   .f-l .req{color:var(--tdah);font-size:10px}
   .f-l .hint{font-size:10.5px;color:var(--ink-400);font-weight:400;margin-left:auto;font-family:var(--mono)}
+  .f-priv-hint{font-size:10.5px;color:var(--ink-400);font-weight:400;font-style:italic;margin-left:6px}
   .inp,.txt{width:100%;padding:9px 12px;border:1px solid var(--ink-200);border-radius:var(--r-md);font-size:13.5px;background:#fff;font-family:inherit;outline:0}
   .inp:focus,.txt:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-50)}
   .txt{min-height:70px;resize:vertical;line-height:1.5}
@@ -539,32 +540,32 @@
           <div class="subhead" id="sub-rest"><span class="subhead-t">Perfils d'exemple</span><span class="subhead-c" id="sub-rest-c">7</span></div>
           <div class="list" id="list-rest">
             <div class="row person" data-pid="ex_tdah" data-demo="true">
-              <div class="row-av av-tdah">L</div>
-              <div><div class="row-name">Laia M. <span class="badge-demo">Exemple</span></div><div class="row-sub">3r ESO · 14 anys</div></div>
+              <div class="row-av av-tdah">Es</div>
+              <div><div class="row-name">L'Estel <span class="badge-demo">Exemple</span></div><div class="row-sub">3r ESO · 14 anys</div></div>
               <div class="row-chips"><span class="chip tdah">TDAH</span></div>
               <div class="row-course">3r ESO</div>
               <div class="row-use demo-use">exemple</div>
               <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
             </div>
             <div class="row person" data-pid="ex_l2" data-demo="true">
-              <div class="row-av av-cat">K</div>
-              <div><div class="row-name">Karim B. <span class="badge-demo">Exemple</span></div><div class="row-sub">1r ESO · 12 anys</div></div>
+              <div class="row-av av-cat">Vi</div>
+              <div><div class="row-name">El Viatger <span class="badge-demo">Exemple</span></div><div class="row-sub">1r ESO · 12 anys</div></div>
               <div class="row-chips"><span class="chip cat">Català L2</span><span class="chip lv">Pre-A1 · 2 mesos</span></div>
               <div class="row-course">1r ESO</div>
               <div class="row-use demo-use">exemple</div>
               <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
             </div>
             <div class="row person" data-pid="ex_tea" data-demo="true">
-              <div class="row-av av-ac">P</div>
-              <div><div class="row-name">Pol V. <span class="badge-demo">Exemple</span></div><div class="row-sub">5è Primària · 10 anys</div></div>
+              <div class="row-av av-ac">As</div>
+              <div><div class="row-name">L'Astrònom <span class="badge-demo">Exemple</span></div><div class="row-sub">5è Primària · 10 anys</div></div>
               <div class="row-chips"><span class="chip ac">TEA</span></div>
               <div class="row-course">5è Primària</div>
               <div class="row-use demo-use">exemple</div>
               <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
             </div>
             <div class="row person" data-pid="ex_aacc" data-demo="true">
-              <div class="row-av av-ac">N</div>
-              <div><div class="row-name">Nora S. <span class="badge-demo">Exemple</span></div><div class="row-sub">4t ESO · 15 anys</div></div>
+              <div class="row-av av-ac">Ex</div>
+              <div><div class="row-name">L'Exploradora <span class="badge-demo">Exemple</span></div><div class="row-sub">4t ESO · 15 anys</div></div>
               <div class="row-chips"><span class="chip ac">Altes capac.</span></div>
               <div class="row-course">4t ESO</div>
               <div class="row-use demo-use">exemple</div>
@@ -608,7 +609,7 @@
           <div class="card">
             <div class="card-t">Identificació</div>
             <div style="display:grid;grid-template-columns:1fr 200px 80px;gap:10px;align-items:end">
-              <div class="f" style="margin:0"><div class="f-l">Nom <span class="req">*</span></div><input class="inp" id="p-nom" placeholder="Ex: Marc Ribera"></div>
+              <div class="f" style="margin:0"><div class="f-l">Nom <span class="req">*</span><span class="f-priv-hint">sobrenom positiu que sols vosaltres enteneu</span></div><input class="inp" id="p-nom" placeholder="Ex: L'Exploradora, El Pilot, La Lluna…"></div>
               <div class="f" style="margin:0"><div class="f-l">Curs</div>
                 <select class="inp" id="p-curs">
                   <option value="" disabled selected>Tria curs…</option>
@@ -870,9 +871,9 @@
                 <input type="text" placeholder="Cerca un perfil per nom, curs o condició…" id="add-prof-q">
               </div>
               <div class="add-picker" id="add-picker" hidden>
-                <label class="pick" data-pid="m"><div class="m-av av-tdah">M</div><div><div class="m-n">Marc Ribera</div><div class="m-s">14 anys · 3r ESO A</div></div><span class="chip tdah">TDAH</span></label>
-                <label class="pick" data-pid="mi"><div class="m-av av-disl">Mi</div><div><div class="m-n">Mireia Solà</div><div class="m-s">12 anys · 2n ESO B</div></div><span class="chip disl">Dislèxia</span></label>
-                <label class="pick" data-pid="l"><div class="m-av av-cat">L</div><div><div class="m-n">Liu Chen</div><div class="m-s">13 anys · 2n ESO C</div></div><span class="chip cat">Català L2</span></label>
+                <label class="pick" data-pid="m"><div class="m-av av-tdah">Pi</div><div><div class="m-n">El Pilot</div><div class="m-s">14 anys · 3r ESO A</div></div><span class="chip tdah">TDAH</span></label>
+                <label class="pick" data-pid="mi"><div class="m-av av-disl">Na</div><div><div class="m-n">La Narradora</div><div class="m-s">12 anys · 2n ESO B</div></div><span class="chip disl">Dislèxia</span></label>
+                <label class="pick" data-pid="l"><div class="m-av av-cat">Po</div><div><div class="m-n">El Pont</div><div class="m-s">13 anys · 2n ESO C</div></div><span class="chip cat">Català L2</span></label>
                 <label class="pick" data-pid="p"><div class="m-av av-ac">P</div><div><div class="m-n">Pol Vidal</div><div class="m-s">15 anys · 4t ESO A</div></div><span class="chip ac">AACC</span></label>
                 <label class="pick" data-pid="a"><div class="m-av av-tdah">A</div><div><div class="m-n">Anna Puig</div><div class="m-s">14 anys · 3r ESO A</div></div><span class="chip tdah">TDAH</span><span class="chip disl">Disl.</span></label>
                 <label class="pick" data-pid="y"><div class="m-av av-cat">Y</div><div><div class="m-n">Youssef El Ameri</div><div class="m-s">11 anys · 6è prim.</div></div><span class="chip cat">Català L2</span></label>
@@ -918,35 +919,35 @@
 
   // Model de dades dels 8 perfils (duplicat a Pas 2 i Pas 3)
   window.ATNE_PROFILES = {
-    marc:         { id:'marc', type:'person', name:'Marc Ribera', age:'14', course:'3r ESO A', avatar:'M', cat:'tdah',
+    marc:         { id:'marc', type:'person', name:'El Pilot',    age:'14', course:'3r ESO A', avatar:'Pi', cat:'tdah',
                     chips:[{label:'TDAH',cat:'tdah'},{label:'B1 · Intermedi',cat:'lv'}],
                     behaviors:['Es distreu amb textos llargs','Respon sense llegir tot','Fatiga lectora al final'],
                     aids:['Fragmentar el text','Una idea per frase','Instruccions numerades','Vocabulari freqüent'] },
-    mireia:       { id:'mireia', type:'person', name:'Mireia Solà', age:'12', course:'1r ESO B', avatar:'Mi', cat:'disl',
+    mireia:       { id:'mireia', type:'person', name:'La Narradora',age:'12', course:'1r ESO B', avatar:'Na', cat:'disl',
                     chips:[{label:'Dislèxia',cat:'disl'},{label:'Decodificació',cat:'lv'}],
                     behaviors:['Confon lletres similars (b/d, p/q)','Lectura lenta','Es cansa al cap d\'un paràgraf'],
                     aids:['Tipografia accessible','Interlineat ampli','Fragmentar el text','Marcar paraules clau'] },
-    liu:          { id:'liu', type:'person', name:'Liu Chen', age:'13', course:'2n ESO C', avatar:'L', cat:'cat',
+    liu:          { id:'liu', type:'person', name:'El Pont',   age:'13', course:'2n ESO C', avatar:'Po', cat:'cat',
                     chips:[{label:'Català L2',cat:'cat'},{label:'Vocab. bàsic',cat:'lv'}],
                     behaviors:['Vocabulari escàs','Dificultats amb connectors','Necessita suport visual'],
                     aids:['Glossari integrat','Vocabulari freqüent','Definicions al marge','Pictogrames'] },
-    pol:          { id:'pol', type:'person', name:'Pol Vidal', age:'15', course:'4t ESO A', avatar:'P', cat:'ac',
+    pol:          { id:'pol', type:'person', name:'El Roure',  age:'15', course:'4t ESO A', avatar:'Ro', cat:'ac',
                     chips:[{label:'Altes capacitats',cat:'ac'}],
                     behaviors:['Acaba molt ràpid i es desmotiva','Busca reptes','Pregunta coses complexes'],
                     aids:['Profunditzacio','Referències externes','Preguntes obertes','Recerca autònoma'] },
-    ex_tdah:  { id:'ex_tdah',  type:'person', name:'Laia M.', age:'14', course:'3r ESO', avatar:'L', cat:'tdah', demo:true,
+    ex_tdah:  { id:'ex_tdah',  type:'person', name:"L'Estel",  age:'14', course:'3r ESO', avatar:'Es', cat:'tdah', demo:true,
                     chips:[{label:'TDAH',cat:'tdah'}],
                     behaviors:['Dificultats atencionals i de planificació','Fatiga ràpida','Necessita textos curts i estructurats'],
                     aids:['Fragmentar el text en blocs petits','Una idea per frase','Marques visuals','Instruccions numerades'] },
-    ex_l2:    { id:'ex_l2',    type:'person', name:'Karim B.', age:'12', course:'1r ESO', avatar:'K', cat:'cat', mesos_catalunya:2, l1:'àrab', demo:true,
+    ex_l2:    { id:'ex_l2',    type:'person', name:'El Viatger', age:'12', course:'1r ESO', avatar:'Vi', cat:'cat', mesos_catalunya:2, l1:'àrab', demo:true,
                     chips:[{label:'Català L2',cat:'cat'},{label:'Pre-A1 · 2 mesos',cat:'lv'}],
                     behaviors:['Arribat fa 2 mesos','Vocabulari molt escàs en català','Bona motivació i escolarització prèvia'],
                     aids:['Glossari amb traducció àrab','Pictogrames i suport visual','Frases SVO curtes','Vocabulari freqüent'] },
-    ex_tea:   { id:'ex_tea',   type:'person', name:'Pol V.', age:'10', course:'5è Primària', avatar:'P', cat:'tea', demo:true,
+    ex_tea:   { id:'ex_tea',   type:'person', name:"L'Astrònom", age:'10', course:'5è Primària', avatar:'As', cat:'tea', demo:true,
                     chips:[{label:'TEA',cat:'tea'}],
                     behaviors:['Necessita estructura clara i predictible','Sensible al llenguatge ambigu o metafòric','Fort en comprensió literal'],
                     aids:['Estructura molt explícita','Evitar metàfores i ironies','Seqüències pas a pas','Títols descriptius'] },
-    ex_aacc:  { id:'ex_aacc',  type:'person', name:'Nora S.', age:'15', course:'4t ESO', avatar:'N', cat:'ac', demo:true,
+    ex_aacc:  { id:'ex_aacc',  type:'person', name:"L'Exploradora", age:'15', course:'4t ESO', avatar:'Ex', cat:'ac', demo:true,
                     chips:[{label:'Altes capacitats',cat:'ac'}],
                     behaviors:['Llegeix textos d\'adults','Fa connexions creatives i interdisciplinars','Busca profunditat i repte'],
                     aids:['Aprofundiment conceptual','Preguntes obertes','Connexions interdisciplinars','Fonts i recerca autònoma'] },
