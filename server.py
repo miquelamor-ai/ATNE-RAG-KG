@@ -2401,6 +2401,146 @@ async def extract_text_from_file(file: UploadFile = File(...)):
     }
 
 
+# ── Adaptació de documents amb preservació de format ─────────────────────
+
+from fastapi import Form as _Form  # noqa: E402
+
+@app.post("/api/adapt-pdf")
+async def adapt_pdf_document(
+    file: UploadFile = File(...),
+    profile: str = _Form("{}"),
+    context: str = _Form("{}"),
+    params: str = _Form("{}"),
+    model: str = _Form(""),
+):
+    """
+    Rep un PDF, adapta el text preservant el layout i retorna el PDF adaptat.
+    Els camps profile/context/params són JSON strings (mateixos camps que /api/adapt).
+    """
+    import io
+    from adaptation.document_adapter import (
+        is_scanned_pdf, extract_pdf_text_map, inject_pdf_adapted, batch_adapt_text_map,
+    )
+    from adaptation.prompt_builder import build_system_prompt
+
+    raw = await file.read()
+    if len(raw) > MAX_UPLOAD_BYTES:
+        return JSONResponse({"error": f"Fitxer massa gran ({len(raw)//1024} KB). Màxim: 5 MB."}, status_code=400)
+    if not raw:
+        return JSONResponse({"error": "Fitxer buit."}, status_code=400)
+
+    try:
+        profile_d = json.loads(profile)
+        context_d = json.loads(context)
+        params_d = json.loads(params)
+    except json.JSONDecodeError as e:
+        return JSONResponse({"error": f"JSON invàlid als paràmetres: {e}"}, status_code=400)
+
+    if is_scanned_pdf(raw):
+        return JSONResponse(
+            {"error": "PDF escanejat (sense text seleccionable). "
+                      "Exporta el document com a PDF des del programa original i torna-ho a provar."},
+            status_code=422,
+        )
+
+    text_map = extract_pdf_text_map(raw)
+    if not text_map:
+        return JSONResponse({"error": "No s'ha trobat text adaptable al PDF."}, status_code=422)
+
+    try:
+        params_d["document_mode"] = True
+        system_prompt = build_system_prompt(profile_d, context_d, params_d)
+        active_model = _model_for("adapt", override=model)
+        adapted = batch_adapt_text_map(text_map, active_model, system_prompt)
+        pdf_out = inject_pdf_adapted(raw, adapted)
+    except Exception as e:
+        return JSONResponse({"error": _safe_error(e, "Error durant l'adaptació del PDF")}, status_code=500)
+
+    filename_out = (file.filename or "document").rsplit(".", 1)[0] + "_adaptat.pdf"
+    return StreamingResponse(
+        io.BytesIO(pdf_out),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename_out}"'},
+    )
+
+
+@app.post("/api/adapt-pptx")
+async def adapt_pptx_document(
+    file: UploadFile = File(...),
+    profile: str = _Form("{}"),
+    context: str = _Form("{}"),
+    params: str = _Form("{}"),
+    model: str = _Form(""),
+):
+    """
+    Rep un PPTX, adapta el text preservant el layout i retorna el PPTX adaptat.
+    Els camps profile/context/params són JSON strings (mateixos camps que /api/adapt).
+    """
+    import io
+    from adaptation.document_adapter import (
+        extract_pptx_text_map, inject_pptx_adapted, batch_adapt_text_map,
+    )
+    from adaptation.prompt_builder import build_system_prompt
+
+    raw = await file.read()
+    if len(raw) > MAX_UPLOAD_BYTES:
+        return JSONResponse({"error": f"Fitxer massa gran ({len(raw)//1024} KB). Màxim: 5 MB."}, status_code=400)
+    if not raw:
+        return JSONResponse({"error": "Fitxer buit."}, status_code=400)
+
+    filename = (file.filename or "").lower()
+    if not filename.endswith(".pptx"):
+        return JSONResponse({"error": "Format no suportat. Accepta: .pptx"}, status_code=400)
+
+    try:
+        profile_d = json.loads(profile)
+        context_d = json.loads(context)
+        params_d = json.loads(params)
+    except json.JSONDecodeError as e:
+        return JSONResponse({"error": f"JSON invàlid als paràmetres: {e}"}, status_code=400)
+
+    text_map = extract_pptx_text_map(raw)
+    if not text_map:
+        return JSONResponse({"error": "No s'ha trobat text adaptable al PPTX."}, status_code=422)
+
+    # Avisar de formes no accessibles (SmartArt, text dins d'imatges)
+    warnings = []
+    try:
+        from pptx import Presentation
+        import io as _io
+        prs = Presentation(_io.BytesIO(raw))
+        for slide_idx, slide in enumerate(prs.slides):
+            for shape in slide.shapes:
+                from pptx.util import Pt
+                from pptx.enum.shapes import MSO_SHAPE_TYPE
+                if shape.shape_type == MSO_SHAPE_TYPE.PICTURE:
+                    continue  # imatges — no es toquen
+                if not shape.has_text_frame and hasattr(shape, "name"):
+                    if "SmartArt" in shape.name or shape.shape_type == 14:  # 14=FREEFORM
+                        warnings.append(f"Diapositiva {slide_idx+1}: «{shape.name}» (SmartArt/forma) no s'ha adaptat.")
+    except Exception:
+        pass
+
+    try:
+        params_d["document_mode"] = True
+        system_prompt = build_system_prompt(profile_d, context_d, params_d)
+        active_model = _model_for("adapt", override=model)
+        adapted = batch_adapt_text_map(text_map, active_model, system_prompt)
+        pptx_out = inject_pptx_adapted(raw, adapted)
+    except Exception as e:
+        return JSONResponse({"error": _safe_error(e, "Error durant l'adaptació del PPTX")}, status_code=500)
+
+    filename_out = (file.filename or "presentacio").rsplit(".", 1)[0] + "_adaptat.pptx"
+    headers = {"Content-Disposition": f'attachment; filename="{filename_out}"'}
+    if warnings:
+        headers["X-Adapt-Warnings"] = json.dumps(warnings[:10], ensure_ascii=False)
+    return StreamingResponse(
+        io.BytesIO(pptx_out),
+        media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        headers=headers,
+    )
+
+
 # ── Generació de text base (per a docents sense text propi) ───────────────
 
 GENERATE_EXTENSIONS = {
