@@ -2014,23 +2014,23 @@
   // a model no detectat: 30s. El % que mostrem és una estimació honesta:
   // pct = min(95, elapsed/expected * 95). Quan acaba, salta a 100%.
   const REGEN_MODEL_TIMES = {
-    'gpt-4o': 12,
-    'gpt-4.1-mini': 18,
-    'gpt-4o-mini': 18,
-    'gemma 3': 45,
-    'gemma3': 45,
-    'gemma 4': 90,
-    'gemma4': 90,
-    'gemini': 20,
-    'mistral': 35,
+    'gpt-4o': 20,
+    'gpt-4.1-mini': 30,
+    'gpt-4o-mini': 30,
+    'gemma 3': 60,
+    'gemma3': 60,
+    'gemma 4': 120,
+    'gemma4': 120,
+    'gemini': 30,
+    'mistral': 60,
   };
   function _expectedTimeFromMsg(msg) {
-    if (!msg) return 30;
+    if (!msg) return 45;
     const lower = msg.toLowerCase();
     for (const key in REGEN_MODEL_TIMES) {
       if (lower.indexOf(key) >= 0) return REGEN_MODEL_TIMES[key];
     }
-    return 30;
+    return 45;
   }
   let _regenTickId = null;
   let _regenMsgId = null;
@@ -2044,7 +2044,7 @@
   window.startRegenLoop = function() {
     window.stopRegenLoop();
     _regenStartTs = Date.now();
-    _regenExpected = 30;
+    _regenExpected = 45;
     const timeEl = document.getElementById('regen-time');
     const subEl = document.querySelector('.regen-s');
     if (timeEl) {
