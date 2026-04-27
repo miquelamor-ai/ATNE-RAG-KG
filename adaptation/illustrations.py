@@ -171,17 +171,34 @@ MATERIA: {subject}
 Retorna UN SOL objecte JSON (sense code fences, sense explicacions):
 {{
   "wikimedia_query": "<2-5 paraules clau en angles per cercar a Wikimedia Commons>",
-  "flux_brief": "<descripcio d'escena en angles, 20-40 paraules, concreta i visual>"
+  "flux_brief": "<descripcio d'escena en angles, 45-70 paraules, rica en detalls visuals>"
 }}
 
-Regles del flux_brief:
-- Concret i visual: subjecte + accio + escenari + llum.
+El flux_brief ha d'omplir aquests slots concatenats en una sola frase:
+1. SUBJECTE concret amb detalls (no "a factory" sino "rows of mechanical looms powered by steam")
+2. ACCIO o estat (workers tending machines, leaves catching light, etc.)
+3. ESCENARI / context historic o geografic (19th century, mediterranean coast, alpine forest...)
+4. LLUM / atmosfera (warm light filtering through tall windows, golden hour, soft overcast...)
+5. ENQUADRAMENT / composicio (waist-up framing, three-quarter view, wide establishing shot, close-up macro...)
+
+Regles obligatories:
 - Nomes afirmacions POSITIVES ("show X"), mai negacions ("no Y", "avoid Y").
-- NO incloguis paraules d'estil (watercolor, flat, illustration, painting, cartoon).
-- NO descriguis enquadrament fotografic si el concepte no n'ho demana.
-- Si el concepte es tecnic-microscopic (cel·lules, atoms), reformula a
-  nivell macroscopic observable (ex: "leaf in sunlight" en lloc de "chloroplasts").
-- Ajusta la complexitat al nivell MECR si ve donat (A1-A2 simple, C1-C2 mes detalls).
+- NO incloguis paraules d'estil (watercolor, flat, illustration, painting, cartoon, vector).
+- Si el concepte es tecnic-microscopic (cel·lules, atoms, molecules), reformula a
+  nivell macroscopic observable (ex: "a green leaf catching sunlight, drops of water on the surface, soft morning light, close-up macro view" en lloc de "chloroplasts performing photosynthesis").
+- Si el concepte es huma o cultural, inclou epoca/vestimenta i enquadrament humanista.
+- Ajusta la complexitat al nivell MECR (A1-A2 mes simple, C1-C2 mes detallat).
+
+EXEMPLES de briefs de qualitat:
+
+CONCEPTE: "Revolucio industrial fabrica textil"
+flux_brief: "the interior of a 19th century textile factory, rows of mechanical looms powered by steam, a few workers in simple period clothing tending the machines, warm light filtering through tall windows, waist-up framing, three-quarter view"
+
+CONCEPTE: "Fotosintesi"
+flux_brief: "a single fresh green leaf in sharp focus, tiny droplets of water on its surface, sunlight streaming from the upper right and casting soft shadows, a blurred forest background, close-up macro composition with the leaf centered, golden morning atmosphere"
+
+CONCEPTE: "Edat mitjana mercat"
+flux_brief: "a bustling medieval town market square in the early afternoon, wooden stalls with bread fruit and cloth, townspeople in simple tunics browsing and bargaining, a stone church wall in the background, warm autumn sunlight, wide establishing shot from a slightly elevated viewpoint"
 
 Respon nomes amb el JSON."""
 
@@ -209,7 +226,7 @@ def _gemma_translate(concept: str, context: dict) -> dict:
         model="gemini-2.5-flash-lite",
         contents=prompt,
         config=types.GenerateContentConfig(
-            temperature=0.2,
+            temperature=0.0,
             thinking_config=types.ThinkingConfig(thinking_budget=0),
         ),
     )
@@ -318,12 +335,20 @@ def search_wikimedia(query: str, limit: int = 1) -> list[WikimediaOption]:
 # ---- FLUX (Pollinations)
 
 def build_flux_url(brief: str, style: str, seed: int) -> str:
-    """Construeix URL Pollinations deterministica (imatge es genera en GET)."""
-    spine = STYLE_SPINES.get(style, STYLE_SPINES[DEFAULT_STYLE])
-    full = f"{spine} {brief} {POSITIVE_SUFFIX}"
+    """Construeix URL Pollinations deterministica (imatge es genera en GET).
+
+    Format del prompt alineat amb el test reeixit del 21/04 (test_revolucio_industrial.py):
+    `{spine}. {brief}. {suffix}.` amb punts entre seccions (FLUX els fa servir per
+    parsejar millor) i mides 1024x1024 (FLUX-schnell rendeix millor a ratio 1:1
+    que a 4:3 com es feia abans 1024x768).
+    """
+    spine = STYLE_SPINES.get(style, STYLE_SPINES[DEFAULT_STYLE]).rstrip(".")
+    brief_clean = (brief or "").strip().rstrip(".")
+    suffix_clean = POSITIVE_SUFFIX.rstrip(".")
+    full = f"{spine}. {brief_clean}. {suffix_clean}."
     return (
         f"{POLLINATIONS_BASE}{quote(full)}"
-        f"?width=1024&height=768&nologo=true&model=flux&seed={seed}"
+        f"?width=1024&height=1024&nologo=true&model=flux&seed={seed}"
         f"&enhance=false&referrer=atne-fje"
     )
 
