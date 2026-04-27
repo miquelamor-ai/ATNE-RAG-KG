@@ -1928,8 +1928,12 @@
             if (o.curs_id) o.curs = o.curs_id;
             else if (o.course) o.curs = o.course.replace(/\s+[A-Z]{1,2}$/, '').trim();
           }
-          // perfils: Taller usa "conditions"; Flash usa "perfils"
-          if (!o.perfils) o.perfils = o.conditions || [];
+          // perfils: Taller usa "conditions" amb claus curtes; Flash usa "perfils" amb claus llargues
+          var _DX_TO_PERFIL = { disl:'dislexia', l2:'nouvingut', ac:'altes_capacitats',
+                                 tdah:'tdah', tea:'tea', di:'di', vulnerabilitat:'vulnerabilitat', tdl:'tdl' };
+          if (!o.perfils) {
+            o.perfils = (o.conditions || []).map(function(c) { return _DX_TO_PERFIL[c] || c; });
+          }
           // adaptacio: deduïr de levels del grup, o al_nivell per defecte
           if (!o.adaptacio) {
             if (o.tipus === 'grup' && o.levels) {
