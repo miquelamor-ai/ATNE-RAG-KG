@@ -176,11 +176,6 @@
     // Activem la característica principal del perfil
     const mainChar = CAT_TO_CHAR[p.cat];
     if (mainChar) caracteristiques[mainChar] = { actiu: true };
-    // Cas especial Anna: TDAH + Dislèxia. Detectem-ho per l'id.
-    if (p.id === 'anna') {
-      caracteristiques['tdah'] = { actiu: true };
-      caracteristiques['dislexia'] = { actiu: true };
-    }
     // Perfils de grup: el 'cat' del perfil és 'group|group-ac|group-cat' i no casa
     // amb CAT_TO_CHAR. Cal recórrer els chips i activar cada característica trobada.
     const isGroup = p.type === 'group' || (p.cat && p.cat.indexOf('group') === 0);

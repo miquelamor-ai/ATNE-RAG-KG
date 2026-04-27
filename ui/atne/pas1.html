@@ -146,6 +146,8 @@
   .row .chip.lv{background:var(--ink-100);color:var(--ink-700)}
   .row-course{font-size:var(--fs-sm);color:var(--ink-600)}
   .row-use{font-family:var(--mono);font-size:var(--fs-xs);color:var(--ink-500)}
+  .demo-use{color:var(--ink-300);font-style:italic}
+  .badge-demo{display:inline-block;font-size:9px;font-family:var(--ui);font-weight:500;letter-spacing:.3px;color:var(--ink-400);background:var(--ink-100);border:1px solid var(--ink-200);border-radius:var(--r-pill);padding:1px 6px;vertical-align:middle;margin-left:4px}
   .row-acts{display:flex;gap:4px;justify-content:flex-end;opacity:0;transition:.1s}
   .row:hover .row-acts{opacity:1}
   .row-acts button{width:28px;height:28px;border-radius:7px;color:var(--ink-500);display:grid;place-items:center}
@@ -530,98 +532,65 @@
             </div>
           </div>
 
-          <div class="subhead" id="sub-recent"><span class="subhead-t">Recents</span><span class="subhead-c" id="sub-recent-c">6</span></div>
-          <div class="list" id="list-recent">
-            <div class="row person" data-pid="marc">
-              <div class="row-av av-tdah">M</div>
-              <div><div class="row-name">Marc Ribera</div><div class="row-sub">3r ESO A · 14 anys</div></div>
-              <div class="row-chips"><span class="chip tdah">TDAH</span><span class="chip lv">Comp. moderada</span></div>
-              <div class="row-course">3r ESO A</div>
-              <div class="row-use">ús avui</div>
-              <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
-            </div>
-            <div class="row person" data-pid="grup3a">
-              <div class="row-av grp">3A</div>
-              <div><div class="row-name">3r ESO A · Grup classe</div><div class="mini-row"><span class="mini av-tdah">M</span><span class="mini av-cat">L</span><span class="mini av-disl">Mi</span><span class="mini av-neu">+21</span></div></div>
-              <div class="row-chips"><span class="chip lv">3 nivells</span><span class="chip tdah">1 TDAH</span><span class="chip cat">2 L2</span></div>
-              <div class="row-course">24 alumnes</div>
-              <div class="row-use">fa 2d</div>
-              <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
-            </div>
-            <div class="row person" data-pid="mireia">
-              <div class="row-av av-disl">Mi</div>
-              <div><div class="row-name">Mireia Solà</div><div class="row-sub">1r ESO B · 12 anys</div></div>
-              <div class="row-chips"><span class="chip disl">Dislèxia</span><span class="chip lv">Decodificació</span></div>
-              <div class="row-course">1r ESO B</div>
-              <div class="row-use">fa 1d</div>
-              <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
-            </div>
-            <div class="row person" data-pid="liu">
-              <div class="row-av av-cat">L</div>
-              <div><div class="row-name">Liu Chen</div><div class="row-sub">2n ESO C · 13 anys</div></div>
-              <div class="row-chips"><span class="chip cat">Català L2</span><span class="chip lv">Vocab. bàsic</span></div>
-              <div class="row-course">2n ESO C</div>
-              <div class="row-use">fa 3d</div>
-              <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
-            </div>
-            <div class="row person" data-pid="desdoblament">
-              <div class="row-av grp grp-ac">DR</div>
-              <div><div class="row-name">Desdoblament R · Ciències 3r</div><div class="mini-row"><span class="mini av-ac">P</span><span class="mini av-ac">An</span><span class="mini av-ac">Sa</span><span class="mini av-neu">+9</span></div></div>
-              <div class="row-chips"><span class="chip lv">2 nivells</span><span class="chip ac">3 AACC</span></div>
-              <div class="row-course">12 alumnes</div>
-              <div class="row-use">fa 5d</div>
-              <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
-            </div>
-            <div class="row person" data-pid="anna">
-              <div class="row-av av-tdah">A</div>
-              <div><div class="row-name">Anna Puig</div><div class="row-sub">3r ESO A · 14 anys</div></div>
-              <div class="row-chips"><span class="chip tdah">TDAH</span><span class="chip disl">Dislèxia</span></div>
-              <div class="row-course">3r ESO A</div>
-              <div class="row-use">fa 6d</div>
-              <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
-            </div>
-          </div>
+          <div class="subhead" id="sub-recent"><span class="subhead-t">Recents</span><span class="subhead-c" id="sub-recent-c">0</span></div>
+          <div class="list" id="list-recent"></div>
 
-          <div class="subhead" id="sub-rest"><span class="subhead-t">Tots els altres</span><span class="subhead-c" id="sub-rest-c">2</span></div>
+          <div class="subhead" id="sub-rest"><span class="subhead-t">Perfils d'exemple</span><span class="subhead-c" id="sub-rest-c">7</span></div>
           <div class="list" id="list-rest">
-            <div class="row person" data-pid="pol">
+            <div class="row person" data-pid="ex_tdah" data-demo="true">
+              <div class="row-av av-tdah">L</div>
+              <div><div class="row-name">Laia M. <span class="badge-demo">Exemple</span></div><div class="row-sub">3r ESO · 14 anys</div></div>
+              <div class="row-chips"><span class="chip tdah">TDAH</span></div>
+              <div class="row-course">3r ESO</div>
+              <div class="row-use demo-use">exemple</div>
+              <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
+            </div>
+            <div class="row person" data-pid="ex_l2" data-demo="true">
+              <div class="row-av av-cat">K</div>
+              <div><div class="row-name">Karim B. <span class="badge-demo">Exemple</span></div><div class="row-sub">1r ESO · 12 anys</div></div>
+              <div class="row-chips"><span class="chip cat">Català L2</span><span class="chip lv">Pre-A1 · 2 mesos</span></div>
+              <div class="row-course">1r ESO</div>
+              <div class="row-use demo-use">exemple</div>
+              <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
+            </div>
+            <div class="row person" data-pid="ex_tea" data-demo="true">
               <div class="row-av av-ac">P</div>
-              <div><div class="row-name">Pol Vidal</div><div class="row-sub">4t ESO A · 15 anys</div></div>
+              <div><div class="row-name">Pol V. <span class="badge-demo">Exemple</span></div><div class="row-sub">5è Primària · 10 anys</div></div>
+              <div class="row-chips"><span class="chip ac">TEA</span></div>
+              <div class="row-course">5è Primària</div>
+              <div class="row-use demo-use">exemple</div>
+              <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
+            </div>
+            <div class="row person" data-pid="ex_aacc" data-demo="true">
+              <div class="row-av av-ac">N</div>
+              <div><div class="row-name">Nora S. <span class="badge-demo">Exemple</span></div><div class="row-sub">4t ESO · 15 anys</div></div>
               <div class="row-chips"><span class="chip ac">Altes capac.</span></div>
-              <div class="row-course">4t ESO A</div>
-              <div class="row-use">fa 1w</div>
+              <div class="row-course">4t ESO</div>
+              <div class="row-use demo-use">exemple</div>
               <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
             </div>
-            <div class="row person" data-pid="jana">
-              <div class="row-av av-tdah">J</div>
-              <div><div class="row-name">Jana Bonet</div><div class="row-sub">4t Primària A · 9 anys</div></div>
-              <div class="row-chips"><span class="chip tdah">TDAH</span><span class="chip lv">A2 · Inicial</span></div>
-              <div class="row-course">4t Primària A</div>
-              <div class="row-use">fa 1w</div>
+            <div class="row person" data-pid="ex_pri" data-demo="true">
+              <div class="row-av grp">5B</div>
+              <div><div class="row-name">5è Primària B · Grup classe <span class="badge-demo">Exemple</span></div><div class="mini-row"><span class="mini av-tdah">L</span><span class="mini av-cat">K</span><span class="mini av-neu">+16</span></div></div>
+              <div class="row-chips"><span class="chip lv">Ritmes diversos</span><span class="chip tdah">1 TDAH</span><span class="chip cat">1 L2</span></div>
+              <div class="row-course">18 alumnes</div>
+              <div class="row-use demo-use">exemple</div>
               <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
             </div>
-            <div class="row person" data-pid="yassin">
-              <div class="row-av av-cat">Y</div>
-              <div><div class="row-name">Yassin Mansour</div><div class="row-sub">3r Primària B · 8 anys</div></div>
-              <div class="row-chips"><span class="chip cat">Català L2</span><span class="chip lv">3 mesos</span></div>
-              <div class="row-course">3r Primària B</div>
-              <div class="row-use">fa 1w</div>
+            <div class="row person" data-pid="ex_eso" data-demo="true">
+              <div class="row-av grp">2C</div>
+              <div><div class="row-name">2n ESO C · Grup classe <span class="badge-demo">Exemple</span></div><div class="mini-row"><span class="mini av-cat">K</span><span class="mini av-cat">Am</span><span class="mini av-ac">P</span><span class="mini av-neu">+19</span></div></div>
+              <div class="row-chips"><span class="chip lv">3 nivells MECR</span><span class="chip cat">2 L2</span><span class="chip ac">1 TEA</span></div>
+              <div class="row-course">22 alumnes</div>
+              <div class="row-use demo-use">exemple</div>
               <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
             </div>
-            <div class="row person" data-pid="clara">
-              <div class="row-av av-ac">C</div>
-              <div><div class="row-name">Clara Font</div><div class="row-sub">5è Primària A · 10 anys</div></div>
-              <div class="row-chips"><span class="chip ac">Altes capacitats</span></div>
-              <div class="row-course">5è Primària A</div>
-              <div class="row-use">fa 1w</div>
-              <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
-            </div>
-            <div class="row person" data-pid="acollida">
-              <div class="row-av grp grp-cat">L2</div>
-              <div><div class="row-name">Aula d'acollida · Cicle sup.</div><div class="mini-row"><span class="mini av-cat">Y</span><span class="mini av-cat">L</span><span class="mini av-cat">Am</span><span class="mini av-neu">+5</span></div></div>
-              <div class="row-chips"><span class="chip lv">4 nivells</span><span class="chip cat">Tots L2</span></div>
-              <div class="row-course">8 alumnes</div>
-              <div class="row-use">fa 2w</div>
+            <div class="row person" data-pid="ex_fp" data-demo="true">
+              <div class="row-av grp">GM</div>
+              <div><div class="row-name">GM Administració 1r · Com. empresarial <span class="badge-demo">Exemple</span></div><div class="mini-row"><span class="mini av-tdah">J</span><span class="mini av-neu">+14</span></div></div>
+              <div class="row-chips"><span class="chip lv">Velocitats diverses</span><span class="chip tdah">1 TDAH</span></div>
+              <div class="row-course">15 alumnes</div>
+              <div class="row-use demo-use">exemple</div>
               <div class="row-acts"><button class="sel">Seleccionar<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button></div>
             </div>
           </div>
@@ -964,34 +933,34 @@
                     chips:[{label:'Altes capacitats',cat:'ac'}],
                     behaviors:['Acaba molt ràpid i es desmotiva','Busca reptes','Pregunta coses complexes'],
                     aids:['Profunditzacio','Referències externes','Preguntes obertes','Recerca autònoma'] },
-    anna:         { id:'anna', type:'person', name:'Anna Puig', age:'14', course:'3r ESO A', avatar:'A', cat:'tdah',
-                    chips:[{label:'TDAH',cat:'tdah'},{label:'Dislèxia',cat:'disl'}],
-                    behaviors:['Dificultats atencionals i lectora','Fatiga ràpida','Necessita textos curts'],
-                    aids:['Fragmentar el text','Tipografia accessible','Una idea per frase','Marques visuals'] },
-    jana:         { id:'jana', type:'person', name:'Jana Bonet', age:'9', course:'4t Primària A', avatar:'J', cat:'tdah',
-                    chips:[{label:'TDAH',cat:'tdah'},{label:'A2 · Inicial',cat:'lv'}],
-                    behaviors:['Es distreu amb textos llargs','Bones capacitats orals','Necessita suport visual'],
-                    aids:['Textos curts','Fragmentar en blocs','Instruccions numerades','Pictogrames'] },
-    yassin:       { id:'yassin', type:'person', name:'Yassin Mansour', age:'8', course:'3r Primària B', avatar:'Y', cat:'cat', mesos_catalunya:3, l1:'àrab',
-                    chips:[{label:'Català L2',cat:'cat'},{label:'3 mesos',cat:'lv'}],
-                    behaviors:['Arribat fa 3 mesos del Marroc','Vocabulari escàs','Bona motivació'],
-                    aids:['Glossari amb traducció àrab','Pictogrames','Vocabulari freqüent','Frases SVO curtes'] },
-    clara:        { id:'clara', type:'person', name:'Clara Font', age:'10', course:'5è Primària A', avatar:'C', cat:'ac',
+    ex_tdah:  { id:'ex_tdah',  type:'person', name:'Laia M.', age:'14', course:'3r ESO', avatar:'L', cat:'tdah', demo:true,
+                    chips:[{label:'TDAH',cat:'tdah'}],
+                    behaviors:['Dificultats atencionals i de planificació','Fatiga ràpida','Necessita textos curts i estructurats'],
+                    aids:['Fragmentar el text en blocs petits','Una idea per frase','Marques visuals','Instruccions numerades'] },
+    ex_l2:    { id:'ex_l2',    type:'person', name:'Karim B.', age:'12', course:'1r ESO', avatar:'K', cat:'cat', mesos_catalunya:2, l1:'àrab', demo:true,
+                    chips:[{label:'Català L2',cat:'cat'},{label:'Pre-A1 · 2 mesos',cat:'lv'}],
+                    behaviors:['Arribat fa 2 mesos','Vocabulari molt escàs en català','Bona motivació i escolarització prèvia'],
+                    aids:['Glossari amb traducció àrab','Pictogrames i suport visual','Frases SVO curtes','Vocabulari freqüent'] },
+    ex_tea:   { id:'ex_tea',   type:'person', name:'Pol V.', age:'10', course:'5è Primària', avatar:'P', cat:'tea', demo:true,
+                    chips:[{label:'TEA',cat:'tea'}],
+                    behaviors:['Necessita estructura clara i predictible','Sensible al llenguatge ambigu o metafòric','Fort en comprensió literal'],
+                    aids:['Estructura molt explícita','Evitar metàfores i ironies','Seqüències pas a pas','Títols descriptius'] },
+    ex_aacc:  { id:'ex_aacc',  type:'person', name:'Nora S.', age:'15', course:'4t ESO', avatar:'N', cat:'ac', demo:true,
                     chips:[{label:'Altes capacitats',cat:'ac'}],
-                    behaviors:['Llegeix textos d\'adults','Fa connexions creatives','Busca reptes'],
-                    aids:['Profunditzacio','Preguntes obertes','Connexions interdisciplinars','Recerca autònoma'] },
-    grup3a:       { id:'grup3a', type:'group', name:'3r ESO A · Grup classe', age:null, course:'24 alumnes', avatar:'3A', cat:'group',
-                    chips:[{label:'3 nivells',cat:'lv'},{label:'1 TDAH',cat:'tdah'},{label:'2 L2',cat:'cat'}],
-                    behaviors:['Ritmes diversos: 3 MECR diferents','Fatiga lectora del TDAH a mitja classe','L2: dificultats amb connectors i vocabulari'],
-                    aids:['Fragmentar el text en seccions','Glossari amb termes clau','Instruccions numerades','Opcions de profunditat segons ritme'] },
-    desdoblament: { id:'desdoblament', type:'group', name:'Desdoblament R · Ciències 3r', age:null, course:'12 alumnes', avatar:'DR', cat:'group-ac',
-                    chips:[{label:'2 nivells',cat:'lv'},{label:'3 AACC',cat:'ac'}],
-                    behaviors:['3 alumnes d\'altes capacitats busquen repte','La resta necessita nivell curricular estàndard','Ritme de treball alt'],
-                    aids:['Activitats d\'aprofundiment optatives','Preguntes obertes i recerca','Mapa mental per al pensament divergent','Referències externes per ampliar'] },
-    acollida:     { id:'acollida', type:'group', name:"Aula d'acollida · Cicle sup.", age:null, course:'8 alumnes', avatar:'L2', cat:'group-cat',
-                    chips:[{label:'4 nivells',cat:'lv'},{label:'Tots L2',cat:'cat'}],
-                    behaviors:['Tots en immersió lingüística (L2)','4 nivells MECR diferents (pre-A1 a B1)','Vocabulari acadèmic escàs'],
-                    aids:['Pictogrames i suport visual','Glossari amb traducció a la L1','Bastides lingüístiques per escriure','Vocabulari bàsic freqüent'] }
+                    behaviors:['Llegeix textos d\'adults','Fa connexions creatives i interdisciplinars','Busca profunditat i repte'],
+                    aids:['Aprofundiment conceptual','Preguntes obertes','Connexions interdisciplinars','Fonts i recerca autònoma'] },
+    ex_pri:   { id:'ex_pri',   type:'group', name:'5è Primària B · Grup classe', age:null, course:'18 alumnes', avatar:'5B', cat:'group', demo:true,
+                    chips:[{label:'Ritmes diversos',cat:'lv'},{label:'1 TDAH',cat:'tdah'},{label:'1 L2',cat:'cat'}],
+                    behaviors:['Ritmes de lectura diversos','1 alumne amb TDAH necessita textos curts','1 alumne nouvingut amb vocabulari limitat'],
+                    aids:['Glossari de termes clau','Fragmentar en blocs','Pictogrames de suport','Una idea per paràgraf'] },
+    ex_eso:   { id:'ex_eso',   type:'group', name:'2n ESO C · Grup classe', age:null, course:'22 alumnes', avatar:'2C', cat:'group', demo:true,
+                    chips:[{label:'3 nivells MECR',cat:'lv'},{label:'2 L2',cat:'cat'},{label:'1 TEA',cat:'ac'}],
+                    behaviors:['3 nivells MECR: A1, B1 i B2','2 alumnes L2 recent incorporats','1 alumne TEA necessita estructura molt explícita'],
+                    aids:['Estructura clara amb encapçalaments','Glossari multilingüe','Seqüències explícites','Evitar ambigüitats'] },
+    ex_fp:    { id:'ex_fp',    type:'group', name:'GM Administració 1r · Com. empresarial', age:null, course:'15 alumnes', avatar:'GM', cat:'group', demo:true,
+                    chips:[{label:'Velocitats diverses',cat:'lv'},{label:'1 TDAH',cat:'tdah'}],
+                    behaviors:['Velocitats de lectura molt diverses','1 alumne amb TDAH','Motivació alta quan el context és laboral i pràctic'],
+                    aids:['Exemples del context professional','Textos curts i directes','Estructures tabulars','Instruccions numerades'] }
   };
 
   // Navegació: clicar fila o "Seleccionar" → desa perfil a localStorage i navega a Pas 2.
