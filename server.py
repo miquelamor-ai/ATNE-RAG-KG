@@ -1628,6 +1628,20 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
             return []
 
     base = f"{SUPABASE_URL}/rest/v1"
+
+    # Mapping docent_id → alias (hash → nom llegible)
+    docents_rows = _get(f"{base}/atne_docents?select=id,alias,email&limit=200")
+    _id_to_alias: dict[str, str] = {}
+    for d in docents_rows:
+        did = d.get("id")
+        if did:
+            _id_to_alias[did] = d.get("alias") or (d.get("email") or "").split("@")[0] or did[:8]
+
+    def _alias(docent_id: str) -> str:
+        if not docent_id:
+            return "–"
+        return _id_to_alias.get(docent_id, docent_id[:8])
+
     sessions = _get(
         f"{base}/atne_sessions"
         f"?select=ts,model,profile_type,conditions,etapa,mecr_sortida,latency_ms,"
@@ -1766,6 +1780,7 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
         ts = (s.get("ts") or "")[:16].replace("T", " ")
         recent.append({
             "ts": ts,
+            "docent": _alias(s.get("docent_id", "")),
             "model": s.get("model", "?"),
             "etapa": s.get("etapa", ""),
             "mecr": s.get("mecr_sortida", ""),
@@ -1774,6 +1789,10 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
             "prompt_version": s.get("prompt_version"),
             "cost_eur": s.get("cost_estimat_eur"),
         })
+
+    # ── Llista docents actius amb noms ──────────────────────────────────
+    docents_actius_ids = {s["docent_id"] for s in sessions if s.get("docent_id")}
+    docents_list = sorted([_alias(did) for did in docents_actius_ids])
 
     # ── Suggeriments i errors client (darrers 30) ────────────────────────
     suggestions = []
@@ -1788,11 +1807,11 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
         if et == "suggestion_submitted" and len(suggestions) < 30:
             text = str(data.get("text") or "")[:300]
             if text:
-                suggestions.append({"ts": ts, "docent": docent, "text": text})
+                suggestions.append({"ts": ts, "docent": _alias(e.get("docent_id") or ""), "text": text})
         elif et == "client_error" and len(client_errors) < 30:
             client_errors.append({
                 "ts": ts,
-                "docent": docent,
+                "docent": _alias(e.get("docent_id") or ""),
                 "page": str(data.get("page") or "")[:40],
                 "msg": str(data.get("msg") or "")[:120],
                 "type": data.get("type") or "js",
@@ -1810,6 +1829,7 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
             "consents": len(consents),
             "cost_eur_total": cost_total,
         },
+        "docents_list": docents_list,
         "by_model": by_model,
         "by_etapa": by_etapa,
         "by_profile": by_profile,

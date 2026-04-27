@@ -152,6 +152,15 @@
   <div class="card kpi"><div class="l">Cost acumulat</div><div class="v" id="k-cost">–</div><div class="h">EUR estimat</div></div>
 </div>
 
+<!-- Qui ha estat actiu -->
+<div class="card" style="margin-top:var(--sp-4)">
+  <h2>👥 Qui ha estat actiu</h2>
+  <p class="hint">Docents que han fet almenys una adaptació durant el pilot.</p>
+  <div id="docents-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
+    <span style="color:var(--ink-400);font-size:13px;font-style:italic">Carregant…</span>
+  </div>
+</div>
+
 <div style="height: var(--sp-4);"></div>
 
 <!-- Funnel d'adopció + qualitat -->
@@ -428,6 +437,7 @@
       var tr = document.createElement('tr');
       tr.innerHTML =
         '<td style="white-space:nowrap;font-family:var(--mono);font-size:11px">' + esc(r.ts || '–') + '</td>' +
+        '<td style="font-weight:500">' + esc(r.docent || '–') + '</td>' +
         '<td>' + esc(r.model || '?') + '</td>' +
         '<td>' + esc(r.etapa || '–') + '</td>' +
         '<td>' + esc(r.mecr || '–') + '</td>' +
@@ -545,9 +555,21 @@
       Math.round(fb.median_time_step4_ms / 1000) + ' s' : '–';
 
     renderRecent(d.recent || []);
+    renderDocentsList(d.docents_list || []);
     renderAltresTexts(fb.altres_texts || []);
     renderSuggestions(d.suggestions || []);
     renderErrors(d.client_errors || []);
+  }
+
+  function renderDocentsList(list) {
+    var el = $('docents-list');
+    if (!list || list.length === 0) {
+      el.innerHTML = '<span style="color:var(--ink-400);font-size:13px;font-style:italic">Cap docent ha fet adaptacions encara.</span>';
+      return;
+    }
+    el.innerHTML = list.map(function(name) {
+      return '<span style="background:var(--primary-50,#eef2ff);color:var(--primary);border:1px solid var(--primary-200,#c7d2fe);border-radius:20px;padding:4px 12px;font-size:13px;font-weight:500">' + esc(name) + '</span>';
+    }).join('');
   }
 
   function showLogin() { $('login-overlay').style.display = 'flex'; }
