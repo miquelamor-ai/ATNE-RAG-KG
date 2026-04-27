@@ -360,6 +360,20 @@
   .umt-btn.active {
     background: var(--primary); color: #fff; border-color: var(--primary);
   }
+  .badge-beta {
+    display: inline-block; padding: 1px 6px; border-radius: 99px;
+    font-size: 10px; font-weight: 700; letter-spacing: .04em;
+    background: #fff3e0; color: #a85500; border: 1px solid #f5c080;
+    vertical-align: middle; margin-left: 4px; line-height: 1.5;
+  }
+  .umt-btn.active .badge-beta,
+  .umt-btn.active .badge-experimental { background: rgba(255,255,255,.2); color: #fff5e0; border-color: rgba(255,255,255,.4); }
+  .badge-experimental {
+    display: inline-block; padding: 1px 6px; border-radius: 99px;
+    font-size: 10px; font-weight: 700; letter-spacing: .04em;
+    background: #fff1ee; color: #c2410c; border: 1px solid #fdba74;
+    vertical-align: middle; margin-left: 4px; line-height: 1.5;
+  }
   /* Toggle format sortida (PDF / Word) — visible en mode Adapta document */
   .doc-output-toggle {
     display: none; align-items: center; gap: 6px; margin-bottom: 10px;
@@ -1047,7 +1061,7 @@
             <!-- Toggle: Extreu text / Adapta document -->
             <div class="upload-mode-toggle">
               <button class="umt-btn active" id="umt-extract">📋 Extreu text</button>
-              <button class="umt-btn" id="umt-adapt">📄 Adapta document</button>
+              <button class="umt-btn" id="umt-adapt">📄 Adapta document <span class="badge-experimental">experimental</span></button>
             </div>
             <!-- Format de sortida: PDF o Word (visible només en mode Adapta) -->
             <div class="doc-output-toggle" id="doc-output-toggle">
@@ -2599,7 +2613,7 @@
     { id: 'activitats_aprofundiment', label: 'Activitats d\'aprofundiment', desc: 'Per a alumnes d\'altes capacitats' },
     { id: 'mapa_mental',           label: 'Mapa mental',                  desc: 'Pensament divergent' },
     { id: 'pictogrames',           label: 'Pictogrames',                  desc: 'Suport visual (L2, TEA)' },
-    { id: 'illustracions',         label: 'Il·lustracions IA',            desc: 'Imatges generades (beta · 1-3 min)' }
+    { id: 'illustracions',         label: 'Il·lustracions IA <span class="badge-experimental">experimental</span>', desc: 'Imatges generades per IA · 1-3 min' }
   ];
 
   function defaultComplementsForProfile(p) {
