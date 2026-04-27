@@ -1869,7 +1869,15 @@
   </div>
 
   <div class="card-cream" style="padding:var(--sp-5) var(--sp-6)">
-    <p style="margin:0;font-size:var(--fs-sm);color:var(--ink-700);line-height:1.65"><strong>Nota tècnica:</strong> El catàleg d'instruccions és codi Python (<code style="font-family:var(--mono);font-size:.85em;background:rgba(255,255,255,.7);padding:1px 5px;border-radius:3px">instruction_catalog.py</code>) mantingut al repositori. L'arquitectura RAG-KG dinàmic (vector store + knowledge graph) és infraestructura reservada per a fases posteriors i no s'activa en el pilot actual.</p>
+    <p style="margin:0;font-size:var(--fs-sm);color:var(--ink-700);line-height:1.65"><strong>Nota tècnica:</strong> El catàleg d'instruccions és codi Python (<code style="font-family:var(--mono);font-size:.85em;background:rgba(255,255,255,.7);padding:1px 5px;border-radius:3px">instruction_catalog.py</code>) mantingut al repositori. A més, un sistema de <em>skills</em> complementàries (fitxers SKILL.md amb triggers declaratius) enriqueix el prompt per a casos específics com gèneres discursius concrets, perfils complexos o el mode d'adaptació de documents estructurats. L'arquitectura RAG-KG dinàmic (vector store + knowledge graph) és infraestructura reservada per a fases posteriors i no s'activa en el pilot actual.</p>
+  </div>
+
+  <div class="card card-p-sm" style="margin-top:var(--sp-4);display:flex;gap:var(--sp-4);align-items:flex-start">
+    <div style="width:40px;height:40px;border-radius:var(--r-md);background:var(--primary-50);display:grid;place-items:center;flex-shrink:0;font-size:20px">📄</div>
+    <div>
+      <div style="font-weight:var(--fw-semi);color:var(--ink-900);margin-bottom:4px">Mode document (PDF · PPTX)</div>
+      <div style="font-size:var(--fs-sm);color:var(--ink-600);line-height:1.55">El docent pot pujar una fitxa d'exercicis PDF o una presentació PPTX. El sistema extreu cada bloc de text (títol, paràgraf, enunciat, pregunta), els adapta individualment preservant la funció estructural de cadascun, i reinjecta el text al fitxer original. El resultat és el document amb el layout intacte (columnes, taules, espais per omplir, numeració) però el text adaptat al perfil. Imatges i gràfics vectorials no es toquen.</div>
+    </div>
   </div>
 </section>
 
