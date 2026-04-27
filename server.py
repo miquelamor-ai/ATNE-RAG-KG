@@ -1474,8 +1474,10 @@ _PILOT_EVENT_TYPES = {
     "model_switch", "preset_applied",
     # Interaccions UI (pilot)
     "font_changed", "complement_toggled", "help_opened",
-    # Navegació pàgines informatives
-    "page_view", "page_leave",
+    # Navegació i comportament de lectura
+    "page_view", "page_leave", "scroll_depth", "form_abandoned",
+    # Edició post-generació
+    "manual_edit_delta",
     # Feedback / rúbrica
     "rubric_submitted", "feedback_skipped", "feedback_submitted",
     # Consent flow

@@ -31,6 +31,17 @@
   var FEEDBACK_ENDPOINT_BASE = '/api/history';
   var _pageLoadTs = Date.now();
 
+  function _deviceInfo() {
+    try {
+      return {
+        screen_w: screen.width,
+        screen_h: screen.height,
+        is_mobile: screen.width < 768 || /Mobi|Android/i.test(navigator.userAgent),
+        lang: navigator.language || '',
+      };
+    } catch (e) { return {}; }
+  }
+
   function _docent() {
     try {
       if (window.ATNE_AUTH && window.ATNE_AUTH.email) return window.ATNE_AUTH.email;
@@ -236,9 +247,41 @@
   // pageView: registra visualització d'una pàgina informativa (saber-ne, etc.)
   // i envia page_leave amb durada quan l'usuari surt.
   function pageView(pageName) {
-    event('page_view', { page: pageName, referrer: document.referrer || '' });
+    event('page_view', Object.assign({ page: pageName, referrer: document.referrer || '' }, _deviceInfo()));
     window.addEventListener('beforeunload', function () {
       event('page_leave', { page: pageName, duration_ms: Date.now() - _pageLoadTs });
+    });
+  }
+
+  // trackScrollDepth: listener de scroll al contenidor donat.
+  // Envia scroll_depth quan l'usuari supera 25%, 50%, 75%, 100%.
+  function trackScrollDepth(containerId, context) {
+    var el = document.getElementById(containerId);
+    if (!el) return;
+    var reported = {};
+    var milestones = [25, 50, 75, 100];
+    function onScroll() {
+      var scrolled = el.scrollTop + el.clientHeight;
+      var total = el.scrollHeight;
+      if (total <= 0) return;
+      var pct = Math.round((scrolled / total) * 100);
+      milestones.forEach(function (m) {
+        if (pct >= m && !reported[m]) {
+          reported[m] = true;
+          event('scroll_depth', Object.assign({ depth_pct: m }, context || {}));
+        }
+      });
+    }
+    el.addEventListener('scroll', onScroll, { passive: true });
+  }
+
+  // trackFormAbandoned: detecta si l'usuari surt sense haver adaptat.
+  // Cal cridar-lo a l'inici + actualitzar _hasAdapted = true quan es genera.
+  function trackFormAbandoned(getHasAdapted, context) {
+    window.addEventListener('beforeunload', function () {
+      if (!getHasAdapted()) {
+        event('form_abandoned', context || {});
+      }
     });
   }
 
@@ -247,5 +290,8 @@
     requireFeedback: requireFeedback,
     resetFeedbackGate: resetFeedbackGate,
     pageView: pageView,
+    trackScrollDepth: trackScrollDepth,
+    trackFormAbandoned: trackFormAbandoned,
+    deviceInfo: _deviceInfo,
   };
 })();

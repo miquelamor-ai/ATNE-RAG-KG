@@ -1348,6 +1348,14 @@
   }
   showState('empty');
 
+  // ── Tracking pilot: scroll depth + form abandoned + dispositiu ────────────────
+  var _hasAdapted = false;
+  if (window.ATNE_TRACK) {
+    ATNE_TRACK.trackScrollDepth('flash-result', { mode: 'flash' });
+    ATNE_TRACK.trackFormAbandoned(function () { return _hasAdapted; }, { mode: 'flash' });
+    ATNE_TRACK.event('page_view', Object.assign({ page: 'flash' }, ATNE_TRACK.deviceInfo()));
+  }
+
   // ── Restore des de la biblioteca (home → Flash) ───────────────────────────────
   (function () {
     var raw = '';
@@ -1511,6 +1519,7 @@
     if (currentAbort) currentAbort.abort();
     currentAbort = new AbortController();
 
+    _hasAdapted = true;
     showState('loading');
     startLoadingAnimation();
     btnAdaptar.disabled = true;
@@ -2016,9 +2025,19 @@
   var box     = document.getElementById('adapted-text');
   if (!editBtn || !box) return;
 
+  var _textBeforeEdit = '';
+
   editBtn.addEventListener('click', function () {
     var editing = box.contentEditable === 'true';
     if (editing) {
+      // Sortint del mode edició: calcula delta i envia event
+      var before = _textBeforeEdit.length;
+      var after  = (box.innerText || '').length;
+      var changed = Math.abs(after - before);
+      var pct = before > 0 ? Math.round((changed / before) * 100) : 0;
+      if (window.ATNE_TRACK && changed > 0) {
+        ATNE_TRACK.event('manual_edit_delta', { chars_before: before, chars_after: after, chars_changed: changed, change_pct: pct, mode: 'flash' });
+      }
       box.contentEditable = 'false';
       editBtn.classList.remove('editing');
       editBtn.innerHTML =
@@ -2026,6 +2045,7 @@
         '<path d="M11.5 2.5a1.414 1.414 0 0 1 2 2L5 13H3v-2z"/></svg>' +
         '<span class="ab-label">Edita</span>';
     } else {
+      _textBeforeEdit = box.innerText || '';
       box.contentEditable = 'true';
       box.focus();
       // Mou el cursor al final
