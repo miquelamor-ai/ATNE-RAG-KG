@@ -29,6 +29,7 @@
 
   var ENDPOINT = '/api/pilot/event';
   var FEEDBACK_ENDPOINT_BASE = '/api/history';
+  var _pageLoadTs = Date.now();
 
   function _docent() {
     try {
@@ -75,13 +76,14 @@
 
   function event(eventType, data, extra) {
     if (!eventType) return;
+    var _data = Object.assign({ time_on_page_ms: Date.now() - _pageLoadTs }, data || {});
     var payload = {
       event_type: eventType,
       session_id: (extra && extra.session_id) || _currentSessionId(),
       history_id: (extra && extra.history_id) || _historyId(),
       step: (extra && extra.step) || _step(),
       docent_id: _docent() || null,
-      data: data || {},
+      data: _data,
     };
     try {
       // keepalive perquè events com 'exported' no es perdin si la pàgina marxa
@@ -231,9 +233,19 @@
   // quan es genera una versió nova).
   function resetFeedbackGate() { _modalShown = false; _selectedStar = null; }
 
+  // pageView: registra visualització d'una pàgina informativa (saber-ne, etc.)
+  // i envia page_leave amb durada quan l'usuari surt.
+  function pageView(pageName) {
+    event('page_view', { page: pageName, referrer: document.referrer || '' });
+    window.addEventListener('beforeunload', function () {
+      event('page_leave', { page: pageName, duration_ms: Date.now() - _pageLoadTs });
+    });
+  }
+
   window.ATNE_TRACK = {
     event: event,
     requireFeedback: requireFeedback,
     resetFeedbackGate: resetFeedbackGate,
+    pageView: pageView,
   };
 })();

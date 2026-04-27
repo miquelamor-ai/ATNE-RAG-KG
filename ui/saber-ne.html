@@ -15,6 +15,7 @@
 
 <!-- Auth ATNE (lanet bridge) — ha de ser el primer script -->
 <script src="/ui/atne/js/auth.js"></script>
+<script src="/ui/atne/js/pilot-tracker.js"></script>
 
 <!-- ATNE base global (ordre obligatori: tokens → base → shell) -->
 <link rel="stylesheet" href="/ui/styles/tokens.css">
@@ -2119,6 +2120,10 @@
 
 </div>
 
+<script>
+  // Tracking pilot: page_view + page_leave (durada) per a saber-ne+
+  if (window.ATNE_TRACK) ATNE_TRACK.pageView('saber-ne');
+</script>
 
 </body>
 </html>

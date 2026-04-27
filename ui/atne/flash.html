@@ -786,8 +786,8 @@
       <a href="/ui/atne/pas1.html" class="step">Taller</a>
     </nav>
     <div class="tb-spacer"></div>
-    <a href="/ui/saber-ne.html" target="_blank" class="icon-btn sbn-link" title="Saber-ne+" style="text-decoration:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6"/><path d="M12 3a6 6 0 0 1 6 6c0 2.22-1.2 4.16-3 5.2V17H9v-2.8C7.2 13.16 6 11.22 6 9a6 6 0 0 1 6-6z"/></svg></a>
-    <a href="/ui/com-funciona.html" target="_blank" class="icon-btn" title="Com funciona ATNE" style="text-decoration:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg></a>
+    <a href="/ui/saber-ne.html" target="_blank" class="icon-btn sbn-link" title="Saber-ne+" style="text-decoration:none" onclick="if(window.ATNE_TRACK)ATNE_TRACK.event('help_opened',{page:'saber-ne',origin:'flash'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6"/><path d="M12 3a6 6 0 0 1 6 6c0 2.22-1.2 4.16-3 5.2V17H9v-2.8C7.2 13.16 6 11.22 6 9a6 6 0 0 1 6-6z"/></svg></a>
+    <a href="/ui/com-funciona.html" target="_blank" class="icon-btn" title="Com funciona ATNE" style="text-decoration:none" onclick="if(window.ATNE_TRACK)ATNE_TRACK.event('help_opened',{page:'com-funciona',origin:'flash'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg></a>
     <button id="docent-av" class="docent-av" title="El teu compte">?</button>
   </header>
 
@@ -1270,9 +1270,11 @@
       if (activeComps.has(comp)) {
         activeComps.delete(comp);
         chip.classList.remove('on');
+        if (window.ATNE_TRACK) ATNE_TRACK.event('complement_toggled', { comp: comp, action: 'off' });
       } else {
         activeComps.add(comp);
         chip.classList.add('on');
+        if (window.ATNE_TRACK) ATNE_TRACK.event('complement_toggled', { comp: comp, action: 'on' });
       }
     });
   });
@@ -1785,7 +1787,9 @@
 
   document.querySelectorAll('.font-opt').forEach(function (o) {
     o.addEventListener('click', function () {
+      var prev = currentFont;
       applyDocFont(o.dataset.font);
+      if (window.ATNE_TRACK) ATNE_TRACK.event('font_changed', { font: o.dataset.font, prev: prev });
       var sel = document.getElementById('font-selector');
       if (sel) sel.classList.remove('open');
     });

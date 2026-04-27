@@ -1453,6 +1453,10 @@ _PILOT_EVENT_TYPES = {
     "biblioteca_opened", "draft_loaded", "pas_change",
     # Model / config
     "model_switch", "preset_applied",
+    # Interaccions UI (pilot)
+    "font_changed", "complement_toggled", "help_opened",
+    # Navegació pàgines informatives
+    "page_view", "page_leave",
     # Feedback / rúbrica
     "rubric_submitted", "feedback_skipped", "feedback_submitted",
     # Consent flow

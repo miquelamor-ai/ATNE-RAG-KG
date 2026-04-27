@@ -183,12 +183,15 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
         )
         cb({"type": "step", "step": "corrections", "msg": f"Aplicant {len(corrections)} correcció(ns) del docent..."})
 
+    _llm_u: dict = {}  # tokens reals + latència LLM de la darrera crida exitosa
     adapted_raw = None
     for attempt in range(1, max_attempts + 1):
         label_attempt = f" (intent {attempt}/{max_attempts})" if verify_enabled else ""
         cb({"type": "step", "step": "adapting", "msg": f"Generant adaptació amb {model_label}{label_attempt}..."})
         try:
             adapted_raw = _call_llm(active_model, system_prompt, user_text)
+            import adaptation.llm_clients as _llm_mod
+            _llm_u = dict(_llm_mod._LAST_LLM_USAGE)
             adapted = clean_gemini_output(adapted_raw)
             adapted = _post_process_llm_output(adapted, lang=lang)
             # Diagnòstic verbós
@@ -308,6 +311,10 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
             if adapted_raw is not None:
                 _ATNE_LAST_ADAPTATION["adapted_raw"] = adapted_raw or ""
                 _ATNE_LAST_ADAPTATION["adapted_raw_len"] = len(adapted_raw or "")
+            if _llm_u:
+                _ATNE_LAST_ADAPTATION["tokens_in"] = _llm_u.get("tokens_in", 0)
+                _ATNE_LAST_ADAPTATION["tokens_out"] = _llm_u.get("tokens_out", 0)
+                _ATNE_LAST_ADAPTATION["llm_ms"] = _llm_u.get("llm_ms", 0)
             # Persisteix a Supabase (fire-and-forget, en thread per no bloquejar SSE)
             try:
                 threading.Thread(

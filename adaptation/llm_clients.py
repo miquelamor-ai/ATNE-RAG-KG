@@ -21,6 +21,11 @@ from google.genai import types
 
 load_dotenv()
 
+# ── Metadades de la darrera crida LLM (tokens reals + latència) ───────────
+# Actualitzat per _call_llm / _call_llm_raw en cada crida exitosa.
+# Llegit per orchestrator.py per persistir a atne_prompt_debug.
+_LAST_LLM_USAGE: dict = {}
+
 # ── Claus API (multi-clau, rotació) ────────────────────────────────────────
 
 GEMINI_API_KEYS = [k for k in [os.getenv(f"GEMINI_API_KEY{s}", "")
@@ -148,6 +153,7 @@ def _call_llm(model_id: str, system_prompt: str, text: str) -> str:
     global _gemma4_key_idx, _gemini_key_idx
     provider, specific_model = _resolve_model(model_id)
     if provider == "mistral":
+        _t0_llm = time.time()
         r = requests.post(
             "https://api.mistral.ai/v1/chat/completions",
             headers={"Authorization": f"Bearer {MISTRAL_API_KEY}", "Content-Type": "application/json"},
@@ -164,7 +170,10 @@ def _call_llm(model_id: str, system_prompt: str, text: str) -> str:
         )
         if r.status_code != 200:
             raise RuntimeError(f"HTTP {r.status_code}: {r.text[:200]}")
-        return r.json()["choices"][0]["message"]["content"] or ""
+        _d = r.json()
+        _u = _d.get("usage", {})
+        _LAST_LLM_USAGE.update({"tokens_in": _u.get("prompt_tokens", 0), "tokens_out": _u.get("completion_tokens", 0), "llm_ms": int((time.time() - _t0_llm) * 1000), "provider": "mistral"})
+        return _d["choices"][0]["message"]["content"] or ""
     elif provider == "gemma4":
         errors = []
         # Retry amb backoff per errors transitoris (500 INTERNAL, 503 UNAVAILABLE,
@@ -183,12 +192,18 @@ def _call_llm(model_id: str, system_prompt: str, text: str) -> str:
                 if retry_delay > 0:
                     time.sleep(retry_delay)
                 try:
+                    _t0_llm = time.time()
                     response = client.models.generate_content(
                         model=specific_model,
                         contents=[types.Content(role="user", parts=[types.Part(text=f"{system_prompt}\n\n---\n\nTEXT ORIGINAL A ADAPTAR:\n\n{text}")])],
                         config=types.GenerateContentConfig(temperature=0.4, max_output_tokens=8192),
                     )
                     _gemma4_key_idx = (idx + 1) % len(GEMMA4_API_KEYS)  # rotar per la pròxima crida
+                    try:
+                        _um = response.usage_metadata
+                        _LAST_LLM_USAGE.update({"tokens_in": getattr(_um, "prompt_token_count", 0) or 0, "tokens_out": getattr(_um, "candidates_token_count", 0) or 0, "llm_ms": int((time.time() - _t0_llm) * 1000), "provider": "gemma4"})
+                    except Exception:
+                        _LAST_LLM_USAGE.update({"llm_ms": int((time.time() - _t0_llm) * 1000), "provider": "gemma4"})
                     return response.text or ""
                 except Exception as e:
                     last_err = e
@@ -213,6 +228,7 @@ def _call_llm(model_id: str, system_prompt: str, text: str) -> str:
                 if retry_delay > 0:
                     time.sleep(retry_delay)
                 try:
+                    _t0_llm = time.time()
                     response = client.models.generate_content(
                         model=specific_model,
                         contents=[types.Content(role="user", parts=[types.Part(text=text)])],
@@ -223,6 +239,11 @@ def _call_llm(model_id: str, system_prompt: str, text: str) -> str:
                         ),
                     )
                     _gemini_key_idx = (idx + 1) % len(GEMINI_API_KEYS)
+                    try:
+                        _um = response.usage_metadata
+                        _LAST_LLM_USAGE.update({"tokens_in": getattr(_um, "prompt_token_count", 0) or 0, "tokens_out": getattr(_um, "candidates_token_count", 0) or 0, "llm_ms": int((time.time() - _t0_llm) * 1000), "provider": "gemini"})
+                    except Exception:
+                        _LAST_LLM_USAGE.update({"llm_ms": int((time.time() - _t0_llm) * 1000), "provider": "gemini"})
                     return response.text or ""
                 except Exception as e:
                     last_err = e
@@ -235,6 +256,7 @@ def _call_llm(model_id: str, system_prompt: str, text: str) -> str:
     elif provider == "gpt":
         from openai import OpenAI
         client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        _t0_llm = time.time()
         resp = client.chat.completions.create(
             model=specific_model,
             messages=[
@@ -243,6 +265,7 @@ def _call_llm(model_id: str, system_prompt: str, text: str) -> str:
             ],
             max_tokens=8192, temperature=0.4,
         )
+        _LAST_LLM_USAGE.update({"tokens_in": (resp.usage.prompt_tokens if resp.usage else 0) or 0, "tokens_out": (resp.usage.completion_tokens if resp.usage else 0) or 0, "llm_ms": int((time.time() - _t0_llm) * 1000), "provider": "gpt"})
         return resp.choices[0].message.content or ""
     elif provider == "openrouter":
         global _openrouter_key_idx
@@ -257,6 +280,7 @@ def _call_llm(model_id: str, system_prompt: str, text: str) -> str:
                 base_url="https://openrouter.ai/api/v1",
             )
             try:
+                _t0_llm = time.time()
                 resp = client.chat.completions.create(
                     model=specific_model,
                     messages=[
@@ -270,6 +294,7 @@ def _call_llm(model_id: str, system_prompt: str, text: str) -> str:
                     },
                 )
                 _openrouter_key_idx = (idx + 1) % len(OPENROUTER_API_KEYS)
+                _LAST_LLM_USAGE.update({"tokens_in": (resp.usage.prompt_tokens if resp.usage else 0) or 0, "tokens_out": (resp.usage.completion_tokens if resp.usage else 0) or 0, "llm_ms": int((time.time() - _t0_llm) * 1000), "provider": "openrouter"})
                 return resp.choices[0].message.content or ""
             except Exception as e:
                 errors.append(f"clau {idx+1}: {str(e)[:200]}")
