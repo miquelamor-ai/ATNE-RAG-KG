@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
 <script src="/ui/atne/js/auth.js"></script>
+<script src="/ui/atne/js/topbar.js"></script>
 <script src="/ui/atne/js/pilot-tracker.js"></script>
   <link rel="stylesheet" href="/ui/fonts/fonts.css">
 <link rel="stylesheet" href="/ui/styles/tokens.css">
@@ -257,6 +258,10 @@
     <a href="/ui/atne/flash.html" class="step" style="text-decoration:none">Flash</a>
     <a href="/ui/atne/pas1.html" class="step" style="text-decoration:none">Taller</a>
   </nav>
+  <button class="icon-btn" id="zoom-out" title="Reduir mida (Ctrl -)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M8 11h6"/></svg></button>
+  <button id="zoom-label" title="Restablir mida (Ctrl 0)" style="font-size:var(--fs-xs);font-weight:600;color:var(--ink-500);background:none;border:none;cursor:pointer;padding:0 2px;min-width:34px;text-align:center;font-family:var(--mono)">100%</button>
+  <button class="icon-btn" id="zoom-in" title="Augmentar mida (Ctrl +)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M8 11h6M11 8v6"/></svg></button>
+  <button class="icon-btn" id="fullscreen-btn" title="Pantalla completa (F11)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V3h4M17 3h4v4M21 17v4h-4M7 21H3v-4"/></svg></button>
   <a href="/ui/saber-ne.html" target="_blank" class="icon-btn sbn-link" title="Saber-ne+" style="text-decoration:none" onclick="if(window.ATNE_TRACK)ATNE_TRACK.event('help_opened',{page:'saber-ne',origin:'home'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6"/><path d="M12 3a6 6 0 0 1 6 6c0 2.22-1.2 4.16-3 5.2V17H9v-2.8C7.2 13.16 6 11.22 6 9a6 6 0 0 1 6-6z"/></svg></a>
   <a href="/ui/com-funciona.html" target="_blank" class="icon-btn" title="Com funciona ATNE" style="text-decoration:none" onclick="if(window.ATNE_TRACK)ATNE_TRACK.event('help_opened',{page:'com-funciona',origin:'home'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg></a>
   <button id="btn-suggest" class="icon-btn" title="Tens un suggeriment?" onclick="if(window.ATNE_TRACK)ATNE_TRACK.openSuggestionBox({page:'home'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
