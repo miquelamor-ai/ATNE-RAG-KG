@@ -455,10 +455,15 @@
   /* Regenerating overlay */
   .regen{position:absolute;inset:0;background:rgba(244,241,232,.85);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:15;flex-direction:column;gap:14px}
   .regen.on{display:flex}
-  .regen-spin{width:36px;height:36px;border:3px solid var(--primary-100);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}
+  .regen-spin{position:relative;width:52px;height:52px;display:flex;align-items:center;justify-content:center}
+  .regen-spin::before{content:"";position:absolute;inset:0;border:3px solid var(--primary-100);border-top-color:var(--primary);border-radius:50%;animation:spin 1.2s linear infinite}
+  .regen-spin::after{content:"\270F\FE0F";font-size:22px;line-height:1;animation:wiggle 1.6s ease-in-out infinite alternate;display:block}
   @keyframes spin{to{transform:rotate(360deg)}}
-  .regen-t{font-family:var(--serif);font-size:var(--fs-lg);font-weight:700}
-  .regen-s{font-size:var(--fs-sm);color:var(--ink-600);font-family:var(--mono)}
+  @keyframes wiggle{0%{transform:rotate(-14deg) translateX(-1px)}100%{transform:rotate(10deg) translateX(2px)}}
+  .regen-t{font-family:var(--serif);font-size:var(--fs-lg);font-weight:700;display:flex;align-items:center;gap:8px}
+  .regen-time{font-family:var(--mono);font-size:var(--fs-sm);color:var(--ink-500);font-weight:500;min-width:36px}
+  .regen-time:empty{display:none}
+  .regen-s{font-size:var(--fs-sm);color:var(--ink-600);font-family:var(--mono);transition:opacity .35s ease}
 
   /* ─── Bottom tab bar (només mòbil) ──────────────────────── */
   .bottom-bar {
@@ -1210,7 +1215,7 @@
         <!-- Regen overlay -->
         <div class="regen" id="regen">
           <div class="regen-spin"></div>
-          <div class="regen-t" id="regen-t">Regenerant…</div>
+          <div class="regen-t"><span id="regen-t">Regenerant…</span><span class="regen-time" id="regen-time"></span></div>
           <div class="regen-s">Això pot trigar uns segons</div>
         </div>
 
@@ -1990,6 +1995,60 @@
   // Regen animation
   const regenEl = document.getElementById('regen');
   const regenT = document.getElementById('regen-t');
+
+  // Loop de comptador + frases rotants per a adaptacions llargues.
+  // Només s'arrenca en adaptText() (no en accions ràpides com "Afegint al glossari…").
+  const REGEN_FUNNY_MSGS = [
+    'Llegint el text amb cura…',
+    'Pensant en el teu alumne…',
+    'Triant el vocabulari adequat…',
+    'Comprovant que tot tingui sentit…',
+    'Polint l’ortografia amb cura…',
+    'Buscant la paraula més clara…',
+    'Ajustant el to i el registre…',
+    'Repassant que res quedi enrere…',
+    'Donant forma a les frases…',
+    'Posant els accents al seu lloc…'
+  ];
+  let _regenTickId = null;
+  let _regenMsgId = null;
+  let _regenStartTs = 0;
+  window.startRegenLoop = function() {
+    window.stopRegenLoop();
+    _regenStartTs = Date.now();
+    const timeEl = document.getElementById('regen-time');
+    const subEl = document.querySelector('.regen-s');
+    if (timeEl) {
+      timeEl.textContent = '0s';
+      _regenTickId = setInterval(() => {
+        const sec = Math.floor((Date.now() - _regenStartTs) / 1000);
+        timeEl.textContent = sec + 's';
+      }, 1000);
+    }
+    if (subEl) {
+      // No sobreescriure immediatament: deixem que el missatge inicial
+      // (ex. "Personalitzant el text per a Marina") es vegi uns segons abans
+      // de començar a rotar les frases pedagògiques.
+      let idx = Math.floor(Math.random() * REGEN_FUNNY_MSGS.length);
+      _regenMsgId = setInterval(() => {
+        subEl.style.opacity = '0';
+        setTimeout(() => {
+          subEl.textContent = REGEN_FUNNY_MSGS[idx];
+          subEl.style.opacity = '1';
+          idx = (idx + 1) % REGEN_FUNNY_MSGS.length;
+        }, 250);
+      }, 5000);
+    }
+  };
+  window.stopRegenLoop = function() {
+    if (_regenTickId) { clearInterval(_regenTickId); _regenTickId = null; }
+    if (_regenMsgId) { clearInterval(_regenMsgId); _regenMsgId = null; }
+    const timeEl = document.getElementById('regen-time');
+    if (timeEl) timeEl.textContent = '';
+    const subEl = document.querySelector('.regen-s');
+    if (subEl) subEl.style.opacity = '1';
+  };
+
   window.regen = (msg) => {
     closePops();
     regenT.textContent = msg || 'Regenerant…';
@@ -2809,6 +2868,7 @@
     if (regenEl) regenEl.classList.add('on');
     if (regenT) regenT.textContent = 'Adaptant el text…';
     if (regenS) regenS.textContent = 'El LLM està personalitzant el text per a ' + profile.name;
+    startRegenLoop();
 
     // Si és grup multinivell i hi ha una vcard type:'level' activa (p.ex. via
     // click de fallback), fem servir el seu MECR en lloc del derivat global.
@@ -2896,10 +2956,12 @@
         if (regenS) regenS.textContent = err.message;
       }
     }).then(() => {
+      stopRegenLoop();
       if (regenEl) regenEl.classList.remove('on');
     }).catch(err => {
       if (regenT) regenT.textContent = 'Error del LLM';
       if (regenS) regenS.textContent = err.message || 'No s\'ha pogut adaptar el text';
+      stopRegenLoop();
       // Mantenim l'overlay 3s amb el missatge d'error perquè el docent el llegeixi
       setTimeout(() => { if (regenEl) regenEl.classList.remove('on'); }, 3000);
     });
@@ -2962,6 +3024,7 @@
     if (regenEl) regenEl.classList.add('on');
     if (regenT) regenT.textContent = `Generant ${versions.length} versions en paral·lel…`;
     if (regenS) regenS.textContent = versions.map(v => `${v.label} (${v.level_mecr})`).join(' · ');
+    startRegenLoop();
 
     const nivellPerfilAdapt = (profile.course || '').replace(/\s+[A-Z]$/, '').trim();
     let done = 0;
@@ -2999,6 +3062,7 @@
             window._renderAdaptedFromRaw(ev.adapted);
             localStorage.setItem('atne.adapted_cache_key', cacheKey);
             localStorage.setItem('atne.adapted_at', String(Date.now()));
+            stopRegenLoop();
             if (regenEl) regenEl.classList.remove('on');
           }
         },
@@ -3016,6 +3080,7 @@
         done++;
         if (regenT) regenT.textContent = `Generant ${versions.length} versions… (${done}/${total})`;
         if (done === total) {
+          stopRegenLoop();
           if (regenEl) regenEl.classList.remove('on');
         }
       });

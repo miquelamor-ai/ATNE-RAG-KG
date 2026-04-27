@@ -4335,6 +4335,7 @@ async def export_doc(payload: dict = Body(...)):
         import base64
         import io
         doc = DocxDocument()
+        doc.styles["Normal"].font.size = Pt(11)
         doc.add_heading(f"Adaptació ATNE — {profile_name}", level=1)
 
         def add_inline(p, text):
@@ -4384,7 +4385,7 @@ async def export_doc(payload: dict = Body(...)):
                     p = doc.add_paragraph()
                     run = p.add_run(caption)
                     run.italic = True
-                    run.font.size = Pt(9)
+                    run.font.size = Pt(10)
                 return True
             except Exception as e:
                 print(f"[export docx] no s'ha pogut incrustar imatge {url[:80]}: {e}")
@@ -4415,7 +4416,7 @@ async def export_doc(payload: dict = Body(...)):
                 clean = stripped.replace("|", "  ").strip()
                 if clean and not all(c in "-: " for c in clean):
                     p = doc.add_paragraph(clean)
-                    p.style.font.size = Pt(9)
+                    p.style.font.size = Pt(11)
             elif stripped.startswith("```"):
                 continue
             elif re.match(r'^[\s]*[-*]\s+(?!\*)', line) and not stripped.startswith("**"):
