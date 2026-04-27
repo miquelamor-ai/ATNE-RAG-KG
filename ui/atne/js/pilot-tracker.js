@@ -183,9 +183,6 @@
     var reason = opts.reason || 'leave';
     var onDone = typeof opts.onDone === 'function' ? opts.onDone : function () {};
 
-    // Si no tenim historyId, no podem associar el feedback. Deixem passar.
-    if (!historyId) { onDone('skipped_no_history'); return; }
-
     // Mostra modal una sola vegada per sessió
     if (_modalShown) { onDone('already_shown'); return; }
     _modalShown = true;
@@ -222,19 +219,23 @@
       var body = { review_items: review };
       if (_selectedStar) body.rating = _selectedStar;
       if (comment) body.comment = comment;
-      try {
-        fetch(FEEDBACK_ENDPOINT_BASE + '/' + historyId, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-          keepalive: true,
-        }).catch(function () { /* */ });
-      } catch (e) { /* */ }
+      // PATCH a historial només si tenim history_id (Taller). Flash usa només events.
+      if (historyId) {
+        try {
+          fetch(FEEDBACK_ENDPOINT_BASE + '/' + historyId, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+            keepalive: true,
+          }).catch(function () { /* */ });
+        } catch (e) { /* */ }
+      }
       event('feedback_submitted', {
         rating: _selectedStar,
         review: review,
         has_comment: !!comment,
         reason: reason,
+        mode: historyId ? 'taller' : 'flash',
       });
       close('submitted');
     });
@@ -285,6 +286,91 @@
     });
   }
 
+  // ── Captura global d'errors JS ────────────────────────────────────────────
+  window.addEventListener('error', function (e) {
+    try {
+      event('client_error', {
+        msg: e.message || '',
+        file: (e.filename || '').replace(location.origin, ''),
+        line: e.lineno || 0,
+        col: e.colno || 0,
+        type: 'js',
+        page: location.pathname,
+      });
+    } catch (_) { /* no bloquejant */ }
+  });
+
+  window.addEventListener('unhandledrejection', function (e) {
+    try {
+      var msg = '';
+      try { msg = String(e.reason && e.reason.message ? e.reason.message : e.reason); } catch (_) { msg = 'unknown'; }
+      event('client_error', {
+        msg: msg,
+        type: 'promise',
+        page: location.pathname,
+      });
+    } catch (_) { /* no bloquejant */ }
+  });
+
+  // ── Botó de suggeriment ───────────────────────────────────────────────────
+  var SUGGESTION_HTML = [
+    '<div id="atne-sug-modal" style="position:fixed;inset:0;background:rgba(20,20,30,0.45);',
+    'z-index:99999;display:flex;align-items:center;justify-content:center;',
+    'font-family:Inter,system-ui,sans-serif;padding:16px">',
+    '  <div style="background:#fff;max-width:420px;width:100%;border-radius:14px;',
+    '       padding:24px 26px;box-shadow:0 12px 40px rgba(0,0,0,0.22)">',
+    '    <h2 style="margin:0 0 8px;font-family:Fraunces,Georgia,serif;font-size:20px;color:#1f1f2c">',
+    '      Tens un suggeriment?',
+    '    </h2>',
+    '    <p style="margin:0 0 14px;color:#454555;font-size:13px;line-height:1.45">',
+    '      Escriu el que vulguis: una idea, un problema, una pregunta.',
+    '      Ho llegim tot.',
+    '    </p>',
+    '    <textarea id="atne-sug-text" placeholder="El teu suggeriment…"',
+    '              style="width:100%;min-height:80px;border:1px solid #d4d4dc;border-radius:8px;',
+    '                     padding:8px 10px;font-family:inherit;font-size:13px;',
+    '                     resize:vertical;box-sizing:border-box;margin-bottom:16px"></textarea>',
+    '    <div style="display:flex;gap:10px;justify-content:flex-end">',
+    '      <button id="atne-sug-cancel" type="button"',
+    '              style="background:#fff;color:#3a3a48;border:1.5px solid #d4d4dc;',
+    '                     border-radius:8px;padding:9px 20px;font-size:14px;font-weight:500;',
+    '                     cursor:pointer;font-family:inherit">Cancel·la</button>',
+    '      <button id="atne-sug-send" type="button"',
+    '              style="background:#4c3fc4;color:#fff;border:none;border-radius:8px;',
+    '                     padding:9px 20px;font-size:14px;font-weight:600;',
+    '                     cursor:pointer;font-family:inherit">Envia</button>',
+    '    </div>',
+    '  </div>',
+    '</div>'
+  ].join('');
+
+  function openSuggestionBox(context) {
+    if (document.getElementById('atne-sug-modal')) return;
+    var div = document.createElement('div');
+    div.innerHTML = SUGGESTION_HTML;
+    document.body.appendChild(div);
+    var ta = document.getElementById('atne-sug-text');
+    setTimeout(function () { ta && ta.focus(); }, 80);
+
+    function close() { try { document.body.removeChild(div); } catch (e) { /* */ } }
+
+    document.getElementById('atne-sug-cancel').addEventListener('click', close);
+    document.getElementById('atne-sug-send').addEventListener('click', function () {
+      var text = (ta.value || '').trim();
+      if (!text) { close(); return; }
+      event('suggestion_submitted', Object.assign({ text: text }, context || {}));
+      close();
+      // Confirmació visual breu
+      var toast = document.createElement('div');
+      toast.textContent = 'Gràcies pel suggeriment!';
+      toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);' +
+        'background:#1f1f2c;color:#fff;padding:10px 22px;border-radius:8px;font-size:14px;' +
+        'z-index:99999;font-family:Inter,sans-serif;pointer-events:none';
+      document.body.appendChild(toast);
+      setTimeout(function () { try { document.body.removeChild(toast); } catch (e) { /* */ } }, 3000);
+    });
+  }
+
   window.ATNE_TRACK = {
     event: event,
     requireFeedback: requireFeedback,
@@ -293,5 +379,6 @@
     trackScrollDepth: trackScrollDepth,
     trackFormAbandoned: trackFormAbandoned,
     deviceInfo: _deviceInfo,
+    openSuggestionBox: openSuggestionBox,
   };
 })();

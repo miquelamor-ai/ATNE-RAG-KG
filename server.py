@@ -1481,8 +1481,10 @@ _PILOT_EVENT_TYPES = {
     "page_view", "page_leave", "scroll_depth", "form_abandoned",
     # Edició post-generació
     "manual_edit_delta",
-    # Feedback / rúbrica
-    "rubric_submitted", "feedback_skipped", "feedback_submitted",
+    # Feedback / rúbrica / suggeriments
+    "rubric_submitted", "feedback_skipped", "feedback_submitted", "suggestion_submitted",
+    # Errors client
+    "client_error",
     # Consent flow
     "consent_shown",
 }
@@ -1770,6 +1772,29 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
             "cost_eur": s.get("cost_estimat_eur"),
         })
 
+    # ── Suggeriments i errors client (darrers 30) ────────────────────────
+    suggestions = []
+    client_errors = []
+    for e in events:
+        et = e.get("event_type")
+        data = e.get("data") or {}
+        ts = (e.get("ts") or "")[:19].replace("T", " ")
+        docent = e.get("docent_id") or ""
+        if docent and "@" in docent:
+            docent = docent.split("@")[0]  # oculta domini per brevetat
+        if et == "suggestion_submitted" and len(suggestions) < 30:
+            text = str(data.get("text") or "")[:300]
+            if text:
+                suggestions.append({"ts": ts, "docent": docent, "text": text})
+        elif et == "client_error" and len(client_errors) < 30:
+            client_errors.append({
+                "ts": ts,
+                "docent": docent,
+                "page": str(data.get("page") or "")[:40],
+                "msg": str(data.get("msg") or "")[:120],
+                "type": data.get("type") or "js",
+            })
+
     return {
         "ok": True,
         "prompt_version_actual": ATNE_PROMPT_VERSION,
@@ -1809,6 +1834,8 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
         "cost_per_model_eur": cost_per_model,
         "funnel": funnel,
         "recent": recent,
+        "suggestions": suggestions,
+        "client_errors": client_errors,
     }
 
 

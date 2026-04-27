@@ -282,6 +282,32 @@
   <ul id="altres-texts" style="font-size: 13px; color: var(--ink-700); padding-left: 18px;"></ul>
 </div>
 
+<!-- Suggeriments i errors -->
+<div style="height: var(--sp-4);"></div>
+<div class="grid grid-2">
+  <div class="card">
+    <h2 style="display:flex;align-items:center;gap:8px">
+      💬 Suggeriments dels docents
+      <span id="sug-badge" style="background:#4c3fc4;color:#fff;border-radius:20px;padding:1px 8px;font-size:12px;font-family:var(--mono);display:none">0</span>
+    </h2>
+    <p class="hint">Missatges enviats pel botó "Tens un suggeriment?" de l'app.</p>
+    <ul id="sug-list" style="font-size:13px;color:var(--ink-700);padding-left:18px;margin:0;list-style:disc"></ul>
+    <p id="sug-empty" style="font-size:13px;color:var(--ink-400);margin:0">Cap suggeriment encara.</p>
+  </div>
+
+  <div class="card">
+    <h2 style="display:flex;align-items:center;gap:8px">
+      🔴 Errors recents
+      <span id="err-badge" style="background:#c53030;color:#fff;border-radius:20px;padding:1px 8px;font-size:12px;font-family:var(--mono);display:none">0</span>
+    </h2>
+    <p class="hint">Errors JS capturats automàticament al navegador dels docents. S'actualitza cada 30 s.</p>
+    <table class="lite" id="t-errors">
+      <tr><th>Hora</th><th>Pàgina</th><th>Missatge</th><th>Docent</th></tr>
+    </table>
+    <p id="err-empty" style="font-size:13px;color:var(--ink-400);margin:0">Cap error recent. ✓</p>
+  </div>
+</div>
+
 </div>
 
 <!-- Login overlay (apareix si /api/admin/* retorna 401) -->
@@ -427,6 +453,54 @@
     });
   }
 
+  function renderSuggestions(arr) {
+    var list = $('sug-list');
+    var empty = $('sug-empty');
+    var badge = $('sug-badge');
+    list.innerHTML = '';
+    if (!arr || arr.length === 0) {
+      empty.style.display = '';
+      badge.style.display = 'none';
+      return;
+    }
+    empty.style.display = 'none';
+    badge.textContent = arr.length;
+    badge.style.display = '';
+    arr.forEach(function (s) {
+      var li = document.createElement('li');
+      var ts = s.ts ? new Date(s.ts).toLocaleString('ca', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+      li.innerHTML = '<span style="color:var(--ink-400);font-size:11px;font-family:var(--mono)">' + esc(ts) + ' · ' + esc(s.docent || 'anònim') + '</span><br>' + esc(s.text || '');
+      li.style.marginBottom = '10px';
+      list.appendChild(li);
+    });
+  }
+
+  function renderErrors(arr) {
+    var t = $('t-errors');
+    var empty = $('err-empty');
+    var badge = $('err-badge');
+    // Neteja files anteriors (manté capçalera)
+    while (t.rows.length > 1) t.deleteRow(1);
+    if (!arr || arr.length === 0) {
+      empty.style.display = '';
+      badge.style.display = 'none';
+      return;
+    }
+    empty.style.display = 'none';
+    badge.textContent = arr.length;
+    badge.style.display = '';
+    arr.forEach(function (e) {
+      var tr = document.createElement('tr');
+      var ts = e.ts ? new Date(e.ts).toLocaleString('ca', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
+      tr.innerHTML =
+        '<td style="font-family:var(--mono);font-size:11px;white-space:nowrap">' + esc(ts) + '</td>' +
+        '<td style="font-size:11px">' + esc(e.page || '–') + '</td>' +
+        '<td style="font-size:12px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + esc(e.msg || '') + '">' + esc(e.msg || '–') + '</td>' +
+        '<td style="font-size:11px">' + esc(e.docent || '–') + '</td>';
+      t.appendChild(tr);
+    });
+  }
+
   function paint(d) {
     if (!d || !d.ok) return;
 
@@ -472,6 +546,8 @@
 
     renderRecent(d.recent || []);
     renderAltresTexts(fb.altres_texts || []);
+    renderSuggestions(d.suggestions || []);
+    renderErrors(d.client_errors || []);
   }
 
   function showLogin() { $('login-overlay').style.display = 'flex'; }
