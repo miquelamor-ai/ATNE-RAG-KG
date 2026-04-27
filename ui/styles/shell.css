@@ -223,57 +223,235 @@
   .hamb { display: grid; }
 }
 
-/* ─── Help Mode ──────────────────────────────────────────── */
+/* ─── Help Mode (contextual) ─────────────────────────────
+   Patró "What's This?" inspirat en Linear / Stripe Docs:
+   cursor SVG personalitzat, backdrop subtil, glow soft als
+   elements, pill flotant amb feedback i popover amb fletxa.
+   ────────────────────────────────────────────────────────── */
+
+/* Cursor custom: cercle blanc amb ? blau, hot-spot al centre.
+   Substitueix el cursor:help natiu (lleig a Windows). */
 body.help-mode,
-body.help-mode * { cursor: help !important; }
+body.help-mode * {
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><defs><filter id='s' x='-50%25' y='-50%25' width='200%25' height='200%25'><feDropShadow dx='0' dy='1' stdDeviation='1.2' flood-opacity='0.25'/></filter></defs><circle cx='14' cy='14' r='11' fill='white' stroke='%232563eb' stroke-width='1.8' filter='url(%23s)'/><path d='M11 11.5a3 3 0 1 1 4.2 2.7c-.7.3-1.1.9-1.1 1.6M14 18.5h.01' stroke='%232563eb' stroke-width='1.8' fill='none' stroke-linecap='round'/></svg>") 14 14, help !important;
+}
 
+/* La pill i el popover: cursor normal, no és element a inspeccionar. */
+body.help-mode .help-banner,
+body.help-mode .help-banner *,
+body.help-mode #help-pop,
+body.help-mode #help-pop * { cursor: default !important; }
+body.help-mode .help-banner-x,
+body.help-mode .help-pop-x,
+body.help-mode #help-mode-btn { cursor: pointer !important; }
+
+/* Backdrop dim molt subtil per indicar canvi de mode. */
+body.help-mode::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 18, 14, 0.035);
+  pointer-events: none;
+  z-index: 9990;
+  animation: helpBackdropIn 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes helpBackdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Glow soft a hover (no outline dur). Multicapa per profunditat. */
+body.help-mode [data-help] {
+  transition: box-shadow 180ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform  180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
 body.help-mode [data-help]:hover {
-  outline: 2px solid var(--primary);
-  outline-offset: 3px;
-  border-radius: 4px;
+  box-shadow:
+    0 0 0 4px rgba(37, 99, 235, 0.10),
+    0 0 0 1.5px rgba(37, 99, 235, 0.45),
+    0 10px 30px -10px rgba(37, 99, 235, 0.22);
+  border-radius: 10px;
+  position: relative;
+  z-index: 9991;
 }
 
+/* Botó ? actiu: ple, primari, amb pulse-ring. */
 #help-mode-btn.active {
-  background: var(--primary-50) !important;
-  color: var(--primary) !important;
+  background: var(--primary) !important;
+  color: #fff !important;
   border-color: var(--primary) !important;
+  position: relative;
+}
+#help-mode-btn.active::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  border: 2px solid var(--primary);
+  animation: helpBtnPulse 1.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  pointer-events: none;
+}
+@keyframes helpBtnPulse {
+  0%   { transform: scale(1);    opacity: 0.55; }
+  70%  { transform: scale(1.45); opacity: 0;    }
+  100% { transform: scale(1.45); opacity: 0;    }
 }
 
+/* Pill flotant a dalt: feedback constant del mode actiu. */
+.help-banner {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  z-index: 9998;
+  transform: translateX(-50%);
+  background: rgba(20, 18, 14, 0.88);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+  color: #fff;
+  padding: 7px 12px 7px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow:
+    0 12px 32px -8px rgba(0,0,0,0.30),
+    0 2px 8px rgba(0,0,0,0.10),
+    inset 0 0 0 1px rgba(255,255,255,0.06);
+  animation: helpBannerIn 280ms cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: auto;
+}
+.help-banner-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
+  animation: helpBannerDot 1.6s ease-out infinite;
+  flex-shrink: 0;
+}
+.help-banner kbd {
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.10);
+  padding: 1.5px 6px;
+  border-radius: 5px;
+  font-family: var(--mono, monospace);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(255,255,255,0.92);
+}
+.help-banner-x {
+  margin-left: 4px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.10);
+  border: 0;
+  display: grid; place-items: center;
+  color: rgba(255,255,255,0.75);
+  cursor: pointer !important;
+  padding: 0;
+  transition: background 120ms;
+}
+.help-banner-x:hover { background: rgba(255,255,255,0.20); color: #fff; }
+.help-banner-x svg { width: 9px; height: 9px; }
+@keyframes helpBannerIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+@keyframes helpBannerDot {
+  0%   { box-shadow: 0 0 0 0   rgba(34, 197, 94, 0.55); }
+  70%  { box-shadow: 0 0 0 7px rgba(34, 197, 94, 0);    }
+  100% { box-shadow: 0 0 0 0   rgba(34, 197, 94, 0);    }
+}
+
+/* Popover: card editorial amb fletxa subtil i spring-in. */
 .help-pop {
   position: fixed;
   z-index: 9999;
-  width: 290px;
+  width: 320px;
   background: #fff;
-  border: 1.5px solid var(--primary, #2563eb);
-  border-radius: var(--r-xl, 16px);
-  box-shadow: 0 12px 40px -12px rgba(16,24,40,.22), 0 4px 10px rgba(16,24,40,.07);
-  padding: 14px 16px;
+  border: 1px solid rgba(20, 18, 14, 0.06);
+  border-radius: 14px;
+  box-shadow:
+    0 24px 50px -12px rgba(20, 18, 14, 0.20),
+    0 6px 16px -4px rgba(20, 18, 14, 0.08),
+    0 0 0 1px rgba(20, 18, 14, 0.02);
+  padding: 16px 18px 18px;
   display: none;
+  animation: helpPopIn 240ms cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: var(--pop-origin, 50% 0);
 }
+@keyframes helpPopIn {
+  from { opacity: 0; transform: scale(0.96) translateY(4px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+/* Fletxa que apunta a l'element ancorat. */
+.help-pop::before {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border: 1px solid rgba(20, 18, 14, 0.06);
+  left: var(--pop-arrow-x, 50%);
+}
+.help-pop.pop-below::before {
+  top: -7px;
+  border-right: 0;
+  border-bottom: 0;
+  transform: translateX(-50%) rotate(45deg);
+}
+.help-pop.pop-above::before {
+  bottom: -7px;
+  border-left: 0;
+  border-top: 0;
+  transform: translateX(-50%) rotate(45deg);
+}
+
 .help-pop-t {
   font-family: var(--serif);
-  font-size: 13.5px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 600;
   color: var(--ink-900);
-  margin-bottom: 6px;
-  padding-right: 20px;
+  margin-bottom: 8px;
+  padding-right: 26px;
   line-height: 1.3;
+  letter-spacing: -0.01em;
 }
 .help-pop-d {
-  font-size: 12px;
-  color: var(--ink-600);
-  line-height: 1.55;
+  font-size: 12.5px;
+  color: var(--ink-700);
+  line-height: 1.6;
+  letter-spacing: 0.005em;
 }
 .help-pop-x {
   position: absolute;
-  top: 9px; right: 9px;
-  width: 18px; height: 18px;
+  top: 12px; right: 12px;
+  width: 22px; height: 22px;
   border-radius: 50%;
-  background: var(--cream-3, #e8e5dd);
-  border: none;
+  background: transparent;
+  border: 0;
   cursor: pointer !important;
   display: grid; place-items: center;
-  color: var(--ink-500);
+  color: var(--ink-400);
   padding: 0;
+  transition: background 140ms ease, color 140ms ease;
 }
-.help-pop-x:hover { background: var(--paper-line); color: var(--ink-900); }
+.help-pop-x:hover {
+  background: var(--cream-3, #efece6);
+  color: var(--ink-900);
+}
+
+/* Accessibilitat: respecta prefers-reduced-motion. */
+@media (prefers-reduced-motion: reduce) {
+  body.help-mode::before,
+  .help-pop,
+  .help-banner,
+  .help-banner-dot,
+  #help-mode-btn.active::after {
+    animation: none !important;
+  }
+  body.help-mode [data-help] { transition: none; }
+}

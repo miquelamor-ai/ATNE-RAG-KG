@@ -308,6 +308,9 @@
 
   var active = false;
   var popEl = null;
+  var bannerEl = null;
+  var POP_W = 320;
+  var POP_GAP = 10; // separació entre l'element i el popover (fa lloc a la fletxa)
 
   function getOrCreatePop() {
     if (popEl) return popEl;
@@ -317,7 +320,7 @@
     el.setAttribute('role', 'tooltip');
     el.innerHTML =
       '<button class="help-pop-x" aria-label="Tancar ajuda">' +
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="10" height="10">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11">' +
           '<path d="M18 6 6 18M6 6l12 12"/>' +
         '</svg>' +
       '</button>' +
@@ -338,25 +341,71 @@
     var pop = getOrCreatePop();
     pop.querySelector('.help-pop-t').textContent = data.t;
     pop.querySelector('.help-pop-d').textContent = data.d;
+
+    // Reset abans de mesurar (per recalcular l'animació en cada show)
+    pop.classList.remove('pop-below', 'pop-above');
+    pop.style.animation = 'none';
     pop.style.display = 'block';
+    /* eslint-disable no-unused-expressions */ pop.offsetHeight; /* reflow */
+    pop.style.animation = '';
 
-    // Posicionar prop de l'element: primer intenta sota, si no hi cap, sobre
     var rect = anchor.getBoundingClientRect();
-    var W = 290, margin = 10;
-    var left = rect.left + rect.width / 2 - W / 2;
-    left = Math.max(margin, Math.min(left, window.innerWidth - W - margin));
+    var margin = 12;
+    var anchorCx = rect.left + rect.width / 2;
 
-    var estH = pop.offsetHeight || 130;
-    var topBelow = rect.bottom + 8;
-    var topAbove = rect.top - estH - 8;
-    var top = (topBelow + estH < window.innerHeight - margin) ? topBelow : Math.max(margin, topAbove);
+    // Horitzontal: centrat sobre l'ancoratge, retallat al viewport
+    var left = anchorCx - POP_W / 2;
+    left = Math.max(margin, Math.min(left, window.innerWidth - POP_W - margin));
 
+    var estH = pop.offsetHeight || 140;
+    var spaceBelow = window.innerHeight - rect.bottom;
+    var spaceAbove = rect.top;
+
+    // Decideix sota/sobre segons quin costat té més espai
+    var below = spaceBelow >= estH + POP_GAP + margin || spaceBelow > spaceAbove;
+    var top = below ? (rect.bottom + POP_GAP) : (rect.top - estH - POP_GAP);
+    top = Math.max(margin, Math.min(top, window.innerHeight - estH - margin));
+
+    // Posició relativa de la fletxa dins el popover (respecte el centre de l'ancoratge)
+    var arrowX = anchorCx - left;
+    arrowX = Math.max(18, Math.min(arrowX, POP_W - 18));
+
+    pop.style.setProperty('--pop-arrow-x', arrowX + 'px');
+    pop.style.setProperty('--pop-origin', arrowX + 'px ' + (below ? '0' : '100%'));
+    pop.classList.add(below ? 'pop-below' : 'pop-above');
     pop.style.left = left + 'px';
     pop.style.top = top + 'px';
   }
 
   function hidePop() {
     if (popEl) popEl.style.display = 'none';
+  }
+
+  function showBanner() {
+    if (bannerEl) return;
+    var el = document.createElement('div');
+    el.className = 'help-banner';
+    el.setAttribute('role', 'status');
+    el.innerHTML =
+      '<span class="help-banner-dot" aria-hidden="true"></span>' +
+      '<span>Mode ajuda · clica un element per saber-ne més</span>' +
+      '<kbd>Esc</kbd>' +
+      '<button class="help-banner-x" aria-label="Sortir del mode ajuda">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg>' +
+      '</button>';
+    el.querySelector('.help-banner-x').addEventListener('click', function (e) {
+      e.stopPropagation();
+      toggle();
+    });
+    document.body.appendChild(el);
+    bannerEl = el;
+  }
+
+  function hideBanner() {
+    if (bannerEl) {
+      bannerEl.remove();
+      bannerEl = null;
+    }
   }
 
   function findHelp(el) {
@@ -379,14 +428,20 @@
         ? 'Sortir del mode ajuda (Esc)'
         : 'Ajuda contextual: clica qualsevol element';
     }
-    if (!active) hidePop();
+    if (active) {
+      showBanner();
+    } else {
+      hidePop();
+      hideBanner();
+    }
     if (window.ATNE_TRACK) ATNE_TRACK.event('help_mode_toggle', { active: active });
   }
 
   document.addEventListener('click', function (e) {
     if (!active) return;
-    if (e.target.closest('#help-mode-btn') || e.target.closest('.help-pop-x')) return;
-    if (e.target.closest('#help-pop')) return; // no tancar si cliquen el popover
+    if (e.target.closest('#help-mode-btn')) return;
+    if (e.target.closest('#help-pop')) return;       // clic dins popover: ignorar
+    if (e.target.closest('.help-banner')) return;    // clic a la pill: ignorar
 
     var found = findHelp(e.target);
     if (found) {
