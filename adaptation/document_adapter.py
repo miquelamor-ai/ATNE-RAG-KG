@@ -14,6 +14,18 @@ import io
 import json
 import re
 
+# Molts PDFs codifiquen l'apòstrof amb un glifo que PyMuPDF mapeja a U+00B7 (·).
+# Normalitzem: · entre lletres → ' (excepte l·l que és la L geminada catalana).
+_MID_DOT_RE = re.compile(r'([A-Za-zÀ-ÖØ-öø-ÿ])(·)([A-Za-zÀ-ÖØ-öø-ÿ])')
+
+def _fix_apostrophes(text: str) -> str:
+    def _repl(m):
+        l, r = m.group(1), m.group(3)
+        if l.lower() == 'l' and r.lower() == 'l':
+            return m.group(0)
+        return l + "'" + r
+    return _MID_DOT_RE.sub(_repl, text)
+
 
 # ── PDF ─────────────────────────────────────────────────────────────────────
 
@@ -41,7 +53,7 @@ def extract_pdf_text_map(pdf_bytes: bytes) -> list:
                 line_text = "".join(span["text"] for span in line["spans"])
                 if line_text.strip():
                     lines_text.append(line_text.strip())
-            block_text = " ".join(lines_text)
+            block_text = _fix_apostrophes(" ".join(lines_text))
             if len(block_text.strip()) < 3:
                 continue
             first_span = None
