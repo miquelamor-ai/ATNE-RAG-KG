@@ -169,6 +169,59 @@ def inject_pptx_adapted(pptx_bytes: bytes, adapted: dict) -> bytes:
     return out.getvalue()
 
 
+# ── DOCX output ─────────────────────────────────────────────────────────────
+
+def build_docx_from_adapted(text_map: list, adapted: dict) -> bytes:
+    """
+    Crea un DOCX editable a partir del text_map i el diccionari de textos adaptats.
+    Preserva l'ordre de lectura i aplica estils bàsics (títols, cos, línies per omplir).
+    """
+    from docx import Document
+    from docx.shared import Pt, RGBColor
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+
+    doc = Document()
+    # Marges normals per fitxes escolars
+    for section in doc.sections:
+        section.top_margin    = Pt(72)
+        section.bottom_margin = Pt(72)
+        section.left_margin   = Pt(72)
+        section.right_margin  = Pt(72)
+
+    # Ordenar per pàgina i posició vertical
+    ordered = sorted(text_map, key=lambda x: (x["page"], x["bbox"][1]))
+
+    for item in ordered:
+        text = adapted.get(item["id"], item["text"]).strip()
+        if not text:
+            continue
+
+        fontsize = item.get("fontsize", 11.0)
+        color_int = item.get("color", 0)
+        r = (color_int >> 16) & 0xFF
+        g = (color_int >> 8)  & 0xFF
+        b = color_int & 0xFF
+
+        # Heurística d'estil per mida de font
+        if fontsize >= 16:
+            p = doc.add_heading(text, level=1)
+        elif fontsize >= 13:
+            p = doc.add_heading(text, level=2)
+        else:
+            p = doc.add_paragraph(text)
+            # Aplicar color original si no és negre
+            if (r, g, b) != (0, 0, 0):
+                for run in p.runs:
+                    run.font.color.rgb = RGBColor(r, g, b)
+            if fontsize < 9:
+                for run in p.runs:
+                    run.font.size = Pt(fontsize)
+
+    out = io.BytesIO()
+    doc.save(out)
+    return out.getvalue()
+
+
 # ── Batch LLM ────────────────────────────────────────────────────────────────
 
 def batch_adapt_text_map(text_map: list, model_id: str, system_prompt: str) -> dict:

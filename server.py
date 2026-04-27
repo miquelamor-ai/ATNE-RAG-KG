@@ -2412,6 +2412,7 @@ async def adapt_pdf_document(
     context: str = _Form("{}"),
     params: str = _Form("{}"),
     model: str = _Form(""),
+    output_format: str = _Form("pdf"),
 ):
     """
     Rep un PDF, adapta el text preservant el layout i retorna el PDF adaptat.
@@ -2452,11 +2453,30 @@ async def adapt_pdf_document(
         system_prompt = build_system_prompt(profile_d, context_d, params_d)
         active_model = _model_for("adapt", override=model)
         adapted = batch_adapt_text_map(text_map, active_model, system_prompt)
-        pdf_out = inject_pdf_adapted(raw, adapted)
     except Exception as e:
         return JSONResponse({"error": _safe_error(e, "Error durant l'adaptació del PDF")}, status_code=500)
 
-    filename_out = (file.filename or "document").rsplit(".", 1)[0] + "_adaptat.pdf"
+    base_name = (file.filename or "document").rsplit(".", 1)[0]
+
+    if output_format == "docx":
+        from adaptation.document_adapter import build_docx_from_adapted
+        try:
+            docx_out = build_docx_from_adapted(text_map, adapted)
+        except Exception as e:
+            return JSONResponse({"error": _safe_error(e, "Error generant el Word")}, status_code=500)
+        filename_out = base_name + "_adaptat.docx"
+        return StreamingResponse(
+            io.BytesIO(docx_out),
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            headers={"Content-Disposition": f'attachment; filename="{filename_out}"'},
+        )
+
+    try:
+        pdf_out = inject_pdf_adapted(raw, adapted)
+    except Exception as e:
+        return JSONResponse({"error": _safe_error(e, "Error reinjectant el PDF")}, status_code=500)
+
+    filename_out = base_name + "_adaptat.pdf"
     return StreamingResponse(
         io.BytesIO(pdf_out),
         media_type="application/pdf",

@@ -360,6 +360,22 @@
   .umt-btn.active {
     background: var(--primary); color: #fff; border-color: var(--primary);
   }
+  /* Toggle format sortida (PDF / Word) — visible en mode Adapta document */
+  .doc-output-toggle {
+    display: none; align-items: center; gap: 6px; margin-bottom: 10px;
+    font-family: var(--sans); font-size: 12px;
+  }
+  .doc-output-toggle.visible { display: flex; }
+  .dot-label { color: var(--ink-500); font-weight: 500; margin-right: 2px; }
+  .dot-btn {
+    padding: 4px 11px; border-radius: var(--r-lg);
+    font-family: var(--sans); font-size: 12px; font-weight: 600;
+    border: 1.5px solid var(--ink-200); background: #fff;
+    color: var(--ink-600); cursor: pointer;
+    transition: background var(--trans-fast), color var(--trans-fast), border-color var(--trans-fast);
+  }
+  .dot-btn.active { background: var(--ink-800); color: #fff; border-color: var(--ink-800); }
+
   /* Estat "adaptant document" — barra de progrés subtil */
   .doc-adapt-status {
     display: none; align-items: center; gap: 10px;
@@ -1032,6 +1048,12 @@
             <div class="upload-mode-toggle">
               <button class="umt-btn active" id="umt-extract">📋 Extreu text</button>
               <button class="umt-btn" id="umt-adapt">📄 Adapta document</button>
+            </div>
+            <!-- Format de sortida: PDF o Word (visible només en mode Adapta) -->
+            <div class="doc-output-toggle" id="doc-output-toggle">
+              <span class="dot-label">Descarrega com:</span>
+              <button class="dot-btn active" id="dot-pdf">PDF</button>
+              <button class="dot-btn" id="dot-docx">Word (.docx)</button>
             </div>
             <!-- Bug 3: accept estès amb MIME types perquè diàleg natiu filtri bé -->
             <input type="file" id="upload-file" accept=".pdf,.docx,.md,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/markdown,text/plain" style="display:none">
@@ -1793,12 +1815,26 @@
   const dropSub     = document.getElementById('drop-sub');
   const umtExtract  = document.getElementById('umt-extract');
   const umtAdapt    = document.getElementById('umt-adapt');
-  let   uploadMode  = 'extract'; // 'extract' | 'adapt'
+  let   uploadMode     = 'extract'; // 'extract' | 'adapt'
+  let   docOutputFmt   = 'pdf';     // 'pdf' | 'docx'
+
+  // Listener toggle PDF/Word
+  document.getElementById('dot-pdf')?.addEventListener('click', () => {
+    docOutputFmt = 'pdf';
+    document.getElementById('dot-pdf')?.classList.add('active');
+    document.getElementById('dot-docx')?.classList.remove('active');
+  });
+  document.getElementById('dot-docx')?.addEventListener('click', () => {
+    docOutputFmt = 'docx';
+    document.getElementById('dot-docx')?.classList.add('active');
+    document.getElementById('dot-pdf')?.classList.remove('active');
+  });
 
   function setUploadMode(mode) {
     uploadMode = mode;
     umtExtract?.classList.toggle('active', mode === 'extract');
     umtAdapt?.classList.toggle('active',   mode === 'adapt');
+    document.getElementById('doc-output-toggle')?.classList.toggle('visible', mode === 'adapt');
     if (mode === 'adapt') {
       uploadInput?.setAttribute('accept', '.pdf,.pptx,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation');
       if (dropSub) dropSub.textContent = 'PDF · PPTX · Màx 5 MB — s\'adaptarà i descarregarà';
@@ -1890,10 +1926,11 @@
     try {
       const endpoint = ext === 'pdf' ? '/api/adapt-pdf' : '/api/adapt-pptx';
       const fd = new FormData();
-      fd.append('file',    file);
-      fd.append('profile', JSON.stringify(prof));
-      fd.append('context', '{}');
-      fd.append('params',  JSON.stringify(params));
+      fd.append('file',          file);
+      fd.append('profile',       JSON.stringify(prof));
+      fd.append('context',       '{}');
+      fd.append('params',        JSON.stringify(params));
+      if (ext === 'pdf') fd.append('output_format', docOutputFmt);
 
       const resp = await fetch(endpoint, { method: 'POST', body: fd });
       if (!resp.ok) {
@@ -1923,7 +1960,8 @@
 
       const url  = URL.createObjectURL(blob);
       const base = file.name.replace(/\.(pdf|pptx)$/i, '');
-      const fname = base + '_adaptat.' + ext;
+      const outExt = (ext === 'pdf' && docOutputFmt === 'docx') ? 'docx' : ext;
+      const fname = base + '_adaptat.' + outExt;
 
       // Intent de descàrrega automàtica
       const a = document.createElement('a');
