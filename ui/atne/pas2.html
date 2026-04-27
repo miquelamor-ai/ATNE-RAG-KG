@@ -1885,6 +1885,7 @@
     if (statusMsg) statusMsg.textContent = 'Adaptant ' + file.name + '…';
     if (dropT)     dropT.textContent = 'Adaptant…';
 
+    let _downloadReady = false;
     try {
       const endpoint = ext === 'pdf' ? '/api/adapt-pdf' : '/api/adapt-pptx';
       const fd = new FormData();
@@ -1910,21 +1911,52 @@
 
       // Descarregar el fitxer adaptat
       const blob = await resp.blob();
+
+      // Detecta si el servidor ha retornat un error JSON amb status 200
+      if (blob.type === 'application/json' || blob.type === 'text/plain') {
+        const txt = await blob.text();
+        let msg = 'Resposta inesperada del servidor';
+        try { msg = JSON.parse(txt).error || msg; } catch(_) { msg = txt.slice(0, 200); }
+        throw new Error(msg);
+      }
+
       const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
       const base = file.name.replace(/\.(pdf|pptx)$/i, '');
-      a.href     = url;
-      a.download = base + '_adaptat.' + ext;
+      const fname = base + '_adaptat.' + ext;
+
+      // Intent de descàrrega automàtica
+      const a = document.createElement('a');
+      a.href = url; a.download = fname; a.style.display = 'none';
       document.body.appendChild(a);
       a.click();
-      setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+      setTimeout(() => a.remove(), 500);
 
-      window.atneToast?.('Document adaptat descarregat ✓', 'ok');
+      // Botó manual per si el navegador bloqueja el click automàtic
+      _downloadReady = true;
+      if (statusEl && statusMsg) {
+        statusEl.classList.add('visible');
+        statusMsg.innerHTML =
+          `Document adaptat. <a href="${url}" download="${fname}"
+             style="color:var(--brand);font-weight:600;text-decoration:underline;">
+             ↓ Descarrega '${fname}'
+           </a>`;
+        // Allibera la URL i amaga l'estat al cap de 60 s
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+          statusEl.classList.remove('visible');
+          statusMsg.textContent = '';
+        }, 60000);
+      } else {
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+      }
+
+      window.atneToast?.('Document adaptat! Si no s\'ha descarregat, clica l\'enllaç que apareix.', 'ok');
     } catch(err) {
       window.atneToast?.('Error adaptant: ' + err.message, 'error');
     } finally {
-      if (statusEl)  statusEl.classList.remove('visible');
-      if (dropT)     dropT.textContent = 'Arrossega un fitxer o fes clic per triar';
+      // Si la descàrrega ja està llesta, deixem visible l'status amb l'enllaç
+      if (!_downloadReady && statusEl) statusEl.classList.remove('visible');
+      if (dropT) dropT.textContent = 'Arrossega un fitxer o fes clic per triar';
       if (uploadInput) uploadInput.value = '';
     }
   }
