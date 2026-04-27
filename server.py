@@ -359,6 +359,12 @@ def _verify_session(token: str) -> str | None:
         return None
 
 
+def _safe_error(e: Exception, prefix: str = "Error intern") -> str:
+    """Missatge genèric per al client; detall complet al log del servidor."""
+    print(f"[ATNE:error] {type(e).__name__}: {e}", flush=True)
+    return prefix
+
+
 def _is_admin_login(login: str) -> bool:
     """True si el login és a la llista ATNE_ADMIN_LOGINS."""
     if not login or not _ADMIN_LOGINS_RAW:
@@ -573,6 +579,19 @@ class _AtneSecurityHeadersMiddleware:
                 _set(b"x-frame-options", b"DENY")
                 _set(b"referrer-policy", b"strict-origin-when-cross-origin")
                 _set(b"permissions-policy", b"camera=(), microphone=(), geolocation=()")
+                _set(b"strict-transport-security", b"max-age=31536000; includeSubDomains")
+                _set(b"content-security-policy", (
+                    b"default-src 'self'; "
+                    b"script-src 'self' 'unsafe-inline'; "
+                    b"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+                    b"font-src 'self' data: https://fonts.gstatic.com; "
+                    b"img-src 'self' data: blob: https:; "
+                    b"connect-src 'self' https:; "
+                    b"object-src 'none'; "
+                    b"frame-src 'none'; "
+                    b"frame-ancestors 'none'; "
+                    b"base-uri 'self';"
+                ))
                 message["headers"] = headers
             await send(message)
 
@@ -2326,7 +2345,7 @@ async def extract_text_from_file(file: UploadFile = File(...)):
 
     except Exception as e:
         return JSONResponse(
-            {"error": f"No s'ha pogut extreure el text: {type(e).__name__}: {e}"},
+            {"error": _safe_error(e, "No s'ha pogut extreure el text")},
             status_code=500,
         )
 
@@ -2484,7 +2503,7 @@ async def generate_text(payload: dict = Body(...)):
         return JSONResponse({"error": str(e)}, status_code=400)
     except Exception as e:
         return JSONResponse(
-            {"error": f"Error generant el text: {type(e).__name__}: {e}"},
+            {"error": _safe_error(e, "Error generant el text")},
             status_code=500,
         )
 
@@ -2529,7 +2548,7 @@ async def generate_text_stream(request: Request, payload: dict = Body(...)):
             except Exception as e:
                 loop.call_soon_threadsafe(
                     queue.put_nowait,
-                    {"type": "error", "message": f"{type(e).__name__}: {str(e)[:300]}"},
+                    {"type": "error", "message": _safe_error(e, "Error generant el text")},
                 )
             finally:
                 loop.call_soon_threadsafe(queue.put_nowait, None)  # sentinella fi
@@ -3485,7 +3504,7 @@ zero — modifica'l mantenint l'estructura general i el contingut.
         result = _post_process_llm_output(result)
     except Exception as e:
         return JSONResponse(
-            {"error": f"Error refinant el text: {type(e).__name__}: {e}"},
+            {"error": _safe_error(e, "Error refinant el text")},
             status_code=500,
         )
 
@@ -4358,8 +4377,8 @@ async def admin_pilot_page():
 # ── Cuina (dashboard intern) ───────────────────────────────────────────────
 
 @app.get("/cuina", response_class=HTMLResponse)
-async def cuina_page():
-    """Serveix la pàgina de cuina (flux + catàleg d'instruccions)."""
+async def cuina_page(_: bool = Depends(_require_admin)):
+    """Serveix la pàgina de cuina (flux + catàleg d'instruccions). Requereix rol admin."""
     html_path = UI_DIR / "cuina.html"
     if html_path.exists():
         return HTMLResponse(
@@ -4370,8 +4389,8 @@ async def cuina_page():
 
 
 @app.get("/pipeline", response_class=HTMLResponse)
-async def pipeline_page():
-    """Pàgina viva /pipeline — formulari → prompt real (crida POST /api/prompt-preview)."""
+async def pipeline_page(_: bool = Depends(_require_admin)):
+    """Pàgina viva /pipeline. Requereix rol admin."""
     html_path = UI_DIR / "pipeline.html"
     if html_path.exists():
         return HTMLResponse(
