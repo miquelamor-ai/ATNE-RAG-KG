@@ -656,7 +656,7 @@
             <div class="levels mecr">
               <button class="lvl"><span class="lv-code">A1</span><b>Inicial</b><small>primeres paraules, imatges i suport visual</small></button>
               <button class="lvl"><span class="lv-code">A2</span><b>Bàsic</b><small>frases curtes, vocabulari quotidià</small></button>
-              <button class="lvl on"><span class="lv-code">B1</span><b>Intermedi</b><small>textos adaptats, idees principals</small></button>
+              <button class="lvl"><span class="lv-code">B1</span><b>Intermedi</b><small>textos adaptats, idees principals</small></button>
               <button class="lvl"><span class="lv-code">B2</span><b>Avançat</b><small>textos autèntics amb suport puntual</small></button>
               <button class="lvl"><span class="lv-code">C1</span><b>Competent</b><small>textos complexos i abstractes</small></button>
             </div>
@@ -1236,6 +1236,28 @@
       l.classList.toggle('on');
     }
   }));
+
+  // Auto-seleccionar MECR quan canvia el curs de l'alumne individual
+  const _PCURS_TO_MECR = {
+    'I3':'A1','I4':'A1','I5':'A1',
+    '1r Primària':'A1','2n Primària':'A1','3r Primària':'A1','4t Primària':'A2',
+    '5è Primària':'A2','6è Primària':'B1',
+    '1r ESO':'B1','2n ESO':'B1','3r ESO':'B2','4t ESO':'B2',
+    '1r Batxillerat':'B2','2n Batxillerat':'C1',
+    '1r FP Grau Bàsic':'A2','2n FP Grau Bàsic':'A2',
+    '1r FP Grau Mitjà':'B1','2n FP Grau Mitjà':'B1',
+    '1r FP Grau Superior':'B2','2n FP Grau Superior':'B2',
+  };
+  const pCursEl = document.getElementById('p-curs');
+  if (pCursEl) {
+    pCursEl.addEventListener('change', () => {
+      const mecr = _PCURS_TO_MECR[pCursEl.value];
+      if (!mecr) return;
+      document.querySelectorAll('.levels.mecr .lvl').forEach(btn => {
+        btn.classList.toggle('on', btn.querySelector('.lv-code')?.textContent === mecr);
+      });
+    });
+  }
 
   // Afegir perfils al grup (el picker s'obre automàticament en focus del search)
   const picker = document.getElementById('add-picker');
@@ -1963,18 +1985,18 @@
   const COURSE_TO_MECR = {
     'I3': 'pre-A1', 'I4': 'pre-A1', 'I5': 'pre-A1',
     '1r Primària': 'A1', '2n Primària': 'A1',
-    '3r Primària': 'A2', '4t Primària': 'A2',
-    '5è Primària': 'A2', '6è Primària': 'A2',
+    '3r Primària': 'A1', '4t Primària': 'A2',
+    '5è Primària': 'A2', '6è Primària': 'B1',
     'Primer cicle Primària': 'A1',
-    'Segon cicle Primària': 'A2',
+    'Segon cicle Primària': 'A1',
     'Tercer cicle Primària': 'A2',
-    '1r ESO': 'B1', '2n ESO': 'B1', '3r ESO': 'B1', '4t ESO': 'B1',
-    'Primer cicle ESO': 'B1', 'Segon cicle ESO': 'B1',
-    '1r Batxillerat': 'B2', '2n Batxillerat': 'B2',
-    'Grau Bàsic': 'A2', 'Grau Mitjà': 'B1', 'Grau Superior': 'B1',
+    '1r ESO': 'B1', '2n ESO': 'B1', '3r ESO': 'B2', '4t ESO': 'B2',
+    'Primer cicle ESO': 'B1', 'Segon cicle ESO': 'B2',
+    '1r Batxillerat': 'B2', '2n Batxillerat': 'C1',
+    'Grau Bàsic': 'A2', 'Grau Mitjà': 'B1', 'Grau Superior': 'B2',
     '1r FP Grau Bàsic': 'A2', '2n FP Grau Bàsic': 'A2',
     '1r FP Grau Mitjà': 'B1', '2n FP Grau Mitjà': 'B1',
-    '1r FP Grau Superior': 'B1', '2n FP Grau Superior': 'B1',
+    '1r FP Grau Superior': 'B2', '2n FP Grau Superior': 'B2',
   };
   const MECR_LADDER = ['pre-A1','A1','A2','B1','B2','C1','C2'];
 
