@@ -73,8 +73,8 @@ STYLE_SPINES: dict[str, str] = {
 }
 
 POSITIVE_SUFFIX = (
-    "Single clear focal point, clean composition, soft cream paper "
-    "background, no text, no letters, no captions, no signage."
+    "single clear focal point, clean composition, soft cream "
+    "background, no text, no letters, no captions"
 )
 
 DEFAULT_STYLE = "aquarela_storybook"
@@ -334,6 +334,18 @@ def search_wikimedia(query: str, limit: int = 1) -> list[WikimediaOption]:
 
 # ---- FLUX (Pollinations)
 
+def _seed_for_concept(concept: str, base_seed: int = 42) -> int:
+    """Seed determinista a partir del concepte: mateix concept = mateixa imatge sempre.
+
+    Així evitem la loteria del "un dia surt bé, un altre malament" — si la
+    primera imatge surt bona per al concept X, sempre serà la mateixa (mateix
+    brief amb T=0 + mateixa seed → mateix output FLUX).
+    """
+    import hashlib
+    h = hashlib.md5((concept or "").encode("utf-8")).digest()
+    return base_seed + int.from_bytes(h[:4], "big") % 100000
+
+
 def build_flux_url(brief: str, style: str, seed: int) -> str:
     """Construeix URL Pollinations deterministica (imatge es genera en GET).
 
@@ -346,16 +358,26 @@ def build_flux_url(brief: str, style: str, seed: int) -> str:
     brief_clean = (brief or "").strip().rstrip(".")
     suffix_clean = POSITIVE_SUFFIX.rstrip(".")
     full = f"{spine}. {brief_clean}. {suffix_clean}."
-    return (
+    url = (
         f"{POLLINATIONS_BASE}{quote(full)}"
         f"?width=1024&height=1024&nologo=true&model=flux&seed={seed}"
         f"&enhance=false&referrer=atne-fje"
     )
+    # Log per a diagnostic post-pilot: si una imatge surt malament, podem
+    # rastrejar-la a Cloud Run logs i veure el brief exacte que va usar FLUX.
+    print(f"[flux] seed={seed} brief={brief_clean[:120]}")
+    return url
 
 
-def flux_option(brief: str, style: str, seed: int) -> FluxOption:
-    """Retorna opcio FLUX (URL directa, el navegador descarrega)."""
-    return FluxOption(url=build_flux_url(brief, style, seed), style=style, brief=brief)
+def flux_option(brief: str, style: str, seed: int, concept: str = "") -> FluxOption:
+    """Retorna opcio FLUX (URL directa, el navegador descarrega).
+
+    Si es passa `concept`, la seed efectiva es deriva del concept (deterministica
+    per concept), de manera que el mateix concept produeix sempre la mateixa
+    imatge — eliminem la loteria seed entre crides.
+    """
+    effective_seed = _seed_for_concept(concept, seed) if concept else seed
+    return FluxOption(url=build_flux_url(brief, style, effective_seed), style=style, brief=brief)
 
 
 # ---- Resolutor principal
@@ -433,7 +455,7 @@ def resolve_marker(
     with ThreadPoolExecutor(max_workers=3) as ex:
         f_wiki = ex.submit(search_wikimedia, result.wikimedia_query, 3)
         f_pex = ex.submit(search_pexels, result.wikimedia_query, 3)
-        f_flux = ex.submit(flux_option, result.flux_brief, style, seed)
+        f_flux = ex.submit(flux_option, result.flux_brief, style, seed, concept_ca)
         try:
             wiki_hits = f_wiki.result(timeout=20)
         except Exception:
