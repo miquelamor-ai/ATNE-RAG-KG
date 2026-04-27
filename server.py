@@ -1634,13 +1634,14 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
 
     base = f"{SUPABASE_URL}/rest/v1"
 
-    # Mapping docent_id → alias (hash → nom llegible)
+    # Mapping docent_id → email local (hash → miquel.amor sense domini)
     docents_rows = _get(f"{base}/atne_docents?select=id,alias,email&limit=200")
     _id_to_alias: dict[str, str] = {}
     for d in docents_rows:
         did = d.get("id")
         if did:
-            _id_to_alias[did] = d.get("alias") or (d.get("email") or "").split("@")[0] or did[:8]
+            email = (d.get("email") or "").split("@")[0]
+            _id_to_alias[did] = email or d.get("alias") or did[:8]
 
     def _alias(docent_id: str) -> str:
         if not docent_id:
