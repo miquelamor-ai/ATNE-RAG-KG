@@ -2002,7 +2002,11 @@
         setTimeout(() => URL.revokeObjectURL(url), 60000);
       }
 
-      window.atneToast?.('Document adaptat! Si no s\'ha descarregat, clica l\'enllaç que apareix.', 'ok');
+      if (outExt === 'docx') {
+        window.atneToast?.('Word descarregat. Nota: les imatges del PDF no s\'inclouen — cal afegir-les manualment.', 'info');
+      } else {
+        window.atneToast?.('Document adaptat! Si no s\'ha descarregat, clica l\'enllaç que apareix.', 'ok');
+      }
     } catch(err) {
       window.atneToast?.('Error adaptant: ' + err.message, 'error');
     } finally {
