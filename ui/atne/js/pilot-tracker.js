@@ -312,6 +312,18 @@
     } catch (_) { /* no bloquejant */ }
   });
 
+  document.addEventListener('securitypolicyviolation', function (e) {
+    try {
+      event('client_error', {
+        msg: 'CSP block: ' + (e.violatedDirective || '') + ' → ' + (e.blockedURI || ''),
+        file: (e.sourceFile || '').replace(location.origin, ''),
+        line: e.lineNumber || 0,
+        type: 'csp',
+        page: location.pathname,
+      });
+    } catch (_) { /* no bloquejant */ }
+  });
+
   // ── Botó de suggeriment ───────────────────────────────────────────────────
   var SUGGESTION_HTML = [
     '<div id="atne-sug-modal" style="position:fixed;inset:0;background:rgba(20,20,30,0.45);',
