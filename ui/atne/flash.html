@@ -788,10 +788,10 @@
     <button id="zoom-label" title="Restablir mida (Ctrl 0)" style="font-size:var(--fs-xs);font-weight:600;color:var(--ink-500);background:none;border:none;cursor:pointer;padding:0 2px;min-width:34px;text-align:center;font-family:var(--mono)">100%</button>
     <button class="icon-btn" id="zoom-in" title="Augmentar mida (Ctrl +)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M8 11h6M11 8v6"/></svg></button>
     <button class="icon-btn" id="fullscreen-btn" title="Pantalla completa (F11)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V3h4M17 3h4v4M21 17v4h-4M7 21H3v-4"/></svg></button>
-    <a href="/ui/saber-ne.html" target="_blank" class="icon-btn sbn-link" title="Saber-ne+" style="text-decoration:none" onclick="if(window.ATNE_TRACK)ATNE_TRACK.event('help_opened',{page:'saber-ne',origin:'flash'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6"/><path d="M12 3a6 6 0 0 1 6 6c0 2.22-1.2 4.16-3 5.2V17H9v-2.8C7.2 13.16 6 11.22 6 9a6 6 0 0 1 6-6z"/></svg></a>
+    <a href="/ui/saber-ne.html" target="_blank" class="icon-btn sbn-link" title="Saber-ne+" style="text-decoration:none" data-help="topbar-saber-ne" onclick="if(window.ATNE_TRACK)ATNE_TRACK.event('help_opened',{page:'saber-ne',origin:'flash'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6"/><path d="M12 3a6 6 0 0 1 6 6c0 2.22-1.2 4.16-3 5.2V17H9v-2.8C7.2 13.16 6 11.22 6 9a6 6 0 0 1 6-6z"/></svg></a>
     <button class="icon-btn" id="help-mode-btn" title="Ajuda contextual: clica qualsevol element" onclick="window.helpMode&&helpMode.toggle()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg></button>
-    <button id="btn-suggest" class="icon-btn" title="Tens un suggeriment?" onclick="if(window.ATNE_TRACK)ATNE_TRACK.openSuggestionBox({page:'flash'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
-    <button id="docent-av" class="docent-av" title="El teu compte">?</button>
+    <button id="btn-suggest" class="icon-btn" title="Tens un suggeriment?" data-help="topbar-suggerir" onclick="if(window.ATNE_TRACK)ATNE_TRACK.openSuggestionBox({page:'flash'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+    <button id="docent-av" class="docent-av" title="El teu compte" data-help="topbar-compte">?</button>
   </header>
 
   <!-- Contingut principal -->
@@ -808,7 +808,7 @@
       <div style="display:flex;gap:var(--sp-3);align-items:flex-start">
         <div class="form-group" style="flex:1;min-width:0">
           <label class="form-label" for="curs-sel">Curs</label>
-          <select class="form-select" id="curs-sel">
+          <select class="form-select" id="curs-sel" data-help="fl-curs">
             <optgroup label="Educació infantil">
               <option value="I3">I3</option>
               <option value="I4">I4</option>
@@ -844,12 +844,12 @@
         </div>
         <div class="form-group" style="flex:none">
           <label class="form-label">Per a qui</label>
-          <div class="steps" id="tipus-steps" role="group" aria-label="Destinatari">
+          <div class="steps" id="tipus-steps" role="group" aria-label="Destinatari" data-help="fl-tipus">
             <button class="step on" data-tipus="grup">Grup</button>
             <button class="step" data-tipus="alumne">Alumne</button>
           </div>
           <div class="load-profile-wrap">
-            <button class="load-profile-btn" id="btn-load-profile">Carrega un perfil desat</button>
+            <button class="load-profile-btn" id="btn-load-profile" data-help="fl-carregar">Carrega un perfil desat</button>
             <div class="load-pf-dropdown" id="load-pf-dropdown"></div>
           </div>
         </div>
@@ -857,12 +857,12 @@
 
       <div class="form-group">
         <label class="form-label" id="car-label">Adaptació del text</label>
-        <select class="form-select" id="car-grup-sel">
+        <select class="form-select" id="car-grup-sel" data-help="fl-condicio">
           <option value="">Nivell estàndard del curs</option>
           <option value="suport">Versió simplificada (més accessible)</option>
           <option value="repte">Versió enriquida (més profunditat)</option>
         </select>
-        <select class="form-select" id="car-sel" style="display:none">
+        <select class="form-select" id="car-sel" style="display:none" data-help="fl-condicio">
           <option value="">Selecciona una condició…</option>
           <option value="dislexia">Li costa llegir (dislèxia)</option>
           <option value="tdah">Li costa l'atenció i la concentració (TDAH)</option>
@@ -876,13 +876,13 @@
 
       <div class="form-group l1-group" id="l1-group">
         <label class="form-label" for="l1-inp">Llengua materna de l'alumne/a</label>
-        <input class="form-input" id="l1-inp" type="text"
+        <input class="form-input" id="l1-inp" type="text" data-help="fl-l1"
                placeholder="p. ex. àrab, amazic, urdú…" maxlength="60">
       </div>
 
       <div class="form-group">
         <label class="form-label">Complements</label>
-        <div class="comp-chips" id="comp-chips">
+        <div class="comp-chips" id="comp-chips" data-help="fl-complements">
           <button class="comp-chip on" data-comp="glossari">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
             Glossari
@@ -900,7 +900,7 @@
 
       <div class="form-group">
         <label class="form-label" for="text-area">Text a adaptar</label>
-        <textarea class="flash-textarea" id="text-area"
+        <textarea class="flash-textarea" id="text-area" data-help="fl-textarea"
                   placeholder="Enganxa aquí el text que vols adaptar…"
                   maxlength="12000"></textarea>
         <div class="word-count" id="word-count">0 paraules</div>
@@ -913,7 +913,7 @@
       <div class="form-footer">
         <label class="form-label" for="lang-sel" style="margin-bottom:6px;display:block">Llengua de sortida</label>
         <div class="lang-adaptar-row">
-          <select class="form-select" id="lang-sel">
+          <select class="form-select" id="lang-sel" data-help="fl-idioma">
             <option value="ca">Català</option>
             <option value="es">Castellà</option>
             <option value="en">Anglès</option>
@@ -921,12 +921,12 @@
             <option value="gl">Gallec (beta)</option>
             <option value="eu">Euskera (beta)</option>
           </select>
-          <button class="btn-adaptar" id="btn-adaptar">
+          <button class="btn-adaptar" id="btn-adaptar" data-help="fl-adaptar">
             <span id="btn-label">Adaptar text →</span>
           </button>
         </div>
         <div class="save-profile-wrap">
-          <button class="save-trigger" id="save-trigger">
+          <button class="save-trigger" id="save-trigger" data-help="fl-desar-perfil">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
             Desa com a perfil
           </button>
@@ -965,7 +965,7 @@
         <div class="result-header">
           <span class="result-title">✦ Text adaptat</span>
           <span class="profile-badge" id="result-badge"></span>
-          <div class="font-selector" id="font-selector">
+          <div class="font-selector" id="font-selector" data-help="fl-font">
             <button class="font-btn" onclick="document.getElementById('font-selector').classList.toggle('open')">
               <span class="font-ic">Aa</span>
               <span class="font-current" id="font-current">Fraunces</span>
@@ -998,7 +998,7 @@
 
         <!-- Text original expandible (accessible des del resultat, sense tornar al formulari) -->
         <div class="orig-section" id="orig-section" style="display:none">
-          <button class="orig-toggle" onclick="window._toggleOrig()">
+          <button class="orig-toggle" onclick="window._toggleOrig()" data-help="fl-original">
             <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 2h7l3 3v9a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z"/><path d="M10 2v4h3"/></svg>
             Text original
             <svg class="orig-chevron" viewBox="0 0 16 16" fill="none" width="12" height="12"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -1009,7 +1009,7 @@
         <div class="adapted-box" id="adapted-text"></div>
 
         <div class="comp-section" id="sec-glossari">
-          <div class="comp-header" onclick="toggleSection('glossari')">
+          <div class="comp-header" onclick="toggleSection('glossari')" data-help="fl-sec-glossari">
             <span class="comp-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
             <span class="comp-title">Glossari</span>
             <span class="comp-status" id="gl-status">Generant…</span>
@@ -1021,7 +1021,7 @@
         </div>
 
         <div class="comp-section" id="sec-preguntes">
-          <div class="comp-header" onclick="toggleSection('preguntes')">
+          <div class="comp-header" onclick="toggleSection('preguntes')" data-help="fl-sec-preguntes">
             <span class="comp-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></span>
             <span class="comp-title">Preguntes de comprensió</span>
             <span class="comp-status" id="pr-status">Generant…</span>
@@ -1033,7 +1033,7 @@
         </div>
 
         <div class="comp-section" id="sec-resum" style="display:none">
-          <div class="comp-header" onclick="toggleSection('resum')">
+          <div class="comp-header" onclick="toggleSection('resum')" data-help="fl-sec-resum">
             <span class="comp-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span>
             <span class="comp-title">Resum</span>
             <span class="comp-status" id="rs-status">Generant…</span>
@@ -1054,7 +1054,7 @@
 
 <!-- Barra flotant d'accions (apareix quan hi ha resultat) -->
 <div class="action-bar" id="action-bar">
-  <button class="ab-btn" id="btn-copy" title="Copia el text al porta-papers">
+  <button class="ab-btn" id="btn-copy" title="Copia el text al porta-papers" data-help="fl-copiar">
     <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">
       <rect x="5" y="5" width="9" height="9" rx="1.5"/>
       <path d="M11 5V3a1.5 1.5 0 0 0-1.5-1.5H3A1.5 1.5 0 0 0 1.5 3v6.5A1.5 1.5 0 0 0 3 11H5"/>
@@ -1062,7 +1062,7 @@
     <span class="ab-label">Copia</span>
   </button>
   <div class="ab-sep"></div>
-  <button class="ab-btn" id="btn-pdf" title="Descarrega com a PDF">
+  <button class="ab-btn" id="btn-pdf" title="Descarrega com a PDF" data-help="fl-pdf">
     <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">
       <path d="M9 1.5H4a1.5 1.5 0 0 0-1.5 1.5v10A1.5 1.5 0 0 0 4 14.5h8A1.5 1.5 0 0 0 13.5 13V6z"/>
       <path d="M9 1.5V6H13.5"/>
@@ -1071,7 +1071,7 @@
     <span class="ab-label">PDF</span>
   </button>
   <div class="ab-sep"></div>
-  <button class="ab-btn" id="btn-refer" title="Torna a generar l'adaptació">
+  <button class="ab-btn" id="btn-refer" title="Torna a generar l'adaptació" data-help="fl-refer">
     <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">
       <path d="M13.5 8A5.5 5.5 0 1 1 10 3.07"/>
       <path d="M10 1v3h3"/>
@@ -1079,21 +1079,21 @@
     <span class="ab-label">Refer</span>
   </button>
   <div class="ab-sep"></div>
-  <button class="ab-btn" id="btn-save" title="Desa a la biblioteca">
+  <button class="ab-btn" id="btn-save" title="Desa a la biblioteca" data-help="fl-desar">
     <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">
       <path d="M3 2h10v13l-5-3-5 3z"/>
     </svg>
     <span class="ab-label">Desa</span>
   </button>
   <div class="ab-sep"></div>
-  <button class="ab-btn" id="btn-edit" title="Edita el text adaptat">
+  <button class="ab-btn" id="btn-edit" title="Edita el text adaptat" data-help="fl-editar">
     <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">
       <path d="M11.5 2.5a1.414 1.414 0 0 1 2 2L5 13H3v-2z"/>
     </svg>
     <span class="ab-label">Edita</span>
   </button>
   <div class="ab-sep"></div>
-  <button class="ab-btn" id="btn-historial" title="Veure la biblioteca d'adaptacions">
+  <button class="ab-btn" id="btn-historial" title="Veure la biblioteca d'adaptacions" data-help="fl-historial">
     <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">
       <circle cx="8" cy="8" r="6.5"/>
       <path d="M8 4.5V8l2.5 2"/>
