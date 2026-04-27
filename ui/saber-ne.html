@@ -6,10 +6,7 @@
 <title>Adaptar materials | Saber-ne+</title>
 
 <!-- Tipografia -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
+  <link rel="stylesheet" href="/ui/fonts/fonts.css">
 <!-- Material Symbols -->
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 
@@ -846,7 +843,18 @@
     color: var(--ink-500);
   }
 
-  /* ─── §9 Bibliografia ────────────────────────────────────── */
+  /* ─── §10 Tipografies ───────────────────────────────────── */
+  .font-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--sp-4); margin-top: var(--sp-6); }
+  .font-card { background: #fff; border: 1px solid var(--paper-line); border-radius: var(--r-xl); padding: var(--sp-5) var(--sp-5) var(--sp-4); }
+  .font-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: var(--sp-3); gap: var(--sp-3); }
+  .font-card-name { font-weight: var(--fw-bold); font-size: var(--fs-md); color: var(--ink-900); }
+  .font-card-badge { font-family: var(--mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: .08em; color: #fff; background: var(--primary); border-radius: var(--r-pill); padding: 2px 7px; white-space: nowrap; }
+  .font-card-sample { font-size: 22px; line-height: 1.3; color: var(--ink-800); margin-bottom: var(--sp-3); border-bottom: 1px solid var(--paper-line); padding-bottom: var(--sp-3); }
+  .font-card-desc { font-size: var(--fs-sm); color: var(--ink-600); line-height: 1.55; }
+  .font-card-uses { display: flex; flex-wrap: wrap; gap: 5px; margin-top: var(--sp-3); }
+  .font-use-chip { font-size: 10.5px; padding: 2px 8px; border-radius: var(--r-pill); background: var(--cream-2); color: var(--ink-700); font-family: var(--mono); }
+
+  /* ─── §9 Bibliografia ───────────────────────────────────── */
   .biblio-card {
     padding: var(--sp-6);
     background: #fff;
@@ -2114,6 +2122,105 @@
   </div>
 </section>
 
+
+</div>
+
+<!-- §10 Tipografies                                              -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="tipografies">
+  <div class="section-header">
+    <span class="section-badge">10</span>
+    <h2 class="section-title">Les tipografies de l'adaptació</h2>
+  </div>
+  <p class="section-intro max-w-3xl">ATNE selecciona automàticament la tipografia del text adaptat segons el perfil de l'alumne. El docent sempre pot canviar-la manualment. Totes les fonts estan allotjades al servidor (sense connexió a Google Fonts) i es carreguen instantàniament.</p>
+
+  <div class="font-grid">
+    <div class="font-card">
+      <div class="font-card-header">
+        <div class="font-card-name" style="font-family:'Inter',sans-serif">Inter</div>
+        <span class="font-card-badge">predeterminada</span>
+      </div>
+      <div class="font-card-sample" style="font-family:'Inter',sans-serif">La Revolució Industrial va transformar la societat europea.</div>
+      <div class="font-card-desc">Dissenyada per Rasmus Andersson (2016) específicament per a pantalles. x-height elevada i apertures obertes → molt llegible a mides petites. Cobertura: llatí, llatí estès, grec, ciríl·lic.</div>
+      <div class="font-card-uses">
+        <span class="font-use-chip">Ús general</span>
+        <span class="font-use-chip">ESO · Batxillerat · FP</span>
+      </div>
+    </div>
+
+    <div class="font-card">
+      <div class="font-card-header">
+        <div class="font-card-name" style="font-family:'Lexend',sans-serif">Lexend</div>
+        <span class="font-card-badge" style="background:#7c3aed">dislèxia · TDAH</span>
+      </div>
+      <div class="font-card-sample" style="font-family:'Lexend',sans-serif">La Revolució Industrial va transformar la societat europea.</div>
+      <div class="font-card-desc">Dissenyada per Thomas Jockin (Google, 2018) aplicant el Lubalin Spaceband Principle. L'espaiat augmentat entre lletres redueix l'esforç visual i la confusió entre caràcters similars (b/d, p/q). Recomanada per a dislèxia, TDAH, TDL i nouvinguts.</div>
+      <div class="font-card-uses">
+        <span class="font-use-chip">Dislèxia</span>
+        <span class="font-use-chip">TDAH</span>
+        <span class="font-use-chip">TDL</span>
+        <span class="font-use-chip">Nouvinguts</span>
+      </div>
+    </div>
+
+    <div class="font-card">
+      <div class="font-card-header">
+        <div class="font-card-name" style="font-family:'Atkinson Hyperlegible Next','Atkinson Hyperlegible',sans-serif">Atkinson Hyperlegible Next</div>
+        <span class="font-card-badge" style="background:#0891b2">visió · TEA</span>
+      </div>
+      <div class="font-card-sample" style="font-family:'Atkinson Hyperlegible Next','Atkinson Hyperlegible',sans-serif">La Revolució Industrial va transformar la societat europea.</div>
+      <div class="font-card-desc">Creada pel Braille Institute of America (2019, Next 2024) per a persones amb baixa visió. Cada caràcter té una forma única i diferenciada: mai es confonen b/d/p/q, 0/O, 1/l/I. Recomanada per al TEA per reduir ambigüitat visual.</div>
+      <div class="font-card-uses">
+        <span class="font-use-chip">Baixa visió</span>
+        <span class="font-use-chip">TEA</span>
+        <span class="font-use-chip">Discapacitat auditiva</span>
+      </div>
+    </div>
+
+    <div class="font-card">
+      <div class="font-card-header">
+        <div class="font-card-name" style="font-family:'Fraunces',serif">Fraunces</div>
+        <span class="font-card-badge" style="background:#b45309">literari · AACC</span>
+      </div>
+      <div class="font-card-sample" style="font-family:'Fraunces',serif">La Revolució Industrial va transformar la societat europea.</div>
+      <div class="font-card-desc">Dissenyada per Undercase Type (2020). Serif variable amb eix òptic (9–144pt): conservadora a cossos petits, expressiva a cossos grans. Adequada per a textos literaris, poesia, narrativa i producció per a altes capacitats.</div>
+      <div class="font-card-uses">
+        <span class="font-use-chip">Altes capacitats</span>
+        <span class="font-use-chip">Textos literaris</span>
+        <span class="font-use-chip">Poesia</span>
+      </div>
+    </div>
+
+    <div class="font-card">
+      <div class="font-card-header">
+        <div class="font-card-name" style="font-family:'JetBrains Mono',monospace">JetBrains Mono</div>
+        <span class="font-card-badge" style="background:#374151">tècnic · FP</span>
+      </div>
+      <div class="font-card-sample" style="font-family:'JetBrains Mono',monospace">La Revolució Industrial va transformar la societat.</div>
+      <div class="font-card-desc">Dissenyada per JetBrains (2019) per a programadors. Amplada augmentada i formes distintes per a entorns de codi. Lligadures tipogràfiques (!=, ->, >=). Indicada per a textos tècnics de FP (programació, electrònica, sistemes).</div>
+      <div class="font-card-uses">
+        <span class="font-use-chip">FP tècnica</span>
+        <span class="font-use-chip">Codi</span>
+        <span class="font-use-chip">Ciències computacionals</span>
+      </div>
+    </div>
+
+    <div class="font-card">
+      <div class="font-card-header">
+        <div class="font-card-name" style="font-family:'Noto Sans Math','Inter',sans-serif">Noto Sans Math</div>
+        <span class="font-card-badge" style="background:#059669">STEM</span>
+      </div>
+      <div class="font-card-sample" style="font-family:'Noto Sans Math','Inter',sans-serif">∑ ∫ √ ∂ ≤ ≥ ≠ ∞ π Δ ∇ ⊕ ⊗</div>
+      <div class="font-card-desc">Part de la família Noto de Google (missió: "cap tofu"). Cobreix el bloc matemàtic complet de l'Unicode. Harmonitza amb Inter (mateixa mètrica vertical). S'aplica automàticament per als símbols matemàtics, físics i químics.</div>
+      <div class="font-card-uses">
+        <span class="font-use-chip">Matemàtiques</span>
+        <span class="font-use-chip">Física</span>
+        <span class="font-use-chip">Química</span>
+        <span class="font-use-chip">STEM</span>
+      </div>
+    </div>
+  </div>
+</section>
 
 </div>
 </main>

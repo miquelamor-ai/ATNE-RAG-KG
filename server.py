@@ -690,6 +690,9 @@ async def serve_static(path: str):
         ".png": "image/png",
         ".svg": "image/svg+xml",
         ".ico": "image/x-icon",
+        ".woff2": "font/woff2",
+        ".woff": "font/woff",
+        ".ttf": "font/ttf",
     }
     ct = content_types.get(file.suffix, "application/octet-stream")
     return FileResponse(file, media_type=ct)

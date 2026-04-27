@@ -14,10 +14,8 @@
 <script src="/ui/atne/js/pilot-tracker.js"></script>
 
 <!-- Tipografia -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
-
+  <link rel="stylesheet" href="/ui/fonts/fonts.css">
+<script src="/ui/atne/js/fonts.js"></script>
 <!-- ATNE base global (ordre obligatori: tokens → base → shell) -->
 <link rel="stylesheet" href="/ui/styles/tokens.css">
 <link rel="stylesheet" href="/ui/styles/base.css">
@@ -421,11 +419,11 @@
   .font-opt.active { background: var(--primary-50); }
   .font-opt-name { font-size: 12.5px; font-weight: 600; color: var(--ink-900); }
   .font-opt-sample { font-size: var(--fs-md); color: var(--ink-700); margin-top: 2px; }
-  .font-opt-sample.font-atkinson { font-family: 'Atkinson Hyperlegible', sans-serif; }
+  .font-opt-sample.font-atkinson { font-family: 'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', sans-serif; }
   .font-opt-sample.font-lexend { font-family: 'Lexend', sans-serif; }
   .font-opt-sample.font-inter { font-family: var(--ui); }
   .font-opt-sample.font-fraunces { font-family: var(--serif); }
-  .font-opt-sample.font-opendyslexic { font-family: 'OpenDyslexic', sans-serif; }
+  .font-opt-sample.font-jetbrains { font-family: 'JetBrains Mono', monospace; }
   .font-opt-note {
     font-family: var(--mono); font-size: 9.5px; text-transform: uppercase;
     letter-spacing: .08em; color: var(--ink-500); margin-top: 2px;
@@ -809,34 +807,34 @@
               <div class="font-selector" id="font-selector">
                 <button class="font-btn" onclick="document.getElementById('font-selector').classList.toggle('open')">
                   <span class="font-ic">Aa</span>
-                  <span class="font-current" id="font-current">Atkinson</span>
+                  <span class="font-current" id="font-current">Inter</span>
                   <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
                 </button>
                 <div class="font-menu">
-                  <button class="font-opt" data-font="atkinson">
-                    <span class="font-opt-name">Atkinson Hyperlegible</span>
-                    <span class="font-opt-sample font-atkinson">La Revolució Industrial</span>
-                    <span class="font-opt-note">recomanada baixa visió i NEE</span>
-                  </button>
-                  <button class="font-opt" data-font="lexend">
-                    <span class="font-opt-name">Lexend</span>
-                    <span class="font-opt-sample font-lexend">La Revolució Industrial</span>
-                    <span class="font-opt-note">millora velocitat lectora</span>
-                  </button>
                   <button class="font-opt" data-font="inter">
                     <span class="font-opt-name">Inter</span>
                     <span class="font-opt-sample font-inter">La Revolució Industrial</span>
-                    <span class="font-opt-note">sans neutra</span>
+                    <span class="font-opt-note">predeterminada · ús general</span>
+                  </button>
+                  <button class="font-opt" data-font="lexend">
+                    <span class="font-opt-name">Lexend · dislèxia · TDAH</span>
+                    <span class="font-opt-sample font-lexend">La Revolució Industrial</span>
+                    <span class="font-opt-note">espaiat augmentat · reduces esforç visual</span>
+                  </button>
+                  <button class="font-opt" data-font="atkinson">
+                    <span class="font-opt-name">Atkinson Hyperlegible Next · visió · TEA</span>
+                    <span class="font-opt-sample font-atkinson">La Revolució Industrial</span>
+                    <span class="font-opt-note">màxima discriminació de caràcters</span>
                   </button>
                   <button class="font-opt" data-font="fraunces">
-                    <span class="font-opt-name">Fraunces</span>
+                    <span class="font-opt-name">Fraunces · literari · AACC</span>
                     <span class="font-opt-sample font-fraunces">La Revolució Industrial</span>
-                    <span class="font-opt-note">serif editorial</span>
+                    <span class="font-opt-note">serif variable · textos literaris</span>
                   </button>
-                  <button class="font-opt" data-font="opendyslexic">
-                    <span class="font-opt-name">OpenDyslexic</span>
-                    <span class="font-opt-sample font-opendyslexic">La Revolució Industrial</span>
-                    <span class="font-opt-note">específica per a dislèxia</span>
+                  <button class="font-opt" data-font="jetbrains">
+                    <span class="font-opt-name">JetBrains Mono · tècnic · FP</span>
+                    <span class="font-opt-sample font-jetbrains">La Revolució Industrial</span>
+                    <span class="font-opt-note">monospace · codi i textos tècnics</span>
                   </button>
                 </div>
               </div>
@@ -1388,35 +1386,25 @@
     }
   } catch(e) {}
 
-  // ──────────────────────────────────────────────────────
-  // Selector de tipografia del text adaptat (doc-read)
-  // Guarda 'atne.doc_font' a localStorage. Default segons perfil:
-  //   TDAH→Lexend, Dislèxia→OpenDyslexic, AC→Fraunces, resta→Atkinson
-  // ──────────────────────────────────────────────────────
-  const FONT_DEFAULTS = { tdah:'lexend', disl:'opendyslexic', ac:'fraunces', cat:'atkinson' };
-  const FONT_LABELS = { atkinson:'Atkinson', lexend:'Lexend', inter:'Inter', fraunces:'Fraunces', opendyslexic:'OpenDyslexic' };
+  // ── Selector de tipografia (delegat a fonts.js) ──────────────────────────
   function applyDocFont(name) {
-    if (!FONT_LABELS[name]) name = 'atkinson';
-    // Aplicar tant al text adaptat (.doc-read) com al contenidor dels complements (.center-body)
-    // perquè glossari/esquema/preguntes també heretin la font triada.
-    const scopes = document.querySelectorAll('.doc-read, .center-body');
-    scopes.forEach(d => {
-      d.classList.remove('font-atkinson','font-lexend','font-inter','font-fraunces','font-opendyslexic');
-      d.classList.add('font-' + name);
+    const fonts = window.ATNE_FONTS || {};
+    if (!fonts[name]) name = 'inter';
+    const css = fonts[name].css;
+    try { localStorage.setItem('atne.font_key', name); } catch(e){}
+    document.querySelectorAll('#adapted-text, .center-body').forEach(el => {
+      el.style.fontFamily = css;
     });
     const cur = document.getElementById('font-current');
-    if (cur) cur.textContent = FONT_LABELS[name];
+    if (cur) cur.textContent = fonts[name].label;
     document.querySelectorAll('.font-opt').forEach(o => o.classList.toggle('active', o.dataset.font === name));
-    localStorage.setItem('atne.doc_font', name);
   }
-  // Click sobre una opció del menú
   document.querySelectorAll('.font-opt').forEach(o => {
     o.addEventListener('click', () => {
       applyDocFont(o.dataset.font);
       document.getElementById('font-selector')?.classList.remove('open');
     });
   });
-  // Tancar el menú si es clica fora
   document.addEventListener('click', e => {
     const sel = document.getElementById('font-selector');
     if (sel && !sel.contains(e.target)) sel.classList.remove('open');
@@ -1549,8 +1537,9 @@
     if (p.type === 'group') {
       renderGroupSidebar(p);
       // Aplicar tipografia per defecte (sense perfil NEE individual, usem Atkinson)
-      const storedFont = localStorage.getItem('atne.doc_font');
-      applyDocFont(storedFont || 'atkinson');
+      // Grups: auto-switch per Inter (neutre), respecta preferència manual
+      const savedFont = localStorage.getItem('atne.font_key') || localStorage.getItem('atne.doc_font');
+      applyDocFont(savedFont || 'inter');
       return;
     }
 
@@ -1594,10 +1583,9 @@
       }
     }
 
-    // Aplicar tipografia: primer la desada per l'usuari, sinó la default del perfil
-    const storedFont = localStorage.getItem('atne.doc_font');
-    const defaultFont = FONT_DEFAULTS[p.cat] || 'atkinson';
-    applyDocFont(storedFont || defaultFont);
+    // Aplicar tipografia: auto-switch pel perfil (fonts.js), respecta preferència manual
+    const autoKey = window.atneAutoFont ? window.atneAutoFont(p) : 'inter';
+    applyDocFont(autoKey);
   })();
 
   // Drawer mòbil (obrir/tancar)
@@ -3507,10 +3495,7 @@
 <head>
 <meta charset="utf-8">
 <title>${escapeHtml(docTitle)}</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
+  <link rel="stylesheet" href="/ui/fonts/fonts.css"><style>
   @page { size: A4; margin: 15mm 15mm 20mm 15mm; }
   @page { @bottom-right { content: counter(page); font-size: 9pt; color: #888; font-family: system-ui, sans-serif; } }
   * { box-sizing: border-box; }
