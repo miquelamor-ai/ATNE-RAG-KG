@@ -1350,6 +1350,7 @@
 
   // ── Tracking pilot: scroll depth + form abandoned + dispositiu ────────────────
   var _hasAdapted = false;
+  var _hasReferred = false;  // true si ha clicat Refer almenys un cop
   if (window.ATNE_TRACK) {
     ATNE_TRACK.trackScrollDepth('flash-result', { mode: 'flash' });
     ATNE_TRACK.trackFormAbandoned(function () { return _hasAdapted; }, { mode: 'flash' });
@@ -1620,6 +1621,7 @@
     var btn = document.getElementById('btn-copy');
     navigator.clipboard.writeText(parts.join('')).then(function () {
       btn.innerHTML = '✓ Copiat';
+      if (window.ATNE_TRACK) ATNE_TRACK.event('copied', { is_first_result: !_hasReferred, chars: parts.join('').length, mode: 'flash' });
       setTimeout(function () {
         btn.innerHTML = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M11 5V3a1.5 1.5 0 0 0-1.5-1.5H3A1.5 1.5 0 0 0 1.5 3v6.5A1.5 1.5 0 0 0 3 11H5"/></svg><span class="ab-label">Copia</span>';
       }, 2000);
@@ -1680,7 +1682,10 @@
       html2canvas: { scale: 2, useCORS: true, logging: false },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       pagebreak: { mode: ['css', 'legacy'] },
-    }).from(stateResult).save().then(restorePdf).catch(restorePdf);
+    }).from(stateResult).save().then(function () {
+      restorePdf();
+      if (window.ATNE_TRACK) ATNE_TRACK.event('exported', { is_first_result: !_hasReferred, format: 'pdf', mode: 'flash' });
+    }).catch(restorePdf);
   });
 
   // ── Desa a la biblioteca ─────────────────────────────────────────────────────
@@ -1755,6 +1760,7 @@
   // ── Refer ─────────────────────────────────────────────────────────────────────
   document.getElementById('btn-refer').addEventListener('click', function () {
     if (!lastPayload) return;
+    _hasReferred = true;
     if (currentAbort) currentAbort.abort();
     currentAbort = new AbortController();
     var docentId = '';
