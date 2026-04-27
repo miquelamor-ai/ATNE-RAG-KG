@@ -169,20 +169,20 @@ const AJUT_GRUPS = {
 // Quan el docent diu "al nivell del curs" (Bloc A = 0), aquest és el MECR.
 // Els desplaçaments (+2/+1/0/-1/-2) pugen o baixen d'un nivell per pas.
 
-const MECR_SCALE = ["pre-A1", "A1", "A2", "B1", "B2"];
+const MECR_SCALE = ["pre-A1", "A1", "A2", "B1", "B2", "C1"];
 
 const MECR_PER_ETAPA_CURS = {
     infantil: { P3: "pre-A1", P4: "pre-A1", P5: "pre-A1" },
     primaria: {
-        "1r": "pre-A1", "2n": "pre-A1",
-        "3r": "A1", "4t": "A1",
-        "5e": "A2", "6e": "A2",
+        "1r": "A1",  "2n": "A1",
+        "3r": "A1",  "4t": "A2",
+        "5e": "A2",  "6e": "B1",
     },
     ESO: {
-        "1r": "A2", "2n": "A2",
-        "3r": "B1", "4t": "B1",
+        "1r": "B1", "2n": "B1",
+        "3r": "B2", "4t": "B2",
     },
-    batxillerat: { "1r": "B2", "2n": "B2" },
+    batxillerat: { "1r": "B2", "2n": "C1" },
     FP: {
         "1r_CFGB": "A2", "2n_CFGB": "A2",
         "1r_CGM": "B1", "2n_CGM": "B1",

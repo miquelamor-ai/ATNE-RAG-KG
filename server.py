@@ -763,11 +763,16 @@ def propose_adaptation(characteristics: dict, context: dict) -> dict:
     # disc_motora, trastorn_emocional) NO proposen MECR — usen el default d'etapa.
     # Font: docs/investigacio/mapa_barreres_perfil.md
     MECR_ORDER = ["pre-A1", "A1", "A2", "B1", "B2", "C1"]
-    etapa_defaults = {
-        "infantil": "A1", "primaria": "B1", "ESO": "B2",
-        "batxillerat": "B2", "FP": "B2",
+    curs = context.get("curs", "")
+    _MECR_PER_CURS = {
+        "infantil":    {"P3": "pre-A1", "P4": "pre-A1", "P5": "pre-A1"},
+        "primaria":    {"1r": "A1", "2n": "A1", "3r": "A1", "4t": "A2", "5e": "A2", "6e": "B1"},
+        "ESO":         {"1r": "B1", "2n": "B1", "3r": "B2", "4t": "B2"},
+        "batxillerat": {"1r": "B2", "2n": "C1"},
+        "FP":          {"1r_CFGB": "A2", "2n_CFGB": "A2", "1r_CGM": "B1", "2n_CGM": "B1", "1r_CGS": "B2", "2n_CGS": "B2"},
     }
-    mecr_base = etapa_defaults.get(etapa, "B2")
+    _etapa_fallback = {"infantil": "pre-A1", "primaria": "A1", "ESO": "B1", "batxillerat": "B2", "FP": "B1"}
+    mecr_base = _MECR_PER_CURS.get(etapa, {}).get(curs) or _etapa_fallback.get(etapa, "B1")
     mecr_candidats = []
 
     # Nouvingut: MECR explícit triat pel docent
@@ -2947,25 +2952,15 @@ def _languagetool_correct(text: str, lang: str = "ca") -> tuple[str, int, list[d
 # Taula etapa+curs → MECR aproximat per al target de llegibilitat
 # Usada quan el client no envia target_mecr explícit.
 def _mecr_from_etapa_curs(etapa: str, curs: str = "") -> str:
-    etapa_lower = (etapa or "").lower()
-    curs_lower = (curs or "").lower()
-    if "infantil" in etapa_lower:
-        return "pre-A1"
-    if "primari" in etapa_lower:
-        # Cicle inicial (1-2): A1; Mitjà (3-4): A2; Superior (5-6): B1
-        if any(x in curs_lower for x in ("1r", "1", "2n", "2")):
-            return "A1"
-        if any(x in curs_lower for x in ("3r", "3", "4t", "4")):
-            return "A2"
-        return "B1"
-    if "eso" in etapa_lower:
-        # 1-2 ESO: B1; 3-4 ESO: B2
-        if any(x in curs_lower for x in ("1r", "1", "2n", "2")):
-            return "B1"
-        return "B2"
-    if "batxillerat" in etapa_lower or "batx" in etapa_lower or "fp" in etapa_lower:
-        return "C1"
-    return "B1"  # default segur
+    _MAP = {
+        "infantil":    {"P3": "pre-A1", "P4": "pre-A1", "P5": "pre-A1"},
+        "primaria":    {"1r": "A1", "2n": "A1", "3r": "A1", "4t": "A2", "5e": "A2", "6e": "B1"},
+        "ESO":         {"1r": "B1", "2n": "B1", "3r": "B2", "4t": "B2"},
+        "batxillerat": {"1r": "B2", "2n": "C1"},
+        "FP":          {"1r_CFGB": "A2", "2n_CFGB": "A2", "1r_CGM": "B1", "2n_CGM": "B1", "1r_CGS": "B2", "2n_CGS": "B2"},
+    }
+    _FALLBACK = {"infantil": "pre-A1", "primaria": "A1", "ESO": "B1", "batxillerat": "B2", "FP": "B1"}
+    return _MAP.get(etapa, {}).get(curs) or _FALLBACK.get(etapa, "B1")
 
 
 # ═══ Filtre de caràcters exòtics (CJK, ciríl·lic, àrab, etc.) ══════════════
@@ -3848,30 +3843,36 @@ async def adapt_stream(request: Request, payload: dict = Body(...)):
 
 # Mapping (curs, adaptacio) → MECR — idèntic al de mpv/server_mpv.py
 _FLASH_CURS_MECR: dict[tuple[str, str], str] = {
-    ("primaria_12", "molt_simplificat"): "A1",
+    # Base al_nivell = A1 (Cicle Inicial: comprensió literal, Decret 175/2022)
+    ("primaria_12", "molt_simplificat"): "pre-A1",
     ("primaria_12", "simplificat"):      "A1",
     ("primaria_12", "al_nivell"):        "A1",
     ("primaria_12", "enriquiment"):      "A2",
-    ("primaria_34", "molt_simplificat"): "A1",
+    # Base al_nivell = A1 (Cicle Mitjà: literal + inferencial bàsic)
+    ("primaria_34", "molt_simplificat"): "pre-A1",
     ("primaria_34", "simplificat"):      "A1",
-    ("primaria_34", "al_nivell"):        "A2",
-    ("primaria_34", "enriquiment"):      "B1",
+    ("primaria_34", "al_nivell"):        "A1",
+    ("primaria_34", "enriquiment"):      "A2",
+    # Base al_nivell = A2 (Cicle Superior: inferencial + interpretatiu)
     ("primaria_56", "molt_simplificat"): "A1",
-    ("primaria_56", "simplificat"):      "A2",
-    ("primaria_56", "al_nivell"):        "B1",
-    ("primaria_56", "enriquiment"):      "B2",
-    ("eso_12",      "molt_simplificat"): "A2",
-    ("eso_12",      "simplificat"):      "B1",
-    ("eso_12",      "al_nivell"):        "B2",
-    ("eso_12",      "enriquiment"):      "C1",
+    ("primaria_56", "simplificat"):      "A1",
+    ("primaria_56", "al_nivell"):        "A2",
+    ("primaria_56", "enriquiment"):      "B1",
+    # Base al_nivell = B1 (1r-2n ESO: interpretatiu + valoratiu)
+    ("eso_12",      "molt_simplificat"): "A1",
+    ("eso_12",      "simplificat"):      "A2",
+    ("eso_12",      "al_nivell"):        "B1",
+    ("eso_12",      "enriquiment"):      "B2",
+    # Base al_nivell = B2 (3r-4t ESO: crític, textos argumentatius)
     ("eso_34",      "molt_simplificat"): "B1",
     ("eso_34",      "simplificat"):      "B1",
     ("eso_34",      "al_nivell"):        "B2",
     ("eso_34",      "enriquiment"):      "C1",
+    # Base al_nivell = B2 (Batxillerat: crític matisat, textos especialitzats)
     ("batxillerat", "molt_simplificat"): "B1",
     ("batxillerat", "simplificat"):      "B2",
-    ("batxillerat", "al_nivell"):        "C1",
-    ("batxillerat", "enriquiment"):      "enriquiment",
+    ("batxillerat", "al_nivell"):        "B2",
+    ("batxillerat", "enriquiment"):      "C1",
 }
 
 _FLASH_NIVELL_MAP: dict[str, str] = {
