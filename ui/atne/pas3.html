@@ -457,11 +457,11 @@
   .regen.on{display:flex}
   .regen-spin{position:relative;width:52px;height:52px;display:flex;align-items:center;justify-content:center}
   .regen-spin::before{content:"";position:absolute;inset:0;border:3px solid var(--primary-100);border-top-color:var(--primary);border-radius:50%;animation:spin 1.2s linear infinite}
-  .regen-spin::after{content:"\270F\FE0F";font-size:22px;line-height:1;animation:wiggle 1.6s ease-in-out infinite alternate;display:block}
+  .regen-spin .regen-icon{width:22px;height:22px;color:var(--primary);animation:wiggle 1.8s ease-in-out infinite alternate;display:block}
   @keyframes spin{to{transform:rotate(360deg)}}
-  @keyframes wiggle{0%{transform:rotate(-14deg) translateX(-1px)}100%{transform:rotate(10deg) translateX(2px)}}
-  .regen-t{font-family:var(--serif);font-size:var(--fs-lg);font-weight:700;display:flex;align-items:center;gap:8px}
-  .regen-time{font-family:var(--mono);font-size:var(--fs-sm);color:var(--ink-500);font-weight:500;min-width:36px}
+  @keyframes wiggle{0%{transform:rotate(-10deg) translateX(-1px)}100%{transform:rotate(8deg) translateX(1px)}}
+  .regen-t{font-family:var(--serif);font-size:var(--fs-lg);font-weight:700;display:flex;align-items:center;gap:10px}
+  .regen-time{font-family:var(--mono);font-size:var(--fs-sm);color:var(--ink-500);font-weight:600;min-width:42px;text-align:right}
   .regen-time:empty{display:none}
   .regen-s{font-size:var(--fs-sm);color:var(--ink-600);font-family:var(--mono);transition:opacity .35s ease}
 
@@ -1214,7 +1214,7 @@
 
         <!-- Regen overlay -->
         <div class="regen" id="regen">
-          <div class="regen-spin"></div>
+          <div class="regen-spin"><svg class="regen-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
           <div class="regen-t"><span id="regen-t">Regenerant…</span><span class="regen-time" id="regen-time"></span></div>
           <div class="regen-s">Això pot trigar uns segons</div>
         </div>
@@ -2010,20 +2010,50 @@
     'Donant forma a les frases…',
     'Posant els accents al seu lloc…'
   ];
+  // Temps mitjos empírics per model (sessions 14/04 i 21/04). Default per
+  // a model no detectat: 30s. El % que mostrem és una estimació honesta:
+  // pct = min(95, elapsed/expected * 95). Quan acaba, salta a 100%.
+  const REGEN_MODEL_TIMES = {
+    'gpt-4o': 12,
+    'gpt-4.1-mini': 18,
+    'gpt-4o-mini': 18,
+    'gemma 3': 45,
+    'gemma3': 45,
+    'gemma 4': 90,
+    'gemma4': 90,
+    'gemini': 20,
+    'mistral': 35,
+  };
+  function _expectedTimeFromMsg(msg) {
+    if (!msg) return 30;
+    const lower = msg.toLowerCase();
+    for (const key in REGEN_MODEL_TIMES) {
+      if (lower.indexOf(key) >= 0) return REGEN_MODEL_TIMES[key];
+    }
+    return 30;
+  }
   let _regenTickId = null;
   let _regenMsgId = null;
   let _regenStartTs = 0;
+  let _regenExpected = 30;
+  window.regenSetExpectedFromStep = function(msg) {
+    // Cridat des de onStep quan arriba "Generant adaptació amb <model>…"
+    const exp = _expectedTimeFromMsg(msg);
+    if (exp && exp > 0) _regenExpected = exp;
+  };
   window.startRegenLoop = function() {
     window.stopRegenLoop();
     _regenStartTs = Date.now();
+    _regenExpected = 30;
     const timeEl = document.getElementById('regen-time');
     const subEl = document.querySelector('.regen-s');
     if (timeEl) {
-      timeEl.textContent = '0s';
+      timeEl.textContent = '0%';
       _regenTickId = setInterval(() => {
-        const sec = Math.floor((Date.now() - _regenStartTs) / 1000);
-        timeEl.textContent = sec + 's';
-      }, 1000);
+        const elapsed = (Date.now() - _regenStartTs) / 1000;
+        const pct = Math.min(95, Math.floor((elapsed / _regenExpected) * 95));
+        timeEl.textContent = pct + '%';
+      }, 500);
     }
     if (subEl) {
       // No sobreescriure immediatament: deixem que el missatge inicial
@@ -2044,7 +2074,11 @@
     if (_regenTickId) { clearInterval(_regenTickId); _regenTickId = null; }
     if (_regenMsgId) { clearInterval(_regenMsgId); _regenMsgId = null; }
     const timeEl = document.getElementById('regen-time');
-    if (timeEl) timeEl.textContent = '';
+    if (timeEl) {
+      // Petit gest: saltem a 100% breument abans d'amagar (sensació de tancament)
+      timeEl.textContent = '100%';
+      setTimeout(() => { if (timeEl) timeEl.textContent = ''; }, 200);
+    }
     const subEl = document.querySelector('.regen-s');
     if (subEl) subEl.style.opacity = '1';
   };
@@ -2907,6 +2941,7 @@
       params: adaptParams,
       onStep: (ev) => {
         if (regenT && ev.msg) regenT.textContent = ev.msg;
+        if (ev.msg) try { regenSetExpectedFromStep(ev.msg); } catch (_) {}
       },
       onResult: (ev) => {
         // Parse de les seccions del resultat (Text adaptat + Glossari + Esquema + Preguntes)
