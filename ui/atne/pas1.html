@@ -1635,8 +1635,35 @@
       const listRecent = document.getElementById('list-recent');
       const listRest   = document.getElementById('list-rest');
       const recentPids = JSON.parse(localStorage.getItem('atne.recent_pids') || '[]');
-      d.profiles.forEach(p => {
-        if (!p.id) return;
+      d.profiles.forEach(raw => {
+        // Fallback: perfils antics desats des de Flash no tenen `id` (només
+        // `_db_id`); els reaprofitem com a id local perquè la fila es renderitzi.
+        if (!raw.id && raw._db_id) raw.id = 'db_' + raw._db_id;
+        if (!raw.id) return;
+        // Enriquim amb el model canònic: derivem chips/cat/behaviors/aids per a
+        // la card si el perfil ve d'un format antic (Flash, Taller pre-canònic).
+        let p = raw;
+        if (window.ATNE_PROFILE_MODEL) {
+          const canonical = window.ATNE_PROFILE_MODEL.normalizeLegacy(raw);
+          if (canonical && canonical.conditions && canonical.conditions.length) {
+            const view = window.ATNE_PROFILE_MODEL.deriveCardView(canonical);
+            p = Object.assign({}, canonical, raw, {
+              id: raw.id,
+              conditions: canonical.conditions,
+              chips: (raw.chips && raw.chips.length) ? raw.chips : view.chips,
+              behaviors: (raw.behaviors && raw.behaviors.length) ? raw.behaviors : view.behaviors,
+              aids: (raw.aids && raw.aids.length) ? raw.aids : view.aids,
+              cat: raw.cat || view.cat,
+              mecr: raw.mecr || view.mecr,
+              avatar: raw.avatar || (raw.name || '?')[0].toUpperCase(),
+              // El curs es pot trobar a `course` (Taller) o `curs` (Flash legacy)
+              course: raw.course || raw.curs || '',
+              // Marca el tipus per al renderer (Flash usa `tipus`, Taller `type`)
+              type: raw.type || (raw.tipus === 'grup' ? 'group' : 'person'),
+              custom: true,
+            });
+          }
+        }
         window.ATNE_PROFILES[p.id] = p;
         if (!document.querySelector(`.row[data-pid="${p.id}"]`)) {
           const row = _buildProfileRow(p);

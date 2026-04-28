@@ -1873,15 +1873,54 @@
       stateError.textContent = 'Cal estar identificat per desar perfils.';
       return;
     }
-    var profile = {
+
+    // Llegim DIRECTAMENT del formulari (no de lastPayload) perquè el docent
+    // pot voler desar el perfil sense haver fet una adaptació prèvia.
+    var caracFromForm = (tipusActual === 'alumne') ? (carSel ? carSel.value : '')
+                                                    : (carGrupSel ? carGrupSel.value : '');
+    var l1FromForm = (tipusActual === 'alumne' && caracFromForm === 'nouvingut' && l1Inp)
+                       ? (l1Inp.value || '').trim() : '';
+
+    // Construïm el canònic via el model: garanteix conditions[] estructurat,
+    // l1_family/alfabet_llati inferits, etc. — així pas1/pas2/pas3 el poden
+    // mostrar a la llista de perfils desats sense camps fantasma.
+    var canonical = null;
+    try {
+      if (window.ATNE_PROFILE_MODEL) {
+        canonical = window.ATNE_PROFILE_MODEL.fromFlashForm({
+          cursUI: cursSel.value,
+          tipus: tipusActual,
+          caracteristica: caracFromForm,
+          l1: l1FromForm,
+        });
+        canonical.name = name;
+        canonical.custom = true;
+        canonical.source = 'flash';
+        canonical.avatar = (name[0] || 'F').toUpperCase();
+      }
+    } catch (e) { /* fallback al format pla */ }
+
+    // Estructura final del perfil desat: barreja del canònic (conditions
+    // estructurats per pas1) + camps clàssics Flash (perfils/curs/tipus/
+    // adaptacio) per a backward compat amb el dropdown propi de Flash.
+    var adaptacioFromForm = lastPayload ? lastPayload.adaptacio
+      : (BEHAVIORAL_TO_ADAPTACIO[caracFromForm] || (GRUP_MAP[caracFromForm] || GRUP_MAP['']).adaptacio);
+    var perfilsFromForm = lastPayload ? lastPayload.perfils
+      : (tipusActual === 'alumne' ? (BEHAVIORAL_TO_PERFILS[caracFromForm] || [])
+                                   : (GRUP_MAP[caracFromForm] || GRUP_MAP['']).perfils);
+    var profile = Object.assign({}, canonical || {}, {
+      // Camps obligatoris perquè pas1 mostri la fila i no la salti
+      id: (canonical && canonical.id) || ('p_flash_' + Date.now().toString(36)),
       name: name,
       source: 'flash',
+      custom: true,
+      // Camps Flash-legacy (per al seu propi dropdown de càrrega)
       curs: cursSel.value,
       tipus: tipusActual,
-      adaptacio: lastPayload ? lastPayload.adaptacio : 'al_nivell',
-      perfils: lastPayload ? lastPayload.perfils : [],
-      l1: lastPayload ? (lastPayload.l1 || '') : '',
-    };
+      adaptacio: adaptacioFromForm,
+      perfils: perfilsFromForm,
+      l1: l1FromForm,
+    });
     fetch('/api/docent/profiles', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1979,8 +2018,18 @@
           // perfils: Taller usa "conditions" amb claus curtes; Flash usa "perfils" amb claus llargues
           var _DX_TO_PERFIL = { disl:'dislexia', l2:'nouvingut', ac:'altes_capacitats',
                                  tdah:'tdah', tea:'tea', di:'di', vulnerabilitat:'vulnerabilitat', tdl:'tdl' };
-          if (!o.perfils) {
-            o.perfils = (o.conditions || []).map(function(c) { return _DX_TO_PERFIL[c] || c; });
+          if (!o.perfils || !o.perfils.length) {
+            // conditions pot ser array de strings (legacy) o d'objectes canònics {key}
+            o.perfils = (o.conditions || []).map(function(c) {
+              if (typeof c === 'string') return _DX_TO_PERFIL[c] || c;
+              if (c && c.key) return _DX_TO_PERFIL[c.key] || c.key;
+              return '';
+            }).filter(Boolean);
+          }
+          // L1 també pot venir nia dins conditions[].l1 (canonical)
+          if (!o.l1 && Array.isArray(o.conditions)) {
+            var nouvCond = o.conditions.find(function(c) { return c && c.key === 'nouvingut'; });
+            if (nouvCond && nouvCond.l1) o.l1 = nouvCond.l1;
           }
           // adaptacio: deduïr de levels del grup, o al_nivell per defecte
           if (!o.adaptacio) {

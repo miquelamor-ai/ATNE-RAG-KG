@@ -693,6 +693,17 @@
       });
     }
 
+    // Forma Flash-legacy: { tipus:'alumne'|'grup', perfils:[...], curs, l1, adaptacio }
+    // (perfils desats des de la pàgina Flash abans del model canònic).
+    if (p.tipus && Array.isArray(p.perfils)) {
+      return fromFlashForm({
+        cursUI: p.curs || p.course || '',
+        tipus: p.tipus,
+        caracteristica: p.perfils[0] || (p.adaptacio === 'enriquiment' ? 'repte' : p.adaptacio === 'simplificat' ? 'suport' : ''),
+        l1: p.l1 || '',
+      });
+    }
+
     // Demo legacy: cat/chips/behaviors/aids però sense conditions estructurades.
     // Inferim condicions de cat (i chips si grup).
     const inferred = [];
