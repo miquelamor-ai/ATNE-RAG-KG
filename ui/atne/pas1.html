@@ -984,9 +984,11 @@
          'atne.doc_materia'].forEach(k => localStorage.removeItem(k));
       }
       localStorage.setItem('atne.profile_id', pid);
-      // Desa el perfil complet si és custom (pas2/pas3 no el tindran a ATNE_PROFILES)
+      // Desa el perfil complet (custom o demo). Els IDs de demos a pas1 (ex_tdah,
+      // ex_l2…) no existeixen a ATNE_PROFILES de pas2/pas3, així que cal injectar
+      // el perfil sencer al localStorage perquè pas2 el pugui recuperar.
       const prof = window.ATNE_PROFILES[pid];
-      if (prof?.custom) {
+      if (prof) {
         localStorage.setItem('atne.custom_profile', JSON.stringify(prof));
       } else {
         localStorage.removeItem('atne.custom_profile');

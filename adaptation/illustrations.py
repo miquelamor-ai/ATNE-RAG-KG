@@ -349,19 +349,20 @@ def _seed_for_concept(concept: str, base_seed: int = 42) -> int:
 def build_flux_url(brief: str, style: str, seed: int) -> str:
     """Construeix URL Pollinations deterministica (imatge es genera en GET).
 
-    Format del prompt alineat amb el test reeixit del 21/04 (test_revolucio_industrial.py):
-    `{spine}. {brief}. {suffix}.` amb punts entre seccions (FLUX els fa servir per
-    parsejar millor) i mides 1024x1024 (FLUX-schnell rendeix millor a ratio 1:1
-    que a 4:3 com es feia abans 1024x768).
+    Format alineat amb test_revolucio_industrial.py (qualitat 21/04):
+    768x768, spine en minúscula inicial, sense referrer. FLUX-schnell rendeix
+    millor a 768 que a 1024 amb prompts complexos (menys artefactes a cares
+    i mans).
     """
-    spine = STYLE_SPINES.get(style, STYLE_SPINES[DEFAULT_STYLE]).rstrip(".")
+    spine_raw = STYLE_SPINES.get(style, STYLE_SPINES[DEFAULT_STYLE]).rstrip(".")
+    spine = spine_raw[:1].lower() + spine_raw[1:] if spine_raw else spine_raw
     brief_clean = (brief or "").strip().rstrip(".")
     suffix_clean = POSITIVE_SUFFIX.rstrip(".")
     full = f"{spine}. {brief_clean}. {suffix_clean}."
     url = (
         f"{POLLINATIONS_BASE}{quote(full)}"
-        f"?width=1024&height=1024&nologo=true&model=flux&seed={seed}"
-        f"&enhance=false&referrer=atne-fje"
+        f"?width=768&height=768&nologo=true&model=flux&seed={seed}"
+        f"&enhance=false"
     )
     # Log per a diagnostic post-pilot: si una imatge surt malament, podem
     # rastrejar-la a Cloud Run logs i veure el brief exacte que va usar FLUX.
