@@ -14,6 +14,7 @@
 -->
 <!-- Pilot tracker (Sprint 1C): events UX granulars al pilot -->
 <script src="/ui/atne/js/pilot-tracker.js"></script>
+<script src="/ui/atne/js/profile-canonical.js"></script>
 <script src="/ui/atne/js/llm.js"></script>
 
 <!-- Tipografia -->
@@ -940,10 +941,11 @@
                     chips:[{label:'TDAH',cat:'tdah'}],
                     behaviors:['Dificultats atencionals i de planificació','Fatiga ràpida','Necessita textos curts i estructurats'],
                     aids:['Fragmentar el text en blocs petits','Una idea per frase','Marques visuals','Instruccions numerades'] },
-    ex_l2:    { id:'ex_l2',    type:'person', name:'El Viatger', age:'12', course:'1r ESO', avatar:'Vi', cat:'cat', mesos_catalunya:2, l1:'àrab', demo:true,
+    ex_l2:    { id:'ex_l2',    type:'person', name:'El Viatger', age:'12', course:'1r ESO', avatar:'Vi', cat:'cat', demo:true,
                     chips:[{label:'Català L2',cat:'cat'},{label:'Pre-A1 · 2 mesos',cat:'lv'}],
                     behaviors:['Arribat fa 2 mesos','Vocabulari molt escàs en català','Bona motivació i escolarització prèvia'],
-                    aids:['Glossari amb traducció àrab','Pictogrames i suport visual','Frases SVO curtes','Vocabulari freqüent'] },
+                    aids:['Glossari amb traducció àrab','Pictogrames i suport visual','Frases SVO curtes','Vocabulari freqüent'],
+                    subvariables:{ nouvingut:{ l1:'Àrab', pais:'Marroc', mesos_range:'Menys de 6 mesos', alfabet_llati:false, alfabetitzacio_l1:true, escolaritzacio:'regular' } } },
     ex_tea:   { id:'ex_tea',   type:'person', name:"L'Astrònom", age:'10', course:'5è Primària', avatar:'As', cat:'tea', demo:true,
                     chips:[{label:'TEA',cat:'tea'}],
                     behaviors:['Necessita estructura clara i predictible','Sensible al llenguatge ambigu o metafòric','Fort en comprensió literal'],
@@ -957,7 +959,7 @@
                     behaviors:['Ritmes de lectura diversos','1 alumne amb TDAH necessita textos curts','1 alumne nouvingut amb vocabulari limitat'],
                     aids:['Glossari de termes clau','Fragmentar en blocs','Pictogrames de suport','Una idea per paràgraf'] },
     ex_eso:   { id:'ex_eso',   type:'group', name:'2n ESO C · Grup classe', age:null, course:'22 alumnes', avatar:'2C', cat:'group', demo:true,
-                    chips:[{label:'3 nivells MECR',cat:'lv'},{label:'2 L2',cat:'cat'},{label:'1 TEA',cat:'ac'}],
+                    chips:[{label:'3 nivells MECR',cat:'lv'},{label:'2 L2',cat:'cat'},{label:'1 TEA',cat:'tea'}],
                     behaviors:['3 nivells MECR: A1, B1 i B2','2 alumnes L2 recent incorporats','1 alumne TEA necessita estructura molt explícita'],
                     aids:['Estructura clara amb encapçalaments','Glossari multilingüe','Seqüències explícites','Evitar ambigüitats'] },
     ex_fp:    { id:'ex_fp',    type:'group', name:'GM Administració 1r · Com. empresarial', age:null, course:'15 alumnes', avatar:'GM', cat:'group', demo:true,
@@ -987,11 +989,15 @@
       // Desa el perfil complet (custom o demo). Els IDs de demos a pas1 (ex_tdah,
       // ex_l2…) no existeixen a ATNE_PROFILES de pas2/pas3, així que cal injectar
       // el perfil sencer al localStorage perquè pas2 el pugui recuperar.
+      // També escrivim a `atne.profile_active` (clau unificada) perquè Flash el
+      // pugui reaprofitar sense haver de tornar-lo a definir.
       const prof = window.ATNE_PROFILES[pid];
       if (prof) {
         localStorage.setItem('atne.custom_profile', JSON.stringify(prof));
+        if (window.ATNE_PROFILE_MODEL) window.ATNE_PROFILE_MODEL.saveActiveProfile(prof);
       } else {
         localStorage.removeItem('atne.custom_profile');
+        if (window.ATNE_PROFILE_MODEL) window.ATNE_PROFILE_MODEL.clearActiveProfile();
       }
       // Actualitza recents
       const recents = JSON.parse(localStorage.getItem('atne.recent_pids') || '[]').filter(x => x !== pid);
@@ -1952,46 +1958,68 @@
     const nameInp  = document.getElementById('p-nom');
     const cursSel  = document.getElementById('p-curs');
     const letraInp = document.getElementById('p-lletra');
-    const mecr     = document.querySelector('.mode[data-m="person"] .lvl.on .lv-code')?.textContent || 'B1';
+    const mecrManual = document.querySelector('.mode[data-m="person"] .lvl.on .lv-code')?.textContent || null;
     const name     = nameInp?.value.trim() || 'Perfil nou';
     const curs     = cursSel?.value.trim() || '';
     const letra    = (letraInp?.value || '').trim().toUpperCase();
     const course   = [curs, letra].filter(Boolean).join(' ');
 
-    // Conductes seleccionades
-    const behaviors = [];
+    // Conductes marcades: text llegible per a la card + identificadors data-beh
+    // per a la "via observable" (mapatge implícit conducta→condició).
+    const behaviorsManual = [];
+    const behaviorsObservedKeys = [];
     document.querySelectorAll('.mode[data-m="person"] .ck input:checked').forEach(cb => {
-      behaviors.push(cb.closest('label')?.querySelector('span')?.textContent.trim() || '');
+      behaviorsManual.push(cb.closest('label')?.querySelector('span')?.textContent.trim() || '');
+      const beh = cb.dataset.beh;
+      if (beh) behaviorsObservedKeys.push(beh);
     });
-
-    // Ajuts seleccionats
-    const aids = [];
+    const aidsManual = [];
     document.querySelectorAll('.mode[data-m="person"] .aid-row input:checked').forEach(cb => {
-      aids.push(cb.closest('label')?.querySelector('.aid-n')?.textContent.trim() || '');
+      aidsManual.push(cb.closest('label')?.querySelector('.aid-n')?.textContent.trim() || '');
     });
 
-    // Condicions/diagnòstics seleccionats
+    // Condicions seleccionades (claus llargues canòniques: tdah, dislexia, nouvingut...)
     const dxTags = [];
     document.querySelectorAll('.mode[data-m="person"] .tag.on').forEach(t => {
       dxTags.push(t.dataset.dx || t.textContent.trim());
     });
 
-    // cat principal (per color)
-    const catMap = {tdah:'tdah', dislexia:'disl', nouvingut:'cat', altes_capacitats:'ac', tea:'tea'};
-    const cat = catMap[dxTags[0]] || 'generic';
+    const subvariables = _collectPersonSubvariables();
 
-    // Chips
-    const chips = dxTags.slice(0,2).map(dx => ({label: DX_NAMES[dx] || dx.toUpperCase(), cat: catMap[dx] || 'generic'}));
-    chips.push({label: `${mecr} · MECR`, cat:'lv'});
+    // Construïm el perfil canònic com a font única. La via observable activa
+    // condicions implícites quan el docent ha marcat conductes mapejables.
+    const canonical = window.ATNE_PROFILE_MODEL.fromTallerForm({
+      type: 'person',
+      name,
+      course,
+      course_base: curs,
+      avatar: name[0]?.toUpperCase() || 'P',
+      conditions: dxTags,
+      subvariables,
+      behaviors: behaviorsManual.filter(Boolean),
+      behaviors_observed: behaviorsObservedKeys,
+      aids: aidsManual.filter(Boolean),
+    });
 
-    // ID únic
-    const pid = 'c_' + Date.now().toString(36);
+    // Override MECR manual si l'usuari l'ha tocat explícitament al formulari
+    // (no és el valor auto-derivat).
+    if (mecrManual) {
+      const auto = window.ATNE_PROFILE_MODEL.deriveMECR(canonical).auto;
+      if (mecrManual !== auto) canonical.mecr_override = mecrManual;
+    }
 
-    return {
-      id: pid, type: 'person', name, course, avatar: name[0]?.toUpperCase() || 'P',
-      cat, mecr, chips, behaviors: behaviors.filter(Boolean), aids: aids.filter(Boolean),
-      conditions: dxTags, subvariables: _collectPersonSubvariables(), custom: true
-    };
+    // Compatibilitat retroactiva: afegim camps que la UI antiga (cards de pas2/pas3,
+    // llistat de pas1, formulari d'edició) encara espera. La info canònica viu a
+    // `conditions` i és la que el backend rep via toBackendProfile().
+    const view = window.ATNE_PROFILE_MODEL.deriveCardView(canonical);
+    canonical.cat = view.cat;
+    canonical.mecr = view.mecr;
+    canonical.chips = view.chips;
+    canonical.behaviors = view.behaviors;
+    canonical.aids = view.aids;
+    canonical.subvariables = subvariables; // perquè l'editor de Pas 1 pugui repoblar el form
+
+    return canonical;
   }
 
   // ── Creació de perfil (grup) ──────────────────────────────────────────────

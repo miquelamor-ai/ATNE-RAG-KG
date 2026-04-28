@@ -23,6 +23,7 @@
 <link rel="stylesheet" href="/ui/styles/shell.css">
 <link rel="stylesheet" href="/ui/driver.css"/>
 <script src="/ui/driver.iife.js"></script>
+<script src="/ui/atne/js/profile-canonical.js"></script>
 <script src="/ui/atne/js/llm.js?v=20260419j" defer></script>
 
 <style>
@@ -1361,9 +1362,21 @@
     if (_cp) { const _p = JSON.parse(_cp); if (_p?.id) window.ATNE_PROFILES[_p.id] = _p; }
   } catch(e) {}
 
+  // Normalitza un perfil (demo legacy o custom) cap al model canònic preservant
+  // els camps de presentació (chips, behaviors, aids, cat, avatar). Així la UI
+  // existent continua funcionant però el backend rep `conditions` canòniques.
+  function _normalizeProfile(raw) {
+    if (!raw) return raw;
+    if (!window.ATNE_PROFILE_MODEL) return raw;
+    const canonical = window.ATNE_PROFILE_MODEL.normalizeLegacy(raw);
+    if (!canonical) return raw;
+    return Object.assign({}, canonical, raw, { conditions: canonical.conditions });
+  }
+
   // Perfil actiu (accessible des de tot el script: complements, adapt, etc.)
   const currentPid = localStorage.getItem('atne.profile_id') || 'marc';
-  const profile = window.ATNE_PROFILES[currentPid] || window.ATNE_PROFILES.marc;
+  const _rawProfile = window.ATNE_PROFILES[currentPid] || window.ATNE_PROFILES.marc;
+  const profile = _normalizeProfile(_rawProfile);
 
   // Chip "Per a qui" al topbar mòbil
   (function paintMobChip() {

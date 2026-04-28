@@ -24,6 +24,7 @@
 <link rel="stylesheet" href="/ui/styles/shell.css">
 <link rel="stylesheet" href="/ui/driver.css"/>
 <script src="/ui/driver.iife.js"></script>
+<script src="/ui/atne/js/profile-canonical.js"></script>
 <script src="/ui/atne/js/llm.js?v=20260419m" defer></script>
 <!-- html2pdf.js per exportar PDF client-side preservant tipografia + complements triats.
      CDN jsDelivr amb bundle (inclou html2canvas + jsPDF en un sol fitxer). -->
@@ -1395,6 +1396,20 @@
     }
   } catch(e) {}
 
+  // Normalitza un perfil (demo legacy o custom) cap al model canònic preservant
+  // els camps de presentació (chips, behaviors, aids, cat, avatar). Això és la
+  // font única de veritat per al backend (conditions canòniques amb subvariables).
+  function _normalizeProfile(raw) {
+    if (!raw) return raw;
+    if (!window.ATNE_PROFILE_MODEL) return raw;
+    const canonical = window.ATNE_PROFILE_MODEL.normalizeLegacy(raw);
+    if (!canonical) return raw;
+    return Object.assign({}, canonical, raw, { conditions: canonical.conditions });
+  }
+  function _getProfile(pid) {
+    return _normalizeProfile(window.ATNE_PROFILES[pid] || window.ATNE_PROFILES.marc);
+  }
+
   // ── Selector de tipografia (delegat a fonts.js) ──────────────────────────
   function applyDocFont(name) {
     const fonts = window.ATNE_FONTS || {};
@@ -1523,7 +1538,7 @@
 
   (function populateProfile() {
     const pid = localStorage.getItem('atne.profile_id') || 'marc';
-    const p = window.ATNE_PROFILES[pid] || window.ATNE_PROFILES.marc;
+    const p = _getProfile(pid);
 
     // Chip "Per a qui" al topbar mòbil
     const mpcAv = document.getElementById('mpc-av');
@@ -2798,7 +2813,7 @@
     _clearMock('#view-esquema .schema', 'Generant esquema…');
 
     const pid = localStorage.getItem('atne.profile_id') || 'marc';
-    const profile = window.ATNE_PROFILES[pid] || window.ATNE_PROFILES.marc;
+    const profile = _getProfile(pid);
     // Actualitza badge "Text adaptat per a X" amb el nom real del perfil
     const adaptedForEl = document.getElementById('adapted-for');
     if (adaptedForEl && profile && profile.name) adaptedForEl.textContent = profile.name;
@@ -3355,7 +3370,7 @@
       }
 
       const pid = localStorage.getItem('atne.profile_id') || 'marc';
-      const profile = window.ATNE_PROFILES?.[pid];
+      const profile = _getProfile(pid);
       const profile_name = profile?.name || 'adaptacio';
 
       // PDF: client-side amb html2pdf.js — preserva tipografia triada i complements actius.

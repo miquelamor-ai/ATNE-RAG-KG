@@ -23,7 +23,13 @@
     tdah: 'tdah',
     disl: 'dislexia',
     cat:  'nouvingut',
-    ac:   'altes_capacitats'
+    ac:   'altes_capacitats',
+    tea:  'tea',
+    di:   'di',
+    tdl:  'tdl',
+    au:   'discapacitat_auditiva',
+    vi:   'discapacitat_visual',
+    discalculia: 'discalculia'
   };
   // Mapeig complet data-dx → clau canònica del backend (instruction_filter)
   // Inclou claus curtes (legacy) i llargues (nou format) per a backward compat.
@@ -71,7 +77,7 @@
   /**
    * Converteix el profile simple del nostre front al format dict que espera
    * el backend a /api/adapt.
-   * @param {Object} p  Perfil de window.ATNE_PROFILES (marc/mireia/...).
+   * @param {Object} p  Perfil de window.ATNE_PROFILE_MODELS (marc/mireia/...).
    * @returns {Object}  Dict amb {nom, caracteristiques, canal_preferent, ...}
    */
   // Mapeig de subvariables del front (profile.subvariables) cap al format
@@ -176,14 +182,20 @@
   }
 
   function buildBackendProfile(p) {
+    // Camí canònic: si window.ATNE_PROFILE_MODEL està disponible, normalitzem el perfil
+    // (sigui demo, custom, legacy) i passem pel mapper únic. És la nova font de
+    // veritat — la lògica antiga (CAT_TO_CHAR / chips / _applySubvarsToBackendChars)
+    // queda com a fallback per si profile-canonical.js no s'ha carregat.
+    if (window.ATNE_PROFILE_MODEL && typeof window.ATNE_PROFILE_MODEL.normalizeLegacy === 'function') {
+      const canonical = window.ATNE_PROFILE_MODEL.normalizeLegacy(p);
+      if (canonical) return window.ATNE_PROFILE_MODEL.toBackendProfile(canonical);
+    }
+
+    // ── Fallback legacy (no s'hauria d'usar; només per resiliència) ──
     const caracteristiques = {};
-    // Totes les característiques inicialitzades a actiu=false (requisit backend)
     ALL_CHAR_KEYS.forEach(k => { caracteristiques[k] = { actiu: false }; });
-    // Activem la característica principal del perfil
     const mainChar = CAT_TO_CHAR[p.cat];
     if (mainChar) caracteristiques[mainChar] = { actiu: true };
-    // Perfils de grup: el 'cat' del perfil és 'group|group-ac|group-cat' i no casa
-    // amb CAT_TO_CHAR. Cal recórrer els chips i activar cada característica trobada.
     const isGroup = p.type === 'group' || (p.cat && p.cat.indexOf('group') === 0);
     if (isGroup && Array.isArray(p.chips)) {
       for (const chip of p.chips) {
@@ -191,7 +203,6 @@
         if (c) caracteristiques[c] = { actiu: true };
       }
     }
-    // Perfils custom (pas1): activa totes les condicions seleccionades (TDL, Discalcúlia, etc.)
     if (p.custom && Array.isArray(p.conditions)) {
       for (const dx of p.conditions) {
         const charKey = DX_TO_CHAR[dx] || dx;
@@ -200,17 +211,13 @@
         }
       }
     }
-    // Propaga subvariables al format backend (caracteristiques.{condicio}.{subvar}).
-    // Això és el que dispara instruccions fines al filtre (ex: G-01 bilingüisme
-    // amb L1 concret, H-20b LSC, A-21 alfabet no-llatí, etc.).
     _applySubvarsToBackendChars(p.subvariables, caracteristiques);
     return {
       nom: p.name,
       caracteristiques,
       canal_preferent: 'text',
       observacions: (p.behaviors || []).join(' · '),
-      _via: 'diagnostic',
-      // Flag informatiu (el backend l'ignora, útil per debugging al dashboard /admin)
+      _via: 'diagnostic-fallback',
       group: !!isGroup
     };
   }
@@ -232,7 +239,7 @@
    *
    * @param {Object} args
    * @param {string} args.text  Text original a adaptar.
-   * @param {Object} args.profile  Perfil del nostre model (window.ATNE_PROFILES[id]).
+   * @param {Object} args.profile  Perfil del nostre model (window.ATNE_PROFILE_MODELS[id]).
    * @param {Object} args.context  { materia, nivell_curs, titol }
    * @param {Object} [args.params]  { mecr_sortida: "B1", levels: ["single"], ... }
    * @param {Function} [args.onStep]  (ev) => void  Callback per events de progrés.

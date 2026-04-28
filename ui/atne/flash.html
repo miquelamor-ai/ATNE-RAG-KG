@@ -9,6 +9,7 @@
 <script src="/ui/atne/js/topbar.js"></script>
 <script src="/ui/atne/js/help-mode.js" defer></script>
 <script src="/ui/atne/js/pilot-tracker.js"></script>
+<script src="/ui/atne/js/profile-canonical.js"></script>
   <link rel="stylesheet" href="/ui/fonts/fonts.css">
 <link rel="stylesheet" href="/ui/styles/tokens.css">
 <link rel="stylesheet" href="/ui/styles/base.css">
@@ -1512,7 +1513,40 @@
     try { docentId = localStorage.getItem('atne.docent_id') || ''; } catch (e) { /* */ }
 
     var langVal = document.getElementById('lang-sel')?.value || 'ca';
-    lastPayload = { text: text, curs: curs, cursUI: cursUI, adaptacio: adaptacio, perfils: perfils, l1: l1, tipus: tipusActual, complements: Array.from(activeComps), docent_id: docentId, lang: langVal, caracteristica: caracteristica };
+
+    // Construeix el perfil canònic equivalent al formulari Flash. Això afegeix
+    // metadata (família lingüística, alfabet llatí, etc.) que el backend pot
+    // aprofitar tot i que la UI Flash sigui ràpida i minimalista.
+    var canonical = null, canonicalCarac = null;
+    try {
+      if (window.ATNE_PROFILE_MODEL) {
+        canonical = window.ATNE_PROFILE_MODEL.fromFlashForm({
+          cursUI: cursUI,
+          tipus: tipusActual,
+          caracteristica: caracteristica,
+          l1: l1,
+        });
+        canonicalCarac = window.ATNE_PROFILE_MODEL.toBackendProfile(canonical).caracteristiques;
+      }
+    } catch (e) { /* fallback al payload pla */ }
+
+    lastPayload = {
+      text: text, curs: curs, cursUI: cursUI, adaptacio: adaptacio,
+      perfils: perfils, l1: l1, tipus: tipusActual,
+      complements: Array.from(activeComps),
+      docent_id: docentId, lang: langVal, caracteristica: caracteristica,
+      // Camps nous (opcionals al backend): perfil canònic enriquit
+      caracteristiques: canonicalCarac,
+      profile_canonical: canonical,
+    };
+
+    // Persisteix el perfil canònic al magatzem unificat perquè un canvi a
+    // Taller després d'una sessió Flash en preservi el context.
+    try {
+      if (canonical && window.ATNE_PROFILE_MODEL) {
+        window.ATNE_PROFILE_MODEL.saveActiveProfile(canonical);
+      }
+    } catch (e) {}
     resultBadge.textContent = badge;
     glStatus.textContent = 'Generant…'; glStatus.className = 'comp-status';
     prStatus.textContent = 'Generant…'; prStatus.className = 'comp-status';
@@ -2014,6 +2048,14 @@
 
             if (p.l1 && l1Inp) l1Inp.value = p.l1;
 
+            // Persisteix el perfil seleccionat al magatzem unificat perquè
+            // pas1/pas2/pas3 el puguin recollir en canviar de mode.
+            try {
+              if (window.ATNE_PROFILE_MODEL) {
+                window.ATNE_PROFILE_MODEL.saveActiveProfile(p);
+              }
+            } catch (ex) {}
+
             // Transforma el botó per mostrar el perfil carregat (inline, amb ✕ per esborrar)
             var condLbl2 = '';
             if (p.tipus === 'alumne') {
@@ -2037,6 +2079,70 @@
     });
 
     document.addEventListener('click', function () { dd.classList.remove('show'); });
+  })();
+
+  // ── Preomplir Flash des del magatzem unificat (canvi de mode des de Taller) ─
+  // Si l'usuari ve de pas1/pas2/pas3 amb un perfil seleccionat, Flash l'agafa
+  // automàticament: tipus, curs, condició principal i L1. No bloqueja: si no
+  // hi ha res, el formulari es queda buit.
+  (function preFillFromActiveProfile() {
+    if (!window.ATNE_PROFILE_MODEL) return;
+    const active = window.ATNE_PROFILE_MODEL.loadActiveProfile();
+    if (!active) return;
+
+    // Tipus
+    const tipusFromActive = active.type === 'group' ? 'grup' : 'alumne';
+    tipusActual = tipusFromActive;
+    document.querySelectorAll('#tipus-steps .step').forEach(function (b) {
+      b.classList.toggle('on', b.dataset.tipus === tipusActual);
+    });
+    updateTipusUI();
+
+    // Curs: primer prova course_base, després course raonable
+    const cursCandidates = [
+      active.course_base,
+      active.course && String(active.course).replace(/\s+[A-Z]{1,2}$/, '').trim(),
+      active.course,
+    ].filter(Boolean);
+    for (const cand of cursCandidates) {
+      if (cursSel) {
+        cursSel.value = cand;
+        if (cursSel.value === cand) break;
+      }
+    }
+
+    const conds = active.conditions || [];
+    if (tipusActual === 'alumne') {
+      // Primera condició → carSel
+      const firstCond = conds[0];
+      if (firstCond && carSel) {
+        const carValue = firstCond.key in {dislexia:1,tdah:1,tea:1,nouvingut:1,altes_capacitats:1,di:1,vulnerabilitat:1}
+          ? firstCond.key : '';
+        if (carValue) {
+          carSel.value = carValue;
+          if (carValue === 'nouvingut') {
+            l1Group.classList.add('show');
+            if (firstCond.l1 && l1Inp) l1Inp.value = firstCond.l1;
+          }
+        }
+      }
+    } else if (tipusActual === 'grup') {
+      // Si conté altes_capacitats → repte; vulnerabilitat → suport
+      if (conds.some(c => c.key === 'altes_capacitats')) {
+        if (carGrupSel) carGrupSel.value = 'repte';
+      } else if (conds.some(c => c.key === 'vulnerabilitat')) {
+        if (carGrupSel) carGrupSel.value = 'suport';
+      }
+    }
+
+    // Indica visualment que el perfil ve del Taller (canvia el botó)
+    const btn = document.getElementById('btn-load-profile');
+    if (btn && active.name) {
+      btn.innerHTML = '<span class="lpf-name-inline">' + active.name + ' (del Taller)</span>' +
+        '<span class="lpf-x" data-clear="1">✕</span>';
+      btn.classList.add('has-profile');
+      btn.title = 'Perfil heretat del Taller · clic per canviar · ✕ per netejar';
+    }
   })();
 
   // ── Handoff Flash → Taller: porta el text original al Pas 2 ─────────────────
