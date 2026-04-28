@@ -46,9 +46,31 @@ def _check_subvar_conditions(instr: dict, profile_data: dict, mecr: str, chars: 
 
     for key, expected in conditions.items():
         if key == "alfabet_llati":
-            actual = profile_data.get("alfabet_llati", True)
+            # Si alfabet_llati no està declarat (None/absent) i la instrucció demana
+            # un valor concret, NO l'activem silenciosament: ho deixem desconegut.
+            # En aquest cas, mirem si la L1 ens permet inferir l'alfabet.
+            actual = profile_data.get("alfabet_llati")
             if isinstance(actual, str):
                 actual = actual.lower() not in ("no", "false", "0")
+            if actual is None:
+                # Inferim de la L1: si la L1 és coneguda i no usa alfabet llatí,
+                # considerem alfabet_llati=False (per activar G-03 transliteració).
+                _NON_LATIN = {
+                    "àrab", "arab", "xinès", "xines", "xinès mandarí", "xinès cantonès",
+                    "japonès", "japones", "coreà", "corea", "hebreu", "hindi", "bengalí",
+                    "bengali", "rus", "búlgar", "bulgar", "ucraïnès", "ucraines",
+                    "tàmil", "tamil", "telugu", "tailandès", "tailandes", "khmer",
+                    "tigrinya", "pastu", "persa", "persa (farsi / dari)", "urdú", "urdu",
+                    "marathi", "nepalí", "nepali", "panjabi", "gujarati", "singalès",
+                    "singales", "grec", "birmà", "birma",
+                }
+                l1 = str(profile_data.get("l1") or profile_data.get("L1") or "").lower().strip()
+                if l1 and l1 in _NON_LATIN:
+                    actual = False
+                else:
+                    # Desconegut: no decidim. Si l'instrucció demana False, no l'activem
+                    # (mantenir comportament conservador); si demana True, tampoc.
+                    return False
             if actual != expected:
                 return False
 

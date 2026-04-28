@@ -3930,11 +3930,26 @@ def _build_flash_system_prompt(
     l1: str = "",
     complements: list[str] | None = None,
     lang: str = "ca",
+    caracteristiques: dict | None = None,
 ) -> str:
+    """Prompt simplificat del mode Flash.
+
+    Pot rebre opcionalment `caracteristiques` (estructura canònica del frontend
+    nou). Quan està disponible, enriqueix puntualment el glossari amb
+    transliteració quan l'alumne nouvingut no usa alfabet llatí. Manté el
+    caràcter concís de Flash — no és el lloc per a tot el catàleg.
+    """
     from adaptation.lang_config import get_lang_label
     if complements is None:
         complements = ["glossari", "preguntes"]
     lang_label = get_lang_label(lang)
+
+    # Extreu info canònica de nouvingut (si arriba)
+    nouv = (caracteristiques or {}).get("nouvingut") or {}
+    alfabet_llati = nouv.get("alfabet_llati")
+    l1_canonical = nouv.get("l1") or l1
+    if isinstance(alfabet_llati, str):
+        alfabet_llati = alfabet_llati.lower() not in ("no", "false", "0")
     p = (
         f"Ets un assistent pedagògic especialitzat en adaptació de textos educatius.\n"
         f"Adapta el text que t'enviaré EN {lang_label.upper()}.\n"
@@ -3951,10 +3966,16 @@ def _build_flash_system_prompt(
                 p += f"- {_FLASH_PERFIL_MAP[pf]}\n"
     comp_lines = []
     if "glossari" in complements:
-        if "nouvingut" in perfils and l1:
+        if "nouvingut" in perfils and l1_canonical:
+            extra_alfabet = ""
+            if alfabet_llati is False:
+                extra_alfabet = (
+                    f" La L1 ({l1_canonical}) NO usa alfabet llatí: afegeix també "
+                    "transliteració fonètica del terme català al costat de la traducció."
+                )
             comp_lines.append(
-                f"- GLOSSARI: taula markdown 3 columnes | Terme | Traducció ({l1}, alfabet original) | Explicació (màx. 8 paraules en {lang_label}) |. "
-                f"6-10 termes: prioritza termes curriculars del text, paraules ambigues pel nivell i col·locacions clau."
+                f"- GLOSSARI: taula markdown 3 columnes | Terme | Traducció ({l1_canonical}, alfabet original) | Explicació (màx. 8 paraules en {lang_label}) |. "
+                f"6-10 termes: prioritza termes curriculars del text, paraules ambigues pel nivell i col·locacions clau.{extra_alfabet}"
             )
         else:
             comp_lines.append(
@@ -4051,13 +4072,17 @@ async def adapt_flash(payload: dict = Body(...)):
     complements = payload.get("complements") or ["glossari", "preguntes"]
     docent_id   = (payload.get("docent_id") or "").strip()
     lang        = (payload.get("lang") or "ca").strip()
+    # Camp opcional: estructura canònica enriquida (subvariables per condició).
+    # El frontend nou (profile-canonical.js) la inclou automàticament; els clients
+    # antics no la passen i el comportament queda com abans.
+    caracteristiques = payload.get("caracteristiques") or None
 
     if not text:
         return JSONResponse({"error": "El text és buit."}, status_code=400)
 
     nivell        = _FLASH_CURS_MECR.get((curs, adaptacio), "B1")
     model_id      = _model_for("adapt_flash")
-    system_prompt = _build_flash_system_prompt(nivell, perfils, l1, complements, lang=lang)
+    system_prompt = _build_flash_system_prompt(nivell, perfils, l1, complements, lang=lang, caracteristiques=caracteristiques)
     t0 = __import__("time").time()
 
     async def gen():
