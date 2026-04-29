@@ -137,6 +137,14 @@
   .cmp-chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
   .cmp-chip.active svg{color:#fff}
 
+  /* Xip "Per al docent" — capa meta-pedagògica, separada visualment dels complements d'alumne */
+  .cmp-chip.docent{background:linear-gradient(180deg,#fbf3e0 0%,#f5e8c8 100%);border-color:#d9bf80;color:#7a5a16;font-weight:600}
+  .cmp-chip.docent svg{color:#a07a26}
+  .cmp-chip.docent:hover{background:linear-gradient(180deg,#fdf6e6 0%,#f8edd1 100%);border-color:#c8a957}
+  .cmp-chip.docent.active{background:#7a5a16;color:#fff;border-color:#7a5a16}
+  .cmp-chip.docent.active svg{color:#fff}
+  .cmp-chip.docent .dot-ok{background:#a07a26}
+
   .cmp-add{color:var(--ink-500);background:transparent;border:1px dashed var(--ink-300);padding:5px 10px;border-radius:var(--r-pill);font-size:11.5px;font-weight:500;display:flex;align-items:center;gap:4px;cursor:pointer}
   .cmp-add:hover{color:var(--primary);border-color:var(--primary)}
   .cmp-add svg{width:12px;height:12px}
@@ -452,6 +460,55 @@
   /* Xip de complement desactivat a la fila superior: dot gris */
   .cmp-chip.off .dot-ok, .cmp-chip.off .dot-pending{background:var(--ink-400) !important}
   .cmp-chip.off{opacity:.6}
+
+  /* ──────────────────────────────────────────────────────────────────
+     Capa "Per al docent": argumentació pedagògica + auditoria de canvis.
+     Estil propi (cream gold) per marcar que NO és contingut d'alumne
+     sinó la traçabilitat pedagògica que distingeix ATNE d'un xatbot genèric.
+     ──────────────────────────────────────────────────────────────────*/
+  .docent-intro{font-family:var(--serif);font-size:var(--fs-md);line-height:1.55;color:var(--ink-700);margin:0 0 22px;padding:14px 18px;background:linear-gradient(180deg,#fbf3e0 0%,#f8edd1 100%);border-left:3px solid #c8a957;border-radius:8px}
+  .docent-intro strong{color:#7a5a16;font-weight:700}
+  .docent-section-title{font-family:var(--serif);font-size:var(--fs-lg);font-weight:700;color:var(--ink-900);margin:26px 0 12px;display:flex;align-items:center;gap:8px}
+  .docent-section-title::before{content:'';width:18px;height:1px;background:#c8a957}
+  .docent-section-title svg{width:18px;height:18px;color:#a07a26}
+
+  .argum-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:0 0 8px}
+  @media(max-width:880px){.argum-grid{grid-template-columns:1fr}}
+  .argum-card{background:#fff;border:1px solid var(--paper-line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;box-shadow:0 1px 3px rgba(16,24,40,.04);transition:box-shadow .15s,border-color .15s}
+  .argum-card:hover{border-color:#d9bf80;box-shadow:0 4px 12px -4px rgba(122,90,22,.15)}
+  .argum-card-head{display:flex;align-items:center;gap:10px}
+  .argum-card-ic{width:32px;height:32px;border-radius:8px;background:#fbf3e0;color:#7a5a16;display:grid;place-items:center;flex-shrink:0}
+  .argum-card-ic svg{width:16px;height:16px}
+  .argum-card-title{font-family:var(--serif);font-size:var(--fs-base);font-weight:700;color:var(--ink-900);line-height:1.25;flex:1;min-width:0}
+  .argum-card-body{font-size:var(--fs-md);line-height:1.55;color:var(--ink-700);margin:2px 0 0}
+  .argum-card-body p{margin:0}
+  .argum-card-body p + p{margin-top:6px}
+  .argum-card-body strong{color:var(--ink-900)}
+  /* Etiqueta del mòdul del corpus FJE (M0–M9) — la traçabilitat que distingeix
+     ATNE: cada decisió pedagògica enllaça al mòdul que la fonamenta. */
+  .argum-mod{margin-top:10px;display:inline-flex;align-items:center;gap:6px;padding:3px 9px 3px 7px;border-radius:var(--r-pill);background:#fbf3e0;border:1px solid #d9bf80;color:#7a5a16;font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.04em;text-decoration:none;align-self:flex-start;transition:.15s}
+  .argum-mod:hover{background:#f5e8c8;border-color:#c8a957;color:#5c4310}
+  .argum-mod .mod-code{padding:1px 5px;background:#7a5a16;color:#fbf3e0;border-radius:4px;font-size:9.5px;letter-spacing:.06em}
+  .argum-mod svg{width:10px;height:10px;color:#a07a26}
+
+  .audit-table-wrap{margin:8px 0 4px;background:#fff;border:1px solid var(--paper-line);border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(16,24,40,.04)}
+  .audit-table{width:100%;border-collapse:collapse;font-size:var(--fs-md)}
+  .audit-table thead th{background:#fbf3e0;color:#7a5a16;font-family:var(--serif);font-size:var(--fs-sm);font-weight:700;text-align:left;padding:10px 14px;border-bottom:1px solid #d9bf80;text-transform:uppercase;letter-spacing:.04em}
+  .audit-table tbody td{padding:11px 14px;border-bottom:1px solid var(--paper-line);vertical-align:top;line-height:1.45;color:var(--ink-700)}
+  .audit-table tbody tr:nth-child(even) td{background:#fbf9f3}
+  .audit-table tbody tr:last-child td{border-bottom:0}
+  .audit-table td:first-child{font-family:var(--serif);font-weight:600;color:var(--ink-900);width:22%}
+  .audit-table td:last-child{color:var(--ink-600);font-style:italic}
+  @media(max-width:720px){
+    .audit-table thead{display:none}
+    .audit-table, .audit-table tbody, .audit-table tr, .audit-table td{display:block;width:100%}
+    .audit-table tbody tr{border-bottom:1px solid var(--paper-line);padding:8px 0}
+    .audit-table tbody tr:last-child{border-bottom:0}
+    .audit-table tbody td{padding:4px 14px;border:0;background:transparent !important}
+    .audit-table tbody td::before{content:attr(data-label) " · ";color:#a07a26;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-right:4px}
+    .audit-table td:first-child{width:auto}
+  }
+  .audit-empty{padding:14px 16px;color:var(--ink-500);font-style:italic;font-size:var(--fs-md)}
 
   /* Regenerating overlay */
   .regen{position:absolute;inset:0;background:rgba(244,241,232,.85);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:15;flex-direction:column;gap:14px}
@@ -811,6 +868,7 @@
               <button class="cmp-chip" data-comp="glossari"><span class="dot-ok"></span>Glossari <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h12a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M4 14a4 4 0 0 1 4-4h12"/></svg></button>
               <button class="cmp-chip" data-comp="esquema"><span class="dot-ok"></span>Esquema <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 17h7"/></svg></button>
               <button class="cmp-chip" data-comp="preguntes"><span class="dot-pending"></span>Preguntes <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1 .9-1 1.7M12 17h.01"/></svg></button>
+              <button class="cmp-chip docent" data-comp="docent" data-help="p3-chip-docent" hidden><span class="dot-ok"></span>Per al docent <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></button>
               <button class="cmp-add" data-help="p3-chip-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Afegir</button>
             </div>
             <div style="margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
@@ -1066,26 +1124,41 @@
             </div>
           </div>
 
-          <!-- Meta info per al docent: argumentació pedagògica + notes d'auditoria.
-               Sempre es generen al prompt (server.py:1718,1727). Abans es perdien
-               perquè parseAdaptedSections les captava però applyComplementsToViews
-               no les renderitzava. -->
-          <details id="view-meta-docent" class="meta-docent" hidden style="margin-top:24px;background:var(--cream-2);border:1px solid var(--paper-line);border-radius:var(--r-lg);padding:12px 16px">
-            <summary style="cursor:pointer;font-family:var(--serif);font-size:15px;font-weight:600;color:var(--primary);padding:4px 0">
-              Informació per al docent
-              <span style="color:var(--ink-500);font-weight:400;font-size:var(--fs-sm);margin-left:6px">(argumentació pedagògica + canvis realitzats)</span>
-            </summary>
-            <div style="margin-top:14px;display:grid;grid-template-columns:1fr;gap:18px">
-              <div id="meta-argumentacio-wrap" hidden>
-                <div style="font-family:var(--serif);font-weight:700;font-size:var(--fs-base);color:var(--ink-800);margin-bottom:6px">Argumentació pedagògica</div>
-                <div id="meta-argumentacio" style="font-size:var(--fs-md);line-height:1.55;color:var(--ink-700)"></div>
+          <!-- ─────────────────────────────────────────────────────────
+               Capa "Per al docent": argumentació pedagògica + auditoria
+               dels canvis. És la traçabilitat que distingeix ATNE d'un
+               xatbot genèric: tot canvi té motiu pedagògic explicat.
+               Vista activable des del xip ".cmp-chip.docent" del chip-bar.
+               ────────────────────────────────────────────────────────── -->
+          <div class="comp-view" id="view-docent" hidden>
+            <div class="comp-card">
+              <div class="comp-head">
+                <div class="comp-ic" style="background:#fbf3e0;color:#7a5a16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+                <div>
+                  <div class="comp-title">Per al docent</div>
+                  <div class="comp-sub">Argumentació pedagògica · auditoria dels canvis</div>
+                </div>
+                <button class="comp-back" onclick="setView('single')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 19 8 12l7-7"/></svg>Tornar al text</button>
               </div>
-              <div id="meta-auditoria-wrap" hidden>
-                <div style="font-family:var(--serif);font-weight:700;font-size:var(--fs-base);color:var(--ink-800);margin-bottom:6px">Notes d'auditoria</div>
-                <div id="meta-auditoria" style="font-size:var(--fs-md);line-height:1.55;color:var(--ink-700)"></div>
+
+              <p class="docent-intro">
+                Aquesta pàgina mostra <strong>per què</strong> s'ha adaptat així i <strong>què</strong> s'ha canviat respecte de l'original. És el rastre pedagògic que pots compartir amb el teu equip o usar per justificar les decisions a una avaluació, una reunió de DOP o una memòria de centre.
+              </p>
+
+              <div class="docent-section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6M12 16v6M2 12h6M16 12h6"/><circle cx="12" cy="12" r="4"/></svg>
+                Argumentació pedagògica
               </div>
+              <div id="argum-grid" class="argum-grid"></div>
+              <div id="argum-fallback" hidden></div>
+
+              <div class="docent-section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg>
+                Auditoria dels canvis
+              </div>
+              <div id="audit-render"></div>
             </div>
-          </details>
+          </div>
 
         </div>
 
@@ -1638,6 +1711,7 @@
     glossari: document.getElementById('view-glossari'),
     esquema: document.getElementById('view-esquema'),
     preguntes: document.getElementById('view-preguntes'),
+    docent: document.getElementById('view-docent'),
   };
   const cmpToggle = document.getElementById('cmp-toggle');
   const cmpChips = document.querySelectorAll('.cmp-chip');
@@ -2592,22 +2666,171 @@
       updateChipDot(meta.chip, 'ok');
     });
 
-    // Meta-informació per al docent: argumentació pedagògica + notes
-    // d'auditoria. El prompt SEMPRE demana aquestes seccions (server.py:1718,
-    // 1727); les mostrem plegades al peu del Pas 3 si el LLM les ha generat.
-    const metaWrap = document.getElementById('view-meta-docent');
-    let anyMeta = false;
+    // Capa "Per al docent": argumentació pedagògica + auditoria dels canvis.
+    // El prompt SEMPRE demana aquestes seccions (prompt_builder.py:608); aquí
+    // les renderitzem en una vista pròpia accessible des del xip ".docent".
+    let anyDocent = false;
     if (complements.argumentacio) {
-      const wrap = document.getElementById('meta-argumentacio-wrap');
-      const cont = document.getElementById('meta-argumentacio');
-      if (wrap && cont) { cont.innerHTML = md2html(complements.argumentacio); wrap.hidden = false; anyMeta = true; }
+      renderArgumentacio(complements.argumentacio);
+      anyDocent = true;
     }
     if (complements.auditoria) {
-      const wrap = document.getElementById('meta-auditoria-wrap');
-      const cont = document.getElementById('meta-auditoria');
-      if (wrap && cont) { cont.innerHTML = md2html(complements.auditoria); wrap.hidden = false; anyMeta = true; }
+      renderAuditoria(complements.auditoria);
+      anyDocent = true;
     }
-    if (metaWrap) metaWrap.hidden = !anyMeta;
+    const docentChip = document.querySelector('.cmp-chip[data-comp="docent"]');
+    if (docentChip) docentChip.hidden = !anyDocent;
+  }
+
+  // Parseja l'argumentació pedagògica (5 eixos imposats pel prompt) en cards.
+  // Format esperat: numbered list `1. **Eix**: contingut...` o `### Eix\ncontingut`.
+  // Si la heurística falla, fallback a md2html dins una sola card.
+  function renderArgumentacio(md) {
+    const grid = document.getElementById('argum-grid');
+    const fb = document.getElementById('argum-fallback');
+    if (!grid || !fb) return;
+    const md2html = window.ATNE_LLM?.markdownToHtml;
+    grid.innerHTML = ''; fb.innerHTML = ''; fb.hidden = true;
+
+    // Mapa de títols cap a (icona SVG, accent color). Reconeix variants de
+    // l'LLM (lingüística/llenguatge, diversitat/inclusió, etc.) per match parcial.
+    const dimMap = [
+      { key:'lingüística|llenguatge|lingüístic', label:'Adaptació lingüística',
+        icon:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+        mod:'M3', modName:'Llengua', anchor:'mecr' },
+      { key:'diversitat|inclusió|inclusio|necessitats|nese|nouvingut|dislex|tdah|tea',
+        label:'Atenció a la diversitat',
+        icon:'<circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.87"/>',
+        mod:'M1', modName:'Subjecte', anchor:'diversitat' },
+      { key:'multimodal|visual|suport|canal',
+        label:'Suport multimodal',
+        icon:'<circle cx="12" cy="12" r="3"/><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/>',
+        mod:'M5', modName:'Tecnopedagogia', anchor:'ajuts' },
+      { key:'gradació|gradacio|cognitiv|progressió|progressio',
+        label:'Gradació cognitiva',
+        icon:'<path d="M3 20h4v-6H3zM10 20h4V10h-4zM17 20h4V4h-4z"/>',
+        mod:'M2', modName:'Mètode', anchor:'mites' },
+      { key:'rigor|curricular|contingut|matèria',
+        label:'Rigor curricular',
+        icon:'<path d="M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6z"/>',
+        mod:'M4', modName:'Contingut curricular', anchor:'mites' },
+    ];
+
+    // Talla l'argumentació en blocs: per numerat (1. ... 2. ...), per ###, o per **Title**:
+    const blocks = [];
+    // Estratègia A: numerat al principi de línia
+    const reNum = /^\s*(\d+)\.\s+(?:\*\*([^*]+?)\*\*\s*:?\s*)?(.+)$/;
+    // Estratègia B: ### Títol
+    const reH3 = /^\s*###\s+(.+)$/;
+    // Estratègia C: **Títol**: contingut (a la mateixa línia, sense numerar)
+    const reBold = /^\s*\*\*([^*]+?)\*\*\s*:\s*(.+)$/;
+
+    const lines = String(md).split('\n');
+    let cur = null;
+    const pushCur = () => { if (cur && (cur.title || cur.body.length)) blocks.push(cur); cur = null; };
+    for (const raw of lines) {
+      const line = raw.replace(/\s+$/, '');
+      if (!line.trim()) { if (cur) cur.body.push(''); continue; }
+      const mNum = line.match(reNum);
+      const mH3 = line.match(reH3);
+      const mBold = line.match(reBold);
+      if (mNum) {
+        pushCur();
+        cur = { title: mNum[2] || '', body: [mNum[3] || ''] };
+      } else if (mH3) {
+        pushCur();
+        cur = { title: mH3[1], body: [] };
+      } else if (mBold && !cur) {
+        pushCur();
+        cur = { title: mBold[1], body: [mBold[2]] };
+      } else {
+        if (!cur) cur = { title: '', body: [] };
+        cur.body.push(line);
+      }
+    }
+    pushCur();
+
+    // Si no hem detectat blocs, fallback markdown directe
+    if (!blocks.length || (blocks.length === 1 && !blocks[0].title)) {
+      grid.style.display = 'none';
+      fb.hidden = false;
+      fb.innerHTML = md2html ? md2html(md) : escapeHtml(md);
+      return;
+    }
+    grid.style.display = '';
+
+    // Per cada bloc, busca el dimMap que casi (o cau a generic)
+    const used = new Set();
+    blocks.forEach(b => {
+      const tLow = (b.title || '').toLowerCase();
+      let found = null;
+      for (const d of dimMap) {
+        if (used.has(d.label)) continue;
+        if (new RegExp(d.key, 'i').test(tLow)) { found = d; used.add(d.label); break; }
+      }
+      const card = document.createElement('div');
+      card.className = 'argum-card';
+      const titleHtml = escapeHtml(b.title || (found ? found.label : 'Decisió pedagògica'));
+      const bodyMd = b.body.join('\n').trim();
+      const bodyHtml = bodyMd ? (md2html ? md2html(bodyMd) : '<p>' + escapeHtml(bodyMd) + '</p>') : '';
+      const iconSvg = found
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' + found.icon + '</svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6z"/></svg>';
+      const modHtml = found
+        ? '<a class="argum-mod" href="/ui/saber-ne.html#' + found.anchor + '" target="_blank" rel="noopener" ' +
+          'title="Aquesta decisió es fonamenta al mòdul ' + found.mod + ' del corpus FJE — ' + found.modName + '. Obre Saber-ne+ en una pestanya nova.">' +
+          '<span class="mod-code">' + found.mod + '</span>' + escapeHtml(found.modName) +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M9 7h8v8"/></svg>' +
+          '</a>'
+        : '';
+      card.innerHTML =
+        '<div class="argum-card-head">' +
+          '<div class="argum-card-ic">' + iconSvg + '</div>' +
+          '<div class="argum-card-title">' + titleHtml + '</div>' +
+        '</div>' +
+        '<div class="argum-card-body">' + bodyHtml + '</div>' +
+        modHtml;
+      grid.appendChild(card);
+    });
+  }
+
+  // Parseja el markdown table de l'auditoria (| Aspecte | Original | Adaptat | Motiu |)
+  // i el converteix en un <table> estilat. Si no detecta taula, fallback md.
+  function renderAuditoria(md) {
+    const cont = document.getElementById('audit-render');
+    if (!cont) return;
+    const md2html = window.ATNE_LLM?.markdownToHtml;
+    const lines = String(md).split('\n').map(l => l.trim()).filter(Boolean);
+    // Una fila de taula md: comença i acaba amb |
+    const tableLines = lines.filter(l => /^\|.*\|$/.test(l));
+    if (tableLines.length < 2) {
+      cont.innerHTML = '<div class="audit-empty">' + (md2html ? md2html(md) : escapeHtml(md)) + '</div>';
+      return;
+    }
+    // Treu separador (| --- | --- |)
+    const rows = tableLines
+      .filter(l => !/^\|\s*:?-{2,}/.test(l.split('|').slice(1, -1).join('|') || l))
+      .map(l => l.replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim()));
+    if (rows.length < 2) {
+      cont.innerHTML = '<div class="audit-empty">' + (md2html ? md2html(md) : escapeHtml(md)) + '</div>';
+      return;
+    }
+    const headers = rows[0];
+    const body = rows.slice(1);
+    const inline = s => escapeHtml(s).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    let html = '<div class="audit-table-wrap"><table class="audit-table"><thead><tr>';
+    headers.forEach(h => { html += '<th>' + escapeHtml(h) + '</th>'; });
+    html += '</tr></thead><tbody>';
+    body.forEach(r => {
+      html += '<tr>';
+      r.forEach((c, i) => {
+        const lbl = headers[i] || '';
+        html += '<td data-label="' + escapeHtml(lbl) + '">' + inline(c) + '</td>';
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+    cont.innerHTML = html;
   }
   function updateChipDot(comp, state) {
     const chip = document.querySelector('.cmp-chip[data-comp="' + comp + '"]');
