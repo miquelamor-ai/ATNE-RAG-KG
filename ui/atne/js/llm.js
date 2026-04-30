@@ -901,16 +901,18 @@
     if (!adapted || !adapted.trim()) throw new Error('No hi ha text per exportar');
     if (!['pdf', 'docx', 'txt'].includes(format)) throw new Error('Format no suportat: ' + format);
 
-    // Pilot 1C: bloquejar amb modal de feedback abans d'exportar.
-    // Si ja s'ha mostrat aquesta sessió, el modal no es torna a obrir.
-    if (window.ATNE_TRACK && window.ATNE_TRACK.requireFeedback) {
-      await new Promise(function (resolve) {
-        window.ATNE_TRACK.requireFeedback({
-          reason: 'export_' + format,
-          onDone: function () { resolve(); },
-        });
-      });
-    }
+    // Pilot 1C → 1D (2026-04-23): treiem el gate de feedback abans d'exportar.
+    // El docent NO ha vist com queda el DOCX/TXT exportat, així que demanar
+    // valoració abans és incoherent (UX feedback Miquel). El feedback es
+    // recull ara via la pill inline persistent al Pas 3 (showInlineFeedback)
+    // que sí que veu el docent quan ja ha pogut llegir el resultat.
+
+    // Nudge subtil a la pill inline després de la 1a acció d'export (one-shot)
+    try {
+      if (window.ATNE_TRACK && window.ATNE_TRACK.nudgeInlineFeedback) {
+        window.ATNE_TRACK.nudgeInlineFeedback();
+      }
+    } catch (_) { /* */ }
 
     try {
       if (window.ATNE_TRACK) {

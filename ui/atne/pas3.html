@@ -3351,6 +3351,15 @@
         // Distribueix els complements a les seves vistes
         applyComplementsToViews(parsed.complements);
 
+        // Sprint 1D: pill de feedback inline visible un cop l'adaptació està
+        // a la vista (substitueix el modal bloquejant a l'export del 1C).
+        try {
+          if (window.ATNE_TRACK && window.ATNE_TRACK.showInlineFeedback) {
+            window.ATNE_TRACK.resetFeedbackGate();
+            window.ATNE_TRACK.showInlineFeedback();
+          }
+        } catch (_) { /* */ }
+
         // Bug 1: desem l'innerHTML SENSE els .para-handle per no serialitzar
         // botons amb listeners morts.
         localStorage.setItem('atne.adapted_text', adaptedInnerHtmlClean());
@@ -3410,6 +3419,13 @@
     }
     localStorage.setItem('atne.adapted_raw', rawAdapted || '');
     if (typeof updateDocMeta === 'function') updateDocMeta();
+    // Sprint 1D: també aquí (canvi de versió cached) mostrem la pill de feedback
+    try {
+      if (window.ATNE_TRACK && window.ATNE_TRACK.showInlineFeedback) {
+        window.ATNE_TRACK.resetFeedbackGate();
+        window.ATNE_TRACK.showInlineFeedback();
+      }
+    } catch (_) { /* */ }
   };
 
   // Genera totes les versions d'un grup multinivell en paral·lel.
@@ -3678,6 +3694,9 @@
       // Imprimir: window.print() — no necessita backend
       if (fmt === 'print') {
         window.print();
+        // Sprint 1D: nudge subtil a la pill de feedback (un cop el docent ha
+        // pogut llegir el resultat al print preview, és el moment ideal).
+        try { window.ATNE_TRACK?.nudgeInlineFeedback?.(); } catch (_) {}
         return;
       }
 
@@ -3726,6 +3745,8 @@
           window.atneToast?.('Copiat al porta-papers' + (n ? ' (amb ' + n + ' complement' + (n===1?'':'s') + ')' : ''), 'success');
           if (window.ATNE_TRACK) {
             window.ATNE_TRACK.event('copied', { chars: full.length, n_complements: n, source: 'export_menu' });
+            // Sprint 1D: nudge a la pill — el docent acaba de "consumir" l'adaptació
+            try { window.ATNE_TRACK.nudgeInlineFeedback?.(); } catch (_) {}
           }
         } catch (err) {
           window.atneToast?.('No s\'ha pogut copiar: ' + err.message, 'error');

@@ -243,7 +243,219 @@
 
   // Permet rearmar el modal per a una nova adaptació (la pas3.html ho farà
   // quan es genera una versió nova).
-  function resetFeedbackGate() { _modalShown = false; _selectedStar = null; }
+  function resetFeedbackGate() {
+    _modalShown = false;
+    _selectedStar = null;
+    _resetInline();  // Sprint 1D: també rearma la pill inline
+  }
+
+  // ── Inline feedback widget (Sprint 1D, 2026-04-23) ─────────────────────
+  //
+  // Pill persistent al Pas 3. Substitueix el modal bloquejant a l'export.
+  // Filosofia: el docent valora QUAN vol (no quan el sistema l'interromp),
+  // i només DESPRÉS d'haver vist com queda l'adaptació.
+  // Sempre visible, mai bloqueja, no apareix repetidament un cop valorat.
+
+  var _INLINE_HTML = [
+    '<div id="atne-fb-pill" class="atne-fb-pill" role="region" aria-label="Valoració de l\'adaptació">',
+    '  <button type="button" class="atne-fb-pill-collapsed" id="atne-fb-pill-btn" aria-expanded="false">',
+    '    <span class="atne-fb-pill-icon" aria-hidden="true">',
+    '      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">',
+    '        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+    '      </svg>',
+    '    </span>',
+    '    <span class="atne-fb-pill-label">Valora aquesta adaptació</span>',
+    '  </button>',
+    '  <div class="atne-fb-pill-panel" hidden>',
+    '    <div class="atne-fb-pill-head">',
+    '      <strong>Com t\'ha quedat?</strong>',
+    '      <button type="button" class="atne-fb-pill-close" aria-label="Tancar">×</button>',
+    '    </div>',
+    '    <div class="atne-fb-pill-stars">',
+    '      <button type="button" class="atne-fb-istar" data-star="1" aria-label="1 estrella">★ 1</button>',
+    '      <button type="button" class="atne-fb-istar" data-star="2" aria-label="2 estrelles">★ 2</button>',
+    '      <button type="button" class="atne-fb-istar" data-star="3" aria-label="3 estrelles">★ 3</button>',
+    '    </div>',
+    '    <div class="atne-fb-pill-checks">',
+    '      <label><input type="checkbox" data-fb="usar_classe"> L\'usaré tal qual</label>',
+    '      <label><input type="checkbox" data-fb="retocar"> L\'hauré de retocar</label>',
+    '      <label><input type="checkbox" data-fb="no_usar"> No la usaré</label>',
+    '    </div>',
+    '    <textarea class="atne-fb-pill-comment" placeholder="Comentari opcional…"></textarea>',
+    '    <div class="atne-fb-pill-actions">',
+    '      <button type="button" class="atne-fb-pill-send">Envia</button>',
+    '    </div>',
+    '    <div class="atne-fb-pill-thanks" hidden>✓ Gràcies pel teu feedback</div>',
+    '  </div>',
+    '</div>',
+  ].join('');
+
+  var _INLINE_CSS = [
+    '.atne-fb-pill{position:fixed;right:16px;bottom:16px;z-index:9000;font-family:Inter,system-ui,sans-serif}',
+    '.atne-fb-pill-collapsed{display:flex;align-items:center;gap:8px;background:#4c3fc4;color:#fff;border:none;border-radius:999px;padding:10px 16px;font-size:13px;font-weight:500;cursor:pointer;box-shadow:0 6px 18px rgba(76,63,196,0.32);font-family:inherit;transition:transform .15s,box-shadow .2s}',
+    '.atne-fb-pill-collapsed:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(76,63,196,0.38)}',
+    '.atne-fb-pill-collapsed.nudge{animation:atne-fb-nudge 1.2s ease-in-out 2}',
+    '@keyframes atne-fb-nudge{0%,100%{transform:translateY(0)}25%{transform:translateY(-4px) scale(1.03)}50%{transform:translateY(0)}75%{transform:translateY(-2px)}}',
+    '.atne-fb-pill.expanded .atne-fb-pill-collapsed{display:none}',
+    '.atne-fb-pill-panel{background:#fff;border-radius:14px;padding:16px 18px;box-shadow:0 12px 36px rgba(0,0,0,0.18);border:1px solid #e6e6ee;max-width:320px;width:calc(100vw - 32px)}',
+    '.atne-fb-pill-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-family:Fraunces,Georgia,serif}',
+    '.atne-fb-pill-head strong{font-size:15px;color:#1f1f2c}',
+    '.atne-fb-pill-close{background:none;border:none;font-size:22px;line-height:1;color:#6b6b7a;cursor:pointer;padding:0 4px}',
+    '.atne-fb-pill-stars{display:flex;gap:6px;margin-bottom:10px}',
+    '.atne-fb-istar{flex:1;background:#fff;border:1.5px solid #d4d4dc;border-radius:8px;padding:7px 8px;font-size:13px;cursor:pointer;font-family:inherit;color:#3a3a48}',
+    '.atne-fb-istar.sel{background:#fff5d9;border-color:#f5b300;color:#7a4f00}',
+    '.atne-fb-istar:hover{border-color:#aaa}',
+    '.atne-fb-pill-checks{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;font-size:12px;color:#3a3a48}',
+    '.atne-fb-pill-checks label{display:flex;align-items:center;gap:6px;cursor:pointer}',
+    '.atne-fb-pill-comment{width:100%;min-height:50px;border:1px solid #d4d4dc;border-radius:6px;padding:6px 8px;font-family:inherit;font-size:12px;resize:vertical;box-sizing:border-box;margin-bottom:10px}',
+    '.atne-fb-pill-actions{display:flex;justify-content:flex-end;gap:6px}',
+    '.atne-fb-pill-send{background:#4c3fc4;color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}',
+    '.atne-fb-pill-send:disabled{opacity:0.6;cursor:default}',
+    '.atne-fb-pill-thanks{margin-top:8px;color:#1f7a3e;font-size:12px;text-align:center;font-weight:500}',
+    '.atne-fb-pill.submitted .atne-fb-pill-collapsed{background:#1f7a3e;box-shadow:0 4px 12px rgba(31,122,62,0.32)}',
+    '.atne-fb-pill.submitted .atne-fb-pill-label::before{content:"✓ "}',
+    '@media (max-width:600px){.atne-fb-pill{right:8px;bottom:8px}}',
+  ].join('\n');
+
+  var _inlineMounted = false;
+  var _inlineSubmitted = false;
+  var _inlineSelectedStar = null;
+
+  function _ensureInlineCss() {
+    if (document.getElementById('atne-fb-inline-css')) return;
+    var st = document.createElement('style');
+    st.id = 'atne-fb-inline-css';
+    st.textContent = _INLINE_CSS;
+    document.head.appendChild(st);
+  }
+
+  function _resetInline() {
+    _inlineSubmitted = false;
+    _inlineSelectedStar = null;
+    var pill = document.getElementById('atne-fb-pill');
+    if (!pill) return;
+    pill.classList.remove('submitted', 'expanded');
+    pill.style.display = '';
+    var panel = pill.querySelector('.atne-fb-pill-panel');
+    if (panel) panel.hidden = true;
+    var thanks = pill.querySelector('.atne-fb-pill-thanks');
+    if (thanks) thanks.hidden = true;
+    pill.querySelectorAll('.atne-fb-istar').forEach(function (s) { s.classList.remove('sel'); });
+    pill.querySelectorAll('input[type=checkbox][data-fb]').forEach(function (c) { c.checked = false; });
+    var comment = pill.querySelector('.atne-fb-pill-comment');
+    if (comment) comment.value = '';
+    var sendBtn = pill.querySelector('.atne-fb-pill-send');
+    if (sendBtn) sendBtn.disabled = false;
+    var btn = pill.querySelector('.atne-fb-pill-collapsed');
+    if (btn) {
+      btn.style.display = '';
+      btn.setAttribute('aria-expanded', 'false');
+      var lab = btn.querySelector('.atne-fb-pill-label');
+      if (lab) lab.textContent = 'Valora aquesta adaptació';
+    }
+  }
+
+  function showInlineFeedback() {
+    if (_inlineMounted) {
+      _resetInline();
+      return;
+    }
+    _ensureInlineCss();
+    var holder = document.createElement('div');
+    holder.innerHTML = _INLINE_HTML;
+    document.body.appendChild(holder.firstElementChild);
+    _inlineMounted = true;
+
+    var pill = document.getElementById('atne-fb-pill');
+    var btn = pill.querySelector('.atne-fb-pill-collapsed');
+    var panel = pill.querySelector('.atne-fb-pill-panel');
+    var closeBtn = pill.querySelector('.atne-fb-pill-close');
+    var stars = pill.querySelectorAll('.atne-fb-istar');
+    var sendBtn = pill.querySelector('.atne-fb-pill-send');
+    var thanks = pill.querySelector('.atne-fb-pill-thanks');
+
+    function expand() {
+      pill.classList.add('expanded');
+      panel.hidden = false;
+      btn.setAttribute('aria-expanded', 'true');
+    }
+    function collapse() {
+      pill.classList.remove('expanded');
+      panel.hidden = true;
+      btn.setAttribute('aria-expanded', 'false');
+    }
+
+    btn.addEventListener('click', expand);
+    closeBtn.addEventListener('click', collapse);
+
+    stars.forEach(function (s) {
+      s.addEventListener('click', function () {
+        _inlineSelectedStar = parseInt(s.dataset.star, 10);
+        stars.forEach(function (x) {
+          x.classList.toggle('sel', parseInt(x.dataset.star, 10) === _inlineSelectedStar);
+        });
+      });
+    });
+
+    sendBtn.addEventListener('click', function () {
+      if (_inlineSubmitted) return;
+      var historyId = _historyId();
+      var review = {};
+      pill.querySelectorAll('input[type=checkbox][data-fb]').forEach(function (c) {
+        review[c.dataset.fb] = !!c.checked;
+      });
+      var comment = (pill.querySelector('.atne-fb-pill-comment').value || '').trim();
+      var body = { review_items: review };
+      if (_inlineSelectedStar) body.rating = _inlineSelectedStar;
+      if (comment) body.comment = comment;
+
+      if (historyId) {
+        try {
+          fetch('/api/history/' + historyId, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+            keepalive: true,
+          }).catch(function () { /* */ });
+        } catch (_) { /* */ }
+      }
+      event('feedback_submitted', {
+        rating: _inlineSelectedStar,
+        review: review,
+        has_comment: !!comment,
+        source: 'inline_pill',
+      });
+
+      _inlineSubmitted = true;
+      sendBtn.disabled = true;
+      thanks.hidden = false;
+      pill.classList.add('submitted');
+      var lab = btn.querySelector('.atne-fb-pill-label');
+      if (lab) lab.textContent = 'Valoració enviada';
+      // Auto-collapse perquè el docent pugui tornar a la feina
+      setTimeout(function () { if (_inlineSubmitted) collapse(); }, 2200);
+    });
+  }
+
+  // One-shot: animació subtil per cridar atenció a la pill després de la
+  // primera "consumició" de l'adaptació (export, copy, print). No reapareix
+  // si el docent ja ha valorat.
+  function nudgeInlineFeedback() {
+    if (_inlineSubmitted) return;
+    if (!_inlineMounted) showInlineFeedback();
+    var pill = document.getElementById('atne-fb-pill');
+    if (!pill) return;
+    var btn = pill.querySelector('.atne-fb-pill-collapsed');
+    if (!btn) return;
+    btn.classList.remove('nudge');
+    void btn.offsetWidth; // forçar reflow per re-iniciar animació
+    btn.classList.add('nudge');
+  }
+
+  function hideInlineFeedback() {
+    var pill = document.getElementById('atne-fb-pill');
+    if (pill) pill.style.display = 'none';
+  }
 
   // pageView: registra visualització d'una pàgina informativa (saber-ne, etc.)
   // i envia page_leave amb durada quan l'usuari surt.
@@ -385,12 +597,16 @@
 
   window.ATNE_TRACK = {
     event: event,
-    requireFeedback: requireFeedback,
+    requireFeedback: requireFeedback,            // legacy (pilot 1C, no s'usa al 1D)
     resetFeedbackGate: resetFeedbackGate,
     pageView: pageView,
     trackScrollDepth: trackScrollDepth,
     trackFormAbandoned: trackFormAbandoned,
     deviceInfo: _deviceInfo,
     openSuggestionBox: openSuggestionBox,
+    // Sprint 1D — feedback inline persistent
+    showInlineFeedback: showInlineFeedback,
+    nudgeInlineFeedback: nudgeInlineFeedback,
+    hideInlineFeedback: hideInlineFeedback,
   };
 })();
