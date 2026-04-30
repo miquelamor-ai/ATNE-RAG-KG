@@ -169,6 +169,117 @@
     color: #6d3aa3;
   }
 
+  /* Sprint 1D — targeta de feedback pendent */
+  #pending-fb-card {
+    background: #fef9e7;
+    border: 1px solid #f5b300;
+    border-radius: var(--r-lg);
+    padding: 16px 18px;
+    margin-bottom: 24px;
+    display: none;
+  }
+  #pending-fb-card.on { display: block; }
+  #pending-fb-card .pf-head {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 12px;
+  }
+  #pending-fb-card .pf-head svg { color: #b8860b; flex-shrink: 0; }
+  #pending-fb-card .pf-title {
+    font-family: var(--serif); font-weight: 600;
+    font-size: var(--fs-lg); color: #5d4505; margin: 0;
+  }
+  #pending-fb-card .pf-sub {
+    font-size: var(--fs-sm); color: #7a5e1a;
+    margin: 0; line-height: 1.4;
+  }
+  #pending-fb-card .pf-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+  #pending-fb-card .pf-item {
+    background: #fff; border-radius: var(--r-md);
+    padding: 10px 12px; display: flex;
+    align-items: center; gap: 10px;
+    border: 1px solid #f5e3a8;
+    cursor: pointer; transition: border-color .12s;
+  }
+  #pending-fb-card .pf-item:hover { border-color: #f5b300; }
+  #pending-fb-card .pf-item-info { flex: 1; min-width: 0; }
+  #pending-fb-card .pf-item-meta {
+    font-size: 11px; color: #8a6c20; margin-bottom: 2px;
+    font-family: var(--mono);
+  }
+  #pending-fb-card .pf-item-name {
+    font-weight: 600; color: var(--ink-900, #121a2b);
+    font-size: var(--fs-base);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #pending-fb-card .pf-item-cta {
+    background: #f5b300; color: #fff; border: none;
+    border-radius: var(--r-sm); padding: 6px 12px;
+    font-size: var(--fs-sm); font-weight: 600;
+    cursor: pointer; flex-shrink: 0; font-family: inherit;
+  }
+  #pending-fb-card .pf-item-cta:hover { background: #d99800; }
+  #pending-fb-card .pf-dismiss {
+    background: none; border: none; color: #7a5e1a;
+    font-size: var(--fs-sm); cursor: pointer;
+    text-decoration: underline; padding: 8px 0 0;
+    font-family: inherit;
+  }
+
+  /* Modal de valoració in-page (no navega a Pas 3) */
+  .pf-modal-overlay {
+    position: fixed; inset: 0; background: rgba(20,20,30,0.55);
+    z-index: 9500; display: none; align-items: center;
+    justify-content: center; padding: 16px;
+  }
+  .pf-modal-overlay.on { display: flex; }
+  .pf-modal-box {
+    background: #fff; max-width: 460px; width: 100%;
+    border-radius: 14px; padding: 22px 24px;
+    box-shadow: 0 14px 38px rgba(0,0,0,0.22);
+    font-family: Inter, system-ui, sans-serif;
+  }
+  .pf-modal-box h2 {
+    font-family: var(--serif); font-size: 20px;
+    margin: 0 0 6px; color: #1f1f2c;
+  }
+  .pf-modal-box .pf-modal-meta {
+    color: #6b6b7a; font-size: 13px; margin: 0 0 16px;
+  }
+  .pf-modal-box .pf-modal-stars { display: flex; gap: 8px; margin-bottom: 14px; }
+  .pf-modal-box .pf-modal-stars button {
+    flex: 1; background: #fff; border: 1.5px solid #d4d4dc;
+    border-radius: 8px; padding: 9px 8px; font-size: 14px;
+    cursor: pointer; font-family: inherit; color: #3a3a48;
+  }
+  .pf-modal-box .pf-modal-stars button.sel {
+    background: #fff5d9; border-color: #f5b300; color: #7a4f00;
+  }
+  .pf-modal-box .pf-modal-checks {
+    display: flex; flex-direction: column; gap: 6px;
+    margin-bottom: 14px; font-size: 13px; color: #3a3a48;
+  }
+  .pf-modal-box .pf-modal-checks label {
+    display: flex; align-items: center; gap: 6px; cursor: pointer;
+  }
+  .pf-modal-box textarea {
+    width: 100%; min-height: 60px; border: 1px solid #d4d4dc;
+    border-radius: 6px; padding: 8px 10px;
+    font-family: inherit; font-size: 13px;
+    resize: vertical; box-sizing: border-box; margin-bottom: 14px;
+  }
+  .pf-modal-box .pf-modal-actions {
+    display: flex; gap: 10px; justify-content: space-between;
+  }
+  .pf-modal-box .pf-modal-actions button {
+    border: none; border-radius: 8px; padding: 9px 18px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    font-family: inherit;
+  }
+  .pf-modal-box .pf-modal-cancel {
+    background: #fff; color: #3a3a48; border: 1.5px solid #d4d4dc !important;
+  }
+  .pf-modal-box .pf-modal-send { background: #4c3fc4; color: #fff; }
+
   .history-empty {
     text-align: center;
     padding: 32px 16px;
@@ -289,6 +400,42 @@
       <div class="mode-title">Taller</div>
       <p class="mode-desc">Complet i precís</p>
     </a>
+  </div>
+
+  <!-- Sprint 1D: targeta de feedback pendent (només visible si n'hi ha) -->
+  <div id="pending-fb-card" role="region" aria-label="Adaptacions pendents de valorar">
+    <div class="pf-head">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <div>
+        <p class="pf-title">Et van funcionar aquestes adaptacions?</p>
+        <p class="pf-sub">Ja les has pogut usar a classe — què et van semblar? Ens ajuda a millorar ATNE.</p>
+      </div>
+    </div>
+    <div class="pf-list" id="pending-fb-list"></div>
+    <button type="button" class="pf-dismiss" id="pending-fb-dismiss">Ara no</button>
+  </div>
+
+  <!-- Modal de valoració in-page (no navega a Pas 3) -->
+  <div class="pf-modal-overlay" id="pf-modal" role="dialog" aria-modal="true">
+    <div class="pf-modal-box">
+      <h2 id="pf-modal-title">Com et va anar?</h2>
+      <p class="pf-modal-meta" id="pf-modal-meta"></p>
+      <div class="pf-modal-stars">
+        <button type="button" data-star="1">★ 1</button>
+        <button type="button" data-star="2">★ 2</button>
+        <button type="button" data-star="3">★ 3</button>
+      </div>
+      <div class="pf-modal-checks">
+        <label><input type="checkbox" data-fb="usar_classe"> L'he usat tal qual</label>
+        <label><input type="checkbox" data-fb="retocar"> L'he hagut de retocar</label>
+        <label><input type="checkbox" data-fb="no_usar"> Al final no l'he usat</label>
+      </div>
+      <textarea id="pf-modal-comment" placeholder="Comentari opcional…"></textarea>
+      <div class="pf-modal-actions">
+        <button type="button" class="pf-modal-cancel" id="pf-modal-cancel">Omet</button>
+        <button type="button" class="pf-modal-send" id="pf-modal-send">Envia</button>
+      </div>
+    </div>
   </div>
 
   <!-- Historial recent -->
@@ -464,6 +611,176 @@
       .catch(function() {});
   }
   loadHistory();
+
+  // ── Sprint 1D: targeta de feedback pendent ────────────────────────────────
+  // Mostra adaptacions consumides (exported/copied) sense valorar dels últims 7 dies.
+  // Click → modal in-page amb estrelles + checkboxes + comentari + PATCH /api/history/{id}.
+
+  function getDocentEmail() {
+    try {
+      if (window.ATNE_AUTH && window.ATNE_AUTH.email) return window.ATNE_AUTH.email;
+      return localStorage.getItem('atne_user_email') || '';
+    } catch(e) { return ''; }
+  }
+
+  // Per docents que han triat ometre la targeta avui (LocalStorage flag amb data)
+  var DISMISS_KEY = 'atne.pending_fb_dismissed_until';
+  function isDismissedToday() {
+    try {
+      var until = parseInt(localStorage.getItem(DISMISS_KEY) || '0', 10);
+      return until && until > Date.now();
+    } catch(e) { return false; }
+  }
+  function markDismissedToday() {
+    try {
+      // Tornarà a aparèixer demà
+      localStorage.setItem(DISMISS_KEY, String(Date.now() + 24 * 3600 * 1000));
+    } catch(e) {}
+  }
+
+  var _pfCard       = document.getElementById('pending-fb-card');
+  var _pfList       = document.getElementById('pending-fb-list');
+  var _pfDismissBtn = document.getElementById('pending-fb-dismiss');
+  var _pfModal      = document.getElementById('pf-modal');
+  var _pfModalTitle = document.getElementById('pf-modal-title');
+  var _pfModalMeta  = document.getElementById('pf-modal-meta');
+  var _pfModalCmt   = document.getElementById('pf-modal-comment');
+  var _pfModalSend  = document.getElementById('pf-modal-send');
+  var _pfModalCancel = document.getElementById('pf-modal-cancel');
+  var _pfCurrent    = null;
+  var _pfStarSel    = null;
+
+  if (_pfDismissBtn) {
+    _pfDismissBtn.addEventListener('click', function() {
+      markDismissedToday();
+      if (_pfCard) _pfCard.classList.remove('on');
+    });
+  }
+
+  function openPfModal(item) {
+    _pfCurrent = item;
+    _pfStarSel = null;
+    if (_pfModalTitle) _pfModalTitle.textContent = 'Com et va anar?';
+    if (_pfModalMeta) _pfModalMeta.textContent = (item.profile_name || 'Adaptació') +
+      (item.age_text ? ' · ' + item.age_text : '');
+    if (_pfModalCmt) _pfModalCmt.value = '';
+    _pfModal.querySelectorAll('.pf-modal-stars button').forEach(function(b) {
+      b.classList.remove('sel');
+    });
+    _pfModal.querySelectorAll('input[type=checkbox][data-fb]').forEach(function(c) {
+      c.checked = false;
+    });
+    _pfModal.classList.add('on');
+  }
+  function closePfModal() {
+    _pfModal.classList.remove('on');
+    _pfCurrent = null;
+  }
+  if (_pfModal) {
+    _pfModal.querySelectorAll('.pf-modal-stars button').forEach(function(b) {
+      b.addEventListener('click', function() {
+        _pfStarSel = parseInt(b.dataset.star, 10);
+        _pfModal.querySelectorAll('.pf-modal-stars button').forEach(function(x) {
+          x.classList.toggle('sel', parseInt(x.dataset.star, 10) === _pfStarSel);
+        });
+      });
+    });
+    _pfModalCancel.addEventListener('click', function() {
+      // Capturem 'feedback_skipped' amb source='followup_card' per analytics
+      try {
+        if (window.ATNE_TRACK && _pfCurrent) {
+          window.ATNE_TRACK.event('feedback_skipped', {
+            source: 'followup_card',
+            history_id: _pfCurrent.id
+          });
+        }
+      } catch(e) {}
+      closePfModal();
+    });
+    _pfModalSend.addEventListener('click', function() {
+      if (!_pfCurrent) { closePfModal(); return; }
+      var review = {};
+      _pfModal.querySelectorAll('input[type=checkbox][data-fb]').forEach(function(c) {
+        review[c.dataset.fb] = !!c.checked;
+      });
+      var comment = (_pfModalCmt.value || '').trim();
+      var body = { review_items: review };
+      if (_pfStarSel) body.rating = _pfStarSel;
+      if (comment) body.comment = comment;
+
+      fetch('/api/history/' + _pfCurrent.id, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        keepalive: true,
+      }).catch(function() {});
+
+      try {
+        if (window.ATNE_TRACK) {
+          window.ATNE_TRACK.event('feedback_submitted', {
+            rating: _pfStarSel,
+            review: review,
+            has_comment: !!comment,
+            source: 'followup_card',
+            history_id: _pfCurrent.id
+          });
+        }
+      } catch(e) {}
+
+      // Treu l'item de la llista (i amaga la targeta si n'era l'últim)
+      var rmId = _pfCurrent.id;
+      closePfModal();
+      var rows = _pfList.querySelectorAll('.pf-item');
+      rows.forEach(function(r) {
+        if (parseInt(r.dataset.id, 10) === rmId) r.remove();
+      });
+      if (!_pfList.querySelectorAll('.pf-item').length) {
+        _pfCard.classList.remove('on');
+      }
+    });
+  }
+
+  function renderPending(items) {
+    if (!_pfCard || !_pfList) return;
+    if (!items || !items.length) {
+      _pfCard.classList.remove('on');
+      return;
+    }
+    _pfList.innerHTML = '';
+    items.forEach(function(it) {
+      var div = document.createElement('div');
+      div.className = 'pf-item';
+      div.dataset.id = it.id;
+      var consumeText = (it.exported && it.copied) ? 'Exportada i copiada' :
+                        it.exported ? 'Exportada' :
+                        it.copied   ? 'Copiada' : '';
+      div.innerHTML =
+        '<div class="pf-item-info">' +
+          '<div class="pf-item-meta">' + consumeText + (it.age_text ? ' · ' + it.age_text : '') + '</div>' +
+          '<div class="pf-item-name">' + (it.profile_name || 'Adaptació') + '</div>' +
+        '</div>' +
+        '<button type="button" class="pf-item-cta">Valora-la</button>';
+      div.querySelector('.pf-item-cta').addEventListener('click', function(e) {
+        e.stopPropagation();
+        openPfModal(it);
+      });
+      div.addEventListener('click', function() { openPfModal(it); });
+      _pfList.appendChild(div);
+    });
+    _pfCard.classList.add('on');
+  }
+
+  function loadPendingFeedback() {
+    if (isDismissedToday()) return;
+    var em = getDocentEmail();
+    if (!em) return;
+    fetch('/api/pilot/pending-feedback?docent_id=' + encodeURIComponent(em) + '&limit=3')
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(d) { if (d && d.ok) renderPending(d.items || []); })
+      .catch(function() {});
+  }
+  // Petit delay per no competir amb la càrrega de la home
+  setTimeout(loadPendingFeedback, 600);
 
   // Scroll automàtic a la secció biblioteca si ve des de Flash → Historial
   var _navTo = '';

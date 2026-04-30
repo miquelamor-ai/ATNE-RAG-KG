@@ -1588,6 +1588,110 @@ async def pilot_consent(request: Request, payload: dict = Body(...)):
         return {"ok": False, "error": str(e)}
 
 
+@app.get("/api/pilot/pending-feedback")
+async def pilot_pending_feedback(docent_id: str = "", limit: int = 3):
+    """Retorna adaptacions del docent que ha consumit (exported/copied) però
+    no ha valorat (sense rating ni review_items). Sprint 1D follow-up: la
+    home mostra una targeta convidant a valorar-les en una sessió posterior,
+    quan ja les ha pogut usar a classe.
+
+    Filtre:
+      - docent_id (email) o docent_hash
+      - exported=true OR copied=true
+      - rating IS NULL AND review_items IS NULL
+      - created_at > now - 7 days
+      - límit configurable (default 3, cap 10)
+
+    NO es protegeix amb auth admin: el docent ha de poder consultar les
+    seves adaptacions pendents. El filtre per docent_id assegura que només
+    veu les seves.
+    """
+    if not docent_id:
+        return {"ok": True, "items": []}
+    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+        return {"ok": False, "items": [], "error": "Supabase no configurat"}
+
+    docent_id = docent_id.strip().lower()
+    docent_hash = _docent_hash_from_id(docent_id)
+    n = max(1, min(int(limit or 3), 10))
+
+    import datetime
+    cutoff = (datetime.datetime.utcnow() - datetime.timedelta(days=7)).isoformat() + "Z"
+
+    # Filtrem per docent_hash (anonimització) i fem dues queries i unim:
+    # una per exported=true, una per copied=true (PostgREST no facilita un OR
+    # complex amb diversos camps amb facilitat). Després unim+deduplim per id.
+    base = (
+        f"{SUPABASE_URL}/rest/v1/history"
+        f"?select=id,profile_name,created_at,exported,copied,original_text,model_used,prompt_version"
+        f"&docent_hash=eq.{docent_hash}"
+        f"&rating=is.null"
+        f"&review_items=is.null"
+        f"&created_at=gte.{cutoff}"
+        f"&order=created_at.desc"
+        f"&limit={n * 2}"  # marge per dedup
+    )
+    try:
+        r1 = requests.get(base + "&exported=eq.true",
+                          headers=SUPABASE_HEADERS, timeout=10)
+        rows1 = r1.json() if r1.status_code == 200 else []
+        r2 = requests.get(base + "&copied=eq.true",
+                          headers=SUPABASE_HEADERS, timeout=10)
+        rows2 = r2.json() if r2.status_code == 200 else []
+    except Exception as e:
+        return {"ok": False, "items": [], "error": str(e)}
+
+    # Unim i deduplim per id, conservant ordre per created_at desc
+    by_id: dict = {}
+    for row in (rows1 + rows2):
+        rid = row.get("id")
+        if rid and rid not in by_id:
+            by_id[rid] = row
+    rows = sorted(
+        by_id.values(),
+        key=lambda r: r.get("created_at") or "",
+        reverse=True,
+    )[:n]
+
+    items = []
+    now = datetime.datetime.utcnow()
+    for row in rows:
+        # Calcular antiguitat per al display ("fa 2h", "fa 1 dia"…)
+        age_text = ""
+        try:
+            ts = (row.get("created_at") or "").replace("Z", "")
+            dt = datetime.datetime.fromisoformat(ts)
+            diff = (now - dt).total_seconds()
+            if diff < 3600:
+                age_text = f"fa {max(1, int(diff / 60))} min"
+            elif diff < 86400:
+                age_text = f"fa {int(diff / 3600)} h"
+            else:
+                d = int(diff / 86400)
+                age_text = "fa 1 dia" if d == 1 else f"fa {d} dies"
+        except Exception:
+            pass
+
+        # Excerpt curt (primers 80 chars del text original) per identificar
+        excerpt = (row.get("original_text") or "")[:80].strip()
+        if len(row.get("original_text") or "") > 80:
+            excerpt += "…"
+
+        items.append({
+            "id": row.get("id"),
+            "profile_name": row.get("profile_name") or "Adaptació",
+            "created_at": row.get("created_at"),
+            "age_text": age_text,
+            "excerpt": excerpt,
+            "exported": bool(row.get("exported")),
+            "copied": bool(row.get("copied")),
+            "model_used": row.get("model_used"),
+            "prompt_version": row.get("prompt_version"),
+        })
+
+    return {"ok": True, "items": items}
+
+
 @app.get("/api/pilot/consent/{docent_id}")
 async def pilot_consent_status(docent_id: str):
     """Retorna l'estat del consentiment d'un docent. Permet al frontend saber
