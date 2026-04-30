@@ -379,13 +379,18 @@
   }
 
   function isFlashAdaptation(item) {
-    // Detecta Flash via context_snapshot.mode (saves nous)
+    // Detecta Flash via context_snapshot.mode (saves nous, font autoritzativa)
     var cs = item.context_snapshot;
-    if (cs && cs.mode === 'flash') return true;
-    // Fallback per saves anteriors: si profile_snapshot té 'tipus' (Flash-specific)
-    // i complements_snapshot té estructura Flash
-    var ps = item.profile_snapshot;
-    if (ps && typeof ps.tipus !== 'undefined' && item.complements_snapshot) return true;
+    if (cs && cs.mode === 'flash')  return true;
+    if (cs && cs.mode === 'taller') return false;
+    // Fallback només per a saves antics SENSE mode explícit. Amb el model
+    // canònic de perfils, profile_snapshot.tipus pot existir també en
+    // adaptacions Taller, així que la heurística no és fiable; només la
+    // mantenim si NO hi ha cap context_snapshot (saves molt antics).
+    if (!cs) {
+      var ps = item.profile_snapshot;
+      if (ps && typeof ps.tipus !== 'undefined' && item.complements_snapshot) return true;
+    }
     return false;
   }
 

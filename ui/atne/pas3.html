@@ -4182,6 +4182,11 @@ ${compsHtml.join('\n')}
     try { profile = JSON.parse(localStorage.getItem('atne.current_profile') || 'null'); } catch (_) {}
     try { context = JSON.parse(localStorage.getItem('atne.current_context') || 'null'); } catch (_) {}
     try { complements = JSON.parse(localStorage.getItem('atne.complements') || 'null'); } catch (_) {}
+    // Marca explícita del mode (Taller). Sense això, isFlashAdaptation() de la
+    // home cau a un fallback que mira profile_snapshot.tipus i, amb el model
+    // canònic actual de perfils, classifica per error Taller com a Flash.
+    if (!context || typeof context !== 'object') context = {};
+    if (!context.mode) context.mode = 'taller';
     // Bug 2026-04-22: abans llegíem 'atne.current_original_text' que cap codi
     // mai setteja. Per això les adaptacions desades fins ara tenien original_text
     // buit i en reobrir-les el Pas 3 redirigia a Pas 2.
