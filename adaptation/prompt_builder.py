@@ -447,22 +447,30 @@ Ha de ser senzill, visual i comprensible per a l'alumne.
     if comp.get("mapa_conceptual"):
         output_sections.append("""
 ## Mapa conceptual
-ACTIVAT — Genera un mapa conceptual en format text amb estructura d'arbre.
-Format:
+ACTIVAT — Genera un mapa conceptual en format text amb estructura d'arbre
+usant NOMÉS llistes amb guions i indentació amb 2 espais.
+
+**FORMAT OBLIGATORI (llista jeràrquica markdown, no caràcters de dibuix):**
+
 ```
-CONCEPTE CENTRAL
-│
-├── Branca 1:
-│   ├─ Element a
-│   └─ Element b
-│
-├── Branca 2:
-│   └─ Element c
-│
-└── Branca 3:
-    ├─ Element d
-    └─ Element e
+- **CONCEPTE CENTRAL**
+  - Branca 1:
+    - Element a
+    - Element b
+  - Branca 2:
+    - Element c
+  - Branca 3:
+    - Element d
+    - Element e
 ```
+
+REGLES CRÍTIQUES:
+- NO usis caràcters de dibuix d'arbre (│ ├ └ ─ ╔ ║). Causen corrupció
+  en alguns models, que substitueixen lletres al mig de paraules
+  ('Causes' → 'Cau—ses').
+- NOMÉS guions `-` i indentació amb 2 espais per nivell.
+- Negreta opcional al concepte central amb `**...**`.
+
 Mostra les relacions jeràrquiques entre els conceptes principals del text.
 """)
 
