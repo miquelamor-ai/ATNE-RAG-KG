@@ -359,10 +359,50 @@ def _fix_word_concatenations(text: str) -> str:
     return _CONCAT_WORD_RE.sub(repl, text)
 
 
+# ── Dittografia: paraules consecutives idèntiques amb espai ─────────────────
+# Patró observat al pilot (parking lot #40): el LLM repeteix una paraula
+# acabada de generar — "La Revolució revolució industrial" — produint la
+# mateixa paraula dos cops amb només un espai. El fix és case-insensitive i
+# preserva la majúscula del primer ocurrent.
+#
+# Mínim 5 caràcters per evitar falsos positius amb dobletes emfàtiques
+# legítimes ("molt molt important", "sí sí", "ja ja"). 5+ chars són
+# pràcticament sempre dittografies del LLM, no estil.
+_DITTO_WORD_RE = re.compile(
+    r'\b([A-Za-zÀ-ÿ]{5,})(\s+)(\1)\b',
+    flags=re.IGNORECASE,
+)
+
+
+def _fix_consecutive_duplicates(text: str) -> str:
+    """Col·lapsa paraules consecutives idèntiques (case-insensitive).
+
+    Exemples:
+    - 'La Revolució revolució industrial' → 'La Revolució industrial'
+    - 'la fotosíntesi fotosíntesi és' → 'la fotosíntesi és'
+    - 'Causes causes principals' → 'Causes principals'
+
+    Conserva la primera ocurrència (la majúscula original). Mínim 5 chars
+    perquè 'molt molt' o 'sí sí' (èmfasi legítim) no es toquin.
+    """
+    if not text:
+        return text
+
+    def repl(m):
+        # Conservem el primer + descartem el duplicat (i el seu espai)
+        return m.group(1)
+
+    # Aplicar 2 vegades per casos com "la la la la" → "la"
+    out = _DITTO_WORD_RE.sub(repl, text)
+    out = _DITTO_WORD_RE.sub(repl, out)
+    return out
+
+
 def _post_process_llm_output(text: str, lang: str = "ca") -> str:
     """Pipeline complet de neteja post-LLM abans del Quality Report."""
     text = _strip_latex_artifacts(text)
     text = _fix_word_concatenations(text)
+    text = _fix_consecutive_duplicates(text)
     if lang == "ca":
         # Fix anglicismes: només rellevant per a sortida en català
         text = _fix_english_words(text)
