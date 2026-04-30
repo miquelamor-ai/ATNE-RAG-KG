@@ -629,6 +629,36 @@ SEMPRE GENERAR — Taula comparativa breu dels canvis principals:
 Màxim 5-6 files amb els canvis més significatius.
 """)
 
+    # Reforç crític per a gèneres on la FORMA és contingut (poema, teatre,
+    # recepta…). Sense això, smoke tests 2026-04-20 mostraven que el LLM
+    # aplanava poemes a prosa quan MECR era baix, contradient la regla del
+    # gènere (parking lot #59). El reforç va al final perquè els LLMs
+    # respecten més les normes properes a la generació.
+    _form_genres = {
+        "poema", "poesia", "vers", "cançó", "canço", "song",
+        "teatre", "guió teatral", "guio teatral", "monòleg", "monoleg", "diàleg", "dialeg",
+        "recepta", "receptari",
+        "reglament", "norma", "instructiu", "manual",
+        "fitxa tècnica", "fitxa tecnica",
+    }
+    _genre_lower = (genre or "").lower()
+    _is_form_genre = any(g in _genre_lower for g in _form_genres)
+    if _is_form_genre:
+        output_sections.append(f"""
+REGLA CRÍTICA — PRESERVA LA FORMA DEL GÈNERE «{genre}»:
+La forma estructural d'aquest gènere ÉS contingut, no només envoltori.
+Si hi ha conflicte entre la simplificació MECR i la preservació de la forma,
+GUANYA LA FORMA. Pots simplificar VOCABULARI però NO:
+- Convertir versos a prosa (poema, cançó): MAI uneixis dos versos amb una coma o un connector. Cada vers a la seva línia.
+- Eliminar acotacions o canvis de personatge (teatre, diàleg): preserva «PERSONATGE:» i les acotacions entre parèntesis o cursiva.
+- Reformular llistes numerades a prosa (recepta, instructiu, reglament): manté el «1. 2. 3.» i els passos discrets.
+- Treure separadors gràfics significatius (fitxa tècnica): respecta la presentació en taula o llista de camps.
+
+Si simplificar-ho et porta a destruir l'estructura, deixa el text en una versió
+mínimament adaptada però FORMALMENT íntegra. La integritat formal és més
+important que arribar al MECR exacte en aquests gèneres.
+""")
+
     output_sections.append("""
 Omet les seccions NO activades. No generis seccions buides.
 Títols: usa literalment «## Text adaptat», «## Glossari», «## Esquema visual», «## Mapa conceptual», «## Mapa mental», «## Preguntes de comprensió», «## Bastides», «## Activitats d'aprofundiment», «## Argumentació pedagògica», «## Notes d'auditoria». Sense prefixos numèrics, emojis ni qualificadors. Sub-apartats amb «###».
