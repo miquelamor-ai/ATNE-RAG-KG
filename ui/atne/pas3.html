@@ -625,6 +625,85 @@
   /* Per defecte (>640px) el chip mòbil està amagat */
   .mob-profile-chip { display: none; }
 
+  /* ───────────────────────────────────────────────────────────
+     Selector de versions multinivell només per a mòbil. Substitueix
+     les vcards de la .lside (que queden amagades a <=640px) per una
+     barra horitzontal de pastilles per canviar entre nivells (ex:
+     A2 / B1 / B2 d'un mateix grup). Visible només quan hi ha 2+
+     versions de tipus 'level' al perfil actiu.
+     ─────────────────────────────────────────────────────────── */
+  .mob-versions { display: none; }
+  @media (max-width: 640px) {
+    .mob-versions[data-active] {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 6px 16px 8px;
+      margin: 0 -16px;
+      border-bottom: 1px solid var(--paper-line);
+      background: var(--cream-2);
+    }
+    .mob-versions .mv-label {
+      font-family: var(--mono);
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--ink-500);
+      font-weight: 600;
+      align-self: center;
+      flex-shrink: 0;
+      padding-right: 4px;
+    }
+    .mob-versions .mv-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 11px 5px 5px;
+      background: #fff;
+      border: 1px solid var(--paper-line);
+      border-radius: var(--r-pill);
+      font-size: var(--fs-xs);
+      color: var(--ink-700);
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: .15s;
+    }
+    .mob-versions .mv-pill .mv-av {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: var(--ink-100);
+      color: var(--ink-700);
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+    .mob-versions .mv-pill .mv-nm { font-weight: 600; white-space: nowrap; }
+    .mob-versions .mv-pill .mv-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--ink-300);
+      flex-shrink: 0;
+    }
+    .mob-versions .mv-pill.v-loading .mv-dot { background: #f59e0b; animation: pulse-dot 1s ease-in-out infinite; }
+    .mob-versions .mv-pill.v-ready .mv-dot { background: var(--ok); }
+    .mob-versions .mv-pill.v-error .mv-dot { background: #dc2626; }
+    .mob-versions .mv-pill.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    .mob-versions .mv-pill.active .mv-av {
+      background: rgba(255,255,255,.18);
+      color: #fff;
+    }
+  }
+
   /* Avatar docent (topbar) */
   .docent-av {
     width: 32px; height: 32px;
@@ -862,6 +941,11 @@
               <button id="btn-redo" title="Refer (⌘⇧Z)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 14 5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h4"/></svg></button>
             </div>
           </div>
+          <!-- Selector de versions multinivell per a mòbil. La .lside queda
+               amagada a <=640px, així que els nivells (A2/B1/B2/...) d'un grup
+               s'exposen aquí com a pastilles. Es popula a renderGroupSidebar()
+               quan el perfil té 2+ versions type:'level'. data-active="1" l'activa. -->
+          <div class="mob-versions" id="mob-versions"></div>
           <div class="chead-row">
             <div class="cmp-chips" data-help="p3-seccions">
               <button class="cmp-chip" data-comp="text" data-help="p3-chip-text"><span class="dot-ok"></span>Text adaptat <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3 1.9 4.6L18.5 9l-4.6 1.9L12 15l-1.9-4.6L5.5 9l4.6-1.4z"/></svg></button>
@@ -1548,6 +1632,54 @@
         Tornar al text
       </button>
     `;
+
+    // Selector mòbil: només si hi ha 2+ versions de tipus 'level' (multinivell).
+    // Mirror simplificat de les vcards. Es popula aquí i el sync de classes
+    // (active/loading/ready/error) es fa via MutationObserver sobre lside.
+    const mobVersions = document.getElementById('mob-versions');
+    const levelVersions = (g.versions || []).filter(v => v.type === 'level' && v.level_mecr);
+    if (mobVersions && levelVersions.length >= 2) {
+      const pillsHtml = levelVersions.map((v, i) => {
+        const levelShort = v.avatar || v.label.replace(/^Nivell /, '').slice(0, 3);
+        const shortLabel = v.label.replace(/^Nivell\s+[A-C]\d?\s*·?\s*/, '').trim() || v.label;
+        return `<button class="mv-pill ${i === 0 ? 'active' : ''}" data-vid="${v.id}" type="button">
+          <span class="mv-av">${levelShort}</span>
+          <span class="mv-nm">${shortLabel}</span>
+          <span class="mv-dot"></span>
+        </button>`;
+      }).join('');
+      mobVersions.innerHTML = '<span class="mv-label">Nivell:</span>' + pillsHtml;
+      mobVersions.dataset.active = '1';
+      // Click → delega a la vcard amagada de la lside (reusa tot el handler)
+      mobVersions.querySelectorAll('.mv-pill').forEach(pill => {
+        pill.addEventListener('click', e => {
+          e.preventDefault();
+          const vid = pill.dataset.vid;
+          const vc = document.querySelector(`.vcard[data-vid="${vid}"]`);
+          if (vc) vc.click();
+        });
+      });
+      // Sync de classes: quan una vcard canvia d'estat (active/loading/ready),
+      // el mateix estat es reflecteix a la pastilla mòbil corresponent.
+      const syncMobVersions = () => {
+        mobVersions.querySelectorAll('.mv-pill').forEach(pill => {
+          const vid = pill.dataset.vid;
+          const vc = lside.querySelector(`.vcard[data-vid="${vid}"]`);
+          if (!vc) return;
+          ['active', 'v-loading', 'v-ready', 'v-error'].forEach(cls => {
+            pill.classList.toggle(cls, vc.classList.contains(cls));
+          });
+        });
+      };
+      syncMobVersions();
+      const obs = new MutationObserver(syncMobVersions);
+      lside.querySelectorAll('.vcard').forEach(vc => {
+        obs.observe(vc, { attributes: true, attributeFilter: ['class'] });
+      });
+    } else if (mobVersions) {
+      mobVersions.innerHTML = '';
+      delete mobVersions.dataset.active;
+    }
     // MULTINIVELL v2 (2026-04-22): les versions es generen EN PARAL·LEL al
     // primer load (vegeu _maybeAdaptOnLoadImpl). El cache viu a
     // window.ATNE_VERSIONS[vid] amb { adapted, raw, model, ready }.
