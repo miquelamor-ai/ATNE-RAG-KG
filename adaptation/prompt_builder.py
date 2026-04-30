@@ -624,6 +624,15 @@ Màxim 5-6 files amb els canvis més significatius.
     output_sections.append("""
 Omet les seccions NO activades. No generis seccions buides.
 Títols: usa literalment «## Text adaptat», «## Glossari», «## Esquema visual», «## Mapa conceptual», «## Mapa mental», «## Preguntes de comprensió», «## Bastides», «## Activitats d'aprofundiment», «## Argumentació pedagògica», «## Notes d'auditoria». Sense prefixos numèrics, emojis ni qualificadors. Sub-apartats amb «###».
+
+REGLA CRÍTICA — NO INVENTIS CONTINGUT NO DEMANAT:
+Dins de la secció «## Text adaptat», NO afegeixis:
+- Preguntes de comprensió, preguntes retòriques o reflexives («Què en penses?», «Per què creus…?», «*Pregunta:*»). Si el complement «Preguntes de comprensió» NO està ACTIVAT, no n'apareix cap dins del text adaptat.
+- Marcadors de progrés tipus «[Secció 1 de 4]», «Part 1», «Capítol 1» si no eren al text original.
+- Comentaris meta sobre l'adaptació («Aquí simplifiquem…», «Hem suprimit…»). Aquestes notes pertanyen exclusivament a «## Notes d'auditoria».
+- Indicacions per al docent dins del text. Si vols donar context al docent, fes-ho a «## Argumentació pedagògica».
+
+El text adaptat ha de ser un text didàctic acabat, llegible directament per l'alumne, sense intromissions del sistema. Si el bloc de complements actius està buit, NO inventis exercicis ni activitats per omplir.
 """)
 
     parts.append("\n".join(output_sections))
