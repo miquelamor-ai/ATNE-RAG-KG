@@ -2553,6 +2553,10 @@
     // Amaga tots els xips hardcodejats si no estan actius
     chipsEl.querySelectorAll('.cmp-chip').forEach(c => {
       if (c.dataset.comp === 'text') { c.style.display = ''; return; }
+      // El xip "Per al docent" és una capa meta-pedagògica (argumentació +
+      // auditoria), no un complement d'alumne. SEMPRE visible — el prompt
+      // sempre genera aquestes seccions (prompt_builder.py:608).
+      if (c.dataset.comp === 'docent') { c.style.display = ''; return; }
       const backendKey = Object.keys(COMP_META).find(k => COMP_META[k].chip === c.dataset.comp);
       const active = !!(backendKey && compActive[backendKey]);
       c.style.display = active ? '' : 'none';
