@@ -26,6 +26,31 @@
 <script src="/ui/driver.iife.js"></script>
 <script src="/ui/atne/js/profile-canonical.js"></script>
 <script src="/ui/atne/js/llm.js?v=20260419m" defer></script>
+<!-- DOMPurify: sanititza HTML que ve del LLM o de Supabase abans d'innerHTML. -->
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+<script>
+  // ATNE_sanitize(html) — embolcall de DOMPurify amb whitelist conservadora
+  // per al contingut adaptat (LLM) i guardat (Supabase). Permet format
+  // tipogràfic i de taula que el prompt pot generar; bloqueja scripts,
+  // event handlers (onclick=...) i URLs javascript:/data:.
+  window.ATNE_sanitize = function(html){
+    if (!html) return '';
+    if (typeof DOMPurify === 'undefined') return html; // fallback si CDN falla
+    return DOMPurify.sanitize(String(html), {
+      ALLOWED_TAGS: [
+        'p','br','span','div','strong','b','em','i','u','s','sub','sup','small','mark',
+        'h1','h2','h3','h4','h5','h6',
+        'ul','ol','li',
+        'blockquote','pre','code',
+        'table','thead','tbody','tfoot','tr','th','td',
+        'a','img','figure','figcaption','hr',
+        'details','summary'
+      ],
+      ALLOWED_ATTR: ['href','title','alt','src','class','id','data-md','data-illus-idx','data-concept','colspan','rowspan','target','rel','style'],
+      ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel|ftp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i
+    });
+  };
+</script>
 <!-- html2pdf.js per exportar PDF client-side preservant tipografia + complements triats.
      CDN jsDelivr amb bundle (inclou html2canvas + jsPDF en un sol fitxer). -->
 <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.2/dist/html2pdf.bundle.min.js" defer></script>
@@ -1873,7 +1898,7 @@
     // Original (sense marques)
     if (origMd && md2html) {
       const titleHtml = title ? ('<h1>' + escapeHtml(title) + '</h1>') : '';
-      origEl.innerHTML = titleHtml + md2html(origMd);
+      origEl.innerHTML = ATNE_sanitize(titleHtml + md2html(origMd));
     } else if (!origMd) {
       origEl.innerHTML = '<p style="color:var(--ink-400);font-style:italic">No s\'ha trobat el text original (tornar al Pas 2).</p>';
     }
@@ -3143,7 +3168,7 @@
     // tocar cap lògica de cacheKey/adapt.
     if (_fromLibraryFallback && (!docOriginal || !docOriginal.trim())) {
       if (adaptedElInit) {
-        adaptedElInit.innerHTML = _libAdaptedText;
+        adaptedElInit.innerHTML = ATNE_sanitize(_libAdaptedText);
         try {
           if (typeof attachParaHandles === 'function') attachParaHandles();
           if (typeof pushHistory === 'function') pushHistory();
@@ -3232,7 +3257,7 @@
       // (veure project_complement_preguntes_graduades.md). Si el docent vol
       // forçar una regeneració, té el botó "Regenerar".
       if (adaptedEl) {
-        adaptedEl.innerHTML = cachedText;
+        adaptedEl.innerHTML = ATNE_sanitize(cachedText);
         attachParaHandles();
         pushHistory();
         // Neteja bound flags i re-enganxa listeners (els data-* s'han restaurat
@@ -3333,12 +3358,12 @@
         const preservedHtml = localStorage.getItem('atne.preserve_adapted');
         if (adaptedEl) {
           if (preservedHtml) {
-            adaptedEl.innerHTML = preservedHtml;
+            adaptedEl.innerHTML = ATNE_sanitize(preservedHtml);
             localStorage.removeItem('atne.preserve_adapted');
           } else {
             const mainText = parsed.main || ev.adapted || '';
             const looksLikeHtml = /<(p|h[1-6]|ul|ol|li|strong|em)[\s>]/i.test(mainText);
-            adaptedEl.innerHTML = looksLikeHtml ? mainText : md2html(mainText);
+            adaptedEl.innerHTML = ATNE_sanitize(looksLikeHtml ? mainText : md2html(mainText));
             // Il·lustracions: si hi ha marcadors, processa'ls
             if (mainText && /\[IMATGE:\s*[^\]]+\]/.test(mainText)) {
               processIllustrationMarkers(adaptedEl, mainText);
@@ -3407,7 +3432,7 @@
     if (adaptedEl) {
       const mainText = parsed.main || rawAdapted || '';
       const looksLikeHtml = /<(p|h[1-6]|ul|ol|li|strong|em)[\s>]/i.test(mainText);
-      adaptedEl.innerHTML = looksLikeHtml ? mainText : md2html(mainText);
+      adaptedEl.innerHTML = ATNE_sanitize(looksLikeHtml ? mainText : md2html(mainText));
       if (mainText && /\[IMATGE:\s*[^\]]+\]/.test(mainText)) {
         processIllustrationMarkers(adaptedEl, mainText);
       }
@@ -3553,9 +3578,9 @@
         // markdownToHtml fa el render: si el text ja és HTML (el LLM el va retornar),
         // igualment funciona perquè els tags queden preservats.
         const looksLikeHtml = /<(p|h[1-6]|ul|ol|li|strong|em)[\s>]/i.test(result.text);
-        adaptedEl.innerHTML = looksLikeHtml
+        adaptedEl.innerHTML = ATNE_sanitize(looksLikeHtml
           ? result.text
-          : window.ATNE_LLM.markdownToHtml(result.text);
+          : window.ATNE_LLM.markdownToHtml(result.text));
         attachParaHandles();
         pushHistory();
         // Bug 1: desar net (sense .para-handle)
