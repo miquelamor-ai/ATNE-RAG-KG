@@ -175,11 +175,11 @@ Retorna UN SOL objecte JSON (sense code fences, sense explicacions):
 }}
 
 El flux_brief ha d'omplir aquests slots concatenats en una sola frase:
-1. SUBJECTE concret amb detalls (no "a factory" sino "rows of mechanical looms powered by steam")
-2. ACCIO o estat (workers tending machines, leaves catching light, etc.)
-3. ESCENARI / context historic o geografic (19th century, mediterranean coast, alpine forest...)
-4. LLUM / atmosfera (warm light filtering through tall windows, golden hour, soft overcast...)
-5. ENQUADRAMENT / composicio (waist-up framing, three-quarter view, wide establishing shot, close-up macro...)
+1. SUBJECTE concret amb TIPUS especific (no "a factory" sino "a textile factory with cast iron looms"; no "machinery" sino "mechanical looms with leather drive belts"). Si el concept es generic, AFEGEIX el tipus mes prototipic per al context (fabrica + segle XIX → textil; ciutat + edat mitjana → walled city).
+2. ESCENARI / context historic o geografic com a element dominant (19th century, mediterranean coast, alpine forest...)
+3. LLUM / atmosfera (warm light filtering through tall windows, golden hour, soft overcast...)
+4. ELEMENTS HUMANS NOMES SI APLICA, sempre com a element secundari ("a few small figures of workers in the background tending the machines"), mai com a focus. NO comencis el brief amb "a worker" o "a person". El SUBJECTE PRINCIPAL es l'escenari/objecte, no la persona.
+5. ENQUADRAMENT amb preferencia per "wide establishing shot" o "wide angle view" per escenes (mostra context); "close-up macro" nomes per concepts microscopics.
 
 Regles obligatories:
 - Nomes afirmacions POSITIVES ("show X"), mai negacions ("no Y", "avoid Y").
@@ -188,11 +188,17 @@ Regles obligatories:
   nivell macroscopic observable (ex: "a green leaf catching sunlight, drops of water on the surface, soft morning light, close-up macro view" en lloc de "chloroplasts performing photosynthesis").
 - Si el concepte es huma o cultural, inclou epoca/vestimenta i enquadrament humanista.
 - Ajusta la complexitat al nivell MECR (A1-A2 mes simple, C1-C2 mes detallat).
+- CRITIC per FLUX-schnell: si el concepte es generic (p.ex. "fabrica", "ciutat", "animal"), ESPECIFICA UN TIPUS CONCRET (p.ex. "textile factory with looms", "medieval walled city", "African savanna elephant"). Els models petits responen molt millor a noms concrets que a categories abstractes.
+- CRITIC: el subjecte ESCENARI ha de dominar el brief, no els humans. Si inclous persones, posa-les com a element secundari ("a few workers tending machines in the background") i no com a focus ("portrait of a worker"). Per "fabrica", "ciutat", "paisatge", "interior", l'arquitectura/escenari es protagonista.
+- Comenca el brief amb el SUBJECTE PRINCIPAL no huma quan sigui possible (interior, building, landscape, scene), no amb "a worker" o "a person".
 
 EXEMPLES de briefs de qualitat:
 
 CONCEPTE: "Revolucio industrial fabrica textil"
 flux_brief: "the interior of a 19th century textile factory, rows of mechanical looms powered by steam, a few workers in simple period clothing tending the machines, warm light filtering through tall windows, waist-up framing, three-quarter view"
+
+CONCEPTE: "Fabrica del segle XIX"
+flux_brief: "the interior of a 19th century textile factory hall, long rows of cast iron mechanical looms with leather drive belts overhead, large arched windows letting in warm afternoon light, a few small figures of workers in the distance tending the machines, dust particles in the sunbeams, wide establishing shot from one end of the hall"
 
 CONCEPTE: "Fotosintesi"
 flux_brief: "a single fresh green leaf in sharp focus, tiny droplets of water on its surface, sunlight streaming from the upper right and casting soft shadows, a blurred forest background, close-up macro composition with the leaf centered, golden morning atmosphere"
@@ -203,34 +209,57 @@ flux_brief: "a bustling medieval town market square in the early afternoon, wood
 Respon nomes amb el JSON."""
 
 
-def _gemma_translate(concept: str, context: dict) -> dict:
+def _gemma_translate(concept: str, context: dict, model_id: str = "") -> dict:
     """Tradueix concepte catala -> (query angles, brief angles).
 
-    Usa Gemini 2.5 Flash-Lite amb thinking_budget=0: ~0.7-1s per crida.
-    Benchmarks: Gemma 3 27B ~10s, Gemini 2.5 Flash ~1.2s, Flash-Lite ~0.7s.
-    Regla cost Miquel 2026-04-21: mantenir thinking_budget=0.
-    """
-    from google import genai
-    from google.genai import types
+    `model_id` opcional sobreescriu el motor a usar. Si buit, usa el configurat
+    a `_MODEL_CONFIG["illustration_translate"]` via `server._model_for(...)`,
+    que el docent pot canviar des d'/admin com la resta de fases.
 
-    api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GEMMA4_API_KEY")
-    if not api_key:
-        raise RuntimeError("GEMINI_API_KEY no disponible")
-    client = genai.Client(api_key=api_key)
+    Defaults històrics:
+      - Gemma 3 27B (~10s) — gratuit free tier, qualitat alta
+      - Gemini 2.5 Flash-Lite (~0.7s) — gratuit dins quota, més ràpid
+    Decisió 2026-05-03 de Miquel: default Gemma 3 27B + configurable per admin.
+    """
+    # Resol el model: override > config > fallback Gemma 3
+    if not model_id:
+        try:
+            import server  # import perezos per evitar cicle
+            model_id = server._model_for("illustration_translate")
+        except Exception:
+            model_id = "gemma-3-27b-it"
+
     prompt = _GEMMA_PROMPT_TEMPLATE.format(
         concept=concept,
         mecr=context.get("mecr") or "B1",
         subject=context.get("subject") or "general",
     )
-    resp = client.models.generate_content(
-        model="gemini-2.5-flash-lite",
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            temperature=0.0,
-            thinking_config=types.ThinkingConfig(thinking_budget=0),
-        ),
-    )
-    text = (resp.text or "").strip()
+
+    # Branca rapida: Gemini Flash-Lite amb thinking_budget=0 (memòria
+    # project_gemini_thinking_cost: thinking_budget ha de ser 0 sempre per
+    # evitar el factor cost ×N que va costar 105€ el 2026-04-21).
+    if model_id.startswith("gemini"):
+        from google import genai
+        from google.genai import types
+        api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GEMMA4_API_KEY")
+        if not api_key:
+            raise RuntimeError("GEMINI_API_KEY no disponible")
+        client = genai.Client(api_key=api_key)
+        resp = client.models.generate_content(
+            model=model_id,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.0,
+                thinking_config=types.ThinkingConfig(thinking_budget=0),
+            ),
+        )
+        text = (resp.text or "").strip()
+    else:
+        # Branca generica: usa _call_llm (Gemma 3/4, GPT, Mistral, OpenRouter).
+        # System prompt empty: el template ja conté tota la consigna i exemples.
+        from adaptation.llm_clients import _call_llm
+        text = (_call_llm(model_id, "", prompt) or "").strip()
+
     # Treu fences
     m = re.search(r"```(?:json)?\s*(.*?)\s*```", text, re.DOTALL)
     if m:

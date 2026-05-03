@@ -669,6 +669,7 @@ const PHASE_META = {
   adapt_flash: { title: "Adaptació Flash",               desc: "POST /api/adapt-flash · mode ràpid sense configuració" },
   refine:      { title: "Refinament (Pas 4)",           desc: "POST /api/refine-text · correccions post-adaptació" },
   complements: { title: "Complements",                   desc: "Preguntes de comprensió, glossari, bastides" },
+  illustration_translate: { title: "Il·lustracions · traductor brief", desc: "Tradueix [IMATGE: concept] → query EN + brief FLUX. Default Gemma 3 27B." },
   auditor:     { title: "Auditor LLM (opt-in)",         desc: "Quality Report post-generació" },
 };
 
@@ -800,7 +801,7 @@ async function loadConfig() {
     configCache = data;
 
     // Generar phase-cards dinàmicament
-    const phases = ["generate", "adapt", "adapt_flash", "refine", "complements", "auditor"];
+    const phases = ["generate", "adapt", "adapt_flash", "refine", "complements", "illustration_translate", "auditor"];
     const grid = document.getElementById("phase-config-grid");
     grid.innerHTML = phases.map(p =>
       renderPhaseCard(p, data.models_available, data.model_costs_eur_per_call, data.model_config[p])
@@ -848,7 +849,7 @@ async function saveConfig() {
   status.innerHTML = '<div class="status info">Guardant…</div>';
 
   // Validació client: cap fase en mode rotate pot estar buida
-  const phases = ["generate", "adapt", "adapt_flash", "refine", "complements", "auditor"];
+  const phases = ["generate", "adapt", "adapt_flash", "refine", "complements", "illustration_translate", "auditor"];
   for (const p of phases) {
     const cfg = collectPhaseConfig(p);
     if (cfg && cfg.mode === "rotate" && (!cfg.models || cfg.models.length === 0)) {
@@ -864,6 +865,7 @@ async function saveConfig() {
     atne_model_adapt_flash: collectPhaseConfig("adapt_flash"),
     atne_model_refine: collectPhaseConfig("refine"),
     atne_model_complements: collectPhaseConfig("complements"),
+    atne_model_illustration_translate: collectPhaseConfig("illustration_translate"),
     atne_model_auditor: collectPhaseConfig("auditor"),
     atne_auditor_enabled: document.getElementById("auditor-enabled").checked,
     pilot_active: document.getElementById("pilot-active").checked,

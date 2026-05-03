@@ -108,6 +108,10 @@ _MODEL_CONFIG: dict[str, str] = {
     "refine": ATNE_MODEL,
     "complements": ATNE_MODEL,
     "auditor": "gpt-4o-mini",
+    # Fase il·lustracions: tradueix concept catala → query EN + brief FLUX.
+    # Default Gemma 3 27B (free tier) per consistencia amb la rotacio. Configurable
+    # des d'/admin com la resta de fases.
+    "illustration_translate": "gemma-3-27b-it",
 }
 
 
@@ -161,6 +165,7 @@ _MODEL_COST_EUR_PER_CALL: dict[str, float] = {
     "gemma-3-27b-it":       0.0,      # Free tier Gemma (claus Google)
     "gemma-3n-e4b-it":      0.0,      # Free tier Gemma (claus Google) — E4B nano
     "gemini-2.5-flash":     0.0,      # Free tier Gemini (claus Google)
+    "gemini-2.5-flash-lite": 0.0,     # Free tier Gemini (~0.7s, més ràpid)
     "gpt-4o-mini":          0.0036,   # ~2k in + 1k out
     "gpt-4o":               0.045,    # idem ~12× més car
     "gpt-4.1-mini":         0.006,    # high-tier OpenAI preu contingut
@@ -237,12 +242,13 @@ def _load_system_config() -> dict:
 
     # Mapa: clau de DB → clau de _MODEL_CONFIG
     model_key_map = {
-        "atne_model_generate":      "generate",
-        "atne_model_adapt":         "adapt",
-        "atne_model_adapt_flash":   "adapt_flash",
-        "atne_model_refine":        "refine",
-        "atne_model_complements":   "complements",
-        "atne_model_auditor":       "auditor",
+        "atne_model_generate":               "generate",
+        "atne_model_adapt":                  "adapt",
+        "atne_model_adapt_flash":            "adapt_flash",
+        "atne_model_refine":                 "refine",
+        "atne_model_complements":            "complements",
+        "atne_model_auditor":                "auditor",
+        "atne_model_illustration_translate": "illustration_translate",
     }
     for row in rows:
         key = row.get("key")
@@ -1042,12 +1048,13 @@ async def health():
 # dashboard /admin. Protegits per password via cookie signada.
 
 _ALLOWED_MODEL_KEYS = {
-    "atne_model_generate":      "generate",
-    "atne_model_adapt":         "adapt",
-    "atne_model_adapt_flash":   "adapt_flash",
-    "atne_model_refine":        "refine",
-    "atne_model_complements":   "complements",
-    "atne_model_auditor":       "auditor",
+    "atne_model_generate":               "generate",
+    "atne_model_adapt":                  "adapt",
+    "atne_model_adapt_flash":            "adapt_flash",
+    "atne_model_refine":                 "refine",
+    "atne_model_complements":            "complements",
+    "atne_model_illustration_translate": "illustration_translate",
+    "atne_model_auditor":                "auditor",
 }
 
 _ALLOWED_MODELS = [
@@ -1056,6 +1063,7 @@ _ALLOWED_MODELS = [
     "gemma-3-12b-it",
     "gemma-3n-e4b-it",
     "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
     "gpt-4o-mini",
     "gpt-4o",
     "gpt-4.1-mini",
