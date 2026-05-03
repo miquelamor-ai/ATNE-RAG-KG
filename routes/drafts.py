@@ -12,8 +12,9 @@ Contracte (5 endpoints, extret de server.py al refactor 2026-04-21):
     PATCH  /api/drafts/{draft_id}   — variant PATCH amb camps parcials
 """
 
+import hashlib
 import requests
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, Request
 from fastapi.responses import JSONResponse
 
 
@@ -36,8 +37,23 @@ def _supabase_conf() -> tuple[str, dict]:
     return server.SUPABASE_URL, server.SUPABASE_HEADERS
 
 
+def _expected_docent_id(request: Request) -> str:
+    """Calcula el docent_id esperat per l'usuari autenticat (SHA256[:16]).
+
+    Mateix patró que routes/adaptations.py:111. La identitat efectiva ve del
+    login Supabase/Google @fje.edu validat al middleware (no del client).
+    """
+    login = getattr(request.state, "user_login", "") or ""
+    return hashlib.sha256(login.lower().encode()).hexdigest()[:16]
+
+
+def _check_ownership(request: Request, docent_id: str) -> bool:
+    """Retorna True si el docent_id coincideix amb l'usuari autenticat."""
+    return docent_id == _expected_docent_id(request)
+
+
 @router.post("")
-async def save_draft(payload: dict = Body(...)):
+async def save_draft(request: Request, payload: dict = Body(...)):
     """Desa un esborrany nou o actualitza un d'existent.
 
     Body: {docent_id, profile_id?, title?, text, materia?, nivell?, id?}
@@ -48,6 +64,8 @@ async def save_draft(payload: dict = Body(...)):
     text = payload.get("text") or ""
     if not docent_id:
         return JSONResponse({"ok": False, "error": "docent_id buit"}, status_code=400)
+    if not _check_ownership(request, docent_id):
+        return JSONResponse({"ok": False, "error": "No autoritzat"}, status_code=403)
     if not text or not text.strip():
         return JSONResponse({"ok": False, "error": "text buit"}, status_code=400)
 
@@ -106,7 +124,7 @@ async def save_draft(payload: dict = Body(...)):
 
 
 @router.get("")
-async def list_drafts(docent_id: str = "", limit: int = 20):
+async def list_drafts(request: Request, docent_id: str = "", limit: int = 20):
     """Llista els esborranys del docent (ordenats per updated_at DESC).
 
     Retorna {ok, items: [{id, profile_id, title, text_preview, materia, nivell,
@@ -116,6 +134,8 @@ async def list_drafts(docent_id: str = "", limit: int = 20):
     docent_id = (docent_id or "").strip()
     if not docent_id:
         return JSONResponse({"ok": False, "error": "docent_id buit"}, status_code=400)
+    if not _check_ownership(request, docent_id):
+        return JSONResponse({"ok": False, "error": "No autoritzat"}, status_code=403)
     # Cap per dalt al límit per evitar abusos (mateix esperit que /api/history).
     try:
         limit = max(1, min(int(limit), 100))
@@ -153,7 +173,7 @@ async def list_drafts(docent_id: str = "", limit: int = 20):
 
 
 @router.get("/{draft_id}")
-async def get_draft(draft_id: int, docent_id: str = ""):
+async def get_draft(request: Request, draft_id: int, docent_id: str = ""):
     """Recupera un draft complet. Verifica que `docent_id` coincideix (evita
     accés creuat entre docents que comparteixen la mateixa instància d'ATNE).
     """
@@ -161,6 +181,8 @@ async def get_draft(draft_id: int, docent_id: str = ""):
     docent_id = (docent_id or "").strip()
     if not docent_id:
         return JSONResponse({"ok": False, "error": "docent_id buit"}, status_code=400)
+    if not _check_ownership(request, docent_id):
+        return JSONResponse({"ok": False, "error": "No autoritzat"}, status_code=403)
     try:
         resp = requests.get(
             f"{SUPABASE_URL}/rest/v1/atne_drafts"
@@ -185,12 +207,14 @@ async def get_draft(draft_id: int, docent_id: str = ""):
 
 
 @router.delete("/{draft_id}")
-async def delete_draft(draft_id: int, docent_id: str = ""):
+async def delete_draft(request: Request, draft_id: int, docent_id: str = ""):
     """Esborra un draft. Verifica `docent_id` igual que GET/one."""
     SUPABASE_URL, SUPABASE_HEADERS = _supabase_conf()
     docent_id = (docent_id or "").strip()
     if not docent_id:
         return JSONResponse({"ok": False, "error": "docent_id buit"}, status_code=400)
+    if not _check_ownership(request, docent_id):
+        return JSONResponse({"ok": False, "error": "No autoritzat"}, status_code=403)
     try:
         resp = requests.delete(
             f"{SUPABASE_URL}/rest/v1/atne_drafts?id=eq.{draft_id}&docent_id=eq.{docent_id}",
@@ -207,7 +231,7 @@ async def delete_draft(draft_id: int, docent_id: str = ""):
 
 
 @router.patch("/{draft_id}")
-async def patch_draft(draft_id: int, payload: dict = Body(...)):
+async def patch_draft(request: Request, draft_id: int, payload: dict = Body(...)):
     """Variant PATCH (alias de POST amb id). Mateixa lògica: accepta camps
     parcials i només actualitza els enviats. Requereix `docent_id` al body.
     """
@@ -215,6 +239,8 @@ async def patch_draft(draft_id: int, payload: dict = Body(...)):
     docent_id = (payload.get("docent_id") or "").strip()
     if not docent_id:
         return JSONResponse({"ok": False, "error": "docent_id buit"}, status_code=400)
+    if not _check_ownership(request, docent_id):
+        return JSONResponse({"ok": False, "error": "No autoritzat"}, status_code=403)
     update: dict = {}
     for field in ("title", "text", "profile_id", "materia", "nivell"):
         if field in payload:
