@@ -23,7 +23,7 @@ import threading
 import time
 
 import instruction_filter
-from adaptation.llm_clients import _call_llm, _resolve_model
+from adaptation.llm_clients import _call_llm, _call_llm_raw, _resolve_model
 from adaptation.post_process import (
     _post_process_llm_output,
     clean_gemini_output,
@@ -58,7 +58,7 @@ Retorna NOMÉS aquest JSON:
 {"Q":1-5,"P":1-5,"C":1-5,"j":"una frase justificació"}"""
 
 
-def _verify_adaptation(active_model: str, text_original: str, text_adapted: str, profile: dict, params: dict):
+def _verify_adaptation(verify_model: str, text_original: str, text_adapted: str, profile: dict, params: dict):
     """Autoavaluació ràpida amb 3 criteris. Retorna (mitjana, info)."""
     import json as _json
     perfil_nom = profile.get("nom", "genèric")
@@ -70,7 +70,14 @@ def _verify_adaptation(active_model: str, text_original: str, text_adapted: str,
         f"TEXT ADAPTAT:\n{text_adapted[:3000]}\n\n"
         f"Puntua Q, P, C (1-5). JSON nomes."
     )
-    raw = _call_llm(active_model, VERIFY_SYSTEM, user_msg)
+    raw = _call_llm_raw(
+        verify_model,
+        VERIFY_SYSTEM,
+        user_msg,
+        temperature=0.2,
+        top_p=0.95,
+        max_tokens=600,
+    )
     m = re.search(r'\{[^}]*"Q"[^}]*\}', raw, re.DOTALL)
     if not m:
         raise RuntimeError(f"No s'ha trobat JSON a la resposta: {raw[:200]}")
@@ -79,7 +86,7 @@ def _verify_adaptation(active_model: str, text_original: str, text_adapted: str,
     p = float(data.get("P", 0))
     c = float(data.get("C", 0))
     mitjana = (q + p + c) / 3.0
-    return mitjana, {"Q": q, "P": p, "C": c, "j": data.get("j", "")}
+    return mitjana, {"Q": q, "P": p, "C": c, "j": data.get("j", ""), "model": verify_model}
 
 
 # ── Pipeline principal: run_adaptation ─────────────────────────────────────
@@ -149,6 +156,7 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
     _prov, _spec = _resolve_model(active_model)
     _labels = {
         "gemma-4-31b-it":       "Gemma 4 31B",
+        "gemma-4-26b-a4b-it":   "Gemma 4 26B A4B",
         "gemma-3-12b-it":       "Gemma 3 12B",
         "gemma-3-27b-it":       "Gemma 3 27B",
         "gemma-3n-e4b-it":      "Gemma 3n E4B",
@@ -164,6 +172,17 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
     model_label = _labels.get(_spec, _spec)
     adapted = ""
     verify_enabled = params.get("verify_retry", True)  # per defecte ON
+    verify_model = (params.get("verify_model") or "").strip()
+    if verify_enabled and not verify_model:
+        # El verify és una tasca curta. Usar el mateix model que genera penalitza
+        # molt Gemma 4 31B, així que deleguem al model auditor configurable.
+        try:
+            verify_model = server._model_for("auditor")
+        except Exception:
+            verify_model = active_model
+    verify_model = verify_model or active_model
+    _verify_prov, _verify_spec = _resolve_model(verify_model)
+    verify_label = _labels.get(_verify_spec, verify_model)
     min_score = 4.0
     max_attempts = 2 if verify_enabled else 1
     best_adapted = ""
@@ -237,9 +256,9 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
             break
 
         # VERIFY: jutge ràpid amb rúbrica simplificada
-        cb({"type": "step", "step": "verifying", "msg": f"Autoavaluant qualitat (intent {attempt})..."})
+        cb({"type": "step", "step": "verifying", "msg": f"Autoavaluant qualitat amb {verify_label} (intent {attempt})..."})
         try:
-            score, verify_info = _verify_adaptation(active_model, text, adapted, profile, params)
+            score, verify_info = _verify_adaptation(verify_model, text, adapted, profile, params)
             cb({"type": "step", "step": "verify_result", "msg": f"Puntuació autoavaluació: {score:.1f}/5.0"})
         except Exception as e:
             cb({"type": "step", "step": "warning", "msg": f"Avís: autoavaluació fallida ({e}). Conservem aquesta versió."})

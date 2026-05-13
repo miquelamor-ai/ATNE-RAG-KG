@@ -47,6 +47,7 @@ def _chars_to_tokens(chars: int) -> int:
 _PRICES_USD_PER_1M: dict[str, tuple[float, float]] = {
     # Google — Gemma free tier (AI Studio sense billing)
     "gemma-4-31b-it":   (0.0, 0.0),
+    "gemma-4-26b-a4b-it": (0.0, 0.0),
     "gemma-3-27b-it":   (0.0, 0.0),
     "gemma-3-12b-it":   (0.0, 0.0),
     "gemma-3n-e4b-it":  (0.0, 0.0),

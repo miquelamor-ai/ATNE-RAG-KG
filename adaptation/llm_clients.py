@@ -59,6 +59,8 @@ ATNE_MODEL = os.getenv("ATNE_MODEL", "gemma4").lower()
 _MODEL_ALIASES: dict[str, tuple[str, str]] = {
     # Aliases curts (backward compat)
     "gemma4":            ("gemma4",  "gemma-4-31b-it"),
+    "gemma4-26b":        ("gemma4",  "gemma-4-26b-a4b-it"),
+    "gemma4-moe":        ("gemma4",  "gemma-4-26b-a4b-it"),
     "gemma3":            ("gemma4",  "gemma-3-27b-it"),
     "gemma3-27b":        ("gemma4",  "gemma-3-27b-it"),
     "gemma3-12b":        ("gemma4",  "gemma-3-12b-it"),
@@ -74,6 +76,7 @@ _MODEL_ALIASES: dict[str, tuple[str, str]] = {
     "qwen":              ("openrouter", "qwen/qwen3.5-27b"),
     # Aliases llargs que vindran de system_config i /admin
     "gemma-4-31b-it":    ("gemma4",  "gemma-4-31b-it"),
+    "gemma-4-26b-a4b-it":("gemma4",  "gemma-4-26b-a4b-it"),
     "gemma-3-12b-it":    ("gemma4",  "gemma-3-12b-it"),
     "gemma-3-27b-it":    ("gemma4",  "gemma-3-27b-it"),
     "gemma-3n-e4b-it":   ("gemma4",  "gemma-3n-e4b-it"),
@@ -111,6 +114,8 @@ def _resolve_model(model_id: str) -> tuple[str, str]:
         return ("openrouter", model_id.strip())
     if key.startswith("deepseek"):
         return ("openrouter", "deepseek/deepseek-chat-v3-0324:free")
+    if key.startswith("gemma-4-26"):
+        return ("gemma4", "gemma-4-26b-a4b-it")
     if key.startswith("gemma-3"):
         return ("gemma4", "gemma-3-12b-it")
     if key.startswith("gemma"):
@@ -135,7 +140,7 @@ def _resolve_model(model_id: str) -> tuple[str, str]:
 
 # ── Client Gemini compartit (per a health-check) ───────────────────────────
 
-_genai_key = GEMMA4_API_KEY if ATNE_MODEL == "gemma4" else GEMINI_API_KEY
+_genai_key = GEMMA4_API_KEY if ATNE_MODEL.startswith("gemma") else GEMINI_API_KEY
 gemini_client = genai.Client(
     api_key=_genai_key or GEMMA4_API_KEY or GEMINI_API_KEY,
     http_options=types.HttpOptions(timeout=300_000),  # 5min per generacions llargues

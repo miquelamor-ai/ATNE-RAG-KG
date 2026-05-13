@@ -161,6 +161,7 @@ def _model_for(phase: str, override: str = "") -> str:
 # project_llicons_costos_api.md i project_estrategia_escalat.md.
 _MODEL_COST_EUR_PER_CALL: dict[str, float] = {
     "gemma-4-31b-it":       0.0,      # Free tier Gemma (claus Google)
+    "gemma-4-26b-a4b-it":   0.0,      # Free tier Gemma 4 MoE (claus Google)
     "gemma-3-12b-it":       0.0,      # Free tier Gemma (claus Google)
     "gemma-3-27b-it":       0.0,      # Free tier Gemma (claus Google)
     "gemma-3n-e4b-it":      0.0,      # Free tier Gemma (claus Google) — E4B nano
