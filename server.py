@@ -109,9 +109,9 @@ _MODEL_CONFIG: dict[str, str] = {
     "complements": ATNE_MODEL,
     "auditor": "gpt-4o-mini",
     # Fase il·lustracions: tradueix concept catala → query EN + brief FLUX.
-    # Default Gemma 3 27B (free tier) per consistencia amb la rotacio. Configurable
-    # des d'/admin com la resta de fases.
-    "illustration_translate": "gemma-3-27b-it",
+    # Default Gemma 4 31B (free tier) — Gemma 3 discontinuat per Google el 2026-05.
+    # Configurable des d'/admin com la resta de fases.
+    "illustration_translate": "gemma-4-31b-it",
 }
 
 
@@ -160,11 +160,8 @@ def _model_for(phase: str, override: str = "") -> str:
 # el budget_eur_max. Fonts: preus públics proveïdors 2026-04, memòria
 # project_llicons_costos_api.md i project_estrategia_escalat.md.
 _MODEL_COST_EUR_PER_CALL: dict[str, float] = {
-    "gemma-4-31b-it":       0.0,      # Free tier Gemma (claus Google)
-    "gemma-4-26b-a4b-it":   0.0,      # Free tier Gemma 4 MoE (claus Google)
-    "gemma-3-12b-it":       0.0,      # Free tier Gemma (claus Google)
-    "gemma-3-27b-it":       0.0,      # Free tier Gemma (claus Google)
-    "gemma-3n-e4b-it":      0.0,      # Free tier Gemma (claus Google) — E4B nano
+    "gemma-4-31b-it":       0.0,      # Free tier Gemma 4 dense (claus Google)
+    "gemma-4-26b-a4b-it":   0.0,      # Free tier Gemma 4 MoE (claus Google) — ~3x més ràpid
     "gemini-2.5-flash":     0.0,      # Free tier Gemini (claus Google)
     "gemini-2.5-flash-lite": 0.0,     # Free tier Gemini (~0.7s, més ràpid)
     "gpt-4o-mini":          0.0036,   # ~2k in + 1k out
@@ -1060,9 +1057,7 @@ _ALLOWED_MODEL_KEYS = {
 
 _ALLOWED_MODELS = [
     "gemma-4-31b-it",
-    "gemma-3-27b-it",
-    "gemma-3-12b-it",
-    "gemma-3n-e4b-it",
+    "gemma-4-26b-a4b-it",
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
     "gpt-4o-mini",

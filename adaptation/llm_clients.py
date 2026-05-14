@@ -61,10 +61,13 @@ _MODEL_ALIASES: dict[str, tuple[str, str]] = {
     "gemma4":            ("gemma4",  "gemma-4-31b-it"),
     "gemma4-26b":        ("gemma4",  "gemma-4-26b-a4b-it"),
     "gemma4-moe":        ("gemma4",  "gemma-4-26b-a4b-it"),
-    "gemma3":            ("gemma4",  "gemma-3-27b-it"),
-    "gemma3-27b":        ("gemma4",  "gemma-3-27b-it"),
-    "gemma3-12b":        ("gemma4",  "gemma-3-12b-it"),
-    "gemma3n":           ("gemma4",  "gemma-3n-e4b-it"),
+    # Aliases Gemma 3 redirigits a Gemma 4 31B — Google va discontinuar
+    # Gemma 3 al v1beta API el 2026-05. Mantenim els alias per
+    # configuracions antigues a system_config; resolen a Gemma 4 31B.
+    "gemma3":            ("gemma4",  "gemma-4-31b-it"),
+    "gemma3-27b":        ("gemma4",  "gemma-4-31b-it"),
+    "gemma3-12b":        ("gemma4",  "gemma-4-31b-it"),
+    "gemma3n":           ("gemma4",  "gemma-4-31b-it"),
     "gemini":            ("gemini",  "gemini-2.5-flash"),
     "mistral":           ("mistral", "mistral-small-latest"),
     "mistral-small":     ("mistral", "mistral-small-latest"),
@@ -77,9 +80,11 @@ _MODEL_ALIASES: dict[str, tuple[str, str]] = {
     # Aliases llargs que vindran de system_config i /admin
     "gemma-4-31b-it":    ("gemma4",  "gemma-4-31b-it"),
     "gemma-4-26b-a4b-it":("gemma4",  "gemma-4-26b-a4b-it"),
-    "gemma-3-12b-it":    ("gemma4",  "gemma-3-12b-it"),
-    "gemma-3-27b-it":    ("gemma4",  "gemma-3-27b-it"),
-    "gemma-3n-e4b-it":   ("gemma4",  "gemma-3n-e4b-it"),
+    # Gemma 3 discontinuat per Google (2026-05) — redirigit a Gemma 4 31B
+    # per a configuracions antigues a Supabase system_config.
+    "gemma-3-12b-it":    ("gemma4",  "gemma-4-31b-it"),
+    "gemma-3-27b-it":    ("gemma4",  "gemma-4-31b-it"),
+    "gemma-3n-e4b-it":   ("gemma4",  "gemma-4-31b-it"),
     "gemini-2.5-flash":      ("gemini",  "gemini-2.5-flash"),
     "gemini-2.5-flash-lite": ("gemini",  "gemini-2.5-flash-lite"),
     "mistral-small-latest": ("mistral", "mistral-small-latest"),
@@ -116,8 +121,6 @@ def _resolve_model(model_id: str) -> tuple[str, str]:
         return ("openrouter", "deepseek/deepseek-chat-v3-0324:free")
     if key.startswith("gemma-4-26"):
         return ("gemma4", "gemma-4-26b-a4b-it")
-    if key.startswith("gemma-3"):
-        return ("gemma4", "gemma-3-12b-it")
     if key.startswith("gemma"):
         return ("gemma4", "gemma-4-31b-it")
     if key.startswith("gemini"):
@@ -307,7 +310,7 @@ def _call_llm(model_id: str, system_prompt: str, text: str) -> str:
                 continue
         raise RuntimeError(f"Totes les claus OpenRouter han fallat: {'; '.join(errors)}")
     else:
-        raise RuntimeError(f"Model desconegut: {model_id}. Opcions: gemini, gemma4, gemma3, gpt, gpt-4o, gpt-4.1-mini, mistral, mistral-large, qwen")
+        raise RuntimeError(f"Model desconegut: {model_id}. Opcions: gemini, gemma4, gpt, gpt-4o, gpt-4.1-mini, mistral, mistral-large, qwen")
 
 
 def _call_llm_raw(
@@ -655,5 +658,5 @@ def _call_llm_stream(
     else:
         raise RuntimeError(
             f"Model desconegut per a streaming: {model_id}. "
-            f"Opcions: gemma4, gemma3, gemini, gpt, gpt-4o, qwen, mistral, mistral-large"
+            f"Opcions: gemma4, gemini, gpt, gpt-4o, qwen, mistral, mistral-large"
         )

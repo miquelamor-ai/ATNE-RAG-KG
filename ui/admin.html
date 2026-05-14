@@ -516,7 +516,7 @@
     <div id="analytics-status"></div>
     <div id="analytics-body" style="display:none">
       <!-- KPIs -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:var(--sp-3);margin-bottom:20px" id="kpi-grid"></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:var(--sp-3);margin-bottom:20px" id="analytics-kpi-grid"></div>
       <!-- Per model / etapa / perfil / condicions -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);margin-bottom:20px">
         <div><div style="font-size:var(--fs-sm);font-weight:var(--fw-semi);color:var(--ink-600);margin-bottom:6px">Per model</div><div id="by-model"></div></div>
@@ -990,7 +990,7 @@ async function loadAnalytics() {
     const latMs = d.latency_avg_ms;
     const latStr = latMs ? `${(latMs/1000).toFixed(1)}s` : '—';
     const p90Str = d.latency_p90_ms ? `p90: ${(d.latency_p90_ms/1000).toFixed(1)}s` : '';
-    document.getElementById('kpi-grid').innerHTML =
+    document.getElementById('analytics-kpi-grid').innerHTML =
       _kpi('Sessions totals', d.total) +
       _kpi('Avui', d.sessions_avui) +
       _kpi('Docents actius', d.docents_actius) +

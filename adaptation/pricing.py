@@ -45,12 +45,10 @@ def _chars_to_tokens(chars: int) -> int:
 #   - docs/sql/sprint1b_admin_config.sql::system_config (default si cal)
 
 _PRICES_USD_PER_1M: dict[str, tuple[float, float]] = {
-    # Google — Gemma free tier (AI Studio sense billing)
-    "gemma-4-31b-it":   (0.0, 0.0),
+    # Google — Gemma free tier (AI Studio sense billing).
+    # Gemma 3 discontinuat per Google a v1beta API el 2026-05.
+    "gemma-4-31b-it":     (0.0, 0.0),
     "gemma-4-26b-a4b-it": (0.0, 0.0),
-    "gemma-3-27b-it":   (0.0, 0.0),
-    "gemma-3-12b-it":   (0.0, 0.0),
-    "gemma-3n-e4b-it":  (0.0, 0.0),
 
     # Google — Gemini de pagament (vigent 2026-04)
     "gemini-2.5-flash":     (0.075, 0.30),

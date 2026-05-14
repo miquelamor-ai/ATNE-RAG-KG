@@ -217,17 +217,17 @@ def _gemma_translate(concept: str, context: dict, model_id: str = "") -> dict:
     que el docent pot canviar des d'/admin com la resta de fases.
 
     Defaults històrics:
-      - Gemma 3 27B (~10s) — gratuit free tier, qualitat alta
+      - Gemma 4 31B (~10s) — gratuit free tier, qualitat alta
       - Gemini 2.5 Flash-Lite (~0.7s) — gratuit dins quota, més ràpid
-    Decisió 2026-05-03 de Miquel: default Gemma 3 27B + configurable per admin.
+    Default Gemma 4 31B (Gemma 3 discontinuat per Google el 2026-05).
     """
-    # Resol el model: override > config > fallback Gemma 3
+    # Resol el model: override > config > fallback Gemma 4
     if not model_id:
         try:
             import server  # import perezos per evitar cicle
             model_id = server._model_for("illustration_translate")
         except Exception:
-            model_id = "gemma-3-27b-it"
+            model_id = "gemma-4-31b-it"
 
     prompt = _GEMMA_PROMPT_TEMPLATE.format(
         concept=concept,
