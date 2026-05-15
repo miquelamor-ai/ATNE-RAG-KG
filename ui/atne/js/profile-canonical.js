@@ -134,6 +134,9 @@
     'tdah', 'dislexia', 'nouvingut', 'altes_capacitats', 'tea',
     'di', 'tdl', 'discapacitat_auditiva', 'discapacitat_visual',
     'discalculia', 'vulnerabilitat',
+    // Ampliacio 2026-05-15: cobertura observable de gaps detectats
+    'tdc',                  // Dispraxia (catàleg H-35..H-38)
+    'comprensio_lectora',   // Comprensió lectora desacoblada (catàleg H-29..H-34)
   ];
 
   // ── Via observable: mapatge conducta → condició implícita ────────────────
@@ -146,11 +149,18 @@
   // Conductes ambigües (fatiga, conceptes abstractes, bloqueig) NO infereixen
   // — només alimenten observacions descriptives.
   const BEHAVIOR_TO_CONDITION = {
-    dist: { key: 'tdah' },           // "Es distreu amb textos llargs"
-    imp:  { key: 'tdah' },           // "Respon abans de llegir la consigna"
-    dec:  { key: 'dislexia' },       // "Confon paraules o salta línies"
-    l2:   { key: 'nouvingut' },      // "Dificultats amb la llengua vehicular"
-    fast: { key: 'altes_capacitats' },// "Acaba molt ràpid i es desmotiva"
+    dist:  { key: 'tdah' },              // "Es distreu amb textos llargs"
+    imp:   { key: 'tdah' },              // "Respon abans de llegir la consigna"
+    dec:   { key: 'dislexia' },          // "Confon paraules o salta línies"
+    l2:    { key: 'nouvingut' },         // "Dificultats amb la llengua vehicular"
+    fast:  { key: 'altes_capacitats' },  // "Acaba molt ràpid i es desmotiva"
+    // Ampliacio 2026-05-15: gaps de cobertura observable
+    comp:  { key: 'comprensio_lectora' },// "Llegeix bé però no entén el que llegeix"
+    lleng: { key: 'tdl' },               // "Expressa idees amb frases curtes o incompletes"
+    num:   { key: 'discalculia' },       // "Li costa amb els números i el càlcul"
+    aud:   { key: 'discapacitat_auditiva' }, // "No sembla sentir bé / l'he de cridar"
+    vis:   { key: 'discapacitat_visual' },   // "S'acosta molt al paper / es queixa que no veu"
+    cor:   { key: 'tdc' },               // "Mala lletra i coordinació motora"
     // Sense mapping (massa ambigues): fat, abs, neg
   };
 
@@ -166,6 +176,9 @@
     tdl: 'TDL', discapacitat_auditiva: 'Disc. auditiva',
     discapacitat_visual: 'Disc. visual', discalculia: 'Discalcúlia',
     vulnerabilitat: 'Vulnerabilitat',
+    // Ampliacio 2026-05-15
+    tdc: 'Dispraxia',
+    comprensio_lectora: 'Comprensió lectora desacoblada',
   };
 
   // Color "cat" del perfil (per a la card) segons primera condició.
@@ -173,6 +186,7 @@
     tdah: 'tdah', dislexia: 'disl', nouvingut: 'cat', altes_capacitats: 'ac',
     tea: 'tea', di: 'tdah', tdl: 'tdah', discapacitat_auditiva: 'tdah',
     discapacitat_visual: 'tdah', discalculia: 'tdah', vulnerabilitat: 'tdah',
+    tdc: 'tdah', comprensio_lectora: 'tdah',
   };
 
   // ── Util ──────────────────────────────────────────────────────────────────

@@ -200,10 +200,21 @@ def build_persona_audience(profile: dict, context: dict, mecr: str) -> str:
 
         elif key == "tdc":
             grau = val.get("grau", "")
-            frag = "TDC/Dispraxia"
+            frag = "Dispraxia"
             if grau:
                 frag += f" (grau {grau})"
             lines.append(frag + ".")
+
+        elif key == "comprensio_lectora":
+            # Patró clínic "poor comprehender": descodifica correctament però no
+            # construeix significat (Cain & Oakhill). Adaptacions H-29..H-34.
+            lines.append(
+                "Comprensió lectora desacoblada: l'alumne descodifica el text "
+                "correctament però NO construeix el significat global per si sol. "
+                "Cal explicitar propòsit lector, inferències, relacions causa-efecte "
+                "i referents pronominals; afegir recapitulacions estructurals i "
+                "micro-preguntes intercalades de metacognició."
+            )
 
         elif key == "2e":
             lines.append("Doble excepcionalitat (2e): combina altes capacitats amb una necessitat d'accessibilitat. Mantenir repte intel·lectual ALT amb suports de format.")

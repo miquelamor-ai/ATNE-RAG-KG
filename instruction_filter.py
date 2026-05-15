@@ -339,6 +339,20 @@ def get_instructions(profile: dict, params: dict) -> dict:
                 included = True
                 motiu = f"COMPLEMENT {comp_key}"
 
+        # ── Suppressió universal (després d'haver decidit inclusió) ──
+        # `suppress_if_profile` ha de funcionar per QUALSEVOL tipus d'activació
+        # (no només SEMPRE), perquè algunes regles NIVELL o COMPLEMENT són
+        # contraproduents per a perfils concrets. Exemple: A-22 (concretar
+        # quantificadors a xifres) és NIVELL però perjudica discalcúlia.
+        if included and _should_suppress_by_profile(instr, active_profiles):
+            suppressed.append(iid)
+            audit.append({"id": iid, "macro": macro_id, "motiu": "suprimit per perfil redundant/contraindicat"})
+            included = False
+        if included and _should_suppress(instr, active_profiles, dua):
+            suppressed.append(iid)
+            audit.append({"id": iid, "macro": macro_id, "motiu": "suprimit per AC/Enriquiment"})
+            included = False
+
         # Afegir a macrodirectiva si inclosa
         if included:
             if macro_id not in macros:

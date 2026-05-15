@@ -100,6 +100,12 @@ MACRODIRECTIVES = {
             "H-09", "H-10", "H-11",
             "H-16", "H-17", "H-23", "H-24", "H-25", "H-26",
             "H-19", "H-20", "H-20b", "H-21",
+            # Discalcúlia (H-27/H-28 base + H-39/H-40/H-41 reforç 2026-05-15)
+            "H-27", "H-28", "H-39", "H-40", "H-41",
+            # Comprensió lectora desacoblada (2026-05-15) — perfil nou
+            "H-29", "H-30", "H-31", "H-32", "H-33", "H-34",
+            # Dispraxia (2026-05-15) — abans buit (només instruccions generals)
+            "H-35", "H-36", "H-37", "H-38",
         ],
     },
     "ENRIQUIMENT": {
@@ -300,6 +306,9 @@ CATALOG = {
         "activation": "NIVELL",
         "macro": "LEXIC",
         "mecr_levels": ["pre-A1", "A1", "A2"],
+        # Per a discalcúlia és contraproduent: la precisió numèrica és barrera, no objectiu.
+        # H-41 cobreix el cas correcte (substituir xifres per aproximacions tangibles).
+        "suppress_if_profile": ["discalculia"],
     },
     "A-23": {
         "text": "Evita cultismes i llatinismes. Substitueix per equivalents patrimonials.",
@@ -890,6 +899,102 @@ CATALOG = {
         "profiles": ["dislexia"],
         "subvar_conditions": {"tipus_fonologica": True},
     },
+
+    # ─── COMPRENSIÓ LECTORA DESACOBLADA (2026-05-15) ────────────────────────────
+    # Perfil "poor comprehender": descodifica correctament però no construeix
+    # significat. Patró clínic reconegut (Cain & Oakhill), distint de dislèxia
+    # i TDL. Adaptacions centrades en macroestructura, inferència, referents.
+
+    "H-29": {
+        "text": "Comprensió lectora desacoblada: davant de cada bloc temàtic, fes explícit el propòsit de la lectura ('Llegeix aquest bloc per saber X') i la conclusió principal que l'alumne ha d'extreure. No deixis l'objectiu de la lectura implícit.",
+        "activation": "PERFIL",
+        "macro": "PERFIL",
+        "profiles": ["comprensio_lectora"],
+    },
+    "H-30": {
+        "text": "Comprensió lectora desacoblada: tradueix les nominalitzacions abstractes a estructura SVO concreta ('la dilatació del metall' → 'el metall es fa més gran quan s'escalfa'). Aquest perfil descodifica correctament però no construeix significat a partir de noms abstractes encadenats.",
+        "activation": "PERFIL",
+        "macro": "PERFIL",
+        "profiles": ["comprensio_lectora"],
+    },
+    "H-31": {
+        "text": "Comprensió lectora desacoblada: fes explícites TOTES les relacions causa-efecte i les inferències implícites del text original. NO assumeixis que la proximitat de dues frases ja indica la connexió: escriu-la amb un connector causal ('això passa perquè...', 'el resultat és que...').",
+        "activation": "PERFIL",
+        "macro": "PERFIL",
+        "profiles": ["comprensio_lectora"],
+    },
+    "H-32": {
+        "text": "Comprensió lectora desacoblada: al final de cada secció llarga, afegeix una mini-recapitulació breu de l'estructura ('Idea central: X. Tres detalls que la suporten: Y, Z, W.'). Reforça la construcció del significat global que l'alumne no extreu sol.",
+        "activation": "PERFIL",
+        "macro": "PERFIL",
+        "profiles": ["comprensio_lectora"],
+    },
+    "H-33": {
+        "text": "Comprensió lectora desacoblada: substitueix els pronoms i referents ambigus pel nom complet, encara que sembli redundant. La sobrecàrrega de memòria de treball per resoldre referents és una de les causes del col·lapse comprensiu en aquest perfil.",
+        "activation": "PERFIL",
+        "macro": "PERFIL",
+        "profiles": ["comprensio_lectora"],
+    },
+    "H-34": {
+        "text": "Comprensió lectora desacoblada: cada 2-3 paràgrafs, inclou una micro-pregunta de verificació intercalada al text (no al final): 'Què acabes de llegir? Digues-ho amb les teves paraules.'. Activa metacognició lectora explícita.",
+        "activation": "PERFIL",
+        "macro": "PERFIL",
+        "profiles": ["comprensio_lectora"],
+    },
+
+    # ─── DISPRAXIA (2026-05-15) ───────────────────────────────────────────────
+    # TDC = dispraxia. Impacte motor + planificació espacial/temporal en
+    # lecto-escriptura. ATNE adapta DISSENY (format, longitud, layout) no
+    # el contingut conceptual.
+
+    "H-35": {
+        "text": "Dispraxia: a les activitats i preguntes de comprensió, prioritza formats de resposta amb mínima escriptura (opció múltiple, V/F, relacionar amb fletxes, completar amb una paraula) sobre redacció oberta. El cost motor i de planificació gràfica fatiga abans que la comprensió mateixa.",
+        "activation": "PERFIL",
+        "macro": "PERFIL",
+        "profiles": ["tdc"],
+    },
+    "H-36": {
+        "text": "Dispraxia: estructura el text en seqüència vertical lineal. Evita layouts en columnes paral·leles o taules amb més de 3 columnes — l'alumne necessita poder seguir el text de dalt a baix sense saltar visualment.",
+        "activation": "PERFIL",
+        "macro": "PERFIL",
+        "profiles": ["tdc"],
+    },
+    "H-37": {
+        "text": "Dispraxia: a procediments i seqüències, separa cada pas en línia independent i numerada. No condensis passos amb 'i després' o 'a continuació'. La planificació motora i temporal és una de les àrees afectades.",
+        "activation": "PERFIL",
+        "macro": "PERFIL",
+        "profiles": ["tdc"],
+    },
+    "H-38": {
+        "text": "Dispraxia: si el text demana producció escrita extensa, retalla'l al nucli essencial. La fatiga motora afecta la qualitat de la resposta abans que la comprensió. Aplica el percentatge més estricte del MECR.",
+        "activation": "PERFIL",
+        "macro": "PERFIL",
+        "profiles": ["tdc"],
+    },
+
+    # ─── DISCALCÚLIA — reforç (2026-05-15) ─────────────────────────────────────
+    # Complementa H-27/H-28 amb vocabulari quantitatiu, gràfics i operacions
+    # implícites. NOTA: A-22 té suppress_if_profile=["discalculia"] perquè
+    # concretar quantificadors amb xifres seria contraproduent per a aquest perfil.
+
+    "H-39": {
+        "text": "Discalcúlia: defineix sempre el vocabulari quantitatiu i matemàtic en context quotidià ('un terç → una de cada tres parts', 'el doble → dues vegades'). No assumir que el lèxic numèric és transparent.",
+        "activation": "PERFIL",
+        "macro": "PERFIL",
+        "profiles": ["discalculia"],
+    },
+    "H-40": {
+        "text": "Discalcúlia: quan el text contingui gràfics, taules o esquemes numèrics, afegeix-hi una descripció verbal de la idea principal ('El gràfic mostra que X creix amb Y'). El processament directe de la informació gràfica numèrica és costós.",
+        "activation": "PERFIL",
+        "macro": "PERFIL",
+        "profiles": ["discalculia"],
+    },
+    "H-41": {
+        "text": "Discalcúlia: si el text exigeix una operació mental per ser comprès ('va passar de 100 a 250, un increment del 150%'), fes l'operació explícita ('va pujar de 100 a 250. Això vol dir que ara és més del doble'). Mai deixar una operació numèrica com a pressuposat.",
+        "activation": "PERFIL",
+        "macro": "PERFIL",
+        "profiles": ["discalculia"],
+    },
 }
 
 
@@ -972,15 +1077,29 @@ PROFILE_INSTRUCTION_MAP = {
         "3_seguretat": ["B-07"],
     },
     "tdc": {
-        "1_estructura": ["B-02", "B-09", "H-19"],
-        "2_compensacio": ["B-04", "B-14"],
+        # Dispraxia (2026-05-15): catàleg propi (H-35..H-38) substitueix
+        # el reciclatge previ d'instruccions genèriques.
+        "1_resposta": ["H-35"],
+        "2_layout": ["H-36"],
+        "3_seqüenciacio": ["H-37"],
+        "4_fatiga_motora": ["H-38"],
     },
     "disc_motora": {
         "1_estructura": ["B-02", "H-19"],
     },
     "discalculia": {
-        "1_numerica": ["H-27"],
+        "1_numerica": ["H-27", "H-41"],
         "2_procedural": ["H-28"],
+        "3_vocabulari": ["H-39"],
+        "4_grafics": ["H-40"],
+    },
+    "comprensio_lectora": {
+        "1_proposit": ["H-29"],
+        "2_desnominalitzacio": ["H-30"],
+        "3_inferencia": ["H-31"],
+        "4_macroestructura": ["H-32"],
+        "5_referents": ["H-33"],
+        "6_metacognicio": ["H-34"],
     },
 }
 

@@ -864,13 +864,16 @@
           <option value="repte">Versió enriquida (més profunditat)</option>
         </select>
         <select class="form-select" id="car-sel" style="display:none" data-help="fl-condicio">
-          <option value="">Selecciona una condició…</option>
-          <option value="dislexia">Li costa llegir (dislèxia)</option>
-          <option value="tdah">Li costa l'atenció i la concentració (TDAH)</option>
-          <option value="tea">Necessita instruccions molt concretes (TEA)</option>
-          <option value="nouvingut">Nouvingut/da – no parla bé el català</option>
-          <option value="altes_capacitats">Vol un repte – altes capacitats</option>
+          <option value="">Selecciona una situació…</option>
+          <option value="dislexia">Li costa llegir</option>
+          <option value="tdah">Li costa l'atenció i la concentració</option>
+          <option value="tea">Necessita instruccions molt concretes</option>
+          <option value="nouvingut">No parla bé el català</option>
+          <option value="altes_capacitats">Vol un repte</option>
           <option value="di">Dificultats generals d'aprenentatge</option>
+          <option value="comprensio_lectora">Llegeix bé però no entén el que llegeix</option>
+          <option value="tdl">Expressa idees amb frases curtes o incompletes</option>
+          <option value="discalculia">Li costa amb els números i el càlcul</option>
           <option value="vulnerabilitat">Té dificultats, però no sé quines</option>
         </select>
       </div>
@@ -1944,19 +1947,23 @@
     var dd  = document.getElementById('load-pf-dropdown');
     if (!btn || !dd) return;
 
-    // Clau canònica → valor de carSel (ara coincideixen; excepcions: tdl/au/vi)
+    // Clau canònica → valor de carSel.
+    // Ampliacio 2026-05-15: tdl, discalculia i comprensio_lectora tenen ara
+    // entrada pròpia al dropdown. Els mappings antics (tdl→dislexia,
+    // discalculia→di, au→tea, vi→vulnerabilitat) eren falsos i s'han
+    // eliminat. au/vi continuen sense porta Flash (només via Taller +
+    // sub-variables) perquè barrejaven casos amb necessitats massa diverses.
     var PERFILS_TO_CAR = {
-      'dislexia':         'dislexia',
-      'tdah':             'tdah',
-      'tea':              'tea',
-      'nouvingut':        'nouvingut',
-      'altes_capacitats': 'altes_capacitats',
-      'di':               'di',
-      'vulnerabilitat':   'vulnerabilitat',
-      'tdl':              'dislexia',
-      'discalculia':      'di',
-      'au':               'tea',
-      'vi':               'vulnerabilitat',
+      'dislexia':            'dislexia',
+      'tdah':                'tdah',
+      'tea':                 'tea',
+      'nouvingut':           'nouvingut',
+      'altes_capacitats':    'altes_capacitats',
+      'di':                  'di',
+      'vulnerabilitat':      'vulnerabilitat',
+      'tdl':                 'tdl',
+      'discalculia':         'discalculia',
+      'comprensio_lectora':  'comprensio_lectora',
     };
     // Backward compat: carSel.value antic (behavioral) → nou (canònic)
     var OLD_CAR_TO_NEW = {

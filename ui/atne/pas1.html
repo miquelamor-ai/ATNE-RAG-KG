@@ -684,6 +684,12 @@
                   <label class="ck"><input type="checkbox" data-beh="imp" checked><span>Respon abans de llegir la consigna</span></label>
                   <label class="ck"><input type="checkbox" data-beh="dec"><span>Confon paraules o salta línies</span></label>
                   <label class="ck"><input type="checkbox" data-beh="l2"><span>Dificultats amb la llengua vehicular</span></label>
+                  <label class="ck"><input type="checkbox" data-beh="comp"><span>Llegeix bé però no entén el que llegeix</span></label>
+                  <label class="ck"><input type="checkbox" data-beh="lleng"><span>Expressa idees amb frases curtes o incompletes</span></label>
+                  <label class="ck"><input type="checkbox" data-beh="num"><span>Li costa amb els números i el càlcul</span></label>
+                  <label class="ck"><input type="checkbox" data-beh="aud"><span>No sembla sentir bé, l'he de cridar</span></label>
+                  <label class="ck"><input type="checkbox" data-beh="vis"><span>S'acosta molt al paper o es queixa que no veu</span></label>
+                  <label class="ck"><input type="checkbox" data-beh="cor"><span>Mala lletra i coordinació motora</span></label>
                   <label class="ck"><input type="checkbox" data-beh="fat"><span>Mostra fatiga o rebuig davant la lectura</span></label>
                   <label class="ck"><input type="checkbox" data-beh="fast"><span>Acaba molt ràpid i es desmotiva</span></label>
                   <label class="ck"><input type="checkbox" data-beh="abs"><span>Li costen conceptes abstractes</span></label>
@@ -735,6 +741,8 @@
                   <button class="tag" data-dx="vi">Discapacitat visual</button>
                   <button class="tag" data-dx="tdl">TDL</button>
                   <button class="tag" data-dx="discalculia">Discalcúlia</button>
+                  <button class="tag" data-dx="tdc">Dispraxia</button>
+                  <button class="tag" data-dx="comprensio_lectora">Comprensió lectora desacoblada</button>
                 </div>
                 <div id="dx-subs"></div>
               </div>
@@ -1388,7 +1396,7 @@
   updateAids();
 
   // Multi-selecció de diagnòstics amb subvariables
-  const DX_NAMES = {tdah:'TDAH',dislexia:'Dislèxia',nouvingut:'Català L2',altes_capacitats:'AACC',tea:'TEA',di:'DI',au:'Aud.',vi:'Vis.',tdl:'TDL',discalculia:'Discalcúlia'};
+  const DX_NAMES = {tdah:'TDAH',dislexia:'Dislèxia',nouvingut:'Català L2',altes_capacitats:'AACC',tea:'TEA',di:'DI',au:'Aud.',vi:'Vis.',tdl:'TDL',discalculia:'Discalcúlia',tdc:'Dispraxia',comprensio_lectora:'Compr. lectora'};
   const L1_META = {
     'Àrab':['semítica','àrab'],
     'Amazic':['amaziga','tifinag / llatí'],

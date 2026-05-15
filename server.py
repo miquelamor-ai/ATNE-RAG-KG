@@ -4375,7 +4375,19 @@ _FLASH_PERFIL_MAP: dict[str, str] = {
                         "Tona tranquil·la i neutral. Divideix la informació en passos petits.",
     "discalculia":      "Discalcúlia: substitueix nombres abstractes per representacions concretes. "
                         "Desglossa qualsevol seqüència numèrica pas a pas sense saltar-ne cap. "
-                        "Per a mesures o estadístiques, afegeix una analogia quotidiana tangible.",
+                        "Per a mesures o estadístiques, afegeix una analogia quotidiana tangible. "
+                        "Defineix el vocabulari quantitatiu en context quotidià ('un terç → una de cada tres parts'). "
+                        "Si el text exigeix una operació mental implícita, fes-la explícita.",
+    "comprensio_lectora": "Comprensió lectora desacoblada: l'alumne descodifica bé però NO construeix significat sol. "
+                          "Fes EXPLÍCITES totes les relacions causa-efecte i inferències del text original (no per proximitat: amb connector causal). "
+                          "Tradueix nominalitzacions abstractes a estructura SVO concreta ('la dilatació del metall' → 'el metall es fa més gran quan s'escalfa'). "
+                          "Substitueix pronoms i referents ambigus pel nom complet. "
+                          "A cada bloc, explicita el propòsit ('Llegeix per saber X') i tanca amb una mini-recapitulació ('Idea central: X. Detalls: Y, Z.'). "
+                          "Intercala micro-preguntes de metacognició cada 2-3 paràgrafs ('Què acabes de llegir? Resumeix-ho.').",
+    "tdc":              "Dispraxia: estructura lineal vertical (evita columnes paral·leles i taules amb >3 columnes). "
+                        "Procediments en passos numerats, un pas per línia (no condensis amb 'i després'). "
+                        "Si demanes resposta escrita, prioritza formats curts (opció múltiple, V/F, completar amb una paraula) sobre redacció lliure. "
+                        "Si el text és llarg, retalla al nucli essencial: la fatiga motora afecta abans que la comprensió.",
 }
 
 
