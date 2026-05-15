@@ -47,7 +47,7 @@
 
   // ── Curs UI → curs API per a Flash backend ────────────────────────────────
   const CURS_TO_API = {
-    'I3': 'primaria_12', 'I4': 'primaria_12', 'I5': 'primaria_12',
+    'I3': 'infantil', 'I4': 'infantil', 'I5': 'infantil',
     '1r Primària': 'primaria_12', '2n Primària': 'primaria_12',
     '3r Primària': 'primaria_34', '4t Primària': 'primaria_34',
     '5è Primària': 'primaria_56', '6è Primària': 'primaria_56',
@@ -269,6 +269,12 @@
       custom: !!o.custom,
       demo: !!o.demo,
       notes: o.notes || '',
+      // Notes narratives del docent (cura personalis, marc rector ignasià):
+      // - punts_forts: en què destaca, què se li dóna bé
+      // - interessos: interessos, cultura, detonants
+      // Acaben al system prompt com a capa descriptiva, NO com a instrucció.
+      punts_forts: (o.punts_forts || '').trim(),
+      interessos: (o.interessos || '').trim(),
       created_at: o.created_at || new Date().toISOString(),
     };
   }
@@ -522,6 +528,11 @@
       caracteristiques,
       canal_preferent: 'text',
       observacions: (profile.behaviors || []).join(' · '),
+      // Capa descriptiva (cura personalis): aportació textual del docent que
+      // entra al system prompt per personalitzar el to i exemples, sense
+      // tocar les instruccions del catàleg.
+      punts_forts: profile.punts_forts || '',
+      interessos: profile.interessos || '',
       _via: 'canonical',
       group: profile.type === 'group',
       profile_id: profile.id,
@@ -651,6 +662,8 @@
       aids: formData.aids,
       mecr_override: formData.mecr_override,
       group_composition: formData.group_composition,
+      punts_forts: formData.punts_forts,
+      interessos: formData.interessos,
       custom: true,
     });
   }

@@ -4294,6 +4294,11 @@ async def adapt_stream(request: Request, payload: dict = Body(...)):
 
 # Mapping (curs, adaptacio) → MECR — idèntic al de mpv/server_mpv.py
 _FLASH_CURS_MECR: dict[tuple[str, str], str] = {
+    # Base al_nivell = pre-A1 (Infantil P3/P4/P5: lectura emergent compartida amb adult)
+    ("infantil",    "molt_simplificat"): "pre-A1",
+    ("infantil",    "simplificat"):      "pre-A1",
+    ("infantil",    "al_nivell"):        "pre-A1",
+    ("infantil",    "enriquiment"):      "A1",
     # Base al_nivell = A1 (Cicle Inicial: comprensió literal, Decret 175/2022)
     ("primaria_12", "molt_simplificat"): "pre-A1",
     ("primaria_12", "simplificat"):      "A1",

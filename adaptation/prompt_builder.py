@@ -217,6 +217,22 @@ def build_persona_audience(profile: dict, context: dict, mecr: str) -> str:
     if obs:
         lines.append(f"Observació del docent: {obs}")
 
+    # Capa descriptiva del docent (cura personalis, marc rector ignasià):
+    # - punts_forts: ajuda l'LLM a apalancar fortaleses i no només a "rebaixar"
+    # - interessos: permet escollir exemples i analogies properes a la persona
+    # Són narratives lliures; entren com a context, NO com a regla normativa.
+    punts_forts = (profile.get("punts_forts") or "").strip()
+    if punts_forts:
+        lines.append(
+            f"Punts forts a apalancar (parteix d'aquí, no només del que li costa): {punts_forts}"
+        )
+
+    interessos = (profile.get("interessos") or "").strip()
+    if interessos:
+        lines.append(
+            f"Interessos, cultura i detonants (usa'ls per escollir exemples, analogies i to): {interessos}"
+        )
+
     return "\n".join(lines)
 
 

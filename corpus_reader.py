@@ -121,7 +121,7 @@ SEGURETAT:
             # Fallback: buscar a partir de "## 6."
             mecr_section = _extract_section(m3, "## 6.")
         if mecr_section:
-            for level in ["pre-A1", "A1", "A2", "B1", "B2"]:
+            for level in ["pre-A1", "A1", "A2", "B1", "B2", "C1"]:
                 blocks = re.findall(
                     rf"### {re.escape(level)}.*?\n```\n?(.*?)```",
                     mecr_section, re.DOTALL
@@ -156,7 +156,7 @@ SEGURETAT:
         if not fewshot_section:
             fewshot_section = _extract_section(m3, "## 9.")
         if fewshot_section:
-            for level in ["pre-A1", "A1", "A2", "B1", "B2"]:
+            for level in ["pre-A1", "A1", "A2", "B1", "B2", "C1"]:
                 pattern = rf"### Exemple {re.escape(level)}\n(.*?)(?=### Exemple|\Z)"
                 m = re.search(pattern, fewshot_section, re.DOTALL)
                 if m:

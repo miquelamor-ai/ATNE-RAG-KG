@@ -195,7 +195,7 @@
   .lvl.on small{color:var(--primary)}
   .lv-code{position:absolute;top:6px;right:8px;font-family:var(--mono);font-size:10px;color:var(--ink-400);font-weight:600;letter-spacing:.03em}
   .lvl.on .lv-code{color:var(--primary)}
-  .levels.mecr{grid-template-columns:repeat(5,1fr)}
+  .levels.mecr{grid-template-columns:repeat(6,1fr)}
   .levels.mecr .lvl{padding:18px 8px 9px;text-align:left}
   .levels.mecr .lvl small{font-size:10px;line-height:1.35;display:block;margin-top:2px}
 
@@ -656,11 +656,20 @@
             <div class="card-t">Nivell lector <span class="req" style="color:var(--tdah);margin-left:4px">*</span></div>
             <div style="font-size:var(--fs-sm);color:var(--ink-500);margin-bottom:10px;line-height:1.5">Nivell de referència de la persona segons el Marc Europeu Comú de Referència (MECR).</div>
             <div class="levels mecr" data-help="mecr">
-              <button class="lvl"><span class="lv-code">A1</span><b>Inicial</b><small>primeres paraules, imatges i suport visual</small></button>
-              <button class="lvl"><span class="lv-code">A2</span><b>Bàsic</b><small>frases curtes, vocabulari quotidià</small></button>
-              <button class="lvl"><span class="lv-code">B1</span><b>Intermedi</b><small>textos adaptats, idees principals</small></button>
-              <button class="lvl"><span class="lv-code">B2</span><b>Avançat</b><small>textos autèntics amb suport puntual</small></button>
-              <button class="lvl"><span class="lv-code">C1</span><b>Competent</b><small>textos complexos i abstractes</small></button>
+              <button class="lvl"><span class="lv-code">pre-A1</span><b>Emergent</b><small>llegeix imatges, símbols i veu d'adult acompanyant (logogràfica)</small></button>
+              <button class="lvl"><span class="lv-code">A1</span><b>Inicial</b><small>desxifra paraules i frases curtes; comença a llegir sol</small></button>
+              <button class="lvl"><span class="lv-code">A2</span><b>Funcional</b><small>llegeix "de les línies": entén el significat literal</small></button>
+              <button class="lvl"><span class="lv-code">B1</span><b>Estratègic</b><small>llegeix "entre línies": infereix, causa-efecte, hipòtesi</small></button>
+              <button class="lvl"><span class="lv-code">B2</span><b>Acadèmic</b><small>llegeix per aprendre: gèneres disciplinars i CALP</small></button>
+              <button class="lvl"><span class="lv-code">C1</span><b>Crític</b><small>llegeix "rere les línies": intenció, ideologia, fiabilitat</small></button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-t">Punts forts i context personal <span class="hint" style="margin-left:8px;font-family:var(--mono);font-size:10.5px;color:var(--ink-400)">comença pel positiu · el que la persona és, abans del que li costa</span></div>
+            <div class="two">
+              <div class="f"><div class="f-l">En què destaca, què se li dóna bé</div><textarea class="txt" id="p-punts-forts" placeholder="Ex: dibuixa molt bé, recorda detalls, ajuda els companys, té molta imaginació…"></textarea></div>
+              <div class="f"><div class="f-l">Interessos, cultura, detonants</div><textarea class="txt" id="p-interessos" placeholder="Qualsevol cosa que ens ajudi a adaptar millor…"></textarea></div>
             </div>
           </div>
 
@@ -749,14 +758,6 @@
             </details>
           </div>
 
-          <div class="card">
-            <div class="card-t">Notes del docent <span class="hint" style="margin-left:8px;font-family:var(--mono);font-size:10.5px;color:var(--ink-400)">opcional</span></div>
-            <div class="two">
-              <div class="f"><div class="f-l">El que saps que li funciona</div><textarea class="txt" placeholder="Ex: respon bé si la consigna està a la pissarra…"></textarea></div>
-              <div class="f"><div class="f-l">Interessos, cultura, detonants</div><textarea class="txt" placeholder="Qualsevol cosa que ens ajudi a adaptar millor…"></textarea></div>
-            </div>
-          </div>
-
           <div class="foot">
             <button class="btn btn-g" data-mode="search">Cancel·lar</button>
             <button class="btn btn-p"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Crear perfil</button>
@@ -837,14 +838,14 @@
               <summary style="cursor:pointer;color:var(--ink-500);padding:4px 0">Ajust MECR manual (només si el nivell lector real difereix del curs)</summary>
               <div style="margin-top:8px;padding:8px 10px;background:var(--ink-50);border-radius:var(--r-md)">
                 <div style="font-size:11.5px;color:var(--ink-500);margin-bottom:6px">Si al grup hi ha alumnes amb nivell lector significativament per sota del curs (p.ex. nouvinguts sense diagnòstic formal, alumnes amb DI o TDL), pots forçar el MECR aquí. Per defecte ATNE usa el derivat del curs.</div>
-                <select class="inp" id="grp-mecr-override" style="max-width:260px">
+                <select class="inp" id="grp-mecr-override" style="max-width:280px">
                   <option value="" selected>Usa el MECR automàtic del curs</option>
-                  <option value="pre-A1">pre-A1 — lectura fàcil extrema</option>
-                  <option value="A1">A1 — primeres paraules, suport visual</option>
-                  <option value="A2">A2 — frases curtes, vocabulari quotidià</option>
-                  <option value="B1">B1 — textos adaptats, idees principals</option>
-                  <option value="B2">B2 — textos autèntics amb suport puntual</option>
-                  <option value="C1">C1 — textos complexos i abstractes</option>
+                  <option value="pre-A1">pre-A1 — Emergent (logogràfica, lectura compartida)</option>
+                  <option value="A1">A1 — Inicial (desxifra paraules i frases curtes)</option>
+                  <option value="A2">A2 — Funcional (llegeix "de les línies")</option>
+                  <option value="B1">B1 — Estratègic (llegeix "entre línies": infereix)</option>
+                  <option value="B2">B2 — Acadèmic (CALP: llegeix per aprendre)</option>
+                  <option value="C1">C1 — Crític (llegeix "rere les línies")</option>
                 </select>
               </div>
             </details>
@@ -1248,7 +1249,7 @@
 
   // Auto-seleccionar MECR quan canvia el curs de l'alumne individual
   const _PCURS_TO_MECR = {
-    'I3':'A1','I4':'A1','I5':'A1',
+    'I3':'pre-A1','I4':'pre-A1','I5':'pre-A1',
     '1r Primària':'A1','2n Primària':'A1','3r Primària':'A1','4t Primària':'A2',
     '5è Primària':'A2','6è Primària':'B1',
     '1r ESO':'B1','2n ESO':'B1','3r ESO':'B2','4t ESO':'B2',
@@ -1799,6 +1800,12 @@
     }
     updateAids();
 
+    // Punts forts i interessos (capa descriptiva, cura personalis)
+    const puntsFortsInp = document.getElementById('p-punts-forts');
+    const interessosInp = document.getElementById('p-interessos');
+    if (puntsFortsInp) puntsFortsInp.value = p.punts_forts || '';
+    if (interessosInp) interessosInp.value = p.interessos || '';
+
     // Canvia el botó
     const saveBtn = form.querySelector('.foot .btn-p');
     if (saveBtn) saveBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Desar canvis';
@@ -2013,6 +2020,12 @@
 
     const subvariables = _collectPersonSubvariables();
 
+    // Notes narratives del docent (cura personalis): punts forts i interessos.
+    // Es passen al canònic i acaben al system prompt com a capa descriptiva
+    // (no com a instrucció), via build_persona_audience() del backend.
+    const puntsForts = (document.getElementById('p-punts-forts')?.value || '').trim();
+    const interessos = (document.getElementById('p-interessos')?.value || '').trim();
+
     // Construïm el perfil canònic com a font única. La via observable activa
     // condicions implícites quan el docent ha marcat conductes mapejables.
     const canonical = window.ATNE_PROFILE_MODEL.fromTallerForm({
@@ -2026,6 +2039,8 @@
       behaviors: behaviorsManual.filter(Boolean),
       behaviors_observed: behaviorsObservedKeys,
       aids: aidsManual.filter(Boolean),
+      punts_forts: puntsForts,
+      interessos: interessos,
     });
 
     // Override MECR manual si l'usuari l'ha tocat explícitament al formulari

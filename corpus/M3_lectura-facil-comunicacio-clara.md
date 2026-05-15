@@ -509,22 +509,27 @@ L'equip decideix adoptar Comunicació Clara com a estàndard de tots els documen
 
 Cada adaptació usa UN ÚNIC nivell MECR de sortida. El codi selecciona el bloc corresponent.
 
-### pre-A1 (Alfabetització)
+### pre-A1 · Emergent (Lectura logogràfica, compartida adult/infant)
 ```
-NIVELL MECR DE SORTIDA: pre-A1 (Alfabetització)
-- Frases de 3-5 paraules màxim
+NIVELL MECR DE SORTIDA: pre-A1 · Emergent (MALL)
+Comportament lector (MALL): l'infant és lector des de l'inici — llegeix imatges, símbols, ritmes i configuracions globals de paraules familiars. Etapa logogràfica: encara no descodifica text llarg sol.
+Destinatari real del text: adult acompanyant (docent a l'aula, família a casa) que llegeix en VEU ALTA amb l'infant. La lectura és compartida.
+- Frases de 3-5 paraules màxim, ritme oral natural
 - Només vocabulari quotidià bàsic (menjar, casa, escola, gran, petit, anar, fer)
 - Verbs en present, només formes regulars
 - NO fórmules, NO nombres grans, NO parèntesis explicatius llargs
 - Cada idea amb suport visual (emoji/pictograma)
 - Estructura: paraula + imatge, paraula + imatge
+- Narrativa amb personatges concrets; fórmules tipus rondalla quan escaigui ("Hi havia una vegada…", "I què va passar?")
 - To: molt conversacional i directe ("Mira! Les plantes...")
 - GLOSSARI PREVI: comença amb "## Paraules clau" (3-5 termes amb imatge)
+- Si el text inclou glossari bilingüe o transliteracions a alfabet origen, presenta'ls sota la capçalera "## Per llegir junts a casa amb la família" (no "Glossari") — el destinatari real és la família.
 ```
 
-### A1 (Accés)
+### A1 · Inicial (Funció executiva, descodificació alfabètica)
 ```
-NIVELL MECR DE SORTIDA: A1 (Accés)
+NIVELL MECR DE SORTIDA: A1 · Inicial (MALL)
+Comportament lector (MALL): funció executiva — domina el codi alfabètic. Casa fonemes amb grafies; llegeix paraules i frases molt senzilles. Comença a llegir sol.
 - Frases de 5-8 paraules màxim
 - Vocabulari quotidià i escolar molt bàsic
 - Present d'indicatiu, frases SVO simples
@@ -534,9 +539,10 @@ NIVELL MECR DE SORTIDA: A1 (Accés)
 - GLOSSARI PREVI: comença amb "## Paraules clau" (3-5 termes)
 ```
 
-### A2 (Plataforma)
+### A2 · Funcional (Lectura "de les línies", significat literal)
 ```
-NIVELL MECR DE SORTIDA: A2 (Plataforma)
+NIVELL MECR DE SORTIDA: A2 · Funcional (MALL)
+Comportament lector (MALL): lectura "de les línies" — entén el significat literal del text. Funció funcional del llenguatge per a la comunicació habitual.
 - Frases de 8-12 paraules màxim
 - Vocabulari freqüent + alguns termes escolars amb definició
 - Es permeten coordinades simples (i, però, perquè)
@@ -546,9 +552,10 @@ NIVELL MECR DE SORTIDA: A2 (Plataforma)
 - GLOSSARI PREVI: comença amb "## Paraules clau" (5-8 termes)
 ```
 
-### B1 (Llindar)
+### B1 · Estratègic (Lectura "entre línies", inferències)
 ```
-NIVELL MECR DE SORTIDA: B1 (Llindar)
+NIVELL MECR DE SORTIDA: B1 · Estratègic (MALL)
+Comportament lector (MALL): lectura "entre línies" — infereix, estableix relacions causa-efecte, formula hipòtesis. Pas cap a la funció instrumental del llenguatge.
 - Frases de 12-18 paraules
 - Vocabulari acadèmic bàsic amb explicacions puntuals
 - Es permeten subordinades simples
@@ -558,15 +565,29 @@ NIVELL MECR DE SORTIDA: B1 (Llindar)
 - To: proper i acadèmic bàsic
 ```
 
-### B2 (Avançat)
+### B2 · Acadèmic (Funció epistèmica, CALP)
 ```
-NIVELL MECR DE SORTIDA: B2 (Avançat)
+NIVELL MECR DE SORTIDA: B2 · Acadèmic (MALL)
+Comportament lector (MALL): funció epistèmica — llegeix per aprendre. Domina gèneres disciplinars i lèxic especialitzat per transformar la lectura en coneixement nou (CALP).
 - Frases de fins a 25 paraules
 - Vocabulari acadèmic estàndard
 - Estructures complexes permeses
 - Termes tècnics sense simplificar (amb definició la primera vegada)
 - Adaptació mínima: principalment clarificar i estructurar
 - To: acadèmic complet
+```
+
+### C1 · Crític (Lectura "rere les línies", ideologia i fiabilitat)
+```
+NIVELL MECR DE SORTIDA: C1 · Crític (MALL)
+Comportament lector (MALL): lectura "rere les línies" — valora intenció autorial, ideologia i fiabilitat. Reconeix to i sentit implícit; emet judicis fonamentats.
+- Sense límit de longitud de frase
+- Vocabulari especialitzat i registres formals admesos
+- Estructures complexes, incisos, gèneres argumentatius
+- Termes tècnics sense simplificar
+- Adaptació molt mínima: només clarificacions puntuals i estructura
+- To: acadèmic complet amb matisos crítics
+- NO simplificar argumentació ni eliminar ambigüitat intencional (la subtilesa és part del contingut)
 ```
 
 ## 7. CÀRREGA COGNITIVA PER NIVELL MECR

@@ -87,7 +87,7 @@ MACRODIRECTIVES = {
         "label": "PERSONALITZACIÓ LINGÜÍSTICA",
         "ordre": 8,
         "instruccions_possibles": [
-            "G-01", "G-02", "G-03", "G-06", "G-07",  # G-05 eliminat (fusionat amb E-08)
+            "G-01", "G-02", "G-03", "G-06", "G-07", "G-08",  # G-05 eliminat (fusionat amb E-08)
         ],
     },
     "PERFIL": {
@@ -704,6 +704,13 @@ CATALOG = {
         "macro": "PERSONALITZACIO",
         "profiles": ["nouvingut"],
         "subvar_conditions": {"calp_inicial": True},
+    },
+
+    "G-08": {
+        "text": "Lectura compartida adult/infant (MECR pre-A1): el text ha de ser apte per ser llegit en VEU ALTA per un adult acompanyant (docent a l'aula, família a casa). Ritme oral natural, frases curtes amb pauses clares (puntuació mínima), narrativa amb personatges concrets, estructura repetitiva tipus rondalla quan escaigui ('Hi havia una vegada…', 'I què va passar?'). L'infant és lector des de l'inici (principi MALL): llegeix imatges, símbols, ritmes i contextos — encara no decodifica text llarg sol. Si afegeixes glossari bilingüe o transliteracions a alfabet origen (G-01/G-03), presenta'ls SEMPRE sota la capçalera **'Per llegir junts a casa amb la família'** (no 'Glossari'), perquè el destinatari real d'aquests recursos és l'adult que llegeix amb l'infant.",
+        "activation": "NIVELL",
+        "macro": "PERSONALITZACIO",
+        "mecr_levels": ["pre-A1"],
     },
 
     # ─── H. ADAPTACIONS ESPECÍFIQUES PER PERFIL ──────────────────────────────
