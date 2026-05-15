@@ -96,15 +96,58 @@ Cada fase admet bastides específiques.
 ### Habilitats cognitivolingüístiques (Jorba/Gómez/Prat)
 
 Cada habilitat cognitivolingüística té els seus propis connectors,
-estructures i bastides:
+iniciadors i pautes d'autoregulació:
 
-| Habilitat | Connectors típics |
-|---|---|
-| Descriure | és, té, està format per, es caracteritza per |
-| Explicar | perquè, com que, ja que, com a conseqüència de |
-| Justificar | les dades indiquen que, segons…, atès que |
-| Argumentar | per tant, en canvi, malgrat que, en oposició a |
-| Definir | és aquell que…, s'anomena així perquè… |
+| Habilitat | Iniciadors de frase | Pauta d'interrogació (autoregulació) |
+|---|---|---|
+| Definir | "X és un/a...", "S'anomena X a...", "Es caracteritza per..." | Has utilitzat un predicat nominal per identificar el concepte? |
+| Descriure | "Està format per...", "Té una aparença...", "Se situa a..." | Has utilitzat prou adjectius qualificatius per detallar les característiques? |
+| Explicar | "Això passa perquè...", "Com que..., llavors...", "El mecanisme és..." | Has utilitzat connectors temporals i causals per encadenar els fets? |
+| Justificar | "Es relaciona amb...", "Té sentit perquè...", "Això es deu a..." | Has validat l'argument amb un model científic o teòric de referència? |
+| Argumentar | "La meva idea és...", "Les meves raons són...", "En conclusió..." | Has inclòs algun contraargument per valorar diferents punts de vista? |
+
+### Exemples de bases d'orientació per matèria (1r-2n ESO)
+
+Les **bases d'orientació** són plantilles que guien el processament i
+la producció d'un gènere textual concret.
+
+**Ciències — Informe de laboratori**
+1. *Resum*: objectiu i conclusió principal.
+2. *Introducció*: què volem saber i hipòtesi ("Si…, llavors…").
+3. *Material i mètodes*: procediment per fases.
+4. *Resultats*: gràfics o taules.
+5. *Conclusions*: interpretació ("Això significa que… perquè…") i
+   validació de la hipòtesi.
+
+**Història — Crònica històrica**
+1. *Situació inicial*: qui, on i quan.
+2. *Desenvolupament cronològic*: connectors temporals (primer, després,
+   finalment).
+3. *Causes i conseqüències*: per què va passar i quin impacte va tenir.
+4. *Conclusió*: valoració de la importància històrica.
+
+**Llengua catalana — Ressenya d'un llibre**
+1. *Dades tècniques*: títol, autor, gènere.
+2. *Resum sense espòilers*: de què tracta.
+3. *Valoració personal*: què m'ha agradat i per què (adjectius
+   valoratius).
+4. *Tancament*: a quin lector el recomanaria.
+
+### Exemple de modulació MECR per a una habilitat
+
+L'habilitat **"justificar"** canvia així segons el nivell MECR de
+l'alumne (progressió de A1 a B2):
+
+| MECR | Característica | Exemple |
+|---|---|---|
+| A1 | Opinions personals senzilles en contextos quotidians | "He triat el llibre vermell **perquè** m'agraden els dibuixos." |
+| A2 | Tries funcionals, seqüències senzilles | "Per anar al museu anirem en bus **perquè** és més ràpid que caminar." |
+| B1 | Justificació vinculada a continguts acadèmics, connectors lògics | "Aquest element flota **perquè** té menys densitat que l'aigua, **tal com hem vist** a l'experiment anterior." |
+| B2 | Llenguatge acadèmic (CALP), fonamentació en un corpus teòric | "L'augment de la temperatura es deu a l'efecte hivernacle, **ja que** els gasos acumulats impedeixen la sortida de la radiació, **seguint el model** climàtic estudiat." |
+
+Aquest patró d'evolució és aplicable a qualsevol habilitat
+cognitivolingüística — la complexitat de les bastides creix amb el
+nivell, no es repeteix idèntica.
 
 ## Errors comuns — què NO fer
 
