@@ -250,9 +250,11 @@
         .catch(function () { /* ignore */ });
     }
 
-    if (did) {
-      checkAdmin(did);
-    } else if (currentLogin) {
+    // Sempre crida /api/docent/login si tenim login: és idempotent i garanteix
+    // que la fila a atne_docents existeix. Sense això, els docents que tenen
+    // un docent_id cachejat d'una versió anterior (on no es creava la fila)
+    // no apareixen mai a atne_docents i el dashboard els mostra com a "docXXXX".
+    if (currentLogin) {
       fetch('/api/docent/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -260,7 +262,10 @@
       })
       .then(function (r) { return r.ok ? r.json() : {}; })
       .then(function (d) {
-        if (!d.ok || !d.docent_id) return;
+        if (!d.ok || !d.docent_id) {
+          if (did) checkAdmin(did);
+          return;
+        }
         try { localStorage.setItem('atne.docent_id', d.docent_id); } catch(e) {}
         if (d.alias) {
           try { localStorage.setItem('atne.docent_alias', d.alias); } catch(e) {}
@@ -271,7 +276,11 @@
         }
         checkAdmin(d.docent_id);
       })
-      .catch(function () { /* ignore */ });
+      .catch(function () {
+        if (did) checkAdmin(did);
+      });
+    } else if (did) {
+      checkAdmin(did);
     }
   }
 
