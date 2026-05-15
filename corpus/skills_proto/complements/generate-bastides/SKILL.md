@@ -2,17 +2,14 @@
 name: generate-bastides
 description: >
   Use when the teacher has activated the "bastides" complement. Generates
-  scaffolding supports for the student that cover the full reading process
-  (pre-reading, during, post-reading) and, when production tasks exist
-  (preguntes_comprensio or activitats_aprofundiment), also production
-  scaffolds (connectors + sentence frames + key vocabulary). Language
-  adapts to the student's MECR level: simple/visual for A1-A2, more
-  technical for B1+. L1 support (translation/transliteration) is delegated
-  to the Glossari complement, not duplicated here. Visual layout
-  suggestions for the teacher go to "Notes d'auditoria", not to the
-  student-facing output.
+  scaffolding supports following MALL/TIL/TILC: helps students access the
+  three planes of reading (literal, inferential, critical) and produce
+  quality texts by activating cognitive-linguistic abilities (describe,
+  explain, justify, argue, demonstrate). Language adapts to MECR. L1
+  support is delegated to the Glossari complement. Visual layout
+  suggestions for the teacher go to "Notes d'auditoria".
 author: FJE — Fundació Jesuïtes Educació
-version: 2.0.0-proto
+version: 3.0.0-proto
 complement_key: bastides
 agent_role: complements
 tools_required: []
@@ -27,55 +24,86 @@ depends_on:
 related:
   - skill: generate-glossari
     note: El suport L1 (traducció + transliteració) es genera al Glossari, no aquí.
+fonts_internes: NotebookLM MALL/TIL/TILC (FJE)
 ---
 
-# Generar bastides (scaffolding) — v2
+# Generar bastides (scaffolding) — v3
 
-## Què són les bastides en aquest context
+## Què cobreix aquest complement
 
-**Bastides = ajudes perquè l'alumne realitzi una tasca** que sense suport no
-podria fer. Segueix el principi de Vygotsky (Zona de Desenvolupament Pròxim)
-i el model DUA/Cummins/MALL-TILC.
+El complement «Bastides» actua com a **mediador per a la construcció de
+significats i la producció de textos de qualitat**. Segueix el model
+**MALL/TIL/TILC** de Jesuïtes Educació.
 
-ATNE distingeix **dos tipus de bastides** dins d'aquest complement:
+### Els tres plànols de la lectura
 
-1. **Bastides de LECTURA** — sempre activades quan el complement està actiu.
-   Ajuden l'alumne a llegir el text amb estratègia, no només a desxifrar.
+Guia l'alumne a través de tres nivells de comprensió:
 
-2. **Bastides de RESPOSTA** — només si hi ha tasca de producció activada
-   (preguntes_comprensio o activitats_aprofundiment). Ajuden l'alumne a
-   formular respostes orals o escrites amb estructura.
+1. **Les línies** — comprensió literal del text (què diu).
+2. **Entre línies** — inferències i hipòtesis (què vol dir).
+3. **Rere les línies** — valoració crítica i ideologia (qui ho diu i
+   per què).
 
-> **Nota important sobre nomenclatura**: pedagògicament *tots* els
-> complements d'ATNE (glossari, esquemes, mapes, preguntes, pictogrames,
-> etc.) són **bastides** en sentit ampli (Vygotsky/Bruner). Aquest
-> complement específic les anomena «bastides» com a abreviació històrica de
-> «bastides lingüístiques i lectores», ja que és el que aporta al sistema
-> en lloc del que ja cobreixen els altres complements. Es preveu una
-> renominació al post-pilot.
+Les bastides de lectura cobreixen aquests tres plànols progressivament.
+
+### Habilitats cognitivolingüístiques
+
+Quan hi ha tasca de producció, l'IA activa una o més de les **5 habilitats
+cognitivolingüístiques** (Jorba/Gómez/Prat):
+
+| Habilitat | Què fa l'alumne |
+|---|---|
+| Descriure | Identificar característiques, classificar |
+| Explicar | Establir relacions causa-efecte, processos |
+| Justificar | Aportar evidències, arguments validats |
+| Argumentar | Defensar una tesi, refutar contraarguments |
+| Demostrar | Provar amb dades, casos o procediments |
+
+### Funció epistèmica de la llengua
+
+La llengua no només comunica, sinó que **fa pensar la matèria**: les
+bastides ajuden a estructurar el raonament disciplinari, no només a
+formular respostes.
+
+## Marc TILC: dependències amb el corpus
+
+Aquest complement no funciona aïllat. Necessita el context del Tractament
+Integrat de Llengua i Contingut (TILC):
+
+| Element | Què aporta | D'on ve |
+|---|---|---|
+| **Patró Temàtic** | Conceptes, models i lèxic disciplinari (el "te") | `materia` + corpus M4 (curricular) |
+| **Patró Lingüístic** | Estructures sintàctiques pròpies de l'àrea (l'"aigua") | corpus M3 + nivell MECR |
+| **Gèneres Textuals** | Estructura del gènere (informe, crònica, debat...) | `params.genere` + corpus M3 (22 gèneres) |
 
 ## Dependència amb altres complements
 
 | Complement | Relació amb bastides |
 |---|---|
-| **Preguntes de comprensió** | Si actiu → s'inclouen bastides de resposta (connectors, frases model). Si no → només bastides de lectura. |
+| **Preguntes de comprensió** | Si actiu → s'inclouen bastides de RESPOSTA (connectors, frases model, checklists). Si no → només bastides de lectura. |
 | **Activitats d'aprofundiment** | Mateixa relació que preguntes. |
 | **Glossari** | Si l'alumne és nouvingut, el glossari ja inclou traducció L1 i transliteració. Per això les bastides NO repeteixen aquesta info. |
+| **Mapa conceptual** | Complementari: el mapa visualitza relacions; les bastides ajuden a verbalitzar-les. |
 
 ## Llenguatge segons MECR
 
-El llenguatge dels títols i etiquetes ha de ser **comprensible per l'alumne**,
-no per al docent. Adaptació obligatòria:
+L'assistent ha d'ajustar la seva complexitat al nivell de l'alumne per
+garantir un **input comprensible** (Krashen):
 
-| MECR | Tractament |
-|---|---|
-| pre-A1, A1, A2 | Títol "**Eines per llegir i respondre**". Emojis i visuals. Frases molt curtes (<10 paraules). EVITAR termes tècnics: «scaffolding», «connectors lògics», «patró lingüístic», «MALL/TILC». |
-| B1, B2 | Títol "**Bastides (ajudes per llegir i respondre)**". Llenguatge clar però pot contenir terminologia bàsica. |
-| C1, C2 | Termes tècnics permesos (l'alumne ja té vocabulari metalingüístic). |
+| MECR | Tractament | Èmfasi |
+|---|---|---|
+| pre-A1, A1, A2 | Frases curtes, suports visuals i multimodals, emojis | Descodificació, vocabulari funcional, BICS |
+| B1, B2 | Terminologia específica de l'àrea, connectors lògics complexos | Foment de l'autonomia i la reflexió metacognitiva |
+| C1, C2 | Terminologia metalingüística, sofisticació argumentativa | CALP avançat, contraargumentació |
 
-## Estructura de sortida
+> **Nota**: a A1-A2 mai s'usen termes tècnics pedagògics (*scaffolding*,
+> *patró lingüístic*, *MALL/TILC*). El títol passa de «Bastides» a
+> «Eines per llegir i respondre». Els 5 elements del MALL es generen
+> igualment però amb llenguatge accessible.
 
-### Sempre presents (bastides de LECTURA)
+## Estructura de sortida v3
+
+### Bastides de LECTURA (sempre, quan el complement està actiu)
 
 ```markdown
 ## [Eines per llegir i respondre | Bastides (ajudes per llegir i respondre)]
@@ -83,73 +111,136 @@ no per al docent. Adaptació obligatòria:
 ### CONTEXT
 - Matèria: [matèria]
 - Etapa: [etapa] · MECR: [nivell]
+- Gènere textual: [gènere]
 
-### 📖 Abans de llegir
-- Pregunta d'activació de coneixements previs
-- Predicció a partir del títol
-- Propòsit clar de la lectura
+### 📖 Abans de llegir — preparar (pla de les línies)
+- Activació de coneixements previs: «Què saps de [tema]?»
+- Predicció: «Què creus que diu el text? Mira el títol.»
+- Propòsit clar: «Llegeix per saber [una cosa concreta].»
 
-### 🔍 Durant la lectura
+### 🔍 Durant la lectura — comprendre (pla entre línies)
 - Què subratllar (1-2 tipus d'informació clau)
-- Com prendre nota al marge (ex: ✓ entès / ? dubte / ! important)
+- Notes al marge (✓ entès / ? dubte / ! important)
 - Idea principal per paràgraf en 1 paraula
 
-### 📝 Després de llegir
-- Resum en 1 frase amb buit per completar
-- Idea principal vs detalls
-- Connexió amb la vida pròpia
+### 📝 Després de llegir — valorar (pla rere les línies)
+- Resum literal en 1 frase amb buit per completar
+- Inferència: «Què deu pensar l'autor sobre…?»
+- Valoració crítica: «Estàs d'acord? Per què?»
 ```
 
-### Condicionals (bastides de RESPOSTA, només si preguntes o activitats)
+### Bastides de RESPOSTA (només si preguntes_comprensio o activitats_aprofundiment)
 
-```markdown
-### 🔗 Connectors per respondre
-[Taula adaptada al MECR amb 5 funcions: causa, conseqüència, contrast, exemple, conclusió]
+L'estructura conté **4 elements MALL**:
 
-### ✏️ Frases per començar la resposta
-[4-5 inicis de frase amb forats per completar]
+**1. Bases d'orientació**
+Guia pas a pas per realitzar la tasca de producció (segons el gènere
+textual i l'habilitat cognitivolingüística demanada). Per exemple,
+per «justificar un fet històric»: pas 1 enunciar el fet → pas 2 buscar
+evidències al text → pas 3 connectar amb causa → pas 4 concloure.
 
-### 🗂️ Paraules clau del text
-[6-10 paraules del text, marcant amb (T) les tècniques]
-```
+**2. Iniciadors de frase (sentence starters)**
+4-5 estructures perquè l'alumne arrenqui la producció. Adaptades a
+l'habilitat cognitivolingüística:
+
+| Habilitat | Iniciadors |
+|---|---|
+| Descriure | «Es caracteritza per…», «Té…», «Està format per…» |
+| Explicar | «Això passa perquè…», «Com a conseqüència…» |
+| Justificar | «Les dades mostren que…», «Si analitzem…, veiem que…» |
+| Argumentar | «Penso que… perquè…», «En canvi…», «Malgrat que…» |
+| Demostrar | «Es pot comprovar que…», «L'exemple de… ho prova» |
+
+**3. Taula de connectors per funció discursiva**
+Modulació per MECR:
+
+| Funció | Connectors (modula segons MECR) |
+|---|---|
+| Causa | perquè, com que, ja que (A1-A2: només «perquè») |
+| Conseqüència | per tant, així doncs, en conseqüència |
+| Oposició / contrast | però, en canvi, malgrat que |
+| Exemplificació | per exemple, com ara, en concret |
+| Conclusió | en resum, per acabar, en definitiva |
+
+**4. Pautes d'interrogació (checklist co-construïble)**
+Llista de preguntes per a l'autoregulació, idealment co-construïdes amb
+l'alumnat:
+- He fet servir el lèxic precís de la matèria?
+- He connectat les idees amb connectors clars?
+- He justificat amb evidències del text?
+- El meu text té introducció, desenvolupament i conclusió?
+- Algú que no hagi llegit el text entendria la meva resposta?
 
 ### Si no hi ha tasca de producció
 
-Substituir bastides de resposta per missatge:
-> **Recomanació**: No hi ha preguntes ni activitats actives. Per generar
-> bastides de resposta (connectors + frases model), activa també el
-> complement «Preguntes de comprensió» o «Activitats d'aprofundiment».
+```markdown
+> **Recomanació**: No hi ha preguntes ni activitats actives en aquesta
+> adaptació. Per això NO s'inclouen bastides de resposta. Si vols que
+> l'alumne respongui, activa també el complement «Preguntes de
+> comprensió» o «Activitats d'aprofundiment».
+```
 
-## Què s'elimina respecte a la v1
+## Errors comuns — què NO fer (v3)
 
-| Bloc v1 | Acció v2 | Motiu |
-|---|---|---|
-| 6. Suport L1 (traducció a llengua materna) | **Eliminat** | Duplicat amb el complement Glossari (que ja inclou L1) |
-| 4. Suport visual recomanat (icones al docent) | **Mogut** a Notes d'auditoria | És info pel docent, no per a l'alumne |
-| Etiquetes tècniques sense modulació MECR | **Adaptades** segons nivell | Inintel·ligible per a A1-A2 |
+Errors específics del MALL que aquesta skill evita:
+
+- **Anàlisis gramaticals descontextualitzades** — no posar regles
+  gramaticals que no serveixin per a la tasca comunicativa.
+- **Simplificació excessiva (baixar nivell vs donar bastides)** —
+  l'objectiu és accedir al **CALP** (llenguatge acadèmic), no
+  substituir-lo per llenguatge col·loquial.
+- **Correcció sistemàtica de l'error** — en una primera versió, prioritzar
+  sentit i comunicació; la correcció ortogràfica és per fases posteriors.
+- **Models únics (talla-única)** — no donar plantilles rígides que
+  impedeixin el discurs genuí de l'alumne.
+- **Sobreintervenció** — intervenir en tot moment genera dependència;
+  cal deixar espai per l'autonomia.
+- **Bastides permanents** — sense fading no hi ha aprenentatge real
+  (només resultat).
+- **Donar la resposta** — la bastida facilita el procés, no el substitueix.
+- **Ocultar els criteris** — l'alumne ha de saber què s'espera d'ell
+  des del principi (per això la checklist és valuosa).
+- **Repetir suport L1** — ja és al complement Glossari.
+- **Suggeriments visuals dins de les bastides** — són info pel docent;
+  van a «Notes d'auditoria».
 
 ## Adequació per etapa educativa
 
-Modula el contingut segons l'etapa (no només el MECR):
-
-- **Infantil / Cicle Inicial**: pre-lectura amb dibuixos, durant amb símbols
-  visuals (✓ ?), després amb dibuix a mà.
-- **Cicle Mitjà / Superior / ESO**: estratègies procedimentals (esquemes,
-  taules, plantilles de resposta).
-- **Batxillerat / FP**: síntesi, anàlisi crítica de múltiples fonts,
-  argumentació amb tesi/antítesi.
+| Etapa | Tipus de bastides prioritzades |
+|---|---|
+| Infantil / Cicle Inicial | Físiques i visuals (imatges, gestos, colors). Evita abstracció. |
+| Cicle Mitjà / Superior / ESO | Procedimentals (estratègies, taules, plantilles). |
+| Batxillerat / FP | Síntesi i anàlisi crítica multifont, argumentació sofisticada. |
 
 ## Regles estrictes
 
 - **SEMPRE** generar les 3 fases de lectura (abans/durant/després).
-- **CONDICIONAL** les bastides de resposta segons preguntes/activitats.
+- **CONDICIONAL** generar bastides de resposta segons preguntes/activitats.
+- **CONDICIONAL** activar els 4 elements del MALL (bases, iniciadors,
+  connectors, checklist) si hi ha producció. Si no, no inserir-los.
 - **MAI** repetir suport L1 (ja és al glossari).
 - **MAI** posar suggeriments visuals al docent dins de les bastides (van
-  a Notes d'auditoria).
-- **NO** donar respostes: l'alumne ha de completar tot.
-- Modular complexitat lingüística segons MECR (especialment a A1-A2).
+  a «Notes d'auditoria»).
+- **MAI** donar respostes: l'alumne ha de completar tot.
+- **SEMPRE** modular complexitat lingüística segons MECR, especialment
+  el TÍTOL (a A1-A2 és «Eines per llegir i respondre», no «Bastides
+  (scaffolding)»).
+- **SEMPRE** connectar les bastides al gènere textual i a la matèria
+  (no genèriques).
+
+## Referències
+
+- `corpus/M2_bastides-scaffolding.md` — marc teòric complet (autors,
+  exemples, errors comuns, fonts).
+- `corpus/external/corpusFJE/M3_TILC-llengua-i-continguts.md` — model
+  TILC (patró temàtic + lingüístic + gèneres).
+- `corpus/external/corpusFJE/M1_desenvolupament-cognitiu-social.md` —
+  ZDP de Vygotski.
+- Jorba, J., Gómez, I., Prat, À. — *Parlar i escriure per aprendre*.
+- Material MALL FJE (ESO, MOPI, PIN).
 
 ## Exemple
 
 Veure `assets/exemple-ciencies-B1.md` (text informatiu, ESO 3r, MECR B1).
-*Nota: l'exemple v1 cal actualitzar a v2 (post-pilot).*
+*Nota: l'exemple v1 cal actualitzar a v3 amb els 3 plànols de lectura i
+els 4 elements MALL — pendent quan es despleguin les skills.*
