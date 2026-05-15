@@ -3374,10 +3374,17 @@
     let _streamBuffer = '';
     let _streamActive = false;
 
+    // Fase A: deriva etapa i curs des de profile.course. Sense això, el
+    // backend usava un default silenciós a "ESO" que generava bugs (cas Petri).
+    const _PM = window.ATNE_PROFILE_MODEL || {};
+    const _etapaAdapt = (typeof _PM.etapaFromCourse === 'function')
+      ? _PM.etapaFromCourse(profile.course || '') : '';
+    const _cursAdapt = (typeof _PM.cursFromCourse === 'function')
+      ? _PM.cursFromCourse(profile.course || '') : nivellPerfilAdapt;
     window.ATNE_LLM.adaptText({
       text: docOriginal,
       profile: profile,
-      context: { materia, titol: title, nivell_curs: nivellPerfilAdapt },
+      context: { materia, titol: title, etapa: _etapaAdapt, curs: _cursAdapt, nivell_curs: _cursAdapt },
       params: adaptParams,
       onStep: (ev) => {
         if (regenT && ev.msg) regenT.textContent = ev.msg;
@@ -3572,6 +3579,12 @@
     startRegenLoop();
 
     const nivellPerfilAdapt = (profile.course || '').replace(/\s+[A-Z]$/, '').trim();
+    // Fase A: deriva etapa des de profile.course (mateix patró que el camí single).
+    const _PM_M = window.ATNE_PROFILE_MODEL || {};
+    const _etapaMulti = (typeof _PM_M.etapaFromCourse === 'function')
+      ? _PM_M.etapaFromCourse(profile.course || '') : '';
+    const _cursMulti = (typeof _PM_M.cursFromCourse === 'function')
+      ? _PM_M.cursFromCourse(profile.course || '') : nivellPerfilAdapt;
     let done = 0;
     const total = versions.length;
 
@@ -3589,7 +3602,7 @@
       window.ATNE_LLM.adaptText({
         text: docOriginal,
         profile: profile,
-        context: { materia, titol: title, nivell_curs: nivellPerfilAdapt },
+        context: { materia, titol: title, etapa: _etapaMulti, curs: _cursMulti, nivell_curs: _cursMulti },
         params: adaptParams,
         onResult: (ev) => {
           window.ATNE_VERSIONS[version.id] = {

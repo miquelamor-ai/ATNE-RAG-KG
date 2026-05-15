@@ -26,6 +26,31 @@
 (function () {
   'use strict';
 
+  // ── Derivació etapa + curs base des del camp `course` ─────────────────────
+  // El frontend treballa amb un sol camp `course` (p.ex. "I5 A", "3r ESO B").
+  // El backend necessita etapa + curs separats:
+  //   - etapa: una de "infantil" | "primaria" | "ESO" | "batxillerat" | "FP"
+  //     (les claus que prompt_builder/persona-audience i bastides reconeixen).
+  //   - curs: el curs base sense la lletra de grup ("I5", "3r ESO").
+  // Aquests helpers són la font única de derivació al frontend. NO defaults
+  // silenciosos: si l'etapa no es pot derivar, retornen string buida i el
+  // backend ha de decidir què fer (loggar, fallar, etc.), no inventar "ESO".
+  function cursFromCourse(course) {
+    if (!course) return '';
+    return String(course).replace(/\s+[A-Z]{1,2}$/, '').trim();
+  }
+  function etapaFromCourse(course) {
+    const c = cursFromCourse(course);
+    if (!c) return '';
+    const low = c.toLowerCase();
+    if (/^i[345]$/i.test(c) || low.includes('infantil')) return 'infantil';
+    if (low.includes('prim')) return 'primaria';
+    if (low.includes('eso')) return 'ESO';
+    if (low.includes('batx')) return 'batxillerat';
+    if (low.includes('fp') || low.includes('grau bàsic') || low.includes('grau mitj') || low.includes('grau superior')) return 'FP';
+    return '';
+  }
+
   // ── Taula curs → MECR (Decret 175/2022 + 171/2022 + 21/2023) ──────────────
   const COURSE_TO_MECR = {
     'I3': 'pre-A1', 'I4': 'pre-A1', 'I5': 'pre-A1',
@@ -827,6 +852,8 @@
     normalizeKey,
     isCanonicalKey,
     mesosRangeToNum,
+    cursFromCourse,
+    etapaFromCourse,
 
     // Factory
     create: createProfile,

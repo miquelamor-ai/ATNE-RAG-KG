@@ -38,16 +38,44 @@ def build_persona_audience(profile: dict, context: dict, mecr: str) -> str:
 
     Aprofita TOTES les sub-variables de tipus NARRATIVA per donar a l'LLM
     una imatge rica de per a qui escriu, no només etiquetes abstractes.
+
+    Fase A (2026-05-15): l'etapa ja no fa fallback silenciós a "ESO". Si el
+    frontend no envia etapa, es loggeja un avís i s'omet la línia de
+    capçalera per evitar la mentida "alumne de ESO" per a infantil/primària.
     """
     chars = profile.get("caracteristiques", {})
     lines = []
 
-    etapa = context.get("etapa", "ESO")
-    curs = context.get("curs", "")
-    header = f"Escrius per a un alumne de {etapa}"
-    if curs:
-        header += f" ({curs})"
-    lines.append(header + ".")
+    etapa = (context.get("etapa") or "").strip()
+    curs = (context.get("curs") or context.get("nivell_curs") or "").strip()
+    if not etapa:
+        # Visibilitat del bug: si el frontend no envia etapa, ho sabrem als logs
+        # en lloc d'assumir "ESO" silenciosament. Si curs porta pistes (p.ex.
+        # "I5", "3r ESO") encara podem orientar la capçalera. Si no, l'ometem.
+        print(
+            f"[prompt_builder] AVIS: context sense 'etapa' (curs='{curs}'). "
+            "El frontend hauria d'enviar-la. Fent inferència minima.",
+            flush=True,
+        )
+        _c = curs.lower()
+        if curs.upper().startswith("I") and len(curs) >= 2 and curs[1] in ("3", "4", "5"):
+            etapa = "infantil"
+        elif "prim" in _c:
+            etapa = "primaria"
+        elif "eso" in _c:
+            etapa = "ESO"
+        elif "batx" in _c:
+            etapa = "batxillerat"
+        elif "fp" in _c or "grau" in _c:
+            etapa = "FP"
+    if etapa:
+        header = f"Escrius per a un alumne de {etapa}"
+        if curs:
+            header += f" ({curs})"
+        lines.append(header + ".")
+    elif curs:
+        # Sense etapa derivable: almenys diem el curs per no perdre tota la senyal.
+        lines.append(f"Escrius per a un alumne del curs «{curs}».")
 
     for key, val in chars.items():
         if not val.get("actiu"):

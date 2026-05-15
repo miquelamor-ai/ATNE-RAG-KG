@@ -224,12 +224,26 @@
 
   /**
    * Construeix el dict 'context' que acompanya el profile.
-   * @param {Object} opts  { materia, nivell_curs, titol }
+   * @param {Object} opts  { materia, etapa, curs, nivell_curs, titol }
+   *
+   * Fase A (2026-05-15): ara enviem `etapa` i `curs` separats com a camps
+   * primaris. `nivell_curs` queda com a alies de compatibilitat fins que
+   * tots els callers facin servir etapa+curs (Fase E elimina nivell_curs).
+   *
+   * No defaults silenciosos: si etapa/curs no arriben, s'envien buits i el
+   * backend decideix (avís a log + fallback explícit), en lloc d'inventar
+   * "ESO" — que és la causa arrel del bug del CONTEXT a les bastides
+   * (cas Petri I5 va sortir com a "Etapa: ESO · MECR: A2").
    */
   function buildBackendContext(opts) {
+    const etapa = opts.etapa || '';
+    const curs = opts.curs || opts.nivell_curs || '';
     return {
       materia: opts.materia || 'Història',
-      nivell_curs: opts.nivell_curs || 'ESO',
+      etapa,
+      curs,
+      // Alias legacy fins a Fase E. Es manté pel codi extern que encara el llegeix.
+      nivell_curs: curs,
       titol: opts.titol || ''
     };
   }
