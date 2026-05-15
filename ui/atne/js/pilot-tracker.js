@@ -582,17 +582,97 @@
     document.getElementById('atne-sug-send').addEventListener('click', function () {
       var text = (ta.value || '').trim();
       if (!text) { close(); return; }
-      event('suggestion_submitted', Object.assign({ text: text }, context || {}));
-      close();
-      // Confirmació visual breu
-      var toast = document.createElement('div');
-      toast.textContent = 'Gràcies pel suggeriment!';
-      toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);' +
-        'background:#1f1f2c;color:#fff;padding:10px 22px;border-radius:8px;font-size:14px;' +
-        'z-index:99999;font-family:Inter,sans-serif;pointer-events:none';
-      document.body.appendChild(toast);
-      setTimeout(function () { try { document.body.removeChild(toast); } catch (e) { /* */ } }, 3000);
+
+      // Backup local IMMEDIAT (mai més perdrem un suggeriment per fallada de
+      // xarxa o backend). Quedarà a localStorage fins que el backend confirmi.
+      var backupKey = 'atne_sug_pending';
+      var pending = [];
+      try { pending = JSON.parse(localStorage.getItem(backupKey) || '[]'); } catch (e) { pending = []; }
+      var localId = 'lcl-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+      pending.push({
+        id: localId,
+        ts: new Date().toISOString(),
+        text: text,
+        context: context || {},
+        docent: _docent() || null,
+        page: location.pathname,
+        sent: false,
+      });
+      try { localStorage.setItem(backupKey, JSON.stringify(pending.slice(-50))); } catch (e) { /* */ }
+
+      // Enviament SÍNCRON amb verificació real de resposta. No usem el
+      // fire-and-forget `event()` general perquè els suggeriments són
+      // dades crítiques (no recuperables si es perden).
+      var sendBtn = document.getElementById('atne-sug-send');
+      sendBtn.disabled = true;
+      sendBtn.textContent = 'Enviant…';
+
+      var payload = {
+        event_type: 'suggestion_submitted',
+        session_id: _currentSessionId(),
+        history_id: _historyId(),
+        step: _step(),
+        docent_id: _docent() || null,
+        data: Object.assign({ text: text, _local_id: localId }, context || {}),
+      };
+
+      fetch(ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+        .then(function (r) { return r.json().catch(function () { return { ok: r.ok }; }); })
+        .then(function (resp) {
+          if (resp && resp.ok) {
+            // Marquem com enviat al backup local (no l'esborrem, queda
+            // com a registre per si el dashboard no el mostra).
+            try {
+              var p = JSON.parse(localStorage.getItem(backupKey) || '[]');
+              p.forEach(function (it) { if (it.id === localId) it.sent = true; });
+              localStorage.setItem(backupKey, JSON.stringify(p));
+            } catch (e) { /* */ }
+            close();
+            _showToast('Gràcies pel suggeriment!', '#1f1f2c');
+          } else {
+            _showSuggestionError(div, text, resp && resp.error);
+          }
+        })
+        .catch(function (err) {
+          _showSuggestionError(div, text, err && err.message);
+        });
     });
+  }
+
+  function _showToast(text, bg) {
+    var toast = document.createElement('div');
+    toast.textContent = text;
+    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);' +
+      'background:' + (bg || '#1f1f2c') + ';color:#fff;padding:10px 22px;border-radius:8px;font-size:14px;' +
+      'z-index:99999;font-family:Inter,sans-serif;pointer-events:none;max-width:90%;text-align:center';
+    document.body.appendChild(toast);
+    setTimeout(function () { try { document.body.removeChild(toast); } catch (e) { /* */ } }, 3500);
+  }
+
+  function _showSuggestionError(modalDiv, originalText, errMsg) {
+    // No tanquem el modal: el text continua visible perquè el docent pugui
+    // copiar-lo. Reactivem el botó i mostrem un missatge inline + toast.
+    var sendBtn = document.getElementById('atne-sug-send');
+    if (sendBtn) {
+      sendBtn.disabled = false;
+      sendBtn.textContent = 'Torna a provar';
+    }
+    var modalInner = modalDiv.querySelector('div > div');
+    if (modalInner && !modalInner.querySelector('.atne-sug-err')) {
+      var err = document.createElement('div');
+      err.className = 'atne-sug-err';
+      err.style.cssText = 'background:#fdecea;border:1px solid #f5b1a8;color:#8a1f15;' +
+        'padding:8px 10px;border-radius:6px;font-size:12px;line-height:1.4;margin:0 0 12px';
+      err.innerHTML = '<strong>No s\'ha pogut enviar.</strong> El text està desat localment ' +
+        'i el podeu copiar (Cmd/Ctrl+A → Cmd/Ctrl+C). Avisa l\'equip ATNE si cal.' +
+        (errMsg ? '<br><span style="font-family:monospace;font-size:11px">' + String(errMsg).slice(0, 200) + '</span>' : '');
+      modalInner.insertBefore(err, modalInner.firstChild);
+    }
+    _showToast('Error enviant el suggeriment — text desat al navegador', '#8a1f15');
   }
 
   window.ATNE_TRACK = {

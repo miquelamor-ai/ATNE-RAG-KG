@@ -206,12 +206,65 @@ _PILOT_ACTIVE: bool = True
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
+# Service-role (opcional). Si està present, l'usem per inserts crítics
+# (telemetria pilot) perquè salta RLS. Mai exposar al frontend.
+SUPABASE_SERVICE_KEY = (
+    os.getenv("SUPABASE_SERVICE_KEY", "")
+    or os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+)
 
 SUPABASE_HEADERS = {
     "apikey": SUPABASE_ANON_KEY,
     "Authorization": f"Bearer {SUPABASE_ANON_KEY}",
     "Content-Type": "application/json",
 }
+
+# Headers per escriptures de telemetria del pilot. Usen service-role si està
+# configurada (salta RLS); en cas contrari cauen a l'anon (que depèn de la
+# política RLS de la taula). Mai exposar SUPABASE_SERVICE_KEY al client.
+_TELEMETRY_WRITE_KEY = SUPABASE_SERVICE_KEY or SUPABASE_ANON_KEY
+SUPABASE_WRITE_HEADERS = {
+    "apikey": _TELEMETRY_WRITE_KEY,
+    "Authorization": f"Bearer {_TELEMETRY_WRITE_KEY}",
+    "Content-Type": "application/json",
+}
+_USING_SERVICE_KEY = bool(SUPABASE_SERVICE_KEY)
+
+# Fitxer de fallback per a events de telemetria que no han pogut entrar a
+# Supabase (xarxa caiguda, RLS, 5xx…). NDJSON append-only, pensat per ser
+# rejugat manualment via /api/admin/pilot/replay-fallback. A Cloud Run el
+# directori /tmp és tmpfs (efímer entre restarts) però els logs stdout sí
+# són durables — per això SEMPRE imprimim el payload a stdout també.
+_PILOT_FALLBACK_DIR = Path(os.getenv("ATNE_PILOT_FALLBACK_DIR", "/tmp")) \
+    if os.name != "nt" else Path(os.getenv("ATNE_PILOT_FALLBACK_DIR", os.getenv("TEMP", "."))).resolve()
+_PILOT_FALLBACK_FILE = _PILOT_FALLBACK_DIR / "atne_pilot_fallback.ndjson"
+
+
+def _append_telemetry_fallback(kind: str, payload: dict, error: str) -> None:
+    """Escriu l'event fallit a stdout (sempre, durable a Cloud Logging) i a
+    un fitxer NDJSON local (recuperable si el procés segueix viu). Mai
+    llança excepció — això mateix és la xarxa de seguretat de la xarxa de
+    seguretat.
+    """
+    import datetime as _dt
+    record = {
+        "ts": _dt.datetime.utcnow().isoformat() + "Z",
+        "kind": kind,
+        "error": error,
+        "payload": payload,
+    }
+    # 1. stdout amb tag indexable per a Cloud Logging
+    try:
+        print(f"[TELEMETRY_FAILED] {json.dumps(record, ensure_ascii=False, default=str)}", flush=True)
+    except Exception:
+        pass
+    # 2. fitxer local NDJSON (millor effort)
+    try:
+        _PILOT_FALLBACK_DIR.mkdir(parents=True, exist_ok=True)
+        with _PILOT_FALLBACK_FILE.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(record, ensure_ascii=False, default=str) + "\n")
+    except Exception:
+        pass
 
 
 def _load_system_config() -> dict:
@@ -635,8 +688,82 @@ async def _atne_startup():
     Sprint 1B: el selector de model per fase viu a system_config. Carreguem
     els valors un cop al boot i els refrescarem via PUT /api/admin/config.
     Si la càrrega falla, els defaults de _MODEL_CONFIG fan de fallback.
+
+    Probe telemetria pilot (afegit 2026-05-15): valida que el backend pot
+    escriure a atne_pilot_events. Si RLS bloqueja l'insert (bug que va fer
+    perdre suggeriments als homòlegs DOP/InfPri), ho diem A LA CARA al log
+    de boot perquè no torni a passar en silenci.
     """
     _load_system_config()
+
+    # ── Asserts de seguretat de la service-role key ──────────────────────
+    # La service-role bypassa RLS — un leak al frontend permetria modificar
+    # qualsevol taula. Aquí verifiquem el bàsic abans d'usar-la.
+    if SUPABASE_SERVICE_KEY:
+        if SUPABASE_SERVICE_KEY == SUPABASE_ANON_KEY:
+            raise RuntimeError(
+                "[ATNE startup] SUPABASE_SERVICE_KEY == SUPABASE_ANON_KEY. "
+                "Has copiat la clau equivocada — la service-role es troba a "
+                "Project Settings → API → 'service_role secret' (sb_secret_… o JWT)."
+            )
+        if not (
+            SUPABASE_SERVICE_KEY.startswith("sb_secret_")
+            or SUPABASE_SERVICE_KEY.startswith("eyJ")
+        ):
+            print(
+                "[ATNE startup] ⚠️  SUPABASE_SERVICE_KEY té format inesperat "
+                "(no comença per 'sb_secret_' ni 'eyJ'). Continuem, però "
+                "revisa que sigui la clau correcta.",
+                flush=True,
+            )
+        # Mai imprimim la clau sencera — només una empremta per identificar-la.
+        _masked = f"{SUPABASE_SERVICE_KEY[:12]}…{SUPABASE_SERVICE_KEY[-4:]}"
+        print(
+            f"[ATNE startup] SUPABASE_SERVICE_KEY configurada ({_masked}) — "
+            "telemetria pilot bypassa RLS.",
+            flush=True,
+        )
+    else:
+        print(
+            "[ATNE startup] SUPABASE_SERVICE_KEY no configurada — la "
+            "telemetria depèn de polítiques RLS d'INSERT per anon (vegeu "
+            "docs/sql/fix_rls_pilot_events_20260515.sql).",
+            flush=True,
+        )
+
+    if SUPABASE_URL and _TELEMETRY_WRITE_KEY:
+        import datetime as _dt
+        try:
+            probe = {
+                "event_type": "client_error",
+                "data": {"_boot_probe": True, "ts": _dt.datetime.utcnow().isoformat() + "Z"},
+            }
+            r = requests.post(
+                f"{SUPABASE_URL}/rest/v1/atne_pilot_events",
+                headers={**SUPABASE_WRITE_HEADERS, "Prefer": "return=minimal"},
+                json=probe,
+                timeout=5,
+            )
+            if r.status_code in (200, 201, 204):
+                print(
+                    f"[ATNE startup] OK telemetria pilot: insert a atne_pilot_events funciona "
+                    f"(service_key={_USING_SERVICE_KEY}).",
+                    flush=True,
+                )
+            else:
+                print(
+                    "\n" + "=" * 72 + "\n"
+                    "[ATNE startup] ⚠️  TELEMETRIA PILOT TRENCADA — els events "
+                    "(suggeriments, refines, etc.) NO entraran a Supabase.\n"
+                    f"  status={r.status_code}  body={r.text[:300]}\n"
+                    f"  service_key_configured={_USING_SERVICE_KEY}\n"
+                    "  Fix: aplica docs/sql/fix_rls_pilot_events_20260515.sql al SQL editor "
+                    "de Supabase, o configura SUPABASE_SERVICE_KEY al Cloud Run.\n"
+                    + "=" * 72,
+                    flush=True,
+                )
+        except Exception as e:
+            print(f"[ATNE startup] probe telemetria error: {e!r}", flush=True)
 
 
 # ── Esborranys (drafts) del Pas 2 ──────────────────────────────────────────
@@ -905,33 +1032,57 @@ from adaptation.llm_clients import (
 
 
 def _log_session(session: dict) -> None:
-    """Insereix una fila a atne_sessions (Supabase). Fire-and-forget."""
-    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+    """Insereix una fila a atne_sessions (Supabase). Fire-and-forget.
+
+    Si l'insert falla (xarxa, RLS, 5xx…) el payload sencer queda a stdout
+    (tag [TELEMETRY_FAILED], durable a Cloud Logging) i al fitxer fallback.
+    Mai es perd silenciosament.
+    """
+    if not SUPABASE_URL or not _TELEMETRY_WRITE_KEY:
+        _append_telemetry_fallback("atne_sessions", session, "supabase_no_configurat")
         return
     try:
-        requests.post(
+        r = requests.post(
             f"{SUPABASE_URL}/rest/v1/atne_sessions",
-            headers={**SUPABASE_HEADERS, "Prefer": "return=minimal"},
+            headers={**SUPABASE_WRITE_HEADERS, "Prefer": "return=minimal"},
             json=session,
             timeout=5,
         )
+        if r.status_code not in (200, 201, 204):
+            _append_telemetry_fallback(
+                "atne_sessions",
+                session,
+                f"http_{r.status_code}: {r.text[:400]}",
+            )
     except Exception as e:
-        print(f"[telemetria] error insert atne_sessions: {e}", flush=True)
+        _append_telemetry_fallback("atne_sessions", session, f"exception: {e!r}")
 
 
 def _log_pilot_event(event: dict) -> None:
-    """Insereix una fila a atne_pilot_events (Supabase). Fire-and-forget."""
-    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+    """Insereix una fila a atne_pilot_events (Supabase). Fire-and-forget.
+
+    Si l'insert falla per RLS, 5xx o xarxa, el payload queda durable a
+    stdout (tag [TELEMETRY_FAILED]) i al fitxer fallback NDJSON. Es pot
+    rejugar amb POST /api/admin/pilot/replay-fallback.
+    """
+    if not SUPABASE_URL or not _TELEMETRY_WRITE_KEY:
+        _append_telemetry_fallback("atne_pilot_events", event, "supabase_no_configurat")
         return
     try:
-        requests.post(
+        r = requests.post(
             f"{SUPABASE_URL}/rest/v1/atne_pilot_events",
-            headers={**SUPABASE_HEADERS, "Prefer": "return=minimal"},
+            headers={**SUPABASE_WRITE_HEADERS, "Prefer": "return=minimal"},
             json=event,
             timeout=5,
         )
+        if r.status_code not in (200, 201, 204):
+            _append_telemetry_fallback(
+                "atne_pilot_events",
+                event,
+                f"http_{r.status_code}: {r.text[:400]}",
+            )
     except Exception as e:
-        print(f"[pilot_event] error insert: {e}", flush=True)
+        _append_telemetry_fallback("atne_pilot_events", event, f"exception: {e!r}")
 
 
 def _docent_hash_from_id(docent_id: str) -> str:
@@ -993,6 +1144,11 @@ async def health():
             "model": ATNE_AUDITOR_MODEL,
             "can_run": bool(os.getenv("OPENAI_API_KEY")),
         },
+        "telemetry_write": {
+            "using_service_key": _USING_SERVICE_KEY,
+            "can_write_pilot_events": None,
+            "error": None,
+        },
     }
 
     # Supabase check
@@ -1035,6 +1191,30 @@ async def health():
         checks["languagetool"]["reachable"] = r.status_code == 200
     except Exception:
         pass
+
+    # Telemetry write probe (CRÍTIC) — sense això es perden dades del pilot.
+    # Detecta el bug del 2026-05-15 (RLS bloquejant inserts a atne_pilot_events).
+    try:
+        import datetime as _dt
+        probe_row = {
+            "event_type": "client_error",  # whitelist-safe
+            "step": None,
+            "data": {"_health_probe": True, "ts": _dt.datetime.utcnow().isoformat() + "Z"},
+        }
+        r = requests.post(
+            f"{SUPABASE_URL}/rest/v1/atne_pilot_events",
+            headers={**SUPABASE_WRITE_HEADERS, "Prefer": "return=minimal"},
+            json=probe_row,
+            timeout=5,
+        )
+        if r.status_code in (200, 201, 204):
+            checks["telemetry_write"]["can_write_pilot_events"] = True
+        else:
+            checks["telemetry_write"]["can_write_pilot_events"] = False
+            checks["telemetry_write"]["error"] = f"http_{r.status_code}: {r.text[:200]}"
+    except Exception as e:
+        checks["telemetry_write"]["can_write_pilot_events"] = False
+        checks["telemetry_write"]["error"] = str(e)
 
     ok = checks["supabase"] and checks["llm"]
     return JSONResponse({"ok": ok, **checks}, status_code=200 if ok else 503)
@@ -1538,7 +1718,42 @@ async def pilot_event(payload: dict = Body(...)):
         "prompt_version": payload.get("prompt_version") or ATNE_PROMPT_VERSION,
     }
 
-    # Fire-and-forget perquè cap clic UI mai bloquegi per latència Supabase
+    # Events crítics (dades irrecuperables si es perden) → insert SÍNCRON
+    # amb retorn d'estat real al client. Així el frontend pot avisar el
+    # docent si el seu suggeriment NO ha entrat i pot copiar-lo manualment.
+    # La resta queden fire-and-forget per no bloquejar la UI.
+    _CRITICAL_EVENTS = {"suggestion_submitted", "client_error"}
+    if event_type in _CRITICAL_EVENTS:
+        if not SUPABASE_URL or not _TELEMETRY_WRITE_KEY:
+            _append_telemetry_fallback("atne_pilot_events", event, "supabase_no_configurat")
+            return JSONResponse(
+                {"ok": False, "error": "Supabase no configurat — guardat localment al servidor"},
+                status_code=503,
+            )
+        try:
+            r = requests.post(
+                f"{SUPABASE_URL}/rest/v1/atne_pilot_events",
+                headers={**SUPABASE_WRITE_HEADERS, "Prefer": "return=minimal"},
+                json=event,
+                timeout=8,
+            )
+            if r.status_code in (200, 201, 204):
+                return {"ok": True}
+            err = f"http_{r.status_code}: {r.text[:200]}"
+            _append_telemetry_fallback("atne_pilot_events", event, err)
+            return JSONResponse(
+                {"ok": False, "error": err, "saved_to_fallback": True},
+                status_code=502,
+            )
+        except Exception as e:
+            _append_telemetry_fallback("atne_pilot_events", event, f"exception: {e!r}")
+            return JSONResponse(
+                {"ok": False, "error": str(e), "saved_to_fallback": True},
+                status_code=502,
+            )
+
+    # Esdeveniments no crítics: fire-and-forget (el fallback intern del
+    # _log_pilot_event ja captura errors a stdout/disc).
     import threading as _th
     _th.Thread(target=_log_pilot_event, args=(event,), daemon=True).start()
     return {"ok": True}
@@ -1581,14 +1796,18 @@ async def pilot_consent(request: Request, payload: dict = Body(...)):
     try:
         r = requests.post(
             f"{SUPABASE_URL}/rest/v1/atne_pilot_consent",
-            headers={**SUPABASE_HEADERS, "Prefer": "return=minimal"},
+            headers={**SUPABASE_WRITE_HEADERS, "Prefer": "return=minimal"},
             json=row,
             timeout=5,
         )
         if r.status_code in (200, 201, 204):
             return {"ok": True}
+        _append_telemetry_fallback(
+            "atne_pilot_consent", row, f"http_{r.status_code}: {r.text[:400]}"
+        )
         return {"ok": False, "error": r.text}
     except Exception as e:
+        _append_telemetry_fallback("atne_pilot_consent", row, f"exception: {e!r}")
         return {"ok": False, "error": str(e)}
 
 
@@ -1762,11 +1981,17 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
         f"n_instructions,verify_score,docent_id,prompt_version,cost_estimat_eur"
         f"&order=ts.desc&limit=1000"
     )
-    events = _get(
+    events_raw = _get(
         f"{base}/atne_pilot_events"
         f"?select=ts,event_type,docent_hash,docent_id,session_id,history_id,step,data,prompt_version"
         f"&order=ts.desc&limit=2000"
     )
+    # Filtra events de probe (health + boot) que es generen automàticament
+    # per detectar regressions del bug RLS 2026-05-15. No són events reals.
+    def _is_probe(e):
+        d = e.get("data") or {}
+        return bool(d.get("_health_probe") or d.get("_boot_probe"))
+    events = [e for e in events_raw if not _is_probe(e)]
     feedback = _get(
         f"{base}/history"
         f"?select=created_at,rating,review_items,refine_count,exported,copied,"
@@ -1973,6 +2198,123 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
         "recent": recent,
         "suggestions": suggestions,
         "client_errors": client_errors,
+    }
+
+
+@app.get("/api/admin/pilot/fallback")
+async def admin_pilot_fallback_list(_: bool = Depends(_require_admin)):
+    """Llista els events de telemetria que no van poder entrar a Supabase
+    (RLS, 5xx, xarxa…) i van quedar al fitxer fallback NDJSON local.
+
+    NOTA: a Cloud Run el directori /tmp és tmpfs (efímer). Els events
+    queden també a stdout amb el tag `[TELEMETRY_FAILED]` (durable a
+    Cloud Logging). Per recuperació real cal mirar Cloud Logging.
+    """
+    if not _PILOT_FALLBACK_FILE.exists():
+        return {"ok": True, "items": [], "path": str(_PILOT_FALLBACK_FILE), "msg": "Sense fallback registrat."}
+    items = []
+    try:
+        with _PILOT_FALLBACK_FILE.open("r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    items.append(json.loads(line))
+                except Exception:
+                    items.append({"_raw": line[:500]})
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+    return {
+        "ok": True,
+        "path": str(_PILOT_FALLBACK_FILE),
+        "count": len(items),
+        "items": items[-200:],  # darreres 200
+        "using_service_key": _USING_SERVICE_KEY,
+    }
+
+
+@app.post("/api/admin/pilot/replay-fallback")
+async def admin_pilot_fallback_replay(_: bool = Depends(_require_admin)):
+    """Reintenta inserir a Supabase tots els events del fallback NDJSON.
+    Si l'insert té èxit l'event es marca com a `_replayed` i s'arxiva
+    a un fitxer rotat (`.ndjson.replayed-<ts>`). No esborra dades.
+    """
+    if not _PILOT_FALLBACK_FILE.exists():
+        return {"ok": True, "replayed": 0, "failed": 0, "msg": "Sense fallback."}
+    if not SUPABASE_URL or not _TELEMETRY_WRITE_KEY:
+        return {"ok": False, "error": "Supabase no configurat"}
+
+    items = []
+    try:
+        with _PILOT_FALLBACK_FILE.open("r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    items.append(json.loads(line))
+                except Exception:
+                    continue
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+    replayed = 0
+    failed = 0
+    still_failing: list[dict] = []
+    for rec in items:
+        kind = rec.get("kind")
+        payload = rec.get("payload") or {}
+        if not kind or not payload:
+            continue
+        table = {
+            "atne_pilot_events": "atne_pilot_events",
+            "atne_pilot_consent": "atne_pilot_consent",
+            "atne_sessions": "atne_sessions",
+        }.get(kind)
+        if not table:
+            still_failing.append(rec)
+            continue
+        try:
+            r = requests.post(
+                f"{SUPABASE_URL}/rest/v1/{table}",
+                headers={**SUPABASE_WRITE_HEADERS, "Prefer": "return=minimal"},
+                json=payload,
+                timeout=8,
+            )
+            if r.status_code in (200, 201, 204):
+                replayed += 1
+            else:
+                failed += 1
+                rec["replay_error"] = f"http_{r.status_code}: {r.text[:200]}"
+                still_failing.append(rec)
+        except Exception as e:
+            failed += 1
+            rec["replay_error"] = f"exception: {e!r}"
+            still_failing.append(rec)
+
+    # Arxiva el fitxer original i reescriu només amb els que segueixen fallant
+    import datetime as _dt
+    try:
+        archive = _PILOT_FALLBACK_FILE.with_suffix(
+            f".ndjson.replayed-{_dt.datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')}"
+        )
+        _PILOT_FALLBACK_FILE.rename(archive)
+    except Exception:
+        archive = None
+    if still_failing:
+        try:
+            with _PILOT_FALLBACK_FILE.open("w", encoding="utf-8") as f:
+                for rec in still_failing:
+                    f.write(json.dumps(rec, ensure_ascii=False, default=str) + "\n")
+        except Exception:
+            pass
+
+    return {
+        "ok": True,
+        "replayed": replayed,
+        "failed": failed,
+        "archived_to": str(archive) if archive else None,
     }
 
 
