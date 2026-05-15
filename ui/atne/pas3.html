@@ -535,6 +535,16 @@
   }
   .audit-empty{padding:14px 16px;color:var(--ink-500);font-style:italic;font-size:var(--fs-md)}
 
+  /* Skeleton loaders: línies grises animades als panells de complements
+     mentre el LLM està generant. Donen sensació visual que «està passant
+     alguna cosa» en lloc d'un text estàtic «Generant…». */
+  .skeleton-loader{padding:16px}
+  .skeleton-label{color:var(--ink-500);font-style:italic;margin-bottom:14px;text-align:center;font-size:var(--fs-sm);display:flex;align-items:center;justify-content:center;gap:8px}
+  .skeleton-label::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--primary);animation:skel-pulse 1.4s ease-in-out infinite}
+  .skeleton-line{height:12px;background:linear-gradient(90deg,var(--ink-100) 0%,var(--paper-line) 50%,var(--ink-100) 100%);background-size:200% 100%;animation:skel-shimmer 1.6s infinite;border-radius:4px;margin-bottom:10px}
+  @keyframes skel-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  @keyframes skel-pulse{0%,100%{opacity:.4;transform:scale(.85)}50%{opacity:1;transform:scale(1.1)}}
+
   /* Regenerating overlay */
   .regen{position:absolute;inset:0;background:rgba(244,241,232,.85);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:15;flex-direction:column;gap:14px}
   .regen.on{display:flex}
@@ -3191,15 +3201,34 @@
     // Sempre que venim de Pas 2 amb text real, netegem el mock abans de render
     // real (evita que l'usuari vegi "Revolució Industrial" mentre espera LLM).
     if (adaptedElInit) adaptedElInit.innerHTML = '';
-    // Netegem també els mocks dels complements (preguntes/glossari/esquema)
-    // per evitar que quedi contingut hardcoded si el LLM no els genera.
-    const _clearMock = (sel, placeholder) => {
-      const el = document.querySelector(sel);
-      if (el) el.innerHTML = '<div style="color:var(--ink-400);font-style:italic;padding:16px;text-align:center">' + placeholder + '</div>';
+    // Netegem els mocks dels complements i mostrem skeletons animats per
+    // donar feedback visual mentre el LLM genera (millor que un text estàtic).
+    const _buildSkeleton = (label, lines) => {
+      const widths = lines || ['92%', '78%', '85%', '60%', '88%'];
+      const lineHtml = widths.map(w => '<div class="skeleton-line" style="width:' + w + '"></div>').join('');
+      return '<div class="skeleton-loader" data-skel="1">' +
+        '<div class="skeleton-label">' + label + '</div>' + lineHtml + '</div>';
     };
-    _clearMock('#view-preguntes .q-list', 'Generant preguntes…');
-    _clearMock('#view-glossari .gl-list', 'Generant glossari…');
-    _clearMock('#view-esquema .schema', 'Generant esquema…');
+    const _setSkeleton = (sel, label, widths) => {
+      const el = document.querySelector(sel);
+      if (el) el.innerHTML = _buildSkeleton(label, widths);
+    };
+    _setSkeleton('#view-preguntes .q-list', 'Generant preguntes de comprensió…');
+    _setSkeleton('#view-glossari .gl-list', 'Generant glossari…', ['90%', '70%', '95%', '65%']);
+    _setSkeleton('#view-esquema .schema', 'Generant esquema visual…', ['80%', '60%', '90%']);
+    // També per als complements genèrics (mapa conceptual, bastides, etc.)
+    document.querySelectorAll('.generic-md').forEach(el => {
+      const view = el.closest('.comp-view');
+      const chipKey = view && view.id ? view.id.replace('view-', '') : 'complement';
+      const labels = {
+        'mapa-conc': 'Generant mapa conceptual…',
+        'mapa-ment': 'Generant mapa mental…',
+        'bastides': 'Generant bastides…',
+        'activitats': "Generant activitats d'aprofundiment…",
+        'pictogrames': 'Generant pictogrames…',
+      };
+      el.innerHTML = _buildSkeleton(labels[chipKey] || 'Generant complement…');
+    });
 
     const pid = localStorage.getItem('atne.profile_id') || 'marc';
     const profile = _getProfile(pid);
@@ -3375,7 +3404,17 @@
           const visible = cutIdx > 0 ? _streamBuffer.slice(0, cutIdx) : _streamBuffer;
           try {
             const md2html = window.ATNE_LLM?.markdownToHtml;
-            adaptedEl.innerHTML = ATNE_sanitize(md2html ? md2html(visible) : visible);
+            let html = ATNE_sanitize(md2html ? md2html(visible) : visible);
+            // Si el text inclou marcadors [IMATGE: ...] complets, els convertim
+            // a un placeholder visual mínim (sense spinner ni cerca encara,
+            // això es fa al onResult quan el batch real es dispara). El docent
+            // veu «està vinent una imatge aquí» en lloc d'un text cru «[IMATGE: ...]».
+            html = html.replace(/\[IMATGE:\s*([^\]]+)\]/g, (m, c) => {
+              const safe = (c || '').trim().replace(/</g, '&lt;');
+              return '<figure class="illus-chooser" data-status="streaming"><div class="illus-concept">🎨 <code>[IMATGE: ' +
+                safe + ']</code></div><div class="illus-options"><div class="illus-opt illus-opt-loading"><div class="illus-spinner"></div><div class="illus-label">Esperant fi de l\'adaptació…</div></div></div></figure>';
+            });
+            adaptedEl.innerHTML = html;
           } catch (_) {
             adaptedEl.textContent = visible;
           }
@@ -3409,6 +3448,23 @@
 
         // Distribueix els complements a les seves vistes
         applyComplementsToViews(parsed.complements);
+
+        // Neteja els skeletons que NO s'han substituït (complements que el LLM
+        // no ha generat malgrat estar actius al perfil). Substituïm per un
+        // missatge empty state perquè el panell no quedi animat per sempre.
+        document.querySelectorAll('[data-skel="1"]').forEach(skel => {
+          skel.outerHTML = '<div style="color:var(--ink-400);font-style:italic;padding:24px;text-align:center;font-size:var(--fs-sm)">Sense contingut. El model no ha generat aquest complement.</div>';
+        });
+
+        // Toast informatiu: el text ja és visible però encara falten
+        // il·lustracions (Pexels/Wikimedia/FLUX) i possibles post-processos.
+        // Aquest avís ajuda el docent a entendre que «no ha acabat tot».
+        try {
+          const mainHasImages = /\[IMATGE:\s*[^\]]+\]/.test(parsed.main || ev.adapted || '');
+          if (mainHasImages) {
+            window.atneToast?.('Cercant il·lustracions…', 'info');
+          }
+        } catch (_) { /* */ }
 
         // Sprint 1D: pill de feedback inline visible un cop l'adaptació està
         // a la vista (substitueix el modal bloquejant a l'export del 1C).
