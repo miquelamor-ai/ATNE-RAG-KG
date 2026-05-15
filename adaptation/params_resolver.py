@@ -16,12 +16,20 @@ lleugerament diferents per a la mateixa entrada. Cas Petri I5 (Infantil 5
   - MECR enviat al backend: A2 (incorrecte, via computeMECRSortida que
     forçava 'A2' per a tot nouvingut amb mesos no-numèrics)
 
-Regla rectora pedagògica (Miquel Amor, 2026-05-15):
-  Per a un nouvingut a etapa infantil (I3/I4/I5), MECR = pre-A1 SEMPRE,
-  amb independència dels mesos. La lectura a infantil ja és emergent i
-  compartida adult/infant per a tothom — no té sentit afegir A2 perquè
-  l'alumne porti 18 mesos a Catalunya. El glossari L1 i la
-  transliteració serveixen a la família lectora, no a l'infant.
+Regla rectora pedagògica (Miquel Amor, 2026-05-15, refinada):
+  ETAPA INFANTIL → MECR pre-A1 SEMPRE (Emergent), sigui quina sigui la
+  resta de condicions: nouvingut, AACC, catalanoparlant pur, etc. Tota
+  lectura a infantil és emergent i compartida amb un adult. La diferència
+  entre perfils (nouvingut, AACC...) modifica QUÈ s'afegeix al voltant
+  del text (glossari L1, suggeriments d'enriquiment per a la família,
+  etc.) però NO el nivell del text mateix.
+
+  Conseqüència: un I5 catalanoparlant amb AACC NO obté +1 nivell de MECR
+  (A1). El seu suport AACC arribarà via les instruccions del catàleg
+  filtrades per `altes_capacitats`, no per MECR més alt. Per a un I5
+  nouvingut amb 24 mesos a Catalunya tampoc puja a A2 — el catàleg
+  nouvingut activa G-01/G-03 (glossari + transliteració) per a la
+  família lectora.
 """
 
 # Ordre canònic dels nivells. min() pot calcular el "més baix" amb aquesta llista.
@@ -220,6 +228,14 @@ def resolve_params(caracteristiques: dict, etapa: str = "", curs: str = "",
         mecr = MECR_ORDER[min(len(MECR_ORDER) - 1, idx + 1)]
         trace.append(f"AACC sense 2e -> +1 ({prev} -> {mecr})")
 
+    # ── 8.5) CLAMP INFANTIL: regla rectora MALL ──
+    # A etapa infantil, tota lectura és Emergent (compartida amb adult).
+    # Cap condició pot pujar el MECR. L'AACC d'I5 expressa el seu repte via
+    # les instruccions PERFIL del catàleg, no via MECR més alt.
+    if etapa == "infantil" and mecr != "pre-A1":
+        trace.append(f"clamp infantil -> pre-A1 (era {mecr}; tota lectura infantil és Emergent)")
+        mecr = "pre-A1"
+
     # ── 9) DUA segons MECR final + condicions ──
     dua = _resolve_dua(chars, mecr)
     trace.append(f"DUA -> {dua}")
@@ -393,6 +409,38 @@ if __name__ == "__main__":
             etapa="ESO", curs="3r ESO",
         ),
         expected_mecr="A1",
+    )
+
+    # ── Regla rectora MALL: infantil sempre pre-A1 (Miquel 2026-05-15) ──
+    all_ok &= _check(
+        "I5 catalanoparlant sense condicions -> pre-A1 (regla rectora)",
+        resolve_params({}, etapa="infantil", curs="I5"),
+        expected_mecr="pre-A1",
+    )
+    all_ok &= _check(
+        "I5 catalanoparlant + AACC -> pre-A1 (NO puja a A1 per AACC)",
+        resolve_params(
+            {"altes_capacitats": {"actiu": True}},
+            etapa="infantil", curs="I5",
+        ),
+        expected_mecr="pre-A1",  # AACC infantil expressa repte via catàleg PERFIL, no MECR
+    )
+    all_ok &= _check(
+        "I5 nouvingut amb >24 mesos -> pre-A1 (NO puja a A2 per temps)",
+        resolve_params(
+            {"nouvingut": {"actiu": True, "mesos_catalunya": 36}},
+            etapa="infantil", curs="I5",
+        ),
+        expected_mecr="pre-A1",
+    )
+    all_ok &= _check(
+        "I3 amb DI sever -> pre-A1 + DUA Acces",
+        resolve_params(
+            {"di": {"actiu": True, "grau": "sever"}},
+            etapa="infantil", curs="I3",
+        ),
+        expected_mecr="pre-A1",
+        expected_dua="Acces",
     )
 
     print("\n", "TOTS OK" if all_ok else "HI HA FALLS", "\n")

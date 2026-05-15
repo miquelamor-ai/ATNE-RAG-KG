@@ -4203,6 +4203,56 @@ LEVEL_SHIFTS = {
 }
 
 
+# ── Resolució canònica de paràmetres (Fase B, 2026-05-15) ─────────────────
+#
+# Substitueix progressivament les 6 implementacions paral·leles de càlcul
+# de MECR/DUA que viuen al frontend i al backend. Vegeu
+# adaptation/params_resolver.py per a la lògica.
+@app.post("/api/derive-params")
+async def derive_params_endpoint(payload: dict = Body(...)):
+    """
+    Calcula MECR + DUA canònic per a un perfil donat.
+
+    Payload:
+      caracteristiques: dict (mateixa estructura que la del backend);
+                        també s'accepta 'profile' amb 'caracteristiques' a dins.
+      etapa: str ("infantil" | "primaria" | "ESO" | "batxillerat" | "FP" | "")
+      curs: str ("I5" | "1r ESO" | ...) — codi canònic; opcional
+      override_mecr: str | null — si el docent ha triat un MECR manual
+
+    Retorna:
+      {ok, mecr, dua, motiu, trace}
+    """
+    from adaptation.params_resolver import resolve_params, MECR_ORDER
+
+    chars = payload.get("caracteristiques")
+    if chars is None:
+        # Format alternatiu: profile pot venir embolcallant les caracteristiques
+        profile = payload.get("profile") or {}
+        chars = profile.get("caracteristiques") or {}
+    if not isinstance(chars, dict):
+        return JSONResponse(
+            {"ok": False, "error": "'caracteristiques' ha de ser un dict"},
+            status_code=400,
+        )
+
+    etapa = (payload.get("etapa") or "").strip()
+    curs = (payload.get("curs") or "").strip()
+    override_mecr = payload.get("override_mecr")
+    if override_mecr and override_mecr not in MECR_ORDER:
+        override_mecr = None  # ignorem overrides invàlids silenciosament
+
+    try:
+        result = resolve_params(chars, etapa=etapa, curs=curs, override_mecr=override_mecr)
+    except Exception as e:
+        return JSONResponse(
+            {"ok": False, "error": f"resolve_params failed: {type(e).__name__}: {e}"},
+            status_code=500,
+        )
+
+    return {"ok": True, **result}
+
+
 @app.post("/api/adapt")
 async def adapt_stream(request: Request, payload: dict = Body(...)):
     _rate_check(f"adapt:{request.client.host}", 15, 60)
