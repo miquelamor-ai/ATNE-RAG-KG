@@ -222,3 +222,153 @@ nivell, no es repeteix idèntica.
 ### Implementacions específiques
 - Estructura **ESETE** de Zinka Carandell (Experiència → Sistematització
   → Enfocament → Teoria → Experiència enriquida).
+
+## Catàleg complet de bastides
+
+Aquest inventari classifica **totes** les bastides documentades pel
+marc MALL/TILC/DUA i els autors clau, indicant l'estat a ATNE:
+
+- ✅ **Implementada** — disponible com a complement actiu d'ATNE.
+- 🔶 **Parcial** — existeix integrada dins d'un altre complement (no és
+  toggle separat).
+- ⬜ **No implementada** — pertany al marc MALL però ATNE encara no l'ofereix.
+- ⛔ **Fora d'abast** — pertany al marc però no és una bastida que un
+  sistema d'adaptació de textos pugui generar (correspon a l'aula
+  física).
+
+### 🟣 Bastides lingüístiques
+
+**Lèxiques** (vocabulari)
+| Bastida | Estat | Detall |
+|---|---|---|
+| Glossari (taula final amb termes + definició simple) | ✅ | Complement separat. Si nouvingut: inclou traducció L1 + transliteració |
+| Negretes amb explicació | ✅ | Termes destacats al text amb explicació entre parèntesis la primera vegada |
+| Definicions integrades | ✅ | Definicions al flux del text, no al final |
+| Traducció L1 | ✅ | Toggle separat (però sobre el glossari) |
+| Banc de paraules clau | 🔶 | Integrat al complement Bastides (Bloc B / paraules del text) |
+
+**Sintàctiques** (gramàtica/estructura)
+| Bastida | Estat | Detall |
+|---|---|---|
+| Connectors lògics (taula) | 🔶 | Integrat al complement Bastides (Bloc C, només si hi ha producció) |
+| Reformulació sintàctica (simplificació) | 🔶 | Aplicada com a regla al catàleg d'instruccions, no com a complement |
+| Frases curtes / una idea per frase | 🔶 | Aplicada com a regla al catàleg d'instruccions |
+| Concordança visible (subjecte-verb explícit) | ⬜ | No implementat |
+
+**Discursives** (gènere textual)
+| Bastida | Estat | Detall |
+|---|---|---|
+| Bases d'orientació per gènere | 🔶 | Integrat al complement Bastides (Bloc A, només si hi ha producció) |
+| Marcadors discursius (primer, després, en canvi...) | 🔶 | Dins de connectors |
+| Plantilles per gènere literari | ⬜ | No implementat com a complement separat |
+
+### 🔵 Bastides visuals i multimodals
+
+| Bastida | Estat | Detall |
+|---|---|---|
+| Pictogrames | ✅ | Complement separat |
+| Il·lustracions | ✅ | Complement beta (Pexels, Wikimedia, FLUX) inserit als marcadors [IMATGE: ...] |
+| Esquema visual | ✅ | Diagrama/mapa de l'estructura del text |
+| Línies de temps | 🔶 | Es pot generar dins de l'esquema visual segons el gènere |
+| Codis de color sistemàtics | ⬜ | No implementat |
+| Icones semàntiques al text | 🔶 | Negretes + emojis a frases clau (aplicat per al LLM) |
+
+### 🟢 Bastides cognitives
+
+**Relacionals** (xarxes de conceptes)
+| Bastida | Estat | Detall |
+|---|---|---|
+| Mapa conceptual | ✅ | Complement separat |
+| Mapa mental | ✅ | Complement separat (radial, divergent) |
+
+**Estructurals** (organització de la informació)
+| Bastida | Estat | Detall |
+|---|---|---|
+| Esquema visual | ✅ | (vegeu visuals) |
+| Resum graduat | ⬜ | No implementat |
+| Idea principal vs detalls | 🔶 | Dins de Bastides de lectura (Després de llegir) |
+
+**Transferència** (anar més enllà)
+| Bastida | Estat | Detall |
+|---|---|---|
+| Activitats d'aprofundiment | ✅ | Complement separat |
+| Connexions interdisciplinars | 🔶 | Dins d'activitats d'aprofundiment |
+
+### 🟡 Bastides metacognitives i de lectura
+
+| Bastida | Estat | Detall |
+|---|---|---|
+| Preguntes de comprensió (3 plànols × 3 moments) | ✅ | Complement separat. Plànols: literal, inferencial, crític |
+| Bastides de pre-lectura (activació previs) | 🔶 | Dins de Bastides → 📖 Abans de llegir |
+| Bastides durant lectura (subratllat, notes) | 🔶 | Dins de Bastides → 🔍 Durant la lectura |
+| Bastides post-lectura (resum, valoració) | 🔶 | Dins de Bastides → 📝 Després de llegir |
+| Pautes d'interrogació (checklist autoregulació) | 🔶 | Dins de Bastides (Bloc D, si producció) |
+| Avaluació reguladora (Sanmartí) | ⬜ | No implementada com a tal — només la rúbrica del verify |
+
+### 🟠 Bastides de producció
+
+| Bastida | Estat | Detall |
+|---|---|---|
+| Iniciadors de frase per HCL (definir, descriure, explicar, justificar, argumentar, demostrar) | 🔶 | Dins de Bastides (Bloc B, si producció) |
+| Cartes conversacionals (per al debat) | ⬜ | MALL ho recomana, no implementat |
+| Modelatge del docent (modeling) | ⛔ | Fora d'abast (correspon a l'aula) |
+| Plantilles de resposta | 🔶 | Es deriva de les bases d'orientació (Bloc A) |
+| Rúbriques per a l'alumne | ⬜ | No implementada (sí la rúbrica interna de verify) |
+
+### 🔴 Bastides procedimentals (per al docent)
+
+| Bastida | Estat | Detall |
+|---|---|---|
+| Argumentació pedagògica (explicar les decisions) | ✅ | Sempre present a la sortida |
+| Notes d'auditoria (canvis amb motiu) | ✅ | Sempre present a la sortida |
+| Suggeriments visuals on ubicar icones, esquemes... | 🔶 | Dins de Notes d'auditoria (separat de bastides per a l'alumne) |
+| Indicadors d'avaluació explícits per a l'alumne | ⬜ | No generat per ATNE |
+
+### ⚫ Bastides socials
+
+| Bastida | Estat | Detall |
+|---|---|---|
+| Treball cooperatiu amb companys més competents | ⛔ | Fora d'abast (Vygotsky social, correspon a l'aula) |
+| Tutor entre iguals | ⛔ | Fora d'abast |
+| Cartes per al debat / escolta activa | ⬜ | Es podria implementar com a complement |
+
+### 🟤 Crosses / suports permanents (no són bastides en sentit estricte)
+
+| Suport | Estat | Detall |
+|---|---|---|
+| Audiodescripció / TTS | ⛔ | Fora d'abast actual d'ATNE |
+| Llengua de signes (LSC) | ⛔ | Fora d'abast actual |
+| Lectors de pantalla amb subtítols | ⛔ | Fora d'abast actual |
+
+### Resum quantitatiu
+
+| Categoria | ✅ | 🔶 | ⬜ | ⛔ |
+|---|---|---|---|---|
+| Lingüístiques | 4 | 5 | 2 | 0 |
+| Visuals i multimodals | 3 | 2 | 1 | 0 |
+| Cognitives | 4 | 1 | 1 | 0 |
+| Metacognitives i lectura | 1 | 4 | 1 | 0 |
+| De producció | 0 | 2 | 3 | 1 |
+| Procedimentals (docent) | 2 | 1 | 1 | 0 |
+| Socials | 0 | 0 | 1 | 2 |
+| Crosses | 0 | 0 | 0 | 3 |
+| **Total** | **14** | **15** | **10** | **6** |
+
+ATNE ofereix actualment **14 bastides com a complements separats** (✅) i
+**15 com a sub-elements dins d'altres complements** (🔶). Hi ha **10
+bastides documentades pel MALL/TILC que ATNE encara no implementa**
+(⬜) i **6 que queden fora de l'abast d'un sistema d'adaptació de textos**
+(⛔).
+
+### Correspondència amb categories UI del saber-ne+ §6
+
+L'inventari pedagògic d'aquesta taula no coincideix amb les **6
+categories UI** del saber-ne+ (Ajuts lèxics, visuals, estructurals, de
+síntesi, de comprensió, d'ampliació). La taxonomia UI és més simple per
+no aclaparar el docent, però la del marc M2 és la canònica per al
+desenvolupament i la documentació pedagògica.
+
+> **Pendents (parking lot post-pilot)**: implementar com a complements
+> separats les bastides 🔶 que tinguin sentit didàctic propi (per
+> exemple, bases d'orientació per gènere autònomes; cartes
+> conversacionals; rúbriques per a l'alumne).
