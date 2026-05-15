@@ -3152,7 +3152,7 @@
   // llm.js (que té 'defer') ja ha definit window.ATNE_LLM. En el cas contrari
   // aquest IIFE s'executaria abans i sortiria al primer return.
   // ──────────────────────────────────────────────────────
-  function _maybeAdaptOnLoadImpl() {
+  async function _maybeAdaptOnLoadImpl() {
     if (!window.ATNE_LLM) return;  // mòdul llm.js no carregat (cas standalone)
 
     const adaptedElInit = document.getElementById('adapted-text');
@@ -3339,7 +3339,24 @@
 
     // Si és grup multinivell i hi ha una vcard type:'level' activa (p.ex. via
     // click de fallback), fem servir el seu MECR en lloc del derivat global.
-    let mecrSortida = computeMECRSortida(profile, profile.course);
+    // Fase B (2026-05-15): MECR via backend canònic; computeMECRSortida queda
+    // com a fallback per si l'endpoint és inaccessible.
+    let mecrSortida;
+    try {
+      const _PM = window.ATNE_PROFILE_MODEL || {};
+      if (typeof _PM.deriveCanonical === 'function') {
+        const _resolved = await _PM.deriveCanonical(profile);
+        mecrSortida = _resolved.mecr;
+        if (_resolved.canonical) {
+          console.info('[ATNE] MECR canònic:', _resolved.mecr, '·', _resolved.motiu);
+        }
+      } else {
+        mecrSortida = computeMECRSortida(profile, profile.course);
+      }
+    } catch (_e) {
+      console.warn('[ATNE] derive failed, fallback local:', _e);
+      mecrSortida = computeMECRSortida(profile, profile.course);
+    }
     if (profile && profile.type === 'group') {
       const activeMecr = localStorage.getItem('atne.active_level_mecr');
       const activeVid = localStorage.getItem('atne.active_level_vid');

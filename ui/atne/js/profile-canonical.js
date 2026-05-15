@@ -318,6 +318,53 @@
     };
   }
 
+  // ── Derivació canònica via backend (font ÚNICA de veritat, Fase B 2026-05-15) ──
+  // Substitueix les implementacions locals (deriveMECR + computeMECRSortida del
+  // pas3) per una crida a /api/derive-params. Si l'endpoint falla (xarxa, etc.),
+  // cau a la derivació local com a xarxa de seguretat per no aturar l'usuari.
+  async function deriveCanonical(profile, opts) {
+    opts = opts || {};
+    const course = (profile && profile.course) || '';
+    const etapa = etapaFromCourse(course);
+    const curs = cursFromCourse(course);
+    const override = opts.override_mecr
+      || (profile && (profile.mecr_override || (profile.mecr_override === '' ? null : null)))
+      || null;
+    // Reaprofitem toBackendProfile per obtenir l'estructura `caracteristiques`
+    // canònica. NO l'enviem sencera al backend per minimitzar paquet.
+    let chars = {};
+    try {
+      chars = (toBackendProfile(profile) || {}).caracteristiques || {};
+    } catch (e) {
+      chars = (profile && profile.caracteristiques) || {};
+    }
+    try {
+      const resp = await fetch('/api/derive-params', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          caracteristiques: chars, etapa, curs, override_mecr: override,
+        }),
+      });
+      if (!resp.ok) throw new Error('http ' + resp.status);
+      const data = await resp.json();
+      if (!data || !data.ok) throw new Error((data && data.error) || 'derive failed');
+      return {
+        mecr: data.mecr, dua: data.dua,
+        motiu: data.motiu || '', trace: data.trace || [],
+        canonical: true,
+      };
+    } catch (e) {
+      console.warn('[ATNE] deriveCanonical fallback to local deriveMECR:', e);
+      const local = deriveMECR(profile);
+      return {
+        mecr: local.mecr, dua: 'Core',
+        motiu: 'fallback local (endpoint inaccessible)',
+        trace: [], canonical: false,
+      };
+    }
+  }
+
   // ── Derivació de MECR ─────────────────────────────────────────────────────
   // Regles documentades:
   //   1) MECR base = COURSE_TO_MECR[course_base]; si multi-curs, agafa el més baix.
@@ -867,6 +914,8 @@
     deriveMECR,
     deriveCardView,
     deriveBehaviorsAndAids,
+    // Derivació canònica (Fase B): crida /api/derive-params; font única.
+    deriveCanonical,
 
     // Mappers
     toBackendProfile,
