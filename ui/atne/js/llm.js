@@ -238,8 +238,13 @@
   function buildBackendContext(opts) {
     const etapa = opts.etapa || '';
     const curs = opts.curs || opts.nivell_curs || '';
+    // Fase B.5 (2026-05-15): la matèria deixa de defaultar silenciosament a
+    // 'Història'. Si el docent no l'ha triada al Pas 2, l'enviem buida. El
+    // backend és lliure d'usar persona-audience genèric sense fer suposicions
+    // disciplinàries falses (cas detectat: a Petri I5 sortia "Matèria: Biologia"
+    // o "Matèria: Història" sense que el docent ho hagués triat).
     return {
-      materia: opts.materia || 'Història',
+      materia: opts.materia || '',
       etapa,
       curs,
       // Alias legacy fins a Fase E. Es manté pel codi extern que encara el llegeix.
