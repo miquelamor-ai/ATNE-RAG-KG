@@ -83,6 +83,57 @@ def clean_gemini_output(text: str) -> str:
     text = re.sub(r'^(#{2,4} )["\'`«»“”‘’]+', r'\1', text, flags=re.MULTILINE)
     text = re.sub(r'^(#{2,4} .*?)["\'`«»“”‘’]+\s*$', r'\1', text, flags=re.MULTILINE)
 
+    # 2d. Xarxa de seguretat: si l'LLM omet el «##» davant d'un títol canònic
+    #     (deixa només «Glossari», «**Glossari**», «# Glossari») el normalitzem.
+    #     Detecció estricta per evitar falsos positius: títol exacte al principi
+    #     de línia, sol (sense altres paraules), opcionalment amb ** o un sol #.
+    _CANONICAL = [
+        "Text adaptat",
+        "Glossari",
+        "Esquema visual",
+        "Mapa conceptual",
+        "Mapa mental",
+        "Preguntes de comprensió",
+        "Preguntes de comprensio",
+        "Bastides",
+        "Bastides (scaffolding)",
+        "Activitats d'aprofundiment",
+        "Activitats d’aprofundiment",
+        "Argumentació pedagògica",
+        "Argumentacio pedagogica",
+        "Notes d'auditoria",
+        "Notes d’auditoria",
+        "Pictogrames",
+        "Traducció L1",
+        "Traduccio L1",
+    ]
+    for _h in _CANONICAL:
+        # «**Glossari**» o «**Glossari:**» → «## Glossari»
+        text = re.sub(
+            r'^\s*\*\*' + re.escape(_h) + r':?\*\*\s*$',
+            '## ' + _h,
+            text,
+            flags=re.MULTILINE | re.IGNORECASE,
+        )
+        # «# Glossari» (un sol #) → «## Glossari». Important: NO matchejar
+        # «## Glossari» (ja correcte) ni «### …» (sub-secció).
+        text = re.sub(
+            r'^#\s+' + re.escape(_h) + r'\s*:?\s*$',
+            '## ' + _h,
+            text,
+            flags=re.MULTILINE | re.IGNORECASE,
+        )
+        # «Glossari» sol al principi de línia (sense # ni **), seguit de línia
+        # buida i contingut. Només si la línia anterior és buida (per evitar
+        # confondre «Glossari» dins d'una frase). Es valida amb negative
+        # lookbehind: cal una línia totalment buida just abans.
+        text = re.sub(
+            r'(?<=\n\n)' + re.escape(_h) + r'\s*:?\s*\n',
+            '## ' + _h + '\n',
+            text,
+            flags=re.IGNORECASE,
+        )
+
     # 3. Treure línies de meta-comentari típiques de Gemini
     lines_to_remove = [
         r"^Final draft.*$",
