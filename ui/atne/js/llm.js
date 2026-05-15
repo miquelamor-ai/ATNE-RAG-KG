@@ -249,7 +249,7 @@
    *   Internament es combina amb un timeout de 180s per evitar loaders penjats.
    * @returns {Promise<{versions: Object, done: boolean}>}
    */
-  async function adaptText({ text, profile, context, params = {}, onStep, onResult, onError, signal }) {
+  async function adaptText({ text, profile, context, params = {}, onStep, onResult, onError, onDelta, signal }) {
     if (!text || !text.trim()) throw new Error('Text buit');
 
     const backendProfile = buildBackendProfile(profile);
@@ -320,6 +320,10 @@
 
           if (ev.type === 'step' && onStep) {
             onStep(ev);
+          } else if (ev.type === 'delta' && onDelta) {
+            // Streaming token a token: el backend emet «delta» a cada chunk
+            // del LLM perquè el frontend renderitzi el text progressivament.
+            onDelta(ev);
           } else if (ev.type === 'result') {
             const lvl = ev.level || 'single';
             versions[lvl] = {

@@ -3338,6 +3338,13 @@
     // Llengua de sortida (selector del Pas 2). Default: "ca".
     const savedLang = localStorage.getItem('atne.lang') || 'ca';
     if (savedLang !== 'ca') adaptParams.lang = savedLang;
+    // Streaming buffer: acumula tots els chunks que arriben mentre el LLM
+    // genera, perquè el frontend pugui mostrar text apareixent progressivament.
+    // Quan arribi 'result' al final, el text complet es reemplaça pel
+    // post-processat (taules formatades, complements separats, etc.).
+    let _streamBuffer = '';
+    let _streamActive = false;
+
     window.ATNE_LLM.adaptText({
       text: docOriginal,
       profile: profile,
@@ -3346,6 +3353,33 @@
       onStep: (ev) => {
         if (regenT && ev.msg) regenT.textContent = ev.msg;
         if (ev.msg) try { regenSetExpectedFromStep(ev.msg); } catch (_) {}
+      },
+      onDelta: (ev) => {
+        // Token streaming: actualitzem el #adapted-text amb el text acumulat
+        // (renderitzat com a markdown bàsic). El text final es reemplaça
+        // quan arribi onResult amb la versió post-processada.
+        if (!ev.text) return;
+        if (!_streamActive) {
+          _streamActive = true;
+          // Amaga l'overlay perquè l'usuari ja veu text aparèixer.
+          if (regenEl) regenEl.classList.remove('on');
+          if (adaptedEl) adaptedEl.innerHTML = '';
+        }
+        _streamBuffer += ev.text;
+        if (adaptedEl) {
+          // Renderització progressiva: markdown bàsic a HTML cada chunk.
+          // Mantenim només el text adaptat (filtrant les seccions de
+          // complements que arribaran al final). Heurística: si ja s'ha
+          // generat una marca «## Glossari» o similar, tallar.
+          const cutIdx = _streamBuffer.search(/\n##\s+(?!Text adaptat)/i);
+          const visible = cutIdx > 0 ? _streamBuffer.slice(0, cutIdx) : _streamBuffer;
+          try {
+            const md2html = window.ATNE_LLM?.markdownToHtml;
+            adaptedEl.innerHTML = ATNE_sanitize(md2html ? md2html(visible) : visible);
+          } catch (_) {
+            adaptedEl.textContent = visible;
+          }
+        }
       },
       onResult: (ev) => {
         // Parse de les seccions del resultat (Text adaptat + Glossari + Esquema + Preguntes)

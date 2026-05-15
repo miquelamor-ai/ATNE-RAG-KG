@@ -23,7 +23,7 @@ import threading
 import time
 
 import instruction_filter
-from adaptation.llm_clients import _call_llm, _call_llm_raw, _resolve_model
+from adaptation.llm_clients import _call_llm, _call_llm_raw, _call_llm_stream, _resolve_model
 from adaptation.post_process import (
     _post_process_llm_output,
     clean_gemini_output,
@@ -205,9 +205,42 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
         label_attempt = f" (intent {attempt}/{max_attempts})" if verify_enabled else ""
         cb({"type": "step", "step": "adapting", "msg": f"Generant adaptació amb {model_label}{label_attempt}..."})
         try:
-            adapted_raw = _call_llm(active_model, system_prompt, user_text)
+            # Streaming: emetem cada chunk com a event SSE «delta» perquè el
+            # frontend pugui renderitzar el text progressivament (com ChatGPT).
+            # Així reduïm la sensació de lentitud quan el rotatiu treu un model
+            # lent (Gemma 4 31B pot trigar ~100s). Acumulem els chunks per tenir
+            # el text complet i poder fer verify + post-process al final.
+            _t0_stream = time.time()
+            _chunks: list[str] = []
+            try:
+                for _chunk in _call_llm_stream(
+                    active_model, system_prompt, user_text,
+                    temperature=0.4, top_p=0.95, max_tokens=8192,
+                ):
+                    _chunks.append(_chunk)
+                    cb({"type": "delta", "text": _chunk})
+                adapted_raw = "".join(_chunks)
+            except Exception as _stream_err:
+                # Fallback: si el stream falla (clau, quota, etc.) prova
+                # crida no-streaming abans de retornar error a l'usuari.
+                print(f"[adapt] Stream fallit, fallback no-stream: {_stream_err}", flush=True)
+                adapted_raw = _call_llm(active_model, system_prompt, user_text)
+
             import adaptation.llm_clients as _llm_mod
-            _llm_u = dict(_llm_mod._LAST_LLM_USAGE)
+            # Si el stream ha funcionat, _LAST_LLM_USAGE no s'ha actualitzat
+            # (només ho fa _call_llm). Estimem tokens i temps a partir de
+            # longituds del text — aproximació suficient per a telemetria del
+            # pilot. Si el fallback no-stream s'ha activat, _LAST_LLM_USAGE
+            # ja conté valors reals del proveïdor.
+            if _chunks:  # cas streaming
+                _llm_u = {
+                    "tokens_in": len(system_prompt + user_text) // 4,
+                    "tokens_out": len(adapted_raw) // 4,
+                    "llm_ms": int((time.time() - _t0_stream) * 1000),
+                    "provider": _resolve_model(active_model)[0],
+                }
+            else:
+                _llm_u = dict(_llm_mod._LAST_LLM_USAGE)
             adapted = clean_gemini_output(adapted_raw)
             adapted = _post_process_llm_output(adapted, lang=lang)
             # Diagnòstic verbós
