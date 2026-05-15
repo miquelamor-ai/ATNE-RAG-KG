@@ -372,3 +372,230 @@ desenvolupament i la documentació pedagògica.
 > separats les bastides 🔶 que tinguin sentit didàctic propi (per
 > exemple, bases d'orientació per gènere autònomes; cartes
 > conversacionals; rúbriques per a l'alumne).
+
+---
+
+## Gradacions operatives per nivell MALL (consulta NotebookLM 2026-05-15)
+
+Aquesta secció ÉS LA PEÇA CLAU per a la implementació de Fase C: dóna
+les taules concretes que substituiran els valors plans actuals al
+catàleg ATNE. Cada complement ha d'adoptar la seva gradació.
+
+### Tres plànols de lectura (Marc rector de qualsevol bateria de preguntes)
+
+| Plànol | Què interroga |
+|---|---|
+| Literal — "llegir les línies" | Info explícita, dades, noms, seqüències temporals |
+| Inferencial — "llegir entre línies" | Deducció, causa-efecte, hipòtesi, pressuposicions |
+| Crític — "llegir rere les línies" | Intencionalitat, ideologia, fiabilitat, judici fonamentat |
+
+Pesos relatius per nivell MALL:
+
+| Nivell | Literal | Inferencial | Crític |
+|---|---|---|---|
+| Emergent | Tot via adult (propedèutic) | Propedèutic | Propedèutic |
+| Inicial | Predominant | Inici | Mínim |
+| Funcional | Domina | Apareix | Inicial |
+| Estratègic | Base | **Motor** | Creixent |
+| Acadèmic | Base | Base | Sòlid |
+| Crític | Base | Base | **Motor** |
+
+### Connectors per nivell
+
+| Nivell | Inventari operatiu |
+|---|---|
+| Emergent (pre-A1) | Cap abstracte. Suport visual/oral. Si textuals: `i`, `després` |
+| Inicial (A1) | + `però`, `perquè` |
+| Funcional (A2) | + `primer`, `llavors`, `per tant` |
+| Estratègic (B1) | + `ja que`, `en canvi`, `a més a més`, `tot i que` |
+| Acadèmic (B2) + Crític (C1) | + `així mateix`, `no obstant això`, `atès que`, `en conseqüència`, `per contra` |
+
+Principi MALL: els connectors no són llistes per memoritzar, sinó **eines
+per jerarquitzar el raonament**. La semàntica abans que la gramàtica.
+
+### Iniciadors de resposta — mida del forat
+
+| Nivell | Iniciador exemple |
+|---|---|
+| Emergent | *"A la imatge veig un ___."* (forat petit, suport visual) |
+| Inicial | *"El personatge es diu ___ i vol ___."* (designació) |
+| Funcional | *"Segons el text, ___ va passar perquè ___."* (literal) |
+| Estratègic | *"Jo crec que ___ perquè el text diu ___."* (raonament propi) |
+| Acadèmic | *"Aquest fenomen s'explica mitjançant ___, ja que ___."* (model teòric) |
+| Crític | *"L'autor intenta convèncer el lector de ___ fent servir ___."* (intencionalitat) |
+
+### Paraules clau / rescat lèxic
+
+| Nivell | Quantitat i tipus |
+|---|---|
+| Emergent | 3-5 paraules + **pictograma**. Objectes reals del tema. NO tecnicismes |
+| Inicial-Funcional | 5-8 paraules. Noms + verbs d'acció bàsics |
+| Estratègic | ~10 paraules. Inclou habilitats: `hipòtesi`, `causa`, `conseqüència` |
+| Acadèmic-Crític | Lèxic d'especialitat pur (CALP), sense equivalent col·loquial |
+
+### Pictogrames i suport visual
+
+| Nivell | Densitat | Col·locació |
+|---|---|---|
+| Emergent | **1-2 per frase** (noms + verbs clau) | **Inline o sobre la paraula**. Paratext lateral per anticipar |
+| Inicial | **1 per frase** o només tecnicismes | **Glossari visual** (dreta o peu del text) |
+| Funcional+ | Decisió docent | Glossari visual (no inline) |
+
+### Esquemes visuals (diagrama de fletxes) — N nodes
+
+| Nivell | N nodes | Apropiat per a |
+|---|---|---|
+| Emergent | 2-3 | Seqüències temporals bàsiques, relacions imatge→paraula |
+| Inicial | 3-4 | Enumerar qualitats o parts d'un objecte |
+| Funcional | 4-6 | Seqüenciar passos d'instrucció / esdeveniments cronològics |
+| Estratègic | 6-8 | Causa-efecte, formulació d'hipòtesis |
+
+### Mapa conceptual jeràrquic
+
+**No apropiat per a Emergent ni Inicial** (l'alumne encara està en
+descodificació). S'introdueix al final de Funcional.
+
+| Nivell | Profunditat |
+|---|---|
+| Funcional (A2) | **2 nivells**: concepte → idees literals principals |
+| Estratègic (B1) | **3 nivells**: concepte → categories → exemples/detalls inferits. Connectors lògics a les fletxes |
+| Acadèmic (B2) | **4+ nivells**. Jerarquització abstracta (CALP) |
+| Crític (C1) | **Mapa de contrast** entre fonts/ideologies (multi-perspectiva) |
+
+### Preguntes — Format per nivell
+
+| Nivell | Formats apropiats |
+|---|---|
+| Emergent | **NO escriptura autònoma**. Assenyalar, dibuixar, dramatitzar, dictat a l'adult |
+| Inicial | V/F textual (sobre paraules clau), omplir buits amb opcions visuals |
+| Funcional | Relacionar amb fletxes, elecció múltiple de títols, ordenació de seqüències |
+| Estratègic | + inferencials (per què? i si...?) |
+| Acadèmic | Argumentació oberta, transferència al jo, contrast de fonts |
+| Crític | Argumentació + valoració d'intencionalitat + judicis fonamentats |
+
+**PROHIBIT a Emergent**: V/F textual, omplir buits textuals,
+relaciona-amb-línies, *"per què..."*, comparacions abstractes,
+metacognició.
+
+### Preguntes — Quantitat per moment
+
+- **Abans de llegir** (Predicció): **2-3 preguntes**. Activar previs +
+  objectiu de lectura
+- **Durant la lectura** (Monitorització): **1-2 aturades**. Dubtes
+  lèxics + hipòtesi + resum parcial
+- **Després de llegir** (Avaluació + Resum): **3-5 preguntes** cobrint
+  els 3 plànols
+
+Regla MALL: *"menys és més"*. No fatigar; mantenir compromís lector.
+
+### Modalitat discursiva (text adaptat + preguntes)
+
+| Tipus de text | Aproximació | Tipus de preguntes |
+|---|---|---|
+| Literari ("Porta Oberta") | Deixa "buits" que l'alumne omple subjectivament | Afectives (emocions), creatives (què hauria passat si...?), crítiques |
+| Informatiu ("Porta Tancada") | Cerca precisió, sense buits | Metacognitives (preveure pel títol), qüestionar info, resumir idees principals |
+
+### Modelatge ("Think Aloud")
+
+Incloure de tant en tant un comentari que verbalitzi el procés d'un
+lector expert. Funciona com a ZDP de Vigotski.
+
+Exemple: *"Com a lector, quan veig aquest títol en negreta em pregunto
+si és la idea més important. I tu, què en penses?"*.
+
+---
+
+## Modalitat lectora (dimensió nova al catàleg ATNE)
+
+ATNE avui té UNA dimensió de "nivell": el MECR. El MALL demostra que
+**la lectura emergent és una modalitat de relació amb el text, NO un
+nivell lingüístic**. Hi ha dues modalitats que pre-A1 actual barreja:
+
+### Tipus 1 — Lectura emergent per edat (MOPI/PIN inferior)
+
+- L'infant **construeix el concepte mateix** de lectura
+- **L'adult descodifica sempre**. L'infant construeix significat.
+- Bastides: pistes paratextuals, lectura logogràfica del propi nom
+- Exemple: *"Mirant el dibuix i el títol, qui creus que serà el
+  protagonista?"*
+
+### Tipus 2 — Lectura emergent per llengua (TILC/L2)
+
+- Alumne **ja és lector en L1**. Té CUP (Competència Subjacent Comuna)
+- L'alumne descodifica, però el català és L2 inicial (pas de BICS a
+  CALP)
+- Bastides: intercomprensió (semblances L1↔català), traducció pedagògica
+  (TOLC), glossari bilingüe, iniciadors comparats
+- Exemple: *"Com es diu 'cèl·lula' en la teva llengua? Fixa't que
+  l'estructura és igual en català que en la teva L1"*
+
+### Variable de perfil a afegir: `fase_lectora`
+
+Marcador real del MALL: trànsit **Fase Logogràfica → Fase Alfabètica**.
+Forquilla evolutiva normal: 4-7 anys (no curs fix).
+
+```
+fase_lectora: "logografica" | "alfabetica_emergent" | "alfabetica_fluida"
+```
+
+Defaults:
+- Infantil → `logografica` (sempre)
+- 1r-2n Primària → `alfabetica_emergent` (el docent pot baixar a `logografica`)
+- 3r+ → `alfabetica_fluida` (el docent pot baixar excepcionalment)
+
+### Càlcul de modalitat
+
+| Condició | Modalitat lectora |
+|---|---|
+| `fase_lectora == "logografica"` | **compartida** (Tipus 1) |
+| `fase_lectora == "alfabetica_emergent"` | **progressiva** ("ara tu, ara jo") |
+| `nouvingut + MECR baix + fase_lectora != "logografica"` | **transferència** (Tipus 2) |
+| Resta | **autònoma** |
+
+### Bastides com a temporals
+
+Principi rector MALL: les bastides s'han d'anar **retirant** quan
+l'alumne pot representar-se mentalment l'estructura. ATNE hauria
+d'apuntar a l'**Argumentació pedagògica** quan una bastida és puntual
+vs quan és contingut estable.
+
+### Habilitats cognitivolingüístiques i format apropiat
+
+| Habilitat | Format | Nivell típic |
+|---|---|---|
+| Descriure | Esquema radial (objecte al centre + adjectius) | Inicial |
+| Explicar | Diagrama de flux amb connectors "perquè"/"per tant" | Funcional/Estratègic |
+| Justificar | Mapa conceptual jeràrquic (tesi + evidències + models) | Acadèmic |
+
+---
+
+## Glossari L1 nouvingut — destinatari rectificat (MALL 2026-05-15)
+
+Versió antiga d'aquest corpus deia que el glossari era *"per a la
+família, no per a l'infant"*. MALL ho rectifica:
+
+- **Destinatari**: **TOTS DOS** (alumne + família)
+- **Per a l'alumne**: veure la seva L1 escrita valida la identitat
+  ("Textos d'Identitat") i activa la CUP
+- **Per a la família**: literacitat familiar, continuïtat del diàleg
+  sobre aprenentatge a casa
+- **Patró concret** per a Emergent + L1 no-llatí:
+  `[Imatge del concepte] + [paraula L1 en alfabet origen] + [PARAULA en català]`
+- La imatge és la "llengua franca visual" que connecta dos sistemes
+  gràfics
+
+---
+
+## Majúscules a Infantil — rectificat (MALL 2026-05-15)
+
+**NO** conversió automàtica a CAPS per a I3-I5. MALL:
+
+- Materials reals a l'aula tenen majúscula + minúscula des d'I3
+- Les minúscules NO s'han d'"amagar" — l'infant les troba a etiquetes,
+  cartells, contes del seu entorn
+- Les majúscules són per **escriure** (motriu), no per **llegir**
+- Transició natural a mixta/lligada quan l'infant arriba a fase
+  alfabètica de l'escriptura
+
+ATNE: opció manual *"Noms de personatges en majúscules"* per a tasques
+d'identificació puntuals, no conversió massiva.

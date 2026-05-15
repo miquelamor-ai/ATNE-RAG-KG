@@ -147,6 +147,51 @@ Reemplaçar la taula plana del bloc bastides a [prompt_builder.py:628-635](adapt
 
 **Acció Fase C**: afegir `mecr_detail` al bloc *"Paraules clau del text"* del bastides.
 
+### 3.4 Pictogrames i suport visual (consulta MALL E1)
+
+| Nivell | Densitat | Col·locació |
+|---|---|---|
+| Emergent | **1-2 per frase** (noms + verbs) | **Inline o sobre la paraula** (associació directa grafia-significat). Paratext lateral per anticipar sentit. |
+| Inicial | **1 per frase** o només tecnicismes | **Glossari visual** (dreta o peu del text). L'alumne descodifica primer. |
+| Funcional+ | Decidir docent | Glossari visual (no inline) — el suport visual no ha de competir amb el text |
+
+**Justificació MALL**: el suport visual no és ornament, és **bastida
+cognitiva** que fa l'input comprensible. La cobertura es gradua segons
+l'estratègia lectora activada.
+
+**Acció Fase C**: gradació al bloc del prompt per al complement
+`pictogrames` (avui sense gradació).
+
+### 3.5 Glossari L1 nouvingut (consulta MALL E2) — **RECTIFICAT**
+
+Memòria 2026-05-15 `project_lectura_compartida_infantil.md` deia que els
+ajuts L1 *"són per a la família, no per a l'infant"*. **És una mitja
+veritat**. MALL ho rectifica: el glossari L1 + transliteració és
+**per a TOTS DOS** (alumne + família):
+
+- **Per a l'alumne**: veure la seva llengua escrita valida la identitat
+  i activa la CUP. Són *"Textos d'Identitat"* que enforteixen la
+  confiança.
+- **Per a la família**: permet acompanyar la comprensió a casa
+  (literacitat familiar).
+
+**Patró concret** per a Emergent + nouvingut L1 no-llatí:
+
+```
+[Imatge del concepte] + [paraula L1 en alfabet origen] + [PARAULA EN CATALÀ]
+```
+
+La imatge és la **"llengua franca visual"** que connecta dos sistemes
+gràfics diferents.
+
+**Acció Fase C**:
+- Reformular text de G-08 i de la capçalera del glossari: ja NO
+  *"Per llegir junts a casa amb la família"* sinó alguna cosa com
+  *"Per llegir junts: pictograma + L1 + català"* o *"Textos d'identitat"*
+- Forçar el triplet pictograma+L1+català al glossari quan
+  modalitat=compartida + alfabet_llati=False
+- Actualitzar la memòria `project_lectura_compartida_infantil.md`
+
 ---
 
 ## 4. Preguntes de comprensió per nivell (substitueix lògica plana actual)
@@ -264,19 +309,87 @@ detectem desajust entre la complexitat del text font i el MECR de sortida
 
 ---
 
-## 7. Majúscules per a I3-I5 (proposta Miquel 2026-05-15)
+## 6.5 Esquemes visuals i mapes conceptuals (consulta MALL F1+F2)
 
-A etapa infantil (i opcional fora), tot el text en majúscules. Raons
-pedagògiques: cada lletra més distingible (sense ascendents/descendents),
-recognició visual simplificada, manuals d'iniciació en CAPS.
+Avui ATNE té els complements `esquema_visual` i `mapa_conceptual` sense
+gradació per nivell. El MALL els distingeix clarament com a **bastides
+cognitives** per fer trànsit cap al CALP.
 
-**Acció Fase C/D**:
-- Post-process automàtic a `adaptation/post_process.py`: si
-  `etapa=="infantil"`, convertir text adaptat + glossari a majúscules
+### Esquema visual (diagrama de fletxes)
+
+Treballa funció executiva i instrumental (seqüenciar, analitzar processos).
+
+| Nivell | Apropiat per a | N nodes |
+|---|---|---|
+| Emergent | Seqüències temporals bàsiques (abans/després), relacions imatge→paraula | **2-3 nodes** |
+| Inicial | Enumerar qualitats o parts d'un objecte (descripció simple) | **3-4 nodes** |
+| Funcional | Seqüenciar passos d'instrucció / esdeveniments cronològics | **4-6 nodes** |
+| Estratègic | Causa-efecte, hipòtesis | **6-8 nodes** |
+| Acadèmic+ | Modelització de processos complexos | Decisió docent |
+
+### Mapa conceptual jeràrquic
+
+Eina de funció epistèmica (escriure i organitzar per pensar). **NO
+treballable abans de A2 final**.
+
+| Nivell | Treballable? | Profunditat |
+|---|---|---|
+| Emergent/Inicial | ❌ Inapropiat (encara descodificació) | — |
+| Funcional (A2) | Introducció guiada | **2 nivells** (concepte → idees principals literals) |
+| Estratègic (B1) | Eina fonamental | **3 nivells** (concepte → categories → exemples/detalls inferits). **Connectors lògics a les fletxes** |
+| Acadèmic (B2) | Dominar superestructura del gènere | **4+ nivells**. Jerarquització complexa abstracta (CALP) |
+| Crític (C1) | **Mapa de contrast** (no només contingut) | Multi-font / multi-ideologia, mostrant fiabilitat/posicionament |
+
+### Bastides com a **temporals**
+
+Principi rector MALL: les bastides visuals s'han d'anar **retirant** quan
+l'alumne pot representar-se mentalment l'estructura. ATNE hauria
+d'apuntar a l'**Argumentació pedagògica** quan un mapa és bastida
+puntual vs quan és contingut estable.
+
+### Acció Fase C
+
+- Afegir `mecr_detail` al bloc del prompt per a `esquema_visual` amb
+  cobertures de nodes per nivell
+- **Suprimir** el complement `mapa_conceptual` automàticament per a
+  Emergent/Inicial (vegeu `suppress_if_low_mecr`)
+- Afegir nota d'argumentació pedagògica sobre bastides temporals
+
+### Habilitats cognitivolingüístiques i format apropiat (MALL)
+
+| Habilitat | Format | Nivell típic |
+|---|---|---|
+| Descriure | Esquema radial (objecte al centre + adjectius) | Inicial |
+| Explicar | Diagrama de flux amb connectors "perquè"/"per tant" | Funcional/Estratègic |
+| Justificar | Mapa conceptual jeràrquic (tesi + evidències + models) | Acadèmic |
+
+---
+
+## 7. Majúscules per a infantil — **RECTIFICAT 2026-05-15 (consulta MALL)**
+
+**Proposta inicial de Miquel**: tot el text en majúscules per a I3-I5.
+
+**Consulta MALL ho reformula**: el MALL NO recomana convertir tot el
+text a majúscules. Tres principis:
+
+1. **Materials reals des d'I3**: lletra d'impremta MAJÚSCULA + minúscula.
+   No s'han d'"amagar" les minúscules — l'infant les troba a etiquetes,
+   cartells i contes del seu entorn real.
+2. **Majúscules són per ESCRIURE, no per LLEGIR**: la lletra de pal és
+   motriument menys complexa per al traç (producció), no per a la
+   percepció lectora.
+3. **Transició natural a mixta/lligada** quan l'infant arriba a fase
+   alfabètica de l'escriptura, no de la lectura.
+
+**Acció Fase C reformulada**:
+- ❌ NO conversió automàtica de tot el text a CAPS per a infantil
+- ✅ Default: text en mixta normal (com els materials reals)
+- ✅ Toggle manual al Pas 2: *"Noms de personatges en majúscules"* per a
+  tasques d'identificació (rètols, llistes, descodificació logogràfica
+  del propi nom)
+- ✅ Toggle manual al Pas 2: *"Tot el text en majúscules"* per a casos
+  específics que el docent jutgi (no com a default infantil)
 - Preservar accents catalans: À/È/É/Í/Ò/Ó/Ú/Ï/Ü, ç→Ç, ñ→Ñ
-- Mantenir emojis intactes
-- Toggle manual al Pas 2 (*"Tot el text en majúscules"*) per casos no-infantil
-- NO aplicar a complements del docent (argumentació pedagògica, notes auditoria)
 
 ---
 
