@@ -549,60 +549,97 @@ ACTIVAT — Genera 2-3 activitats de repte cognitiu per a {etapa_complement}:
 """)
 
     if comp.get("bastides"):
-        output_sections.append(f"""
-## Bastides (scaffolding)
-ACTIVAT — Suports didàctics reals per AJUDAR L'ALUMNE A PRODUIR les respostes
-(model MALL/TILC: patró lingüístic de la matèria + connectors + lèxic temàtic).
+        # Bastides → dos blocs lògics segons hi hagi tasca de producció o no:
+        #   - LECTURA (sempre): pre-lectura + durant + post-lectura
+        #   - RESPOSTA (només si preguntes_comprensio o activitats_aprofundiment
+        #     estan actives): connectors + frases model
+        # Llenguatge adaptat al MECR de l'alumne (A1-A2 = simple/visual; B1+ = més tècnic).
+        # El bloc "Suport L1" s'elimina: ja es cobreix amb el complement Glossari
+        # (que té traducció L1 + transliteració quan l'alumne és nouvingut).
+        # El "Suport visual recomanat" passa a «Notes d'auditoria» (info pel docent).
+        _has_production_task = bool(
+            comp.get("preguntes_comprensio") or comp.get("activitats_aprofundiment")
+        )
+        _mecr_norm = (mecr_complement or "B1").upper().replace("Ç", "C")
+        _is_low_mecr = _mecr_norm in ("PRE-A1", "A1", "A2")
+
+        if _is_low_mecr:
+            _bastides_title = "Eines per llegir i respondre"
+            _lang_note = (
+                "🟡 LLENGUATGE SIMPLE: l'alumne és MECR baix. Usa títols planers "
+                "i emojis. Evita termes tècnics («scaffolding», «connectors lògics», «patró lingüístic»). "
+                "Una idea per línia. Frases molt curtes."
+            )
+        else:
+            _bastides_title = "Bastides (ajudes per llegir i respondre)"
+            _lang_note = (
+                "Llenguatge clar per a l'alumne. Si MECR ≤ B1, evita termes massa tècnics."
+            )
+
+        # Blocs comuns: lectura
+        _bastides_block = f"""
+## {_bastides_title}
+ACTIVAT — Ajudes per a l'alumne (NO explicació del text). {_lang_note}
 
 ### CONTEXT
 - Matèria: {materia_complement}
 - Etapa: {etapa_complement} · MECR: {mecr_complement}
-- Si l'alumne és nouvingut, L1: {l1_display}
 
-### 1. Taula de connectors lògics
-Taula amb els connectors del tipus de raonament que demanen les preguntes:
-| Funció | Connectors (adequats al MECR {mecr_complement}) |
+### 📖 Abans de llegir
+2-3 pistes curtes perquè l'alumne enfoqui la lectura ABANS de començar:
+- Una pregunta d'activació: «Què saps de [tema]?»
+- Una predicció: «Què creus que diu el text? Mira el títol i pensa.»
+- Un propòsit clar: «Llegeix per saber [una cosa concreta del text].»
+
+### 🔍 Durant la lectura
+2-3 estratègies pràctiques:
+- Què subratllar (1-2 tipus d'informació clau, ex: «verbs d'acció», «dates»).
+- Com prendre nota al marge (ex: ✓ entès / ? dubte / ! important).
+- Per cada paràgraf, anota la idea principal en 1 paraula.
+
+### 📝 Després de llegir
+2-3 activitats curtes per consolidar:
+- Resum en 1 frase: «Aquest text parla de ______ i diu que ______.»
+- Idea principal vs detalls: distingeix-les.
+- Connecta amb la teva vida: «Això em recorda ______.»
+"""
+
+        if _has_production_task:
+            _bastides_block += f"""
+
+### 🔗 Connectors per respondre
+Taula amb els connectors que es poden fer servir a les respostes:
+| Per què | Paraules útils ({mecr_complement}) |
 |---|---|
-| Causa | perquè, com que, ja que, a causa de |
-| Conseqüència | per tant, així doncs, en conseqüència, per això |
-| Oposició / contrast | però, en canvi, tanmateix, malgrat que |
-| Exemplificació | per exemple, com ara, en concret |
-| Conclusió | en resum, per acabar, en definitiva |
-Adapta la quantitat i complexitat al nivell.
+| Donar una causa | perquè, com que, ja que |
+| Dir una conseqüència | per tant, així doncs, per això |
+| Comparar / contrastar | però, en canvi |
+| Donar exemples | per exemple, com ara |
+| Tancar la resposta | en resum, per acabar |
+Adapta la quantitat al MECR de l'alumne (a A1-A2 dóna 1-2 connectors per fila; a B1+ dóna 3-4).
 
-### 2. Frases model per argumentar amb el text
-4-6 bastides d'inici de frase perquè l'alumne escrigui respostes ben formulades:
-- "Segons el text, ______ perquè ______."
-- "Podem deduir que ______ ja que el text diu que ______."
-- "A diferència de ______, ______ s'assembla a ______ perquè ______."
-- "Un exemple d'això és ______."
-- "Jo crec que ______, i ho justifico perquè ______."
-Adapta la complexitat al MECR: més simples a A1-A2, més sofisticades a B1-C1.
+### ✏️ Frases per començar la resposta
+4-5 inicis de frase perquè l'alumne completi (no donis la resposta sencera):
+- «Segons el text, ______ perquè ______.»
+- «Penso que ______ perquè el text diu ______.»
+- «Un exemple és ______.»
+- «A ______ li passa que ______.»
+- (Adapta al MECR: més curtes i amb 1-2 forats a A1-A2; més sofisticades a B2-C1.)
 
-### 3. Banc de paraules (lèxic temàtic de {materia_complement})
-8-12 paraules del patró lingüístic de la matèria, extretes del text o complementàries,
-que l'alumne pot usar per respondre. Si escau, agrupa-les per camp semàntic.
-Format: paraula1 – paraula2 – paraula3 – …
+### 🗂️ Paraules clau del text
+6-10 paraules importants del text que l'alumne pot reaprofitar a les respostes.
+Format llista separada per «–». Si són tècniques, marca-les amb (T): paraula1 – paraula2(T) – paraula3 – …
+"""
+        else:
+            _bastides_block += """
 
-### 4. Suport visual recomanat
-Indica 2-3 suports visuals concrets que afegirien valor (icones, colors destacats,
-esquemes, línies de temps, mapes, gràfiques, fotografies…) i on ubicar-los al text.
+### 💡 Recomanació
+No hi ha preguntes ni activitats actives en aquesta adaptació. Per això NO s'inclouen
+bastides de resposta (connectors + frases model). Si vols que l'alumne respongui,
+activa també el complement «Preguntes de comprensió» o «Activitats d'aprofundiment».
+"""
 
-### 5. Crosses de lectura (abans d'engegar)
-2-3 pistes concretes perquè l'alumne enfoqui bé la lectura:
-- Què ha de buscar mentre llegeix (1-2 elements clau)?
-- Com marcar el que és important (subratllar, prendre nota, fletxes)?
-- Quin és el propòsit d'aquesta lectura?
-
-### 6. Suport L1
-Si l'alumne és nouvingut, tradueix 5-8 conceptes més abstractes a {l1_display}
-(en l'alfabet original si escau: àrab, xinès, urdú, etc.).
-
-### ADEQUACIÓ PER ETAPA
-- Infantil / Cicle Inicial: crosses FÍSIQUES i VISUALS (imatges, colors, referents sonors).
-- Cicle Mitjà / Superior / ESO: crosses PROCEDIMENTALS (estratègies, plantilles, taules).
-- Batxillerat / FP: estratègies de SÍNTESI i anàlisi crítica de múltiples fonts.
-""")
+        output_sections.append(_bastides_block)
 
     if comp.get("mapa_mental"):
         output_sections.append("""
