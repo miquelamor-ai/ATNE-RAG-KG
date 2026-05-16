@@ -2376,16 +2376,25 @@
     saveCurrentDraft();
   });
 
-  // Auto-save cada 30 s (debounced): només si ja hi ha un draft_id associat.
-  // No volem crear drafts automàticament sense acció explícita del docent —
-  // però un cop desat, mantenim actualitzada la versió del servidor.
+  // Auto-save:
+  //   - Si JA hi ha draft_id: actualitza cada 30 s quan hi ha canvis.
+  //   - Si NO hi ha draft_id i el text té ≥ 50 caràcters: crea el primer
+  //     draft automàticament 90 s després del primer input. Evita crear
+  //     drafts buits per a docents que obren el pas i no escriuen res.
   let autosaveTimer = null;
+  let autosaveFirstTimer = null;
   function scheduleAutosave() {
-    if (!localStorage.getItem('atne.draft_id')) return;
     clearTimeout(autosaveTimer);
-    autosaveTimer = setTimeout(() => {
-      saveCurrentDraft({ silent: true });
-    }, 30000);
+    if (localStorage.getItem('atne.draft_id')) {
+      autosaveTimer = setTimeout(() => saveCurrentDraft({ silent: true }), 30000);
+    } else {
+      // Primer draft: espera 90 s des del darrer input i crea si hi ha text
+      clearTimeout(autosaveFirstTimer);
+      autosaveFirstTimer = setTimeout(async () => {
+        const text = (document.getElementById('write-ta')?.value || '').trim();
+        if (text.length >= 50) await saveCurrentDraft({ silent: true });
+      }, 90000);
+    }
   }
   ta.addEventListener('input', scheduleAutosave);
   document.getElementById('doc-title')?.addEventListener('input', scheduleAutosave);
