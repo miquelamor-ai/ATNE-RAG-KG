@@ -26,6 +26,14 @@ debat) donant a cada alumne un repertori d'iniciadors associats al seu **rol** d
 la conversa. No és una llista de connectors: cada carta = un rol + iniciadors
 concrets per a aquella funció comunicativa.
 
+El MALL les anomena **cartes amb etiquetes lingüístiques** i distingeix dos tipus de
+conversa que condicionen el registre i els rols:
+
+| Tipus | Característica | Quan usar |
+|---|---|---|
+| **Conversa exploratòria** | Raonament visible, posicions obertes, errors tolerats | A2-B1: pensar en veu alta junts |
+| **Conversa disputativa** | Posicions definides, argumentació formal, citació d'evidències | B2+: debat acadèmic, contrast de fonts |
+
 El MALL les recomana per:
 - Debats argumentats (activitats d'aprofundiment)
 - Posades en comú estructurades (post-lectura)
@@ -41,6 +49,20 @@ El MALL les recomana per:
 | **Sintetitzador/a** | Resumeix el que s'ha dit i treu conclusions |
 
 Pots usar 2 rols (Proposador/Objector) o els 4. Adapta al nombre de membres del grup.
+
+## Instrument companion: Taulell de debat
+
+El MALL documenta un instrument complementari que acompanya les cartes a B1+: el
+**taulell de debat** — una superfície compartida (cartolina o pantalla) on el grup
+anota en temps real:
+
+- Arguments a favor / Arguments en contra
+- Punts d'acord trobats
+- Preguntes obertes sense resoldre
+
+Funció: externalitza el raonament col·lectiu i fa visible l'evolució del debat.
+Quan generes les cartes per a B1+, afegeix una nota breu al docent indicant que
+el taulell de debat és l'instrument companion recomanat.
 
 ## Gradació per nivell MALL
 

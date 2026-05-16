@@ -29,6 +29,23 @@ La gradació no és de complexitat del text sinó de **mida del forat**:
 - A nivells baixos, la majoria del marc ja és donat; l'alumne omple 1-2 buits.
 - A nivells alts, el marc és mínim (criteris) i l'alumne construeix lliurement.
 
+## Recapitular com a pas previ
+
+El MALL distingeix dos processos que sovint es confonen:
+
+- **Recapitular** (pas previ, oral o visual): ordenar i seleccionar la informació sense produir
+  text autònom — ordenar imatges, dictat a l'adult, respondre "qui / on / quan".
+- **Resumir** (producció): generar un text coherent que condensa el principal.
+
+A pre-A1 i A1, el resum graduat treballa el **recapitular**. El resumir escrit és la
+fita final d'un procés progressiu.
+
+### Eines de bastida per a A1-A2 (validat MALL)
+
+- **Textos amb llacunes (cloze)**: frase marc amb 1-3 buits — l'alumne tria d'una llista o omple.
+- **Ordenació de seqüències**: frases o imatges desordenades que l'alumne ordena lògicament.
+- **Columna de selecció**: llista d'idees on l'alumne marca les que pertanyen al tema principal.
+
 ## Diferència amb altres instruments
 
 | Instrument | Funció |

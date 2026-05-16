@@ -34,6 +34,16 @@ obertes o activitats d'aprofundiment). Contenen tres blocs:
 
 **PRE-A1: NO generar cap d'aquests blocs.** Zero escriptura autònoma.
 
+## Context dins la Seqüència Didàctica (SD)
+
+Els tres blocs es generen per a moments **distints** de la SD:
+
+| Bloc | Fase SD | Funció |
+|---|---|---|
+| **Bloc A** — Base d'orientació | Fase 0-1 (Activació / Presentació del gènere) | GPS del gènere: el docent el presenta ABANS de la producció |
+| **Bloc B** — Catàleg de recursos | Fase 2-3 (Comprensió / Teorització) | Es construeix DURANT l'anàlisi del text model |
+| **Blocs A+B combinats** | Fase 4 (Transferència / Producció) | L'alumne els consulta com a referència mentre escriu |
+
 ## Principi crític: base d'orientació SEMPRE disciplinar
 
 ❌ **Genèric** (prohibit): *"Escriu la introducció, el desenvolupament i la conclusió."*

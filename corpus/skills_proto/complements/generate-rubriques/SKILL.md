@@ -26,6 +26,27 @@ Aquesta rúbrica és per a l'**alumne**, no per al docent. Permet l'autoavaluaci
 coavaluació. S'orienta a la producció derivada del text (activitat d'aprofundiment,
 pregunta oberta, tasca escrita).
 
+## Principi MALL: doble esmicolament
+
+Dissenyar una rúbrica requereix dos passos seqüencials:
+
+1. **Primer esmicolament** — Identificar els **criteris** (dimensions de la qualitat):
+   contingut, llengua, estructura, rigor, reflexió.
+2. **Segon esmicolament** — Definir els **indicadors** per a cada nivell (NA/AS/AN/AE):
+   comportaments observables i concrets, en primera persona.
+
+Sense el segon esmicolament, els descriptors queden abstractes ("fa bé", "és adequat")
+i l'alumne no sap on se situa ni com millorar.
+
+## Distinció: Rúbrica vs Pauta d'interrogació
+
+| Instrument | Quan s'usa | Funció |
+|---|---|---|
+| **Rúbrica d'assoliment** | Al FINAL de la producció | Avaluar el resultat (inici i final del procés) |
+| **Pauta d'interrogació** | DURANT la producció | Checklist d'autoregulació pas a pas (Bloc C de bastides de producció) |
+
+La pauta d'interrogació acompanya el procés d'escriptura. La rúbrica avalua el producte final.
+
 ## Escala FJE
 
 | Codi | Nom | Significat |

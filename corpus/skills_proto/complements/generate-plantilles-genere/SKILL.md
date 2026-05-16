@@ -37,6 +37,19 @@ L'alumne veu la forma acabada i l'imita amb el contingut del text que ha llegit.
 - Alumnat nouvingut o amb dificultats d'expressió que necessita un model concret.
 - Qualsevol MECR: la plantilla canvia de densitat de forats, no de format.
 
+## Principi cognitiu: descarregar la textualització
+
+La plantilla actua a la **Fase 4 (Textualització)** de la SD. En aquest moment, l'alumne
+ha d'activar simultàniament tres processos cognitius:
+
+1. Recuperar el contingut (el que ha après del text)
+2. Organitzar les idees (estructura del gènere)
+3. Codificar en llengua nova (L2 o NESE)
+
+La plantilla elimina la càrrega del pas (2) — l'estructura ja és donada — perquè l'alumne
+pugui centrar-se en (1) i (3). **No és una drecera: és una bastida temporal** que es retira
+quan l'alumne interioritza el gènere.
+
 ## Gradació per nivell MALL
 
 | Nivell | Forats | Estructura |

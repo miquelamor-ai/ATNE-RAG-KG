@@ -28,6 +28,17 @@ i als **tres plànols** de comprensió. Són sempre actives quan el complement
 Es diferencien del complement `preguntes_comprensio`: les bastides de lectura
 proporcionen el **procediment** (com llegir), no les preguntes (què cal respondre).
 
+## Estratègies MALL que activa
+
+Les bastides de lectura posen en marxa quatre estratègies cognitives clau del MALL:
+
+| Moment | Estratègia | Descripció |
+|---|---|---|
+| **Abans** | Formular hipòtesis | Activar coneixements previs i crear expectativa lectora a partir del títol, imatge o context |
+| **Durant** | Visualitzar | Construir representació mental del text mentre es llegeix; especialment potent a pre-A1/A1 |
+| **Durant/Després** | Fer inferències | Relacionar el dit i el no-dit; detectar implicatures i intenció de l'autor |
+| **Després** | Recapitular → Resumir | Recapitular és el pas previ (oral, ordenació); resumir és la producció textual final |
+
 ## Gradació per nivell MALL
 
 | Nivell | Abans | Durant | Després |

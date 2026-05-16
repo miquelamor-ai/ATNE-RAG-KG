@@ -43,6 +43,16 @@ Usa la **traducció** com a eina pedagògica. No és un glossari: és una compar
 
 Diferència clau: TOLC **tradueix i compara**; PBCS **alterna per consciència metalingüística**.
 
+**PBCS**: és exclusivament oral a Infantil; es pot treballar per escrit a partir de Primària.
+
+### Formats concrets de TOLC (validat MALL)
+
+- **Taula bilingüe** (A1+): comparació parell a parell L1↔L2 (format base d'aquesta skill)
+- **Dictat bilingüe**: l'alumne dicta en L1 el que ha entès; el docent o company escriu en català
+- **Col·lage lingüístic**: text que integra expressions en L1 i català de forma planificada
+- **Language Identity Texts (LIT)**: l'alumne crea un text propi (poema, relat, presentació)
+  que integra la seva identitat lingüística en L1 i L2 alhora. Especialment potent a Primària i ESO.
+
 ## Estructura del bloc generat
 
 El bloc TOLC conté tres moments:
