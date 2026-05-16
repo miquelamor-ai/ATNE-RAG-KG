@@ -9,6 +9,7 @@ LANG_CONFIG: dict[str, dict] = {
     "es": {"label": "castellà",  "lt_code": "es",    "beta": False},
     "en": {"label": "anglès",    "lt_code": "en-US", "beta": False},
     "fr": {"label": "francès",   "lt_code": "fr",    "beta": False},
+    "de": {"label": "alemany",   "lt_code": "de-DE", "beta": False},
     "gl": {"label": "gallec",    "lt_code": "gl-ES", "beta": True},
     "eu": {"label": "euskera",   "lt_code": "eu",    "beta": True},
 }

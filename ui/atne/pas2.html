@@ -1150,25 +1150,11 @@
                     <option value="dialeg">Diàleg / guió teatral</option>
                   </optgroup>
                 </select></div>
-                <div><div class="mp-l">Tipologia</div><select class="sel">
-                  <option value="expositiva" selected>Expositiva</option>
-                  <option value="narrativa">Narrativa</option>
-                  <option value="descriptiva">Descriptiva</option>
-                  <option value="argumentativa">Argumentativa</option>
-                  <option value="instructiva">Instructiva</option>
-                  <option value="dialogada">Dialogada</option>
-                </select></div>
-                <div><div class="mp-l">To</div><select class="sel">
+                <div><div class="mp-l">To</div><select class="sel" id="gen-to">
                   <option value="neutre" selected>Neutre</option>
-                  <option value="informal">Informal</option>
-                  <option value="creatiu">Creatiu</option>
+                  <option value="proper">Proper</option>
                   <option value="motivador">Motivador</option>
-                  <option value="reflexiu">Reflexiu</option>
-                  <option value="empatic">Empàtic</option>
-                  <option value="humoristic">Humorístic</option>
-                  <option value="solemne">Solemne</option>
                   <option value="academic">Acadèmic</option>
-                  <option value="tecnic">Tècnic</option>
                 </select></div>
                 <div><div class="mp-l">Extensió</div><select class="sel" id="gen-extensio">
                   <option value="micro">Micro (~75 par.)</option>
@@ -1176,6 +1162,17 @@
                   <option value="estandard" selected>Estàndard (~400 par.)</option>
                   <option value="extens">Extens (~700 par.)</option>
                 </select></div>
+                <div><div class="mp-l">Llengua</div><select class="sel" id="gen-lang">
+                  <option value="ca" selected>Català</option>
+                  <option value="es">Castellà</option>
+                  <option value="en">Anglès</option>
+                  <option value="fr">Francès</option>
+                  <option value="de">Alemany</option>
+                </select></div>
+              </div>
+              <div style="margin-top:8px">
+                <div class="mp-l" style="margin-bottom:4px">Indicació al docent <span style="font-weight:400;color:var(--ink-400)">(opcional)</span></div>
+                <textarea id="gen-notes" class="gen-card .ta" placeholder="Ex. Usa exemples de la vida quotidiana. Evita tecnicismes…" style="min-height:38px;max-height:80px;width:100%;box-sizing:border-box;padding:7px 10px;border:1px solid var(--paper-line);border-radius:var(--r-md);font-size:13px;resize:vertical;line-height:1.4"></textarea>
               </div>
               <!-- Bug 5: gen-cancel apareix mentre el streaming està actiu (display:none per defecte) -->
               <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center">
@@ -1265,6 +1262,7 @@
               <option value="es">ES</option>
               <option value="en">EN</option>
               <option value="fr">FR</option>
+              <option value="de">DE</option>
               <option value="gl">GL</option>
               <option value="eu">EU</option>
             </select>
@@ -1492,22 +1490,31 @@
     updateAdaptState(mode);
   }));
 
-  // Per a perfils infantil: pre-selecciona "micro" al selector d'extensió i
-  // mostra una nota sobre el cap de 40 paraules.
+  // Per a perfils infantil: cap de 40 paraules (lectura compartida MALL G-09).
+  // Cap soft: el docent pot sobreescriure explícitament via checkbox.
   (function setupGenInfantil() {
     const _PM = window.ATNE_PROFILE_MODEL;
     if (!_PM) return;
     const etapaActual = (_PM.etapaFromCourse && _PM.etapaFromCourse(profile.course || '')) || '';
     if (etapaActual !== 'infantil') return;
     const extSel = document.getElementById('gen-extensio');
-    if (extSel) {
-      extSel.value = 'micro';
-      // Nota cap 40 par.
-      const note = document.createElement('div');
-      note.style.cssText = 'font-size:10.5px;color:var(--ink-500);margin-top:3px';
-      note.textContent = 'Infantil: el text es limitarà a ≤40 paraules';
-      extSel.closest('div')?.appendChild(note);
-    }
+    if (!extSel) return;
+    extSel.value = 'micro';
+    extSel.disabled = true;
+    const wrap = extSel.closest('div');
+    if (!wrap) return;
+    const note = document.createElement('div');
+    note.style.cssText = 'font-size:10.5px;color:var(--ink-500);margin-top:3px';
+    note.textContent = 'Lectura compartida: ≤40 paraules (MALL G-09)';
+    wrap.appendChild(note);
+    const overrideLabel = document.createElement('label');
+    overrideLabel.style.cssText = 'display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--ink-400);margin-top:4px;cursor:pointer';
+    overrideLabel.innerHTML = '<input type="checkbox" id="gen-override-cap" style="cursor:pointer"> Sobreescriure (avançat)';
+    wrap.appendChild(overrideLabel);
+    document.getElementById('gen-override-cap')?.addEventListener('change', function() {
+      extSel.disabled = !this.checked;
+      if (!this.checked) extSel.value = 'micro';
+    });
   })();
 
   // Comptador paraules al textarea d'Escriure
@@ -2119,10 +2126,14 @@
     const aiPanel = document.querySelector('.mode-panel[data-p="ai"]');
     if (!aiPanel) return;
     const topicTa = aiPanel.querySelector('textarea');
-    const selects = aiPanel.querySelectorAll('select');
     const tema = topicTa?.value?.trim();
     if (!tema) { window.atneToast && window.atneToast('Cal escriure un tema o tòpic','error'); return; }
-    const [genere, tipologia, to, extensio] = Array.from(selects).map(s => s.value);
+    const genere = aiPanel.querySelector('select.sel')?.value || 'manual';
+    const to = document.getElementById('gen-to')?.value || 'neutre';
+    const extensio = document.getElementById('gen-extensio')?.value || 'estandard';
+    const genLang = document.getElementById('gen-lang')?.value || 'ca';
+    const genNotes = document.getElementById('gen-notes')?.value?.trim() || '';
+    const overrideCap = document.getElementById('gen-override-cap')?.checked || false;
 
     const btn = document.getElementById('gen-go');
     const btnCancel = document.getElementById('gen-cancel');
@@ -2152,7 +2163,9 @@
       else if (/batx/i.test(courseNorm)) etapaCur = 'Batxillerat';
       else if (/fp/i.test(courseNorm)) etapaCur = 'FP';
       const result = await window.ATNE_LLM.generateTextStream({
-        tema, genere, tipologia, to, extensio,
+        tema, genere, to, extensio, lang: genLang,
+        notes: genNotes || undefined,
+        override_cap: overrideCap || undefined,
         context: { etapa: etapaCur, curs: courseNorm, materia: (localStorage.getItem('atne.doc_materia') || '').trim() },
         signal: genAbortCtrl.signal,
         onChunk: ({ acumulat }) => {
@@ -2172,10 +2185,9 @@
         if (docTitle) docTitle.value = title;
         localStorage.setItem('atne.doc_title', title);
         localStorage.setItem('atne.doc_draft', result.text);
-        // Persistim el gènere i la tipologia per al Pas 3 (adaptació genere-aware).
-        // El backend els fa servir via corpus_reader.get_genre_block(genere).
+        // Persistim el gènere per al Pas 3 (adaptació genere-aware).
+        // El backend el fa servir via corpus_reader.get_genre_block(genere).
         if (genere) localStorage.setItem('atne.genere_discursiu', genere);
-        if (tipologia) localStorage.setItem('atne.tipologia', tipologia);
         updateWC();
       }
     } catch (err) {

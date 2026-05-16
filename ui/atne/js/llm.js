@@ -625,9 +625,11 @@
    *   Internament es combina amb un timeout de 180s.
    * @returns {Promise<{text: string, paraules: number, model: string}>}  Resultat final.
    */
-  async function generateTextStream({ tema, genere, tipologia, to, extensio, notes, context, onStart, onChunk, onDone, onError, signal }) {
+  async function generateTextStream({ tema, genere, to, extensio, lang, notes, override_cap, context, onStart, onChunk, onDone, onError, signal }) {
     if (!tema || !tema.trim()) throw new Error('Cal un tema per generar el text');
-    const body = { tema, genere, tipologia, to, extensio };
+    const body = { tema, genere, to, extensio };
+    if (lang) body.lang = lang;
+    if (override_cap) body.override_cap = true;
     if (notes) body.notes = notes;
     if (context) body.context = context;
     const combinedSignal = combineSignals(signal, SSE_TIMEOUT_MS);
