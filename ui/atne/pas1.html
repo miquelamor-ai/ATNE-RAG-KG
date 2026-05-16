@@ -216,6 +216,14 @@
   .ck input{accent-color:var(--primary);flex:none}
   .ck-add{margin-top:6px;padding:8px;border:1px dashed var(--ink-200);border-radius:7px;font-size:var(--fs-sm);color:var(--ink-500);background:#fff;text-align:center;cursor:pointer}
   .ck-add:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-50)}
+  .ck-add-row{display:flex;gap:6px;margin-top:6px;align-items:center}
+  .ck-add-row input{flex:1;font-size:var(--fs-sm);padding:6px 8px;border:1px solid var(--ink-200);border-radius:6px;outline:none}
+  .ck-add-row input:focus{border-color:var(--primary)}
+  .ck-add-row button{padding:5px 10px;border-radius:6px;font-size:var(--fs-sm);cursor:pointer;border:none}
+  .ck-add-row .btn-ok{background:var(--primary);color:#fff}
+  .ck-add-row .btn-cancel{background:var(--ink-100);color:var(--ink-600)}
+  .ck-del{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--ink-400);font-size:14px;padding:0 2px;line-height:1}
+  .ck-del:hover{color:var(--error,#dc2626)}
   .aids-list{display:flex;flex-direction:column;gap:2px}
   .aid-row{display:grid;grid-template-columns:16px 8px 1fr auto;align-items:center;gap:10px;padding:7px 9px;border-radius:7px;font-size:var(--fs-md);color:var(--ink-800);cursor:pointer;transition:.1s;border:1px solid transparent}
   .aid-row:hover{background:var(--ink-75)}
@@ -1085,6 +1093,7 @@
     const form = document.querySelector('.mode[data-m="person"]');
     if (!form) return;
     form.querySelectorAll('.inp, .txt').forEach(el => { el.value = ''; });
+    form.querySelectorAll('.ck-custom').forEach(el => el.remove());
     const faseSel = document.getElementById('p-fase-lectora');
     if (faseSel) faseSel.value = 'alfabetica_fluida';
     form.querySelectorAll('.lvl').forEach(b => b.classList.remove('on'));
@@ -1865,6 +1874,27 @@
       const txt = cb.closest('label')?.querySelector('span')?.textContent.toLowerCase() || '';
       cb.checked = behaviorTexts.some(b => txt.includes(b.substring(0, 15)));
     });
+    // Restaura conductes custom (les que no coincideixen amb cap checkbox fix)
+    const fixedTexts = Array.from(form.querySelectorAll('.ck:not(.ck-custom) span'))
+      .map(s => s.textContent.toLowerCase());
+    const checksContainer = form.querySelector('.checks');
+    const ckAddBtn = checksContainer?.querySelector('.ck-add');
+    (p.behaviors || []).forEach(beh => {
+      const behLow = beh.toLowerCase();
+      const isFixed = fixedTexts.some(t => behLow.includes(t.substring(0, 15)) || t.includes(behLow.substring(0, 15)));
+      if (!isFixed && ckAddBtn) {
+        const lbl = document.createElement('label');
+        lbl.className = 'ck ck-custom';
+        lbl.innerHTML =
+          '<input type="checkbox" data-beh="custom" checked>' +
+          '<span>' + beh.replace(/</g, '&lt;') + '</span>' +
+          '<button class="ck-del" type="button" title="Eliminar">✕</button>';
+        lbl.querySelector('.ck-del').addEventListener('click', ev => {
+          ev.preventDefault(); ev.stopPropagation(); lbl.remove();
+        });
+        ckAddBtn.insertAdjacentElement('beforebegin', lbl);
+      }
+    });
 
     // Condicions (normalitza claus legacy curtes → llargues)
     const _LEGACY_DX = {disl:'dislexia', l2:'nouvingut', ac:'altes_capacitats'};
@@ -2630,9 +2660,48 @@
     });
   }
 
-  // "+ Afegir conducta pròpia" (pendent)
-  document.querySelectorAll('.ck-add').forEach(b => {
-    b.addEventListener('click', e => { e.preventDefault(); });
+  // "+ Afegir conducta pròpia"
+  document.querySelectorAll('.ck-add').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      const checks = btn.closest('.checks');
+      if (!checks) return;
+      // Evita obrir-ne dos alhora
+      if (checks.querySelector('.ck-add-row')) return;
+
+      const row = document.createElement('div');
+      row.className = 'ck-add-row';
+      row.innerHTML =
+        '<input type="text" placeholder="Descriu el que observes…" maxlength="120" autocomplete="off">' +
+        '<button class="btn-ok" type="button">Afegir</button>' +
+        '<button class="btn-cancel" type="button">✕</button>';
+      btn.insertAdjacentElement('beforebegin', row);
+      row.querySelector('input').focus();
+
+      function _confirm() {
+        const txt = row.querySelector('input').value.trim();
+        row.remove();
+        if (!txt) return;
+        const lbl = document.createElement('label');
+        lbl.className = 'ck ck-custom';
+        lbl.innerHTML =
+          '<input type="checkbox" data-beh="custom" checked>' +
+          '<span>' + txt.replace(/</g, '&lt;') + '</span>' +
+          '<button class="ck-del" type="button" title="Eliminar">✕</button>';
+        lbl.querySelector('.ck-del').addEventListener('click', ev => {
+          ev.preventDefault(); ev.stopPropagation(); lbl.remove();
+        });
+        btn.insertAdjacentElement('beforebegin', lbl);
+        _scheduleChipRefresh?.();
+      }
+
+      row.querySelector('.btn-ok').addEventListener('click', _confirm);
+      row.querySelector('.btn-cancel').addEventListener('click', () => row.remove());
+      row.querySelector('input').addEventListener('keydown', ev => {
+        if (ev.key === 'Enter') { ev.preventDefault(); _confirm(); }
+        if (ev.key === 'Escape') row.remove();
+      });
+    });
   });
 
   // ── Visita guiada (Driver.js) ─────────────────────────────────────────────
