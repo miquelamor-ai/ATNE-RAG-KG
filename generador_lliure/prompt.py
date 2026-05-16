@@ -62,6 +62,28 @@ SYSTEM_PER_LLENGUA: dict[str, str] = {
 # Retrocompat: SYSTEM_MINIM apunta al catal\u00e0 per defecte
 SYSTEM_MINIM = SYSTEM_PER_LLENGUA["ca"]
 
+# SYSTEM espec\u00edfic per a Educaci\u00f3 Infantil (MOPI/MALL).
+# Substitueix SYSTEM_PER_LLENGUA quan etapa=infantil.
+SYSTEM_INFANTIL = (
+    "Ets un redactor especialitzat en materials per a Educaci\u00f3 Infantil (I3-I5, 3-6 anys), "
+    "seguint el Model d'Orientaci\u00f3 Psicopedag\u00f2gica per a la Lectura Inicial (MOPI). "
+    "Escrius textos per a LECTURA COMPARTIDA adult/infant: l'adult llegeix en veu alta "
+    "mentre l'infant mira les imatges i anticipa el significat. "
+    "\n\nREGLES OBLIGAT\u00d2RIES:"
+    "\n(1) M\u00e0xim 40 paraules en total. Cap excepci\u00f3."
+    "\n(2) Frases de 3-6 paraules. Subjecte expl\u00edcit sempre. Verb simple (present indicatiu)."
+    "\n(3) Vocabulari exclusivament concret i visual: objectes, animals, colors, accions simples del m\u00f3n immediat."
+    "\n(4) Estructura repetitiva i r\u00edtmica que afavoreixi l'anticipaci\u00f3: "
+    "\u00abLa Maria t\u00e9 un gat. El gat \u00e9s taronja. El gat menja.\u00bb"
+    "\n(5) Textos d'Identitat (Jim Cummins/MALL): el protagonista \u00e9s l'infant, la seva fam\u00edlia "
+    "o el seu entorn immediat (classe, pati, casa, escola). L'infant ha de poder recon\u00e8ixer-se al text."
+    "\n(6) Afegeix marcadors [IMATGE: concepte] al final de cada frase per indicar on va la il\u00b7lustraci\u00f3. "
+    "Exemple: \u00abLa Laia t\u00e9 un gos. [IMATGE: nen amb gos]\u00bb"
+    "\n(7) PROHIBIT: frases subordinades, conceptes abstractes, vocabulari desconegut del quotidi\u00e0."
+    "\n\nCatal\u00e0 normatiu. Maj\u00fascules normals (no tot en maj\u00fascules). "
+    "Escriu directament el text, sense t\u00edtol meta ni disclaimers."
+)
+
 
 # Mapping d'extensi\u00f3 qualitativa a rang num\u00e8ric.
 # Sincronitzat amb els valors que el Pas 2 pot enviar al payload.
@@ -186,6 +208,11 @@ def build_user(params: dict) -> str:
 
 def build_prompt(params: dict) -> tuple[str, str]:
     """Retorna (system, user) preparats per passar a `_call_llm_raw`."""
-    lang = resolve_lang(params.get("lang") or params.get("llengua"))
-    system = SYSTEM_PER_LLENGUA.get(lang, SYSTEM_PER_LLENGUA["ca"])
+    ctx = params.get("context") or {}
+    etapa = (ctx.get("etapa") or "").strip().lower()
+    if etapa == "infantil":
+        system = SYSTEM_INFANTIL
+    else:
+        lang = resolve_lang(params.get("lang") or params.get("llengua"))
+        system = SYSTEM_PER_LLENGUA.get(lang, SYSTEM_PER_LLENGUA["ca"])
     return system, build_user(params)
