@@ -3457,9 +3457,6 @@
         }
       },
       onResult: (ev) => {
-        // Diagnòstic: log del contingut rebut del backend
-        console.log('[ATNE][onResult] adapted_len=' + (ev.adapted || '').length +
-          ' adapted_preview=' + JSON.stringify((ev.adapted || '').slice(0, 80)));
         // Parse de les seccions del resultat (Text adaptat + Glossari + Esquema + Preguntes)
         const parsed = window.ATNE_LLM.parseAdaptedSections(ev.adapted || '');
         const md2html = window.ATNE_LLM.markdownToHtml;
