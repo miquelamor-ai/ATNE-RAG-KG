@@ -1170,11 +1170,11 @@
                   <option value="academic">Acadèmic</option>
                   <option value="tecnic">Tècnic</option>
                 </select></div>
-                <div><div class="mp-l">Extensió</div><select class="sel">
-                  <option value="micro">Micro (50-100)</option>
-                  <option value="curt">Curt (~200)</option>
-                  <option value="estandard" selected>Estàndard (~400)</option>
-                  <option value="extens">Extens (+600)</option>
+                <div><div class="mp-l">Extensió</div><select class="sel" id="gen-extensio">
+                  <option value="micro">Micro (~75 par.)</option>
+                  <option value="curt">Curt (~200 par.)</option>
+                  <option value="estandard" selected>Estàndard (~400 par.)</option>
+                  <option value="extens">Extens (~700 par.)</option>
                 </select></div>
               </div>
               <!-- Bug 5: gen-cancel apareix mentre el streaming està actiu (display:none per defecte) -->
@@ -1491,6 +1491,24 @@
     // Actualitzar estat Adaptar/frail segons si el mode té text o no
     updateAdaptState(mode);
   }));
+
+  // Per a perfils infantil: pre-selecciona "micro" al selector d'extensió i
+  // mostra una nota sobre el cap de 40 paraules.
+  (function setupGenInfantil() {
+    const _PM = window.ATNE_PROFILE_MODEL;
+    if (!_PM) return;
+    const etapaActual = (_PM.etapaFromCourse && _PM.etapaFromCourse(profile.course || '')) || '';
+    if (etapaActual !== 'infantil') return;
+    const extSel = document.getElementById('gen-extensio');
+    if (extSel) {
+      extSel.value = 'micro';
+      // Nota cap 40 par.
+      const note = document.createElement('div');
+      note.style.cssText = 'font-size:10.5px;color:var(--ink-500);margin-top:3px';
+      note.textContent = 'Infantil: el text es limitarà a ≤40 paraules';
+      extSel.closest('div')?.appendChild(note);
+    }
+  })();
 
   // Comptador paraules al textarea d'Escriure
   const ta = document.getElementById('write-ta');

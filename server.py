@@ -4011,15 +4011,24 @@ zero — modifica'l mantenint l'estructura general i el contingut.
     # Sprint 1B: el model del refine es resol via _MODEL_CONFIG["refine"]
     # (configurable des de /admin) amb override puntual via payload.model.
     refine_model = _model_for("refine", override=model_override)
-    try:
-        result = _call_llm(refine_model, prompt, "")
-        result = clean_gemini_output(result).strip()
-        result = _post_process_llm_output(result)
-    except Exception as e:
-        return JSONResponse(
-            {"error": _safe_error(e, "Error refinant el text")},
-            status_code=500,
-        )
+    # Fallback: si el model principal falla (quota, timeout...), prova gpt-4o-mini.
+    fallback_model = "gpt-4o-mini" if refine_model != "gpt-4o-mini" else "gpt-4.1-mini"
+    result = ""
+    model_used = refine_model
+    for attempt_model in (refine_model, fallback_model):
+        try:
+            result = _call_llm(attempt_model, prompt, "")
+            result = clean_gemini_output(result).strip()
+            result = _post_process_llm_output(result)
+            model_used = attempt_model
+            break
+        except Exception as e:
+            print(f"[ATNE] refine-text fallada amb {attempt_model}: {e}", flush=True)
+            if attempt_model == fallback_model:
+                return JSONResponse(
+                    {"error": _safe_error(e, "Error refinant el text. Torna-ho a provar en uns instants.")},
+                    status_code=500,
+                )
 
     if not result:
         return JSONResponse({"error": "L'LLM ha retornat un text buit."}, status_code=500)
@@ -4028,7 +4037,7 @@ zero — modifica'l mantenint l'estructura general i el contingut.
         "text": result,
         "paraules": len(result.split()),
         "preset_aplicat": preset or None,
-        "model_used": refine_model,
+        "model_used": model_used,
     }
 
 

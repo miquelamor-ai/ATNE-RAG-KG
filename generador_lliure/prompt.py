@@ -29,14 +29,18 @@ SYSTEM_MINIM = (
 # Sincronitzat amb els valors que el Pas 2 pot enviar al payload.
 # Valors aproximats; el model tendeix a respectar-los amb ±15%.
 EXTENSIONS = {
-    "curt":      (250, "curt"),
-    "breu":      (250, "curt"),
+    "micro":     (75,  "molt curt (50-100 paraules)"),
+    "curt":      (200, "curt"),
+    "breu":      (200, "curt"),
     "estandard": (400, "d'extensi\u00f3 est\u00e0ndard"),
     "estandar":  (400, "d'extensi\u00f3 est\u00e0ndard"),
     "mitja":     (400, "d'extensi\u00f3 est\u00e0ndard"),
     "extens":    (700, "extens"),
     "llarg":     (700, "extens"),
 }
+
+# Per a infantil (pre-A1), frases de 3-6 paraules per a lectura compartida.
+INFANTIL_MAX_PARAULES = 40
 
 
 def resolve_extension(extensio_raw: str | None) -> tuple[int, str]:
@@ -70,8 +74,6 @@ def build_user(params: dict) -> str:
     genere = (params.get("genere") or "article divulgatiu").strip()
     tipologia = (params.get("tipologia") or "expositiva").strip().lower()
     to = (params.get("to") or "neutre").strip().lower()
-    extensio_raw = params.get("extensio") or "estandard"
-    n_paraules, etiqueta_llarg = resolve_extension(extensio_raw)
     notes = (params.get("notes") or "").strip()
     saber = (params.get("saber_curricular") or "").strip()
 
@@ -80,6 +82,14 @@ def build_user(params: dict) -> str:
     etapa = (ctx.get("etapa") or "").strip()
     materia = (ctx.get("materia") or "").strip()
     ambit = (ctx.get("ambit") or "").strip()
+
+    extensio_raw = params.get("extensio") or "estandard"
+    n_paraules, etiqueta_llarg = resolve_extension(extensio_raw)
+    # Cap per a infantil: independentment de l'extensió triada, els textos
+    # per a I3-I5 han de ser molt curts (lectura compartida adult/infant).
+    if etapa.lower() == "infantil" and n_paraules > INFANTIL_MAX_PARAULES:
+        n_paraules = INFANTIL_MAX_PARAULES
+        etiqueta_llarg = f"molt curt ({INFANTIL_MAX_PARAULES} paraules màxim, frases de 3-6 paraules)"
 
     # Frase narrativa principal — atributs del TEXT
     frase = (
