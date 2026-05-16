@@ -55,6 +55,7 @@ def load_corpus():
         "cognitive_load": {},
         "conflict_resolution": "",
         "fewshot": {},
+        "gradacio": {},
         "identity": "",
         "universal_rules": "",
     }
@@ -219,6 +220,36 @@ SEGURETAT:
         if alias not in _cache["genres"] and target in _cache["genres"]:
             _cache["genres"][alias] = _cache["genres"][target]
 
+    # ── Gradació lingüística (M3_gradació_lingüística.md) ──
+    # Blocs operatius per nivell MECR + instruccions d'enriquiment.
+    gradació = _load_file("M3_gradació_lingüística.md")
+    if gradació:
+        grad_section = _extract_section(gradació, "## 5. Blocs per a l'LLM")
+        if grad_section:
+            for level in ["pre-A1", "A1", "A2", "B1", "B2", "C1"]:
+                blocks = re.findall(
+                    rf"### {re.escape(level)}\s*\n```\n?(.*?)```",
+                    grad_section, re.DOTALL
+                )
+                if blocks:
+                    _cache["gradacio"][level] = blocks[0].strip()
+        enriq_section = _extract_section(gradació, "## 6. Instrucció d'enriquiment per a l'LLM")
+        if enriq_section:
+            # Bloc amb placeholders (quan tenim MECR explícit)
+            blocks_amb = re.findall(
+                r"### Enriquir-amb-nivell\s*\n```\n?(.*?)```",
+                enriq_section, re.DOTALL
+            )
+            if blocks_amb:
+                _cache["gradacio"]["_enriquir_template"] = blocks_amb[0].strip()
+            # Bloc d'auto-avaluació (quan no tenim MECR)
+            blocks_auto = re.findall(
+                r"### Enriquir-auto-avaluació\s*\n```\n?(.*?)```",
+                enriq_section, re.DOTALL
+            )
+            if blocks_auto:
+                _cache["gradacio"]["_enriquir_auto"] = blocks_auto[0].strip()
+
     # ── Creuaments (llegits del M1_creuament) ──
     crossings = _load_file("M1_creuament-variables-dependencies.md")
     if crossings:
@@ -301,6 +332,61 @@ def get_fewshot_example(mecr: str) -> str:
     if not _cache:
         load_corpus()
     return _cache.get("fewshot", {}).get(mecr, "")
+
+
+# Mapping de nivell actual → nivell N+1 per a enriquiment
+_NEXT_LEVEL: dict[str, str] = {
+    "pre-A1": "A1",
+    "A1":     "A2",
+    "A2":     "B1",
+    "B1":     "B2",
+    "B2":     "C1",
+    "C1":     "C1",
+    "C2":     "C1",
+}
+
+
+def get_gradacio_block(mecr: str) -> str:
+    """Retorna el bloc operatiu de gradació lingüística per al nivell MECR indicat.
+
+    Útil per injectar al generador quan volem calibrar el text al nivell de l'alumnat.
+    Retorna string buit si el nivell no es troba.
+    """
+    if not _cache:
+        load_corpus()
+    return _cache.get("gradacio", {}).get(mecr, "")
+
+
+def get_enriquir_instruction(mecr: str | None = None) -> str:
+    """Retorna la instrucció d'enriquiment per a l'LLM.
+
+    Si `mecr` és conegut: retorna la instrucció amb el nivell N+1 explícit i el
+    bloc de característiques corresponent injectat (màxima precisió).
+    Si `mecr` és None o desconegut: retorna la instrucció d'auto-avaluació
+    (l'LLM detecta el nivell pel seu compte i eleva un graó).
+    """
+    if not _cache:
+        load_corpus()
+    grad = _cache.get("gradacio", {})
+
+    if mecr and mecr in _NEXT_LEVEL:
+        nivell_sup = _NEXT_LEVEL[mecr]
+        template = grad.get("_enriquir_template", "")
+        bloc_sup = grad.get(nivell_sup, "")
+        if template and bloc_sup:
+            return (
+                template
+                .replace("{NIVELL_SUPERIOR}", nivell_sup)
+                .replace("{BLOC_NIVELL_SUPERIOR}", bloc_sup)
+            )
+
+    # Fallback: auto-avaluació
+    return grad.get("_enriquir_auto", (
+        "Enriqueix el text un graó respecte al seu nivell actual. "
+        "Observa el text: longitud de frase, connectors i complexitat sintàctica. "
+        "Eleva vocabulari i estructures un nivell per sobre del que detectes. "
+        "Mantén gènere, to i longitud total."
+    ))
 
 
 def get_all_loaded_stats() -> dict:

@@ -3015,10 +3015,8 @@ async def generate_text(payload: dict = Body(...)):
     """
     from generador_lliure import generar as generar_text_lliure
 
-    # Bug 2 (2026-04-19): mapeja `extensio` → `target_words` abans de delegar.
-    # TODO: idealment el mapping faria generador_lliure.py, però no tocat en
-    # aquest parxe (veure _resolve_target_words).
     payload = _resolve_target_words(payload)
+    payload["model"] = _model_for("generate", override=(payload.get("model") or "").strip())
 
     try:
         result = generar_text_lliure(payload)
@@ -3056,6 +3054,9 @@ async def generate_text_stream(request: Request, payload: dict = Body(...)):
     # Bug 2 (2026-04-19): mateix mapping que /api/generate-text perquè el
     # streaming també respecti l'extensió demanada.
     payload = _resolve_target_words(payload)
+    # Desacoblament: el server resol el model i l'injecta al payload perquè
+    # generador_lliure no hagi d'importar res de server.py.
+    payload["model"] = _model_for("generate", override=(payload.get("model") or "").strip())
 
     async def gen():
         # Els chunks del LLM arriben sync; els emetem com events SSE.
@@ -3948,6 +3949,7 @@ async def refine_text(payload: dict = Body(...)):
     preset = (payload.get("preset") or "").strip().lower()
     instruccio_lliure = (payload.get("instruccio") or "").strip()
     model_override = (payload.get("model") or "").strip()
+    mecr = (payload.get("mecr") or "").strip()
 
     # Preset "catala" → LanguageTool (determinista, no LLM)
     if preset == "catala" and not instruccio_lliure:
@@ -3962,7 +3964,10 @@ async def refine_text(payload: dict = Body(...)):
         }
 
     instruccio_final = ""
-    if preset and preset in REFINE_PRESETS:
+    if preset == "enriquir":
+        # Instrucció dinàmica: usa el nivell MECR si és conegut, sinó auto-avaluació.
+        instruccio_final = corpus_reader.get_enriquir_instruction(mecr or None)
+    elif preset and preset in REFINE_PRESETS:
         instruccio_final = REFINE_PRESETS[preset]
     if instruccio_lliure:
         if instruccio_final:

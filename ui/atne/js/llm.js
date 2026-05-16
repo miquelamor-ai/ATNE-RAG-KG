@@ -536,7 +536,7 @@
    * @param {string} [args.instruccio]  Instrucció lliure del docent.
    * @returns {Promise<{text: string, paraules: number, ...}>}
    */
-  async function refineText({ text, preset, instruccio, onError }) {
+  async function refineText({ text, preset, instruccio, mecr, onError }) {
     if (!text || !text.trim()) throw new Error('Text buit');
     // Pilot 1C: registra l'inici de refine
     try {
@@ -551,6 +551,7 @@
     const _t0 = Date.now();
     const body = { text };
     if (preset) body.preset = preset;
+    if (mecr) body.mecr = mecr;
     // Afegim sempre la instrucció de preservar format (a més de la del docent),
     // excepte per al preset 'catala' que és LanguageTool determinista (no passa pel LLM)
     if (preset !== 'catala') {
@@ -625,12 +626,13 @@
    *   Internament es combina amb un timeout de 180s.
    * @returns {Promise<{text: string, paraules: number, model: string}>}  Resultat final.
    */
-  async function generateTextStream({ tema, genere, to, extensio, lang, notes, override_cap, context, onStart, onChunk, onDone, onError, signal }) {
+  async function generateTextStream({ tema, genere, to, extensio, lang, notes, override_cap, mecr, context, onStart, onChunk, onDone, onError, signal }) {
     if (!tema || !tema.trim()) throw new Error('Cal un tema per generar el text');
     const body = { tema, genere, to, extensio };
     if (lang) body.lang = lang;
     if (override_cap) body.override_cap = true;
     if (notes) body.notes = notes;
+    if (mecr) body.mecr = mecr;
     if (context) body.context = context;
     const combinedSignal = combineSignals(signal, SSE_TIMEOUT_MS);
     const resp = await fetch('/api/generate-text-stream', {

@@ -2167,7 +2167,7 @@
         tema, genere, to, extensio, lang: genLang,
         notes: genNotes || undefined,
         override_cap: overrideCap || undefined,
-        context: { etapa: etapaCur, curs: courseNorm, materia: (localStorage.getItem('atne.doc_materia') || '').trim() },
+        context: { etapa: etapaCur, curs: courseNorm, materia: (localStorage.getItem('atne.doc_materia') || '').trim(), mecr: (profCur?.mecr || localStorage.getItem('atne.mecr') || '') },
         signal: genAbortCtrl.signal,
         onChunk: ({ acumulat }) => {
           if (writeTa) {
@@ -2523,7 +2523,16 @@
       window.atneToast?.('Refinant text…', 'info');
       p2Snapshot();
       try {
-        const result = await window.ATNE_LLM.refineText({ text, preset });
+        // Per a "enriquir": passar el MECR del perfil actiu si es coneix,
+        // perquè el backend pugui usar la gradació explícita (N+1).
+        let extraParams = {};
+        if (preset === 'enriquir') {
+          const pid = localStorage.getItem('atne.profile_id') || '';
+          const prof = window.ATNE_PROFILES && pid ? window.ATNE_PROFILES[pid] : null;
+          const mecr = prof?.mecr || localStorage.getItem('atne.mecr') || '';
+          if (mecr) extraParams.mecr = mecr;
+        }
+        const result = await window.ATNE_LLM.refineText({ text, preset, ...extraParams });
         if (result?.text) {
           writeTa.value = result.text;
           localStorage.setItem('atne.doc_draft', result.text);

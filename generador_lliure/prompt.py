@@ -188,8 +188,23 @@ def build_user(params: dict) -> str:
     else:
         destinatari = "Destinatari: alumnat escolar (curs no especificat)."
 
+    # Gradació lingüística (injectada si hi ha mecr al context)
+    mecr = (ctx.get("mecr") or ctx.get("nivell") or params.get("mecr") or "").strip()
+    gradacio_bloc = ""
+    if mecr and etapa.lower() != "infantil":
+        try:
+            import corpus_reader
+            gradacio_bloc = corpus_reader.get_gradacio_block(mecr)
+        except Exception:
+            pass
+
     # Notes opcionals
     blocs_opcionals = []
+    if gradacio_bloc:
+        blocs_opcionals.append(
+            f"Nivell lingüístic del destinatari ({mecr}). Aplica EXACTAMENT aquestes "
+            f"característiques al text:\n{gradacio_bloc}"
+        )
     if notes:
         blocs_opcionals.append(f"Indicacions del docent: {notes}")
     if saber:

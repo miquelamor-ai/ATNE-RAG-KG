@@ -54,23 +54,18 @@ def generar(params: dict) -> dict:
         ValueError si falta `tema`.
         RuntimeError si tots els providers del model resolen fallen.
     """
-    # Import local per evitar cicle a l'arrencada.
-    from server import _model_for
-
     # Validaci\u00f3 m\u00ednima
     tema = (params.get("tema") or "").strip()
     if not tema:
         raise ValueError("Cal especificar un 'tema' per generar text.")
 
-    # Construcci\u00f3 del prompt (pot aixecar ValueError per tema buit, ja ja)
+    # Construcci\u00f3 del prompt (pot aixecar ValueError per tema buit)
     system, user = build_prompt(params)
 
-    # Resoluci\u00f3 del model a usar per a la fase "generate"
-    # Aix\u00f2 respecta:
-    #   override expl\u00edcit del payload > _MODEL_CONFIG["generate"] > ATNE_MODEL
-    # I en mode rotaci\u00f3, fa random.choice dels models seleccionats a /admin.
-    model_override = (params.get("model") or "").strip()
-    model_usat = _model_for("generate", override=model_override)
+    # El model ha d'estar resolt pel caller (server.py via _model_for) i
+    # injectat al payload com a params["model"]. Si no ve (crida directa al
+    # m\u00f2dul sense server), fem fallback al model per defecte de Gemini Flash.
+    model_usat = (params.get("model") or "gemini-2.5-flash").strip()
 
     # Sampling overrides (opcional)
     temperature = float(params.get("temperature") or 1.0)
@@ -131,8 +126,6 @@ def generar_stream(params: dict) -> Iterator[dict]:
     veu paraules apareixent des del segon 1-2. Cost i temps total
     id\u00e8ntics a `generar()`; nom\u00e9s canvia el transport.
     """
-    from server import _model_for
-
     try:
         tema = (params.get("tema") or "").strip()
         if not tema:
@@ -141,8 +134,7 @@ def generar_stream(params: dict) -> Iterator[dict]:
 
         system, user = build_prompt(params)
 
-        model_override = (params.get("model") or "").strip()
-        model_usat = _model_for("generate", override=model_override)
+        model_usat = (params.get("model") or "gemini-2.5-flash").strip()
 
         temperature = float(params.get("temperature") or 1.0)
         top_p = float(params.get("top_p") or 0.95)
