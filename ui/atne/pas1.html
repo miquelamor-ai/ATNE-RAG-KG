@@ -651,7 +651,7 @@
               <div class="f" style="margin:0"><div class="f-l">Lletra</div><input class="inp" id="p-lletra" placeholder="A" maxlength="3" style="text-align:center;text-transform:uppercase"></div>
             </div>
             <div class="f" style="margin-top:8px">
-              <div class="f-l">Fase lectora <span class="f-priv-hint">la fase és de la persona, no del curs</span></div>
+              <div class="f-l">Fase lectora <span class="f-priv-hint" id="p-fase-hint">la fase és de la persona, no del curs</span></div>
               <select class="inp" id="p-fase-lectora">
                 <option value="logografica">Loogràfica — llegeix imatges i paraules globals</option>
                 <option value="alfabetica_emergent">Alfabètica emergent — comença a descodificar</option>
@@ -1292,14 +1292,26 @@
     _applyMecrBtn(_MECR_SCALE[idx]);
   }
   const pFaseLectoraEl = document.getElementById('p-fase-lectora');
+  const pFaseHintEl    = document.getElementById('p-fase-hint');
   const _CURS_TO_FASE = {
     'I3':'logografica','I4':'logografica','I5':'logografica',
     '1r Primària':'alfabetica_emergent','2n Primària':'alfabetica_emergent',
+  };
+  const _CURS_TO_FASE_HINT = {
+    'I3': 'Per defecte: loogràfica. Ja llegeix paraules sol/a? Canvia a «Alfabètica emergent».',
+    'I4': 'Per defecte: loogràfica. Ja llegeix paraules sol/a? Canvia a «Alfabètica emergent».',
+    'I5': 'Per defecte: loogràfica. Ja llegeix paraules sol/a? Canvia a «Alfabètica emergent».',
+    '1r Primària': 'Per defecte: alfabètica emergent. Encara no descodifica sol/a? Canvia a «Loogràfica».',
+    '2n Primària': 'Per defecte: alfabètica emergent. Encara no descodifica sol/a? Canvia a «Loogràfica».',
   };
   function _applyFaseLectoraDefault() {
     if (!pCursEl || !pFaseLectoraEl) return;
     const fase = _CURS_TO_FASE[pCursEl.value] || 'alfabetica_fluida';
     pFaseLectoraEl.value = fase;
+    if (pFaseHintEl) {
+      pFaseHintEl.textContent = _CURS_TO_FASE_HINT[pCursEl.value]
+        || (pCursEl.value ? 'Lectura encara emergent? Canvia a «Alfabètica emergent».' : 'la fase és de la persona, no del curs');
+    }
   }
   if (pCursEl) {
     pCursEl.addEventListener('change', _recomputeMecr);
