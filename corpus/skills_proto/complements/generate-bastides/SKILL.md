@@ -1,6 +1,9 @@
 ---
 name: generate-bastides
+deprecated: true
+superseded_by: [generate-bastides-lectura, generate-bastides-produccio]
 description: >
+  DEPRECATED — substituïda per generate-bastides-lectura i generate-bastides-produccio.
   Use when the teacher has activated the "bastides" complement. Generates
   reading scaffolds (3 moments: before/during/after) and production
   scaffolds (4 blocks: base d'orientació, HCL starters, connectors,
