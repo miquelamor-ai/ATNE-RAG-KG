@@ -3223,11 +3223,17 @@
       const labels = {
         'mapa-conc': 'Generant mapa conceptual…',
         'mapa-ment': 'Generant mapa mental…',
-        'bastides': 'Generant bastides…',
+        'bastides': 'Generant suports…',
         'activitats': "Generant activitats d'aprofundiment…",
         'pictogrames': 'Generant pictogrames…',
       };
       el.innerHTML = _buildSkeleton(labels[chipKey] || 'Generant complement…');
+    });
+    // "Per al docent" (argumentació + auditoria) no tenia skeleton → contingut
+    // d'adaptacions anteriors podia quedar visible (BUG-3). Neteja explícita.
+    document.querySelectorAll('.ped-card-body, .audit-table-wrap, .audit-body').forEach(el => {
+      el.innerHTML = _buildSkeleton('Generant argumentació…', ['85%', '65%', '75%']);
+      el.dataset.skel = '1';
     });
 
     const pid = localStorage.getItem('atne.profile_id') || 'marc';
@@ -3302,8 +3308,14 @@
           }
         } catch (_) {}
       }
-      if (cachedRaw && window.ATNE_LLM?.parseAdaptedSections) {
-        const parsed = window.ATNE_LLM.parseAdaptedSections(cachedRaw);
+      // Verifica que adapted_raw és del mateix cicle que la cache key actual.
+      // Si no coincideix (sessió antiga del browser), els complements podrien
+      // ser d'un altre text i causarien el BUG-3. En cas de mismatch, deixem
+      // les vistes en blanc (el docent pot regenerar).
+      const rawCacheKey = localStorage.getItem('atne.adapted_raw_ck') || '';
+      const safeRaw = (rawCacheKey === cacheKey || _fromLibrary) ? cachedRaw : '';
+      if (safeRaw && window.ATNE_LLM?.parseAdaptedSections) {
+        const parsed = window.ATNE_LLM.parseAdaptedSections(safeRaw);
         applyComplementsToViews(parsed.complements);
       }
       updateDocMeta();
@@ -3470,7 +3482,17 @@
           pushHistory();
         }
 
-        // Distribueix els complements a les seves vistes
+        // Distribueix els complements a les seves vistes.
+        // Neteja prèvia de les vistes que no reben skeleton automàtic (BUG-3):
+        // les cards d'argumentació i auditoria queden stale si el LLM no les
+        // genera en el format esperat. S'eliminen ara; applyComplementsToViews
+        // les sobreescriurà si hi ha contingut nou.
+        if (!parsed.complements.argumentacio) {
+          document.querySelectorAll('.ped-card-body').forEach(el => { el.innerHTML = ''; });
+        }
+        if (!parsed.complements.auditoria) {
+          document.querySelectorAll('.audit-table-wrap, .audit-body').forEach(el => { el.innerHTML = ''; });
+        }
         applyComplementsToViews(parsed.complements);
 
         // Neteja els skeletons que NO s'han substituït (complements que el LLM
@@ -3503,6 +3525,7 @@
         // botons amb listeners morts.
         localStorage.setItem('atne.adapted_text', adaptedInnerHtmlClean());
         localStorage.setItem('atne.adapted_raw', ev.adapted || '');
+        localStorage.setItem('atne.adapted_raw_ck', cacheKey);
         localStorage.setItem('atne.adapted_cache_key', cacheKey);
         // Bug 4: timestamp de generació per al "adaptat fa ..."
         localStorage.setItem('atne.adapted_at', String(Date.now()));
@@ -3810,6 +3833,7 @@
     localStorage.removeItem('atne.adapted_text');
     localStorage.removeItem('atne.adapted_cache_key');
     localStorage.removeItem('atne.adapted_raw');
+    localStorage.removeItem('atne.adapted_raw_ck');
     closePops();
     const msg = preserveText
       ? 'Regenerant només els complements (text intacte)...'
@@ -3823,6 +3847,7 @@
     localStorage.removeItem('atne.adapted_text');
     localStorage.removeItem('atne.adapted_cache_key');
     localStorage.removeItem('atne.adapted_raw');
+    localStorage.removeItem('atne.adapted_raw_ck');
     location.reload();
   });
 
