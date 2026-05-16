@@ -96,8 +96,10 @@ def validate_skill(skill_md: Path) -> list[str]:
         errors.append(f"{rel}: body molt curt ({len(body)} chars) — probablement buit")
 
     # Regla anti-regressió: dins del bloc de codi "## Format de sortida",
-    # NO poden aparèixer línies amb "## " (han d'anar amb "###"). Motiu:
-    # el model copia literalment aquest format i trenca el parser de ## top-level.
+    # el PRIMER `## ...` és acceptat (és el títol top-level del complement,
+    # coherent amb `## Glossari`, `## Preguntes`...). Els `## ...` ADDICIONALS
+    # són un error: el model els copiaria literalment i trencaria el parser
+    # top-level del frontend.
     import re as _re
     fmt_match = _re.search(
         r'## Format de sortida\s*\n+```[a-z]*\n(.+?)\n```',
@@ -105,11 +107,13 @@ def validate_skill(skill_md: Path) -> list[str]:
     )
     if fmt_match:
         inner = fmt_match.group(1)
-        bad_lines = [ln for ln in inner.split("\n") if _re.match(r'^## [^#]', ln)]
-        if bad_lines:
+        top_level = [ln for ln in inner.split("\n") if _re.match(r'^## [^#]', ln)]
+        if len(top_level) > 1:
+            bad = top_level[1:]
             errors.append(
-                f"{rel}: el bloc 'Format de sortida' conté {len(bad_lines)} línia(es) amb "
-                f"'## ' (haurien de ser '### '): {bad_lines[0][:60]!r}..."
+                f"{rel}: el bloc 'Format de sortida' conté {len(bad)} línia(es) "
+                f"'## ' addicionals al títol top-level (haurien de ser '### '): "
+                f"{bad[0][:60]!r}..."
             )
 
     return errors
