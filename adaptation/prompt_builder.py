@@ -310,7 +310,7 @@ def build_system_prompt(profile: dict, context: dict, params: dict, rag_context:
 
     # ═══ CAPES 2-3: INSTRUCCIONS FILTRADES (catàleg de 89 instruccions LLM) ═══
     # Filtra segons perfils actius, sub-variables, MECR, DUA i complements
-    filtered = instruction_filter.get_instructions(profile, params)
+    filtered = instruction_filter.get_instructions(profile, params, context=context)
     instructions_text = instruction_filter.format_instructions_for_prompt(filtered)
     parts.append(instructions_text)
 
@@ -446,12 +446,28 @@ ACTIVAT — Ja integrat al text adaptat (definicions entre parèntesis). No cal 
 ACTIVAT — Ja integrat al glossari (columna de traducció a {l1_display}). No cal secció separada.
 """)
 
+    # C.3 MALL: gradació visuals — computa MECR aquí per als blocs pictogrames/esquema/mapa
+    _mecr_c3 = (params.get("mecr_sortida") or params.get("mecr") or "B1").upper().replace("Ç", "C")
+
     if comp.get("pictogrames"):
-        output_sections.append("""
+        # C.3 MALL: densitat i col·locació de pictogrames per nivell
+        _picto_map = {
+            "PRE-A1": "1-2 emojis PER FRASE (noms + verbs clau). Col·loca'ls INLINE, immediatament sobre o al costat de la paraula (associació directa grafia-significat). Afegeix 1 emoji paratextual al marge esquerre per anticipar el sentit de cada paràgraf.",
+            "A1":     "1 emoji per frase o per terme tècnic nou. Situa'ls al GLOSSARI VISUAL al peu del text. L'alumne descodifica primer, l'emoji reforça.",
+            "A2":     "Emojis al glossari visual (dreta o peu del text). NO inline. Màxim 5-6 emojis per document.",
+        }
+        _picto_instr = _picto_map.get(_mecr_c3)
+        if _picto_instr:
+            output_sections.append(f"""
 ## Pictogrames
-ACTIVAT — Afegeix icones/emojis de suport al costat dels conceptes clau del text adaptat.
-Exemples: ☀️ per llum, 💧 per aigua, 🌱 per planta, 🔬 per ciència, etc.
-Integra'ls directament al text adaptat, no en secció separada.
+ACTIVAT — Afegeix emojis/icones de suport. Gradació per a {_mecr_c3}: {_picto_instr}
+Exemples d'emojis: ☀️ llum, 💧 aigua, 🌱 planta, 🔬 ciència, ⚡ energia.
+""")
+        else:
+            output_sections.append("""
+## Pictogrames
+ACTIVAT — Afegeix emojis/icones al glossari visual (peu del text). NO inline per a B1+.
+Màxim 4-5 emojis per document, només per a termes tècnics o conceptes difícils de visualitzar.
 """)
 
     if comp.get("illustracions"):
@@ -484,9 +500,17 @@ Exemples INCORRECTES:
 """)
 
     if comp.get("esquema_visual"):
-        output_sections.append("""
+        # C.3 MALL: nombre de nodes per nivell
+        _esquema_nodes_map = {
+            "PRE-A1": "2-3 nodes. Seqüències temporals bàsiques (abans→després) o relacions imatge→paraula.",
+            "A1":     "3-4 nodes. Enumeració de qualitats o parts d'un objecte (descripció simple).",
+            "A2":     "4-6 nodes. Seqüència de passos d'instrucció o esdeveniments cronològics.",
+            "B1":     "6-8 nodes. Relacions causa-efecte o hipòtesi-evidència.",
+        }
+        _esquema_nodes = _esquema_nodes_map.get(_mecr_c3, "Nombre de nodes a criteri docent. Modelitza processos complexos.")
+        output_sections.append(f"""
 ## Esquema visual
-ACTIVAT — Genera un esquema/diagrama en format text que mostri el procés o les relacions del contingut.
+ACTIVAT — Genera un esquema/diagrama en format text. Per a {_mecr_c3}: {_esquema_nodes}
 Format: usa fletxes (→, ↓), símbols (+, =) i emojis per fer-lo visual i intuïtiu.
 Exemple de format:
 ```
@@ -496,14 +520,32 @@ ELEMENT A ☀️
   ↓
 RESULTAT → PRODUCTE 1 + PRODUCTE 2
 ```
-Ha de ser senzill, visual i comprensible per a l'alumne.
+Ha de ser senzill i comprensible per a l'alumne. Bastida temporal: retira-la quan l'alumne pugui representar l'estructura mentalment.
 """)
 
     if comp.get("mapa_conceptual"):
-        output_sections.append("""
+        # C.3 MALL: mapa conceptual inapropiat per a Emergent/Inicial
+        if _mecr_c3 in ("PRE-A1", "A1"):
+            output_sections.append(f"""
 ## Mapa conceptual
-ACTIVAT — Genera un mapa conceptual en format text amb estructura d'arbre
-usant NOMÉS llistes amb guions i indentació amb 2 espais.
+⚠️ NIVELL {_mecr_c3} — BASTIDA INAPROPIADA: el mapa conceptual requereix autonomia lectora consolidada (mínim A2).
+A nivell {_mecr_c3}, substitueix el mapa per un esquema visual simple (2-4 nodes amb imatges).
+NO generis el mapa conceptual per a aquest nivell.
+""")
+        else:
+            # Profunditat per nivell (MALL)
+            _mapa_depth_map = {
+                "A2": "2 nivells (concepte central → idees principals literals del text). Guiat.",
+                "B1": "3 nivells (concepte → categories → exemples/detalls inferits). Connectors lògics a les fletxes.",
+                "B2": "4+ nivells. Jerarquització complexa abstracta (CALP). Superestructura del gènere.",
+                "C1": "Mapa de CONTRAST entre fonts o posicions ideològiques (no només contingut). Multi-font.",
+                "C2": "Mapa de CONTRAST entre fonts o posicions ideològiques (no només contingut). Multi-font.",
+            }
+            _mapa_depth = _mapa_depth_map.get(_mecr_c3, _mapa_depth_map["B1"])
+            output_sections.append(f"""
+## Mapa conceptual
+ACTIVAT — Genera un mapa conceptual en format text. Per a {_mecr_c3}: {_mapa_depth}
+Usa NOMÉS llistes amb guions i indentació amb 2 espais.
 
 **FORMAT OBLIGATORI (llista jeràrquica markdown, no caràcters de dibuix):**
 
@@ -514,9 +556,6 @@ usant NOMÉS llistes amb guions i indentació amb 2 espais.
     - Element b
   - Branca 2:
     - Element c
-  - Branca 3:
-    - Element d
-    - Element e
 ```
 
 REGLES CRÍTIQUES:
@@ -525,8 +564,7 @@ REGLES CRÍTIQUES:
   ('Causes' → 'Cau—ses').
 - NOMÉS guions `-` i indentació amb 2 espais per nivell.
 - Negreta opcional al concepte central amb `**...**`.
-
-Mostra les relacions jeràrquiques entre els conceptes principals del text.
+- Bastida temporal: retira-la quan l'alumne pugui organitzar les idees sense suport.
 """)
 
     # Variables de context per als complements pedagògics (MALL/TILC)
@@ -559,35 +597,59 @@ Mostra les relacions jeràrquiques entre els conceptes principals del text.
         adequacio_linia = "- Arguments, connectors lògics, contrast de fonts."
 
     if comp.get("preguntes_comprensio"):
+        # C.2 MALL: formats per nivell + 3 plànols + quantitats per moment
+        _pq_format_map = {
+            "PRE-A1": "Emergent — NO escriptura autònoma. Formats ÚNICAMENT: assenyalar imatge, dibuixar, dramatitzar, dictat a l'adult.",
+            "A1":     "Inicial — V/F textual (sobre paraules clau). Omplir buits AMB opcions donades (mai en blanc).",
+            "A2":     "Funcional — relacionar amb fletxes, elecció múltiple de títols, ordenació de seqüències.",
+            "B1":     "Estratègic — idem A2 + inferencials oberts (per què? i si...?). Inici d'argumentació breu.",
+            "B2":     "Acadèmic — argumentació oberta, transferència al jo, contrast de fonts.",
+            "C1":     "Crític — argumentació + valoració d'intencionalitat + judicis fonamentats sobre el text.",
+            "C2":     "Crític — argumentació + valoració d'intencionalitat + judicis fonamentats sobre el text.",
+        }
+        _pq_planol_map = {
+            "PRE-A1": "Tot via adult (propedèutic). NO preguntes escrites inferencials ni crítiques.",
+            "A1":     "Literal predominant. Inferencial molt simple (màxim 1 pregunta).",
+            "A2":     "Literal domina (2 preguntes). Inferencial apareix (1). Crític molt guiat (1).",
+            "B1":     "Inferencial és motor (2 preguntes). Literal de base (1). Crític creixent (1-2).",
+            "B2":     "Literal i inferencial de base. Crític sòlid (2 preguntes).",
+            "C1":     "Crític és motor (3+ preguntes). Literal i inferencial de suport.",
+            "C2":     "Crític és motor (3+ preguntes). Literal i inferencial de suport.",
+        }
+        _pq_format = _pq_format_map.get(_mecr_norm, _pq_format_map["B1"])
+        _pq_planol = _pq_planol_map.get(_mecr_norm, _pq_planol_map["B1"])
+
         output_sections.append(f"""
 ## Preguntes de comprensió
-ACTIVAT — Guió de comprensió lectora MALL/TILC (3 moments · formats variats).
+ACTIVAT — Guió comprensió lectora MALL (3 moments · 3 plànols · formats per nivell).
 
 Context: {materia_complement} · {etapa_complement} · MECR {mecr_complement} · gènere {genere_complement} · {modalitat_text}
-Adequació a l'etapa: {adequacio_linia[2:]}
-Modalitat: {modalitat_linia[2:]}
+Format per a {mecr_complement}: {_pq_format}
+Pesos dels 3 plànols (Literal / Inferencial / Crític) per a {mecr_complement}: {_pq_planol}
+Modalitat discursiva: {modalitat_linia[2:]}
+
+QUANTITAT PER MOMENT (regla MALL «menys és més»):
+- Abans de llegir: 2-3 preguntes (predicció + activació previs + propòsit)
+- Durant la lectura: 1-2 aturades (dubte lèxic o hipòtesi en curs)
+- Després de llegir: 3-5 preguntes (cobrir els 3 plànols amb el pes indicat amunt)
+
+MODELATGE (Think Aloud): inclou 1 comentari de veu lectora experta que verbalitzi el procés, per exemple: «Com a lector, quan veig aquest títol em pregunto si és la idea clau. I tu, què en penses?»
 
 FORMAT DE SORTIDA (exacte, és el que veu l'alumnat):
 
 ## Preguntes de comprensió
 
 ### Abans de llegir
-- [hipòtesi sobre títol]
-- [connexió amb coneixements previs]
-- [propòsit de lectura]
+- [predicció des del títol o imatge]
+- [activació de previs: «Què saps de [tema]?»]
+- [propòsit clar: «Llegeix per saber [una cosa concreta]»]
 
 ### Durant la lectura
-- [inferència en curs]
-- [visualització / imatge mental]
-- [lèxic en context]
+- [aturada 1: dubte lèxic o hipòtesi parcial]
+- [aturada 2 si escau: resum parcial o verificació d'hipòtesi]
 
 ### Després de llegir
-- [literal 1: V/F amb justificació, omplir buits, relaciona amb fletxes…]
-- [literal 2: format diferent de l'anterior]
-- [inferencial 1: per què creus…? i si…?]
-- [inferencial 2: causa-efecte]
-- [crític 1: argumentativa oberta]
-- [crític 2: transferència al jo / biaixos]
+[3-5 preguntes cobrint els 3 plànols amb el pes per a {mecr_complement}; 1 Think Aloud integrat]
 
 Regles: NO escriguis «Moment», «Nivell LITERAL», ni etiquetes [Literal · V/F]. Cada pregunta comença amb «- ». Integra els formats visuals dins la pregunta («- Omple els buits: El ___ serveix per ___.»).
 """)
@@ -660,30 +722,61 @@ ACTIVAT — Ajudes per a l'alumne (NO explicació del text). {_lang_note}
 """
 
         if _has_production_task:
-            _bastides_block += f"""
+            # C.1 MALL: connectors, iniciadors i paraules clau graduats per nivell MECR
+            _connector_rows_map = {
+                "PRE-A1": None,  # Nivell Emergent: sense taula de connectors
+                "A1":  "| Lligar idees | i, després |\n| Contrastar | però |\n| Causa | perquè |",
+                "A2":  "| Lligar idees | i, però, perquè |\n| Seqüenciar | primer, llavors |\n| Concloure | per tant |",
+                "B1":  "| Causa | ja que, perquè |\n| Contrast | en canvi, però |\n| Afegir | a més a més |\n| Concedir | tot i que |",
+                "B2":  "| Causa | ja que, atès que |\n| Conseqüència | en conseqüència, per contra |\n| Contrast | no obstant això, tot i que |\n| Afegir | així mateix |",
+                "C1":  "| Causa | ja que, atès que |\n| Conseqüència | en conseqüència, per contra |\n| Contrast | no obstant això, tot i que |\n| Afegir | així mateix |",
+                "C2":  "| Causa | ja que, atès que |\n| Conseqüència | en conseqüència, per contra |\n| Contrast | no obstant això, tot i que |\n| Afegir | així mateix |",
+            }
+            _iniciador_map = {
+                "PRE-A1": "«A la imatge veig un ___.» (forat únic; suport visual obligatori)",
+                "A1":     "«El personatge es diu ___ i vol ___.» (designació; màxim 2 forats)",
+                "A2":     "«Segons el text, ___ va passar perquè ___.» (causa literal)",
+                "B1":     "«Jo crec que ___ perquè el text diu ___.» (raonament propi)",
+                "B2":     "«Aquest fenomen s'explica mitjançant ___, ja que ___.» (model teòric)",
+                "C1":     "«L'autor intenta convèncer el lector de ___ fent servir ___.» (intencionalitat)",
+                "C2":     "«L'autor intenta convèncer el lector de ___ fent servir ___.» (intencionalitat)",
+            }
+            _keyword_map = {
+                "PRE-A1": "3-5 paraules + pictograma. Objectes reals del tema. NO tecnicismes.",
+                "A1":     "5-8 paraules. Noms + verbs d'acció bàsics.",
+                "A2":     "5-8 paraules. Noms + verbs d'acció bàsics.",
+                "B1":     "~10 paraules. Inclou habilitats cognitives (hipòtesi, causa, conseqüència).",
+                "B2":     "Lèxic d'especialitat pur (CALP). Sense equivalent col·loquial.",
+                "C1":     "Lèxic d'especialitat pur (CALP). Sense equivalent col·loquial.",
+                "C2":     "Lèxic d'especialitat pur (CALP). Sense equivalent col·loquial.",
+            }
+            _c_rows = _connector_rows_map.get(_mecr_norm, _connector_rows_map["B1"])
+            _c_iniciador = _iniciador_map.get(_mecr_norm, _iniciador_map["B1"])
+            _c_keywords = _keyword_map.get(_mecr_norm, _keyword_map["B1"])
 
-### 🔗 Connectors per respondre
-Taula amb els connectors que es poden fer servir a les respostes:
-| Per què | Paraules útils ({mecr_complement}) |
+            if _c_rows is None:
+                _connectors_section = f"""
+### 🔗 Connectors ({mecr_complement} — Emergent)
+⚠️ Nivell Emergent: NO usis connectors abstractes. Si cal connectar idees, usa ÚNICAMENT «i» o «després».
+Prefereix suport visual/oral en lloc de connectors textuals.
+"""
+            else:
+                _connectors_section = f"""
+### 🔗 Connectors per respondre ({mecr_complement})
+Usa ÚNICAMENT els connectors d'aquesta taula (no n'afegeixis d'altres nivells):
+| Per què | Paraules útils |
 |---|---|
-| Donar una causa | perquè, com que, ja que |
-| Dir una conseqüència | per tant, així doncs, per això |
-| Comparar / contrastar | però, en canvi |
-| Donar exemples | per exemple, com ara |
-| Tancar la resposta | en resum, per acabar |
-Adapta la quantitat al MECR de l'alumne (a A1-A2 dóna 1-2 connectors per fila; a B1+ dóna 3-4).
+{_c_rows}
+"""
 
+            _bastides_block += f"""{_connectors_section}
 ### ✏️ Frases per començar la resposta
-4-5 inicis de frase perquè l'alumne completi (no donis la resposta sencera):
-- «Segons el text, ______ perquè ______.»
-- «Penso que ______ perquè el text diu ______.»
-- «Un exemple és ______.»
-- «A ______ li passa que ______.»
-- (Adapta al MECR: més curtes i amb 1-2 forats a A1-A2; més sofisticades a B2-C1.)
+Model d'iniciador per a {mecr_complement}: {_c_iniciador}
+Genera 3-4 variacions d'aquest patró adaptades al text concret (no donis la resposta sencera).
 
 ### 🗂️ Paraules clau del text
-6-10 paraules importants del text que l'alumne pot reaprofitar a les respostes.
-Format llista separada per «–». Si són tècniques, marca-les amb (T): paraula1 – paraula2(T) – paraula3 – …
+{_c_keywords}
+Format llista separada per «–». Si són tècniques, marca-les amb (T): paraula1 – paraula2(T) – …
 """
         else:
             _bastides_block += """

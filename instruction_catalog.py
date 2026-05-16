@@ -245,6 +245,15 @@ CATALOG = {
         "text": "Connectors explícits entre frases: per tant, a més, en canvi, primer, després.",
         "activation": "SEMPRE",
         "macro": "LEXIC",
+        "mecr_detail": {
+            "pre-A1": "ÚNICS connectors permesos al text adaptat: «i», «després». Cap altre. NO usis «per tant», «en canvi», «perquè», «però» ni cap connector abstracte.",
+            "A1":     "Connectors permesos: i, després, però, perquè. Màxim 1-2 connectors distincts per text.",
+            "A2":     "Connectors permesos: i, però, perquè, primer, llavors, per tant. Evita els de nivell B1+.",
+            "B1":     "Connectors recomanats: ja que, en canvi, a més a més, tot i que, però, perquè.",
+            "B2":     "Connectors de nivell acadèmic: ja que, atès que, no obstant això, en conseqüència, per contra, així mateix, tot i que.",
+            "C1":     "Connectors de nivell crític i argumentatiu: tots els anteriors + matisadors d'intencionalitat.",
+            "C2":     "Connectors de nivell crític i argumentatiu: tots els anteriors + matisadors d'intencionalitat.",
+        },
     },
     "A-15": {
         "text": "Scaffolding decreixent (Vygotsky): 1a aparició = terme + definició completa; 2a = terme + definició breu; 3a en endavant = terme sol.",
@@ -727,10 +736,11 @@ CATALOG = {
     },
 
     "G-08": {
-        "text": "Lectura compartida adult/infant (MECR pre-A1): el text ha de ser apte per ser llegit en VEU ALTA per un adult acompanyant (docent a l'aula, família a casa). Ritme oral natural, frases curtes amb pauses clares (puntuació mínima), narrativa amb personatges concrets, estructura repetitiva tipus rondalla quan escaigui ('Hi havia una vegada…', 'I què va passar?'). L'infant és lector des de l'inici (principi MALL): llegeix imatges, símbols, ritmes i contextos — encara no decodifica text llarg sol. Si afegeixes glossari bilingüe o transliteracions a alfabet origen (G-01/G-03), presenta'ls SEMPRE sota la capçalera **'Per llegir junts a casa amb la família'** (no 'Glossari'), perquè el destinatari real d'aquests recursos és l'adult que llegeix amb l'infant.",
+        "text": "Lectura compartida adult/infant (modalitat Emergent / logogràfica): el text ha de ser apte per ser llegit en VEU ALTA per un adult acompanyant (docent a l'aula, família a casa). Ritme oral natural, frases curtes amb pauses clares (puntuació mínima), narrativa amb personatges concrets, estructura repetitiva tipus rondalla quan escaigui ('Hi havia una vegada…', 'I què va passar?'). L'infant és lector des de l'inici (principi MALL): llegeix imatges, símbols, ritmes i contextos — encara no decodifica text llarg sol. Si afegeixes glossari bilingüe o transliteracions a alfabet origen (G-01/G-03), usa el patró **[imatge del concepte] + [paraula en alfabet origen] + [PARAULA EN CATALÀ]** i presenta'ls sota la capçalera **'Per llegir junts: pictograma + L1 + català'** — és un recurs de Textos d'Identitat que serveix tant a l'alumne (activa la CUP, valida la seva llengua) com a la família (acompanyament a casa).",
         "activation": "NIVELL",
         "macro": "PERSONALITZACIO",
         "mecr_levels": ["pre-A1"],
+        "modalitat_lectora_required": "compartida",
     },
 
     # ─── H. ADAPTACIONS ESPECÍFIQUES PER PERFIL ──────────────────────────────

@@ -18,6 +18,69 @@ def _is_l1_romanica(l1: str) -> bool:
     return l1.lower().strip() in LLENGUES_ROMANIQUES
 
 
+# Curs → etapa canònica (usada per derivar fase_lectora per defecte)
+_CURS_TO_ETAPA = {
+    "i3": "infantil", "i4": "infantil", "i5": "infantil",
+    "p3": "infantil", "p4": "infantil", "p5": "infantil",
+    "1r primària": "primaria_ci", "1r primaria": "primaria_ci",
+    "2n primària": "primaria_ci", "2n primaria": "primaria_ci",
+    "3r primària": "primaria_cm", "3r primaria": "primaria_cm",
+    "4t primària": "primaria_cm", "4t primaria": "primaria_cm",
+    "5è primària": "primaria_cs", "5e primaria": "primaria_cs",
+    "6è primària": "primaria_cs", "6e primaria": "primaria_cs",
+}
+
+
+def _derive_fase_lectora(chars: dict, mecr: str, context: dict | None) -> str:
+    """
+    C.4 MALL: deriva la fase lectora canònica.
+    Valors: 'logografica' | 'alfabetica_emergent' | 'alfabetica_fluida'
+
+    Prioritat:
+    1. Override explícit del docent (en chars['fase_lectora'] o context['fase_lectora'])
+    2. Default per etapa/curs:
+       - infantil → logografica
+       - 1r-2n Primària (CI) → alfabetica_emergent
+       - 3r+ → alfabetica_fluida
+    """
+    ctx = context or {}
+    # Override explícit (el docent ha triat manualment al Pas 1)
+    explicit = ctx.get("fase_lectora") or chars.get("fase_lectora")
+    if explicit in ("logografica", "alfabetica_emergent", "alfabetica_fluida"):
+        return explicit
+
+    etapa = (ctx.get("etapa") or "").lower().strip()
+    curs = (ctx.get("curs") or "").lower().strip()
+
+    # Derives per etapa/curs
+    if etapa == "infantil" or curs in ("i3", "i4", "i5", "p3", "p4", "p5"):
+        return "logografica"
+    etapa_norm = _CURS_TO_ETAPA.get(curs, "")
+    if etapa_norm == "primaria_ci" or any(k in etapa for k in ("cicle inicial", "1r prim", "2n prim")):
+        return "alfabetica_emergent"
+    return "alfabetica_fluida"
+
+
+def _derive_modalitat_lectora(chars: dict, mecr: str, fase_lectora: str) -> str:
+    """
+    C.4 MALL: deriva la modalitat lectora per a l'activació de G-08 i altres.
+    Valors: 'compartida' | 'progressiva' | 'transferencia' | 'autonoma'
+    """
+    if fase_lectora == "logografica":
+        return "compartida"
+    if fase_lectora == "alfabetica_emergent":
+        # Nouvingut amb MECR baix → transferència, no progressiva
+        is_nouvingut = chars.get("nouvingut", {}).get("actiu", False)
+        if is_nouvingut and mecr in ("pre-A1", "A1"):
+            return "transferencia"
+        return "progressiva"
+    # alfabetica_fluida
+    is_nouvingut = chars.get("nouvingut", {}).get("actiu", False)
+    if is_nouvingut and mecr in ("pre-A1", "A1"):
+        return "transferencia"
+    return "autonoma"
+
+
 def _check_subvar_conditions(instr: dict, profile_data: dict, mecr: str, chars: dict) -> bool:
     """
     Comprova si les condicions de sub-variables es compleixen.
@@ -254,7 +317,7 @@ def _str_to_bool(val) -> bool:
     return bool(val)
 
 
-def get_instructions(profile: dict, params: dict) -> dict:
+def get_instructions(profile: dict, params: dict, context: dict = None) -> dict:
     """
     Retorna les instruccions filtrades, agrupades per macrodirectiva.
 
@@ -273,6 +336,10 @@ def get_instructions(profile: dict, params: dict) -> dict:
     dua = params.get("dua", "Core")
     complements = params.get("complements", {})
     chars = profile.get("caracteristiques", {})
+
+    # C.4 MALL: derivació de modalitat lectora (per a G-08 i futurs usos)
+    _fase_lectora = _derive_fase_lectora(chars, mecr, context)
+    _modalitat_lectora = _derive_modalitat_lectora(chars, mecr, _fase_lectora)
 
     active_profiles = [key for key, val in chars.items() if val.get("actiu")]
 
@@ -314,6 +381,13 @@ def get_instructions(profile: dict, params: dict) -> dict:
             else:
                 included = True
                 motiu = "NIVELL (fallback)"
+            # C.4 MALL: condició addicional modalitat_lectora_required
+            if included and "modalitat_lectora_required" in instr:
+                if _modalitat_lectora != instr["modalitat_lectora_required"]:
+                    suppressed.append(iid)
+                    audit.append({"id": iid, "macro": macro_id,
+                                  "motiu": f"suprimit: modalitat_lectora={_modalitat_lectora} ≠ {instr['modalitat_lectora_required']}"})
+                    included = False
 
         # ── PERFIL ──
         elif activation == "PERFIL":

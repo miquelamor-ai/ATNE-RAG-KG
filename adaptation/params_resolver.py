@@ -131,7 +131,12 @@ def resolve_params(caracteristiques: dict, etapa: str = "", curs: str = "",
         trace.append(f"override docent -> {mecr}")
         dua = _resolve_dua(chars, mecr)
         trace.append(f"DUA -> {dua}")
-        return {"mecr": mecr, "dua": dua, "motiu": " · ".join(trace), "trace": trace}
+        fase_lectora = _resolve_fase_lectora(etapa, curs, chars)
+        modalitat_lectora = _resolve_modalitat_lectora(chars, mecr, fase_lectora)
+        trace.append(f"fase_lectora -> {fase_lectora} | modalitat_lectora -> {modalitat_lectora}")
+        return {"mecr": mecr, "dua": dua, "fase_lectora": fase_lectora,
+                "modalitat_lectora": modalitat_lectora,
+                "motiu": " · ".join(trace), "trace": trace}
 
     # ── 1) MECR base segons curs canònic, amb fallback per etapa ──
     mecr_base = COURSE_TO_MECR.get(curs)
@@ -240,7 +245,55 @@ def resolve_params(caracteristiques: dict, etapa: str = "", curs: str = "",
     dua = _resolve_dua(chars, mecr)
     trace.append(f"DUA -> {dua}")
 
-    return {"mecr": mecr, "dua": dua, "motiu": " · ".join(trace), "trace": trace}
+    # ── 10) Fase lectora + modalitat lectora (C.4 MALL) ──
+    fase_lectora = _resolve_fase_lectora(etapa, curs, chars)
+    modalitat_lectora = _resolve_modalitat_lectora(chars, mecr, fase_lectora)
+    trace.append(f"fase_lectora -> {fase_lectora} | modalitat_lectora -> {modalitat_lectora}")
+
+    return {
+        "mecr": mecr, "dua": dua,
+        "fase_lectora": fase_lectora, "modalitat_lectora": modalitat_lectora,
+        "motiu": " · ".join(trace), "trace": trace,
+    }
+
+
+_CI_CURS = {"1r primària", "1r primaria", "2n primària", "2n primaria",
+            "1r", "2n"}  # Cicle Inicial Primària
+
+
+def _resolve_fase_lectora(etapa: str, curs: str, chars: dict) -> str:
+    """
+    C.5 MALL: fase lectora canònica per defecte (pot ser sobreescrita pel docent).
+    Valors: 'logografica' | 'alfabetica_emergent' | 'alfabetica_fluida'
+    """
+    # Override explícit del docent (en el perfil com a camp de nivell superior)
+    explicit = chars.get("fase_lectora")
+    if explicit in ("logografica", "alfabetica_emergent", "alfabetica_fluida"):
+        return explicit
+
+    etapa_low = (etapa or "").lower().strip()
+    curs_low = (curs or "").lower().strip()
+
+    if etapa_low == "infantil" or curs_low.startswith(("i3", "i4", "i5", "p3", "p4", "p5")):
+        return "logografica"
+    if curs_low in _CI_CURS or any(k in etapa_low for k in ("cicle inicial",)):
+        return "alfabetica_emergent"
+    return "alfabetica_fluida"
+
+
+def _resolve_modalitat_lectora(chars: dict, mecr: str, fase_lectora: str) -> str:
+    """
+    C.4 MALL: modalitat lectora derivada.
+    Valors: 'compartida' | 'progressiva' | 'transferencia' | 'autonoma'
+    """
+    if fase_lectora == "logografica":
+        return "compartida"
+    is_nouvingut = chars.get("nouvingut", {}).get("actiu", False)
+    if is_nouvingut and mecr in ("pre-A1", "A1"):
+        return "transferencia"
+    if fase_lectora == "alfabetica_emergent":
+        return "progressiva"
+    return "autonoma"
 
 
 def _resolve_dua(chars: dict, mecr_sortida: str) -> str:

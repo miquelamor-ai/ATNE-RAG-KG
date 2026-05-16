@@ -118,7 +118,7 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
     # System prompt — sense RAG, les instruccions graduades són el motor
     cb({"type": "step", "step": "search", "msg": "Preparant instruccions d'adaptació..."})
     system_prompt = build_system_prompt(profile, context, params, rag_context="")
-    _filtered = instruction_filter.get_instructions(profile, params)
+    _filtered = instruction_filter.get_instructions(profile, params, context=context)
     _instruction_ids = [
         instr["id"]
         for _macro in _filtered.get("macrodirectives", {}).values()
