@@ -1169,6 +1169,16 @@
                   <option value="fr">Francès</option>
                   <option value="de">Alemany</option>
                 </select></div>
+                <div><div class="mp-l">Habilitat cognitiva <span style="font-weight:400;color:var(--ink-400);font-size:10px">(MALL HCL)</span></div><select class="sel" id="gen-hcl">
+                  <option value="auto" selected>Auto (segons gènere)</option>
+                  <option value="descriure">Descriure</option>
+                  <option value="explicar">Explicar</option>
+                  <option value="justificar">Justificar</option>
+                  <option value="argumentar">Argumentar</option>
+                  <option value="demostrar">Demostrar</option>
+                  <option value="definir">Definir</option>
+                  <option value="interpretar">Interpretar</option>
+                </select></div>
               </div>
               <div style="margin-top:8px">
                 <div class="mp-l" style="margin-bottom:4px">Indicació al docent <span style="font-weight:400;color:var(--ink-400)">(opcional)</span></div>
@@ -2133,6 +2143,7 @@
     const to = document.getElementById('gen-to')?.value || 'neutre';
     const extensio = document.getElementById('gen-extensio')?.value || 'estandard';
     const genLang = document.getElementById('gen-lang')?.value || 'ca';
+    const genHcl = document.getElementById('gen-hcl')?.value || 'auto';
     const genNotes = document.getElementById('gen-notes')?.value?.trim() || '';
     const overrideCap = document.getElementById('gen-override-cap')?.checked || false;
 
@@ -2165,6 +2176,7 @@
       else if (/fp/i.test(courseNorm)) etapaCur = 'FP';
       const result = await window.ATNE_LLM.generateTextStream({
         tema, genere, to, extensio, lang: genLang,
+        hcl: genHcl !== 'auto' ? genHcl : undefined,
         notes: genNotes || undefined,
         override_cap: overrideCap || undefined,
         context: { etapa: etapaCur, curs: courseNorm, materia: (localStorage.getItem('atne.doc_materia') || '').trim(), mecr: (profCur?.mecr || localStorage.getItem('atne.mecr') || '') },

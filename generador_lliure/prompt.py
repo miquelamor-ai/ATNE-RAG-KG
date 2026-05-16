@@ -144,6 +144,7 @@ def build_user(params: dict) -> str:
 
     genere = (params.get("genere") or "article divulgatiu").strip()
     to = (params.get("to") or "neutre").strip().lower()
+    hcl = (params.get("hcl") or "").strip().lower()
     notes = (params.get("notes") or "").strip()
     saber = (params.get("saber_curricular") or "").strip()
     override_cap = bool(params.get("override_cap", False))
@@ -198,8 +199,23 @@ def build_user(params: dict) -> str:
         except Exception:
             pass
 
+    # HCL (habilitat cognitivolingüística MALL)
+    HCL_DESCRIPCIO = {
+        "descriure":   "DESCRIURE — el text ha de presentar característiques, parts, propietats observables del tema. Preguntes implícites: qui, què, com és, on, quan.",
+        "explicar":    "EXPLICAR — el text ha d'exposar el funcionament, les causes i els processos. Preguntes implícites: per què, com funciona, què passa.",
+        "justificar":  "JUSTIFICAR — el text ha de donar raons d'una afirmació o decisió amb suport empíric o lògic. Preguntes implícites: per què és així, en què es basa.",
+        "argumentar":  "ARGUMENTAR — el text ha de defensar una tesi amb arguments, contrastar amb objeccions i orientar el lector cap a una conclusió.",
+        "demostrar":   "DEMOSTRAR — el text ha de mostrar formalment que una afirmació és certa a partir d'evidències, premisses o passos lògics encadenats.",
+        "definir":     "DEFINIR — el text ha de fixar el significat exacte d'un concepte: gènere proper + diferència específica. Adequat a ciències i humanitats acadèmiques.",
+        "interpretar": "INTERPRETAR — el text ha d'atribuir sentit a un fet, una obra o una dada, considerant context i punts de vista.",
+    }
+
     # Notes opcionals
     blocs_opcionals = []
+    if hcl and hcl in HCL_DESCRIPCIO:
+        blocs_opcionals.append(
+            f"Habilitat cognitivolingüística requerida (MALL): {HCL_DESCRIPCIO[hcl]}"
+        )
     if gradacio_bloc:
         blocs_opcionals.append(
             f"Nivell lingüístic del destinatari ({mecr}). Aplica EXACTAMENT aquestes "
