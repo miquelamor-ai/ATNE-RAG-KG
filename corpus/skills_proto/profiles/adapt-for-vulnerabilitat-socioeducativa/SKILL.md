@@ -44,6 +44,13 @@ acadèmic. L'alumne té la capacitat per aprendre; el que li falta és
 la xarxa de referents previs que el sistema dóna per suposada.
 L'objectiu és explicitar el que és implícit, no rebaixar l'exigència.
 
+## Connexions MALL
+
+**BICS/CALP aplicable a alumnat no-L2**: L'alumnat de capital cultural baix pot tenir bon BICS (conversa) però CALP feble (codi acadèmic). El MALL fa explícit aquest "currículum ocult" a totes les matèries — és responsabilitat de cada àrea, no només de llengua.
+**HCL porta d'entrada**: Narrar, Descriure — connecten amb el bagatge propi de l'alumne (la seva experiència és font d'HCL legítima). La guia turística del barri, la crònica familiar, dignifiquen el bagatge i activen les HCL.
+**HCL que necessiten bastida de codi**: Justificar, Argumentar — gèneres acadèmics apresos, no universals. Explicitar l'estructura, els connectors i el registre (bastida MALL del codi acadèmic) és la via d'accés.
+**Eix oral/escrit**: L'oralitat dialògica és el punt de partida. "Interpensem plegats oralment, després textualitzem" (MALL). El debat oral exploratiu com a pre-escriptura redueix la distància entre la veu pròpia i el text acadèmic.
+
 ## Instruccions principals d'adaptació
 
 ```

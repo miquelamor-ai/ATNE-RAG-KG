@@ -47,6 +47,16 @@ té TDAH, o no donar suport perquè té AC) és l'error més comú i té
 conseqüències devastadores: avorriment, desmotivació, baixa
 autoestima, fracàs escolar malgrat el potencial.
 
+## Connexions MALL
+
+**Principi del doble eix** (MALL per a 2e):
+- **El "Què"** (exigència cognitiva = HCL superiors AC) **no es toca mai**
+- **El "Com"** (bastida operativa = compensar la condició associada) s'adapta sense rebaixar la HCL
+
+**HCL actives**: Idèntic a alumnat AC (Justificar/Argumentar sempre). La bastida per a la condició associada garanteix l'accés al canal, no simplifica la HCL.
+**Risc a evitar**: Substituir una HCL complexa per una de simple per compensar la condició associada (ex: demanar Descriure a AC+TDAH en lloc de Justificar amb micro-blocs). Això és l'error d'infraexpectativa — devastador per a l'alumnat 2e.
+**Eix oral/escrit**: Oral previ sempre, especialment per a AC+TDC (canal d'expressió) i AC+TDAH (pre-planificació dialògica).
+
 ## Instruccions principals d'adaptació
 
 ```

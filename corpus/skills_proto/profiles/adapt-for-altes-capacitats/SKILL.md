@@ -36,6 +36,13 @@ barrera real és l'**avorriment i la desmotivació** davant material massa
 senzill. Si el text és trivial, l'alumne desconnecta, produeix menys del
 que pot i pot arribar al fracàs escolar malgrat el seu potencial.
 
+## Connexions MALL
+
+**HCL a activar sempre**: Justificar, Argumentar — fins i tot quan el nivell de codi lingüístic és A2/B1, si se li donen les peces lingüístiques. La demanda cognitiva avança per sobre del nivell de llengua.
+**Escriptura epistèmica**: El MALL distingeix escriure per transcriure (reproduir el que s'ha dit) de escriure per transformar el pensament. L'alumnat AC ha d'activar sempre la funció epistèmica: escriure per pensar i generar coneixement nou.
+**Principi MALL — doble eix**: El "Què" (exigència cognitiva) i el "Com" (bastida lingüística) son independents. Es pot demanar Justificar a B2 cognitiu amb eines lingüístiques de B1. Mai rebaixar el "Què".
+**Eix oral/escrit**: Debat i argumentació oral com a SD prèvia a la producció escrita. Gèneres d'opinió, assaig i informe científic son les formes canòniques MALL per a AC.
+
 ## Instruccions principals d'adaptació
 
 ```

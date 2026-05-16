@@ -45,6 +45,13 @@ competència lectora, l'adaptació textual és mínima: les necessitats
 són principalment de frontend (subtítols, sistema FM, bucle magnètic,
 intèrpret de LSC, ubicació a l'aula, reducció del soroll).
 
+## Connexions MALL
+
+**Perfil LSC (sord prelocutiu signant)**: Les HCL s'han d'avaluar respecte a la L2 (català escrit). Progressió idèntica a nouvingut: Narrar/Descriure (A1-A2) → Explicar (B1) → Justificar/Argumentar (B2-C1). L'alumne JA TÉ les HCL en LSC; la bastida és per transferir-les al català escrit.
+**Perfil oral (hipoacúsia amb bona competència lectora)**: Accés a totes les HCL. Bastida orientada al canal (suport visual de l'estructura discursiva), no simplificació de HCL.
+**Bastida clau MALL**: Glossari bilingüe català–LSC. TOLC: LIT multimodals (text + referent visual o signe). Textos model escrits de bona qualitat com a referents de cada HCL.
+**Eix oral/escrit**: En perfil LSC, la LSC és l'oral (L1); el català és l'escrit (L2). El MALL reconeix la LSC com a llengua plena per a l'activació prèvia de les HCL (Llei 17/2010).
+
 ## Instruccions principals d'adaptació
 
 ```

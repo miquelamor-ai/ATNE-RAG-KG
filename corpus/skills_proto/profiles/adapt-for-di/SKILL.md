@@ -37,6 +37,13 @@ entre frases, inferir relacions i abstraure conceptes. Necessita
 concreció extrema i repetició sistemàtica. La capacitat de generalitzar
 aprenentatges entre contextos és especialment feble.
 
+## Connexions MALL
+
+**HCL accessible directament**: Narrar (seqüenciar accions observables), Descriure (propietats tangibles, A1-A2)
+**HCL que necessiten bastida intensa**: Explicar (B1) — la causalitat abstracta necessita analogies quotidianes obligatòries. Justificar/Argumentar fora d'abast pràctic per a grau moderat/sever.
+**Bastida clau MALL**: Un sol concepte nou per bloc = reducció de càrrega discursiva. Analogies quotidianes com a pont concret ("la fotosíntesi és com cuinar: les plantes fan servir la llum com nosaltres el foc"). Pictogrames ARASAAC = representació visual de la HCL en curs, no decoració.
+**Eix oral/escrit**: Dictat a l'adult per a grau moderat/sever. L'oral és el canal primari; l'escrit és suport secundari. La lectura en veu alta del docent elimina la barrera de descodificació i permet activar la comprensió.
+
 ## Instruccions principals d'adaptació
 
 ```

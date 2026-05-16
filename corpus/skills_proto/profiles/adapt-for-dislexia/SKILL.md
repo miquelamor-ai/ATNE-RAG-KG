@@ -33,6 +33,13 @@ estructura morfològica complexa generen fatiga lectora exponencial. La
 memòria de treball es consumeix en la descodificació i no queda prou per a
 la comprensió.
 
+## Connexions MALL
+
+**HCL accessible directament**: Totes les HCL (Narrar → Argumentar) — la barrera és fonològica/descodificació, NO cognitiva
+**Cap HCL exclosa**: La bastida no canvia la complexitat cognitiva sinó el canal d'accés. Un alumne amb dislèxia pot Justificar o Argumentar si no ha de descodificar text difícil per fer-ho.
+**Bastida clau MALL**: Dissociar descodificació de comprensió — lectures en veu alta del docent, text-to-speech. Catàleg de recursos amb lèxic controlat (no sinònims, paraules d'alta freqüència). La lectura en veu alta allibera la descodificació i permet treballar HCL superiors.
+**Eix oral/escrit**: L'oralitat és el canal fort. Dictat a l'adult i resposta oral per a la producció. La participació en totes les HCL ha d'estar garantida via canal oral.
+
 ## Instruccions principals d'adaptació
 
 ```

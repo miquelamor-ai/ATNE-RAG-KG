@@ -40,6 +40,16 @@ principal. La distància lingüística entre L1 i català amplifica la
 dificultat: no és el mateix adaptar un text per a un alumne amb L1
 romànica que per a un amb L1 sino-tibetana o araboberber.
 
+## Connexions MALL
+
+**HCL i progressió L2** (BICS/CALP): L'alumne nouvingut JA DOMINA les HCL en la seva L1. La bastida és per a la L2, no per a la cognició.
+- A1-A2 → Narrar, Descriure (BICS en formació: 2-3 anys)
+- B1 → Explicar
+- B2-C1 → Justificar, Argumentar (CALP: 5-7 anys per consolidar)
+
+**Bastida clau MALL**: TOLC — Language Identity Texts (LIT): escriure en L1 i L2 simultàniament. Dictats bilingües. Collages lingüístics. Recasting i rephrasing com a feedback no interruptiu. Textos model de la HCL demanada com a referent.
+**Eix oral/escrit**: L'oralitat en L1 és el pont per a l'escriptura en L2. Prioritzar la comprensió oral (i activació de la HCL en L1) ABANS de la producció escrita en L2.
+
 ## Instruccions principals d'adaptació
 
 ```

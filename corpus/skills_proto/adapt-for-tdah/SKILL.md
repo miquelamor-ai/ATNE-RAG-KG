@@ -33,6 +33,13 @@ retroalimentació constant.
 **Atenció sostinguda limitada.** La memòria de treball compromesa dificulta
 retenir informació entre frases llargues o paràgrafs densos.
 
+## Connexions MALL
+
+**HCL accessible directament**: Narrar, Descriure (A1-A2); Explicar (B1)
+**HCL que necessiten bastida**: Justificar, Argumentar (B2-C1) — exigeixen planificació sostinguda que sobrecarrega la memòria de treball
+**Bastida clau MALL**: Bases d'orientació (GPS del gènere) per compensar el dèficit de planificació executiva. Micro-blocs + indicadors de progrés [Secció X de Y] per mantenir l'atenció activa en cada fase de la SD.
+**Eix oral/escrit**: Prioritzar oralitat exploratòria ABANS de la producció escrita. El dictat a l'adult allibera la memòria de treball i permet centrar-se en el significat, no en la grafomotricitat.
+
 ## Instruccions principals d'adaptació
 
 ```

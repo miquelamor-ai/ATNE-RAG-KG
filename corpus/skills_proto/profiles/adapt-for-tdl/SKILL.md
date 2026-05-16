@@ -47,6 +47,13 @@ fonològica compromesa dificulta retenir frases llargues. La capacitat
 cognitiva no verbal sovint és normativa o superior: el TDL afecta el
 canal, no la capacitat de pensar.
 
+## Connexions MALL
+
+**HCL accessible**: Totes les HCL (la barrera és lingüística, no cognitiva). La capacitat cognitiva no verbal és normativa o superior.
+**HCL que necessiten bastida lingüística**: Explicar, Justificar, Argumentar — no per incapacitat cognitiva sinó per limitació del canal lingüístic. La bastida adequa el "Com" sense rebaixar el "Què".
+**Bastida clau MALL**: Reducció de densitat lèxica = menys sobrecàrrega de comprensió simultània. Modelatge de termes en 2-3 contextos = aprenentatge incidental del lèxic acadèmic. Catàleg de connectors per HCL: narrar (primer/després), explicar (perquè/per tant), argumentar (ben al contrari/en conclusió).
+**Eix oral/escrit**: Verbalitzar les HCL oralment ABANS d'escriure (Recapitular → Resumir). Cartes de conversa amb etiquetes lingüístiques reduïen la càrrega productiva oral i permeten activar Argumentar amb suport explícit.
+
 ## Instruccions principals d'adaptació
 
 ```

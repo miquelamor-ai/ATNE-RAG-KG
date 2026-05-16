@@ -47,6 +47,13 @@ per a l'LLM són mínimes: la majoria de necessitats són CSS/frontend
 (navegació per teclat, mida clicable dels elements, temps addicional,
 alternatives al motor manual).
 
+## Connexions MALL
+
+**HCL accessible directament**: Totes les HCL (la barrera és motriu, NO cognitiva ni lingüística)
+**Principi MALL**: Dissociar el canal de producció de la HCL. No rebaixar Justificar/Argumentar perquè l'alumne no pot escriure a mà — oferir alternatives (oral, teclat, selecció) per a la mateixa HCL.
+**Bastida clau MALL**: Plantilles de gènere en format digital (bastida de producció accessible via teclat). Cartes de conversa / taulells de debat per participar en HCL Argumentar sense producció escrita manual.
+**Eix oral/escrit**: L'oral és el canal fort. Dictat digital i resposta oral com a formats de producció equivalents a l'escrit. La participació oral en debats és una via completa d'accés a totes les HCL.
+
 ## Instruccions principals d'adaptació
 
 ```

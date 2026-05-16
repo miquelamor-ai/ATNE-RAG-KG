@@ -41,6 +41,13 @@ la informació. Les adaptacions per a l'LLM se centren en l'estructura
 semàntica del text (encapçalaments, alt-text), ja que la majoria
 d'adaptacions són CSS/frontend (contrast, mida, zoom).
 
+## Connexions MALL
+
+**HCL accessible directament**: Totes les HCL (la barrera és de canal/percepció, NO cognitiva ni lingüística)
+**Cap modulació HCL**: L'exigència cognitiva no canvia. L'alt-text descriptiu és HCL "Descriure" activada textualment — és contingut, no accessibilitat decorativa.
+**Bastida clau MALL**: Estructura semàntica (H1-H3) = seqüència discursiva accessible via lector de pantalla. Descripcions textuals de taules, gràfics i imatges com a equivalents funcionals del contingut visual.
+**Eix oral/escrit**: Text-to-speech és el canal primari per a ceguesa. Les activitats orals (debat, explicació, discussió) han d'estar accessibles com a via de participació en totes les HCL.
+
 ## Instruccions principals d'adaptació
 
 ```
