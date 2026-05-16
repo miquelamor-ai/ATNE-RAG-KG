@@ -7,7 +7,6 @@ Substitueix progressivament les 6 implementacions paral·leles repartides per:
   - ui/atne/js/profile-canonical.js (deriveMECR)
   - ui/atne/pas3.html (computeMECRSortida)
   - ui/atne/flash.html + server.py _FLASH_CURS_MECR
-  - server.py propose_adaptation (taula _MECR_PER_CURS interna)
 
 Bug arrel que motiva aquest mòdul: cada implementació tenia regles
 lleugerament diferents per a la mateixa entrada. Cas Petri I5 (Infantil 5

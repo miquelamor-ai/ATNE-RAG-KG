@@ -8,7 +8,7 @@ description: >
   (3) skip if not renderable. The LLM only places markers; it does NOT
   write English briefs — that's the backend's job.
 author: FJE — Fundació Jesuïtes Educació
-version: 0.3.0-proto
+version: 0.4.0-proto
 complement_key: illustracions
 agent_role: complements
 tools_required:
@@ -161,6 +161,50 @@ El frontmatter `style_presets` defineix 7 estils validats empíricament
 
 **Selecció**: el docent pot triar-ne un al Pas 2; si no, el backend aplica
 el `default_for` del frontmatter (MECR + assignatura + context).
+
+## Gradació per nivell MALL
+
+### Quantitat i densitat per nivell
+
+| Nivell MALL | Marcadors màxim | Ubicació preferent | Principi |
+|---|---|---|---|
+| **Emergent (pre-A1)** | 1-2 per document | Inline, davant de cada paràgraf clau | Imatge = text per a lectors loogràfics. Obligatòria per a conceptes nous. |
+| **Inicial (A1)** | 2-3 per document | Inline o al principi de cada secció | Ancoratge visual per a descodificadors emergents. |
+| **Funcional (A2)** | 2-3 per document | Al principi de seccions temàtiques | Suport de comprensió literal. |
+| **Estratègic (B1)** | 2-4 per document | Secció principal + concepte clau | Ancoratge inferencial. Pot ser un diagrama o procés. |
+| **Acadèmic (B2)** | 1-3 per document | Selectiu: només si aporta valor | Il·lustrar processos, sistemes, relacions. |
+| **Crític (C1+)** | 0-2 per document | Opcional, molt selectiu | Imatge com a argument visual, no suport. |
+
+### Criteris de concepte visualitzable per nivell
+
+- **Emergent**: objectes físics reals (arbre, cotxe, persona menjant). Mai conceptes abstractes.
+  Exemple correcte: `[IMATGE: nena llegint un llibre]`
+  Exemple incorrecte: `[IMATGE: l'aprenentatge]`
+
+- **Inicial / Funcional**: processos físics observables (pluja, creixement, construcció).
+  Exemple: `[IMATGE: cigonyes migrant cap al sud]`
+
+- **Estratègic / Acadèmic**: sistemes, mapes, línies de temps, relacions causa-efecte visibles.
+  Exemple: `[IMATGE: fàbrica tèxtil del segle XIX amb treballadors]`
+
+- **Crític**: icona o metàfora visual quan el text ho demana explícitament.
+
+### Presets recomanats per etapa (orientació MALL)
+
+| Etapa / perfil | Preset recomanat |
+|---|---|
+| Infantil + pre-A1 | `icona_minimalista` o `aquarela_storybook` |
+| Primària, LF, nouvingut | `aquarela_storybook` o `claymation_plastilina` |
+| ESO, humanitats | `vectorial_editorial` o `escala_grisos_carbonet` |
+| ESO+, STEM | `isometric_infografic` |
+| Història, filosofia | `escala_grisos_carbonet` o `fotografia_documental` |
+
+### Regla MALL «menys és més»
+
+Cada marcador carrega cognitivament. A Emergent i A1, **preferir pictogrames**
+(complement `pictogrames`) en lloc d'il·lustracions FLUX, que tarden 1-3 min.
+Les il·lustracions aporten màxim valor quan hi ha un **concepte difícil de
+descriure en paraules** però fàcil de mostrar en imatge.
 
 ## Format del marcador
 
