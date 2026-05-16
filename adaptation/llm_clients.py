@@ -213,7 +213,12 @@ def _call_llm(model_id: str, system_prompt: str, text: str) -> str:
                         _LAST_LLM_USAGE.update({"tokens_in": getattr(_um, "prompt_token_count", 0) or 0, "tokens_out": getattr(_um, "candidates_token_count", 0) or 0, "llm_ms": int((time.time() - _t0_llm) * 1000), "provider": "gemma4"})
                     except Exception:
                         _LAST_LLM_USAGE.update({"llm_ms": int((time.time() - _t0_llm) * 1000), "provider": "gemma4"})
-                    return response.text or ""
+                    result_text = response.text
+                    if not result_text:
+                        finish = getattr(response, "candidates", [{}])[0] if response.candidates else {}
+                        reason = getattr(finish, "finish_reason", "UNKNOWN") if finish else "UNKNOWN"
+                        raise RuntimeError(f"Gemma4 resposta buida (finish_reason={reason}). Possible quota exhaurida o filtre de seguretat.")
+                    return result_text
                 except Exception as e:
                     last_err = e
                     err_str = str(e)

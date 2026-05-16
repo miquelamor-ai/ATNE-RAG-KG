@@ -4324,6 +4324,13 @@ async def adapt_stream(request: Request, payload: dict = Body(...)):
             while events:
                 yield f"data: {json.dumps(events.pop(0), ensure_ascii=False)}\n\n"
 
+            # Recollim excepcions de tasks que hagin fallat silenciosament
+            for t in tasks:
+                try:
+                    t.result()
+                except Exception as task_err:
+                    yield f"data: {json.dumps({'type': 'error', 'error': str(task_err)}, ensure_ascii=False)}\n\n"
+
             # 'done' global quan tots els nivells han acabat
             yield f"data: {json.dumps({'type': 'done', 'total_levels': total}, ensure_ascii=False)}\n\n"
 

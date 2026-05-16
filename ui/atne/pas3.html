@@ -3236,8 +3236,8 @@
     const adaptedForEl = document.getElementById('adapted-for');
     if (adaptedForEl && profile && profile.name) adaptedForEl.textContent = profile.name;
     const title = localStorage.getItem('atne.doc_title') || 'Sense títol';
-    const materia = localStorage.getItem('atne.doc_materia') || 'Història';
-    const nivell = localStorage.getItem('atne.doc_nivell') || 'ESO';
+    const materia = localStorage.getItem('atne.doc_materia') || '';
+    const nivell = localStorage.getItem('atne.doc_nivell') || '';
 
     // Clau de cache (perfil + títol + primers 40 chars del text) — si coincideix
     // amb l'adaptat desat, ho reutilitzem sense regenerar.
