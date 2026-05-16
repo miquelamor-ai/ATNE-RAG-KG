@@ -1,6 +1,6 @@
 """Validador d'skills — útil per a docents que editen un SKILL.md.
 
-Valida cada SKILL.md del directori corpus/skills_proto/:
+Valida cada SKILL.md del directori corpus/external/corpusFJE/skills/:
 - YAML frontmatter parsejable
 - Camps obligatoris presents (name, description, agent_role, triggers)
 - Triggers ben formats (path + operador conegut)
@@ -24,7 +24,7 @@ sys.path.insert(0, str(ROOT))
 
 import yaml
 
-SKILLS_ROOT = ROOT / "corpus" / "skills_proto"
+SKILLS_ROOT = ROOT / "corpus" / "external" / "corpusFJE" / "skills"
 REQUIRED_FIELDS = ("name", "description", "agent_role", "triggers")
 VALID_AGENT_ROLES = {"adapter", "complements", "evaluator", "multimodal", "generator"}
 VALID_TRIGGER_OPS = {"equals", "not_equals", "in", "exists", "truthy"}

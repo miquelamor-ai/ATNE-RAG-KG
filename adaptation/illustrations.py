@@ -9,7 +9,7 @@ materia, seed del document, estil).
 
 Sortida: dict amb 2 opcions (wikimedia + flux) per al frontend.
 
-Veure `corpus/skills_proto/complements/generate-illustracions/SKILL.md` v0.3.
+Veure `corpus/external/corpusFJE/skills/complements/generate-illustracions/SKILL.md`.
 """
 
 from __future__ import annotations

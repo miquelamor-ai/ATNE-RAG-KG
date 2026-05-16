@@ -178,47 +178,11 @@ SEGURETAT:
                 if blocks:
                     _cache["dua"][key] = blocks[0].strip()
 
-    # ── Gèneres discursius (llegits del M3_generes) ──
-    genres = _load_file("M3_generes-discursius.md")
-    if genres:
-        for genre in ["Explicació", "Narració", "Instrucció", "Argumentació"]:
-            key = genre.lower()
-            # Normalitzar clau
-            key = key.replace("ó", "o").replace("ió", "io") if "ó" in key else key
-            key = {"explicació": "explicacio", "narració": "narracio",
-                   "instrucció": "instruccio", "argumentació": "argumentacio"}.get(genre.lower(), genre.lower())
-            blocks = re.findall(
-                rf"### \d+\. {re.escape(genre)}.*?```\n?(.*?)```",
-                genres, re.DOTALL
-            )
-            if blocks:
-                _cache["genres"][key] = blocks[0].strip()
-
-    # ── Sub-gèneres (M3_generes-22.md, 22 blocs amb format "## <key>") ──
-    # Complementa els 4 macro-gèneres amb els 22 sub-gèneres del dropdown del Pas 2.
-    # Format: cada bloc comença amb "## <clau>" i continua fins al següent "## " o final.
-    subgenres = _load_file("M3_generes-22.md")
-    if subgenres:
-        # Extreure només el cos del document (després del frontmatter i de la intro)
-        # Cerca tots els blocs que comencin amb "## <clau>\n" i capturar fins al següent "## "
-        matches = re.findall(r"^## ([a-z]+)\s*\n(.*?)(?=\n## |\Z)", subgenres, re.MULTILINE | re.DOTALL)
-        for key, body in matches:
-            _cache["genres"][key] = body.strip()
-
-    # ── Aliases: tipologies → macro-gènere més proper ──
-    # Permet usar directament el valor del dropdown "Tipologia" del Pas 2 si el
-    # sub-gènere no està disponible.
-    _typology_aliases = {
-        "expositiva": "explicacio",
-        "narrativa": "narracio",
-        "argumentativa": "argumentacio",
-        "instructiva": "instruccio",
-        "descriptiva": "explicacio",  # descripció encaixa millor amb explicació
-        "dialogada": "narracio",       # dialogat tractat com a variant narrativa
-    }
-    for alias, target in _typology_aliases.items():
-        if alias not in _cache["genres"] and target in _cache["genres"]:
-            _cache["genres"][alias] = _cache["genres"][target]
+    # ── Gèneres discursius: MIGRATS A SKILLs (2026-05-17) ──
+    # Els blocs de gènere ja no es llegeixen del M3. Ara venen del submodule
+    # corpusFJE/skills/genres/write-*/SKILL.md via skills_loader.py amb el
+    # feature flag ATNE_USE_SKILLS=true. get_genre_block() es manté retornant
+    # "" per compatibilitat amb tests històrics i export_fje.
 
     # ── Gradació lingüística (M3_gradació_lingüística.md) ──
     # Blocs operatius per nivell MECR + instruccions d'enriquiment.

@@ -46,8 +46,9 @@ def load_skills(skills_roots) -> list[Skill]:
     """Escaneja un o més directoris recursivament i retorna els Skill vàlids.
 
     `skills_roots` pot ser un Path o una llista de Paths. S'escaneja en ordre;
-    si un `name` apareix a dos roots, guanya el PRIMER (prioritat a la font
-    canònica, p.ex. corpusFJE sobre skills_proto local).
+    si un `name` apareix a dos roots, guanya el PRIMER. Des de 2026-05-17 hi ha
+    una sola font productiva (corpusFJE/skills/); el paràmetre es manté com a
+    llista per si en algun moment cal un overlay de testing.
 
     Un SKILL.md ha de començar per `---\n...frontmatter...\n---\nbody`.
     Fitxers mal formats es salten silenciosament (amb print d'avís).
@@ -74,7 +75,7 @@ def load_skills(skills_roots) -> list[Skill]:
                     print(f"[skills_loader] ignored (no name): {skill_md}")
                     continue
                 if name in seen_names:
-                    # Guanya la primera font (corpusFJE abans que skills_proto)
+                    # Guanya la primera font (preserva semàntica per overlays).
                     continue
                 seen_names.add(name)
                 skills.append(Skill(
@@ -94,19 +95,17 @@ def load_skills(skills_roots) -> list[Skill]:
 
 
 def default_skills_roots() -> list[Path]:
-    """Retorna els directoris on buscar skills, en ordre de prioritat.
+    """Retorna els directoris on buscar skills.
 
-    1r: `corpus/external/corpusFJE/skills/` — font canònica compartida amb
-        els altres assistents FJE (submodule git, veure .gitmodules).
-    2n: `corpus/skills_proto/` — contingut local d'ATNE (fallback mentre no
-        es migra el contingut a corpusFJE).
+    Font única (2026-05-17): `corpus/external/corpusFJE/skills/` — submodule
+    canònic compartit amb els altres assistents FJE (veure `.gitmodules`).
 
-    Si un skill amb el mateix `name` apareix a ambdues, guanya corpusFJE.
+    Es manté com a llista per si en el futur cal un overlay (testing,
+    skills experimentals per branch, etc.).
     """
     here = Path(__file__).resolve().parent
     return [
         here / "corpus" / "external" / "corpusFJE" / "skills",
-        here / "corpus" / "skills_proto",
     ]
 
 
@@ -210,7 +209,7 @@ def debug_dump(skills_roots, profile: dict, params: dict, agent_role: str = "ada
 
 if __name__ == "__main__":
     # Smoke test amb un perfil TDAH + gènere notícia + glossari.
-    # Usa els roots per defecte: corpusFJE primer, skills_proto com a fallback.
+    # Usa els roots per defecte: corpusFJE (font única).
     roots = default_skills_roots()
     profile = {
         "caracteristiques": {

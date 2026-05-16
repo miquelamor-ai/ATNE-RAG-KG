@@ -42,13 +42,22 @@ code: zero crides reals. El prompt s'omple via:
 2. **`corpus_reader.py` (legeix MD)** — SOMENTS aquests blocs:
    - `get_identity()` — identitat fixa de l'assistent
    - `get_dua_block(dua)` — blocs DUA Acces/Core/Enriquiment
-   - `get_genre_block(genre)` — gèneres discursius (22)
    - `get_crossing_blocks(active_profiles)` — creuaments entre condicions
    - `get_fewshot_example(mecr)` — exemple abans/despres
-   - **NO usats**: `get_profile_block()`, `get_mecr_block()` — funcions orfes.
-3. **Corpus MD local** (`ATNE/corpus/`) — 18 fitxers locals, font duplicada.
-   Font de veritat real: `github.com/miquelamor-ai/corpusFJE` (93 fitxers).
-   Fase D pendent post-pilot: substituir corpus local per submodule del corpusFJE.
+   - `get_gradacio_block(mecr)` — gradació MECR canonical (M3)
+   - **DEPRECATS (retornen `""`)**: `get_genre_block()` (substituit per skills),
+     `get_profile_block()`, `get_mecr_block()` (funcions orfes).
+3. **Skills (`skills_loader.py`)** — font productiva des de 2026-05-17 amb
+   `ATNE_USE_SKILLS=true`. Llegeix de `corpus/external/corpusFJE/skills/`
+   (submodule, font canonica unica per als 5 assistents FJE). 37 SKILLs:
+   - 1 `adapt-document` (round-trip PDF/PPTX/DOCX)
+   - 14 `complements/generate-*` (glossari, preguntes, bastides, mapes...)
+   - 22 `genres/write-*` (notícia, conte, assaig, recepta, poema...)
+   Triggers declaratius (path + equals/in/exists) contra perfil+params.
+4. **Corpus MD local** (`ATNE/corpus/`) — fitxers locals, font duplicada.
+   Font de veritat real: `github.com/miquelamor-ai/corpusFJE` (submodule a
+   `corpus/external/corpusFJE/`). Fase D pendent: substituir corpus local
+   per submodule complet. `M3_generes-22.md` eliminat 2026-05-17.
 
 **Implicacio practica**: editar un M1_*.md NO canvia el prompt per a perfils
 (TDAH, dislexia, etc.) — les instruccions de perfil venen del Python hardcoded.

@@ -319,12 +319,12 @@ def build_system_prompt(profile: dict, context: dict, params: dict, rag_context:
     if dua_block:
         parts.append(dua_block)
 
-    # Gènere discursiu (si indicat)
+    # Gènere discursiu: ara s'injecta com a SKILL (write-<genre>) via
+    # skills_loader (bloc 4b-bis), no com a bloc del M3. La crida a
+    # corpus_reader.get_genre_block() s'ha eliminat (2026-05-17) per evitar
+    # duplicació amb la skill activa. La variable `genre` es manté perquè
+    # més avall (regla preservació forma) s'usa per detectar gèneres-forma.
     genre = params.get("genere_discursiu", "")
-    if genre:
-        genre_block = corpus_reader.get_genre_block(genre)
-        if genre_block:
-            parts.append(genre_block)
 
     # Creuaments (si 2+ perfils actius)
     active_profiles = _get_active_profiles(profile)
@@ -352,7 +352,7 @@ def build_system_prompt(profile: dict, context: dict, params: dict, rag_context:
     try:
         import skills_loader
         if skills_loader.is_skills_enabled():
-            # Roots per defecte: corpusFJE (submodule) primer, skills_proto fallback.
+            # Roots per defecte: corpusFJE (submodule) — font única des 2026-05-17.
             _all_skills = skills_loader.load_skills(skills_loader.default_skills_roots())
             # MVP single-call: carreguem adapter + complements en un sol prompt.
             # Quan migrem a multiagent, cada agent carregarà només el seu rol.
