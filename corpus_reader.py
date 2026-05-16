@@ -247,12 +247,6 @@ def get_identity(lang: str = "ca") -> str:
     return identity
 
 
-def get_universal_rules() -> str:
-    if not _cache:
-        load_corpus()
-    return _cache.get("universal_rules", "")
-
-
 def get_dua_block(level: str) -> str:
     if not _cache:
         load_corpus()
@@ -295,16 +289,6 @@ def get_crossing_blocks(active_profiles: list[str]) -> list[str]:
         elif "trauma" in block_norm and ("vulnerabilitat" in profiles_norm or "trastorn_emocional" in profiles_norm):
             result.append(block)
     return result
-
-
-def get_cognitive_load_block(mecr: str) -> str:
-    if not _cache:
-        load_corpus()
-    if mecr in ("pre-A1", "A1", "A2"):
-        return _cache.get("cognitive_load", {}).get("low", "")
-    elif mecr == "B1":
-        return _cache.get("cognitive_load", {}).get("mid", "")
-    return _cache.get("cognitive_load", {}).get("high", "")
 
 
 def get_conflict_resolution() -> str:

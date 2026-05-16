@@ -833,6 +833,13 @@
     return resp.json();
   }
 
+  async function cleanupExpiredDrafts() {
+    const qs = 'docent_id=' + encodeURIComponent(getDocentId());
+    try {
+      await fetch('/api/drafts/cleanup/expired?' + qs, { method: 'DELETE' });
+    } catch (_) {}
+  }
+
   // ── Adaptations (biblioteca d'adaptacions finals al núvol) ──────────────
 
   /**
@@ -1114,6 +1121,7 @@
     listDrafts,
     getDraft,
     deleteDraft,
+    cleanupExpiredDrafts,
     // Adaptations (biblioteca al núvol)
     saveAdaptation,
     listAdaptations,

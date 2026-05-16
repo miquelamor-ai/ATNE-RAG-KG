@@ -2209,6 +2209,7 @@
     const host = document.getElementById('drafts-list');
     const section = document.getElementById('drafts-section');
     if (!host || !section || !window.ATNE_LLM) return;
+    window.ATNE_LLM.cleanupExpiredDrafts?.();
     try {
       const data = await window.ATNE_LLM.listDrafts(20);
       if (!data.ok || !data.items?.length) {

@@ -268,3 +268,39 @@ async def patch_draft(request: Request, draft_id: int, payload: dict = Body(...)
     except Exception as e:
         print(f"[ATNE] drafts PATCH exception: {e}")
         return _drafts_error(str(e) or type(e).__name__)
+
+
+# ── TTL cleanup ─────────────────────────────────────────────────────────────
+DRAFT_TTL_DAYS = 30
+
+
+@router.delete("/cleanup/expired")
+async def cleanup_expired_drafts(request: Request, docent_id: str = ""):
+    """Esborra els esborranys del docent no actualitzats en els darrers 30 dies.
+
+    Crida des del frontend quan obre el llistat de drafts. El docent_id és
+    obligatori i ha de coincidir amb l'usuari autenticat (same ownership check).
+    Retorna {ok, deleted: N}.
+    """
+    SUPABASE_URL, SUPABASE_HEADERS = _supabase_conf()
+    docent_id = (docent_id or "").strip()
+    if not docent_id:
+        return JSONResponse({"ok": False, "error": "docent_id buit"}, status_code=400)
+    if not _check_ownership(request, docent_id):
+        return JSONResponse({"ok": False, "error": "No autoritzat"}, status_code=403)
+    try:
+        cutoff = f"now()-interval '{DRAFT_TTL_DAYS} days'"
+        resp = requests.delete(
+            f"{SUPABASE_URL}/rest/v1/atne_drafts"
+            f"?docent_id=eq.{docent_id}&updated_at=lt.{cutoff}",
+            headers={**SUPABASE_HEADERS, "Prefer": "return=representation"},
+            timeout=10,
+        )
+        if resp.status_code in (200, 204):
+            deleted = len(resp.json()) if resp.text else 0
+            return {"ok": True, "deleted": deleted}
+        print(f"[ATNE] drafts cleanup failed: {resp.status_code} {resp.text[:200]}")
+        return _drafts_error(resp.text or f"Supabase HTTP {resp.status_code}")
+    except Exception as e:
+        print(f"[ATNE] drafts cleanup exception: {e}")
+        return _drafts_error(str(e) or type(e).__name__)
