@@ -1041,6 +1041,7 @@
       recents.unshift(pid);
       localStorage.setItem('atne.recent_pids', JSON.stringify(recents.slice(0, 10)));
     }
+    sessionStorage.setItem('atne.p1_nav', '1');
     location.href = '/ui/atne/pas2.html?new=1';
   }
   document.querySelectorAll('.row-acts .sel').forEach(b => {

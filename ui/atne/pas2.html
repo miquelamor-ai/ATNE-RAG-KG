@@ -896,6 +896,27 @@
     /* Bottom bar visible */
     .bottom-bar { display: block; }
   }
+
+  /* ── Banner restauració (contingut anterior) ────────────────────────────── */
+  .p2-restore-notice {
+    display: flex; align-items: center; gap: 10px;
+    background: #fff9e6; border-bottom: 1px solid #f0d98a;
+    padding: 8px 18px; font-size: var(--fs-sm);
+    color: var(--ink-700); flex-wrap: wrap;
+  }
+  .p2-restore-notice .rn-info { flex: 1; min-width: 0; }
+  .p2-restore-notice .rn-info b { font-weight: 600; }
+  .p2-restore-notice .rn-new {
+    background: #fff; border: 1px solid var(--ink-300);
+    border-radius: var(--r-xs); padding: 3px 10px;
+    font-size: var(--fs-xs); font-weight: 600; cursor: pointer; white-space: nowrap;
+  }
+  .p2-restore-notice .rn-new:hover { background: var(--ink-75); }
+  .p2-restore-notice .rn-close {
+    background: none; border: none; cursor: pointer; color: var(--ink-400);
+    font-size: 14px; padding: 0 2px; line-height: 1;
+  }
+  .p2-restore-notice .rn-close:hover { color: var(--ink-700); }
 </style>
 </head>
 <body>
@@ -1499,6 +1520,35 @@
     if (savedDraft !== null) ta.value = savedDraft;
     const savedTitle = localStorage.getItem('atne.doc_title');
     if (savedTitle && docTitleEl) docTitleEl.value = savedTitle;
+
+    // Mostra banner de restauració si hi ha contingut anterior (pas2 accedit
+    // sense haver seleccionat perfil nou al pas1 en aquesta sessió).
+    if (savedDraft && savedDraft.trim() && !sessionStorage.getItem('atne.p1_nav')) {
+      const profileName = (() => {
+        try { return JSON.parse(localStorage.getItem('atne.custom_profile') || 'null')?.name || ''; }
+        catch { return ''; }
+      })();
+      const titlePreview = (savedTitle || profileName || 'text anterior').slice(0, 50);
+      const notice = document.createElement('div');
+      notice.className = 'p2-restore-notice';
+      notice.innerHTML =
+        `<span class="rn-info">Continuant amb: <b>${titlePreview.replace(/</g,'&lt;')}</b></span>` +
+        `<button class="rn-new" type="button">Comença de nou</button>` +
+        `<button class="rn-close" type="button" title="Tanca">✕</button>`;
+      notice.querySelector('.rn-new').addEventListener('click', () => {
+        ['atne.doc_draft','atne.doc_title','atne.doc_original',
+         'atne.adapted_cache_key','atne.adapted_raw_ck','atne.adapted_raw',
+         'atne.adapted_text','atne.draft_id'].forEach(k => localStorage.removeItem(k));
+        location.href = '/ui/atne/pas1.html';
+      });
+      notice.querySelector('.rn-close').addEventListener('click', () => notice.remove());
+      // Auto-dismiss quan el docent comença a escriure
+      ta.addEventListener('input', () => notice.remove(), { once: true });
+      document.querySelector('.canvas')?.insertBefore(
+        notice,
+        document.querySelector('.main') || document.querySelector('.topbar')?.nextSibling
+      );
+    }
   }
 
   // Handoff des de Flash: avisa el docent que el text ve de Flash
