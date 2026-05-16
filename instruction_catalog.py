@@ -66,7 +66,7 @@ MACRODIRECTIVES = {
         "ordre": 5,
         "instruccions_possibles": [
             "E-01", "E-02", "E-05", "E-06", "E-07", "E-08",
-            "E-09", "E-10", "E-11", "E-12",
+            "E-09", "E-10", "E-11", "E-12", "E-13",
         ],
     },
     "MULTIMODAL": {
@@ -647,6 +647,17 @@ CATALOG = {
         "activation": "NIVELL",
         "macro": "QUALITAT",
         "mecr_levels": ["B1", "B2"],
+    },
+    "E-13": {
+        "text": "Fidelitat al contingut original (MALL: 'menys és més'). Reescriu les mateixes idees en format accessible, però NO hi afegeixis informació nova. Trossejar una oració subordinada en dues frases simples és legítim (mateixa idea, dos passos). Afegir explicacions col·loquials, context de fons o ampliar 'per facilitar' que l'original no tenia NO és adaptar, és inventar. Cada frase de l'adaptat ha de correspondre a contingut ja present a l'original.",
+        "activation": "SEMPRE",
+        "macro": "QUALITAT",
+        "suppress_if_profile": ["altes_capacitats"],
+        "mecr_detail": {
+            "pre-A1": "Reforç pre-A1: compta les idees essencials del text original i mantén-les totes (sense eliminar nucli curricular), però NO en generis de noves. Si l'original té 5 idees i l'adaptat en conté 10, hi ha 5 idees inventades. Com a guia aproximada: l'adaptat no hauria de superar el 150% de la mida en paraules de l'original; si l'original té 100 paraules, l'adaptat ≤150.",
+            "A1": "L'adaptat no supera el 130% de la mida de l'original. Trosseja frases complexes però no hi afegeixis context nou.",
+            "A2": "L'adaptat no supera el 120% de l'original. Simplifica sense ampliar el contingut.",
+        },
     },
 
     # ─── F. AVALUACIÓ I COMPRENSIÓ ────────────────────────────────────────────
