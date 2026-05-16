@@ -3138,6 +3138,13 @@ REFINE_PRESETS = {
         "frases llargues en frases més curtes. Mantén el to general. "
         "OBJECTIU: mateix missatge, vocabulari més senzill."
     ),
+    "enriquir": (
+        "Enriqueix el llenguatge sense canviar el contingut ni la longitud. "
+        "Substitueix paraules freqüents per sinònims més precisos i acadèmics. "
+        "Afegeix frases subordinades i connectors argumentatius (tot i que, per tant, "
+        "atès que, en conseqüència). Eleva el registre cap al formal-acadèmic. "
+        "OBJECTIU: mateix missatge, vocabulari més ric i sintaxi més elaborada."
+    ),
     "ampliar": (
         "AMPLIA EL TEXT. El text resultant HA DE SER MÉS LLARG que l'original, "
         "no més curt. Afegeix exemples concrets, contextualització, detalls "
