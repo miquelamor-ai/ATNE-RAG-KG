@@ -199,6 +199,22 @@ def build_user(params: dict) -> str:
         except Exception:
             pass
 
+    # Modalitat lectora (MALL G-08/G-09/G-10): aplica regles específiques.
+    # G-10 transferencia: nouvingut secundària que ja llegeix en L1 → no reduir
+    # la longitud, el repte és el CALP (vocabulari acadèmic).
+    modalitat = (ctx.get("modalitat_lectora") or "").strip().lower()
+    nota_modalitat = ""
+    if modalitat == "transferencia":
+        nota_modalitat = (
+            "MODALITAT LECTORA: transferència L1→L2 (MALL G-10, hipòtesi de la "
+            "interdependència de Cummins). Aquest alumne ja sap llegir en la seva L1; "
+            "la competència lectora subjacent és comuna. NO redueixis la longitud del "
+            "text per simpatia: el repte real és el vocabulari acadèmic (CALP) i la "
+            "complexitat sintàctica, no la mida. Mantén el contingut curricular complet "
+            "i afegeix bastides al vocabulari (definicions inline, exemples concrets, "
+            "marca termes clau en negreta) en lloc d'escurçar."
+        )
+
     # HCL (habilitat cognitivolingüística MALL)
     HCL_DESCRIPCIO = {
         "descriure":   "DESCRIURE — el text ha de presentar característiques, parts, propietats observables del tema. Preguntes implícites: qui, què, com és, on, quan.",
@@ -212,6 +228,8 @@ def build_user(params: dict) -> str:
 
     # Notes opcionals
     blocs_opcionals = []
+    if nota_modalitat:
+        blocs_opcionals.append(nota_modalitat)
     if hcl and hcl in HCL_DESCRIPCIO:
         blocs_opcionals.append(
             f"Habilitat cognitivolingüística requerida (MALL): {HCL_DESCRIPCIO[hcl]}"

@@ -2179,7 +2179,23 @@
         hcl: genHcl !== 'auto' ? genHcl : undefined,
         notes: genNotes || undefined,
         override_cap: overrideCap || undefined,
-        context: { etapa: etapaCur, curs: courseNorm, materia: (localStorage.getItem('atne.doc_materia') || '').trim(), mecr: (profCur?.mecr || localStorage.getItem('atne.mecr') || '') },
+        context: (() => {
+          // Deriva modalitat_lectora pel generador (mirall de params_resolver._resolve_modalitat_lectora)
+          const chars = profCur?.caracteristiques || {};
+          const mecrVal = profCur?.mecr || localStorage.getItem('atne.mecr') || '';
+          const faseVal = profCur?.fase_lectora || '';
+          const isNouvingut = chars.nouvingut?.actiu === true;
+          let modalitat = 'autonoma';
+          if (faseVal === 'logografica') modalitat = 'compartida';
+          else if (isNouvingut && (mecrVal === 'pre-A1' || mecrVal === 'A1')) modalitat = 'transferencia';
+          else if (faseVal === 'alfabetica_emergent') modalitat = 'progressiva';
+          return {
+            etapa: etapaCur, curs: courseNorm,
+            materia: (localStorage.getItem('atne.doc_materia') || '').trim(),
+            mecr: mecrVal,
+            modalitat_lectora: modalitat,
+          };
+        })(),
         signal: genAbortCtrl.signal,
         onChunk: ({ acumulat }) => {
           if (writeTa) {
