@@ -87,7 +87,7 @@ MACRODIRECTIVES = {
         "label": "PERSONALITZACIÓ LINGÜÍSTICA",
         "ordre": 8,
         "instruccions_possibles": [
-            "G-01", "G-02", "G-03", "G-06", "G-07", "G-08",  # G-05 eliminat (fusionat amb E-08)
+            "G-01", "G-02", "G-03", "G-06", "G-07", "G-08", "G-09", "G-10",  # G-05 eliminat (fusionat amb E-08)
         ],
     },
     "PERFIL": {
@@ -741,6 +741,20 @@ CATALOG = {
         "macro": "PERSONALITZACIO",
         "mecr_levels": ["pre-A1"],
         "modalitat_lectora_required": "compartida",
+    },
+    "G-09": {
+        "text": "Lectura compartida (modalitat Emergent/logogràfica): LÍMIT DE LLARGADA 40 paraules en total. El text és per ser llegit en veu alta per un adult; l'infant no decodifica text llarg. Frases de 3-6 paraules. Vocabulari exclusivament concret i visual. No eliminis el nucli pedagògic de la sessió — comprimeix la forma però mantén l'objectiu d'aprenentatge.",
+        "activation": "NIVELL",
+        "macro": "PERSONALITZACIO",
+        "mecr_levels": ["pre-A1"],
+        "modalitat_lectora_required": "compartida",
+    },
+    "G-10": {
+        "text": "Nouvingut en fase de transferència L1→L2 (TILC/MALL): NO redueixis la llargada del text. Aquest alumne ja sap llegir en la seva L1 (hipòtesi de la interdependència de Cummins: la competència subjacent és comuna). El repte és el vocabulari acadèmic (CALP) i la complexitat sintàctica, NO la llargada. Adapta lèxic i sintaxi però mantén el contingut curricular complet. Afegeix bastides (glossari bilingüe, definicions integrades, exemples concrets) en lloc d'escurçar el text.",
+        "activation": "PERFIL",
+        "macro": "PERSONALITZACIO",
+        "profiles": ["nouvingut"],
+        "modalitat_lectora_required": "transferencia",
     },
 
     # ─── H. ADAPTACIONS ESPECÍFIQUES PER PERFIL ──────────────────────────────

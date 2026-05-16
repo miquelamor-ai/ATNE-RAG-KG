@@ -426,6 +426,14 @@ def get_instructions(profile: dict, params: dict, context: dict = None) -> dict:
             suppressed.append(iid)
             audit.append({"id": iid, "macro": macro_id, "motiu": "suprimit per AC/Enriquiment"})
             included = False
+        # C.4 MALL: modalitat_lectora_required universal (PERFIL i COMPLEMENT, a més de NIVELL)
+        # NIVELL ja té la seva pròpia comprovació a dalt; aquí capturem PERFIL/COMPLEMENT.
+        if included and "modalitat_lectora_required" in instr and activation != "NIVELL":
+            if _modalitat_lectora != instr["modalitat_lectora_required"]:
+                suppressed.append(iid)
+                audit.append({"id": iid, "macro": macro_id,
+                              "motiu": f"suprimit: modalitat_lectora={_modalitat_lectora} ≠ {instr['modalitat_lectora_required']}"})
+                included = False
 
         # Afegir a macrodirectiva si inclosa
         if included:
