@@ -314,6 +314,7 @@
       // Acaben al system prompt com a capa descriptiva, NO com a instrucció.
       punts_forts: (o.punts_forts || '').trim(),
       interessos: (o.interessos || '').trim(),
+      fase_lectora: o.fase_lectora || null,
       created_at: o.created_at || new Date().toISOString(),
     };
   }
@@ -609,6 +610,10 @@
       caracteristiques[c.key] = out;
     }
 
+    if (profile.fase_lectora) {
+      caracteristiques.fase_lectora = profile.fase_lectora;
+    }
+
     return {
       nom: profile.name,
       caracteristiques,
@@ -750,6 +755,7 @@
       group_composition: formData.group_composition,
       punts_forts: formData.punts_forts,
       interessos: formData.interessos,
+      fase_lectora: formData.fase_lectora || null,
       custom: true,
     });
   }
