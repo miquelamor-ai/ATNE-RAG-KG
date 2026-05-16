@@ -102,6 +102,13 @@
   .fchip{font-size:11.5px;padding:6px 11px;border-radius:var(--r-pill);background:var(--ink-75);border:1px solid var(--ink-150);color:var(--ink-600);font-weight:500;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;cursor:pointer}
   .fchip:hover{background:var(--ink-100)}
   .fchip.on{background:var(--ink-900);color:#fff;border-color:var(--ink-900)}
+
+  /* Chip resum perfil (B.4): MECR + modalitat lectora derivats */
+  .profile-summary-chip{display:none;margin-top:10px;padding:8px 12px;background:var(--primary-50,#eef2ff);border:1px solid var(--primary-100,#c7d2fe);border-radius:var(--r-lg);font-size:var(--fs-sm);color:var(--primary,#4f46e5);gap:10px;align-items:center;flex-wrap:wrap}
+  .profile-summary-chip.visible{display:flex}
+  .profile-summary-chip .ps-badge{font-weight:700;font-size:12px;background:var(--primary,#4f46e5);color:#fff;border-radius:var(--r-sm);padding:2px 7px}
+  .profile-summary-chip .ps-sep{color:var(--primary-300,#a5b4fc);font-size:10px}
+  .profile-summary-chip .ps-modal{color:var(--ink-600);font-size:var(--fs-sm)}
   .fchip .dot{width:6px;height:6px;border-radius:50%}
   .fchip .num{font-family:var(--mono);font-size:10px;color:var(--ink-400)}
   .fchip.on .num{color:#b5bdd4}
@@ -670,6 +677,11 @@
               <button class="lvl"><span class="lv-code">B1</span><b>Estratègic</b><small>llegeix "entre línies": infereix, causa-efecte, hipòtesi</small></button>
               <button class="lvl"><span class="lv-code">B2</span><b>Acadèmic</b><small>llegeix per aprendre: gèneres disciplinars i CALP</small></button>
               <button class="lvl"><span class="lv-code">C1</span><b>Crític</b><small>llegeix "rere les línies": intenció, ideologia, fiabilitat</small></button>
+            </div>
+            <div class="profile-summary-chip" id="p-profile-chip">
+              <span class="ps-badge" id="p-chip-mecr">—</span>
+              <span class="ps-sep">·</span>
+              <span class="ps-modal" id="p-chip-modal">—</span>
             </div>
           </div>
 
@@ -1316,7 +1328,58 @@
   if (pCursEl) {
     pCursEl.addEventListener('change', _recomputeMecr);
     pCursEl.addEventListener('change', _applyFaseLectoraDefault);
+    pCursEl.addEventListener('change', _scheduleChipRefresh);
   }
+
+  // B.4: Chip resum MECR + modalitat lectora
+  const _MODAL_LABELS = {
+    'compartida':   'Lectura compartida (adult + alumne)',
+    'progressiva':  'Lectura progressiva (suport decreixent)',
+    'transferencia':'Lectura en transferència (L1 → català)',
+    'autonoma':     'Lectura autònoma',
+  };
+  const pProfileChip  = document.getElementById('p-profile-chip');
+  const pChipMecr     = document.getElementById('p-chip-mecr');
+  const pChipModal    = document.getElementById('p-chip-modal');
+  let   _chipTimer    = null;
+  function _scheduleChipRefresh() {
+    clearTimeout(_chipTimer);
+    _chipTimer = setTimeout(_refreshProfileChip, 400);
+  }
+  async function _refreshProfileChip() {
+    if (!pProfileChip || !window.ATNE_PROFILE_MODEL) return;
+    const curs  = pCursEl?.value || '';
+    if (!curs) { pProfileChip.classList.remove('visible'); return; }
+    const etapa = window.ATNE_PROFILE_MODEL.etapaFromCourse(curs);
+    const mecr  = document.querySelector('.mode[data-m="person"] .levels.mecr .lvl.on .lv-code')?.textContent || '';
+    const fase  = pFaseLectoraEl?.value || '';
+    const conds = {};
+    document.querySelectorAll('.mode[data-m="person"] .tag.on').forEach(t => {
+      const dx = t.dataset.dx;
+      if (dx) conds[dx] = { actiu: true };
+    });
+    if (fase) conds['fase_lectora'] = fase;
+    try {
+      const resp = await fetch('/api/derive-params', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ caracteristiques: conds, etapa, curs, override_mecr: mecr || null }),
+      });
+      if (!resp.ok) return;
+      const data = await resp.json();
+      if (!data.ok) return;
+      pChipMecr.textContent  = data.mecr || mecr || '—';
+      pChipModal.textContent = _MODAL_LABELS[data.modalitat_lectora] || data.modalitat_lectora || '—';
+      pProfileChip.classList.add('visible');
+    } catch (_) { /* xarxa: no mostrem el chip */ }
+  }
+  // Refresc quan canvia MECR manualment o la fase lectora
+  document.querySelectorAll('.mode[data-m="person"] .levels.mecr .lvl').forEach(btn => {
+    btn.addEventListener('click', _scheduleChipRefresh);
+  });
+  if (pFaseLectoraEl) pFaseLectoraEl.addEventListener('change', _scheduleChipRefresh);
+  document.querySelector('.mode[data-m="person"] .checks')
+    ?.addEventListener('change', _scheduleChipRefresh);
 
   // Afegir perfils al grup (el picker s'obre automàticament en focus del search)
   const picker = document.getElementById('add-picker');

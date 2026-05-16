@@ -352,6 +352,8 @@
       if (!data || !data.ok) throw new Error((data && data.error) || 'derive failed');
       return {
         mecr: data.mecr, dua: data.dua,
+        fase_lectora: data.fase_lectora || null,
+        modalitat_lectora: data.modalitat_lectora || null,
         motiu: data.motiu || '', trace: data.trace || [],
         canonical: true,
       };
