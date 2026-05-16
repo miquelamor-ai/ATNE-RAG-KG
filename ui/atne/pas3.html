@@ -1747,6 +1747,8 @@
 
       // Cache hit (ready): render instantani sense regenerar
       if (cached && cached.ready && cached.raw) {
+        localStorage.removeItem('atne.adapted_raw_ck');
+        localStorage.removeItem('atne.adapted_cache_key');
         if (typeof window._renderAdaptedFromRaw === 'function') {
           window._renderAdaptedFromRaw(cached.raw);
         }
@@ -3426,6 +3428,8 @@
         if (!ev.text) return;
         if (!_streamActive) {
           _streamActive = true;
+          localStorage.removeItem('atne.adapted_raw_ck');
+          localStorage.removeItem('atne.adapted_cache_key');
           // Amaga l'overlay perquè l'usuari ja veu text aparèixer.
           if (regenEl) regenEl.classList.remove('on');
           if (adaptedEl) adaptedEl.innerHTML = '';
@@ -3600,6 +3604,9 @@
       || (versions[0] && versions[0].id);
     // Reset cache per aquest grup
     window.ATNE_VERSIONS = {};
+    localStorage.removeItem('atne.adapted_raw_ck');
+    localStorage.removeItem('atne.adapted_cache_key');
+    localStorage.removeItem('atne.adapted_raw');
     versions.forEach(v => {
       window.ATNE_VERSIONS[v.id] = { ready: false, mecr: v.level_mecr };
     });
