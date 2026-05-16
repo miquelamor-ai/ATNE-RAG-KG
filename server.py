@@ -3139,11 +3139,18 @@ REFINE_PRESETS = {
         "OBJECTIU: mateix missatge, vocabulari més senzill."
     ),
     "enriquir": (
-        "Enriqueix el llenguatge sense canviar el contingut ni la longitud. "
-        "Substitueix paraules freqüents per sinònims més precisos i acadèmics. "
-        "Afegeix frases subordinades i connectors argumentatius (tot i que, per tant, "
-        "atès que, en conseqüència). Eleva el registre cap al formal-acadèmic. "
-        "OBJECTIU: mateix missatge, vocabulari més ric i sintaxi més elaborada."
+        "Enriqueix el text UN GRAÓ respecte al seu nivell actual. "
+        "PRIMER observa el text original: el seu to, la seva complexitat sintàctica "
+        "i el seu destinatari implícit. DESPRÉS eleva'l lleugerament sense canviar "
+        "el gènere, el to ni la longitud: "
+        "substitueix paraules massa freqüents per sinònims més precisos; "
+        "afegeix detalls descriptius o matisos on el text és massa esquemàtic. "
+        "REGLA CLAU: respecta el nivell de partida. "
+        "Si el text és per a lectors joves o emergents → enriqueix el vocabulari "
+        "però mantén les frases curtes i simples, sense subordinació. "
+        "Si el text és de nivell intermedi o superior → pots afegir alguna subordinada "
+        "i connectors argumentatius amb mesura. "
+        "OBJECTIU: una versió lleugerament millor del mateix text, no un canvi de registre."
     ),
     "ampliar": (
         "AMPLIA EL TEXT. El text resultant HA DE SER MÉS LLARG que l'original, "
