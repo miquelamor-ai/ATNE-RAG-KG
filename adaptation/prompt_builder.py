@@ -571,6 +571,7 @@ REGLES CRÍTIQUES:
     materia_complement = params.get("materia") or context.get("materia") or "la matèria corresponent"
     etapa_complement = context.get("etapa") or params.get("etapa") or "l'etapa educativa corresponent"
     mecr_complement = params.get("mecr_sortida") or params.get("mecr") or "el nivell MECR indicat"
+    _mecr_norm = (mecr_complement or "B1").upper().replace("Ç", "C")
     genere_complement = params.get("genere_discursiu") or "no especificat"
     # Detectar si és text literari o informatiu (heurística a partir del gènere)
     literari_keywords = ("conte", "relat", "poesia", "poema", "llegendari", "fantàstic", "narrativa", "literari")
@@ -677,7 +678,6 @@ ACTIVAT — Genera 2-3 activitats de repte cognitiu per a {etapa_complement}:
         _has_production_task = bool(
             comp.get("preguntes_comprensio") or comp.get("activitats_aprofundiment")
         )
-        _mecr_norm = (mecr_complement or "B1").upper().replace("Ç", "C")
         _is_low_mecr = _mecr_norm in ("PRE-A1", "A1", "A2")
 
         if _is_low_mecr:
