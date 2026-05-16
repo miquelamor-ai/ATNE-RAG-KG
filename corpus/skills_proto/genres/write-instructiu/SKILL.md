@@ -25,6 +25,12 @@ Activar quan el docent ha seleccionat el gènere "instructiu" al Pas 2
 de l'adaptador. El text instructiu guia el lector per fer alguna
 cosa amb passos clars i ordenats.
 
+## Tipologia i HCL
+
+**Tipologia MALL**: Instructiva/Prescriptiva
+**HCL principal**: Narrar — seqüenciar passos ordenats en el temps (seqüència processal)
+**HCL secundàries**: Descriure (materials i quantitats)
+
 ## Estructura canònica
 Tot text instructiu adaptat ha de tenir **aquestes parts, en aquest
 ordre**:

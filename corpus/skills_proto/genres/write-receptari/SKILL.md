@@ -25,6 +25,12 @@ Activar quan el docent ha seleccionat el gènere "receptari" al Pas 2
 de l'adaptador. La recepta és un text instructiu culinari amb
 ingredients i passos específics.
 
+## Tipologia i HCL
+
+**Tipologia MALL**: Instructiva
+**HCL principal**: Narrar — seqüenciar passos de preparació en ordre processal
+**HCL secundàries**: Descriure (ingredients i quantitats)
+
 ## Estructura canònica
 Tota recepta adaptada ha de tenir **aquestes parts, en aquest ordre**:
 

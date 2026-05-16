@@ -25,6 +25,12 @@ Activar quan el docent ha seleccionat el gènere "cronica" al Pas 2
 de l'adaptador. La crònica narra un esdeveniment amb la perspectiva
 del cronista i descripcions sensorials concretes.
 
+## Tipologia i HCL
+
+**Tipologia MALL**: Narrativa/Testimonial
+**HCL principal**: Narrar — seqüenciar un esdeveniment real amb perspectiva del cronista
+**HCL secundàries**: Descriure (sensorial) · Interpretar/Valorar (B2+)
+
 ## Estructura canònica
 Tota crònica adaptada ha de tenir **aquestes parts, en aquest ordre**:
 

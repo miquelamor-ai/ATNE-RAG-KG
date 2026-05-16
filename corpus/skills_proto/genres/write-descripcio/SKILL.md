@@ -25,6 +25,13 @@ Activar quan el docent ha seleccionat el gènere "descripcio" al Pas 2
 de l'adaptador. La descripció presenta característiques d'un objecte,
 persona o lloc amb ordre espacial i concreció.
 
+## Tipologia i HCL
+
+**Tipologia MALL**: Descriptiva
+**HCL principal**: Descriure — identificar i enumerar qualitats, propietats o característiques
+**HCL secundàries**: Explicar (relació entre característiques, B1+)
+**Pre-A1 (Emergent)**: Textos enumeratius (llistes de noms) + dictat a l'adult
+
 ## Estructura canònica
 Tota descripció adaptada ha de tenir **aquestes parts, en aquest ordre**:
 

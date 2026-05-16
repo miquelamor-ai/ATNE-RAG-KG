@@ -25,6 +25,12 @@ Activar quan el docent ha seleccionat el gènere "assaig" al Pas 2 de
 l'adaptador. L'assaig és un text reflexiu i argumentatiu amb tesi
 clara i desenvolupament ordenat.
 
+## Tipologia i HCL
+
+**Tipologia MALL**: Argumentativa (convèncer)
+**HCL principal**: Argumentar — defensar una tesi per persuadir l'interlocutor
+**HCL secundàries**: Justificar (evidències vinculades a fets o models) a B1+
+
 ## Estructura canònica
 Tot assaig adaptat ha de tenir **aquestes parts, en aquest ordre**:
 

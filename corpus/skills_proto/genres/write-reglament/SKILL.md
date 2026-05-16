@@ -25,6 +25,12 @@ Activar quan el docent ha seleccionat el gènere "reglament" al Pas 2
 de l'adaptador. El reglament és un text prescriptiu amb normes
 clares, agrupades per tema, i conseqüències separades.
 
+## Tipologia i HCL
+
+**Tipologia MALL**: Prescriptiva
+**HCL principal**: Justificar — donar les raons per les quals cal seguir cada norma
+**HCL secundàries**: Descriure (la norma en si) · Argumentar (B2+)
+
 ## Estructura canònica
 Tot reglament adaptat ha de tenir **aquestes parts, en aquest ordre**:
 

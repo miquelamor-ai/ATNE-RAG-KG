@@ -25,6 +25,12 @@ Activar quan el docent ha seleccionat el gènere "enciclopedic" al Pas 2
 de l'adaptador. L'entrada enciclopèdica defineix un terme amb precisió
 i el contextualitza amb un exemple concret.
 
+## Tipologia i HCL
+
+**Tipologia MALL**: Expositiva/Descriptiva
+**HCL principal**: Descriure — definir i caracteritzar un concepte o objecte
+**HCL secundàries**: Explicar (per a entrades amb relació causa-efecte, B1+)
+
 ## Estructura canònica
 Tota entrada enciclopèdica adaptada ha de tenir **aquestes parts, en
 aquest ordre**:

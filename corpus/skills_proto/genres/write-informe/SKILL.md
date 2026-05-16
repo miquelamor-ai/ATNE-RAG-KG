@@ -25,15 +25,25 @@ Activar quan el docent ha seleccionat el gènere "informe" al Pas 2
 de l'adaptador. L'informe és un text expositiu que presenta dades,
 resultats i conclusions d'una manera estructurada i verificable.
 
+## Tipologia i HCL
+
+**Tipologia MALL**: Expositiva/Científica
+**HCL principal**: Justificar — vincular observacions a models teòrics o científics
+**HCL secundàries**: Explicar (causa-efecte) · Descriure (resultats, A2)
+**Nota CALP**: L'informe exigeix vocabulari acadèmic disciplinar (CALP) des de A2. Posar termes en **negreta** amb definició breu; no simplificar eliminant el terme.
+
 ## Estructura canònica
 Tot informe adaptat ha de tenir **aquestes parts, en aquest ordre**:
 
 1. **Títol** — tema de l'informe.
-2. **Resum executiu** — què s'ha fet i què s'ha trobat, al principi.
-3. **Objectiu** — per què s'ha fet l'informe.
-4. **Mètode** — com s'ha fet.
-5. **Resultats** — què s'ha trobat, amb dades visuals.
-6. **Conclusions** — frase final prominent amb la idea clau.
+2. **Resum executiu** — què s'ha fet i què s'ha trobat (1-2 frases).
+3. **Paraules clau** — 3-5 termes del camp disciplinar *(B1+; ometre a A1-A2)*.
+4. **Objectiu** — per què s'ha fet l'informe.
+5. **Hipòtesi** — «Si ___, llavors ___» *(B1+; ometre a A1-A2)*.
+6. **Mètode** — com s'ha fet.
+7. **Resultats** — dades en taula o llista si és possible.
+8. **Discussió** — relació entre resultats i hipòtesi *(B1+; ometre a A1-A2)*.
+9. **Conclusions** — frase final prominent amb la idea clau.
 
 ## Regles crítiques (FER)
 - **Resum executiu al principi** (què s'ha fet i què s'ha trobat).

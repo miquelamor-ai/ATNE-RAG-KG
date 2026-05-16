@@ -25,6 +25,12 @@ Activar quan el docent ha seleccionat el gènere "divulgatiu" al Pas 2
 de l'adaptador. El text divulgatiu explica continguts científics o
 tècnics amb to narratiu i accessible per a públic no expert.
 
+## Tipologia i HCL
+
+**Tipologia MALL**: Expositiva
+**HCL principal**: Explicar — establir relacions causa-efecte sobre un fenomen accessible
+**HCL secundàries**: Descriure (context, A1-A2) · Justificar (evidències científiques, B2+)
+
 ## Estructura canònica
 Tot text divulgatiu adaptat ha de tenir **aquestes parts, en aquest ordre**:
 

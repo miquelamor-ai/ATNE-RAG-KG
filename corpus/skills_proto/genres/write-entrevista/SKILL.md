@@ -25,6 +25,12 @@ Activar quan el docent ha seleccionat el gènere "entrevista" al Pas 2
 de l'adaptador. L'entrevista és un gènere dialogat amb parells
 pregunta/resposta que cal mantenir en l'adaptació.
 
+## Tipologia i HCL
+
+**Tipologia MALL**: Dialogada/Informativa
+**HCL principal**: Descriure (qui és l'entrevistat) + Narrar (intercanvi estructurat)
+**HCL secundàries**: Argumentar (si l'entrevistat defensa una posició, B1+)
+
 ## Estructura canònica
 Tota entrevista adaptada ha de tenir **aquestes parts, en aquest
 ordre**:

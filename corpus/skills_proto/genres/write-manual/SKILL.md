@@ -26,6 +26,12 @@ l'adaptador. El manual és un text expositiu organitzat en apartats que
 presenta coneixements de manera progressiva i requereix definicions
 explícites per ser accessible.
 
+## Tipologia i HCL
+
+**Tipologia MALL**: Expositiva
+**HCL principal**: Explicar — exposar coneixements de manera progressiva i organitzada
+**HCL secundàries**: Descriure (conceptes nous) · Justificar (manuals tècnics, B1+)
+
 ## Estructura canònica
 Tot manual adaptat ha de tenir **aquestes parts, en aquest ordre**:
 

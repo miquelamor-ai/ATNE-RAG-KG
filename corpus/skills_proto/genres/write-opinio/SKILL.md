@@ -25,6 +25,12 @@ Activar quan el docent ha seleccionat el gènere "opinio" al Pas 2 de
 l'adaptador. L'article d'opinió defensa una tesi amb arguments
 recolzats en evidències concretes.
 
+## Tipologia i HCL
+
+**Tipologia MALL**: Argumentativa (convèncer)
+**HCL principal**: Argumentar — defensar una tesi per convèncer l'interlocutor
+**HCL secundàries**: Justificar (evidències concretes) · Interpretar (reconèixer altres posicions, B2+)
+
 ## Estructura canònica
 Tot article d'opinió adaptat ha de tenir **aquestes parts, en aquest
 ordre**:

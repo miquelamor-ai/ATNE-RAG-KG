@@ -25,6 +25,13 @@ Activar quan el docent ha seleccionat el gènere "ressenya" al Pas 2
 de l'adaptador. La ressenya descriu i valora una obra amb arguments
 separant clarament fets de judicis.
 
+## Tipologia i HCL
+
+**Tipologia MALL**: Argumentativa/Avaluativa (interpretar)
+**HCL principal**: Interpretar/Valorar — posicionar-se davant d'una obra i justificar-ho
+**HCL secundàries**: Descriure (l'obra) · Argumentar (comparació d'obres, B2+)
+**Distinció clau**: La ressenya activa *interpretar/valorar*, NO *argumentar*. L'assaig i el debat convencen; la ressenya posiciona i valora.
+
 ## Estructura canònica
 Tota ressenya adaptada ha de tenir **aquestes parts, en aquest ordre**:
 

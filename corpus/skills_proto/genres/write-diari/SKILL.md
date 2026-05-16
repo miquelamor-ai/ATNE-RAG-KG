@@ -25,6 +25,13 @@ Activar quan el docent ha seleccionat el gènere "diari" al Pas 2 de
 l'adaptador. L'entrada de diari és un text personal en primera
 persona que combina fets, emocions i reflexió.
 
+## Tipologia i HCL
+
+**Tipologia MALL**: Narrativa/Reflexiva (personal) · Expositiva/Justificativa (acadèmic)
+**HCL principal**: Narrar (seqüenciar fets) + Interpretar/Valorar (reflexió personal)
+**HCL secundàries**: Explicar (causes, B1+) · Justificar (diari de laboratori/camp, B1+)
+**Nota**: El **diari acadèmic** (de laboratori, de camp) activa HCL *justificar* a partir de B1.
+
 ## Estructura canònica
 Tota entrada de diari adaptada ha de tenir **aquestes parts, en
 aquest ordre**:

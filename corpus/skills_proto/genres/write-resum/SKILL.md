@@ -25,6 +25,13 @@ Activar quan el docent ha seleccionat el gènere "resum" al Pas 2 de
 l'adaptador. El resum condensa un text original respectant-ne la veu
 i organitzant les idees de manera lògica.
 
+## Tipologia i HCL
+
+**Tipologia MALL**: Expositiva
+**HCL principal**: Explicar — seleccionar la idea principal i sintetitzar-la coherentment
+**HCL secundàries**: Descriure (idees secundàries)
+**Nota**: Resumir implica recapitular primer (pas oral, previ) i produir text compacte després. El resum és una *estratègia* (seleccionar + organitzar), no una tasca oberta.
+
 ## Estructura canònica
 Tot resum adaptat ha de tenir **aquestes parts, en aquest ordre**:
 

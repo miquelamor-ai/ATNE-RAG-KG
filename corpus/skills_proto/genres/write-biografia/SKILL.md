@@ -25,6 +25,12 @@ Activar quan el docent ha seleccionat el gènere "biografia" al Pas 2
 de l'adaptador. La biografia és una narració cronològica de la vida
 d'una persona, amb fets seleccionats i context clar.
 
+## Tipologia i HCL
+
+**Tipologia MALL**: Narrativa
+**HCL principal**: Narrar — seqüenciar fets biogràfics en el temps
+**HCL secundàries**: Descriure (context i entorn) · Explicar (causes i llegat, B1+)
+
 ## Estructura canònica
 Tota biografia adaptada ha de tenir **aquestes parts, en aquest ordre**:
 

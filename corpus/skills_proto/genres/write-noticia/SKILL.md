@@ -24,6 +24,12 @@ Activar quan el docent ha seleccionat el gènere "notícia" al Pas 2 de
 l'adaptador. La notícia és una narrativa informativa amb estructura canònica
 (piràmide invertida) que requereix decisions específiques per ser accessible.
 
+## Tipologia i HCL
+
+**Tipologia MALL**: Narrativa/Informativa
+**HCL principal**: Narrar — seqüenciar un fet real (les 5W: qui, on, quan, com, per què)
+**HCL secundàries**: Descriure (context) · Justificar (cites i fonts, B1+)
+
 ## Estructura canònica
 Tota notícia adaptada ha de tenir **aquestes 3 parts, en aquest ordre**:
 

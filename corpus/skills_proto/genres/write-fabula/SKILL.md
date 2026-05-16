@@ -25,13 +25,20 @@ Activar quan el docent ha seleccionat el gènere "fabula" al Pas 2 de
 l'adaptador. La fàbula és una narració breu amb personatges
 arquetípics (sovint animals) i una moral explícita al final.
 
+## Tipologia i HCL
+
+**Tipologia MALL**: Narrativa
+**HCL principal**: Narrar — seqüenciar una acció amb personatges arquetípics
+**HCL secundàries**: Interpretar/Valorar (la moral és una HCL explícita des de A2)
+
 ## Estructura canònica
 Tota fàbula adaptada ha de tenir **aquestes 4 parts, en aquest ordre**:
 
 1. **Situació** — presentació dels personatges arquetípics.
-2. **Acció** — el que fan els personatges.
-3. **Desenllaç** — el resultat de les seves accions.
-4. **Moral explícita** — la lliçó, al final, no subentesa.
+2. **Fet desencadenant** — l'incident que posa en moviment la narració.
+3. **Acció** — com els personatges responen al conflicte.
+4. **Desenllaç** — el resultat de les seves accions.
+5. **Moral explícita** — la lliçó, al final, no subentesa.
 
 ## Regles crítiques (FER)
 - **Moral explícita al final**, no subentesa.

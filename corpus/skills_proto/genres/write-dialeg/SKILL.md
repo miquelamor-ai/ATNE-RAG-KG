@@ -25,6 +25,12 @@ Activar quan el docent ha seleccionat el gènere "dialeg" al Pas 2 de
 l'adaptador. El diàleg és un gènere teatral amb personatges,
 acotacions i torns de paraula clarament marcats.
 
+## Tipologia i HCL
+
+**Tipologia MALL**: Dialogada
+**HCL principal**: Narrar — co-construir un intercanvi seqüenciat entre personatges
+**HCL secundàries**: Argumentar (conflicte verbal, B1+) · Interpretar (subtext, B2+)
+
 ## Estructura canònica
 Tot diàleg adaptat ha de tenir **aquestes parts, en aquest ordre**:
 

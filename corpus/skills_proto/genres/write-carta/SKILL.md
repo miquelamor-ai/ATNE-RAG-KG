@@ -25,6 +25,12 @@ Activar quan el docent ha seleccionat el gènere "carta" al Pas 2 de
 l'adaptador. La carta és un text comunicatiu amb estructura fixa i
 registre ajustat al destinatari.
 
+## Tipologia i HCL
+
+**Tipologia MALL**: Argumentativa/Dialogada
+**HCL principal**: Argumentar (B1+) / Justificar (A2) — defensar una petició o posició
+**HCL secundàries**: Descriure (A1: motiu concret i destinatari)
+
 ## Estructura canònica
 Tota carta adaptada ha de tenir **aquestes parts, en aquest ordre**:
 

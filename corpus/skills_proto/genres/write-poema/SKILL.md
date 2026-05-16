@@ -24,6 +24,13 @@ Activar quan el docent ha seleccionat el gènere "poema" al Pas 2 de
 l'adaptador. El poema és un gènere líric amb estructura estròfica
 que cal preservar en tota adaptació.
 
+## Tipologia i HCL
+
+**Tipologia MALL**: Expressiva/Retòrica
+**HCL principal**: Descriure — expressar qualitats, sensacions i emocions amb recursos estètics
+**HCL secundàries**: Interpretar/Valorar (posicionament personal, B1+)
+**Pre-A1 (Emergent)**: Cançons, rodolins, endevinalles, embarbussaments — oral, lúdic, repetitiu
+
 ## Estructura canònica
 Tot poema adaptat ha de tenir **aquestes parts**:
 

@@ -25,12 +25,23 @@ Activar quan el docent ha seleccionat el gènere "conte" al Pas 2 de
 l'adaptador. El conte és una narració breu amb estructura canònica
 (situació-nus-resolució) i requereix claredat cronològica i emocional.
 
+## Tipologia i HCL
+
+**Tipologia MALL**: Narrativa
+**HCL principal**: Narrar — seqüenciar fets amb personatge, conflicte i resolució
+**HCL secundàries**: Descriure (personatges i entorn) · Explicar (motivacions, B1+)
+**Pre-A1 (Emergent)**: Oral i gestual — dictat a l'adult, il·lustracions seqüenciades
+
 ## Estructura canònica
 Tot conte adaptat ha de tenir **aquestes 3 parts, en aquest ordre**:
 
-1. **Situació inicial** — presentació de personatges i context.
-2. **Nus** — conflicte o problema.
-3. **Resolució** — final clar que tanca el conflicte.
+1. **Situació inicial** — presentació de personatge/s, espai i temps.
+2. **Fet desencadenant** — l'incident que trenca l'equilibri inicial.
+3. **Nus** — el conflicte o problema central.
+4. **Desenllaç** — resolució del conflicte.
+5. **Situació final** — nova normalitat o aprenentatge del personatge.
+
+*(A A1-A2, simplificar a 3 parts: situació inicial → nus → desenllaç.)*
 
 ## Regles crítiques (FER)
 - **Cronologia lineal**: no flashbacks, no salts temporals.
