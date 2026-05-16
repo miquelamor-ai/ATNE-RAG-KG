@@ -224,16 +224,17 @@ SEGURETAT:
     # Blocs operatius per nivell MECR + instruccions d'enriquiment.
     gradació = _load_file("M3_gradació_lingüística.md")
     if gradació:
-        grad_section = _extract_section(gradació, "## 5. Blocs per a l'LLM")
+        grad_section = _extract_section(gradació, "## 6. INSTRUCCIONS PER NIVELL MECR")
         if grad_section:
             for level in ["pre-A1", "A1", "A2", "B1", "B2", "C1"]:
+                # Format canonical M3: "### pre-A1 · Emergent (...)" + bloc de codi
                 blocks = re.findall(
-                    rf"### {re.escape(level)}\s*\n```\n?(.*?)```",
+                    rf"### {re.escape(level)}[^\n]*\n```\n?(.*?)```",
                     grad_section, re.DOTALL
                 )
                 if blocks:
                     _cache["gradacio"][level] = blocks[0].strip()
-        enriq_section = _extract_section(gradació, "## 6. Instrucció d'enriquiment per a l'LLM")
+        enriq_section = _extract_section(gradació, "## 7. ENRIQUIMENT GRADUAL")
         if enriq_section:
             # Bloc amb placeholders (quan tenim MECR explícit)
             blocks_amb = re.findall(
