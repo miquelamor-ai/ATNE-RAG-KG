@@ -3,11 +3,12 @@ name: generate-preguntes-comprensio
 description: >
   Use when the teacher has activated the "preguntes_comprensio" complement.
   Generates a comprehension reading guide following the MALL/TILC model: 3
-  reading moments (before, during, after) × 3 cognitive levels (literal,
-  inferential, critical). Modulated by matter, stage, MECR level and literary
-  vs informative register of the text.
+  reading moments (before, during, after) × 3 cognitive planes (literal,
+  inferential, critical). Modulated by MECR level and literary vs informative
+  register. Pre-A1: no autonomous writing — pointing, drawing, dramatisation,
+  adult dictation only.
 author: FJE — Fundació Jesuïtes Educació
-version: 1.0.0-proto
+version: 2.0.0-proto
 complement_key: preguntes_comprensio
 agent_role: complements
 tools_required: []
@@ -20,92 +21,73 @@ triggers:
 
 ## Quan activar aquesta skill
 Activar quan el docent ha marcat el complement **"Preguntes de comprensió"** al
-Pas 2. Aquesta skill genera un guió estructurat que acompanya l'alumnat durant
-la lectura, no un exàmen final.
+Pas 2. Genera un guió que acompanya l'alumnat durant la lectura, no un examen final.
 
-## Model pedagògic: MALL/TILC
-La comprensió lectora té **3 moments** cadascun amb un propòsit cognitiu propi:
+## Model pedagògic: MALL — 3 moments × 3 plànols
 
-| Moment | Propòsit | Nombre preguntes |
+Principi rector: **"Menys és més"** (MALL). No fatigar l'alumne. Total: **6-10 preguntes**.
+
+| Moment | Propòsit | Nombre |
 |---|---|---|
-| **Abans de llegir** | Activació (hipòtesi + coneixements previs + propòsit) | 3 |
-| **Durant la lectura** | Processament actiu (inferència + visualització + lèxic) | 3 |
-| **Després de llegir** | Consolidació en 3 nivells cognitius (literal, inferencial, crític) | 7-8 |
+| **Abans de llegir** | Activar coneixements previs, predicció, propòsit de lectura | 2-3 |
+| **Durant la lectura** | Aturades estratègiques: dubtes lèxics, hipòtesi, resum parcial | 1-2 |
+| **Després de llegir** | Interrogar el text als 3 plànols: literal → inferencial → crític | 3-5 |
 
-Total: **13-14 preguntes**.
+## Modulació per MECR: format i plànol dominant
 
-## Modulació per context
+| Nivell MALL | Format permès | Plànol dominant (Després) | "Per què…?" |
+|---|---|---|---|
+| **Emergent (pre-A1)** | Assenyalar imatge, dibuixar, dramatitzar, dictat a l'adult. **Cap escriptura autònoma** | Via adult (propedèutic) | Oral i mediat per l'adult |
+| **Inicial (A1)** | V/F textual senzill, omplir buits amb llista tancada o suport visual | Literal | Causa oral o guiada |
+| **Funcional (A2)** | Ordenar seqüències, relacionar amb fletxes, elecció múltiple (idea principal) | Literal | Causa literal al text |
+| **Estratègic (B1)** | Resposta breu, hipòtesis, causa-efecte | Inferencial | Deducció relacional |
+| **Acadèmic (B2)** | Argumentació oberta, resum d'idees abstractes, superestructura del gènere | CALP / epistèmic | Justificació + model teòric |
+| **Crític (C1)** | Contrast de fonts, anàlisi d'intencionalitat, argumentació fonamentada | Crític | Judici sobre fiabilitat |
 
-### Segons MECR i etapa
+> Els 3 plànols es treballen des d'infantil, però sempre **via adult** a pre-A1.
+> El plànol crític s'introdueix oralment ja al conte de I5 («Què hauries fet tu?»).
 
-| Nivell | Adequació |
-|---|---|
-| **Infantil / Cicle Inicial (A1)** | Predicció visual, connexió amb el jo, dibuix. Evita «justifica» i «argumenta». Preguntes curtes. |
-| **Cicle Mitjà / Superior (A2-B1)** | Idea principal, relacions, comparacions. |
-| **Secundària (B1-B2)** | Arguments, connectors lògics, contrast de fonts. |
-| **Batxillerat/FP (C1)** | Anàlisi crítica, intertextualitat, biaixos. |
+## Modulació per modalitat del text
 
-### Segons modalitat del text
-
-- **Text LITERARI** (conte, relat, poema, fantàstic, narrativa): preguntes
-  afectives, d'identificació, d'imatges mentals, creatives. Deixa espais
-  interpretatius.
-- **Text INFORMATIU** (tot el que no és literari): precisió conceptual, dades,
-  relacions causa-efecte, model teòric de la matèria.
-
-### Tipologia interna (ús del model, NO mostrar a la sortida)
-
-- **Nivell LITERAL**: oberta curta, V/F amb justificació, opció múltiple,
-  omplir buits, relaciona amb fletxes.
-- **Nivell INFERENCIAL**: «per què creus…?», «i si…?», relaciona causa-efecte.
-- **Nivell CRÍTIC**: argumentativa oberta, transferència al jo, detecció de
-  biaixos.
-
-Alterna formats a Després de llegir (no totes obertes, no totes V/F).
+- **Text LITERARI** («Porta Oberta»): preguntes afectives («Com et sentiria?»),
+  creatives («Què hauria passat si…?»), interpretació de metàfores i símbols.
+  L'objectiu és el gaudi estètic i la construcció de sentit personal.
+- **Text INFORMATIU** («Porta Tancada»): monitorització metacognitiva, precisió
+  conceptual, jerarquització amb connectors, valoració de la fiabilitat de les dades.
 
 ## Format de sortida — OBLIGATORI
-
-La resposta d'aquesta skill ha de ser EXACTAMENT aquesta estructura
-(comença amb `## Preguntes de comprensió` i a dins tres sub-seccions `###`):
 
 ```markdown
 ## Preguntes de comprensió
 
 ### Abans de llegir
-- [pregunta d'hipòtesi]
-- [pregunta de connexió prèvia]
-- [pregunta de propòsit]
+- [pregunta d'activació / predicció]
+- [pregunta de propòsit: «Llegeix per saber…»]
 
 ### Durant la lectura
-- [pregunta d'inferència en curs]
-- [pregunta de visualització]
-- [pregunta de lèxic en context]
+- [aturada: dubte lèxic o hipòtesi a verificar]
 
 ### Després de llegir
-- [pregunta literal 1]
-- [pregunta literal 2]
-- [pregunta inferencial 1]
-- [pregunta inferencial 2]
-- [pregunta crítica 1]
-- [pregunta crítica 2]
-- [1-2 més si cal, alternant formats]
+- [pregunta literal — format adequat al MECR]
+- [pregunta inferencial — si MECR ≥ A2]
+- [pregunta crítica / creativa — si literari o MECR ≥ B1]
 ```
 
-## Regles estrictes de la sortida
+## Regles estrictes de sortida
 
-- Comença **sempre** amb la línia literal `## Preguntes de comprensió`.
-- Les tres sub-seccions han de ser **sempre** i en aquest ordre, amb els
-  títols literals: `### Abans de llegir`, `### Durant la lectura`,
-  `### Després de llegir`.
-- **NO** escriguis la paraula «Moment» ni «Moment 1/2/3» als encapçalaments.
-- **NO** posis sub-encapçalaments de nivell («Nivell LITERAL…») visibles.
-- **NO** posis etiquetes entre claudàtors davant de cap pregunta
-  (`[Literal · V/F]`, `[Inferencial · per què]`, `[Hipòtesi]`, `[Propòsit]`).
-- Cada pregunta comença amb `- ` (vinyeta), text directe, sense numerar.
-- Per als formats visuals (omplir buits, relaciona), integra'ls dins de la
-  pregunta:
+- Comença **sempre** amb `## Preguntes de comprensió`.
+- Sub-seccions literals: `### Abans de llegir`, `### Durant la lectura`, `### Després de llegir`.
+- **NO** etiquetes visibles de nivell (`[Literal]`, `[Inferencial]`, `[Hipòtesi]`…).
+- **NO** numeració; cada pregunta comença amb `- `.
+- Formats visuals integrats a la pregunta:
   - `- Omple els buits: El ______ serveix per ______.`
-  - `- Relaciona amb una fletxa: aigua → …, foc → …`
+  - `- Relaciona amb una fletxa: sol → …, pluja → …`
+- **Pre-A1**: substitueix les preguntes escrites per consignes d'acció:
+  - `- Assenyala la imatge on es veu [concepte].`
+  - `- Dibuixa com se sent el personatge.`
+  - `- Fes com el personatge: [acció].`
+- **NO** generar mai preguntes «copia i enganxa» (resposta copiable sense processament).
+- **NO** V/F a pre-A1. V/F només des d'A1 i sempre senzill (paraula clau, no frase complexa).
 
 ## Exemple
 Veure `assets/exemple-literari-A2.md` (text narratiu, MECR A2) i

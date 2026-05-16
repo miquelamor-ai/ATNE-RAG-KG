@@ -2,11 +2,12 @@
 name: generate-glossari
 description: >
   Use when the teacher has activated the "glossari" complement. Generates a
-  markdown table of key terms from the adapted text, with simple explanations.
-  If the student is a newcomer (nouvingut) with a known L1, includes a
-  translation column in that L1 (in its native script).
+  markdown glossary of key terms from the adapted text. Monolingüe or bilingüe
+  (with L1 column in native script) depending on whether the student is a
+  newcomer. Quantity and format modulated by MECR level: Emergent uses a
+  visual icon+word list (no table); from A1 upwards uses a markdown table.
 author: FJE — Fundació Jesuïtes Educació
-version: 1.0.0-proto
+version: 2.0.0-proto
 complement_key: glossari
 agent_role: complements
 tools_required: []
@@ -21,73 +22,88 @@ variants:
 # Generar glossari
 
 ## Quan activar aquesta skill
-Activar quan el docent ha marcat el complement "glossari" al Pas 2.
-La variant (monolingüe o bilingüe) es decideix automàticament segons el perfil:
 
-- Si el perfil inclou `nouvingut.actiu=true` i `nouvingut.L1` està definit →
-  **variant bilingüe** amb columna de traducció a aquesta L1.
-- En qualsevol altre cas → **variant monolingüe**.
+Activar quan el docent ha marcat el complement **"Glossari"** al Pas 2.
+La variant (monolingüe o bilingüe) es decideix automàticament:
 
-## Què genera
-Una secció `## Glossari` amb una **taula markdown** que llista tots els termes
-tècnics o difícils del text adaptat.
+- `nouvingut.actiu=true` i `nouvingut.L1` definit → **variant bilingüe**.
+- Qualsevol altre cas → **variant monolingüe**.
 
-**Mínim 8-12 termes.** Si el text no té prou termes tècnics, completar amb
-paraules que podrien ser difícils per a l'alumne concret (segons MECR i perfil).
+## Graduació MALL per nivell
 
-## Variant monolingüe
+| Nivell | Nombre de termes | Tipus de lèxic | Format |
+|---|---|---|---|
+| **Emergent (pre-A1)** | 3-5 | Objectes reals, noms concrets. **NO** tecnicismes | Icona + paraula (no taula) |
+| **Inicial (A1)** | 5-8 | Noms + verbs d'acció | Taula |
+| **Funcional (A2)** | 8-10 | Noms + verbs + adjectius clau | Taula |
+| **Estratègic (B1)** | 10-12 | + habilitats (hipòtesi, causa, conseqüència) | Taula |
+| **Acadèmic (B2) / Crític (C1)** | 12-15 | Lèxic d'especialitat (CALP) | Taula |
+
+## Format Emergent (pre-A1) — visual, sense taula
+
+A Emergent, la taula és massa complexa. Format: emoji + **terme** (+ L1 si nouvingut).
+
+**Monolingüe Emergent:**
+```markdown
+## Glossari
+
+☀️ **sol**
+💧 **aigua**
+🌳 **arbre**
+```
+
+**Bilingüe Emergent (nouvingut + L1):**
+```markdown
+## Per llegir junts: pictograma + L1 + català
+
+☀️ **sol** — شمس
+💧 **aigua** — ماء
+🌳 **arbre** — شجرة
+```
+
+## Variant monolingüe (A1+)
 
 ```markdown
 ## Glossari
 
 | Terme | Explicació simple |
 |---|---|
-| [terme en negreta] | [explicació en català nivell A1] |
+| **[terme]** | [explicació en català molt senzill, màx. 8 paraules] |
 ```
 
 Regles:
-- L'explicació ha de ser en **català molt senzill (nivell A1)**, fins i tot si
-  el MECR de l'alumne és superior.
-- Frases de màxim 8 paraules.
-- No usar altres termes tècnics a l'explicació: "un tipus de..." → especificar
-  directament.
+- Explicació en **català molt senzill (nivell A1)**, sigui quin sigui el MECR de l'alumne.
+- Màxim 8 paraules per explicació.
+- No usar altres termes tècnics dins de l'explicació.
 - No repetir el terme dins de la seva explicació.
 
-## Variant bilingüe (nouvinguts amb L1 coneguda)
+## Variant bilingüe A1+ (nouvinguts amb L1 coneguda)
 
 ```markdown
 ## Glossari
 
 | Terme | Traducció ({L1}) | Explicació simple |
 |---|---|---|
-| [terme] | [traducció real a L1, en alfabet original] | [català A1] |
+| **[terme]** | [traducció en alfabet original de la L1] | [català A1] |
 ```
 
 Regles addicionals:
-- La traducció ha de ser la **forma real** en la L1, no una transliteració.
-- Usar l'**alfabet original** de la L1:
-  - Àrab: الكتاب
-  - Xinès: 书
-  - Urdú: کتاب
-  - Ciríl·lic: книга
-  - Armeni: գիրք
-- Si la L1 no té una paraula exacta per al concepte, usar la més propera i
-  afegir aclariment breu entre parèntesis.
+- Usar l'**alfabet original** de la L1: àrab الكتاب, xinès 书, urdú کتاب, ciríl·lic книга, armeni գիրք.
+- Si no existeix paraula exacta en L1, usar la més propera + aclariment breu entre parèntesis.
 
 ## Criteris de selecció de termes
 
-Prioritzar, per aquest ordre:
-1. **Termes curriculars del text** (Matemàtiques: equació, variable; Ciències:
-   ecosistema, fotosíntesi; Història: monarquia, revolució).
-2. **Paraules d'alta freqüència que poden ser ambigües** per MECR baix o L1
-   diferent (pex: "mitjà" té múltiples sentits).
+Prioritzar, per ordre:
+1. **Termes curriculars del text** (Matemàtiques: equació; Ciències: fotosíntesi; Història: monarquia).
+2. **Paraules d'alta freqüència ambigues** per MECR baix o L1 diferent (ex: "mitjà" té múltiples sentits).
 3. **Col·locacions** importants: "prendre una decisió", "tenir en compte".
 
 NO prioritzar:
-- Paraules quotidianes òbvies (casa, menjar, aigua).
+- Paraules quotidianes òbvies (casa, menjar, aigua) — excepte a Emergent on sí poden ser noves.
 - Noms propis excepte si són clau per la matèria.
 - Connectors (perquè, però, així).
 
 ## Exemples
-- `assets/exemple-monolingue-ciencies.md` (MECR B1, matèria ciències)
+- `assets/exemple-monolingue-ciencies.md` (MECR B1, ciències)
 - `assets/exemple-bilingue-arab-historia.md` (nouvingut A2, L1 àrab, història)
+- `assets/exemple-emergent-infantil.md` (pre-A1, infantil, bilingüe)

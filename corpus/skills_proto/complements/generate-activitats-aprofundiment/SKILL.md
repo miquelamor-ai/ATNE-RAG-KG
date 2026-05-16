@@ -6,7 +6,7 @@ description: >
   interdisciplinary connections, critical thinking, guided research, debate and
   (when the text allows it) a plurilingual dimension. Modulated by stage and MECR.
 author: FJE — Fundació Jesuïtes Educació
-version: 1.0.0-proto
+version: 2.0.0-proto
 complement_key: activitats_aprofundiment
 agent_role: complements
 tools_required: []
@@ -46,6 +46,7 @@ Adapta el nivell d'abstracció i la complexitat cognitiva:
 
 | Etapa / MECR | Tipus d'activitat recomanada |
 |---|---|
+| **Emergent (pre-A1)** | **Cap escriptura autònoma.** Activitats físiques/manipulatives: ordenar imatges, construir, modelar, representar dramàticament, dibuixar. Cognitiu exigent però no verbal. Útil per a AACC nouvingut. |
 | **Infantil / Cicle Inicial (A1)** | Connexions molt concretes i visuals, recerca amb ajuda familiar, dibuix o creació. Evita debats abstractes. |
 | **Cicle Mitjà / Superior (A2-B1)** | Comparacions, petites recerques a casa, preguntes «què passaria si…?» amb exemples propers. |
 | **Secundària (B1-B2)** | Debat amb dos bàndols, connexió interdisciplinar explícita, recerca a fonts diverses, argumentació escrita. |
@@ -75,6 +76,8 @@ escau, el producte final esperat.]
 ```
 
 ## Regles estrictes de la sortida
+
+- **Pre-A1**: ZERO escriptura autònoma. Proposa activitats físiques, visuals o manipulatives que siguin cognitivament exigents però no requereixen producció escrita.
 
 - Comença **sempre** amb la línia literal `## Activitats d'aprofundiment`.
 - **2 o 3 activitats**, no més. Millor poques i ben triades que moltes i

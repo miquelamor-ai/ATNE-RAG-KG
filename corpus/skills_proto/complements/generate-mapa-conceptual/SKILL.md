@@ -2,13 +2,13 @@
 name: generate-mapa-conceptual
 description: >
   Use when the teacher has activated the "mapa_conceptual" complement.
-  Generates a hierarchical concept map in structured markdown (central concept
-  + branches + sub-elements) that is directly useful as a study guide and can
-  be copy-pasted into any external diagramming tool (Canva, MindMeister,
-  XMind, Word SmartArt). Output is NOT ASCII-art; it's a purposeful
-  pedagogical document.
+  Generates a visual organiser adapted to MECR level: at pre-A1/A1 a simple
+  visual schema (2-4 nodes, image→word or parts of a whole); from A2 a
+  hierarchical concept map in structured markdown (central concept + branches
+  + sub-elements). Output is NOT ASCII-art. Can be copy-pasted into Canva,
+  MindMeister, XMind, Word SmartArt.
 author: FJE — Fundació Jesuïtes Educació
-version: 1.0.0-proto
+version: 2.0.0-proto
 complement_key: mapa_conceptual
 agent_role: complements
 tools_required: []
@@ -17,65 +17,62 @@ triggers:
     equals: true
 ---
 
-# Generar mapa conceptual
+# Generar mapa conceptual / esquema visual
 
-## Quan activar aquesta skill
-Activar quan el docent ha marcat el complement **"Mapa conceptual"** al Pas 2.
+## Distinció fonamental (MALL)
+
+El MALL distingeix dues eines amb funcions diferents:
+
+- **Esquema visual** (funció instrumental/executiva): seqüències temporals,
+  parts d'un tot, ordenació. Adequat des de pre-A1.
+- **Mapa conceptual jeràrquic** (funció epistèmica — «llegir per aprendre»):
+  reorganitza el coneixement en categories i relacions lògiques. Comença a **A2**.
+
+Aquesta skill genera l'eina adequada per al MECR de l'alumne.
+
+## Gradació per nivell MALL
+
+| Nivell | Eina | Nodes / Nivells | Característiques |
+|---|---|---|---|
+| **Emergent (pre-A1)** | Esquema visual | 2-3 nodes | Imatge → paraula, o seqüència antes/després. Màxim concreció visual |
+| **Inicial (A1)** | Esquema visual | 3-4 nodes | Parts d'un tot o qualitats simples d'un objecte. Molt guiat |
+| **Funcional (A2)** | Mapa conceptual | **2 nivells** | Concepte central → idees principals literals. Primera introducció guiada |
+| **Estratègic (B1)** | Mapa conceptual | **3 nivells** | Concepte → categories → detalls inferits. Connectors lògics a les fletxes |
+| **Acadèmic (B2)** | Mapa conceptual | **4+ nivells** | Superestructura del gènere. Lèxic CALP. Relacions abstractes |
+| **Crític (C1)** | Mapa de contrast | 2 columnes | Comparació de fonts o ideologies. «Rere les línies» |
 
 ## Principi: text jeràrquic útil, no ASCII-art
 
-**L'objectiu NO és dibuixar** un diagrama amb fletxes ASCII, caixes de text o
-emojis. Aquest format és soroll visual per a alumnat amb TEA/dislèxia i
-inutilitzable per al docent.
-
-**L'objectiu SÍ és** generar una **jerarquia estructurada en markdown** que:
-
-1. **Es pot llegir com a guia d'estudi** directament (sense cap eina extra).
-2. **Es pot projectar o imprimir** tal qual.
-3. **Es pot copiar-enganxar** a qualsevol eina de mapes mentals/conceptuals
-   (Canva, MindMeister, XMind, SimpleMind, Coggle, Word SmartArt) i el diagrama
-   es fa automàticament o amb mínima edició.
-4. **Es pot exportar a PDF** sense renderitzadors especials.
+**L'objectiu NO és dibuixar** un diagrama amb fletxes ASCII, caixes o emojis.
+**L'objectiu SÍ és** una **jerarquia estructurada en markdown** que:
+- Es llegeix directament com a guia d'estudi.
+- Es copia a Canva, MindMeister, XMind, Word SmartArt amb mínima edició.
+- S'exporta a PDF sense renderitzadors especials.
 
 ## Regles per construir el mapa
 
-### Estructura obligatòria
-
-- **Concepte central**: 1 concepte clau del text, amb èmfasi (**negreta**).
-- **Branques principals**: 3-5 categories que relacionen conceptes amb el
-  central (ex. causes, conseqüències, tipus, exemples, processos).
-- **Sub-elements**: 2-4 per branca, termes o frases curtes.
-
-Profunditat màxima: **2 nivells de sub-elements** (no més de 3 nivells de
-sagnia). Un mapa amb 5 nivells és un esquema, no un mapa.
-
-### Qualitat pedagògica
-
-- **Els sub-elements han de ser conceptes o entitats**, no frases explicatives
-  llargues. Un mapa conceptual **és de conceptes**, no un resum en viñetes.
-- **Les branques han de representar RELACIONS clares** (p.ex. "Causes", no
-  "Informació"; "Conseqüències socials", no "Altres dades").
-- Els termes han de provenir del **text adaptat**, no inventar-los.
+- **Concepte central**: 1 terme nuclear del text, en negreta.
+- **Branques principals**: 3-5 categories (causes, conseqüències, tipus, processos...).
+- **Sub-elements**: conceptes o entitats curtes, no frases explicatives.
+- **Branques = relacions clares** («Causes», no «Informació»).
+- Termes del **text adaptat**, no inventats.
 - **No repetir** el mateix concepte a múltiples branques.
-
-### Modulació per MECR i etapa
-
-| Nivell | Profunditat | Nombre branques | Sub-elements per branca |
-|---|---|---|---|
-| A1 | 1 nivell | 2-3 | 2 |
-| A2 | 1-2 nivells | 3-4 | 2-3 |
-| B1 | 2 nivells | 3-4 | 3-4 |
-| B2-C1 | 2 nivells | 4-5 | 3-4 |
-
-A etapes inicials (Infantil, Cicle Inicial): 2-3 branques màxim, termes
-concrets i propers. A Batxillerat: més branques i relacions conceptuals
-abstractes.
 
 ## Format de sortida — OBLIGATORI
 
-La secció comença SEMPRE amb `## Mapa conceptual` i segueix aquesta
-estructura:
+**Esquema visual (pre-A1/A1):**
+```markdown
+## Esquema visual
 
+**[concepte o personatge central]**
+
+- [element 1] → [element 2]
+- [part/qualitat 1]
+- [part/qualitat 2]
+- [part/qualitat 3]
+```
+
+**Mapa conceptual (A2+):**
 ```markdown
 ## Mapa conceptual
 
@@ -84,7 +81,6 @@ estructura:
 - **[Branca 1 — relació/categoria]**
   - [Sub-element 1.1]
   - [Sub-element 1.2]
-  - [Sub-element 1.3]
 - **[Branca 2 — relació/categoria]**
   - [Sub-element 2.1]
   - [Sub-element 2.2]
@@ -93,41 +89,34 @@ estructura:
   - [Sub-element 3.2]
 ```
 
-**Opcional, al final**, afegir una línia que indiqui com usar-lo:
-
+**Opcional** al final (A2+):
 ```markdown
-> Aquest mapa es pot enganxar directament a una eina de diagrames
-> (MindMeister, Canva, XMind…) per convertir-lo en un mapa visual.
+> Aquest mapa es pot enganxar a MindMeister, Canva o XMind per convertir-lo en diagrama visual.
 ```
 
-## Regles estrictes de la sortida
+## Regles estrictes de sortida
 
-- **SEMPRE** començar amb `## Mapa conceptual` (secció top-level del parser).
-- **SEMPRE** etiquetar les branques amb **negreta** (`- **Branca**`).
-- **NO** usar fletxes (→, ↓), no usar caixes ASCII (│├└), no usar emojis
-  decoratius. Pots usar emojis si aporten (p.ex. ☀️ al costat de "llum
-  solar"), però com a reforç del concepte, no com a decoració.
-- **NO** escriure explicacions llargues als sub-elements; han de ser
-  conceptes/entitats curtes.
-- **NO** inventar conceptes que no siguin al text adaptat.
-- **NO** superar 3 nivells de sagnia en cap cas.
+- Pre-A1/A1: comença amb `## Esquema visual`.
+- A2+: comença amb `## Mapa conceptual`.
+- **Sempre** etiquetar les branques en negreta.
+- **NO** fletxes ASCII (→ és acceptable com a connector, no com a estructura).
+- **NO** caixes ASCII (│├└), no emojis decoratius.
+- **NO** sub-elements com a frases llargues.
+- **NO** conceptes no presents al text adaptat.
+- **NO** superar 3 nivells de sagnia (profunditat limitada).
 
 ## Casos especials
 
-### Si el text és narratiu (conte, relat)
-Els mapes conceptuals no sempre tenen sentit per narrativa pura. En aquest cas:
-- Concepte central: el tema o la idea nuclear del relat (no "El conte").
-- Branques: personatges, espai-temps, conflicte, resolució, tema/missatge.
-- Sub-elements: conceptes concrets (no "passos de la trama").
+### Text narratiu (conte, relat)
+- Concepte central: tema o idea nuclear (no «El conte»).
+- Branques: personatges, espai-temps, conflicte, resolució, missatge.
 
-### Si el text és poètic
-Genera un mapa **temàtic**, no narratiu:
-- Concepte central: el tema nuclear.
+### Text poètic
+- Concepte central: tema nuclear.
 - Branques: camps semàntics, imatges, emocions, recursos recurrents.
 
-### Si el docent també ha activat "mapa mental" o "esquema visual"
-Pots generar una sola secció `## Mapa conceptual` — aquests 3 complements
-tenen el mateix output en el MVP actual. No duplicar seccions.
+### Si el docent ha activat «esquema visual» i «mapa conceptual» alhora
+Genera una sola secció (`## Mapa conceptual` a A2+, `## Esquema visual` a A1).
 
 ## Exemple
 Veure `assets/exemple-historia-B1.md` (Revolució Industrial, ESO 3r) i
