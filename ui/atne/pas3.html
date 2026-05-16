@@ -3788,11 +3788,9 @@
       .map(r => (r.querySelector('span:last-child')?.textContent || '').trim())
       .filter(Boolean);
     const userObs = (pop.querySelector('textarea')?.value || '').trim();
-    if (!problems.length && !userObs) { closePops(); return; }
-    const corrections = [];
-    problems.forEach(p => corrections.push(p));
-    if (userObs) corrections.push('Observació del docent: ' + userObs);
     const preserveText = document.getElementById('rub-preserve')?.classList.contains('on');
+    if (!problems.length && !userObs && !preserveText) { closePops(); return; }
+    const corrections = [];
     if (preserveText) {
       // Snapshot del text adaptat actual perquè després de la regeneració el
       // puguem restaurar íntegrament (keeping els complements nous).
