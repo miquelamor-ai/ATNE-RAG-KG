@@ -681,7 +681,7 @@ ACTIVAT — Genera 2-3 activitats de repte cognitiu per a {etapa_complement}:
         _is_low_mecr = _mecr_norm in ("PRE-A1", "A1", "A2")
 
         if _is_low_mecr:
-            _bastides_title = "Eines per llegir i respondre"
+            _bastides_title = "Suports"
             _lang_note = (
                 "🟡 LLENGUATGE SIMPLE: l'alumne és MECR baix. Usa títols planers "
                 "i emojis. Evita termes tècnics («scaffolding», «connectors lògics», «patró lingüístic»). "
