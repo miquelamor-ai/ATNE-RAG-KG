@@ -1643,10 +1643,12 @@
     return '3r ESO';
   }
 
-  // Inicialitza els inputs de Matèria (localStorage → default)
-  const initialMateria = localStorage.getItem('atne.doc_materia') || '';
+  // Inicialitza els inputs de Matèria: NO pre-omplim de sessions anteriors
+  // per evitar que una matèria d'una prova anterior contamini noves adaptacions.
+  // El docent la escriu si vol; si queda buit el LLM infereix del contingut.
+  localStorage.removeItem('atne.doc_materia');
   document.querySelectorAll('.doc-materia-inp').forEach(inp => {
-    inp.value = initialMateria;
+    inp.value = '';
     inp.addEventListener('input', () => {
       localStorage.setItem('atne.doc_materia', inp.value);
       // Sincronitza els altres inputs de Matèria
