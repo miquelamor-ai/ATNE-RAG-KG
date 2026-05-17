@@ -1179,6 +1179,13 @@
                   <option value="definir">Definir</option>
                   <option value="interpretar">Interpretar</option>
                 </select></div>
+                <div><div class="mp-l">Modalitat lectora <span style="font-weight:400;color:var(--ink-400);font-size:10px">(MALL G-09)</span></div><select class="sel" id="gen-modalitat">
+                  <option value="auto" selected>Auto (derivada del perfil)</option>
+                  <option value="compartida">Compartida (adult llegeix)</option>
+                  <option value="transferencia">Transferència (L1→L2)</option>
+                  <option value="progressiva">Progressiva (emergent)</option>
+                  <option value="autonoma">Autònoma</option>
+                </select></div>
               </div>
               <div style="margin-top:8px">
                 <div class="mp-l" style="margin-bottom:4px">Indicació al docent <span style="font-weight:400;color:var(--ink-400)">(opcional)</span></div>
@@ -2185,8 +2192,11 @@
           const mecrVal = profCur?.mecr || localStorage.getItem('atne.mecr') || '';
           const faseVal = profCur?.fase_lectora || '';
           const isNouvingut = chars.nouvingut?.actiu === true;
+          const modalitatOverride = document.getElementById('gen-modalitat')?.value || 'auto';
           let modalitat = 'autonoma';
-          if (faseVal === 'logografica') modalitat = 'compartida';
+          if (modalitatOverride !== 'auto') {
+            modalitat = modalitatOverride;
+          } else if (faseVal === 'logografica') modalitat = 'compartida';
           else if (isNouvingut && (mecrVal === 'pre-A1' || mecrVal === 'A1')) modalitat = 'transferencia';
           else if (faseVal === 'alfabetica_emergent') modalitat = 'progressiva';
           return {

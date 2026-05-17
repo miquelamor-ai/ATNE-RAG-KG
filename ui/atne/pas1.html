@@ -2686,13 +2686,19 @@
         const lbl = document.createElement('label');
         lbl.className = 'ck ck-custom';
         lbl.innerHTML =
-          '<input type="checkbox" data-beh="custom" checked>' +
+          '<input type="checkbox" checked>' +
           '<span>' + txt.replace(/</g, '&lt;') + '</span>' +
           '<button class="ck-del" type="button" title="Eliminar">✕</button>';
         lbl.querySelector('.ck-del').addEventListener('click', ev => {
           ev.preventDefault(); ev.stopPropagation(); lbl.remove();
         });
         btn.insertAdjacentElement('beforebegin', lbl);
+        // Afegeix la conducta al camp d'interessos/context perquè arribi al LLM
+        const interessosEl = document.getElementById('p-interessos');
+        if (interessosEl) {
+          const sep = interessosEl.value.trim() ? '\n' : '';
+          interessosEl.value += sep + 'Conducta observada: ' + txt;
+        }
         _scheduleChipRefresh?.();
       }
 
