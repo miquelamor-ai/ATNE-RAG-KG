@@ -136,73 +136,85 @@ Cada text està etiquetat amb **(etapa | nivell MECR objectiu | tema)**. El nive
 
 ### G1 — Infantil 4-5 | pre-A1 / Emergent | Animals del bosc
 
-> **Glossari: animals del bosc**
+> Glossari: animals del bosc
 >
-> **Esquirol**: animal petit, de color marró o vermellós, amb una cua llarga i peluda. Viu als arbres i menja avellanes, nous i pinyons. Salta de branca en branca.
+> 🐿️ esquirol
 >
-> **Cérvol**: animal gran, marró, amb potes llargues. Els mascles tenen banyes a sobre del cap, que perden i tornen a créixer cada any. Menja herba i fulles.
+> 🦌 cérvol
 >
-> **Senglar**: animal fort i pelut, de color marró fosc o negre. Té el morro llarg per remenar la terra i buscar arrels. A vegades surt del bosc i s'acosta a les cases.
+> 🐗 senglar
 >
-> **Mussol**: ocell que dorm de dia i caça de nit. Té els ulls grans i rodons, i pot girar molt el cap. Menja ratolins petits.
+> 🦉 mussol
 >
-> **Esquirol vermell** (variant): més petit que altres esquirols, amb el pèl molt vermell. Viu sobretot als boscos de pins.
+> 🦊 guineu
 
 ### G2 — Primària 1-2 | A1 / Inicial | Parts del cos
 
-> **Glossari: parts del cos humà**
+> Glossari: parts del cos humà
 >
-> **Cap**: és la part de dalt del cos. Hi tenim els ulls, el nas, les orelles i la boca. Dintre del cap hi ha el cervell, que ens fa pensar.
->
-> **Braç**: és la part del cos que va de l'espatlla fins a la mà. Tenim dos braços, un a cada costat. Els braços ens ajuden a agafar coses i a abraçar.
->
-> **Cama**: és la part del cos que va del maluc fins al peu. Tenim dues cames. Les cames ens serveixen per caminar, córrer i saltar.
->
-> **Mà**: és la part del braç que té cinc dits. Amb les mans podem escriure, dibuixar, menjar i tocar coses.
->
-> **Cor**: és un múscul molt important que tenim dintre del pit. El cor bombeja la sang per tot el cos. Mai no para, ni quan dormim.
+> | Terme | Explicació |
+> |---|---|
+> | cap | part de dalt del cos amb la cara |
+> | braç | va de l'espatlla fins a la mà |
+> | cama | va del maluc fins al peu |
+> | mà | part del braç amb cinc dits |
+> | peu | part de baix per caminar |
+> | cor | múscul que bombeja la sang |
+> | ull | òrgan que ens fa veure |
 
 ### G3 — Primària 5-6 | A2 / Funcional | La vida dels romans
 
-> **Glossari: vida quotidiana a l'antiga Roma**
+> Glossari: vida quotidiana a l'antiga Roma
 >
-> **Domus**: és la casa on vivien les famílies romanes riques. Tenia un pati central anomenat atri, amb una piscina petita al mig on s'acumulava l'aigua de la pluja. Al voltant de l'atri hi havia les habitacions: el menjador, el dormitori i el despatx.
->
-> **Insulae**: eren els edificis de pisos on vivien els romans més pobres. Podien tenir fins a sis o set plantes. Les famílies que vivien als pisos més alts pagaven menys lloguer, però era més perillós perquè sovint hi havia incendis.
->
-> **Forum**: era la plaça principal de la ciutat. Allà s'hi reunia la gent per parlar, comprar, escoltar discursos polítics o assistir a judicis. Era el centre de la vida pública romana.
->
-> **Termes**: eren uns banys públics on els romans anaven cada dia. No només per rentar-se, sinó també per fer exercici, parlar amb amics o tancar negocis. Hi havia sales d'aigua freda, calenta i tèbia.
->
-> **Toga**: era el vestit típic dels homes romans lliures. Es feia amb una peça gran de roba blanca que s'enrotllava al cos. Només els ciutadans romans la podien portar; els esclaus, no.
+> | Terme | Explicació |
+> |---|---|
+> | domus | casa gran de romans rics |
+> | insulae | edificis de pisos per gent pobra |
+> | forum | plaça principal de la ciutat |
+> | termes | banys públics per rentar-se |
+> | toga | vestit blanc dels ciutadans lliures |
+> | atri | pati central de la domus |
+> | mosaic | terra fet amb pedres petites |
+> | esclau | persona sense llibertat ni drets |
+> | legió | unitat gran de l'exèrcit romà |
 
 ### G4 — ESO 1-2 | B1 / Estratègic | La cèl·lula
 
-> **Glossari: la cèl·lula i els seus orgànuls**
+> Glossari: la cèl·lula i els seus orgànuls
 >
-> **Cèl·lula**: és la unitat mínima de vida. Tots els éssers vius estem fets de cèl·lules: alguns d'una sola (els bacteris), i altres de milions (com els humans). Cada cèl·lula està delimitada per una membrana i conté un material gelatinós anomenat citoplasma, on flota la informació genètica i els orgànuls.
->
-> **Nucli**: és com el "centre de control" de la cèl·lula. Hi guarda l'ADN, que és la molècula que conté les instruccions per fabricar totes les proteïnes del cos. Només les cèl·lules eucariotes tenen nucli; els bacteris, no.
->
-> **Mitocondri**: és l'orgànul que s'encarrega de produir energia. Agafa els nutrients que ens arriben del menjar i els transforma en una mena de "moneda energètica" anomenada ATP, que la resta de la cèl·lula utilitza per funcionar. Per això a vegades es diu que els mitocondris són les "centrals elèctriques" de la cèl·lula.
->
-> **Ribosoma**: és un orgànul molt petit que fabrica proteïnes. Llegeix les instruccions que arriben del nucli i va unint aminoàcids per construir cada proteïna. Hi ha milers de ribosomes dispersos pel citoplasma o enganxats al reticle endoplasmàtic.
->
-> **Membrana plasmàtica**: és la "paret" exterior de la cèl·lula. No és una paret rígida, sinó una pel·lícula flexible feta de lípids i proteïnes que controla què entra i què surt: deixa passar l'oxigen i els nutrients, però barra el pas a substàncies nocives.
+> | Terme | Explicació |
+> |---|---|
+> | cèl·lula | unitat mínima de vida amb membrana i citoplasma |
+> | nucli | centre que guarda l'ADN de la cèl·lula |
+> | mitocondri | orgànul que produeix energia (ATP) cel·lular |
+> | ribosoma | fabrica proteïnes seguint instruccions de l'ADN |
+> | membrana plasmàtica | pel·lícula exterior que controla què entra |
+> | citoplasma | gel intern on flotan els orgànuls |
+> | ADN | molècula amb instruccions genètiques heretades |
+> | proteïna | molècula que executa funcions a la cèl·lula |
+> | orgànul | estructura interna amb funció específica |
+> | bacteri | ésser viu d'una sola cèl·lula sense nucli |
+> | cromosoma | filament d'ADN molt plegat al nucli |
 
 ### G5 — Batxillerat | B2 / Acadèmic | La taula periòdica
 
-> **Glossari: conceptes fonamentals de la taula periòdica**
+> Glossari: conceptes fonamentals de la taula periòdica
 >
-> **Element químic**: tipus d'àtom caracteritzat per un nombre concret de protons al nucli, anomenat nombre atòmic. Cada element ocupa una posició única a la taula periòdica i té propietats físiques i químiques distintives. Avui es coneixen cent divuit elements, dels quals noranta-quatre es troben de manera natural a l'escorça terrestre i la resta han estat sintetitzats artificialment en laboratori.
->
-> **Període**: cadascuna de les set files horitzontals de la taula periòdica. Els elements d'un mateix període tenen el mateix nombre de capes electròniques, però difereixen en el nombre d'electrons de la capa de valència, fet que explica que les seves propietats variïn de manera gradual d'esquerra a dreta.
->
-> **Grup**: cadascuna de les divuit columnes verticals de la taula. Els elements d'un mateix grup comparteixen la configuració electrònica de la capa de valència i, en conseqüència, presenten un comportament químic similar. Els grups inclouen famílies tan rellevants com els metalls alcalins (grup 1), els halògens (grup 17) o els gasos nobles (grup 18).
->
-> **Electronegativitat**: tendència relativa d'un àtom a atraure cap a si els electrons compartits en un enllaç químic. És una propietat periòdica que augmenta d'esquerra a dreta dins d'un mateix període i disminueix de dalt a baix dins d'un mateix grup. El fluor és l'element més electronegatiu de la taula, amb un valor de 3,98 a l'escala de Pauling.
->
-> **Isòtops**: àtoms d'un mateix element que tenen el mateix nombre atòmic però difereixen en el nombre de neutrons al nucli, i per tant en la seva massa atòmica. Alguns isòtops són estables i altres són radioactius, és a dir, es desintegren espontàniament emetent radiació. Aquesta propietat es fa servir en aplicacions mèdiques, datació arqueològica i generació d'energia nuclear.
+> | Terme | Explicació |
+> |---|---|
+> | element químic | tipus d'àtom amb un nombre concret de protons al nucli |
+> | nombre atòmic | quantitat de protons que defineix l'element |
+> | període | fila horitzontal de la taula amb mateixa capa electrònica |
+> | grup | columna vertical amb mateixa configuració de valència |
+> | electronegativitat | tendència d'un àtom a atraure electrons compartits |
+> | isòtop | variant amb mateixos protons però diferent nombre de neutrons |
+> | metall alcalí | element del grup 1 molt reactiu amb aigua |
+> | halogen | element del grup 17 amb 7 electrons de valència |
+> | gas noble | element del grup 18 amb capa de valència completa |
+> | massa atòmica | mitjana ponderada de les masses dels seus isòtops |
+> | radioactivitat | desintegració espontània del nucli amb emissió de radiació |
+> | enllaç covalent | unió per compartició d'electrons entre àtoms |
+> | configuració electrònica | distribució dels electrons en orbitals i capes |
 
 ---
 
