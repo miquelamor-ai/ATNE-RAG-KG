@@ -81,23 +81,47 @@ Format taula. 15-18 termes. Definicions plenes en CALP, amb matís i precisió c
 
 ## Detecció
 
-> ⚠️ ESBORRANY — requereix validació pedagògica humana (docents FJE)
-
 **Senyals docent** (quan activar glossari):
-- El text conté termes curriculars específics que l'alumnat probablement desconeix.
-- L'alumnat és nouvingut o té MECR baix en relació al text.
-- La matèria és de ciències, tecnologia o ciències socials (densitat lèxica alta).
+- El text conté termes curriculars d'especialitat que l'alumnat probablement desconeix (fotosíntesi, democràcia, equació, monarquia...).
+- L'alumnat és nouvingut o té MECR baix en relació al text adaptat.
+- La matèria és de ciències, tecnologia o ciències socials (densitat lèxica acadèmica alta).
+- El text conté nominalitzacions o passives que dificulten la comprensió ("la realització del procés" en lloc de "quan es fa el procés").
+- El docent ha notat que l'alumne usa BICS (llengua quotidiana) on caldria CALP: diu "cosa" en lloc de "recurs", "fer" en lloc de "implementar".
+
+**Senyals alumne** (que indica que necessita glossari):
+- Pregunta "Què vol dir...?" més de 3 vegades per paràgraf: la freqüència de bloquejos lèxics supera el llindar de processament.
+- Llegeix fluïdament però no pot respondre preguntes sobre el contingut: el text és decodificat però no comprès.
+- Nouvingut pre-A1/A1: s'atura i mira l'adult sense dir res (el vocabulari és completament opac).
+- Usa termes col·loquials en lloc dels tècnics quan explica el text ("la cosa que creix" en lloc de "la cèl·lula").
+- En el diari de lectura o resposta escrita, bypassa els termes tècnics amb "etc." o "i altres coses".
+
+**Context favorable**:
+- Aula d'acollida o grup amb nouvinguts recents (beneficien especialment de la variant bilingüe amb L1 en alfabet original).
+- Text de matèria no lingüística (TILC) amb densitat lèxica d'especialitat alta.
+- Unitat didàctica on els termes clau tornaran a aparèixer al llarg del trimestre (val la pena inversió en glossari).
 
 **Anti-senyals** (quan NO activar glossari):
-- El text és molt curt (menys de 100 paraules) i ja inclou definicions integrades.
-- L'alumnat coneix bé el vocabulari del tema (text familiar).
+- El text ja inclou definicions integrades ("la fotosíntesi, és a dir, el procés pel qual...").
+- Text de menys de 100 paraules on els termes desconeguts es poden explicar oralment en 2 minuts.
+- L'alumnat coneix bé el vocabulari del tema (text familiar o repàs).
+- El temps és limitat i és millor una explicació oral directa.
 
 ## Heurístiques docent
 
-> ⚠️ ESBORRANY — requereix captura via entrevistes a docents FJE
+**H1 — La marca mental de preguntes anteriors**
+Selecciono els termes del glossari llegint el text i marcant els que l'alumnat m'ha preguntat en unitats anteriors sobre el mateix tema. Tinc una llista mental (o física) de "paraules conflictives" per matèria i nivell: a ciències 3r ESO, "osmosi", "membrana" i "ions" sempre necessiten glossari. Si els trobo al text nou, el glossari és automàtic.
 
-- H1: El docent sol seleccionar els termes llegint el text i marcant els que l'alumnat ha preguntat anteriorment en contextos similars.
-- H2: Per a nouvinguts, el docent prioritza sempre la variant bilingüe, especialment si la L1 és una llengua d'alfabet no llatí.
+**H2 — La prova de la substitució**
+Per decidir si un terme va al glossari, faig la prova de la substitució: "Podria l'alumne entendre la frase si tragués aquesta paraula i la substituís per 'cosa'?" Si la resposta és "sí, quasi bé", el terme no és crític per a la comprensió. Si la resposta és "no, perdria tot el sentit", el terme va al glossari. Aquesta prova em permet ser selectiu i no sobrecarregar l'alumne amb 20 termes.
+
+**H3 — Variant bilingüe amb L1 d'alfabet no llatí**
+Per a alumnat nouvingut d'àrab, xinès, urdú o armeni, el glossari bilingüe amb l'alfabet original de la L1 és gairebé sempre necessari els primers 3 mesos. El terme en L1 actua com a "ancoratge cognitiu": l'alumne ja sap el concepte en la seva llengua i el glossari bilingüe simplement li dóna la paraula en català. Sense aquest pont, l'alumne ha d'aprendre simultàniament el concepte i la paraula, cosa que dobla la càrrega cognitiva.
+
+**H4 — Glossari col·laboratiu**
+A partir de B1, proposo que sigui l'alumnat qui construeixi el glossari col·lectivament: primer identifiquen els termes que no entenen, després busquen la definició en parelles. El docent valida i corregeix. Aquesta estratègia té un efecte doble: l'alumne pren consciència del seu propi desconeixement lèxic (metacognició) i el glossari resultant és més ajustat a les necessitats reals del grup.
+
+**H5 — El glossari com a avaluació diagnòstica**
+Abans d'adaptar un text complex, demano a l'alumnat que subralli les paraules que no entenen. El resultat és un diagnòstic lèxic ràpid: si la majoria del grup subratlla els mateixos termes, el problema és col·lectiu i cal glossari comú. Si cada alumne subratlla paraules diferents, el problema és individual i cal suport personalitzat (o glossari diferenciat per nivell).
 
 ## Autoavaluació (descriptors en primera persona)
 

@@ -81,24 +81,46 @@ Estructura completa de crònica periodística. Sense límit estricte de paraules
 
 ## Detecció
 
-> ⚠️ ESBORRANY — requereix validació pedagògica humana (docents FJE)
-
 **Senyals docent** (quan triar notícia):
-- Treballa un fet d'actualitat o tema del currículum amb dimensió social.
-- Vol que l'alumnat distingeixi fet i opinió.
-- L'alumnat ha de practicar la comprensió de text informatiu.
+- El text font és un article de premsa, una notícia digital o un document informatiu sobre un fet real.
+- Vol treballar la distinció fet/opinió (competència crítica, Decret 175/2022).
+- L'alumnat ha de llegir un text de CCSS, CN o Llengua amb dimensió social o d'actualitat.
+- El grup té alumnat nouvingut que necessita comprendre textos informatius en català per integrar-se a les matèries.
+- La matèria treballa la comprensió de text informatiu (avaluació competencial).
+
+**Senyals alumne** (que indica que necessita l'instrument):
+- En resumir la notícia, narra lliurement ("hi ha un home que...") sense estructurar Qui/Quan/On: no té la superestructura del gènere.
+- Llegeix el text sencer però no pot respondre "per què ha passat?" — *efecte mirall literal* (MALL): llegeix les línies però no entre línies.
+- Es bloqueja davant titulars amb metàfores ("La guerra del clima") i no sap de què tracta la notícia.
+- Confon la cita d'opinió de l'entrevistat amb el fet objectiu: no distingeix veu de l'autor / veu de la font.
+- Nouvingut pre-A1/A1: descodifica mecànicament però no construeix sentit; s'atura i mira l'adult sense dir res.
+
+**Context favorable** (quan l'instrument és especialment necessari):
+- Aula amb alumnat nouvingut (aula d'acollida o integrat): necessiten superestructura del gènere per comprendre textos de matèries.
+- Grup heterogeni on el 30%+ pot tenir comprensió lectora baixa (PIRLS Catalunya 2021).
+- Matèries no lingüístiques (CCSS, CN) que usen textos informatius com a font d'aprenentatge (TILC).
 
 **Anti-senyals** (quan NO triar notícia):
-- El text font és un conte o ficció → gènere incorrecte.
-- L'alumnat vol expressar sentiments personals → opinió o diari.
-- El text no té un fet concret → assaig o divulgatiu.
+- El text font és un conte, poema o narrativa de ficció → adaptar al gènere original.
+- L'alumnat vol expressar la seva opinió o vivència personal → opinió, diari o carta.
+- El text no relata cap fet concret (és especulatiu o filosòfic) → assaig o divulgatiu.
 
 ## Heurístiques docent
 
-> ⚠️ ESBORRANY — requereix captura via entrevistes a docents FJE
+**H1 — La prova de les 5W**
+Quan un alumne em mostra el resum de la notícia i és una narració lliure sense estructura ("hi ha un home que va fer una cosa important"), li faig la prova de les 5W: "Qui? Quan? On? Per què?" Si no pot respondre 3 de les 5 preguntes, la superestructura del gènere no és interioritzada. En aquests casos, l'instrument notícia amb les 5W explícites és la bastida correcta. No cal que sigui el text complet: de vegades el lead sol ja és suficient per treballar.
 
-- H1: Quan el text font és molt llarg, el docent selecciona les 5W principals i construeix el lead primer, i deixa els detalls per al cos.
-- H2: Per a nouvinguts A1, el docent simplifica primer el titular i el lead, i deixa el cos per a lectura acompanyada posterior.
+**H2 — El bloqueig davant densitat lèxica**
+Quan l'alumne nouvingut s'atura a cada paràgraf i em mira sense dir res, o pregunta "Mestre, no entenc res", no és un problema de voluntat sinó de càrrega cognitiva: el vocabulari és opac i no pot construir sentit. Sé que cal adaptar la notícia al seu MECR i afegir glossari. El senyal d'alarma és quan la freqüència de preguntes "Què vol dir...?" supera 3 per paràgraf.
+
+**H3 — La confusió fet/opinió**
+A ESO, quan demano que identifiquin el fet principal i em diuen l'opinió de l'entrevistat com si fos un fet ("diu que és molt important"), sé que no distingeixen la veu narrativa de la veu de la font. L'instrument notícia amb la regla "cita directa + atribució clara" és la resposta pedagògica. Abans de passar a un text nou, fem la distinció en el text actual: "Qui diu això? L'autor o la persona entrevistada?"
+
+**H4 — Nouvingut recent (aula d'acollida)**
+Per a alumnat nouvingut de 0-3 mesos, el primer instrument que funciona és la notícia amb pictogrames. Triï un fet que l'alumne ja conegui d'alguna manera (esport, temps, escola) per activar el coneixement previ en L1. Si la L1 és àrab o xinès, la variant bilingüe del glossari acompanyant és gairebé obligatòria: el vincle L1→L2 redueix l'ansietat i accelera la comprensió.
+
+**H5 — La piràmide invertida com a prova de comprensió**
+Quan un alumne ha llegit la notícia i me la resumeix del revés (comença pels detalls i acaba pel fet principal), sé que la piràmide invertida no és interioritzada. Li demano que subralli la frase més important de cada paràgraf i que les ordeni. Si no sap quina és la més important, el problema és inferencial: cal un text adaptat al seu MECR amb la piràmide molt explícita.
 
 ## Autoavaluació (descriptors en primera persona)
 

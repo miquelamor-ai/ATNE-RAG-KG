@@ -55,15 +55,30 @@ L'article d'opinió és un gènere argumentatiu que defensa una tesi amb argumen
 
 > ⚠️ ESBORRANY — requereix validació pedagògica humana (docents FJE)
 
-**Senyals docent**: Vol treballar el pensament crític · L'alumnat ha de practicar l'argumentació · El text font expressa un punt de vista.
-**Anti-senyals**: Text font és neutral → notícia · Alumnat pre-A1 → gènere no adequat · Text narratiu → adaptar al gènere original.
+**Senyals docent**: text font expressa postura o valoració · vol treballar HCL argumentar · unitat inclou debat o controvèrsia sociocientífica · alumnat 4t Primària en amunt amb MECR mínim A1.
+
+**Senyals alumne**: quan se li demana argumentar, descriu o narra (*encavalcament HCL*) · no pren postura ("depèn...") · tesi apareix al final en lloc de l'inici · usa "m'agrada/no m'agrada" sense evidència · connectors monotons a tots els arguments.
+
+**Context favorable**: CCSS, Filosofia, Llengua, Tutoria amb debat · nouvingut B1-B2 amb BICS però sense CALP argumentatiu · avaluació competencial amb argumentació escrita.
+
+**Anti-senyals**: text font neutral → notícia · pre-A1 → gènere massa abstracte · text narratiu → adaptar al gènere original · docent vol comprensió, no producció → preguntes.
 
 ## Heurístiques docent
 
-> ⚠️ ESBORRANY — requereix captura via entrevistes a docents FJE
+**H1 — La pregunta binària com a arrencada**
+Per a alumnat A1 o que no pren postura, la pregunta binària funciona millor que "Qué penses tu?": "Estàs a favor o en contra de [tema]?" Un cop ha dit "a favor", li pregunto: "Per quina raó? Dona'm un exemple de la teva vida." Aquesta seqüència de 3 passos (postura → raó → exemple) és la bastida mínima per a l'article d'opinió A1.
 
-- H1: Per a A1, el docent sol partir d'una pregunta binària ("Estàs a favor o en contra de X?") i ajuda a formular la tesi.
-- H2: Per a nouvinguts B1, el docent accepta evidències de la cultura d'origen com a argument vàlid.
+**H2 — Detectar l'encavalcament HCL**
+Quan demano "Argumenta per qué creus que [tema] és important" i l'alumne respon "Perquè és molt important i tothom ho ha de saber", sé que confon argumentar amb descriure. Faig el Think Aloud en veu alta: "Mira com ho faig jo: 'Crec que X és important perquè [dada]. Per exemple, [cas real].' Ara fes-ho tu."
+
+**H3 — Nouvingut B1 amb sabers del país d'origen**
+Accepto evidències de la cultura d'origen com a argument vàlid ("A la meva família fem X perquè..."). L'alumne té contingut i la classe guanya diversitat de punts de vista. La bastida de connectors del V3 és especialment útil aquí perquè és explícita i gradada.
+
+**H4 — La tesi al final (estructura invertida)**
+Quan un alumne escriu 3 paràgrafs d'arguments i acaba amb "Per tot això, crec que X", li demano que llegeixi només el primer paràgraf en veu alta: "Saps de seguida qué defensa l'autor?" Si la resposta és "no", l'exercici és clar: mou la tesi al principi.
+
+**H5 — Connectors com a termòmetre del nivell**
+Reviso ràpidament els connectors: si tots els arguments comencen amb "perquè" o "però" → A1-A2. Si varia entre "en primer lloc", "per tant" → B1. Si usa "tanmateix", "no obstant" → B2. Trenta segons de lectura dels connectors em dóna el MECR real de l'alumne i indica quin nivell de bastida necessita l'adaptació.
 
 ## Fonts principals
 

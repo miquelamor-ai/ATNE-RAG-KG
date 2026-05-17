@@ -93,23 +93,46 @@ Per a alumnat nouvingut (A1-B2), s'afegeix al final del "Després de llegir" una
 
 ## Detecció
 
-> ⚠️ ESBORRANY — requereix validació pedagògica humana (docents FJE)
-
 **Senyals docent** (quan activar preguntes de comprensió):
-- El docent vol assegurar la comprensió del text adaptat.
-- El text és complex per al nivell de l'alumnat.
-- L'alumnat ha de demostrar comprensió per a una avaluació o activitat posterior.
+- El text adaptat és complex per al nivell de l'alumnat i cal guiar el processament actiu.
+- L'alumnat llegeix passivament: llegeix les paraules però no construeix sentit.
+- Cal demostrar comprensió per a una activitat posterior (debat, producció escrita, avaluació).
+- La unitat inclou text de matèria no lingüística (TILC) on la comprensió és prerequisit per a l'aprenentatge.
+- L'alumnat nouvingut necessita un guió de lectura per compensar el menor coneixement de context cultural.
+
+**Senyals alumne** (que indica que necessita les preguntes):
+- Llegeix el text sencer i quan li preguntes "De qué tracta?" respon "No sé" o "Parla de coses" — lectura sense propòsit.
+- Respon les preguntes literals però no pot fer cap inferència — *efecte mirall literal* (MALL).
+- No pot predir de qué tractarà el text a partir del títol o les imatges — no activa coneixement previ.
+- S'atura durant la lectura i no sap com continuar davant una frase difícil.
+- Nouvingut A1-A2: llegeix en veu alta correctament però no sap respondre "Qué ha passat?" en català simple.
+
+**Context favorable**:
+- Matèria TILC on la comprensió és prerequisit per a l'activitat posterior.
+- Grup amb 30%+ de comprensió lectora baixa (PIRLS Catalunya: 30.4% sota el llindar mínim el 2021).
+- Text literari en Llengua o Tutoria on cal treballar la resposta estètica i afectiva.
 
 **Anti-senyals** (quan NO activar):
-- El text és molt curt i la comprensió és òbvia.
-- El docent ha preparat les seves pròpies preguntes.
+- El text és molt curt (< 80 paraules) i la comprensió és immediata.
+- El docent ja ha preparat les seves pròpies preguntes.
+- El temps de la sessió és molt limitat → millor discussió oral col·lectiva.
 
 ## Heurístiques docent
 
-> ⚠️ ESBORRANY — requereix captura via entrevistes a docents FJE
+**H1 — La resposta "no sé" com a senyal d'alarma**
+Quan pregunto "De qué tracta el text?" i l'alumne respon "No sé" o "Parla de coses", ha llegit sense propòsit. El moment "Abans de llegir" és el més important: li dono un propòsit explícit ("Llegeix per saber [X concret]") i li pregunto el que ja sap del tema. Amb un propòsit, la comprensió millora notablement fins i tot sense canviar el text.
 
-- H1: El docent sol prioritzar "Abans de llegir" per a alumnat amb poc coneixement previ del tema.
-- H2: Per a textos literaris, el docent afavoreix les preguntes creatives i afectives per sobre de les literals.
+**H2 — Detectar el mirall literal**
+L'alumne respon correctament totes les preguntes literals (copiables del text) però es queda en blanc davant "Per qué creus que...?" o "Qué passaria si...?". Introdueixo gradualment l'inferencial: primer amb inferències mínimes ("La resposta no és al text però sí al context"), progressivament amb major distància inferencial.
+
+**H3 — El coneixement previ com a palanca**
+Per a textos sobre temes allunyats de l'experiència de l'alumne (història medieval, ecosistemes de l'Àrtic), el "Abans de llegir" és crític. Si l'alumne no té cap coneixement previ, dedico 5 minuts a activar-lo (imatge, vídeo curt, explicació oral breu) abans de distribuir el text.
+
+**H4 — Text literari vs. informatiu: canvi de preguntes**
+La primera pregunta després d'un text literari és sempre afectiva: "Com t'has sentit llegint-lo?" Per a un text informatiu, la primera és de precisió: "Quin és el fet o dada més important?" Aquesta distinció inicial marca el to de tota la sessió i evita que l'alumnat apliqui la mateixa estratègia a gèneres molt diferents.
+
+**H5 — "Menys és més" en el nombre de preguntes**
+Quan tinc poc temps, trio les 3 preguntes més potents (una literal, una inferencial, una crítica) en lloc de preparar 10. La investigació MALL confirma que la qualitat importa més que la quantitat: una bona pregunta inferencial genera més aprenentatge que cinc de literals.
 
 ## Autoavaluació (descriptors en primera persona)
 

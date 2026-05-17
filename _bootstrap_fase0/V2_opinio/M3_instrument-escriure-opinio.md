@@ -78,24 +78,46 @@ Tesi complexa, pot ser paradoxal o matisar la pròpia postura. Múltiples argume
 
 ## Detecció
 
-> ⚠️ ESBORRANY — requereix validació pedagògica humana (docents FJE)
-
 **Senyals docent** (quan triar opinió):
-- Vol treballar el pensament crític i la presa de postura.
-- L'alumnat ha de practicar l'argumentació estructurada.
-- El text font expressa un punt de vista o una postura.
+- El text font expressa un punt de vista, defensa una postura o inclou valoracions (editorial, carta al director, article d'opinió).
+- Vol treballar l'argumentació estructurada i la presa de postura (HCL argumentar).
+- La unitat didàctica inclou debat, pensament crític o controvèrsia sociocientífica.
+- Alumnat de 4t de Primària en amunt amb MECR mínim A1.
+
+**Senyals alumne** (que indica que necessita l'instrument):
+- Quan se li demana "Justifica la teva resposta", descriu o narra en lloc d'argumentar — *encavalcament HCL* (MALL): la habilitat demanada supera la competència actual.
+- No pren postura: "Depèn..." o "Hi ha gent que pensa X i gent que pensa Y" sense defensar cap postura pròpia.
+- La seva tesi no apareix fins al final del text (estructura invertida respecte al gènere).
+- Usa "m'agrada / no m'agrada" com a argument, sense evidència.
+- A B2, usa connectors A1 ("perquè", "però") en tots els arguments sense varietat.
+
+**Context favorable**:
+- Matèries de CCSS, Filosofia, Llengua o Tutoria amb debat o controvèrsia.
+- Alumnat nouvingut B1-B2 que ja gestiona el català conversacional (BICS) però no el registre argumentatiu (CALP).
+- Avaluació competencial que requereix argumentació escrita.
 
 **Anti-senyals** (quan NO triar opinió):
-- El text font és una notícia o document neutral → notícia o divulgatiu.
-- L'alumnat no ha assolit A1 → gènere no adequat (massa abstracte).
-- El text font és narratiu (conte, biografia) → adaptar al gènere original.
+- El text font és neutral o descriptiu → notícia o divulgatiu.
+- Alumnat pre-A1: el gènere argumentatiu és massa abstracte (no s'adapta a pre-A1).
+- El text font és narratiu → adaptar al gènere original.
+- El docent vol treballar comprensió, no producció → preguntes de comprensió.
 
 ## Heurístiques docent
 
-> ⚠️ ESBORRANY — requereix captura via entrevistes a docents FJE
+**H1 — La pregunta binària com a arrencada**
+Per a alumnat A1 o que no pren postura, la pregunta binària funciona millor que "Qué penses tu?": "Estàs a favor o en contra de [tema]?" El binari força la presa de postura. Un cop ha dit "a favor", li pregunto: "Per quina raó? Dona'm un exemple de la teva vida." Aquesta seqüència de 3 passos (postura → raó → exemple) és la bastida mínima per a l'article d'opinió A1.
 
-- H1: Per a alumnat A1, el docent sol partir d'una pregunta binària ("Estàs a favor o en contra de X?") i ajuda l'alumne a formular la tesi a partir de la resposta.
-- H2: Per a alumnat nouvingut B1, el docent accepta evidències de la cultura d'origen com a argument vàlid, enriquint el text per a tota la classe.
+**H2 — Detectar l'encavalcament HCL**
+Quan demano "Argumenta per qué creus que [tema] és important" i l'alumne respon "Perquè és molt important i tothom ho ha de saber", sé que confon argumentar amb descriure. Li mostro la diferència amb un model en veu alta (Think Aloud, MALL): "Mira com ho faig jo: 'Crec que X és important perquè [dada concreta]. Per exemple, [cas real].' Ara fes-ho tu." El modelatge és la bastida prèvia a l'escriptura autònoma.
+
+**H3 — Nouvingut B1 amb sabers del país d'origen**
+Per a alumnat nouvingut que ja domina el català conversacional però té dificultats amb l'argumentació formal, accepto evidències de la seva cultura d'origen com a argument vàlid ("A la meva família fem X perquè..."). Aquesta estratègia té dos avantatges: l'alumne té contingut i la classe guanya diversitat de punts de vista. L'instrument opinió V3 és especialment útil aquí perquè la bastida de connectors és explícita i gradada.
+
+**H4 — La tesi al final (estructura invertida)**
+Quan un alumne escriu 3 paràgrafs d'arguments i acaba amb "Per tot això, crec que X", la tesi és al final en lloc de ser al principi. No és un error de contingut: és un error de superestructura del gènere. Li demano que llegeixi només el primer paràgraf en veu alta i li pregunto: "Saps de seguida qué defensa l'autor?" Si la resposta és "no", l'exercici és clar: mou la tesi al principi i comprova si el text guanya o perd.
+
+**H5 — Connectors com a termòmetre del nivell**
+Reviso ràpidament els connectors que usa l'alumne: si tots els arguments comencen amb "perquè" o "però", és A1-A2 funcional. Si varia entre "en primer lloc", "a més", "per tant", és B1. Si usa "tanmateix", "no obstant", "en conseqüència", és B2. Aquesta lectura de 30 segons dels connectors em dóna el MECR real de l'alumne millor que cap test formal, i m'indica quin nivell de bastida de connectors necessita l'adaptació.
 
 ## Autoavaluació (descriptors en primera persona)
 

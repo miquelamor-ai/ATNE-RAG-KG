@@ -60,8 +60,22 @@ El glossari és un instrument de mediació lèxica. Aquesta V3 presenta una rúb
 
 > ⚠️ ESBORRANY — requereix captura via entrevistes a docents FJE
 
-- H1: El docent sol seleccionar els termes llegint el text i marcant els que l'alumnat ha preguntat anteriorment.
-- H2: Per a nouvinguts, el docent prioritza sempre la variant bilingüe si la L1 és d'alfabet no llatí.
+**Detecció** — Senyals docent: text amb termes curriculars d'especialitat · alumnat nouvingut o MECR baix · matèria TILC amb densitat lèxica alta · alumne usa BICS on caldria CALP. Senyals alumne: "Què vol dir?" > 3 cops per paràgraf · llegeix fluïdament però no comprèn · s'atura i mira l'adult sense dir res · usa "cosa" en lloc del terme tècnic · en text escrit bypassa termes amb "etc.". Anti-senyals: text < 100 paraules amb definicions integrades · vocabulari familiar · temps limitat per a explicació oral directa.
+
+**H1 — La marca mental de preguntes anteriors**
+Selecciono termes llegint el text i marcant els que l'alumnat m'ha preguntat en unitats anteriors. Tinc una llista mental de "paraules conflictives" per matèria i nivell: a ciències 3r ESO, "osmosi", "membrana" i "ions" sempre necessiten glossari.
+
+**H2 — La prova de la substitució**
+Per decidir si un terme va al glossari, faig la prova: "Podria l'alumne entendre la frase si substituís aquesta paraula per 'cosa'?" Si la resposta és "sí", el terme no és crític. Si és "no", va al glossari. Permet ser selectiu i no sobrecarregar l'alumne.
+
+**H3 — Variant bilingüe amb L1 d'alfabet no llatí**
+Per a nouvinguts d'àrab, xinès o urdú, el glossari bilingüe amb alfabet original és gairebé obligatori els primers 3 mesos. El terme en L1 és l'"ancoratge cognitiu": l'alumne ja sap el concepte, el glossari simplement li dóna la paraula en català. Sense aquest pont, cal aprendre simultàniament concepte i paraula, cosa que dobla la càrrega cognitiva.
+
+**H4 — Glossari col·laboratiu (B1+)**
+A partir de B1, proposo que l'alumnat construeixi el glossari col·lectivament: identifiquen els termes que no entenen, busquen la definició en parelles, el docent valida. Efecte doble: metacognició lèxica i glossari ajustat a les necessitats reals.
+
+**H5 — Glossari com a diagnòstic previ**
+Abans d'adaptar un text complex, demano que subratllin les paraules que no entenen. Si la majoria subratlla els mateixos termes: problema col·lectiu → glossari comú. Si cada alumne subratlla paraules diferents: problema individual → suport personalitzat.
 
 ## Fonts principals
 

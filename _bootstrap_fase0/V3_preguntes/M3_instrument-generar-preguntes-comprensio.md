@@ -53,17 +53,30 @@ Les preguntes de comprensió lectora segueixen el **model MALL de 3 moments × 3
 
 ## Detecció
 
-> ⚠️ ESBORRANY — requereix validació pedagògica humana (docents FJE)
+**Senyals docent**: text complex per al nivell · alumnat llegeix passivament · cal demostrar comprensió per a activitat posterior · text TILC on comprensió és prerequisit · nouvingut necessita guió de lectura.
 
-**Senyals docent**: Vol assegurar la comprensió · El text és complex per al nivell · Cal demostrar comprensió per a activitat posterior.
-**Anti-senyals**: Text molt curt i comprensió òbvia · El docent ja té les seves pròpies preguntes.
+**Senyals alumne**: respon "no sé" o "parla de coses" → lectura sense propòsit · respon literals però no inferències (*efecte mirall literal*) · no pot predir de qué tractarà el text · s'atura i no sap com continuar · nouvingut A1-A2: descodifica però no comprèn.
+
+**Context favorable**: matèria TILC · grup amb 30%+ comprensió lectora baixa (PIRLS Catalunya 2021) · text literari amb resposta estètica i afectiva.
+
+**Anti-senyals**: text < 80 paraules i comprensió immediata · docent ja té les seves pròpies preguntes · temps limitat → millor discussió oral col·lectiva.
 
 ## Heurístiques docent
 
-> ⚠️ ESBORRANY — requereix captura via entrevistes a docents FJE
+**H1 — La resposta "no sé" com a senyal d'alarma**
+Quan pregunto "De qué tracta el text?" i l'alumne respon "No sé", ha llegit sense propòsit. El moment "Abans de llegir" és el més important: li dono un propòsit explícit ("Llegeix per saber [X concret]") i li pregunto el que ja sap del tema. Amb un propòsit, la comprensió millora notablement fins i tot sense canviar el text.
 
-- H1: El docent prioritza "Abans de llegir" per a alumnat amb poc coneixement previ del tema.
-- H2: Per a textos literaris, el docent afavoreix les preguntes creatives i afectives per sobre de les literals.
+**H2 — Detectar el mirall literal**
+L'alumne respon correctament les preguntes literals però es queda en blanc davant "Per qué creus que...?" Introdueixo gradualment l'inferencial: primer amb inferències mínimes ("La resposta no és al text però sí al context"), progressivament amb major distància inferencial.
+
+**H3 — El coneixement previ com a palanca**
+Per a textos sobre temes allunyats de l'experiència de l'alumne, dedico 5 minuts a activar coneixement previ (imatge, vídeo curt, explicació oral) abans de distribuir el text. Sense aquest ancoratge, les preguntes de comprensió posterior seran molt difícils.
+
+**H4 — Text literari vs. informatiu**
+La primera pregunta després d'un text literari és sempre afectiva: "Com t'has sentit llegint-lo?" Per a un text informatiu: "Quin és el fet o dada més important?" Aquesta distinció inicial marca el to de tota la sessió.
+
+**H5 — "Menys és més"**
+Quan tinc poc temps, trio 3 preguntes potents (una literal, una inferencial, una crítica) en lloc de 10. Una bona pregunta inferencial genera més aprenentatge que cinc de literals (MALL: "menys és més").
 
 ## Fonts principals
 
