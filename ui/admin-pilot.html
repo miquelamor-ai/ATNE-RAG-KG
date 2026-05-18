@@ -249,14 +249,8 @@
 
 <div style="height: var(--sp-4);"></div>
 
-<!-- Problemes detectats per docents (rúbrica review_items) -->
-<div class="grid grid-2">
-  <div class="card">
-    <h2>Problemes que assenyalen els docents</h2>
-    <p class="hint">Marques a la rúbrica del Pas 4 (mostra el que no quadra).</p>
-    <div id="review-items" class="review-bar"></div>
-  </div>
-
+<!-- Comportament d'ús -->
+<div class="grid grid-1">
   <div class="card">
     <h2>Comportament d'ús</h2>
     <table class="lite">
@@ -287,8 +281,9 @@
 <div style="height: var(--sp-4);"></div>
 <div class="card">
   <h2>Comentaris lliures dels docents</h2>
-  <p class="hint">Camp "Altres" de la rúbrica + comentari del feedback.</p>
+  <p class="hint">Textos lliures escrits al popover «Refer» i «Refer amb rúbrica» del Pas 3. Per al detall complet (què van marcar + què van escriure), mira la secció «🔁 Refinaments amb context».</p>
   <ul id="altres-texts" style="font-size: 13px; color: var(--ink-700); padding-left: 18px;"></ul>
+  <p id="altres-empty" style="font-size:13px;color:var(--ink-400);margin:0">Cap comentari lliure encara.</p>
 </div>
 
 <!-- Refinaments amb context -->
@@ -465,13 +460,16 @@
 
   function renderAltresTexts(arr) {
     var el = $('altres-texts');
+    var empty = $('altres-empty');
     el.innerHTML = '';
     if (!arr || arr.length === 0) {
-      el.innerHTML = '<li style="color:var(--ink-400);font-style:italic">Cap comentari encara.</li>';
+      if (empty) empty.style.display = '';
       return;
     }
+    if (empty) empty.style.display = 'none';
     arr.forEach(function (t) {
       var li = document.createElement('li');
+      li.style.marginBottom = '8px';
       li.textContent = t;
       el.appendChild(li);
     });
@@ -561,7 +559,8 @@
     renderTable('t-presets', d.presets_used || {});
     renderTable('t-complements', d.complement_actions || {});
 
-    renderReviewItems(fb.review_items || {});
+    // renderReviewItems eliminat: la secció «Problemes que assenyalen» depenia
+    // del modal de follow-up obsolet. La info útil ara és a «🔁 Refinaments amb context».
     $('m-edit-rate').textContent = fb.edit_rate != null ? fmtPct(fb.edit_rate) : '–';
     $('m-copied-rate').textContent = fb.copied_rate != null ? fmtPct(fb.copied_rate) : '–';
     $('m-exported-rate').textContent = fb.exported_rate != null ? fmtPct(fb.exported_rate) : '–';

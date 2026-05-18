@@ -2056,12 +2056,17 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
     # Refines amb context (text/rúbrica): per a cada esdeveniment, exposem
     # QUÈ ha demanat el docent (problemes marcats + text lliure) perquè
     # el dashboard pugui mostrar-ho amb un format llegible.
+    # També extreu els textos lliures cap a `comentaris_lliures` perquè
+    # la secció de "Comentaris lliures" del dashboard tingui dades reals
+    # (abans depenia del modal antic de /home, sempre buit).
     refines_detall = []
+    comentaris_lliures: list[str] = []
     for e in refines_dedicated:
         data = e.get("data") or {}
         ts = (e.get("ts") or "")[:19].replace("T", " ")
         et = e.get("event_type")
         if et == "refine_submitted":
+            user_text = (data.get("user_instruction") or "").strip()
             refines_detall.append({
                 "ts": ts,
                 "tipus": "refine_text",
@@ -2071,20 +2076,25 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
                 "simp": data.get("simp"),
                 "tone": data.get("tone"),
                 "revisa_catala": bool(data.get("revisa_catala")),
-                "instruccio": data.get("user_instruction") or data.get("instruction_full"),
+                "instruccio": user_text or data.get("instruction_full"),
                 "problems": [],
             })
+            if user_text and len(comentaris_lliures) < 40:
+                comentaris_lliures.append(f"[{ts}] [Refer] {user_text}")
         elif et == "redo_rubric":
+            user_text = (data.get("user_observation") or "").strip()
             refines_detall.append({
                 "ts": ts,
                 "tipus": "rubric_redo",
                 "docent": _alias(e.get("docent_id") or ""),
                 "problems": data.get("problems") or [],
-                "instruccio": data.get("user_observation"),
+                "instruccio": user_text or None,
                 "preserve_text": bool(data.get("preserve_text")),
                 "preset": None, "len": None, "simp": None, "tone": None,
                 "revisa_catala": False,
             })
+            if user_text and len(comentaris_lliures) < 40:
+                comentaris_lliures.append(f"[{ts}] [Rúbrica] {user_text}")
 
     body = {
         "ok": True,
@@ -2117,7 +2127,9 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
             "rating_avg": rating_avg,
             "rating_dist": rating_dist,
             "review_items": dict(review_items_counter),
-            "altres_texts": altres_texts[:20],
+            # Combinem comentaris lliures dels refines (font principal ara) i
+            # els antics altres_text de history.review_items (residuals).
+            "altres_texts": (comentaris_lliures + altres_texts)[:40],
             "edit_rate": edit_rate,
             "copied_rate": copied_rate,
             "exported_rate": exported_rate,
