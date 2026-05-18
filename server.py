@@ -1854,6 +1854,24 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
         d = e.get("data") or {}
         return bool(d.get("_health_probe") or d.get("_boot_probe"))
     events = [e for e in events_raw if not _is_probe(e)]
+
+    # Suggestions i client_errors: queries dedicades. El loop principal sobre
+    # `events` només veu els 2000 events més recents — amb volum normal del
+    # pilot (5-20 events/sessió), suggestions de fa pocs dies poden quedar
+    # fora del window. Aquests queries garanteixen que TOTS els suggeriments
+    # es vegin al dashboard, independentment del volum d'altres events.
+    suggestions_dedicated = _get(
+        f"{base}/atne_pilot_events"
+        f"?select=ts,docent_id,data"
+        f"&event_type=eq.suggestion_submitted"
+        f"&order=ts.desc&limit=100"
+    )
+    client_errors_dedicated = _get(
+        f"{base}/atne_pilot_events"
+        f"?select=ts,docent_id,data"
+        f"&event_type=eq.client_error"
+        f"&order=ts.desc&limit=100"
+    )
     feedback = _get(
         f"{base}/history"
         f"?select=created_at,rating,review_items,refine_count,exported,copied,"
@@ -1995,21 +2013,21 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
     docents_actius_ids = {s["docent_id"] for s in sessions if s.get("docent_id")}
     docents_list = sorted([_alias(did) for did in docents_actius_ids])
 
-    # ── Suggeriments i errors client (darrers 30) ────────────────────────
+    # ── Suggeriments i errors client (queries dedicades, NO depenen del
+    #    window de 2000 events més recents).
     suggestions = []
-    client_errors = []
-    for e in events:
-        et = e.get("event_type")
+    for e in suggestions_dedicated:
         data = e.get("data") or {}
         ts = (e.get("ts") or "")[:19].replace("T", " ")
-        docent = e.get("docent_id") or ""
-        if docent and "@" in docent:
-            docent = docent.split("@")[0]  # oculta domini per brevetat
-        if et == "suggestion_submitted" and len(suggestions) < 30:
-            text = str(data.get("text") or "")[:300]
-            if text:
-                suggestions.append({"ts": ts, "docent": _alias(e.get("docent_id") or ""), "text": text})
-        elif et == "client_error" and len(client_errors) < 30:
+        text = str(data.get("text") or "")[:300]
+        if text and len(suggestions) < 100:
+            suggestions.append({"ts": ts, "docent": _alias(e.get("docent_id") or ""), "text": text})
+
+    client_errors = []
+    for e in client_errors_dedicated:
+        data = e.get("data") or {}
+        ts = (e.get("ts") or "")[:19].replace("T", " ")
+        if len(client_errors) < 100:
             client_errors.append({
                 "ts": ts,
                 "docent": _alias(e.get("docent_id") or ""),
