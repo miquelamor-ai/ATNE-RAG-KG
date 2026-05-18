@@ -1891,7 +1891,7 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
     )
     feedback = _get(
         f"{base}/history"
-        f"?select=created_at,rating,review_items,refine_count,exported,copied,"
+        f"?select=created_at,rating,review_items,comment,refine_count,exported,copied,"
         f"edit_manual,time_on_step4_ms,model_used,prompt_version,docent_hash,cost_estimat_eur"
         f"&order=created_at.desc&limit=1000"
     )
@@ -1971,9 +1971,11 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
     rating_avg = round(sum(h["rating"] for h in rated) / len(rated), 2) if rated else None
     feedback_rate = round(len(rated) / len(feedback), 3) if feedback else None
 
-    # Review items: agregar checkboxes
+    # Review items: agregar checkboxes (usar_classe / retocar / no_usar i altres)
+    # provinents del pill «Valora aquesta adaptació» del Pas 3 + modal antic.
     review_items_counter: Counter = Counter()
     altres_texts: list[str] = []
+    feedback_comments: list[str] = []
     for h in feedback:
         ri = h.get("review_items") or {}
         if isinstance(ri, dict):
@@ -1982,6 +1984,11 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
                     if v: altres_texts.append(str(v)[:200])
                 elif v:
                     review_items_counter[k] += 1
+        # comment del pill: text lliure que escriu el docent quan valora
+        cmt = (h.get("comment") or "").strip()
+        if cmt:
+            ts = (h.get("created_at") or "")[:19].replace("T", " ")
+            feedback_comments.append(f"[{ts}] [Valora] {cmt[:300]}")
 
     edit_rate = (sum(1 for h in feedback if h.get("edit_manual"))
                  / len(feedback)) if feedback else None
@@ -2127,9 +2134,17 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
             "rating_avg": rating_avg,
             "rating_dist": rating_dist,
             "review_items": dict(review_items_counter),
-            # Combinem comentaris lliures dels refines (font principal ara) i
-            # els antics altres_text de history.review_items (residuals).
-            "altres_texts": (comentaris_lliures + altres_texts)[:40],
+            # Combinem comentaris lliures de 3 fonts:
+            # - pill «Valora aquesta adaptació» (history.comment): font principal
+            # - popovers Refer/Rúbrica del Pas 3 (events refine_submitted/redo_rubric)
+            # - modal antic de /home (history.review_items.altres_text): residuals
+            "altres_texts": (feedback_comments + comentaris_lliures + altres_texts)[:50],
+            # Checkboxes d'ús del pill «Valora»: comptadors d'intenció
+            "usage_intent": {
+                "usar_classe": review_items_counter.get("usar_classe", 0),
+                "retocar":     review_items_counter.get("retocar", 0),
+                "no_usar":     review_items_counter.get("no_usar", 0),
+            },
             "edit_rate": edit_rate,
             "copied_rate": copied_rate,
             "exported_rate": exported_rate,

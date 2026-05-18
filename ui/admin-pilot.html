@@ -249,10 +249,21 @@
 
 <div style="height: var(--sp-4);"></div>
 
-<!-- Comportament d'ús -->
-<div class="grid grid-1">
+<!-- Intenció d'ús + Comportament d'ús -->
+<div class="grid grid-2">
   <div class="card">
-    <h2>Comportament d'ús</h2>
+    <h2>Intenció d'ús (declarada)</h2>
+    <p class="hint">Checkboxes del pill «Valora aquesta adaptació» del Pas 3. Què diu el docent que farà amb el resultat.</p>
+    <table class="lite">
+      <tr><th>Intenció</th><th class="num">N</th></tr>
+      <tr><td>L'usaré tal qual</td><td class="num" id="u-usar">–</td></tr>
+      <tr><td>L'hauré de retocar</td><td class="num" id="u-retocar">–</td></tr>
+      <tr><td>No la usaré</td><td class="num" id="u-no-usar">–</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Comportament d'ús (real)</h2>
     <table class="lite">
       <tr><th>Indicador</th><th class="num">%</th></tr>
       <tr><td>Edita manualment l'adaptació</td><td class="num" id="m-edit-rate">–</td></tr>
@@ -281,7 +292,7 @@
 <div style="height: var(--sp-4);"></div>
 <div class="card">
   <h2>Comentaris lliures dels docents</h2>
-  <p class="hint">Textos lliures escrits al popover «Refer» i «Refer amb rúbrica» del Pas 3. Per al detall complet (què van marcar + què van escriure), mira la secció «🔁 Refinaments amb context».</p>
+  <p class="hint">3 fonts combinades: pill «Valora aquesta adaptació» del Pas 3 (etiqueta [Valora]), popovers «Refer» i «Refer amb rúbrica» (etiquetes [Refer] i [Rúbrica]), modal antic de /home (residual). Per al detall del refer/rúbrica mira la secció «🔁 Refinaments amb context».</p>
   <ul id="altres-texts" style="font-size: 13px; color: var(--ink-700); padding-left: 18px;"></ul>
   <p id="altres-empty" style="font-size:13px;color:var(--ink-400);margin:0">Cap comentari lliure encara.</p>
 </div>
@@ -561,6 +572,10 @@
 
     // renderReviewItems eliminat: la secció «Problemes que assenyalen» depenia
     // del modal de follow-up obsolet. La info útil ara és a «🔁 Refinaments amb context».
+    var ui = d.usage_intent || {};
+    $('u-usar').textContent     = ui.usar_classe != null ? ui.usar_classe : '–';
+    $('u-retocar').textContent  = ui.retocar     != null ? ui.retocar     : '–';
+    $('u-no-usar').textContent  = ui.no_usar     != null ? ui.no_usar     : '–';
     $('m-edit-rate').textContent = fb.edit_rate != null ? fmtPct(fb.edit_rate) : '–';
     $('m-copied-rate').textContent = fb.copied_rate != null ? fmtPct(fb.copied_rate) : '–';
     $('m-exported-rate').textContent = fb.exported_rate != null ? fmtPct(fb.exported_rate) : '–';
