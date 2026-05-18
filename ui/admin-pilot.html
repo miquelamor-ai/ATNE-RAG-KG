@@ -291,6 +291,20 @@
   <ul id="altres-texts" style="font-size: 13px; color: var(--ink-700); padding-left: 18px;"></ul>
 </div>
 
+<!-- Refinaments amb context -->
+<div style="height: var(--sp-4);"></div>
+<div class="card">
+  <h2 style="display:flex;align-items:center;gap:8px">
+    🔁 Refinaments amb context
+    <span id="refines-badge" style="background:#4c3fc4;color:#fff;border-radius:20px;padding:1px 8px;font-size:12px;font-family:var(--mono);display:none">0</span>
+  </h2>
+  <p class="hint">Cada cop que un docent prem «Refer» o «Refer amb rúbrica»: què ha marcat (steppers + rúbrica) i què ha escrit al quadre de text.</p>
+  <table class="lite" id="t-refines-detall">
+    <tr><th style="width:130px">Hora</th><th style="width:80px">Tipus</th><th style="width:120px">Docent</th><th>Marcat + observació lliure</th></tr>
+  </table>
+  <p id="refines-empty" style="font-size:13px;color:var(--ink-400);margin:0">Cap refinament registrat encara.</p>
+</div>
+
 <!-- Suggeriments i errors -->
 <div style="height: var(--sp-4);"></div>
 <div class="grid grid-2">
@@ -559,6 +573,50 @@
     renderAltresTexts(fb.altres_texts || []);
     renderSuggestions(d.suggestions || []);
     renderErrors(d.client_errors || []);
+    renderRefines(d.refines_detall || []);
+  }
+
+  function renderRefines(arr) {
+    var t = $('t-refines-detall');
+    var empty = $('refines-empty');
+    var badge = $('refines-badge');
+    if (!t) return;
+    while (t.rows.length > 1) t.deleteRow(1);
+    if (!arr || arr.length === 0) {
+      if (empty) empty.style.display = '';
+      if (badge) badge.style.display = 'none';
+      return;
+    }
+    if (empty) empty.style.display = 'none';
+    if (badge) { badge.textContent = arr.length; badge.style.display = ''; }
+    arr.forEach(function (r) {
+      var tr = t.insertRow();
+      var ts = r.ts ? new Date(r.ts.replace(' ', 'T')).toLocaleString('ca', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+      var tipus = r.tipus === 'rubric_redo'
+        ? '<span style="background:#fef3c7;color:#92400e;border-radius:4px;padding:2px 6px;font-size:11px;font-family:var(--mono)">RÚBRICA</span>'
+        : '<span style="background:#dbeafe;color:#1e40af;border-radius:4px;padding:2px 6px;font-size:11px;font-family:var(--mono)">REFINE</span>';
+      var marcat = '';
+      if (r.tipus === 'rubric_redo') {
+        if (r.problems && r.problems.length) {
+          marcat = r.problems.map(function (p) { return '<span style="background:#f3f4f6;border:1px solid var(--ink-150);border-radius:3px;padding:1px 6px;margin-right:3px;font-size:11px">' + esc(p) + '</span>'; }).join('');
+        }
+        if (r.preserve_text) marcat += ' <em style="color:var(--ink-500);font-size:11px">+mantenir text</em>';
+      } else {
+        var bits = [];
+        if (r.preset) bits.push(r.preset);
+        if (r.len && r.len !== 'mantenir') bits.push('longitud: ' + r.len);
+        if (r.simp && r.simp !== 'mitjà') bits.push('simp: ' + r.simp);
+        if (r.tone && r.tone !== 'neutre') bits.push('to: ' + r.tone);
+        if (r.revisa_catala) bits.push('+català');
+        marcat = bits.map(function (b) { return '<span style="background:#f3f4f6;border:1px solid var(--ink-150);border-radius:3px;padding:1px 6px;margin-right:3px;font-size:11px">' + esc(b) + '</span>'; }).join('');
+      }
+      var instr = r.instruccio ? '<div style="color:var(--ink-700);font-size:12px;margin-top:4px;font-style:italic">«' + esc(r.instruccio) + '»</div>' : '';
+      tr.innerHTML =
+        '<td style="font-family:var(--mono);font-size:11px;color:var(--ink-500);white-space:nowrap">' + esc(ts) + '</td>' +
+        '<td>' + tipus + '</td>' +
+        '<td style="font-weight:500">' + esc(r.docent || '–') + '</td>' +
+        '<td>' + marcat + instr + '</td>';
+    });
   }
 
   function renderDocentsList(list) {

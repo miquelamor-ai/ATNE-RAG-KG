@@ -3803,6 +3803,19 @@
       return;
     }
 
+    // Tracking enriquit: captura TOT el que el docent ha triat al popover
+    // (steppers + text lliure + toggle català). Si no es captura aquí, el
+    // dashboard només sap si hi va haver instrucció (boolean), no què deia.
+    try {
+      window.ATNE_TRACK?.event('refine_submitted', {
+        preset: preset || null,
+        len, simp, tone,
+        revisa_catala: revCatala,
+        user_instruction: userInstr ? userInstr.slice(0, 500) : null,
+        instruction_full: instruccio ? instruccio.slice(0, 500) : null,
+      });
+    } catch (e) { /* */ }
+
     refineAdaptedText({ preset, instruccio, overlayMsg: 'Refinant el text…' });
   });
 
@@ -3820,6 +3833,19 @@
     const userObs = (pop.querySelector('textarea')?.value || '').trim();
     const preserveText = document.getElementById('rub-preserve')?.classList.contains('on');
     if (!problems.length && !userObs && !preserveText) { closePops(); return; }
+
+    // Tracking: aquest flux NO traçava res. Capturem els problemes marcats
+    // a la rúbrica i el text d'observació lliure perquè el dashboard pugui
+    // mostrar QUÈ ha demanat el docent (no només QUE ha refet).
+    try {
+      window.ATNE_TRACK?.event('redo_rubric', {
+        problems,
+        user_observation: userObs ? userObs.slice(0, 500) : null,
+        preserve_text: preserveText,
+        n_problems: problems.length,
+      });
+    } catch (e) { /* */ }
+
     const corrections = [];
     if (preserveText) {
       // Snapshot del text adaptat actual perquè després de la regeneració el

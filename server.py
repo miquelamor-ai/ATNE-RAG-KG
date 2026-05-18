@@ -1520,7 +1520,7 @@ _PILOT_EVENT_TYPES = {
     # Adaptació
     "adapt_started", "adapt_done", "adapt_error",
     # Refinaments
-    "refine_started", "refined", "redo", "redo_rubric",
+    "refine_started", "refined", "refine_submitted", "redo", "redo_rubric",
     # Complements
     "complement_generated", "complement_deleted", "complement_edited",
     # Edició / exports
@@ -1880,6 +1880,15 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
         f"&event_type=eq.client_error"
         f"&order=ts.desc&limit=100"
     )
+    # Refines: dos tipus d'events ens interessen amb el seu context complet.
+    #  - refine_submitted: refinament del text (steppers + instrucció lliure)
+    #  - redo_rubric: regeneració amb rúbrica (problemes marcats + observació)
+    refines_dedicated = _get(
+        f"{base}/atne_pilot_events"
+        f"?select=ts,event_type,docent_id,data"
+        f"&event_type=in.(refine_submitted,redo_rubric)"
+        f"&order=ts.desc&limit=100"
+    )
     feedback = _get(
         f"{base}/history"
         f"?select=created_at,rating,review_items,refine_count,exported,copied,"
@@ -2044,6 +2053,39 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
                 "type": data.get("type") or "js",
             })
 
+    # Refines amb context (text/rúbrica): per a cada esdeveniment, exposem
+    # QUÈ ha demanat el docent (problemes marcats + text lliure) perquè
+    # el dashboard pugui mostrar-ho amb un format llegible.
+    refines_detall = []
+    for e in refines_dedicated:
+        data = e.get("data") or {}
+        ts = (e.get("ts") or "")[:19].replace("T", " ")
+        et = e.get("event_type")
+        if et == "refine_submitted":
+            refines_detall.append({
+                "ts": ts,
+                "tipus": "refine_text",
+                "docent": _alias(e.get("docent_id") or ""),
+                "preset": data.get("preset"),
+                "len": data.get("len"),
+                "simp": data.get("simp"),
+                "tone": data.get("tone"),
+                "revisa_catala": bool(data.get("revisa_catala")),
+                "instruccio": data.get("user_instruction") or data.get("instruction_full"),
+                "problems": [],
+            })
+        elif et == "redo_rubric":
+            refines_detall.append({
+                "ts": ts,
+                "tipus": "rubric_redo",
+                "docent": _alias(e.get("docent_id") or ""),
+                "problems": data.get("problems") or [],
+                "instruccio": data.get("user_observation"),
+                "preserve_text": bool(data.get("preserve_text")),
+                "preset": None, "len": None, "simp": None, "tone": None,
+                "revisa_catala": False,
+            })
+
     body = {
         "ok": True,
         "prompt_version_actual": ATNE_PROMPT_VERSION,
@@ -2086,6 +2128,7 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
         "recent": recent,
         "suggestions": suggestions,
         "client_errors": client_errors,
+        "refines_detall": refines_detall,
     }
     # Cap cache: les dades de pilot canvien constantment. Sense aquest header,
     # alguns navegadors/proxies cachejaven la resposta i el docent veia dades
