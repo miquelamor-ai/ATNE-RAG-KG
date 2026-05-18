@@ -1814,9 +1814,17 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
     if not SUPABASE_URL or not SUPABASE_ANON_KEY:
         return {"ok": False, "error": "Supabase no configurat"}
 
+    # IMPORTANT: usem SUPABASE_WRITE_HEADERS (service-key) per LLEGIR. Causa:
+    # les escriptures de telemetria del pilot usen service-key per bypassar
+    # RLS (atne_pilot_events típicament té RLS permissive INSERT-only per
+    # anon). Si llegim amb anon-key, RLS bloqueja i veiem 0 resultats encara
+    # que les dades existeixin. L'endpoint ja està protegit per _require_admin
+    # → és segur usar service-key aquí (mai s'exposa al client).
+    _read_headers = SUPABASE_WRITE_HEADERS if _USING_SERVICE_KEY else SUPABASE_HEADERS
+
     def _get(url):
         try:
-            r = requests.get(url, headers=SUPABASE_HEADERS, timeout=10)
+            r = requests.get(url, headers=_read_headers, timeout=10)
             return r.json() if r.status_code == 200 else []
         except Exception:
             return []
