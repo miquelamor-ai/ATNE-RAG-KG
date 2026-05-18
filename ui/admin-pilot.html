@@ -595,7 +595,13 @@
   }
 
   async function fetchMetrics() {
-    var r = await fetch('/api/admin/pilot-metrics', { credentials: 'include' });
+    // cache: 'no-store' garanteix sempre dades fresques de Supabase.
+    // Sense això, alguns navegadors revalidaven via HTTP cache i retornaven
+    // la resposta anterior encara que hi hagués hagut events nous.
+    var r = await fetch('/api/admin/pilot-metrics?_t=' + Date.now(), {
+      credentials: 'include',
+      cache: 'no-store',
+    });
     if (r.status === 401) {
       showLogin();
       return null;

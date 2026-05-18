@@ -2036,7 +2036,7 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
                 "type": data.get("type") or "js",
             })
 
-    return {
+    body = {
         "ok": True,
         "prompt_version_actual": ATNE_PROMPT_VERSION,
         "totals": {
@@ -2079,6 +2079,13 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
         "suggestions": suggestions,
         "client_errors": client_errors,
     }
+    # Cap cache: les dades de pilot canvien constantment. Sense aquest header,
+    # alguns navegadors/proxies cachejaven la resposta i el docent veia dades
+    # antigues després d'una adaptació recent.
+    return JSONResponse(content=body, headers={
+        "Cache-Control": "no-store, no-cache, must-revalidate",
+        "Pragma": "no-cache",
+    })
 
 
 @app.get("/api/admin/pilot/fallback")
