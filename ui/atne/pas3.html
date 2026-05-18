@@ -3847,6 +3847,19 @@
     } catch (e) { /* */ }
 
     const corrections = [];
+    // BUG RESOLT 2026-05-18: abans, problems i userObs es capturaven però NO
+    // es passaven al LLM. El docent marcava la rúbrica i escrivia
+    // observacions, i el LLM no rebia absolutament res — generava la
+    // mateixa adaptació. Ara s'afegeixen al payload `corrections`.
+    if (problems.length) {
+      corrections.push(
+        'Problemes detectats per la persona docent a l\'adaptació anterior: '
+        + problems.join('; ') + '. Corregeix-los a la nova regeneració.'
+      );
+    }
+    if (userObs) {
+      corrections.push('Observació de la persona docent: ' + userObs);
+    }
     if (preserveText) {
       // Snapshot del text adaptat actual perquè després de la regeneració el
       // puguem restaurar íntegrament (keeping els complements nous).
