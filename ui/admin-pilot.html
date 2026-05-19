@@ -141,7 +141,10 @@
 <header class="page">
   <h1>Dashboard del pilot ATNE <span class="pilot-status">EN CURS</span></h1>
   <div class="sub">Pilot 2026-04-20 → 2026-05-08 · 16 docents FJE</div>
-  <div class="updated-at" id="updated-at" style="color:rgba(255,255,255,0.7);margin-top:8px;">Carregant…</div>
+  <div class="updated-at" id="updated-at" style="color:rgba(255,255,255,0.7);margin-top:8px;">Carregant… <span style="color:rgba(255,255,255,0.5);font-size:12px;margin-left:8px">· auto-refresh cada 60 s</span></div>
+  <div style="margin-top:12px">
+    <button id="btn-csv" onclick="downloadCsv()" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:6px 14px;font-size:13px;cursor:pointer">⇩ Exportar CSV (últimes adaptacions)</button>
+  </div>
 </header>
 
 <!-- KPIs principals -->
@@ -224,6 +227,36 @@
     <h2>Per condició</h2>
     <table class="lite" id="t-by-conditions"><tr><th>Condició</th><th class="num">Sessions</th></tr></table>
   </div>
+</div>
+
+<div style="height: var(--sp-4);"></div>
+
+<!-- MALL: MECR sortida + Fase lectora + Modalitat lectora -->
+<div class="grid grid-3">
+  <div class="card">
+    <h2>Per MECR sortida</h2>
+    <p class="hint">Quants pre-A1/A1/A2 (emergent) vs B1+ (estratègic). Validem si el pilot cobreix nivells baixos.</p>
+    <table class="lite" id="t-by-mecr"><tr><th>MECR</th><th class="num">Sessions</th></tr></table>
+  </div>
+  <div class="card">
+    <h2>Per fase lectora</h2>
+    <p class="hint">Loogràfica / Alfabètica emergent / Alfabètica fluida. Derivat de etapa+MECR.</p>
+    <table class="lite" id="t-by-fase-lectora"><tr><th>Fase</th><th class="num">Sessions</th></tr></table>
+  </div>
+  <div class="card">
+    <h2>Per modalitat lectora</h2>
+    <p class="hint">Compartida (MOPI) · Progressiva · Transferència (TILC) · Autònoma. Valida arquitectura MALL.</p>
+    <table class="lite" id="t-by-modalitat"><tr><th>Modalitat</th><th class="num">Sessions</th></tr></table>
+  </div>
+</div>
+
+<div style="height: var(--sp-4);"></div>
+
+<!-- Heatmap condició × MECR -->
+<div class="card">
+  <h2>Heatmap condició × MECR</h2>
+  <p class="hint">Quines combinacions condició + nivell rep el pilot. Cel·les buides = combinacions no provades.</p>
+  <div id="heatmap-host" style="overflow-x:auto"></div>
 </div>
 
 <div style="height: var(--sp-4);"></div>
@@ -536,9 +569,12 @@
 
   function paint(d) {
     if (!d || !d.ok) return;
+    // Memoritzem la darrera resposta perquè downloadCsv() la pugui usar
+    window.__ATNE_LAST_DATA__ = d;
 
     document.getElementById('prompt-version-tag').textContent = 'prompt: ' + (d.prompt_version_actual || '?');
     document.getElementById('updated-at').textContent = 'Actualitzat: ' + new Date().toLocaleTimeString();
+    startAutoRefresh();
 
     var t = d.totals || {};
     $('k-sessions').textContent = fmt(t.sessions);
@@ -566,6 +602,11 @@
     renderTable('t-by-model', d.by_model || {});
     renderTable('t-by-etapa', d.by_etapa || {});
     renderTable('t-by-conditions', d.by_conditions || {});
+    // Noves distribucions MALL: MECR sortida + fase lectora + modalitat lectora
+    renderTable('t-by-mecr', d.by_mecr || {});
+    renderTable('t-by-fase-lectora', d.by_fase_lectora || {});
+    renderTable('t-by-modalitat', d.by_modalitat_lectora || {});
+    renderHeatmap(d.heatmap_condicio_mecr || {});
     renderTable('t-prompt-versions', d.by_prompt_version || {});
     renderTable('t-presets', d.presets_used || {});
     renderTable('t-complements', d.complement_actions || {});
@@ -588,6 +629,88 @@
     renderSuggestions(d.suggestions || []);
     renderErrors(d.client_errors || []);
     renderRefines(d.refines_detall || []);
+  }
+
+  // Heatmap condició × MECR — taula amb cel·les colored per intensitat.
+  function renderHeatmap(h) {
+    var host = $('heatmap-host');
+    if (!host) return;
+    var conds = Object.keys(h);
+    if (conds.length === 0) {
+      host.innerHTML = '<p style="color:var(--ink-400);font-size:13px;font-style:italic;margin:0">Sense dades.</p>';
+      return;
+    }
+    var mecrs = ['pre-A1', 'A1', 'A2', 'B1', 'B2', 'C1'];
+    var maxVal = 0;
+    conds.forEach(function (c) {
+      mecrs.forEach(function (m) { if ((h[c] || {})[m] > maxVal) maxVal = h[c][m]; });
+    });
+    var html = '<table class="lite" style="font-size:12px"><tr><th>Condició</th>';
+    mecrs.forEach(function (m) { html += '<th class="num">' + m + '</th>'; });
+    html += '<th class="num">Total</th></tr>';
+    // Ordenem per total descendent
+    conds.sort(function (a, b) {
+      var sa = Object.values(h[a] || {}).reduce(function (x, y) { return x + y; }, 0);
+      var sb = Object.values(h[b] || {}).reduce(function (x, y) { return x + y; }, 0);
+      return sb - sa;
+    });
+    conds.forEach(function (c) {
+      var row = '<tr><td style="font-weight:500">' + esc(c) + '</td>';
+      var total = 0;
+      mecrs.forEach(function (m) {
+        var v = (h[c] || {})[m] || 0;
+        total += v;
+        if (v === 0) {
+          row += '<td class="num" style="color:var(--ink-200)">·</td>';
+        } else {
+          var intensity = maxVal > 0 ? v / maxVal : 0;
+          // Gradient blau: 0.1 (clar) → 0.9 (fosc)
+          var alpha = 0.15 + intensity * 0.65;
+          var color = intensity > 0.55 ? '#fff' : 'var(--ink-900)';
+          row += '<td class="num" style="background:rgba(76,63,196,' + alpha.toFixed(2) + ');color:' + color + ';font-weight:600">' + v + '</td>';
+        }
+      });
+      row += '<td class="num" style="font-weight:600">' + total + '</td>';
+      row += '</tr>';
+      html += row;
+    });
+    html += '</table>';
+    host.innerHTML = html;
+  }
+
+  // Auto-refresh cada 60s + export CSV. ES MUNTA UN COP per evitar timers
+  // duplicats si paint() s'executés diverses vegades.
+  var _autoRefreshTimer = null;
+  function startAutoRefresh() {
+    if (_autoRefreshTimer) return;
+    _autoRefreshTimer = setInterval(function () { refresh(); }, 60000);
+  }
+  function downloadCsv() {
+    var d = window.__ATNE_LAST_DATA__;
+    if (!d || !d.ok) return;
+    var rows = [['ts', 'docent', 'model', 'etapa', 'mecr', 'latency_ms', 'verify', 'prompt_version', 'cost_eur']];
+    (d.recent || []).forEach(function (r) {
+      rows.push([
+        r.ts || '', r.docent || '', r.model || '', r.etapa || '',
+        r.mecr || '', r.latency_ms || '', r.score != null ? r.score : '',
+        r.prompt_version || '', r.cost_eur != null ? r.cost_eur : '',
+      ]);
+    });
+    var csv = rows.map(function (row) {
+      return row.map(function (v) {
+        var s = String(v).replace(/"/g, '""');
+        return /[",\n]/.test(s) ? '"' + s + '"' : s;
+      }).join(',');
+    }).join('\n');
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'atne-pilot-' + new Date().toISOString().slice(0, 10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   function renderRefines(arr) {

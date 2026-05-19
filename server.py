@@ -1922,6 +1922,57 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
                 cond_counter[c] += 1
     by_conditions = dict(cond_counter.most_common(10))
 
+    # Distribució MECR sortida (clau per validar Fase C — quant pre-A1/A1/A2?)
+    by_mecr = dict(
+        Counter(s.get("mecr_sortida", "?") for s in sessions if s.get("mecr_sortida")).most_common()
+    )
+
+    # Fase lectora i modalitat: derivades runtime des de etapa + mecr + conditions.
+    # Replica les regles de adaptation/params_resolver.py (single source of truth).
+    def _derive_fase(etapa: str, mecr: str) -> str:
+        et = (etapa or "").lower()
+        if et == "infantil":
+            return "logografica"
+        if mecr in ("pre-A1",) and et in ("primaria", "primària"):
+            return "alfabetica_emergent"
+        if mecr in ("A1",) and et in ("primaria", "primària"):
+            return "alfabetica_emergent"
+        return "alfabetica_fluida"
+
+    def _derive_modalitat(fase: str, mecr: str, conds: list) -> str:
+        if fase == "logografica":
+            return "compartida"
+        is_nouv = any(c == "nouvingut" for c in (conds or []))
+        if is_nouv and mecr in ("pre-A1", "A1"):
+            return "transferencia"
+        if fase == "alfabetica_emergent":
+            return "progressiva"
+        return "autonoma"
+
+    fase_counter: Counter = Counter()
+    modal_counter: Counter = Counter()
+    # Heatmap condició × MECR
+    heatmap: dict = defaultdict(lambda: Counter())
+    for s in sessions:
+        etapa = s.get("etapa") or ""
+        mecr = s.get("mecr_sortida") or ""
+        conds = s.get("conditions") or []
+        fase = _derive_fase(etapa, mecr)
+        modal = _derive_modalitat(fase, mecr, conds)
+        fase_counter[fase] += 1
+        modal_counter[modal] += 1
+        if mecr:
+            if conds:
+                for c in conds:
+                    if c and c != "desconegut":
+                        heatmap[c][mecr] += 1
+            else:
+                heatmap["sense_condicio"][mecr] += 1
+    by_fase_lectora = dict(fase_counter.most_common())
+    by_modalitat_lectora = dict(modal_counter.most_common())
+    # Convert heatmap to nested dict for JSON serialization
+    heatmap_dict = {k: dict(v) for k, v in heatmap.items()}
+
     latencies = [s["latency_ms"] for s in sessions if s.get("latency_ms")]
     latency_avg = int(sum(latencies) / len(latencies)) if latencies else None
     latency_p90 = int(sorted(latencies)[int(len(latencies) * 0.9)]) if len(latencies) >= 5 else None
@@ -2120,6 +2171,10 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
         "by_etapa": by_etapa,
         "by_profile": by_profile,
         "by_conditions": by_conditions,
+        "by_mecr": by_mecr,
+        "by_fase_lectora": by_fase_lectora,
+        "by_modalitat_lectora": by_modalitat_lectora,
+        "heatmap_condicio_mecr": heatmap_dict,
         "by_prompt_version": by_prompt_version,
         "by_event_type": by_event_type,
         "complement_actions": dict(complement_actions.most_common(20)),

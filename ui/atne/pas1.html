@@ -1012,15 +1012,24 @@
     if (pid && window.ATNE_PROFILES[pid]) {
       const prev = localStorage.getItem('atne.profile_id');
       if (prev && prev !== pid) {
-        // Esborrem artefactes lligats al perfil anterior. Conservem doc_draft i
-        // doc_title: són el text del docent, vàlid per a qualsevol perfil.
+        // Esborrem TOTS els artefactes lligats al perfil anterior per evitar
+        // residus a Pas 3 (BUG-2/3 — defensa en profunditat). Conservem
+        // doc_draft i doc_title: són el text del docent, vàlid per a qualsevol
+        // perfil. Incloem current_adaptation_id i adapted_raw_ck que abans no
+        // s'esborraven: si bé el flux actual no podia mostrar adaptació
+        // antiga (cachedText buit feia fallar la condició), eliminar-los
+        // tanca qualsevol porta latent al BUG-2/3.
         ['atne.adapted_text',
          'atne.adapted_raw',
+         'atne.adapted_raw_ck',
          'atne.adapted_cache_key',
+         'atne.current_adaptation_id',
          'atne.complements',
          'atne.complements_for_pid',
          'atne.doc_nivell',
-         'atne.doc_materia'].forEach(k => localStorage.removeItem(k));
+         'atne.doc_materia',
+         'atne.preserve_adapted',
+         'atne.pending_corrections'].forEach(k => localStorage.removeItem(k));
       }
       localStorage.setItem('atne.profile_id', pid);
       // Desa el perfil complet (custom o demo). Els IDs de demos a pas1 (ex_tdah,
