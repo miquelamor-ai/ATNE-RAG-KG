@@ -467,6 +467,48 @@
     letter-spacing: .08em; color: var(--ink-500); margin-top: 2px;
   }
 
+  /* Toggle MAJÚSCULES per a infantil (lletra de pal). No canvia família,
+     només aplica text-transform: uppercase amb letter-spacing pedagògic. */
+  .font-uc-row{
+    display:flex;align-items:center;gap:10px;padding:8px 12px;margin-top:4px;
+    border-top:1px solid var(--paper-line);cursor:pointer;background:transparent;border:0;width:100%;text-align:left;
+  }
+  .font-uc-row:hover{background:var(--cream-2)}
+  .font-uc-row .uc-sw{
+    width:30px;height:18px;border-radius:9px;background:var(--ink-200);position:relative;flex-shrink:0;transition:background .15s;
+  }
+  .font-uc-row .uc-sw::after{
+    content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .15s;box-shadow:0 1px 2px rgba(0,0,0,.15);
+  }
+  .font-uc-row.on .uc-sw{background:var(--primary)}
+  .font-uc-row.on .uc-sw::after{transform:translateX(12px)}
+  .font-uc-row .uc-body{flex:1;min-width:0}
+  .font-uc-row .uc-name{font-size:12.5px;font-weight:600;color:var(--ink-900)}
+  .font-uc-row .uc-note{font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-500);margin-top:2px}
+  /* Aplicat al text adaptat. letter-spacing i word-spacing per llegibilitat. */
+  #adapted-text.atne-uppercase{ text-transform:uppercase; letter-spacing:.04em; word-spacing:.08em; }
+
+  /* Badge "Validant qualitat…" mentre el verify del LLM encara treballa.
+     Apareix al header del text adaptat quan onStep rep step='verifying' i
+     desapareix al verify_result / quality_ok / onResult. */
+  .verify-badge{
+    display:none;align-items:center;gap:6px;
+    background:#fff3d0;color:#8a6600;
+    padding:3px 9px;border-radius:var(--r-pill);
+    font-family:var(--mono);font-size:10px;font-weight:600;
+    border:1px solid #e9d59a;
+    text-transform:none;letter-spacing:.02em;
+    animation:verify-pulse 1.6s ease-in-out infinite;
+  }
+  .verify-badge.on{display:inline-flex}
+  .verify-badge::before{
+    content:"";width:6px;height:6px;border-radius:50%;background:#b58900;
+    animation:cloud-pulse .9s infinite;
+  }
+  @keyframes verify-pulse{
+    0%,100%{opacity:1}50%{opacity:.78}
+  }
+
   /* Toggle "Inclou a l'export" al capçal del panell de complement */
   .comp-toggle-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--primary-50);border:1px solid var(--primary-100);border-radius:var(--r-md);margin-bottom:16px;font-size:12.5px;gap:12px;flex-wrap:wrap}
   .comp-switch{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
@@ -1023,6 +1065,13 @@
                     <span class="font-opt-sample font-jetbrains">La Revolució Industrial</span>
                     <span class="font-opt-note">monospace · codi i textos tècnics</span>
                   </button>
+                  <button class="font-uc-row" id="font-uc-toggle" type="button" aria-pressed="false">
+                    <span class="uc-sw" aria-hidden="true"></span>
+                    <span class="uc-body">
+                      <span class="uc-name">TOT MAJÚSCULES · infantil</span>
+                      <span class="uc-note">lletra de pal · primers lectors</span>
+                    </span>
+                  </button>
                 </div>
               </div>
               <button class="cmp-toggle" id="cmp-toggle" data-help="p3-comparar">
@@ -1042,6 +1091,10 @@
               <div class="txt-badge adapted">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m12 3 1.9 4.6L18.5 9l-4.6 1.9L12 15l-1.9-4.6L5.5 9l4.6-1.4z"/></svg>
                 Text adaptat per a <span id="adapted-for">l'alumne</span>
+                <span class="verify-badge" id="verify-badge" title="L'agent validador encara està revisant la qualitat de l'adaptació">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+                  <span id="verify-badge-t">Validant qualitat…</span>
+                </span>
               </div>
               <div class="doc-read" id="adapted-text" data-help="p3-text">
                 <h1>La Revolució Industrial</h1>
@@ -1627,6 +1680,49 @@
     const sel = document.getElementById('font-selector');
     if (sel && !sel.contains(e.target)) sel.classList.remove('open');
   });
+
+  // ── Toggle MAJÚSCULES (lletra de pal per a infantil) ──────────────────
+  // Aplica text-transform:uppercase al #adapted-text amb letter-spacing
+  // pedagògic. Es desa a localStorage perquè persisteixi entre adaptacions.
+  function applyDocUppercase(on) {
+    try { localStorage.setItem('atne.font_uppercase', on ? '1' : '0'); } catch(e){}
+    const t = document.getElementById('adapted-text');
+    if (t) t.classList.toggle('atne-uppercase', !!on);
+    const btn = document.getElementById('font-uc-toggle');
+    if (btn) {
+      btn.classList.toggle('on', !!on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+  }
+  (function initUppercase(){
+    let saved = '0';
+    try { saved = localStorage.getItem('atne.font_uppercase') || '0'; } catch(e){}
+    applyDocUppercase(saved === '1');
+    const btn = document.getElementById('font-uc-toggle');
+    if (btn) {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        applyDocUppercase(!btn.classList.contains('on'));
+      });
+    }
+  })();
+
+  // ── Badge "Validant qualitat…" mentre el verify del LLM treballa ──────
+  // Apareix quan onStep rep step='verifying' i s'amaga al verify_result
+  // /quality_ok/quality, o al onResult. Senyal visual perquè el docent
+  // sàpiga que «el text es veu, però encara s'està revisant».
+  window.ATNE_VERIFY_BADGE = {
+    show(label) {
+      const b = document.getElementById('verify-badge');
+      const t = document.getElementById('verify-badge-t');
+      if (t && label) t.textContent = label;
+      if (b) b.classList.add('on');
+    },
+    hide() {
+      const b = document.getElementById('verify-badge');
+      if (b) b.classList.remove('on');
+    }
+  };
 
   function renderGroupSidebar(g) {
     const lside = document.querySelector('.lside');
@@ -2388,6 +2484,18 @@
     updateUndoRedo();
     updateDocMeta();  // Bug 4: recompta paraules a cada canvi
   }
+  // Reinicia l'stack amb el contingut actual com a únic estat (idx=0).
+  // S'usa en càrregues «fresques» (page load, SSE result d'una adaptació
+  // nova, canvi de versió multinivell) perquè el botó Desfer no torni
+  // al text demo hardcoded del template ni a una adaptació anterior
+  // que ja no és recuperable. Manté pushHistory() per a refines/edicions
+  // dins l'editor, on Desfer sí que ha de revertir el canvi.
+  window.resetHistory = function resetHistory(){
+    history.stack = [adaptedInnerHtmlClean()];
+    history.idx = 0;
+    updateUndoRedo();
+    updateDocMeta();
+  };
   function updateUndoRedo(){
     btnUndo.disabled = history.idx <= 0;
     btnRedo.disabled = history.idx >= history.stack.length - 1;
@@ -3183,7 +3291,9 @@
         adaptedElInit.innerHTML = ATNE_sanitize(_libAdaptedText);
         try {
           if (typeof attachParaHandles === 'function') attachParaHandles();
-          if (typeof pushHistory === 'function') pushHistory();
+          // Càrrega «fresca» des de la biblioteca: stack ha de començar
+          // amb aquest text com a únic estat (sinó Desfer mostraria el demo).
+          if (typeof window.resetHistory === 'function') window.resetHistory();
           if (typeof updateDocMeta === 'function') updateDocMeta();
           adaptedElInit.querySelectorAll('[data-actions-bound]').forEach(el => delete el.dataset.actionsBound);
           adaptedElInit.querySelectorAll('[data-bound]').forEach(el => delete el.dataset.bound);
@@ -3296,7 +3406,9 @@
       if (adaptedEl) {
         adaptedEl.innerHTML = ATNE_sanitize(cachedText);
         attachParaHandles();
-        pushHistory();
+        // Càrrega del cache (mateix perfil+text+títol): no és una edició,
+        // és restauració. Reset perquè Desfer no torni al demo del template.
+        if (typeof window.resetHistory === 'function') window.resetHistory();
         // Neteja bound flags i re-enganxa listeners (els data-* s'han restaurat
         // del HTML però els event listeners no es serialitzen).
         try {
@@ -3420,6 +3532,19 @@
       onStep: (ev) => {
         if (regenT && ev.msg) regenT.textContent = ev.msg;
         if (ev.msg) try { regenSetExpectedFromStep(ev.msg); } catch (_) {}
+        // Mostra/amaga el badge "Validant qualitat…" segons fase del verify.
+        // L'overlay 'regen' s'ha amagat tan bon punt arriba el primer delta,
+        // així que aquest badge és l'única senyal que el validador encara treballa.
+        try {
+          const s = ev.step || '';
+          if (s === 'verifying') {
+            window.ATNE_VERIFY_BADGE?.show('Validant qualitat…');
+          } else if (s === 'retry') {
+            window.ATNE_VERIFY_BADGE?.show('Regenerant per millorar qualitat…');
+          } else if (s === 'verify_result' || s === 'quality_ok' || s === 'quality' || s === 'warning') {
+            window.ATNE_VERIFY_BADGE?.hide();
+          }
+        } catch(_) {}
       },
       onDelta: (ev) => {
         // Token streaming: actualitzem el #adapted-text amb el text acumulat
@@ -3483,7 +3608,10 @@
             }
           }
           attachParaHandles();
-          pushHistory();
+          // Adaptació nova (SSE result): reset perquè Desfer no torni al
+          // demo del template ni a una adaptació anterior obsoleta. Una
+          // adaptació nova és un punt de partida nou.
+          if (typeof window.resetHistory === 'function') window.resetHistory();
         }
 
         // Distribueix els complements a les seves vistes.
@@ -3547,10 +3675,12 @@
     }).then(() => {
       stopRegenLoop();
       if (regenEl) regenEl.classList.remove('on');
+      window.ATNE_VERIFY_BADGE?.hide();
     }).catch(err => {
       if (regenT) regenT.textContent = 'Error del LLM';
       if (regenS) regenS.textContent = err.message || 'No s\'ha pogut adaptar el text';
       stopRegenLoop();
+      window.ATNE_VERIFY_BADGE?.hide();
       // Mantenim l'overlay 3s amb el missatge d'error perquè el docent el llegeixi
       setTimeout(() => { if (regenEl) regenEl.classList.remove('on'); }, 3000);
     });
@@ -3578,7 +3708,9 @@
         processIllustrationMarkers(adaptedEl, mainText);
       }
       if (typeof attachParaHandles === 'function') attachParaHandles();
-      if (typeof pushHistory === 'function') pushHistory();
+      // Canvi de versió multinivell: cada versió és un document diferent,
+      // així que reset per evitar que Desfer barregi versions.
+      if (typeof window.resetHistory === 'function') window.resetHistory();
     }
     if (typeof applyComplementsToViews === 'function') {
       applyComplementsToViews(parsed.complements || {});
