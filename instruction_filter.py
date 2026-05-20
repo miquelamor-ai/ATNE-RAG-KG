@@ -341,7 +341,11 @@ def get_instructions(profile: dict, params: dict, context: dict = None) -> dict:
     _fase_lectora = _derive_fase_lectora(chars, mecr, context)
     _modalitat_lectora = _derive_modalitat_lectora(chars, mecr, _fase_lectora)
 
-    active_profiles = [key for key, val in chars.items() if val.get("actiu")]
+    # Defensiu: caracteristiques pot contenir valors no-dict (ex: fase_lectora=str).
+    active_profiles = [
+        key for key, val in chars.items()
+        if isinstance(val, dict) and val.get("actiu")
+    ]
 
     # Resultat organitzat per macrodirectiva
     macros = {}

@@ -18,9 +18,16 @@ from adaptation.post_process import MECR_MAX_WORDS
 
 
 def _get_active_profiles(profile: dict) -> list[str]:
-    """Retorna llista de claus de perfils actius."""
+    """Retorna llista de claus de perfils actius.
+
+    Defensiu: caracteristiques pot contenir valors no-dict (ex: fase_lectora=str).
+    Filtra només els que son dict abans de cridar .get("actiu").
+    """
     chars = profile.get("caracteristiques", {})
-    return [key for key, val in chars.items() if val.get("actiu")]
+    return [
+        key for key, val in chars.items()
+        if isinstance(val, dict) and val.get("actiu")
+    ]
 
 
 def _str_to_bool(val) -> bool:
@@ -78,6 +85,9 @@ def build_persona_audience(profile: dict, context: dict, mecr: str) -> str:
         lines.append(f"Escrius per a un alumne del curs «{curs}».")
 
     for key, val in chars.items():
+        # Defensiu: caracteristiques pot contenir valors no-dict (ex: fase_lectora=str).
+        if not isinstance(val, dict):
+            continue
         if not val.get("actiu"):
             continue
 
@@ -409,7 +419,12 @@ El text complet adaptat segons tots els paràmetres indicats.
 """)
 
     if comp.get("glossari"):
-        is_nouvingut = "nouvingut" in [k for k, v in chars.items() if v.get("actiu")]
+        # Defensiu: caracteristiques pot contenir valors no-dict (ex: fase_lectora=str).
+        # Filtra només els que son dict abans de cridar .get("actiu").
+        is_nouvingut = "nouvingut" in [
+            k for k, v in chars.items()
+            if isinstance(v, dict) and v.get("actiu")
+        ]
         if is_nouvingut and l1:
             output_sections.append(f"""
 ## Glossari
