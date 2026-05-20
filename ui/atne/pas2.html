@@ -2857,11 +2857,15 @@
     if (!host) return;
     const autoDefaults = defaultComplementsForProfile(profile);
     // TOLC actiu? (català L2 + L1 declarada) → enriqueix descripcions de glossari i pictogrames
+    // Usa profile.conditions canòniques amb fallback a chips/cat/subvariables legacy.
+    const _conds = Array.isArray(profile && profile.conditions) ? profile.conditions : [];
+    const _nouCond = _conds.find(c => c && c.key === 'nouvingut') || {};
     const _sv = (profile && profile.subvariables) || {};
-    const _nou = _sv.nouvingut || _sv.l2 || {};
-    const _dx = Array.isArray(profile && profile.dx) ? profile.dx : [];
-    const _isL2 = _dx.includes('nouvingut') || _dx.includes('l2');
-    const _l1 = _nou.l1 || (profile && profile.l1) || '';
+    const _nouSv = _sv.nouvingut || _sv.l2 || {};
+    const _chips = Array.isArray(profile && profile.chips) ? profile.chips.map(c => (c && c.cat) || '') : [];
+    const _isL2 = !!_conds.find(c => c && c.key === 'nouvingut') ||
+                  _chips.includes('cat') || (profile && (profile.cat === 'cat' || profile.cat === 'group-cat'));
+    const _l1 = _nouCond.l1 || _nouSv.l1 || (profile && profile.l1) || '';
     const _tolcActive = _isL2 && _l1;
     // MECR per modular pictogrames (inline només a pre-A1/A1)
     const _mecr = (profile && (profile.adaptacio || profile.mecr_sortida || profile.mecr)) || '';
@@ -2940,11 +2944,16 @@
     const tolcBadge = document.getElementById('tolc-badge');
     const tolcBadgeL1 = document.getElementById('tolc-badge-l1');
     if (tolcBadge && profile) {
+      // Detecció via conditions canòniques (Pas 1 normalitza demos i custom a aquest format)
+      const conds = Array.isArray(profile.conditions) ? profile.conditions : [];
+      const nouCond = conds.find(c => c && c.key === 'nouvingut') || {};
+      // Fallback per a perfils demo antics que tenen subvariables/dx
       const sv = profile.subvariables || {};
-      const nou = sv.nouvingut || sv.l2 || {};
-      const dx = Array.isArray(profile.dx) ? profile.dx : [];
-      const isL2 = dx.includes('nouvingut') || dx.includes('l2');
-      const l1 = nou.l1 || profile.l1 || '';
+      const nouSv = sv.nouvingut || sv.l2 || {};
+      const chips = Array.isArray(profile.chips) ? profile.chips.map(c => (c && c.cat) || '') : [];
+      const isL2 = !!conds.find(c => c && c.key === 'nouvingut') ||
+                   chips.includes('cat') || profile.cat === 'cat' || profile.cat === 'group-cat';
+      const l1 = nouCond.l1 || nouSv.l1 || profile.l1 || '';
       if (isL2 && l1) {
         if (tolcBadgeL1) tolcBadgeL1.textContent = '· ' + l1;
         tolcBadge.style.display = 'block';
