@@ -1477,12 +1477,22 @@
     const detail = pcard.querySelector('.p-detail');
     const expandBtn = pcard.querySelector('.p-expand');
     if (detail) {
-      if (p.behaviors.length || p.aids.length) {
+      // Compatibilitat retroactiva: perfils antics (saved abans del 20/05/26) no tenen
+      // "Pont lingüístic (TOLC)" als aids perquè el codi de derivació no l'incloïa.
+      // Afegim-lo dinàmicament aquí si el perfil té català L2 + L1 declarada.
+      const _conds = Array.isArray(p.conditions) ? p.conditions : [];
+      const _nouCond = _conds.find(c => c && c.key === 'nouvingut') || {};
+      const _l1Top = _nouCond.l1 || (p.subvariables && (p.subvariables.nouvingut || p.subvariables.l2 || {}).l1) || p.l1 || '';
+      const _aidsList = Array.isArray(p.aids) ? p.aids.slice() : [];
+      if (_l1Top && !_aidsList.some(a => /Pont lingüístic|TOLC/i.test(a))) {
+        _aidsList.unshift('Pont lingüístic (TOLC) · ' + _l1Top);
+      }
+      if (p.behaviors.length || _aidsList.length) {
         detail.innerHTML = `
           <div class="p-sect">Conductes observades</div>
           <div class="p-list">${p.behaviors.map(b => `<div class="p-item">${b}</div>`).join('')}</div>
           <div class="p-sect">Ajuts que activa el perfil</div>
-          <div class="p-list">${p.aids.map(a => `<div class="p-item">${a}</div>`).join('')}</div>
+          <div class="p-list">${_aidsList.map(a => `<div class="p-item">${a}</div>`).join('')}</div>
         `;
         if (expandBtn) expandBtn.style.display = '';
       } else {
