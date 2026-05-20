@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Walktour - Plantilla mínima</title>
+
+  <!-- Driver.js (servit localment, NO CDN) -->
+  <link rel="stylesheet" href="driver.css"/>
+  <script src="driver.iife.js"></script>
+
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+    nav { background: #f0f0f0; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+    button { padding: .5rem 1rem; font-size: 1rem; cursor: pointer; }
+    #help-btn { position: fixed; top: 1rem; right: 1rem; border-radius: 50%;
+                width: 40px; height: 40px; background: #2563eb; color: white; border: 0; }
+    .secondary-panel { display: none; padding: 1rem; background: #fff8dc; margin-top: 1rem; border-radius: 8px; }
+    .secondary-panel.open { display: block; }
+  </style>
+</head>
+<body>
+
+  <!-- ──────────────────────────────────────────────────────────────────────
+       MARCATGE D'EXEMPLE - substitueix pel teu
+       ────────────────────────────────────────────────────────────────────── -->
+
+  <button id="help-btn" title="Visita guiada">?</button>
+
+  <h1>La meva app</h1>
+
+  <nav id="menu-principal">
+    <a href="#">Inici</a> ·
+    <a href="#">Productes</a> ·
+    <a href="#">Contacte</a>
+  </nav>
+
+  <p>Contingut principal de l'app.</p>
+
+  <button id="boto-accio" onclick="document.querySelector('.secondary-panel').classList.toggle('open')">
+    Acció principal
+  </button>
+
+  <div class="secondary-panel">
+    <strong>Panell secundari</strong> - apareix només quan cliques l'acció.
+  </div>
+
+  <!-- ──────────────────────────────────────────────────────────────────────
+       WALKTOUR
+       ────────────────────────────────────────────────────────────────────── -->
+
+  <script>
+  (function () {
+    'use strict';
+
+    function startTour() {
+      // Guard: si la llibreria no s'ha carregat, no facis res
+      if (typeof driver === 'undefined' || !driver.js?.driver) return;
+
+      const tour = driver.js.driver({
+        showProgress: true,
+        nextBtnText: 'Següent →',
+        prevBtnText: '← Anterior',
+        doneBtnText: 'Entès!',
+        progressText: '{{current}} de {{total}}',
+
+        // Es crida quan l'usuari surt del tour (X o "Entès!").
+        // Útil per restaurar la UI a un estat net.
+        onDestroyed: () => {
+          document.querySelector('.secondary-panel')?.classList.remove('open');
+        },
+
+        steps: [
+
+          // ── 1. Benvinguda ─────────────────────────────────────────────
+          // Sense `element` → es mostra com a modal central.
+          {
+            popover: {
+              title: 'Benvingut/da',
+              description: 'Aquesta visita guiada t\'ensenya com funciona l\'app en menys d\'un minut.<br><br>Pots tornar-la a llançar quan vulguis amb el botó <b>?</b>.'
+            }
+          },
+
+          // ── 2. Element ancorat amb posició personalitzada ─────────────
+          {
+            element: '#menu-principal',
+            popover: {
+              title: 'Menú principal',
+              description: 'Des d\'aquí accedeixes a totes les seccions de l\'app.',
+              side: 'bottom'   // top | bottom | left | right
+            }
+          },
+
+          // ── 3. Element + acció prèvia per preparar el DOM ────────────
+          // `onHighlightStarted` s'executa abans de mostrar el popover.
+          // Imprescindible si l'element està ocult o cal canviar de vista.
+          {
+            element: '.secondary-panel',
+            popover: {
+              title: 'Panell secundari',
+              description: 'Aquest panell apareix només quan actives l\'acció principal. El tour l\'obre per ensenyar-te\'l.'
+            },
+            onHighlightStarted: () => {
+              document.querySelector('.secondary-panel')?.classList.add('open');
+            }
+          },
+
+          // ── 4. Botó del topbar ────────────────────────────────────────
+          {
+            element: '#help-btn',
+            popover: {
+              title: 'Tornar a veure aquesta visita',
+              description: 'Clica aquest botó <b>?</b> sempre que vulguis tornar a veure la visita guiada.'
+            }
+          },
+
+        ]
+      });
+
+      tour.drive();
+    }
+
+    // Botó manual (qualsevol moment)
+    document.getElementById('help-btn')?.addEventListener('click', startTour);
+
+    // Auto-llançament la primera visita només
+    if (!localStorage.getItem('app.tour_done')) {
+      localStorage.setItem('app.tour_done', '1');
+      setTimeout(startTour, 600);   // marge perquè el DOM es pinti
+    }
+
+  })();
+  </script>
+
+</body>
+</html>
