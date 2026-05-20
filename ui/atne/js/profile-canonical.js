@@ -493,12 +493,22 @@
         if (c.mesos_range) beh.push('Temps a Catalunya: ' + String(c.mesos_range).toLowerCase());
         if (c.alfabet_llati === false) {
           beh.push('Alfabet d\'origen no llatí');
-          aids.push('Transliteració fonètica al glossari');
         }
         if (c.alfabetitzacio_l1 === false) beh.push('Sense alfabetització en L1');
         if (c.escolaritzacio === 'interrompuda') beh.push('Escolarització prèvia interrompuda');
-        if (c.l1) aids.push('Glossari amb traducció a ' + String(c.l1).toLowerCase());
-        else aids.push('Glossari amb traducció a la L1');
+        // TOLC (Translation for Other Learning Contexts): instrument MALL canònic
+        // del marc TIL. S'activa automàticament i fa que el glossari sigui bilingüe,
+        // hi hagi transliteració si cal, consignes en L1, etc. Veure saber-ne+ §Plurilingüisme.
+        if (c.l1) {
+          aids.push('Pont lingüístic (TOLC) · ' + String(c.l1));
+          aids.push('Glossari bilingüe amb traducció a ' + String(c.l1).toLowerCase());
+        } else {
+          aids.push('Pont lingüístic (TOLC)');
+          aids.push('Glossari bilingüe amb traducció a la L1');
+        }
+        if (c.alfabet_llati === false) {
+          aids.push('Transliteració fonètica al glossari');
+        }
         aids.push('Pictogrames i suport visual');
         aids.push('Frases SVO curtes');
         aids.push('Vocabulari freqüent');
