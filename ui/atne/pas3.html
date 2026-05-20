@@ -3663,8 +3663,16 @@
         }
       },
       onResult: (ev) => {
+        // DIAG TEMPORAL (re-afegit 2026-05-20 per diagnosticar text en blanc amb Flick).
+        // Quan estigui resolt, treure aquest log.
+        const _diagLen = (ev.adapted || '').length;
+        const _diagPrev = JSON.stringify((ev.adapted || '').slice(0, 120));
+        console.log('[ATNE][onResult][DIAG] adapted_len=' + _diagLen + ' preview=' + _diagPrev);
+        console.log('[ATNE][onResult][DIAG] ev_keys=' + Object.keys(ev).join(','));
         // Parse de les seccions del resultat (Text adaptat + Glossari + Esquema + Preguntes)
         const parsed = window.ATNE_LLM.parseAdaptedSections(ev.adapted || '');
+        console.log('[ATNE][onResult][DIAG] parsed_main_len=' + ((parsed.main || '').length) +
+          ' parsed_keys=' + Object.keys(parsed).join(','));
         const md2html = window.ATNE_LLM.markdownToHtml;
 
         // Si el docent ha demanat "mantenir text adaptat actual", restaurem
