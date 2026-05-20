@@ -1,0 +1,1076 @@
+{
+ "history_comments": [
+  {
+   "created_at": "2026-03-29T19:31:11.405699+00:00",
+   "comment": "Perquè has traduit al castella el glossari?",
+   "review_items": null,
+   "rating": 2,
+   "docent_hash": null,
+   "profile_name": "TDHA-DX 3r ESO",
+   "etapa": null,
+   "curs": null
+  },
+  {
+   "created_at": "2026-03-29T18:57:14.850457+00:00",
+   "comment": "La traducció en el Glossari ha estat al llatí i crec que en no ser de altes capacitats no calia afegir-la...penso.",
+   "review_items": null,
+   "rating": 3,
+   "docent_hash": null,
+   "profile_name": "TDHA-DX 3r ESO",
+   "etapa": null,
+   "curs": null
+  },
+  {
+   "created_at": "2026-03-27T11:45:55.4223+00:00",
+   "comment": "No surten els complements",
+   "review_items": null,
+   "rating": 1,
+   "docent_hash": null,
+   "profile_name": "Empresa FP",
+   "etapa": null,
+   "curs": null
+  },
+  {
+   "created_at": "2026-03-27T10:06:02.957924+00:00",
+   "comment": "No surten els complements",
+   "review_items": null,
+   "rating": 1,
+   "docent_hash": null,
+   "profile_name": "Empresa FP",
+   "etapa": null,
+   "curs": null
+  },
+  {
+   "created_at": "2026-03-23T23:17:02.965109+00:00",
+   "comment": "Molt bona adaptacio, clara i precisa.",
+   "review_items": null,
+   "rating": 3,
+   "docent_hash": null,
+   "profile_name": "Test alumne",
+   "etapa": null,
+   "curs": null
+  }
+ ],
+ "history_altres": [],
+ "events": [
+  {
+   "ts": "2026-05-19T14:26:51.419581+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-19T14:26:51.241307Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-19T12:09:32.360147+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-19T12:09:32.183474Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-19T11:33:38.023829+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-19T11:33:37.888884Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-19T09:31:43.498549+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-19T09:31:43.318513Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-19T05:40:25.12472+00:00",
+   "event_type": "suggestion_submitted",
+   "data": {
+    "page": "flash",
+    "text": "En el mode flash cal treballar el tema de carregar els perfils. \nSurt un llistat enorme de llarg si tens molts…\nI quan carregues algun d’ells no activa cap conducta. Potser perquè te un diagnòstic???\nHaurem de treballar com donar solució. Algun activa el no sap català però sense L1… algun altre si que activa conducta. Haurien de ser compatibles els perfils flash amb els de taller",
+    "_local_id": "lcl-1779169224787-pvdq"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-19T05:36:41.751581+00:00",
+   "event_type": "suggestion_submitted",
+   "data": {
+    "page": "flash",
+    "text": "Al mòbil al mode flash no es veuen les opcions del topbar excepte hamburguesa, 100% i avatar. Però la resta hi son en molt petit quasi no es veuen (molt estretes). Caldria poder posar ordre en un menú desplegable,,,,?",
+    "_local_id": "lcl-1779169001494-pzy1"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-19T05:31:38.417313+00:00",
+   "event_type": "suggestion_submitted",
+   "data": {
+    "page": "home",
+    "text": "He obert la app al mòbil i no em reconeixia ni posava el meu nom i també sortia l’espai de recents en blanc. He entrat a flash i quan he tornat a inici llavors si que ha carregat la biblioteca de recents",
+    "_local_id": "lcl-1779168698110-6v87"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-19T05:27:13.158553+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-19T05:27:13.055155Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-18T21:44:33.510236+00:00",
+   "event_type": "feedback_submitted",
+   "data": {
+    "rating": 2,
+    "review": {
+     "no_usar": false,
+     "retocar": true,
+     "usar_classe": false
+    },
+    "source": "inline_pill",
+    "has_comment": true,
+    "time_on_page_ms": 213662
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T21:43:52.682829+00:00",
+   "event_type": "suggestion_submitted",
+   "data": {
+    "page": "pas3",
+    "text": "mentre que l'agent validador esta fent la feina el text ja apareix (no les imatges que esperen que estigui validat)\npotser es podria significar d'alguna manera... amb un missatge o be amb un vel sobre el text ... ja m'agrada que es vegi  el pugui epassr pero avisar que encara no esta",
+    "_local_id": "lcl-1779140632527-ksgq"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T21:40:59.674391+00:00",
+   "event_type": "redo_rubric",
+   "data": {
+    "problems": [
+     "No s'apliquen bé les estratègies del perfil"
+    ],
+    "n_problems": 1,
+    "preserve_text": false,
+    "time_on_page_ms": 26377,
+    "user_observation": "no s'ha aplicat aixo\nS’han fet frases curtes i clares, amb vocabulari freqüent i definicions per a termes tècnics. Això facilita la comprensió per a alumnes amb nivell B2 i dificultats d’atenció.\n\nM3\nLlengua\nAtenció a la diversitat\nEl text està dividit en blocs curts i amb objectius explícits. S’eviten frases llargues i es fa ús de repetició coherent per ajudar la memòria de treball.\n\nM1\nSubjecte\nSuport multimodal\nS’han introduït marcadors d’imatges i un esquema visual per activar canals visuals"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T21:40:33.035242+00:00",
+   "event_type": "redo_rubric",
+   "data": {
+    "problems": [
+     "No s'apliquen bé les estratègies del perfil"
+    ],
+    "n_problems": 1,
+    "preserve_text": false,
+    "time_on_page_ms": 133284,
+    "user_observation": "no s'aplicat aixo\nS’han fet frases curtes i clares, amb vocabulari freqüent i definicions per a termes tècnics. Això facilita la comprensió per a alumnes amb nivell B2 i dificultats d’atenció.\n\nM3\nLlengua\nAtenció a la diversitat\nEl text està dividit en blocs curts i amb objectius explícits. S’eviten frases llargues i es fa ús de repetició coherent per ajudar la memòria de treball.\n\nM1\nSubjecte\nSuport multimodal\nS’han introduït marcadors d’imatges i un esquema visual per activar canals visuals i "
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T21:39:28.030922+00:00",
+   "event_type": "refine_submitted",
+   "data": {
+    "len": "escurçar",
+    "simp": "−",
+    "tone": "neutre",
+    "preset": "escurcar",
+    "revisa_catala": true,
+    "time_on_page_ms": 68289,
+    "instruction_full": "Augmenta el nivell de vocabulari. Revisa el català (ortografia, diacrítics, concordances). Cal seguir i aplicar les indicacionspel perfil declarat.",
+    "user_instruction": "Cal seguir i aplicar les indicacionspel perfil declarat"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T21:38:19.494314+00:00",
+   "event_type": "redo_rubric",
+   "data": {
+    "problems": [
+     "No s'apliquen bé les estratègies del perfil"
+    ],
+    "n_problems": 1,
+    "preserve_text": false,
+    "time_on_page_ms": 62856,
+    "user_observation": "no s'apliquen les idicacions per a les necesitats del perfil tal com indica l'apratat per al docent"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T21:37:15.218836+00:00",
+   "event_type": "suggestion_submitted",
+   "data": {
+    "page": "taller",
+    "text": "en el pas 2 La opcio accions del menu dreta flotant t'esborra el text de escrire\ncal repensar si cal aquesta opcio de Altres o Accions i que hauria d'anar aquei o treure-ho",
+    "_local_id": "lcl-1779140235132-n8he"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T21:34:46.735731+00:00",
+   "event_type": "refine_submitted",
+   "data": {
+    "len": "escurçar",
+    "simp": "−",
+    "tone": "neutre",
+    "preset": "escurcar",
+    "revisa_catala": true,
+    "time_on_page_ms": 44061,
+    "instruction_full": "Augmenta el nivell de vocabulari. Revisa el català (ortografia, diacrítics, concordances).",
+    "user_instruction": null
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T21:34:15.283899+00:00",
+   "event_type": "refine_submitted",
+   "data": {
+    "len": "escurçar",
+    "simp": "−",
+    "tone": "neutre",
+    "preset": "escurcar",
+    "revisa_catala": true,
+    "time_on_page_ms": 12581,
+    "instruction_full": "Augmenta el nivell de vocabulari. Revisa el català (ortografia, diacrítics, concordances).",
+    "user_instruction": null
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T21:33:25.36979+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-18T21:33:25.218642Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-18T21:29:02.33337+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-18T21:29:02.283983Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-18T21:25:13.337177+00:00",
+   "event_type": "feedback_submitted",
+   "data": {
+    "rating": 2,
+    "review": {
+     "no_usar": false,
+     "retocar": false,
+     "usar_classe": true
+    },
+    "source": "inline_pill",
+    "has_comment": true,
+    "time_on_page_ms": 806829
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T21:14:39.691908+00:00",
+   "event_type": "refine_submitted",
+   "data": {
+    "len": "escurçar",
+    "simp": "mitjà",
+    "tone": "neutre",
+    "preset": "escurcar",
+    "revisa_catala": true,
+    "time_on_page_ms": 173223,
+    "instruction_full": "Revisa el català (ortografia, diacrítics, concordances).",
+    "user_instruction": null
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T21:11:46.313997+00:00",
+   "event_type": "redo_rubric",
+   "data": {
+    "problems": [
+     "No s'apliquen bé les estratègies del perfil"
+    ],
+    "n_problems": 1,
+    "preserve_text": false,
+    "time_on_page_ms": 128930,
+    "user_observation": "algunes paraules son més complexes que l'original.\nno s'apliquen \nS'han tingut en compte les necessitats de l'alumnat amb TDAH, amb blocs curts i estructurats per facilitar la concentració i la comprensió.\nni tampoc el tema de les preguntes i guies per seguir la lectura"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T21:09:37.11261+00:00",
+   "event_type": "redo_rubric",
+   "data": {
+    "problems": [
+     "No s'apliquen bé les estratègies del perfil"
+    ],
+    "n_problems": 1,
+    "preserve_text": false,
+    "time_on_page_ms": 145542,
+    "user_observation": "no es veu que estigu adaptat"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T21:07:11.463411+00:00",
+   "event_type": "redo_rubric",
+   "data": {
+    "problems": [
+     "No s'apliquen bé les estratègies del perfil"
+    ],
+    "n_problems": 1,
+    "preserve_text": false,
+    "time_on_page_ms": 133703,
+    "user_observation": "la adaptacio ha multiplicat el nombre de paraules"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T21:05:20.296607+00:00",
+   "event_type": "refine_submitted",
+   "data": {
+    "len": "mantenir",
+    "simp": "mitjà",
+    "tone": "neutre",
+    "preset": null,
+    "revisa_catala": true,
+    "time_on_page_ms": 22570,
+    "instruction_full": "Revisa el català (ortografia, diacrítics, concordances). anomena les principals xarxes que fan servir els joves avui en dia.",
+    "user_instruction": "anomena les principals xarxes que fan servir els joves avui en dia"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T20:56:14.020107+00:00",
+   "event_type": "suggestion_submitted",
+   "data": {
+    "page": "pas3",
+    "text": "Quan tens un grup amb dues versions i en un treus les ilustracions quan vas a l'altre i fas el mateix quan tornes al primer tornen a estar",
+    "_local_id": "lcl-1779137773999-rhzh"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T20:52:12.199331+00:00",
+   "event_type": "redo_rubric",
+   "data": {
+    "problems": [
+     "No s'apliquen bé les estratègies del perfil"
+    ],
+    "n_problems": 1,
+    "preserve_text": false,
+    "time_on_page_ms": 233959,
+    "user_observation": "Cal diferenciar els dos nivells lectors"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T20:51:48.557934+00:00",
+   "event_type": "suggestion_submitted",
+   "data": {
+    "page": "pas3",
+    "text": "quan refas o refines un text crec que si tens dues versions totes dues son la mateixa. tenia un grup amb dos nivells, basic i estandard i ara les dues versions son la mateixa",
+    "_local_id": "lcl-1779137508567-ahld"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T20:44:29.930958+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-18T20:44:29.844354Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-18T20:39:06.138366+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-18T20:39:06.066439Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-18T20:29:41.552999+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-18T20:29:41.480366Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-18T20:21:46.635987+00:00",
+   "event_type": "suggestion_submitted",
+   "data": {
+    "page": "pas3",
+    "text": "al pdf exportat surt l'aparatat d'esquema visual sense l'¡esquema i amb l'overlay Generant-se",
+    "_local_id": "lcl-1779135706600-mw91"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T20:20:33.263762+00:00",
+   "event_type": "suggestion_submitted",
+   "data": {
+    "page": "pas3",
+    "text": "El glossari es podria fer en un altre format més visual?",
+    "_local_id": "lcl-1779135633222-ebp0"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T20:19:55.899988+00:00",
+   "event_type": "suggestion_submitted",
+   "data": {
+    "page": "pas3",
+    "text": "les preguntes graduades per I5 son massa dificils potser?",
+    "_local_id": "lcl-1779135595608-48wm"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T20:16:57.651838+00:00",
+   "event_type": "suggestion_submitted",
+   "data": {
+    "page": "pas3",
+    "text": "Les lletres majuscules per infantil com es poden posar?",
+    "_local_id": "lcl-1779135417652-j0rw"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T20:14:10.139138+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-18T20:14:09.948229Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-18T18:44:37.045985+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-18T18:44:36.859268Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-18T16:29:10.626354+00:00",
+   "event_type": "suggestion_submitted",
+   "data": {
+    "page": "pas3",
+    "text": "el corrector laguagetool quan els passes sobre un text adaptat fa perdre tot el format i les ilustarcions",
+    "_local_id": "lcl-1779121750929-hx5n"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T15:18:46.654385+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-18T15:18:46.483603Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-18T12:54:11.097248+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-18T12:54:11.033479Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-18T12:50:00.307934+00:00",
+   "event_type": "suggestion_submitted",
+   "data": {
+    "page": "pas3",
+    "text": "-------",
+    "_local_id": "lcl-1779108600118-ffo2"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T12:46:57.161943+00:00",
+   "event_type": "suggestion_submitted",
+   "data": {
+    "page": "pas3",
+    "text": "Quan demano refer la adpatcio perquè falten les il·lustracions i indico que no estan els complements em regenera el text sense les imatges",
+    "_local_id": "lcl-1779108416989-y7ie"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T12:03:35.318047+00:00",
+   "event_type": "suggestion_submitted",
+   "data": {
+    "page": "pas3",
+    "text": "Quan generes un text el titol no apareix amb el text i apareix dalt. pero és el igual a la frase que has demanat al generador i aquest viatge al pas3. Potser esta be aixi, pero esperava que el generador en proposi un",
+    "_local_id": "lcl-1779105815025-9p3y"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-18T11:59:07.797722+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-18T11:59:07.727667Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-18T11:41:01.810905+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-18T11:41:01.696233Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-18T09:51:19.944872+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-18T09:51:19.769861Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-18T08:01:25.354144+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-18T08:01:25.196087Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-18T06:06:18.367435+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-18T06:06:18.268114Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-17T19:52:19.741355+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-17T19:52:19.572223Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-17T18:54:12.008781+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-17T18:54:11.851665Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-17T18:28:09.432948+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-17T18:28:09.298034Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-17T18:07:50.813902+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-17T18:07:50.736040Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-17T17:57:25.271038+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-17T17:57:25.216416Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-17T17:51:32.640254+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-17T17:51:32.516247Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-17T16:59:40.875897+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-17T16:59:40.724124Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-17T16:59:40.868076+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-17T16:59:40.723317Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-17T16:59:40.827913+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-17T16:59:40.721483Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-17T16:59:40.824077+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-17T16:59:40.721144Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-17T14:30:43.782103+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-17T14:30:43.680023Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-17T09:28:03.084632+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-17T09:28:02.972385Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-17T02:50:39.16748+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-17T02:50:38.990713Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T23:00:36.060092+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T23:00:35.986122Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T23:00:17.681912+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T23:00:17.603955Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T22:59:36.583908+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T22:59:36.502106Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T22:57:05.619025+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T22:57:05.514980Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T22:38:29.167322+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T22:38:28.997043Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T18:43:36.184321+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T18:43:36.021940Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T14:42:39.899479+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T14:42:39.813550Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T14:42:33.409533+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T14:42:33.235326Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T14:27:11.973082+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T14:27:11.870980Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T12:34:18.758878+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T12:34:18.597538Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T11:16:23.625702+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T11:16:23.515365Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T10:21:53.171374+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T10:21:53.093111Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T09:57:02.975325+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T09:57:02.871569Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T08:38:02.811479+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T08:38:02.667133Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T07:50:10.044932+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T07:50:09.953179Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T07:29:26.713033+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T07:29:26.626754Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T07:27:31.228972+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T07:27:31.134581Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T07:01:00.503053+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T07:01:00.393948Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T06:42:20.085954+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T06:42:19.987358Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T06:40:26.229528+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T06:40:26.100912Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T06:25:07.160323+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T06:25:07.009897Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T06:19:30.635369+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T06:19:30.573339Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T05:57:52.376851+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T05:57:52.299036Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-16T04:48:40.016145+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-16T04:48:39.852698Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-15T20:22:25.359581+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-15T20:22:25.257870Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-15T20:14:05.162911+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-15T20:14:04.975747Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-15T18:28:45.403777+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-15T18:28:45.295805Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-15T18:15:58.05468+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-15T18:15:57.884323Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-15T17:46:31.409609+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-15T17:46:31.225984Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-15T15:56:46.441597+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-15T15:56:46.373683Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-15T15:51:32.844135+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-15T15:51:32.742558Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-15T14:09:47.408503+00:00",
+   "event_type": "suggestion_submitted",
+   "data": {
+    "page": "pas3",
+    "text": "es pot fer alguna cosa per tenir en compte les etapes d'aprenenattege de la lectura? com es podria acollir? poodem consultar al noebooklm del mall",
+    "_local_id": "lcl-1778854187182-2q18"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-15T14:09:07.210732+00:00",
+   "event_type": "suggestion_submitted",
+   "data": {
+    "page": "pas3",
+    "text": "els textos per a edats de 3 a 5 anys son massa dificils i llargs\ncaldria poder proposar al modeul de generacio, textos més petits de 50\nels nivells de A1 i PRE-A1 potser son encara molt elevats per algu que esta aprenent a llegir\ncom ho solucionem",
+    "_local_id": "lcl-1778854146868-z28r"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-15T14:07:37.034505+00:00",
+   "event_type": "suggestion_submitted",
+   "data": {
+    "page": "pas3",
+    "text": "caldra fer una batuda de tot el vocabilari utilitzat si és inclosiu i d¡acord amb el marc conceptual de la inclusio i dela nostra identitat",
+    "_local_id": "lcl-1778854056883-gk52"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-15T14:06:55.944402+00:00",
+   "event_type": "suggestion_submitted",
+   "data": {
+    "page": "pas3",
+    "text": "a crear nou perfil de persona ell quadre de text sobre en que destaca o que se li dona bé etc hauria d'estar abans de les dificultats observables",
+    "_local_id": "lcl-1778854015684-sgar"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-15T14:06:08.870678+00:00",
+   "event_type": "suggestion_submitted",
+   "data": {
+    "page": "pas3",
+    "text": "a taller quan creas un nou perfil:\nsi afegeixes una nova conducta, aquesta associarà algun complement automaticament?",
+    "_local_id": "lcl-1778853968632-2ea6"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-15T14:05:31.561383+00:00",
+   "event_type": "suggestion_submitted",
+   "data": {
+    "page": "pas3",
+    "text": "als comporyaments observables del mode flash treure les etiquestes de diagnostics de caratceristiques (TDHA etc)",
+    "_local_id": "lcl-1778853931411-mi1x"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-15T13:56:12.935197+00:00",
+   "event_type": "suggestion_submitted",
+   "data": {
+    "page": "flash",
+    "text": "ATENCIO! \nLLETRA MAJÚSCULA PER INFANTIL opcional",
+    "_local_id": "lcl-1778853372574-2o97"
+   },
+   "docent_id": "miquel.amor"
+  },
+  {
+   "ts": "2026-05-15T13:52:51.669075+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-15T13:52:51.545723Z",
+    "_health_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-15T13:52:18.679506+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-15T13:52:18.594038Z",
+    "_health_probe": true
+   },
+   "docent_id": null
+  },
+  {
+   "ts": "2026-05-15T13:50:56.758034+00:00",
+   "event_type": "client_error",
+   "data": {
+    "ts": "2026-05-15T13:50:56.686827Z",
+    "_boot_probe": true
+   },
+   "docent_id": null
+  }
+ ]
+}
