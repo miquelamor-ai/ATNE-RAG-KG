@@ -1306,6 +1306,14 @@
         <div class="fr-pop wide" id="fr-pop-compl">
           <div class="fr-pop-t">Complements per al perfil</div>
           <div class="fr-pop-s" id="compl-hint">Aquests complements es generen segons les necessitats del perfil. Pots modificar-ho.</div>
+          <!-- Badge TOLC: visible quan el perfil té català com a L2 amb L1 coneguda -->
+          <div id="tolc-badge" style="display:none;margin:8px 0 12px;padding:10px 12px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;font-size:12.5px;color:#3730a3;line-height:1.45">
+            <div style="display:flex;align-items:center;gap:6px;font-weight:600;margin-bottom:4px">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <span>Pont lingüístic actiu <span id="tolc-badge-l1" style="font-weight:700"></span></span>
+            </div>
+            <div style="color:#4338ca;font-size:11.5px">ATNE generarà <strong>glossari bilingüe</strong>, <strong>transliteració</strong> i pistes etimològiques translingües automàticament (instrument <strong>TOLC</strong> del MALL). <a href="/ui/saber-ne.html#plurilinguisme" target="_blank" style="color:#4f46e5;text-decoration:underline">Saber-ne+</a></div>
+          </div>
           <div class="compl-list" id="compl-list"></div>
           <div class="fr-pop-actions">
             <button class="fr-pop-btn" id="compl-apply">Aplicar</button>
@@ -2905,6 +2913,24 @@
     if (hint && profile) {
       hint.textContent = 'Preselecció per a ' + (profile.name || 'aquest perfil') +
         '. Les opcions marcades "Auto" són les que el perfil necessita més.';
+    }
+    // Badge TOLC: detecta si el perfil té català com a L2 + L1 declarada i mostra el badge
+    // del pont lingüístic (TOLC). El TOLC s'activa automàticament al motor: aquest badge
+    // només dona visibilitat. Veure saber-ne.html#plurilinguisme.
+    const tolcBadge = document.getElementById('tolc-badge');
+    const tolcBadgeL1 = document.getElementById('tolc-badge-l1');
+    if (tolcBadge && profile) {
+      const sv = profile.subvariables || {};
+      const nou = sv.nouvingut || sv.l2 || {};
+      const dx = Array.isArray(profile.dx) ? profile.dx : [];
+      const isL2 = dx.includes('nouvingut') || dx.includes('l2');
+      const l1 = nou.l1 || profile.l1 || '';
+      if (isL2 && l1) {
+        if (tolcBadgeL1) tolcBadgeL1.textContent = '· ' + l1;
+        tolcBadge.style.display = 'block';
+      } else {
+        tolcBadge.style.display = 'none';
+      }
     }
   }
 
