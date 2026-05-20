@@ -1306,8 +1306,9 @@
         <div class="fr-pop wide" id="fr-pop-compl">
           <div class="fr-pop-t">Complements per al perfil</div>
           <div class="fr-pop-s" id="compl-hint">Aquests complements es generen segons les necessitats del perfil. Pots modificar-ho.</div>
-          <!-- Badge TOLC: visible quan el perfil té català com a L2 amb L1 coneguda -->
-          <div id="tolc-badge" style="display:none;margin:8px 0 12px;padding:10px 12px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;font-size:12.5px;color:#3730a3;line-height:1.45">
+          <!-- Badge TOLC: visible quan el perfil té català com a L2 amb L1 coneguda.
+               Sticky perquè es vegi sempre durant el scroll del popover. -->
+          <div id="tolc-badge" style="display:none;position:sticky;top:-12px;margin:0 -12px 12px;padding:10px 12px;background:#eef2ff;border-top:1px solid #c7d2fe;border-bottom:1px solid #c7d2fe;font-size:12.5px;color:#3730a3;line-height:1.45;z-index:2">
             <div style="display:flex;align-items:center;gap:6px;font-weight:600;margin-bottom:4px">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
               <span>Pont lingüístic actiu <span id="tolc-badge-l1" style="font-weight:700"></span></span>
@@ -2855,13 +2856,32 @@
     const host = document.getElementById('compl-list');
     if (!host) return;
     const autoDefaults = defaultComplementsForProfile(profile);
+    // TOLC actiu? (català L2 + L1 declarada) → enriqueix descripcions de glossari i pictogrames
+    const _sv = (profile && profile.subvariables) || {};
+    const _nou = _sv.nouvingut || _sv.l2 || {};
+    const _dx = Array.isArray(profile && profile.dx) ? profile.dx : [];
+    const _isL2 = _dx.includes('nouvingut') || _dx.includes('l2');
+    const _l1 = _nou.l1 || (profile && profile.l1) || '';
+    const _tolcActive = _isL2 && _l1;
+    // MECR per modular pictogrames (inline només a pre-A1/A1)
+    const _mecr = (profile && (profile.adaptacio || profile.mecr_sortida || profile.mecr)) || '';
+    const _isLowMECR = ['pre-A1','A1'].includes(_mecr);
     host.innerHTML = COMPLEMENT_DEFS.map(c => {
       const checked = complSelected.includes(c.id) ? 'checked' : '';
       const auto = autoDefaults.includes(c.id) ? ' auto' : '';
+      // Enriqueix descripcions segons context TOLC
+      let desc = c.desc;
+      if (_tolcActive && c.id === 'glossari') {
+        desc = 'Termes clau explicats · <strong style="color:#4338ca">BILINGÜE: ' + _l1 + '</strong>';
+      } else if (_tolcActive && c.id === 'pictogrames') {
+        desc = _isLowMECR
+          ? 'Suport visual · <strong style="color:#4338ca">INLINE (pre-A1/A1)</strong>'
+          : 'Suport visual · <strong style="color:#4338ca">Glossari visual al peu</strong>';
+      }
       let html = (
         '<label class="compl-item' + auto + '">' +
           '<input type="checkbox" data-compl="' + c.id + '" ' + checked + '>' +
-          '<div class="ci-b"><div class="ci-t">' + c.label + '</div><div class="ci-s">' + c.desc + '</div></div>' +
+          '<div class="ci-b"><div class="ci-t">' + c.label + '</div><div class="ci-s">' + desc + '</div></div>' +
         '</label>'
       );
       // Selector d'estil per a il·lustracions (apareix quan s'activa)
