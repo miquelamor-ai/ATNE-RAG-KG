@@ -499,33 +499,47 @@
   /* Aplicat al text adaptat. letter-spacing i word-spacing per llegibilitat. */
   #adapted-text.atne-uppercase{ text-transform:uppercase; letter-spacing:.04em; word-spacing:.08em; }
 
-  /* Pill "Validant…" al stepper superior del Pas 3.
-     Sempre visible si l'usuari està al Pas 3 i el verify està en curs.
-     Complementa el badge del header de text amb una segona via visual
-     que NO depèn del scroll. */
-  .step-verify-pill{
-    display:none;align-items:center;gap:5px;
-    margin-left:8px;padding:3px 9px;
-    background:#fb923c;color:#fff;
-    border-radius:var(--r-pill);
-    font-size:10.5px;font-weight:700;
-    text-transform:none;letter-spacing:.02em;
-    font-family:var(--mono);
-    box-shadow:0 1px 3px rgba(251,146,60,.4);
-    animation:svp-pulse 1.5s ease-in-out infinite;
+  /* Overlay "Validant qualitat…" sobre el text adaptat.
+     Quan el verify del LLM treballa, mostrem un overlay subtil sobre el
+     contenidor del text amb un missatge centrat ben visible. El text
+     queda llegible a sota (opacity .55) però amb tractament visual que
+     indica clarament "encara estem treballant". */
+  .verify-overlay-wrap{position:relative}
+  .verify-overlay-wrap.verifying::before{
+    content:"";
+    position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(255,247,222,.55) 0%,rgba(255,247,222,.35) 100%);
+    border-radius:var(--r-md,8px);
+    pointer-events:none;
+    z-index:2;
+    animation:vo-fade 1.6s ease-in-out infinite;
   }
-  .step.on.verifying .step-verify-pill{display:inline-flex}
-  .svp-dot{
-    width:6px;height:6px;border-radius:50%;background:#fff;
-    animation:svp-dot-blink .85s infinite;
+  .verify-overlay-wrap.verifying > .doc-read{filter:saturate(.7);transition:filter .25s}
+  .verify-overlay-box{
+    display:none;
+    position:absolute;top:24px;left:50%;transform:translateX(-50%);
+    z-index:3;
+    background:#fff;
+    border:2px solid #fb923c;
+    border-radius:var(--r-lg,12px);
+    padding:14px 22px;
+    box-shadow:0 6px 24px rgba(251,146,60,.3),0 2px 6px rgba(0,0,0,.08);
+    align-items:center;
+    gap:12px;
+    font-family:var(--ui);
+    min-width:280px;
   }
-  @keyframes svp-pulse{
-    0%,100%{box-shadow:0 1px 3px rgba(251,146,60,.4)}
-    50%{box-shadow:0 2px 8px rgba(251,146,60,.7)}
+  .verify-overlay-wrap.verifying .verify-overlay-box{display:flex}
+  .vo-spinner{
+    width:22px;height:22px;flex-shrink:0;
+    border:3px solid #fed7aa;border-top-color:#fb923c;border-radius:50%;
+    animation:vo-spin .9s linear infinite;
   }
-  @keyframes svp-dot-blink{
-    0%,100%{opacity:1}50%{opacity:.4}
-  }
+  .vo-txt{display:flex;flex-direction:column;gap:2px}
+  .vo-t1{font-size:13.5px;font-weight:700;color:#9a3412;line-height:1.2}
+  .vo-t2{font-size:11.5px;color:#9a3412;opacity:.75;line-height:1.3}
+  @keyframes vo-fade{0%,100%{opacity:1}50%{opacity:.55}}
+  @keyframes vo-spin{to{transform:rotate(360deg)}}
 
   /* Badge "Validant qualitat…" mentre el verify del LLM encara treballa.
      Apareix al header del text adaptat quan onStep rep step='verifying' i
@@ -990,7 +1004,7 @@
       <div class="steps" data-help="topbar-steps">
         <button class="step done" data-step="1" onclick="location.href='/ui/atne/pas1.html'"><span class="step-num">1</span>Per a qui</button>
         <button class="step done" data-step="2" onclick="location.href='/ui/atne/pas2.html'"><span class="step-num">2</span>Text</button>
-        <button class="step on" data-step="3" id="step3-btn"><span class="step-num">3</span>Adaptacions<span class="step-verify-pill" id="step3-verify-pill"><span class="svp-dot"></span><span id="step3-verify-pill-t">Validant…</span></span></button>
+        <button class="step on" data-step="3" id="step3-btn"><span class="step-num">3</span>Adaptacions</button>
       </div>
             <button class="icon-btn" id="zoom-out" title="Reduir mida (Ctrl -)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M8 11h6"/></svg></button>
       <button id="zoom-label" title="Restablir mida (Ctrl 0)" style="font-size:var(--fs-xs);font-weight:600;color:var(--ink-500);background:none;border:none;cursor:pointer;padding:0 2px;min-width:34px;text-align:center;font-family:var(--mono)">100%</button>
@@ -1750,28 +1764,48 @@
   // Apareix quan onStep rep step='verifying' i s'amaga al verify_result
   // /quality_ok/quality, o al onResult. Senyal visual perquè el docent
   // sàpiga que «el text es veu, però encara s'està revisant».
+  // Inicialitza el wrapper d'overlay al voltant del text adaptat (només cal fer-ho un cop).
+  // Encapsulem #adapted-text en un .verify-overlay-wrap que contindrà la caixa d'avís
+  // centrada quan el verify del LLM està en curs.
+  function _ensureVerifyOverlayWrap() {
+    const adt = document.getElementById('adapted-text');
+    if (!adt || adt.parentElement?.classList.contains('verify-overlay-wrap')) return;
+    const wrap = document.createElement('div');
+    wrap.className = 'verify-overlay-wrap';
+    wrap.id = 'verify-overlay-wrap';
+    const box = document.createElement('div');
+    box.className = 'verify-overlay-box';
+    box.innerHTML = (
+      '<div class="vo-spinner"></div>' +
+      '<div class="vo-txt">' +
+        '<div class="vo-t1" id="verify-overlay-t1">Validant qualitat…</div>' +
+        '<div class="vo-t2">L\'agent comprova la rúbrica MALL (5-15 s)</div>' +
+      '</div>'
+    );
+    adt.parentElement.insertBefore(wrap, adt);
+    wrap.appendChild(box);
+    wrap.appendChild(adt);
+  }
+
   window.ATNE_VERIFY_BADGE = {
     show(label) {
-      // 1. Badge dins el header del text adaptat (visible si l'usuari hi és)
+      // 1. Badge dins el header del text adaptat (compatibilitat retroactiva)
       const b = document.getElementById('verify-badge');
       const t = document.getElementById('verify-badge-t');
       if (t && label) t.textContent = label;
       if (b) b.classList.add('on');
-      // 2. Pill al stepper superior (sempre visible, no depèn del scroll)
-      const step3 = document.getElementById('step3-btn');
-      const stepT = document.getElementById('step3-verify-pill-t');
-      if (stepT && label) {
-        // Versió curta per a la pill del breadcrumb
-        const short = label.length > 16 ? 'Validant…' : label;
-        stepT.textContent = short;
-      }
-      if (step3) step3.classList.add('verifying');
+      // 2. Overlay subtil sobre el text adaptat amb missatge centrat (Opció D)
+      _ensureVerifyOverlayWrap();
+      const wrap = document.getElementById('verify-overlay-wrap');
+      const t1 = document.getElementById('verify-overlay-t1');
+      if (t1 && label) t1.textContent = label;
+      if (wrap) wrap.classList.add('verifying');
     },
     hide() {
       const b = document.getElementById('verify-badge');
       if (b) b.classList.remove('on');
-      const step3 = document.getElementById('step3-btn');
-      if (step3) step3.classList.remove('verifying');
+      const wrap = document.getElementById('verify-overlay-wrap');
+      if (wrap) wrap.classList.remove('verifying');
     }
   };
 
