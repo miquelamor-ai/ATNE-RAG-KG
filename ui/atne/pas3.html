@@ -499,6 +499,34 @@
   /* Aplicat al text adaptat. letter-spacing i word-spacing per llegibilitat. */
   #adapted-text.atne-uppercase{ text-transform:uppercase; letter-spacing:.04em; word-spacing:.08em; }
 
+  /* Pill "Validant…" al stepper superior del Pas 3.
+     Sempre visible si l'usuari està al Pas 3 i el verify està en curs.
+     Complementa el badge del header de text amb una segona via visual
+     que NO depèn del scroll. */
+  .step-verify-pill{
+    display:none;align-items:center;gap:5px;
+    margin-left:8px;padding:3px 9px;
+    background:#fb923c;color:#fff;
+    border-radius:var(--r-pill);
+    font-size:10.5px;font-weight:700;
+    text-transform:none;letter-spacing:.02em;
+    font-family:var(--mono);
+    box-shadow:0 1px 3px rgba(251,146,60,.4);
+    animation:svp-pulse 1.5s ease-in-out infinite;
+  }
+  .step.on.verifying .step-verify-pill{display:inline-flex}
+  .svp-dot{
+    width:6px;height:6px;border-radius:50%;background:#fff;
+    animation:svp-dot-blink .85s infinite;
+  }
+  @keyframes svp-pulse{
+    0%,100%{box-shadow:0 1px 3px rgba(251,146,60,.4)}
+    50%{box-shadow:0 2px 8px rgba(251,146,60,.7)}
+  }
+  @keyframes svp-dot-blink{
+    0%,100%{opacity:1}50%{opacity:.4}
+  }
+
   /* Badge "Validant qualitat…" mentre el verify del LLM encara treballa.
      Apareix al header del text adaptat quan onStep rep step='verifying' i
      desapareix al verify_result / quality_ok / onResult. */
@@ -962,7 +990,7 @@
       <div class="steps" data-help="topbar-steps">
         <button class="step done" data-step="1" onclick="location.href='/ui/atne/pas1.html'"><span class="step-num">1</span>Per a qui</button>
         <button class="step done" data-step="2" onclick="location.href='/ui/atne/pas2.html'"><span class="step-num">2</span>Text</button>
-        <button class="step on" data-step="3"><span class="step-num">3</span>Adaptacions</button>
+        <button class="step on" data-step="3" id="step3-btn"><span class="step-num">3</span>Adaptacions<span class="step-verify-pill" id="step3-verify-pill"><span class="svp-dot"></span><span id="step3-verify-pill-t">Validant…</span></span></button>
       </div>
             <button class="icon-btn" id="zoom-out" title="Reduir mida (Ctrl -)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M8 11h6"/></svg></button>
       <button id="zoom-label" title="Restablir mida (Ctrl 0)" style="font-size:var(--fs-xs);font-weight:600;color:var(--ink-500);background:none;border:none;cursor:pointer;padding:0 2px;min-width:34px;text-align:center;font-family:var(--mono)">100%</button>
@@ -1724,14 +1752,26 @@
   // sàpiga que «el text es veu, però encara s'està revisant».
   window.ATNE_VERIFY_BADGE = {
     show(label) {
+      // 1. Badge dins el header del text adaptat (visible si l'usuari hi és)
       const b = document.getElementById('verify-badge');
       const t = document.getElementById('verify-badge-t');
       if (t && label) t.textContent = label;
       if (b) b.classList.add('on');
+      // 2. Pill al stepper superior (sempre visible, no depèn del scroll)
+      const step3 = document.getElementById('step3-btn');
+      const stepT = document.getElementById('step3-verify-pill-t');
+      if (stepT && label) {
+        // Versió curta per a la pill del breadcrumb
+        const short = label.length > 16 ? 'Validant…' : label;
+        stepT.textContent = short;
+      }
+      if (step3) step3.classList.add('verifying');
     },
     hide() {
       const b = document.getElementById('verify-badge');
       if (b) b.classList.remove('on');
+      const step3 = document.getElementById('step3-btn');
+      if (step3) step3.classList.remove('verifying');
     }
   };
 
