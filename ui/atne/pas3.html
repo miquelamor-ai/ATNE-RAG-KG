@@ -599,8 +599,27 @@
   @keyframes skel-pulse{0%,100%{opacity:.4;transform:scale(.85)}50%{opacity:1;transform:scale(1.1)}}
 
   /* Regenerating overlay */
-  .regen{position:absolute;inset:0;background:rgba(244,241,232,.85);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:15;flex-direction:column;gap:14px}
+  .regen{position:absolute;inset:0;background:rgba(244,241,232,.85);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:15;flex-direction:column;gap:14px;transition:background .3s ease,backdrop-filter .3s ease}
   .regen.on{display:flex}
+  /* Mode streaming: l'overlay deixa veure el text que va apareixent.
+     Fons quasi transparent, sense blur, contingut al cantó superior dret
+     en compte de centrat. Manté el spinner i el text visibles per assenyalar
+     que la generació encara està en curs. */
+  .regen.on.streaming{
+    background:transparent;
+    backdrop-filter:none;
+    justify-content:flex-start;
+    align-items:flex-end;
+    pointer-events:none;
+    padding:14px 18px 0 0;
+    flex-direction:row;
+    gap:10px;
+  }
+  .regen.on.streaming .regen-spin{width:36px;height:36px;flex-shrink:0}
+  .regen.on.streaming .regen-spin .regen-icon{width:16px;height:16px}
+  .regen.on.streaming .regen-t{font-size:var(--fs-sm);background:rgba(255,255,255,.92);border:1px solid var(--paper-line);border-radius:var(--r-pill);padding:5px 12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+  .regen.on.streaming .regen-s{display:none}
+  .regen.on.streaming .regen-time{display:none}
   .regen-spin{position:relative;width:52px;height:52px;display:flex;align-items:center;justify-content:center}
   .regen-spin::before{content:"";position:absolute;inset:0;border:3px solid var(--primary-100);border-top-color:var(--primary);border-radius:50%;animation:spin 1.2s linear infinite}
   .regen-spin .regen-icon{width:22px;height:22px;color:var(--primary);animation:wiggle 1.8s ease-in-out infinite alternate;display:block}
@@ -2412,6 +2431,11 @@
     window.stopRegenLoop();
     _regenStartTs = Date.now();
     _regenExpected = 45;
+    // Neteja la classe "streaming" del cicle anterior perquè el nou
+    // cicle comenci amb l'overlay en mode normal (centrat, amb blur).
+    // onDelta hi tornarà a afegir "streaming" quan arribi el primer token.
+    const regenElInit = document.getElementById('regen');
+    if (regenElInit) regenElInit.classList.remove('streaming');
     const timeEl = document.getElementById('regen-time');
     const subEl = document.querySelector('.regen-s');
     if (timeEl) {
@@ -3632,8 +3656,15 @@
           _streamActive = true;
           localStorage.removeItem('atne.adapted_raw_ck');
           localStorage.removeItem('atne.adapted_cache_key');
-          // Amaga l'overlay perquè l'usuari ja veu text aparèixer.
-          if (regenEl) regenEl.classList.remove('on');
+          // En lloc d'amagar l'overlay, el passem a mode "streaming":
+          // fons transparent + spinner+text al cantó superior dret. Així
+          // el text que va apareixent és llegible PERÒ l'usuari sap que
+          // encara s'està generant (no espera "ja està?" en silenci).
+          if (regenEl) {
+            regenEl.classList.add('streaming');
+            const _rt = document.getElementById('regen-t');
+            if (_rt) _rt.textContent = 'Generant…';
+          }
           if (adaptedEl) adaptedEl.innerHTML = '';
         }
         _streamBuffer += ev.text;
