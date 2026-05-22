@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<title>ATNE · Test manual Mermaid converter</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; color: #1a1714; background: #faf8f4; }
+  h1 { font-size: 22px; margin-bottom: 4px; }
+  .subtitle { color: #6b6560; font-size: 13px; margin-bottom: 32px; }
+  h2 { font-size: 16px; margin: 32px 0 8px; border-top: 1px solid #e0dbd2; padding-top: 16px; }
+  .case { background: #fff; border: 1px solid #e0dbd2; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+  .case-label { font-size: 11px; font-family: monospace; color: #6b6560; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .1em; }
+  .input-md { background: #f0ece4; border-radius: 6px; padding: 10px 12px; font-family: monospace; font-size: 12px; white-space: pre-wrap; margin-bottom: 12px; }
+  .output-area { border: 1px solid #e0dbd2; border-radius: 8px; min-height: 60px; }
+  .badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 20px; margin-bottom: 8px; }
+  .badge-ok { background: #d1fae5; color: #065f46; }
+  .badge-fallback { background: #fef3c7; color: #92400e; }
+  /* Inclou estils de mermaid-wrapper (copia dels shell.css per al test autònom) */
+  .mermaid-wrapper { display: flex; flex-direction: column; gap: 8px; margin: 4px 0; }
+  .mermaid-diagram { background: #ffffff; border: 1px solid #e0dbd2; border-radius: 12px; padding: 20px 16px; overflow-x: auto; max-width: 100%; }
+  .mermaid-diagram svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+  .mermaid-toggle-btn { align-self: flex-start; font-size: 11px; color: #6b6560; background: transparent; border: 1px solid #e0dbd2; border-radius: 20px; padding: 3px 10px; cursor: pointer; }
+  .mermaid-toggle-btn:hover { background: #f0ece4; color: #1a1714; }
+  .mermaid-fallback-details { font-size: 11px; color: #6b6560; }
+  .mermaid-fallback-details summary { cursor: pointer; padding: 2px 0; }
+  .mermaid-fallback-pre { font-family: monospace; font-size: 11px; line-height: 1.5; white-space: pre-wrap; color: #3d3a37; background: #faf8f4; border: 1px solid #e0dbd2; border-radius: 6px; padding: 10px 12px; margin: 6px 0 0; overflow-x: auto; }
+  #log { background: #1a1714; color: #a8ff8a; font-family: monospace; font-size: 12px; padding: 16px; border-radius: 8px; white-space: pre-wrap; margin-top: 32px; min-height: 60px; }
+</style>
+</head>
+<body>
+
+<h1>ATNE · Test manual Mermaid converter</h1>
+<p class="subtitle">Obre aquest fitxer al navegador per verificar visualment el renderitzat de Mermaid.js.<br>
+Requereix connexió a internet (CDN jsdelivr). No requereix cap servidor.</p>
+
+<!-- CAS 1: Mapa conceptual jeràrquic -->
+<div class="case">
+  <div class="case-label">Cas 1 — mapa_conceptual (mindmap)</div>
+  <div class="input-md">## Mapa conceptual
+- Sistema solar
+  - Estrella central: Sol
+  - 8 planetes
+    - Interiors: Mercuri, Venus, Terra, Mart
+    - Exteriors: Júpiter, Saturn, Urà, Neptú
+  - Cinturó d'asteroides
+  - Llunes i satèl·lits</div>
+  <div id="out-1" class="output-area"></div>
+</div>
+
+<!-- CAS 2: Esquema visual seqüencial -->
+<div class="case">
+  <div class="case-label">Cas 2 — esquema_visual (flowchart LR)</div>
+  <div class="input-md">## Esquema visual
+- La fotosíntesi
+  - Entrada
+    - Llum solar
+    - Diòxid de carboni (CO₂)
+    - Aigua (H₂O)
+  - Procés: cloroplasts
+  - Sortida
+    - Glucosa (aliment)
+    - Oxigen (O₂)</div>
+  <div id="out-2" class="output-area"></div>
+</div>
+
+<!-- CAS 3: Mapa mental (igual que mindmap) -->
+<div class="case">
+  <div class="case-label">Cas 3 — mapa_mental (mindmap)</div>
+  <div class="input-md">## Mapa mental
+- La revolució industrial
+  - Causes
+    - Revolució agrícola
+    - Acumulació de capital
+    - Carbó abundant
+  - Canvis
+    - Màquina de vapor
+    - Treball en fàbrica
+    - Urbanització massiva
+  - Conseqüències
+    - Classe obrera
+    - Contaminació
+    - Progrés tecnològic</div>
+  <div id="out-3" class="output-area"></div>
+</div>
+
+<!-- CAS 4: Fallback amb text invàlid -->
+<div class="case">
+  <div class="case-label">Cas 4 — fallback (text invàlid / no parseable)</div>
+  <div class="input-md">## Mapa conceptual
+Text completament lliure sense estructura de llista.
+Aquí no hi ha guions ni sagnies, per tant la conversió
+retornarà null i es mantindrà el text original.</div>
+  <div id="out-4" class="output-area"></div>
+</div>
+
+<div id="log">Inicialitzant...</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+// Copia autònoma de mermaid-converter.js per al test (sense dependre del servidor)
+// Inclou les funcions de conversió i renderitzat.
+
+(function() {
+  'use strict';
+
+  function escapeMermaidLabel(text) {
+    return text.replace(/\(/g,'（').replace(/\)/g,'）').replace(/\[/g,'［').replace(/\]/g,'］').replace(/"/g,"'").trim();
+  }
+  function indentLevel(line) {
+    const match = line.match(/^(\s*)/);
+    if (!match) return 0;
+    const ws = match[1];
+    const tabs = (ws.match(/\t/g)||[]).length;
+    const spaces = (ws.match(/ /g)||[]).length;
+    return tabs > 0 ? tabs : Math.floor(spaces / 2);
+  }
+  function extractText(line) {
+    return line.replace(/^\s*-\s+/,'').replace(/\*\*([^*]+)\*\*/g,'$1').replace(/^#+\s+/,'').trim();
+  }
+  function markdownToMindmap(mdText) {
+    const lines = mdText.split('\n').filter(l => { const t=l.trim(); return t.length>0 && !t.startsWith('#'); });
+    if (!lines.length) return null;
+    const levels = lines.map(l => indentLevel(l));
+    const minLevel = Math.min(...levels);
+    const out = ['mindmap'];
+    let rootEmitted = false;
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      const level = indentLevel(line) - minLevel;
+      const text = escapeMermaidLabel(extractText(trimmed));
+      if (!text) continue;
+      const indent = '  '.repeat(level + 1);
+      if (!rootEmitted) { out.push('  root((' + text + '))'); rootEmitted = true; }
+      else { out.push(indent + text); }
+    }
+    return rootEmitted ? out.join('\n') : null;
+  }
+  function markdownToFlowchart(mdText) {
+    const lines = mdText.split('\n').filter(l => { const t=l.trim(); return t.length>0 && !t.startsWith('#'); });
+    if (!lines.length) return null;
+    const levels = lines.map(l => indentLevel(l));
+    const minLevel = Math.min(...levels);
+    const out = ['flowchart LR'];
+    let nodeId = 0;
+    const parentStack = [];
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      const level = indentLevel(line) - minLevel;
+      const text = escapeMermaidLabel(extractText(trimmed));
+      if (!text) continue;
+      const id = 'n' + (nodeId++);
+      const label = text.length > 40 ? text.slice(0,38)+'…' : text;
+      while (parentStack.length > 0 && parentStack[parentStack.length-1].level >= level) parentStack.pop();
+      if (parentStack.length === 0) { out.push('  ' + id + '["' + label + '"]'); }
+      else { const pid = parentStack[parentStack.length-1].id; out.push('  ' + id + '("' + label + '")'); out.push('  ' + pid + ' --> ' + id); }
+      parentStack.push({ level, id });
+    }
+    return nodeId > 0 ? out.join('\n') : null;
+  }
+  function convertMarkdownToMermaid(mdText, type) {
+    if (!mdText) return null;
+    const body = mdText.split('\n').filter(l => !l.match(/^##\s+/)).join('\n').trim();
+    if (!body) return null;
+    try {
+      if (type === 'mapa_conceptual' || type === 'mapa_mental') return markdownToMindmap(body);
+      if (type === 'esquema_visual') return markdownToFlowchart(body);
+      return null;
+    } catch(e) { return null; }
+  }
+
+  // Mermaid ja és carregat per script sincrona dalt
+  window.mermaid.initialize({
+    startOnLoad: false,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#f0ece4', primaryTextColor: '#1a1714',
+      primaryBorderColor: '#c9c3b8', lineColor: '#6b6560',
+      secondaryColor: '#faf8f4', fontFamily: 'system-ui', fontSize: '14px',
+    },
+    mindmap: { padding: 16, curve: 'linear' },
+    flowchart: { curve: 'basis', padding: 16 },
+  });
+
+  const log = document.getElementById('log');
+  function appendLog(msg) { log.textContent += '\n' + msg; }
+  log.textContent = '[ATNE Mermaid test] Iniciat ' + new Date().toLocaleTimeString();
+
+  const cases = [
+    { outId: 'out-1', type: 'mapa_conceptual' },
+    { outId: 'out-2', type: 'esquema_visual' },
+    { outId: 'out-3', type: 'mapa_mental' },
+    { outId: 'out-4', type: 'mapa_conceptual' },
+  ];
+
+  cases.forEach(function(c, idx) {
+    const outEl = document.getElementById(c.outId);
+    const inputEl = outEl.previousElementSibling;
+    const mdRaw = inputEl.textContent;
+    const syntax = convertMarkdownToMermaid(mdRaw, c.type);
+
+    if (!syntax) {
+      // Fallback: mostra text pla
+      const badge = document.createElement('div');
+      badge.className = 'badge badge-fallback';
+      badge.textContent = 'FALLBACK — text pla (conversió retorna null)';
+      const pre = document.createElement('pre');
+      pre.style.cssText = 'font-family:monospace;font-size:12px;white-space:pre-wrap;padding:12px;margin:0;color:#3d3a37';
+      pre.textContent = mdRaw;
+      outEl.style.padding = '12px';
+      outEl.appendChild(badge);
+      outEl.appendChild(pre);
+      appendLog('Cas ' + (idx+1) + ' [' + c.type + ']: FALLBACK (null)');
+      return;
+    }
+
+    appendLog('Cas ' + (idx+1) + ' [' + c.type + ']: syntax generada (' + syntax.split('\n').length + ' línies)');
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'mermaid-wrapper';
+    wrapper.style.padding = '12px';
+
+    const badge = document.createElement('div');
+    badge.className = 'badge badge-ok';
+    badge.textContent = 'OK — Mermaid renderitzat';
+    wrapper.appendChild(badge);
+
+    const mermaidDiv = document.createElement('div');
+    mermaidDiv.className = 'mermaid-diagram';
+    mermaidDiv.textContent = syntax;
+
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'mermaid-toggle-btn';
+    toggleBtn.textContent = 'Veure com a text';
+    toggleBtn.setAttribute('aria-pressed', 'false');
+
+    const details = document.createElement('details');
+    details.className = 'mermaid-fallback-details';
+    const summary = document.createElement('summary');
+    summary.textContent = 'Sintaxi Mermaid generada';
+    const pre = document.createElement('pre');
+    pre.className = 'mermaid-fallback-pre';
+    pre.textContent = syntax;
+    details.appendChild(summary);
+    details.appendChild(pre);
+
+    toggleBtn.addEventListener('click', function() {
+      const showText = toggleBtn.getAttribute('aria-pressed') === 'false';
+      toggleBtn.setAttribute('aria-pressed', showText ? 'true' : 'false');
+      toggleBtn.textContent = showText ? 'Veure com a diagrama' : 'Veure com a text';
+      mermaidDiv.style.display = showText ? 'none' : '';
+      details.open = showText;
+    });
+
+    wrapper.appendChild(toggleBtn);
+    wrapper.appendChild(mermaidDiv);
+    wrapper.appendChild(details);
+    outEl.appendChild(wrapper);
+
+    window.mermaid.run({ nodes: [mermaidDiv] }).then(function() {
+      appendLog('  → SVG renderitzat correctament');
+    }).catch(function(err) {
+      appendLog('  → ERROR mermaid.run(): ' + err.message);
+      badge.className = 'badge badge-fallback';
+      badge.textContent = 'ERROR Mermaid — mostrant sintaxi';
+      details.open = true;
+      mermaidDiv.style.display = 'none';
+    });
+  });
+
+}());
+</script>
+</body>
+</html>

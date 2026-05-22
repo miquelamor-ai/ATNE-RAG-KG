@@ -26,6 +26,9 @@
 <script src="/ui/driver.iife.js"></script>
 <script src="/ui/atne/js/profile-canonical.js"></script>
 <script src="/ui/atne/js/llm.js?v=20260419m" defer></script>
+<!-- Mermaid converter: càrrega lazy de Mermaid.js per a mapes conceptuals i esquemes visuals.
+     El script no carrega Mermaid.js fins que no hi ha un complement d'aquest tipus actiu. -->
+<script src="/ui/atne/js/mermaid-converter.js" defer></script>
 <!-- DOMPurify: sanititza HTML que ve del LLM o de Supabase abans d'innerHTML. -->
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
 <script>
@@ -3049,6 +3052,17 @@
       if (cont) { cont.dataset.md = complements[key]; cont.innerHTML = md2html(complements[key]); }
       updateChipDot(meta.chip, 'ok');
     });
+
+    // Renderitza mapes conceptuals i esquemes visuals amb Mermaid.js (lazy).
+    // S'executa DESPRÉS que tots els complements hagin rebut el seu contingut,
+    // perquè renderMermaidBlock llegeix dataset.md dels contenidors.
+    try {
+      if (window.ATNE_MERMAID && typeof window.ATNE_MERMAID.renderAllMermaidComplements === 'function') {
+        window.ATNE_MERMAID.renderAllMermaidComplements();
+      }
+    } catch (_mErr) {
+      // Fallback silenciós: el contingut text ja és visible
+    }
 
     // Capa "Per al docent": argumentació pedagògica + auditoria dels canvis.
     // El prompt SEMPRE demana aquestes seccions (prompt_builder.py:608); aquí

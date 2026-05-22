@@ -462,3 +462,91 @@ body.help-mode [data-help]:hover {
   vertical-align: middle;
   margin: 0 2px;
 }
+
+/* ─── Mermaid: mapes conceptuals i esquemes visuals ─────────────────────── */
+
+/* Contenidor del diagrama renderitzat */
+.mermaid-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 0;
+}
+
+/* El div que Mermaid.js omple amb l'SVG */
+.mermaid-diagram {
+  background: #ffffff;
+  border: 1px solid var(--paper-line, #e0dbd2);
+  border-radius: var(--r-xl, 12px);
+  padding: 20px 16px;
+  overflow-x: auto;
+  /* Permet que l'SVG gran tingui scroll horitzontal sense trencar el layout */
+  max-width: 100%;
+}
+
+/* L'SVG generat per Mermaid: centra i adapta al contenidor */
+.mermaid-diagram svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+/* Botó toggle Veure com a text / Veure com a diagrama */
+.mermaid-toggle-btn {
+  align-self: flex-start;
+  font-family: var(--ui, system-ui);
+  font-size: var(--fs-xs, 11px);
+  color: var(--ink-500, #6b6560);
+  background: transparent;
+  border: 1px solid var(--paper-line, #e0dbd2);
+  border-radius: 20px;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.mermaid-toggle-btn:hover {
+  background: var(--cream-2, #f0ece4);
+  color: var(--ink-900, #1a1714);
+}
+
+/* Details de fallback amb el text pla (per PDF i per si Mermaid falla) */
+.mermaid-fallback-details {
+  font-family: var(--ui, system-ui);
+  font-size: var(--fs-xs, 11px);
+  color: var(--ink-500, #6b6560);
+}
+.mermaid-fallback-details summary {
+  cursor: pointer;
+  padding: 2px 0;
+}
+.mermaid-fallback-pre {
+  font-family: var(--mono, monospace);
+  font-size: var(--fs-xs, 11px);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  color: var(--ink-700, #3d3a37);
+  background: var(--cream-1, #faf8f4);
+  border: 1px solid var(--paper-line, #e0dbd2);
+  border-radius: var(--r-md, 6px);
+  padding: 10px 12px;
+  margin: 6px 0 0;
+  overflow-x: auto;
+}
+
+/* ─── Mermaid: media print ───────────────────────────────────────────────── */
+@media print {
+  .mermaid-diagram {
+    /* Evita que el diagrama es talli entre pàgines */
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .mermaid-toggle-btn {
+    display: none;
+  }
+  /* Assegura que l'SVG es vegi en blanc sobre blanc (no fons cream) */
+  .mermaid-diagram {
+    background: #ffffff !important;
+    border: 1px solid #ccc !important;
+  }
+}
