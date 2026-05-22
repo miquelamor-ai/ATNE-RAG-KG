@@ -997,7 +997,7 @@
               <div class="p-item">Respon sense llegir tot</div>
               <div class="p-item">Fatiga lectora al final</div>
             </div>
-            <div class="p-sect">Ajuts que activa el perfil</div>
+            <div class="p-sect">Complements i regles del perfil</div>
             <div class="p-list">
               <div class="p-item">Fragmentar el text</div>
               <div class="p-item">Una idea per frase</div>
@@ -1491,7 +1491,7 @@
         detail.innerHTML = `
           <div class="p-sect">Conductes observades</div>
           <div class="p-list">${p.behaviors.map(b => `<div class="p-item">${b}</div>`).join('')}</div>
-          <div class="p-sect">Ajuts que activa el perfil</div>
+          <div class="p-sect">Complements i regles del perfil</div>
           <div class="p-list">${_aidsList.map(a => `<div class="p-item">${a}</div>`).join('')}</div>
         `;
         if (expandBtn) expandBtn.style.display = '';
@@ -2785,24 +2785,69 @@
     { id: 'esquema_visual',        label: 'Esquema visual',               desc: 'Estructura gràfica del contingut' },
     { id: 'mapa_conceptual',       label: 'Mapa conceptual',              desc: 'Relacions entre conceptes (ESO+)' },
     { id: 'preguntes_comprensio',  label: 'Preguntes de comprensió',      desc: 'Verificació de la lectura' },
-    { id: 'bastides',              label: 'Bastides lingüístiques',       desc: 'Suports per a l\'expressió escrita' },
+    { id: 'bastides',              label: 'Bastides lingüístiques',       desc: 'Bastides per a la lectura estratègica i la producció escrita' },
     { id: 'activitats_aprofundiment', label: 'Activitats d\'aprofundiment', desc: 'Per a alumnes d\'altes capacitats' },
     { id: 'mapa_mental',           label: 'Mapa mental',                  desc: 'Pensament divergent' },
     { id: 'pictogrames',           label: 'Pictogrames',                  desc: 'Suport visual (L2, TEA)' },
     { id: 'illustracions',         label: 'Il·lustracions IA <span class="badge-experimental">experimental</span>', desc: 'Imatges generades per IA · 1-3 min' }
   ];
 
+  // Matriu canònica FJE — font: ui/saber-ne.html §7 (Complements per condició)
+  // Columnes mapejades a IDs de COMPLEMENT_DEFS:
+  //   glossari | esquema_visual | bastides | mapa_conceptual | preguntes_comprensio | activitats_aprofundiment | pictogrames
+  // Nota: "Negretes", "Def.integr." i "Trad.L1" són variables de prompt, no complements UI.
+  // Nota: mapa_mental (antic AC) substituït per mapa_conceptual seguint la matriu canònica.
+  // Chip `lv` = nivell MECR informatiu (no és una condició), s'ignora aquí.
+  //
+  // Canvis vs versió anterior:
+  //   - Cobertura ampliada de 4 a 12 condicions
+  //   - AC: mapa_mental → mapa_conceptual (canvi canònic)
+  //   - Afegides: tea, di, tdl, aud, vis, tdc, vuln, emo
+  //   - Condicions desconegudes: retornen el set bàsic (glossari + preguntes_comprensio)
+  //
+  // Tests inline (validen la matriu — verificar manualment si es modifica):
+  //   TDAH      → glossari, esquema_visual, bastides, preguntes_comprensio               (bastides ✓)
+  //   Nouvingut → glossari, esquema_visual, bastides, preguntes_comprensio, pictogrames  (trad_L1 és variable de prompt, no complement)
+  //   AC        → glossari, esquema_visual, mapa_conceptual, preguntes_comprensio, activitats_aprofundiment (mapa_conceptual ✓, no mapa_mental)
+  //   TEA       → glossari, esquema_visual, bastides, preguntes_comprensio, pictogrames  (pictogrames ✓)
+  //   DI        → glossari, esquema_visual, bastides, pictogrames                        (sense preguntes_comprensio ✓)
+  const MATRIU_CONDICIONS = {
+    //            [glossari, esquema, bastides, mapa_conc, preguntes, aprofund, pictogrames]
+    tea:  [true,  true,  true,  false, true,  false, true],
+    tdah: [true,  true,  true,  false, true,  false, false],
+    disl: [true,  true,  true,  false, true,  false, false],
+    di:   [true,  true,  true,  false, false, false, true],
+    tdl:  [true,  true,  true,  false, true,  false, false],
+    ac:   [true,  true,  false, true,  true,  true,  false],
+    aud:  [true,  true,  true,  false, true,  false, true],
+    vis:  [true,  false, false, false, true,  false, false],
+    tdc:  [true,  false, false, false, true,  false, false],
+    cat:  [true,  true,  true,  false, true,  false, true],
+    vuln: [true,  true,  true,  false, true,  false, false],
+    emo:  [true,  true,  true,  false, true,  false, false],
+  };
+  // Ordre: [glossari, esquema_visual, bastides, mapa_conceptual, preguntes_comprensio, activitats_aprofundiment, pictogrames]
+  const MATRIU_KEYS = ['glossari', 'esquema_visual', 'bastides', 'mapa_conceptual', 'preguntes_comprensio', 'activitats_aprofundiment', 'pictogrames'];
+
   function defaultComplementsForProfile(p) {
     const cat = p?.cat || '';
     const chips = (p?.chips || []).map(c => c.cat).filter(Boolean);
     const has = c => cat === c || chips.includes(c) || cat === 'group-' + c;
-    const set = new Set(['glossari']); // glossari sempre
-    if (has('tdah') || has('disl') || has('cat')) set.add('esquema_visual');
-    if (has('disl') || has('cat'))               set.add('bastides');
-    if (has('ac'))                                { set.add('mapa_mental'); set.add('activitats_aprofundiment'); }
-    if (has('cat'))                               set.add('pictogrames');
-    set.add('preguntes_comprensio');              // útil per verificar lectura
-    return Array.from(set);
+
+    // Agreguem les columnes de cada condició present per unió (OR lògic)
+    const active = new Array(MATRIU_KEYS.length).fill(false);
+    let anyKnown = false;
+    for (const cond of Object.keys(MATRIU_CONDICIONS)) {
+      if (has(cond)) {
+        anyKnown = true;
+        MATRIU_CONDICIONS[cond].forEach((v, i) => { if (v) active[i] = true; });
+      }
+    }
+
+    // Fallback: cap condició reconeguda → set bàsic
+    if (!anyKnown) return ['glossari', 'preguntes_comprensio'];
+
+    return MATRIU_KEYS.filter((_, i) => active[i]);
   }
 
   // Estat actual dels complements seleccionats (persistit a localStorage).
@@ -3062,7 +3107,7 @@
       onDestroyed: () => _switchTab('write'),
       steps: [
         // ── Perfil ──
-        { element: '.pcard', popover: { title: 'El perfil seleccionat', description: 'Resum de l\'alumne o grup escollit al Pas 1: MECR, condicions i ajuts que s\'aplicaran a l\'adaptació.', side:'right' } },
+        { element: '.pcard', popover: { title: 'El perfil seleccionat', description: 'Resum de l\'alumne o grup escollit al Pas 1: MECR, condicions i complements que s\'aplicaran a l\'adaptació.', side:'right' } },
 
         // ── Vies d'entrada ──
         { element: '.mode-tab[data-mode="write"]',
