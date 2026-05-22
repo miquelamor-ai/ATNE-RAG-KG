@@ -894,12 +894,35 @@ ACTIVAT — Genera un resum del text adaptat en 3-5 frases en {lang_label}.
 - NO comences amb "Aquest text parla de..." — usa una frase directa sobre el contingut.
 """)
 
-    if comp.get("mapa_mental"):
+    if comp.get("mapa_mental") and _skills_on:
+        # SKILLs ON: generate-mapa-mental aporta gradació MECR, format radial,
+        # distinció vs mapa conceptual, exemple B1 (Buzan + Novak).
+        output_sections.append("""
+## Mapa mental
+ACTIVAT — Vegeu les instruccions detallades a la SKILL generate-mapa-mental
+(estructura radial, branques associatives, preguntes generadores, connexions
+transversals; gradació MECR pre-A1 → C1).
+""")
+    elif comp.get("mapa_mental"):
+        # SKILLs OFF: bloc backup amb format compatible amb renderer Mermaid (mindmap).
+        # Usa llista markdown amb sagnia (-, 2 espais) — NO fletxes Unicode ni ASCII-art.
         output_sections.append("""
 ## Mapa mental
 ACTIVAT — Genera un mapa mental radial (diferent del mapa conceptual).
-El concepte central al mig, amb branques que s'expandeixen amb associacions lliures,
-preguntes generadores i connexions amb altres matèries.
+Format: llista markdown amb sagnia (2 espais per nivell). Concepte central al primer
+nivell, branques associatives al segon, idees i preguntes generadores al tercer.
+NO usar fletxes Unicode ni ASCII-art. El frontend ATNE el renderitza com a
+diagrama mindmap SVG (Mermaid).
+
+Exemple de format:
+```
+- **CONCEPTE CENTRAL**
+  - Branca 1
+    - Idea associada
+    - Pregunta generadora?
+  - Branca 2
+    - Connexió interdisciplinar
+```
 """)
 
     # Sempre: argumentació pedagògica + auditoria
