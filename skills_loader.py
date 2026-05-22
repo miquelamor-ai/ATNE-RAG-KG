@@ -77,6 +77,13 @@ def load_skills(skills_roots) -> list[Skill]:
                 if name in seen_names:
                     # Guanya la primera font (preserva semàntica per overlays).
                     continue
+                # BUG bastides deprecated (2026-05-22): exclou skills amb
+                # active=false o deprecated=true per evitar instruccions dobles.
+                # generate-bastides és substituïda per -lectura i -produccio.
+                if fm.get("active") is False or (
+                    fm.get("deprecated") is True and fm.get("active") is not True
+                ):
+                    continue
                 seen_names.add(name)
                 skills.append(Skill(
                     path=skill_md.parent,

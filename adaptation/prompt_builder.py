@@ -804,6 +804,18 @@ activa també el complement «Preguntes de comprensió» o «Activitats d'aprofu
 
         output_sections.append(_bastides_block)
 
+    if comp.get("resum"):
+        # BUG fix (2026-05-22): Flash tenia branca "resum" a _build_flash_system_prompt
+        # (server.py:4553) però el pipeline normal (Taller) no la tenia. Ara el Taller
+        # també pot generar resum quan el docent activa el complement.
+        output_sections.append(f"""
+## Resum
+ACTIVAT — Genera un resum del text adaptat en 3-5 frases en {lang_label}.
+- Cobreix les idees principals en ordre lògic.
+- Usa el nivell lingüístic del text adaptat (no simpliquis més del necessari).
+- NO comences amb "Aquest text parla de..." — usa una frase directa sobre el contingut.
+""")
+
     if comp.get("mapa_mental"):
         output_sections.append("""
 ## Mapa mental

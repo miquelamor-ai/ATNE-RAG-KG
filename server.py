@@ -4291,11 +4291,111 @@ async def derive_params_endpoint(payload: dict = Body(...)):
     return {"ok": True, **result}
 
 
+# ── Normalització de perfil (BUG-7, 2026-05-22) ────────────────────────────
+# El backend espera profile.caracteristiques.X.actiu=True, però Flash i els
+# perfils custom del Taller envien formats divergents:
+#   - Flash: profile.perfils = ["nouvingut", "tdah"]
+#   - Custom: profile.chips = [{"cat": "tdah"}, ...]
+#   - Categoria principal: profile.cat = "nouvingut"
+#   - L1 al top level: profile.l1 = "àrab"
+# Fins 2026-05-22: 0/55 perfils custom enviaven el format que el backend
+# esperava → 21 nouvinguts sense glossari bilingüe, perfils TDAH/dislèxia
+# sense instruccions específiques.
+
+# Mapeig de clau curta (chip/perfil) → clau canònica de caracteristiques
+_CHIP_TO_CARACT = {
+    "cat":       "nouvingut",
+    "disl":      "dislexia",
+    "tdah":      "tdah",
+    "ac":        "altes_capacitats",
+    "tea":       "tea",
+    "di":        "di",
+    # "lv" no té equivalent canònic confirmat — es preserva sense mapejar
+    # "generic" i "group" no corresponen a condicions individuals
+}
+
+# Claus que representen perfils directament (format Flash: profile.perfils=[...])
+_PERFIL_DIRECT = {"nouvingut", "dislexia", "tdah", "altes_capacitats", "tea", "di", "tgd", "tdc"}
+
+
+def normalize_profile(profile: dict) -> dict:
+    """Normalitza el profile al format canònic que espera el backend.
+
+    El backend (prompt_builder.py, instruction_filter.py) llegeix SEMPRE
+    profile.caracteristiques.X.actiu=True. Aquesta funció converteix els
+    formats alternatius del frontend (Flash, Taller custom) al format
+    canònic, preservant les claus originals per backwards-compat.
+
+    Casos coberts:
+    1. caracteristiques ja existeix i no és buit → no toca res.
+    2. profile.perfils = ["nouvingut", ...] (format Flash) → injecta actiu=True.
+    3. profile.chips = [{"cat": "tdah"}, ...] (Taller custom) → injecta via _CHIP_TO_CARACT.
+    4. profile.cat = "nouvingut" (categoria principal) → injecta actiu=True.
+    5. profile.l1 o profile.L1 al top level → copia a caracteristiques.nouvingut.l1.
+    """
+    # Copia superficial per no mutar l'original rebut pel handler
+    profile = dict(profile)
+
+    chars = profile.get("caracteristiques") or {}
+
+    # Cas 1: si ja tenim caracteristiques poblades, no cal normalitzar
+    if chars:
+        # Igualment propaguem L1 top-level per si falta dins de nouvingut
+        l1_top = profile.get("l1") or profile.get("L1") or ""
+        if l1_top and isinstance(chars.get("nouvingut"), dict):
+            if not chars["nouvingut"].get("l1") and not chars["nouvingut"].get("L1"):
+                chars["nouvingut"]["l1"] = l1_top
+                profile["caracteristiques"] = chars
+        return profile
+
+    # A partir d'aquí, chars és buit o inexistent → construïm caracteristiques
+    new_chars: dict = {}
+
+    # Cas 2: format Flash — profile.perfils = ["nouvingut", "tdah"]
+    for pf in (profile.get("perfils") or []):
+        if isinstance(pf, str) and pf in _PERFIL_DIRECT:
+            new_chars.setdefault(pf, {})["actiu"] = True
+
+    # Cas 3: format Taller custom — profile.chips = [{"cat": "tdah"}, ...]
+    for chip in (profile.get("chips") or []):
+        if not isinstance(chip, dict):
+            continue
+        key = chip.get("cat") or chip.get("key") or chip.get("id") or ""
+        canonical = _CHIP_TO_CARACT.get(key)
+        if canonical:
+            new_chars.setdefault(canonical, {})["actiu"] = True
+        elif key and key not in ("generic", "group", "lv"):
+            # Chip desconegut no genèric: l'injectem tal com és per no perdre info
+            new_chars.setdefault(key, {})["actiu"] = True
+        # "lv" (Lectura Visual) es preserva al chip però no es mapeja per manca
+        # de clau canònica confirmada. Tasca pendent: definir caract. "lv" al backend.
+
+    # Cas 4: profile.cat — categoria principal (ex: "nouvingut")
+    cat_top = profile.get("cat") or ""
+    if cat_top and cat_top not in ("generic", "group"):
+        canonical_cat = _CHIP_TO_CARACT.get(cat_top, cat_top)
+        new_chars.setdefault(canonical_cat, {})["actiu"] = True
+
+    # Cas 5: L1 top level → nuevingut.l1
+    l1_top = profile.get("l1") or profile.get("L1") or ""
+    if l1_top and "nouvingut" in new_chars:
+        new_chars["nouvingut"]["l1"] = l1_top
+
+    if new_chars:
+        profile["caracteristiques"] = new_chars
+
+    return profile
+
+
 @app.post("/api/adapt")
 async def adapt_stream(request: Request, payload: dict = Body(...)):
     _rate_check(f"adapt:{request.client.host}", 15, 60)
     text = payload.get("text", "")
     profile = payload.get("profile", {})
+    # BUG-7 (2026-05-22): normalitzem el perfil al format canònic del backend.
+    # Flash envia 'perfils', Taller custom envia 'chips'. Sense normalització,
+    # 0/55 perfils custom activaven instruccions específiques (TDAH, nouvingut...).
+    profile = normalize_profile(profile)
     context = payload.get("context", {})
     params = payload.get("params", {})
     model = payload.get("model", "")  # mistral | gemma4 | (buit = default ATNE_MODEL)
@@ -4544,6 +4644,12 @@ def _build_flash_system_prompt(
                 f"- GLOSSARI: taula markdown 2 columnes | Terme | Explicació (màx. 8 paraules en {lang_label}) |. "
                 f"6-10 termes: prioritza termes curriculars del text, paraules ambigues pel nivell i col·locacions clau."
             )
+    # Nota BUG claus Flash (2026-05-22): Flash usa claus curtes ("preguntes",
+    # "glossari", "resum") definides a activeComps = new Set([...]) al frontend
+    # (flash.html:1272). Aquestes claus SÓN INTENCIONALS per a Flash — el prompt
+    # builder de Flash (aquest mètode) les espera explícitament. NO s'han de
+    # canviar a "preguntes_comprensio": Flash té un prompt propi, condensat.
+    # El pipeline Taller usa prompt_builder.py on la clau és "preguntes_comprensio".
     if "preguntes" in complements:
         comp_lines.append(
             f"- PREGUNTES DE COMPRENSIÓ: 5-6 preguntes en {lang_label} en 3 moments — "
