@@ -401,6 +401,19 @@ COMPLEMENTS A GENERAR (a més del text adaptat):
     l1 = _nouv.get("L1", "") or _nouv.get("l1", "")
     l1_display = l1 if l1 else "la llengua materna de l'alumne"
 
+    # Desduplicació SKILL↔hardcoded (2026-05-22): si ATNE_USE_SKILLS està
+    # actiu, les SKILLs de glossari/bastides/preguntes_comprensio aporten les
+    # instruccions detallades (gradació MECR, variants per perfil, format).
+    # En aquest cas, simplifiquem el hardcoded a una capçalera mínima per
+    # evitar duplicació i contradiccions (hardcoded deia "mínim 8-12 termes"
+    # sempre, SKILL gradua de 3-5 a 12-15 segons MECR). Mantenim el hardcoded
+    # complet quan SKILLs OFF perquè continuï essent backup funcional.
+    try:
+        import skills_loader as _sl
+        _skills_on = _sl.is_skills_enabled()
+    except Exception:
+        _skills_on = False
+
     output_sections = []
     output_sections.append("""
 FORMAT DE SORTIDA:
@@ -425,7 +438,17 @@ El text complet adaptat segons tots els paràmetres indicats.
             k for k, v in chars.items()
             if isinstance(v, dict) and v.get("actiu")
         ]
-        if is_nouvingut and l1:
+        if _skills_on:
+            # SKILLs ON: generate-glossari SKILL aporta el format complet
+            # (gradació BICS/CALP per MECR, variant bilingüe per nouvingut+L1,
+            # nombre de termes graduat). Aquí només marquem la secció com a
+            # activada perquè el LLM no s'oblidi de generar-la.
+            output_sections.append(f"""
+## Glossari
+ACTIVAT — Vegeu les instruccions detallades a la SKILL generate-glossari
+(format gradat per MECR{', variant bilingüe ' + l1_display if is_nouvingut and l1 else ''}).
+""")
+        elif is_nouvingut and l1:
             output_sections.append(f"""
 ## Glossari
 ACTIVAT — Genera una TAULA MARKDOWN amb 3 columnes:
@@ -642,7 +665,16 @@ REGLES CRÍTIQUES:
         # ESO / secundària i fallback
         adequacio_linia = "- Arguments, connectors lògics, contrast de fonts."
 
-    if comp.get("preguntes_comprensio"):
+    if comp.get("preguntes_comprensio") and _skills_on:
+        # SKILLs ON: generate-preguntes-comprensio aporta les instruccions
+        # detallades (3 moments × 3 plànols, gradació MECR, Think Aloud).
+        output_sections.append("""
+## Preguntes de comprensió
+ACTIVAT — Vegeu les instruccions detallades a la SKILL generate-preguntes-comprensio
+(3 moments × 3 plànols, gradació MECR, modulació literari/informatiu, modelatge Think Aloud).
+""")
+    elif comp.get("preguntes_comprensio"):
+        # SKILLs OFF: bloc hardcoded legacy (backup funcional)
         # C.2 MALL: formats per nivell + 3 plànols + quantitats per moment
         _pq_format_map = {
             "PRE-A1": "Emergent — NO escriptura autònoma. Formats ÚNICAMENT: assenyalar imatge, dibuixar, dramatitzar, dictat a l'adult.",
@@ -711,7 +743,18 @@ ACTIVAT — Genera 2-3 activitats de repte cognitiu per a {etapa_complement}:
 - Si el text ho permet: dimensió plurilingüe (com es diu X en altres llengües de l'aula?)
 """)
 
-    if comp.get("bastides"):
+    if comp.get("bastides") and _skills_on:
+        # SKILLs ON: generate-bastides-lectura + generate-bastides-produccio
+        # aporten les instruccions detallades (3 plànols, blocs A/B/C, gradació MECR).
+        output_sections.append("""
+## Bastides
+ACTIVAT — Vegeu les instruccions detallades a les SKILLs
+generate-bastides-lectura (3 moments × 3 plànols) i, si hi ha tasca de
+producció activa, generate-bastides-produccio (blocs A/B/C: base
+d'orientació + catàleg de recursos + pauta d'interrogació).
+""")
+    elif comp.get("bastides"):
+        # SKILLs OFF: bloc hardcoded legacy (backup funcional)
         # Bastides → dos blocs lògics segons hi hagi tasca de producció o no:
         #   - LECTURA (sempre): pre-lectura + durant + post-lectura
         #   - RESPOSTA (només si preguntes_comprensio o activitats_aprofundiment
