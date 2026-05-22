@@ -578,17 +578,22 @@ Exemples INCORRECTES:
         _esquema_nodes = _esquema_nodes_map.get(_mecr_c3, "Nombre de nodes a criteri docent. Modelitza processos complexos.")
         output_sections.append(f"""
 ## Esquema visual
-ACTIVAT — Genera un esquema/diagrama en format text. Per a {_mecr_c3}: {_esquema_nodes}
-Format: usa fletxes (→, ↓), símbols (+, =) i emojis per fer-lo visual i intuïtiu.
+ACTIVAT — Genera un esquema seqüencial en format llista markdown amb sagnia. Per a {_mecr_c3}: {_esquema_nodes}
+
+Format: arrel + ramificacions amb `-` i sagnia de 2 espais. NO usar fletxes Unicode (→, ↓) ni ASCII-art (│ ├ └). El frontend ATNE detecta aquest format i el renderitza com a diagrama SVG (Mermaid flowchart LR). Si no es pot renderitzar, queda com a llista llegible.
+
 Exemple de format:
 ```
-ELEMENT A ☀️
-  ↓
-+ ELEMENT B 💧
-  ↓
-RESULTAT → PRODUCTE 1 + PRODUCTE 2
+- Pas inicial
+  - Estat A
+  - Estat B
+- Acció central
+  - Resultat 1
+  - Resultat 2
+- Conclusió
 ```
-Ha de ser senzill i comprensible per a l'alumne. Bastida temporal: retira-la quan l'alumne pugui representar l'estructura mentalment.
+
+Ha de ser senzill i comprensible. Bastida temporal: retira-la quan l'alumne pugui representar l'estructura mentalment.
 """)
 
     if comp.get("mapa_conceptual"):

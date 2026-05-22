@@ -558,7 +558,7 @@ CATALOG = {
         "complement": "pictogrames",
     },
     "D-02": {
-        "text": "Esquema de procés en format text (fletxes, símbols) per mostrar relacions causa-efecte.",
+        "text": "Esquema de procés com a llista markdown amb sagnia (compatible amb renderer Mermaid SVG del frontend); NO fletxes Unicode ni ASCII-art.",
         "activation": "COMPLEMENT",
         "macro": "MULTIMODAL",
         "complement": "esquema_visual",
