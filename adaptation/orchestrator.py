@@ -313,6 +313,22 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
     for w in pp.get("warnings", []):
         cb({"type": "step", "step": "warning", "msg": w})
 
+    # 6b. Resolucio pictogrames ARASAAC — substitueix [PICTO: terme] per <img>
+    # Només s'activa si el complement 'pictogrames' és true i el text conté
+    # marcadors. Si ARASAAC falla parcialment, els marcadors sense resolució
+    # queden com a emoji de fallback (no es trenca el flux).
+    _comps = params.get("complements", {}) if isinstance(params, dict) else {}
+    if _comps.get("pictogrames"):
+        try:
+            from adaptation.pictograms_arasaac import resolve_pictogram_markers
+            _n_markers_before = adapted.count("[PICTO")
+            if _n_markers_before:
+                cb({"type": "step", "step": "pictograms",
+                    "msg": f"Resolent {_n_markers_before} pictograma(es) ARASAAC..."})
+                adapted = resolve_pictogram_markers(adapted, lang=lang)
+        except Exception as _picto_err:
+            print(f"[pictograms] resolucio fallida (fallback emoji): {_picto_err}", flush=True)
+
     # 7. Pipeline de qualitat català (LanguageTool + llegibilitat + LLM Auditor)
     quality_enabled = params.get("quality_check", True)
     use_auditor = params.get("auditor")

@@ -465,24 +465,54 @@ ACTIVAT — Ja integrat al glossari (columna de traducció a {l1_display}). No c
     _mecr_c3 = (params.get("mecr_sortida") or params.get("mecr") or "B1").upper().replace("Ç", "C")
 
     if comp.get("pictogrames"):
-        # C.3 MALL: densitat i col·locació de pictogrames per nivell
+        # C.3 MALL: gradació ARASAAC per nivell MECR.
+        # El LLM emet marcadors [PICTO: terme] — el backend els substitueix per
+        # pictogrames reals ARASAAC (CC BY-NC-SA 4.0). NO emojis Unicode.
+        # Decisió pedagògica 2026-05-21: docent pilot va denunciar que "emojis
+        # no son pictogrames AAC". Veure adaptation/pictograms_arasaac.py.
         _picto_map = {
-            "PRE-A1": "1-2 emojis PER FRASE (noms + verbs clau). Col·loca'ls INLINE, immediatament sobre o al costat de la paraula (associació directa grafia-significat). Afegeix 1 emoji paratextual al marge esquerre per anticipar el sentit de cada paràgraf.",
-            "A1":     "1 emoji per frase o per terme tècnic nou. Situa'ls al GLOSSARI VISUAL al peu del text. L'alumne descodifica primer, l'emoji reforça.",
-            "A2":     "Emojis al glossari visual (dreta o peu del text). NO inline. Màxim 5-6 emojis per document.",
+            "PRE-A1": (
+                "1-2 marcadors PER FRASE per als noms i verbs clau. "
+                "Col·loca'ls INLINE, immediatament al costat de la paraula "
+                "(associació directa grafia-pictograma). "
+                "Afegeix 1 marcador paratextual al marge esquerre per anticipar "
+                "el sentit de cada paràgraf."
+            ),
+            "A1": (
+                "1 marcador per frase o per terme tècnic nou. "
+                "Situa'ls al GLOSSARI VISUAL al peu del text. "
+                "L'alumne descodifica primer, el pictograma reforça."
+            ),
+            "A2": (
+                "Marcadors al glossari visual (peu del text). "
+                "NO inline al text corrent. Màxim 5-6 pictogrames per document."
+            ),
         }
         _picto_instr = _picto_map.get(_mecr_c3)
+        _picto_format = (
+            "Format OBLIGATORI del marcador: `[PICTO: terme_en_catala]`\n"
+            "  - Terme curt (1-3 paraules), en català, en minúscules.\n"
+            "  - Concepte concret i visualitzable (objecte, acció, ésser viu).\n"
+            "  - Exemples: `[PICTO: aigua]` `[PICTO: sol]` `[PICTO: planta]` "
+            "`[PICTO: menjar]` `[PICTO: casa]` `[PICTO: correr]`\n"
+            "  - NO inventis emojis Unicode. Usa SEMPRE el marcador `[PICTO: ...]`.\n"
+            "  - NO poses text ni puntuació dins del marcador, només el terme.\n"
+            "  - El backend substituirà cada marcador per un pictograma ARASAAC real."
+        )
         if _picto_instr:
             output_sections.append(f"""
-## Pictogrames
-ACTIVAT — Afegeix emojis/icones de suport. Gradació per a {_mecr_c3}: {_picto_instr}
-Exemples d'emojis: ☀️ llum, 💧 aigua, 🌱 planta, 🔬 ciència, ⚡ energia.
+## Pictogrames ARASAAC
+ACTIVAT — Afegeix pictogrames de suport. Gradació per a {_mecr_c3}: {_picto_instr}
+
+{_picto_format}
 """)
         else:
-            output_sections.append("""
-## Pictogrames
-ACTIVAT — Afegeix emojis/icones al glossari visual (peu del text). NO inline per a B1+.
-Màxim 4-5 emojis per document, només per a termes tècnics o conceptes difícils de visualitzar.
+            output_sections.append(f"""
+## Pictogrames ARASAAC
+ACTIVAT — Afegeix pictogrames al glossari visual (peu del text). NO inline per a B1+.
+Màxim 4-5 pictogrames per document, només per a termes tècnics o conceptes clau.
+
+{_picto_format}
 """)
 
     if comp.get("illustracions"):
