@@ -455,3 +455,10 @@ body.help-mode [data-help]:hover {
   }
   body.help-mode [data-help] { transition: none; }
 }
+
+/* Pictogrames ARASAAC inserits inline al text adaptat. */
+.arasaac-picto {
+  max-height: 64px;
+  vertical-align: middle;
+  margin: 0 2px;
+}
