@@ -552,7 +552,7 @@ CATALOG = {
     # ─── D. MULTIMODALITAT (només les que executa l'LLM) ─────────────────────
 
     "D-01": {
-        "text": "Emojis/icones de suport al costat dels conceptes clau (☀️ llum, 💧 aigua, 🌱 planta).",
+        "text": "Pictogrames ARASAAC al costat dels conceptes clau via marcadors `[PICTO: terme]` (el backend els substitueix per imatges reals ARASAAC; emoji només com a fallback si no es troba).",
         "activation": "COMPLEMENT",
         "macro": "MULTIMODAL",
         "complement": "pictogrames",
