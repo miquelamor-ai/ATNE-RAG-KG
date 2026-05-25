@@ -35,7 +35,7 @@ La biografia és una narració cronològica de la vida d'una persona real, centr
 **Tipologia MALL**: Narrativa (narrar fets reals en el temps).
 **HCL principal**: Narrar — seqüenciar fets biogràfics reals en ordre cronològic.
 **HCL secundàries**: Descriure context i entorn (A2+) · Explicar causes del llegat i connexió amb el present (B1+) · Argumentar des d'una perspectiva historiogràfica (C1+).
-**No s'adapta a pre-A1**: el gènere requereix comprensió del temps, la cronologia i el context social com a categories abstractes.
+**No s'adapta a pre-A1**: la biografia requereix el temps com a categoria abstracta (cronologia, context historicogeogràfic, llegat diferit — "per què importa avui"). Cap d'aquests conceptes es pot construir per via visual i concreta sense base lingüística mínima. A diferència del conte, no hi ha mediació adulta que substitueixi la comprensió temporal abstracta. (Decisió 6 canònica Fase B.)
 
 **Connexions MALL transversals:**
 - *Narrar en el temps*: la biografia és el gènere canònic per treballar la cronologia. Els connectors temporals (primer, llavors, l'any..., quan tenia... anys, finalment) són el vocabulari estructural del gènere i la bastida principal de la comprensió.

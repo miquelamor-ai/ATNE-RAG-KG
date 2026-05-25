@@ -35,7 +35,7 @@ La fàbula és una narració breu amb personatges arquetípics (animals o ésser
 **Tipologia MALL**: Narrativa (imaginar — il·lustrar un principi moral via ficció).
 **HCL principal**: Narrar — seqüenciar una acció amb personatges arquetípics que il·lustren una tensió moral.
 **HCL secundàries**: Interpretar/Valorar — la moral és HCL explícita des de A2 · Argumentar — justificar la moral amb el text, B2+.
-**No s'adapta a pre-A1**: la fàbula requereix comprensió de la relació historia-moral, que és una operació d'abstracció cognitiva no accessible sense base lingüística mínima.
+**No s'adapta a pre-A1**: la fàbula requereix comprendre dos plans simultanis — la narració superficial i la lliçó moral — i entendre que els personatges *representen* arquetips humans, no que *són* animals. Aquesta abstracció de segon nivell (símbol + inferència) no és accessible a la fase logogràfica/emergent, on el significat es construeix per via visual i concreta. (Decisió 6 canònica Fase B.)
 
 **Connexions MALL transversals:**
 - *Arquetip com a bastida transcultural*: els personatges arquetípics (el ràpid i descuidat, el llest i orgullós, l'humil i treballador) son esquemes cognitius universals. L'alumne nouvingut els reconeix fins i tot sense conèixer la tradició literària local perquè els arquetips son transculturals. No cal translanguaging: l'analogia s'activa per les accions del personatge, no per la traducció.

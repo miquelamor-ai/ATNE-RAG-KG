@@ -175,7 +175,7 @@ notebooklm_review:
 
 ---
 
-## 6. 5 decisions canòniques (regiren tots els pilots Fase B)
+## 6. 6 decisions canòniques (regiren tots els pilots Fase B)
 
 ### Decisió 1 — Asimetria `agent_roles`
 Gèneres: `[adapter, generator]`. **Complements: `[generator]`** (no `adapter`).
@@ -198,6 +198,20 @@ Si l'instrument **orienta** un procés (bastides, preguntes-comprensio), **no in
 
 ### Decisió 5 — Validació NotebookLM obligatòria
 **Tots els pilots Fase B passen per NotebookLM**. No replicació mecànica sense validació. Notebook: `5524a29e-805c-4bf8-b1f7-001a412c9cb9`.
+
+### Decisió 6 — Pre-A1: criteri del concret vs l'abstracte
+**Emergida del lot B.1 (2026-05-26)**. Un instrument admet `pre-A1` si i només si el significat es pot construir per via visual i concreta, mediat per l'adult, sense inferència simbòlica ni abstracció temporal.
+
+**Filtre en dues preguntes**:
+1. Pot l'adult mediar el significat amb imatges i gest, sense que l'alumne hagi d'inferir res? → Si sí, pre-A1 possible.
+2. El gènere requereix comprendre dos plans simultanis (simbòlic, temporal, causal diferit)? → Si sí, NO pre-A1.
+
+**Casos del lot B.1**:
+- `write-conte` → **pre-A1 SÍ**: personatge + acció + imatge, significat concret i visual.
+- `write-fabula` → **pre-A1 NO**: relació historia↔moral requereix abstracció de 2n nivell (símbol).
+- `write-biografia` → **pre-A1 NO**: cronologia i llegat diferit requereixen temps com a categoria abstracta.
+
+**Implicació per als lots restants**: aplicar el filtre per a cada nou instrument. Documentar la justificació al camp `No s'adapta a pre-A1:` de la Descripció.
 
 ---
 
