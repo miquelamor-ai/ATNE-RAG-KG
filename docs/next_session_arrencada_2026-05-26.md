@@ -67,7 +67,19 @@ NotebookLM ha plantejat una pregunta de disseny que cal resoldre abans que es ge
 
 Afecta: tots els futurs instruments de mediació amb dependència intra-pipeline. **Decisió pendent** — passar a mineriaRAG perquè és la seva àrea (validation runtime).
 
-### Tasca 3 — Validació conjunta Fase A per part de Miquel
+### Tasca 3 — ✅ FETA 2026-05-25 nit — Validació conjunta Fase A per part de Miquel
+
+**Estat**: Fase A **VALIDADA CONJUNTAMENT**. Veredicte: el patró M\*.md canònic és estable i replicable mecànicament a Fase B.
+
+**5 decisions canòniques** (regiran Fase B) — vegeu memòria [[validacio-conjunta-fase-a-20260525]]:
+
+1. **Asimetria `agent_roles`**: complements `[generator]` (no `adapter`). PRINCIPI NOU: complements es generen segons perfil — el mateix complement pot ser **diferent segons perfil** (glossari TEA ≠ glossari AACC; bastides dislèxia ≠ bastides nouvingut). Documentar modulació per perfil als M\*.md de Fase B.
+2. Opinió sense pre-A1 — confirmat. Revisar més endavant amb `expressar-preferencies`.
+3. **Variabilitat cardinal de passos** — confirmat com a principi. No s'estandarditza.
+4. Bastides-lectura `translanguaging: false` — confirmat. Separació de funcions amb glossari.
+5. **Validació NotebookLM obligatòria** per tots els pilots Fase B. No replicació mecànica sense validació.
+
+### Tasca 3 anterior (ja completada) — Validació conjunta
 
 Quan tinguem pilots 3 i 4 al corpusFJE, Miquel valida la Fase A completa abans d'entrar a Fase B.
 
