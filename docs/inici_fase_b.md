@@ -67,9 +67,9 @@ Aquests fitxers han de carregar-se al context (o resumir-se):
 - [x] B.4.2 — `write-manual` (v4.0.0-canonic, NLM si, 2026-05-26)
 - [x] B.4.3 — `write-receptari` (v4.0.0-canonic, NLM si-amb-correccions, 2026-05-26)
 - [x] B.4.4 — `write-reglament` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
-- [ ] B.5.1 — `write-assaig`
-- [ ] B.5.2 — `write-ressenya`
-- [ ] B.5.3 — `write-resum` *(veure §9 cas especial: solapament amb `generate-resum-graduat`)*
+- [x] B.5.1 — `write-assaig` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
+- [x] B.5.2 — `write-ressenya` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
+- [x] B.5.3 — `write-resum` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
 - [ ] B.6.1 — `write-poema`
 - [ ] B.6.2 — `write-dialeg`
 - [ ] B.6.3 — `expressar-preferencies` **(NOU)** — *vegeu §10*
