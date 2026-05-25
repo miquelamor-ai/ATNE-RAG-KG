@@ -4544,8 +4544,13 @@
 
     // 2) Preparar els complements actius
     // Llegim la llista de complements activats pel docent (guardada en Pas 2).
-    // Serveix per filtrar: un toggle "checked" no garanteix que el complement
-    // hagi estat activat (els 3 hardcoded glossari/esquema/preguntes sempre estan al DOM).
+    // atne.complements guarda claus internes llargues (esquema_visual, mapa_conceptual…)
+    // però data-comp-toggle usa noms curts (esquema, mapa-conc…). Cal mapeig.
+    const _CHIP_TO_INTERNAL = {
+      'glossari': 'glossari', 'esquema': 'esquema_visual', 'preguntes': 'preguntes_comprensio',
+      'mapa-conc': 'mapa_conceptual', 'mapa-ment': 'mapa_mental', 'bastides': 'bastides',
+      'activitats': 'activitats_aprofundiment', 'pictogrames': 'pictogrames',
+    };
     let _pdfActivated = [];
     try {
       const _rawComp = localStorage.getItem('atne.complements');
@@ -4563,7 +4568,8 @@
       if (seenComps.has(compId)) return;
       // Salta complements que no estaven activats pel docent en Pas 2.
       // Excepció: 'docent' (argumentació+auditoria) sempre es genera.
-      if (_pdfActivated.length > 0 && compId !== 'docent' && !_pdfActivated.includes(compId)) return;
+      const _internalId = _CHIP_TO_INTERNAL[compId] || compId;
+      if (_pdfActivated.length > 0 && compId !== 'docent' && !_pdfActivated.includes(_internalId)) return;
       seenComps.add(compId);
       const compView = document.getElementById('view-' + compId);
       if (!compView) return;
