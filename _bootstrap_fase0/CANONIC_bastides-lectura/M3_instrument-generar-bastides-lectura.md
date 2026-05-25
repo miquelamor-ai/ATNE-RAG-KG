@@ -19,10 +19,12 @@ version: 4.0.0-canonic
 generat_at: 2026-05-25
 actualitzat_at: 2026-05-25
 notebooklm_review:
-  data: pendent
-  veredicte: pendent
+  data: 2026-05-25
+  veredicte: si-amb-correccions-menors
   aplicades_des_d_inici: [patro-canonic-pilots-noticia-glossari-opinio, fidelitat-gradada-C2, aclariment-us-lectura-vs-produccio-C1, metadades-cella, cas-especial-V2-compartit-V3-dedicat]
-  comentari_key: "Pilot 4 — cas especial: V2 compartit (lectura+producció) i V3 dedicat (només lectura). La fusió canònica reté NOMÉS la dimensió lectura del V2. El pilot complementari `CANONIC_bastides-produccio` cobrirà la dimensió producció."
+  aplicades_post_review: [C1-terminologia-frase-buit-A1-resum-i-autoavaluacio, C2-pausa-obligatoria-explicita-hipotesi-en-curs-B1plus]
+  comentari_key: "Pilot 4 aporta la lògica de control intra-pipeline (descriptor cross_source dependent del pipeline) i consolida el model 3 moments × 3 plànols com a estàndard de mediació cognitiva ATNE. Quart pilot Fase A validat amb la mateixa estructura canònica."
+  pregunta_oberta_miquel: "Pas 4.2 cross_source amb preguntes_comprensio — quan els dos complements estan actius simultàniament, `build_skills.py` ha de generar feedback condicional al docent si detecta duplicitat, o l'IA ho resol silenciosament per disseny? Decisió arquitectònica pendent — afecta tots els futurs instruments de mediació amb dependència intra-pipeline."
 ---
 
 # Generar bastides de lectura
@@ -80,8 +82,8 @@ Aquesta rúbrica descriu les **bastides que ATNE o el docent presenten a l'alumn
 |  | Propòsit de lectura | Propòsit oral de l'adult: "Anem a saber què passa amb [X]". | Propòsit explícit i concret: "Llegeix per saber [una cosa concreta]". | + propòsit operatiu amb verb d'acció: "Llegeix per identificar [X]". | + propòsit jeràrquic: "Llegeix per distingir el fet principal del context". | + propòsit avaluatiu: "Llegeix per avaluar la fiabilitat de les dades". | + propòsit metacognitiu: l'alumne formula el seu propi propòsit i justifica per què. |
 |  | Hipòtesi prèvia | No aplicable (predicció oral guiada). | Predicció pel títol: "De què creus que parlarà?". 1 paraula o frase mínima. | Predicció breu escrita: "Crec que el text dirà…". | Hipòtesi pròpia formulada per escrit: "Hipòtesi: ___. Per què: ___". | + identificació del posicionament inicial probable de l'autor. | + plantejament d'hipòtesis contrastades. |
 | **2. Moment Durant** | Modalitat lectora | L'adult llegeix en veu alta. L'alumne assenyala, dramatitza o dibuixa el que entén. **Zero lectura autònoma.** | Lectura mediada per l'adult; l'alumne segueix amb el dit. Subratlla 1 mot clau per paràgraf. | Lectura autònoma possible. Marca ✓ (entès) / ? (dubte) / ! (important) al marge. | Lectura autònoma. Notes marginals breus (1-3 paraules per marca). | + identificació explícita del posicionament de l'autor al marge. | + contrast actiu amb coneixements previs anotat: "Aquí diu X però jo sabia Y". |
-|  | Hipòtesi en curs | No aplicable. | No aplicable. | No aplicable. | Hipòtesi en curs cada paràgraf llarg: "Fins aquí, crec que el text dirà que…". | + revisió explícita de la hipòtesi inicial: "La meva hipòtesi era X, ara crec Y, per què…". | + reformulació metacognitiva: "Si la meva hipòtesi falla, què revela el text que jo no sabia?". |
-| **3. Moment Després** | Plànol literal — Resum | Dibuixar el que ha après. Dictat oral a l'adult. Ordenació d'imatges. | Frase marc literal amb **1 sol buit**: "El text parla de ___". | Resum breu de 2-3 frases sobre què tracta el text. | Resum estructurat de 3-4 frases (idea principal + 2 secundàries). | Resum amb jerarquització explícita (titular + cos). | Resum sintètic + comparació amb hipòtesi inicial. |
+|  | Hipòtesi en curs | No aplicable. | No aplicable. | No aplicable. | **Pausa obligatòria** marcada al text (símbol ⏸ o instrucció "Atura't aquí") on l'alumne escriu hipòtesi en curs: "Fins aquí, crec que el text dirà que…". | + a la mateixa pausa, **revisió explícita** de la hipòtesi inicial: "La meva hipòtesi era X, ara crec Y, per què…". | + a la mateixa pausa, **reformulació metacognitiva**: "Si la meva hipòtesi falla, què revela el text que jo no sabia?". |
+| **3. Moment Després** | Plànol literal — Resum | Dibuixar el que ha après. Dictat oral a l'adult. Ordenació d'imatges. | **Frase-buit** literal d'un sol buit: "El text parla de ___". | Resum breu de 2-3 frases sobre què tracta el text. | Resum estructurat de 3-4 frases (idea principal + 2 secundàries). | Resum amb jerarquització explícita (titular + cos). | Resum sintètic + comparació amb hipòtesi inicial. |
 |  | Plànol inferencial | No aplicable. | No aplicable. | 1 pregunta inferencial guiada: "Per què creus que…?". | Inferència explícita: "Quin era l'objectiu de l'autor?" + "Què queda implícit?". | + detecció de pressuposicions i seleccions narratives no explícites. | + anàlisi de l'enquadrament: "Què queda fora del marc del text? Per què?". |
 |  | Plànol crític / Valoració | No aplicable. | No aplicable. | No aplicable. | Valoració simple: "Estàs d'acord amb el que diu el text? Per què?". | Avaluació de fiabilitat: "Fins a quin punt és objectiu l'autor? Quines proves dóna?". | Contrast crític: "Quines altres fonts caldrien per validar aquesta informació?". |
 |  | Autoregulació (metacognició) | "He fet el que m'ha dit el mestre." (registre oral/gestual de l'adult). | "He llegit el text amb el mestre i he marcat la paraula difícil." | "He llegit i he marcat ✓/? / !. He fet el resum." | "He revisat si la meva hipòtesi inicial era correcta o no." | "He pensat si l'autor és imparcial. He comprovat si dóna proves de les seves afirmacions." | "He entès tot el que calia? Quines preguntes m'han quedat obertes? Quin pas faria a continuació?" |
@@ -89,7 +91,7 @@ Aquesta rúbrica descriu les **bastides que ATNE o el docent presenten a l'alumn
 |  | No duplicar `preguntes_comprensio` | Les bastides donen el procediment; les preguntes detallades són del complement `preguntes_comprensio`. | Idem. | Idem. | Idem. | Idem. | Idem. |
 |  | Especificitat del propòsit | Propòsit referit a una imatge o paraula concreta del text. | Propòsit específic del text actual, no genèric. | Idem. | Idem. | Idem. | Idem. |
 |  | Format obligatori | Secció `## Suports de lectura` + 3 subseccions (Abans/Durant/Després). | Idem. | Idem. | Idem. | Idem. | Idem. |
-| **5. Autoavaluació (per l'alumne)** | Reflexió en primera persona | *(via adult)* "He assenyalat el que m'ha demanat el mestre." | "He marcat una paraula important. He completat la frase del resum." | "He marcat ✓/? /! mentre llegia. He escrit de què tracta el text." | "He fet una hipòtesi abans de llegir. He comprovat si era correcta." | "He identificat la postura de l'autor. He avaluat si les dades eren fiables." | "He formulat les meves pròpies preguntes abans de llegir i he comprovat si el text les responia." |
+| **5. Autoavaluació (per l'alumne)** | Reflexió en primera persona | *(via adult)* "He assenyalat el que m'ha demanat el mestre." | "He marcat una paraula important. He completat la frase-buit del resum." | "He marcat ✓/? /! mentre llegia. He escrit de què tracta el text." | "He fet una hipòtesi abans de llegir. He comprovat si era correcta." | "He identificat la postura de l'autor. He avaluat si les dades eren fiables." | "He formulat les meves pròpies preguntes abans de llegir i he comprovat si el text les responia." |
 
 ## Metadades de cel·la (per a `build_skills.py`)
 
@@ -110,7 +112,7 @@ Cada dimensió té un **tipus de descriptor** que condiciona com s'ha de transfo
 | 1.2 Abans — Propòsit de lectura | `qualitative` + `structural` | sí (text adaptat) | LLM-jutge: propòsit específic del text actual vs propòsit genèric ("llegeix el text") |
 | 1.3 Abans — Hipòtesi prèvia | `binary` (existència) + `qualitative` (qualitat) | no | detectar presència de bastida d'hipòtesi a A1+ amb forma adequada al nivell |
 | 2.1 Durant — Modalitat lectora | `structural` + `binary` | no | detectar instrucció de marcatge (✓/?/!, subratllat, notes) i la seva adequació al nivell |
-| 2.2 Durant — Hipòtesi en curs | `binary` (existència) + `qualitative` | no | detectar bastida metacognitiva a B1+ (revisió d'hipòtesi durant la lectura) |
+| 2.2 Durant — Hipòtesi en curs | `binary` (existència) + `structural` | no | a B1+: detectar **marca de pausa explícita** al text (símbol ⏸ o instrucció "Atura't aquí") + bastida metacognitiva de revisió d'hipòtesi en curs |
 | 3.1 Després — Resum literal | `countable` + `structural` | no | comptar buits/frases del resum; verificar adequació al nivell (1 buit a A1, 3-4 frases a B1) |
 | 3.2 Després — Inferència | `qualitative` | no | LLM-jutge: la pregunta demana inferència no literal i és respondible amb el text |
 | 3.3 Després — Valoració crítica | `qualitative` | no | LLM-jutge: la bastida obre un espai de judici argumentat (B1+) o d'avaluació de fonts (B2+) |
