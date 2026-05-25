@@ -263,23 +263,32 @@
     byId[rootId].y = 0;
 
     propIds.forEach(function (pid, i) {
-      var prop   = byId[pid];
-      prop.x     = i * colW + colW / 2;
-      prop.y     = CM.RH / 2 + CM.VG + CM.PH / 2;
+      var prop = byId[pid];
+      prop.x   = i * colW + colW / 2;
+      prop.y   = CM.RH / 2 + CM.VG + CM.PH / 2;
 
-      var leaves = kids[pid] || [];
-      var baseY  = prop.y + CM.PH / 2 + CM.PG + CM.NH / 2;
-      leaves.forEach(function (lid, j) {
+      // Acumulador vertical: tots els fills i néts van en la mateixa columna
+      var cy = prop.y + CM.PH / 2 + CM.PG;
+      (kids[pid] || []).forEach(function (lid) {
         byId[lid].x = prop.x;
-        byId[lid].y = baseY + j * (CM.NH + CM.LG);
-        // Recursiu si el fill té fills propis (peu probable al format SKILL)
-        var subLeaves = kids[lid] || [];
-        subLeaves.forEach(function (slid, k) {
-          byId[slid].x = byId[lid].x + colW;
-          byId[slid].y = byId[lid].y + k * (CM.NH + CM.LG);
+        byId[lid].y = cy + CM.NH / 2;
+        cy += CM.NH;
+        // Néts (3r nivell) → directament a sota del pare, mateixa columna
+        (kids[lid] || []).forEach(function (slid) {
+          cy += CM.LG;
+          byId[slid].x = prop.x;
+          byId[slid].y = cy + CM.NH / 2;
+          cy += CM.NH;
         });
+        cy += CM.LG;
       });
     });
+
+    // Centra l'arrel sobre totes les proposicions (independentment del nombre)
+    if (propIds.length) {
+      var propXs = propIds.map(function (pid) { return byId[pid].x; });
+      byId[rootId].x = (Math.min.apply(null, propXs) + Math.max.apply(null, propXs)) / 2;
+    }
 
     // ── ViewBox ──
     var all = g.nodes.filter(function (n) { return n.x !== undefined; });
