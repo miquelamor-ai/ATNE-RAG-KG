@@ -70,9 +70,9 @@ Aquests fitxers han de carregar-se al context (o resumir-se):
 - [x] B.5.1 — `write-assaig` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
 - [x] B.5.2 — `write-ressenya` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
 - [x] B.5.3 — `write-resum` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
-- [ ] B.6.1 — `write-poema`
-- [ ] B.6.2 — `write-dialeg`
-- [ ] B.6.3 — `expressar-preferencies` **(NOU)** — *vegeu §10*
+- [x] B.6.1 — `write-poema` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
+- [x] B.6.2 — `write-dialeg` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
+- [x] B.6.3 — `expressar-preferencies` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26) **(NOU)**
 - [ ] **FINAL** — `write-contrarelat-odi` **(NOU)** — *últim lot pre-Fase C, vegeu §10*
 
 ### Mediació (11 restants)
