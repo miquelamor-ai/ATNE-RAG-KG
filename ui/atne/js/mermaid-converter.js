@@ -207,18 +207,84 @@
     return mermaidLines.join('\n');
   }
 
+  // ── Mapa conceptual Novak (flowchart TD amb proposicions) ─────────────
+
+  /**
+   * Converteix markdown jeràrquic a un mapa conceptual estil Novak:
+   * nodes (conceptes) connectats per arestes etiquetades (proposicions).
+   *
+   * Suporta proposicions embegudes al format: "- [proposició] Concepte"
+   * Si no hi ha proposició explícita, usa "inclou" com a genèric.
+   *
+   * Exemple d'entrada:
+   *   - Transports
+   *     - [es classifiquen en] Tipus
+   *       - [inclou] Terrestres
+   *       - [inclou] Aeris
+   *     - [necessiten] Motors
+   *       - [transformen] Energia
+   */
+  function markdownToConceptMap(mdText) {
+    const rawLines = mdText.split('\n');
+    const lines = rawLines.filter(l => {
+      const t = l.trim();
+      return t.length > 0 && !t.startsWith('#') && !t.startsWith('```');
+    });
+    if (lines.length === 0) return null;
+
+    const levels = lines.map(l => indentLevel(l));
+    const minLevel = Math.min(...levels);
+
+    const mermaidLines = ['flowchart TD'];
+    let nodeId = 0;
+    const parentStack = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+
+      const level = indentLevel(line) - minLevel;
+
+      // Suporta proposicions embegudes: "- [proposició] Text del concepte"
+      const propMatch = trimmed.match(/^-\s+\[([^\]]+)\]\s+(.+)$/);
+      const rawText = propMatch ? propMatch[2] : extractText(trimmed);
+      const prop = propMatch ? propMatch[1].trim() : 'inclou';
+      const text = escapeMermaidLabel(rawText);
+      if (!text) continue;
+
+      const id = 'c' + (nodeId++);
+      const label = text.length > 38 ? text.slice(0, 36) + '…' : text;
+
+      while (parentStack.length > 0 && parentStack[parentStack.length - 1].level >= level) {
+        parentStack.pop();
+      }
+
+      if (parentStack.length === 0) {
+        // Concepte arrel: node ovalat per distingir-lo
+        mermaidLines.push('  ' + id + '([' + label + '])');
+      } else {
+        const parent = parentStack[parentStack.length - 1];
+        // Concepte fill: rectangle arrodonit
+        mermaidLines.push('  ' + id + '("' + label + '")');
+        // Aresta amb proposició etiquetada
+        mermaidLines.push('  ' + parent.id + ' -->|"' + escapeMermaidLabel(prop) + '"| ' + id);
+      }
+      parentStack.push({ level, id });
+    }
+
+    if (nodeId === 0) return null;
+    return mermaidLines.join('\n');
+  }
+
   // ── API pública ─────────────────────────────────────────────────────────
 
   /**
-   * Funció principal de conversió.
-   *
-   * @param {string} mdText  Text markdown (pot incloure la capçalera ## o no)
-   * @param {'mapa_conceptual'|'esquema_visual'} type  Tipus de diagrama
-   * @returns {string|null}  Sintaxi Mermaid o null si el fallback és necessari
+   * Funció principal de conversió per a Mermaid.
+   * Nota: mapa_mental usa markmap (no Mermaid) → retorna null.
    */
   function convertMarkdownToMermaid(mdText, type) {
     if (!mdText || typeof mdText !== 'string') return null;
-    // Elimina les capçaleres ## i els blocs de codi ``` (el LLM sovint els posa)
     const body = mdText
       .split('\n')
       .filter(l => !l.match(/^##\s+/) && !l.match(/^```/))
@@ -228,16 +294,12 @@
     if (!body) return null;
 
     try {
-      if (type === 'mapa_mental') {
-        // Mapa mental (Buzan): radial, associació lliure → mindmap
-        return markdownToMindmap(body);
-      } else if (type === 'mapa_conceptual') {
-        // Mapa conceptual (Novak): jerarquia conceptual → flowchart TD (arbre vertical)
-        return markdownToFlowchart(body, 'TD');
+      if (type === 'mapa_conceptual') {
+        return markdownToConceptMap(body);
       } else if (type === 'esquema_visual') {
-        // Esquema: seqüència/procés → flowchart LR (horitzontal)
         return markdownToFlowchart(body, 'LR');
       }
+      // mapa_mental → renderMarkmapBlock (no Mermaid)
       return null;
     } catch (e) {
       console.warn('[ATNE Mermaid] Error de conversió:', e);
@@ -294,6 +356,154 @@
     document.head.appendChild(script);
   }
 
+  // ── Càrrega lazy de markmap.js (mapa mental) ────────────────────────────
+
+  let markmapLoaded = false;
+  let markmapLoading = false;
+  const markmapCallbacks = [];
+
+  function loadMarkmap(cb) {
+    if (markmapLoaded && window.markmap && window.markmap.Transformer && window.markmap.Markmap) {
+      cb(); return;
+    }
+    markmapCallbacks.push(cb);
+    if (markmapLoading) return;
+    markmapLoading = true;
+
+    function _loadScript(url, onLoad, onErr) {
+      var s = document.createElement('script');
+      s.src = url;
+      s.onload = onLoad;
+      s.onerror = onErr;
+      document.head.appendChild(s);
+    }
+
+    var LIB = 'https://cdn.jsdelivr.net/npm/markmap-lib@0.15.4/dist/browser/index.min.js';
+    var VIEW = 'https://cdn.jsdelivr.net/npm/markmap-view@0.15.4/dist/browser/index.min.js';
+
+    _loadScript(LIB, function () {
+      _loadScript(VIEW, function () {
+        markmapLoaded = true;
+        markmapLoading = false;
+        markmapCallbacks.forEach(function (fn) { try { fn(); } catch (_) {} });
+        markmapCallbacks.length = 0;
+      }, function () {
+        markmapLoading = false;
+        console.warn('[ATNE Markmap] No s\'ha pogut carregar markmap-view');
+        markmapCallbacks.length = 0;
+      });
+    }, function () {
+      markmapLoading = false;
+      console.warn('[ATNE Markmap] No s\'ha pogut carregar markmap-lib');
+      markmapCallbacks.length = 0;
+    });
+  }
+
+  /**
+   * Converteix la llista markdown (guions) a format de capçaleres per a markmap.
+   * - Concepte           → # Concepte
+   *   - Subconcept       → ## Subconcept
+   */
+  function markdownListToMarkmapMd(mdText) {
+    const lines = mdText.split('\n').filter(function (l) {
+      var t = l.trim();
+      return t.length > 0 && !t.startsWith('#') && !t.startsWith('```');
+    });
+    if (lines.length === 0) return null;
+    var levels = lines.map(function (l) { return indentLevel(l); });
+    var minLevel = Math.min.apply(null, levels);
+    var result = [];
+    for (var i = 0; i < lines.length; i++) {
+      var level = indentLevel(lines[i]) - minLevel + 1;
+      var text = extractText(lines[i].trim());
+      if (text) result.push('#'.repeat(Math.min(level, 6)) + ' ' + text);
+    }
+    return result.join('\n');
+  }
+
+  /**
+   * Construeix el panell d'edició (textarea + botó) comú als dos renders.
+   * @param {string}      mdRaw     Markdown font original
+   * @param {HTMLElement} cont      Contenidor pare
+   * @param {string}      compType  Clau del complement
+   * @param {Function}    reRenderFn  Funció a cridar en re-renderitzar
+   */
+  function buildEditPanel(mdRaw, cont, compType, reRenderFn) {
+    var details = document.createElement('details');
+    details.className = 'mermaid-edit-details';
+    var summary = document.createElement('summary');
+    summary.className = 'mermaid-edit-toggle';
+    summary.textContent = '✏️ Editar font del diagrama';
+    var textarea = document.createElement('textarea');
+    textarea.className = 'mermaid-edit-textarea';
+    textarea.value = mdRaw;
+    textarea.rows = 8;
+    textarea.spellcheck = false;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'mermaid-rerender-btn';
+    btn.textContent = 'Refés el mapa';
+    btn.addEventListener('click', function () {
+      var newMd = textarea.value.trim();
+      if (!newMd) return;
+      cont.dataset.md = newMd;
+      cont.classList.remove('mermaid-active');
+      cont.innerHTML = '';
+      reRenderFn(cont, newMd, compType);
+    });
+    details.appendChild(summary);
+    details.appendChild(textarea);
+    details.appendChild(btn);
+    return details;
+  }
+
+  /**
+   * Renderitza un mapa mental (Buzan) usant markmap.js.
+   * Fallback a Mermaid mindmap si markmap no carrega.
+   */
+  function renderMarkmapBlock(cont, mdRaw, compType) {
+    var markmapMd = markdownListToMarkmapMd(mdRaw);
+    if (!markmapMd) { return; }
+
+    var wrapper = document.createElement('div');
+    wrapper.className = 'mermaid-wrapper';
+
+    var svgEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svgEl.style.cssText = 'width:100%;min-height:420px;display:block';
+
+    var editPanel = buildEditPanel(mdRaw, cont, compType, renderMermaidBlock);
+
+    wrapper.appendChild(svgEl);
+    wrapper.appendChild(editPanel);
+
+    cont.innerHTML = '';
+    cont.appendChild(wrapper);
+
+    loadMarkmap(function () {
+      try {
+        var mm = window.markmap;
+        if (!mm || !mm.Transformer || !mm.Markmap) throw new Error('API no disponible');
+        var transformer = new mm.Transformer();
+        var transformed = transformer.transform(markmapMd);
+        mm.Markmap.create(svgEl, {
+          autoFit: true,
+          duration: 300,
+          maxWidth: 300,
+          zoom: true,
+          pan: true,
+        }, transformed.root);
+      } catch (e) {
+        console.warn('[ATNE Markmap] error, fallback a Mermaid:', e);
+        // Fallback: mermaid mindmap
+        var mermaidSyntax = markdownToMindmap(markmapMd.replace(/^#+\s*/gm, '- '));
+        if (mermaidSyntax) {
+          cont.innerHTML = '';
+          renderMermaidBlock(cont, mdRaw, 'mapa_mental_fallback');
+        }
+      }
+    });
+  }
+
   // ── Renderitzat d'un element .mermaid-block ──────────────────────────────
 
   /**
@@ -307,16 +517,20 @@
    * @param {string} compType   La clau del complement (ex. 'mapa_conceptual')
    */
   function renderMermaidBlock(cont, mdRaw, compType) {
+    // Mapa mental → markmap.js (millor estètica que Mermaid mindmap)
+    if (compType === 'mapa_mental') {
+      renderMarkmapBlock(cont, mdRaw, compType);
+      return;
+    }
+
     const mermaidSyntax = convertMarkdownToMermaid(mdRaw, compType);
     if (!mermaidSyntax) {
       console.warn('[ATNE Mermaid] conversió→null per', compType,
-        '— len=' + (mdRaw||'').length,
-        '— preview=' + JSON.stringify((mdRaw||'').slice(0, 200)));
-      return; // fallback: deixa el text com estava
+        '— len=' + (mdRaw||'').length);
+      return;
     }
     console.log('[ATNE Mermaid] conversió OK per', compType, '— syntax len=', mermaidSyntax.length);
 
-    // Construeix el DOM: wrapper + bloc mermaid + panell d'edició
     const wrapper = document.createElement('div');
     wrapper.className = 'mermaid-wrapper';
 
@@ -325,56 +539,20 @@
     mermaidDiv.setAttribute('data-mermaid-syntax', mermaidSyntax);
     mermaidDiv.textContent = mermaidSyntax;
 
-    // Panell d'edició: <details> col·lapsable amb textarea + botó re-render
-    const details = document.createElement('details');
-    details.className = 'mermaid-edit-details';
-
-    const summary = document.createElement('summary');
-    summary.className = 'mermaid-edit-toggle';
-    summary.textContent = '✏️ Editar font del diagrama';
-
-    const textarea = document.createElement('textarea');
-    textarea.className = 'mermaid-edit-textarea';
-    textarea.value = mdRaw;
-    textarea.rows = 8;
-    textarea.spellcheck = false;
-    textarea.setAttribute('aria-label', 'Font markdown del diagrama');
-
-    const reRenderBtn = document.createElement('button');
-    reRenderBtn.type = 'button';
-    reRenderBtn.className = 'mermaid-rerender-btn';
-    reRenderBtn.textContent = 'Refés el mapa';
-    reRenderBtn.addEventListener('click', function () {
-      const newMd = textarea.value.trim();
-      if (!newMd) return;
-      cont.dataset.md = newMd;
-      cont.classList.remove('mermaid-active');
-      cont.innerHTML = '';
-      renderMermaidBlock(cont, newMd, compType);
-    });
-
-    details.appendChild(summary);
-    details.appendChild(textarea);
-    details.appendChild(reRenderBtn);
+    const editPanel = buildEditPanel(mdRaw, cont, compType, renderMermaidBlock);
 
     wrapper.appendChild(mermaidDiv);
-    wrapper.appendChild(details);
+    wrapper.appendChild(editPanel);
 
-    // Substitueix el contingut del contenidor.
-    // Si és un .schema (grid 2 columnes), canviem a display:block perquè
-    // el diagrama no quedi tallat a la meitat de l'amplada.
     cont.innerHTML = '';
     if (cont.classList.contains('schema')) {
       cont.classList.add('mermaid-active');
     }
     cont.appendChild(wrapper);
 
-    // Demana Mermaid i renderitza. mermaid.run() retorna Promise — captura
-    // errors via .catch() i també verifica post-render si Mermaid ha pintat
-    // un SVG d'error (a vegades no llença excepció, només dibuixa "Syntax error").
     const showFallback = function (reason) {
       console.warn('[ATNE Mermaid] fallback:', reason);
-      details.open = true;
+      editPanel.open = true;
       mermaidDiv.style.display = 'none';
     };
     loadMermaid(function () {
@@ -382,7 +560,6 @@
         const result = window.mermaid.run({ nodes: [mermaidDiv] });
         if (result && typeof result.then === 'function') {
           result.then(function () {
-            // Verifica si el SVG resultant és un error de Mermaid
             const svg = mermaidDiv.querySelector('svg');
             const txt = svg ? svg.textContent || '' : '';
             if (/syntax error|parse error/i.test(txt) ||
