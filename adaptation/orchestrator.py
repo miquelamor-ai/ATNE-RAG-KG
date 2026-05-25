@@ -215,7 +215,7 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
             try:
                 for _chunk in _call_llm_stream(
                     active_model, system_prompt, user_text,
-                    temperature=0.4, top_p=0.95, max_tokens=8192,
+                    temperature=0.4, top_p=0.95, max_tokens=16384,
                 ):
                     _chunks.append(_chunk)
                     cb({"type": "delta", "text": _chunk})

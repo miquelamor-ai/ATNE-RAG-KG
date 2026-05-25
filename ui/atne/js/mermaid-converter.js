@@ -94,9 +94,21 @@
     const levels = lines.map(l => indentLevel(l));
     const minLevel = Math.min(...levels);
 
+    // Detecta si el LLM ha generat múltiples ítems de nivell 0 (arrels múltiples).
+    // Mermaid mindmap requereix exactament UNA arrel. Si n'hi ha més d'una,
+    // afegim una arrel implícita "Mapa" i desplacem tots els nodes un nivell.
+    const rootCount = lines.filter(l => indentLevel(l) - minLevel === 0).length;
+    const needsImplicitRoot = rootCount > 1;
+
     // Construeix les línies Mermaid
     const mermaidLines = ['mindmap'];
     let rootEmitted = false;
+    // Si cal arrel implícita, l'afegim ara i tractem TOTS els ítems com a fills.
+    const levelShift = needsImplicitRoot ? 1 : 0;
+    if (needsImplicitRoot) {
+      mermaidLines.push('  root((Mapa))');
+      rootEmitted = true;
+    }
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
@@ -104,7 +116,7 @@
       // Saltar línies que no siguin items de llista ni text simple
       if (!trimmed) continue;
 
-      const level = indentLevel(line) - minLevel;
+      const level = indentLevel(line) - minLevel + levelShift;
       const text = escapeMermaidLabel(extractText(trimmed));
       if (!text) continue;
 
@@ -202,10 +214,10 @@
    */
   function convertMarkdownToMermaid(mdText, type) {
     if (!mdText || typeof mdText !== 'string') return null;
-    // Elimina les capçaleres ## per processar només el contingut
+    // Elimina les capçaleres ## i els blocs de codi ``` (el LLM sovint els posa)
     const body = mdText
       .split('\n')
-      .filter(l => !l.match(/^##\s+/))
+      .filter(l => !l.match(/^##\s+/) && !l.match(/^```/))
       .join('\n')
       .trim();
 
