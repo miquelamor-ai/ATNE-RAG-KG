@@ -2023,6 +2023,25 @@
     cmpToggle.classList.toggle('on', v === 'compare');
     cmpChips.forEach(c => c.classList.toggle('active', c.dataset.comp === v));
     if (v === 'compare') populateCompareView();
+    // Re-renderitza Mermaid quan el xip es fa visible: el primer render es fa
+    // amb el contenidor hidden (display:none) i el SVG surt amb dimensions zero.
+    // Quan el docent clica el xip, el contenidor és visible i el render és correcte.
+    const MERMAID_VIEWS = {
+      'mapa-conc': { sel: '#view-mapa-conc .generic-md', type: 'mapa_conceptual' },
+      'mapa-ment': { sel: '#view-mapa-ment .generic-md', type: 'mapa_mental' },
+      'esquema':   { sel: '#view-esquema .schema',       type: 'esquema_visual' },
+    };
+    if (MERMAID_VIEWS[v] && window.ATNE_MERMAID) {
+      const target = MERMAID_VIEWS[v];
+      requestAnimationFrame(function () {
+        const cont = document.querySelector(target.sel);
+        if (!cont || !cont.dataset.md) return;
+        // Només re-renderitza si Mermaid no ha produït un SVG vàlid (height > 0)
+        const existingSvg = cont.querySelector('svg');
+        if (existingSvg && (existingSvg.getBoundingClientRect().height > 10)) return;
+        window.ATNE_MERMAID.renderMermaidBlock(cont, cont.dataset.md, target.type);
+      });
+    }
   }
 
   // Omple el #view-compare amb el text ORIGINAL i l'ADAPTAT reals.
