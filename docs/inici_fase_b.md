@@ -52,17 +52,17 @@ Aquests fitxers han de carregar-se al context (o resumir-se):
 
 ### Gèneres (20 restants + 1 nou = 21)
 
-- [ ] B.1.1 — `write-conte`
-- [ ] B.1.2 — `write-fabula`
-- [ ] B.1.3 — `write-biografia`
-- [ ] B.2.1 — `write-descripcio`
-- [ ] B.2.2 — `write-divulgatiu`
-- [ ] B.2.3 — `write-enciclopedic`
-- [ ] B.2.4 — `write-informe`
-- [ ] B.3.1 — `write-cronica`
-- [ ] B.3.2 — `write-entrevista`
-- [ ] B.3.3 — `write-diari`
-- [ ] B.3.4 — `write-carta`
+- [x] B.1.1 — `write-conte` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
+- [x] B.1.2 — `write-fabula` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
+- [x] B.1.3 — `write-biografia` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
+- [x] B.2.1 — `write-descripcio` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
+- [x] B.2.2 — `write-divulgatiu` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
+- [x] B.2.3 — `write-enciclopedic` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
+- [x] B.2.4 — `write-informe` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
+- [x] B.3.1 — `write-cronica` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
+- [x] B.3.2 — `write-entrevista` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
+- [x] B.3.3 — `write-diari` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
+- [x] B.3.4 — `write-carta` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
 - [ ] B.4.1 — `write-instructiu`
 - [ ] B.4.2 — `write-manual`
 - [ ] B.4.3 — `write-receptari`
