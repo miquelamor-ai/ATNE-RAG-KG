@@ -6,8 +6,8 @@ pictogrames, son emojis. Haurien de ser els ARASAAC". Aquesta decissio
 pedagogica queda documentada aqui com a referencia.
 
 Flux:
-  LLM emet  [PICTO: terme_en_catala]
-  →  ARASAAC API cerca el terme (bestsearch)
+  LLM emet  [PICTO: terme_en_castella]  ← castella per millor cobertura ARASAAC
+  →  ARASAAC API cerca el terme (bestsearch, lang="es")
   →  retorna URL imatge estatica (300 px PNG)
   →  substitut a <img class="arasaac-picto"> dins del text
 

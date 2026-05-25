@@ -524,11 +524,12 @@ ACTIVAT — Ja integrat al glossari (columna de traducció a {l1_display}). No c
         }
         _picto_instr = _picto_map.get(_mecr_c3)
         _picto_format = (
-            "Format OBLIGATORI del marcador: `[PICTO: terme_en_catala]`\n"
-            "  - Terme curt (1-3 paraules), en català, en minúscules.\n"
+            "Format OBLIGATORI del marcador: `[PICTO: terme_en_castellà]`\n"
+            "  - Terme curt (1-3 paraules), EN CASTELLÀ, en minúscules.\n"
+            "  - ARASAAC té cobertura molt superior en castellà; usa sempre castellà.\n"
             "  - Concepte concret i visualitzable (objecte, acció, ésser viu).\n"
-            "  - Exemples: `[PICTO: aigua]` `[PICTO: sol]` `[PICTO: planta]` "
-            "`[PICTO: menjar]` `[PICTO: casa]` `[PICTO: correr]`\n"
+            "  - Exemples: `[PICTO: agua]` `[PICTO: sol]` `[PICTO: planta]` "
+            "`[PICTO: comer]` `[PICTO: casa]` `[PICTO: correr]`\n"
             "  - NO inventis emojis Unicode. Usa SEMPRE el marcador `[PICTO: ...]`.\n"
             "  - NO poses text ni puntuació dins del marcador, només el terme.\n"
             "  - El backend substituirà cada marcador per un pictograma ARASAAC real."
