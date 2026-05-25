@@ -3112,7 +3112,18 @@
       const hasContent = complements[key] && complements[key].trim().length > 0;
       const isActivated = _activatedKeys.includes(key);
       const isInline = _INLINE_COMPS.has(key);
-      if (hasContent) {
+      if (hasContent && isInline) {
+        // Complement inline (pictogrames/il·lustracions) però LLM ha generat secció ##
+        // separada (confusió del model). Fallback: injectar al final del text adaptat
+        // perquè els pictogrames siguin visibles. Panel mostra missatge orientatiu.
+        const adaptedElInline = document.getElementById('adapted-text');
+        if (adaptedElInline) {
+          const appendHtml = '<div class="picto-fallback-inline" style="margin-top:16px;border-top:1px solid var(--ink-100);padding-top:12px">' + md2html(complements[key]) + '</div>';
+          adaptedElInline.insertAdjacentHTML('beforeend', ATNE_sanitize(appendHtml));
+        }
+        cont.innerHTML = '<div style="color:var(--ink-500);padding:24px;text-align:center;font-size:var(--fs-sm)">Aquest complement s\'aplica <strong>directament al text adaptat</strong> (marcadors visuals inline). Torna al text per veure\'l.</div>';
+        updateChipDot(meta.chip, 'ok');
+      } else if (hasContent) {
         cont.dataset.md = complements[key];
         cont.innerHTML = md2html(complements[key]);
         updateChipDot(meta.chip, 'ok');

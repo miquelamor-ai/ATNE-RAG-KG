@@ -535,14 +535,14 @@ ACTIVAT — Ja integrat al glossari (columna de traducció a {l1_display}). No c
         )
         if _picto_instr:
             output_sections.append(f"""
-## Pictogrames ARASAAC
+**⚠️ INSTRUCCIÓ PICTOGRAMES ARASAAC — NO generar com a secció ## separada. Afegir INLINE dins "## Text adaptat".**
 ACTIVAT — Afegeix pictogrames de suport. Gradació per a {_mecr_c3}: {_picto_instr}
 
 {_picto_format}
 """)
         else:
             output_sections.append(f"""
-## Pictogrames ARASAAC
+**⚠️ INSTRUCCIÓ PICTOGRAMES ARASAAC — NO generar com a secció ## separada. Afegir INLINE dins "## Text adaptat".**
 ACTIVAT — Afegeix pictogrames al glossari visual (peu del text). NO inline per a B1+.
 Màxim 4-5 pictogrames per document, només per a termes tècnics o conceptes clau.
 
@@ -551,7 +551,7 @@ Màxim 4-5 pictogrames per document, només per a termes tècnics o conceptes cl
 
     if comp.get("illustracions"):
         output_sections.append(f"""
-## Il·lustracions (inline, no secció separada)
+**⚠️ INSTRUCCIÓ IL·LUSTRACIONS — NO generar com a secció ## separada. Inserir INLINE dins "## Text adaptat".**
 ACTIVAT — Insereix marcadors `[IMATGE: <concepte curt en {lang_label}>]` al text adaptat
 allà on una il·lustració ajudaria la comprensió.
 
