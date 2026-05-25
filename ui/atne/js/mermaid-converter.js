@@ -98,25 +98,19 @@
     return root;
   }
 
-  // treeToGraph — estil CmapTools: proposicions com a etiquetes sobre la fletxa
-  // Nodes bold intermedis → la seva etiqueta es passa als fills com a `lbl` de l'aresta
-  // L'arrel sempre és node concepte (fins i tot si és bold al markdown)
+  // treeToGraph — nodes bold (no arrel) = nodes proposició VISIBLES (oval italic)
+  // UNA proposició per branca, fills concepte penjen d'ella
   function treeToGraph(root) {
     var nodes = [], edges = [], cnt = 0;
-    function visit(node, parentId, propLabel) {
-      if (!node) return;
-      var isRoot = (parentId === null);
-      if (node.bold && !isRoot) {
-        // Proposició → transfereix l'etiqueta als fills directes
-        node.children.forEach(function (c) { visit(c, parentId, node.label); });
-      } else {
-        var id = 'c' + cnt++;
-        nodes.push({ id: id, label: node.label, root: isRoot, lineIdx: node.lineIdx });
-        if (!isRoot) edges.push({ s: parentId, t: id, lbl: propLabel || '' });
-        node.children.forEach(function (c) { visit(c, id, ''); });
-      }
+    function visit(node, parentId) {
+      var isRoot = parentId === null;
+      var id = 'c' + cnt++;
+      var type = isRoot ? 'root' : (node.bold ? 'prop' : 'concept');
+      nodes.push({ id: id, label: node.label, type: type, lineIdx: node.lineIdx });
+      if (!isRoot) edges.push({ s: parentId, t: id });
+      node.children.forEach(function (c) { visit(c, id); });
     }
-    visit(root, null, '');
+    visit(root, null);
     return { nodes: nodes, edges: edges };
   }
 
@@ -240,13 +234,14 @@
   // MAPA CONCEPTUAL — Novak, top-down
   // ─────────────────────────────────────────────────────────────────────────────
 
-  // Mapa conceptual — constants (estil CmapTools)
+  // Mapa conceptual — constants
   var CM = {
     RW: 148, RH: 40, RR: 10,   // root
-    NW: 120, NH: 36, NR: 8,    // amplada FIXA per a tots els nodes concepte
-    HG: 50,                     // gap horitzontal → colW=170, sense solapament amb NW=120
-    VG1: 52, VG2: 36, LG: 10,
-    M: 32, PFS: 10,
+    NW: 120, NH: 36, NR: 8,    // concepte
+    PH: 22,                     // proposició (alçada base)
+    HG: 44,                     // gap horitzontal → colW = 164
+    VG1: 44, VG2: 28, LG: 10,
+    M: 32, PFS: 11,
   };
 
   function buildConceptMap(md) {
@@ -256,48 +251,60 @@
     var byId = {}, childMap = {};
     g.nodes.forEach(function (n) {
       byId[n.id] = n; childMap[n.id] = [];
-      // Pre-càlcul línies + alçada dinàmica (text pot requerir 2+ línies)
-      n.lines = wrap(n.label, CM.NW - 18, 12);
-      n.nh    = Math.max(CM.NH, n.lines.length * 16 + 10);
+      if (n.type === 'prop') {
+        var pls = wrap(n.label, CM.NW - 20, CM.PFS);
+        n.pLines = pls; n.ph = Math.max(CM.PH, pls.length * 14 + 8);
+      } else {
+        n.lines = wrap(n.label, CM.NW - 18, 12);
+        n.nh    = Math.max(CM.NH, n.lines.length * 16 + 10);
+      }
     });
-    g.edges.forEach(function (e) {
-      if (childMap[e.s]) childMap[e.s].push(e.t);
-    });
+    g.edges.forEach(function (e) { if (childMap[e.s]) childMap[e.s].push(e.t); });
 
     var rootId = g.nodes[0].id;
     var l1Ids  = childMap[rootId] || [];
-    var colW   = CM.NW + CM.HG;   // 170 — columnes ben separades
+    var colW   = CM.NW + CM.HG;  // 164
 
+    // Alçada de la columna d'un L1 (prop o concepte directe)
     function colH(nid) {
       var n = byId[nid], subs = childMap[nid] || [];
-      if (!subs.length) return n.nh;
-      return n.nh + subs.reduce(function (s, sid) { return s + CM.VG2 + colH(sid); }, 0);
+      if (n.type === 'prop') {
+        if (!subs.length) return n.ph;
+        var conH = subs.reduce(function (s, sid) { return s + CM.LG + byId[sid].nh; }, -CM.LG);
+        return n.ph + CM.VG2 + conH;
+      }
+      return n.nh;
     }
+
     function placeColumn(nid, cx, startY) {
       var n = byId[nid];
-      n.x = cx; n.y = startY + n.nh / 2;
-      var subs = childMap[nid] || [], cy = startY + n.nh + CM.LG;
-      subs.forEach(function (sid) { placeColumn(sid, cx, cy); cy += colH(sid) + CM.LG; });
+      if (n.type === 'prop') {
+        n.x = cx; n.y = startY + n.ph / 2;
+        var cy = startY + n.ph + CM.VG2;
+        (childMap[nid] || []).forEach(function (sid) {
+          var cn = byId[sid]; cn.x = cx; cn.y = cy + cn.nh / 2; cy += cn.nh + CM.LG;
+        });
+      } else {
+        n.x = cx; n.y = startY + n.nh / 2;
+      }
     }
 
-    l1Ids.forEach(function (nid, i) { placeColumn(nid, i * colW + colW / 2, CM.RH / 2 + CM.VG1); });
-
+    var startY = CM.RH / 2 + CM.VG1;
+    l1Ids.forEach(function (nid, i) { placeColumn(nid, i * colW + colW / 2, startY); });
     byId[rootId].y = 0;
     if (l1Ids.length) {
       var xs1 = l1Ids.map(function (id) { return byId[id].x; });
       byId[rootId].x = (Math.min.apply(null, xs1) + Math.max.apply(null, xs1)) / 2;
-    } else {
-      byId[rootId].x = colW / 2;
-    }
+    } else { byId[rootId].x = colW / 2; }
 
     var all = g.nodes;
     var xs  = all.map(function (n) { return n.x || 0; });
     var ys  = all.map(function (n) { return n.y || 0; });
-    var nhs = all.map(function (n) { return n.nh || CM.NH; });
+    var allH = all.map(function (n) { return n.nh || n.ph || CM.NH; });
     var x0  = Math.min.apply(null, xs) - CM.NW / 2 - CM.M;
     var y0  = Math.min.apply(null, ys) - CM.RH / 2 - CM.M;
     var x1  = Math.max.apply(null, xs) + CM.NW / 2 + CM.M;
-    var y1  = Math.max.apply(null, ys) + Math.max.apply(null, nhs) / 2 + CM.M;
+    var y1  = Math.max.apply(null, ys) + Math.max.apply(null, allH) / 2 + CM.M;
 
     var uid = 'cm' + (Math.random() * 1e9 | 0);
     var svg = el('svg', { viewBox: [x0, y0, x1 - x0, y1 - y0].join(' '), xmlns: NS,
@@ -305,8 +312,7 @@
 
     var defs = el('defs');
     defs.appendChild(el('filter', { id: uid + '-sh', x: '-20%', y: '-20%', width: '140%', height: '140%' }, [
-      el('feDropShadow', { dx: 0, dy: 1, stdDeviation: 2.5, 'flood-opacity': 0.11 }),
-    ]));
+      el('feDropShadow', { dx: 0, dy: 1, stdDeviation: 2.5, 'flood-opacity': 0.11 })]));
     defs.appendChild(el('marker', { id: uid + '-arr', viewBox: '0 0 8 8', refX: 7, refY: 4,
       markerWidth: 5, markerHeight: 5, orient: 'auto' },
       [el('path', { d: 'M0,1 L7,4 L0,7 L2,4 Z', fill: '#818cf8' })]));
@@ -315,26 +321,18 @@
     var gE = el('g');
     g.edges.forEach(function (e) {
       var sn = byId[e.s], tn = byId[e.t]; if (!sn || !tn) return;
-      var sx = sn.x, sy = sn.y + (sn.root ? CM.RH / 2 : sn.nh / 2);
-      var tx = tn.x, ty = tn.y - tn.nh / 2 - 3;
-      var d;
-      if (Math.abs(sx - tx) < 3) {
-        d = 'M ' + sx + ' ' + sy + ' L ' + tx + ' ' + ty;
+      var sy2 = sn.type === 'root' ? sn.y + CM.RH / 2 :
+                sn.type === 'prop' ? sn.y + sn.ph / 2 : sn.y + sn.nh / 2;
+      var ty2 = tn.type === 'prop' ? tn.y - tn.ph / 2 - 3 : tn.y - tn.nh / 2 - 3;
+      var sx2 = sn.x, tx2 = tn.x, d;
+      if (Math.abs(sx2 - tx2) < 3) {
+        d = 'M ' + sx2 + ' ' + sy2 + ' L ' + tx2 + ' ' + ty2;
       } else {
-        var cy2 = sy + (ty - sy) * 0.6;
-        d = 'M ' + sx + ' ' + sy + ' C ' + sx + ' ' + cy2 + ' ' + tx + ' ' + cy2 + ' ' + tx + ' ' + ty;
+        var cp = sy2 + (ty2 - sy2) * 0.6;
+        d = 'M ' + sx2 + ' ' + sy2 + ' C ' + sx2 + ' ' + cp + ' ' + tx2 + ' ' + cp + ' ' + tx2 + ' ' + ty2;
       }
       gE.appendChild(el('path', { d: d, stroke: '#a5b4fc', 'stroke-width': 1.5,
         fill: 'none', 'marker-end': 'url(#' + uid + '-arr)' }));
-      if (e.lbl) {
-        var lx = (sx + tx) / 2, ly = (sy + ty) / 2;
-        var lw = Math.min(tw(e.lbl, CM.PFS) + 10, 120);
-        gE.appendChild(el('rect', { x: lx - lw / 2, y: ly - CM.PFS - 1,
-          width: lw, height: CM.PFS + 6, fill: '#fff', rx: 3, 'fill-opacity': 0.92 }));
-        gE.appendChild(txt(e.lbl, { x: lx, y: ly + 1, 'font-size': CM.PFS,
-          'font-style': 'italic', 'text-anchor': 'middle', 'dominant-baseline': 'central',
-          fill: '#4338ca', 'font-family': pageFont() }));
-      }
     });
     svg.appendChild(gE);
 
@@ -342,25 +340,33 @@
     g.nodes.forEach(function (n) {
       if (n.x === undefined) return;
       var grp = nodeGroup(n);
-      var title = document.createElementNS(NS, 'title');
-      title.textContent = 'Clic per editar'; grp.appendChild(title);
-      grp.setAttribute('filter', 'url(#' + uid + '-sh)');
+      var ttl = document.createElementNS(NS, 'title');
+      ttl.textContent = 'Clic per editar'; grp.appendChild(ttl);
 
-      if (n.root) {
-        grp.appendChild(el('rect', {
-          x: n.x - CM.RW / 2, y: n.y - CM.RH / 2,
-          width: CM.RW, height: CM.RH, rx: CM.RR,
-          fill: '#312e81', stroke: '#6366f1', 'stroke-width': 1.5 }));
+      if (n.type === 'root') {
+        grp.setAttribute('filter', 'url(#' + uid + '-sh)');
+        grp.appendChild(el('rect', { x: n.x - CM.RW / 2, y: n.y - CM.RH / 2,
+          width: CM.RW, height: CM.RH, rx: CM.RR, fill: '#312e81', stroke: '#6366f1', 'stroke-width': 1.5 }));
         grp.appendChild(mtext(wrap(n.label, CM.RW - 24, 13), n.x, n.y, 13,
           { fill: '#fff', 'font-weight': '700' }));
+
+      } else if (n.type === 'prop') {
+        // Oval petit italic — UNA sola proposició per branca
+        var pw2 = Math.min(tw(n.label, CM.PFS) + 16, CM.NW);
+        grp.appendChild(el('rect', { x: n.x - pw2 / 2, y: n.y - n.ph / 2,
+          width: pw2, height: n.ph, rx: n.ph / 2,
+          fill: '#eef2ff', stroke: '#818cf8', 'stroke-width': 1 }));
+        grp.appendChild(mtext(n.pLines, n.x, n.y, CM.PFS,
+          { 'font-style': 'italic', fill: '#4338ca' }));
+
       } else {
+        // Concepte
+        grp.setAttribute('filter', 'url(#' + uid + '-sh)');
         var hasChildren = childMap[n.id] && childMap[n.id].length;
-        var fill   = hasChildren ? '#eef2ff' : '#f8f7ff';
-        var stroke = hasChildren ? '#818cf8' : '#c4b5fd';
-        // Amplada FIXA CM.NW — mai desborda la columna
-        grp.appendChild(el('rect', {
-          x: n.x - CM.NW / 2, y: n.y - n.nh / 2, width: CM.NW, height: n.nh, rx: CM.NR,
-          fill: fill, stroke: stroke, 'stroke-width': 1 }));
+        grp.appendChild(el('rect', { x: n.x - CM.NW / 2, y: n.y - n.nh / 2,
+          width: CM.NW, height: n.nh, rx: CM.NR,
+          fill: hasChildren ? '#eef2ff' : '#f8f7ff',
+          stroke: hasChildren ? '#818cf8' : '#c4b5fd', 'stroke-width': 1 }));
         grp.appendChild(mtext(n.lines, n.x, n.y, 12, { fill: '#1e1b4b' }));
       }
       gN.appendChild(grp);
