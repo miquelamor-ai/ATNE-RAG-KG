@@ -308,7 +308,7 @@
 
     var uid = 'cm' + (Math.random() * 1e9 | 0);
     var svg = el('svg', { viewBox: [x0, y0, x1 - x0, y1 - y0].join(' '), xmlns: NS,
-      width: '100%', style: 'max-height:600px;display:block', 'font-family': pageFont() });
+      'font-family': pageFont() });
 
     var defs = el('defs');
     defs.appendChild(el('filter', { id: uid + '-sh', x: '-20%', y: '-20%', width: '140%', height: '140%' }, [
@@ -434,7 +434,6 @@
 
     var uid = 'mm' + (Math.random() * 1e9 | 0);
     var svg = el('svg', { viewBox: [x0, y0, x1 - x0, y1 - y0].join(' '), xmlns: NS,
-      width: '100%', style: 'max-height:520px;display:block',
       'font-family': pageFont() });
 
     var defs = el('defs');
@@ -552,7 +551,7 @@
 
     var uid = 'sc' + (Math.random() * 1e9 | 0);
     var svg = el('svg', { viewBox: [x0, y0, x1 - x0, y1 - y0].join(' '), xmlns: NS,
-      width: '100%', style: 'max-height:480px;display:block', 'font-family': pageFont() });
+      'font-family': pageFont() });
 
     var defs = el('defs');
     defs.appendChild(el('filter', { id: uid + '-sh', x: '-20%', y: '-20%', width: '140%', height: '140%' }, [
@@ -588,23 +587,36 @@
   // CONTROLS UI
   // ─────────────────────────────────────────────────────────────────────────────
 
+  // Calcula width/height inicials per a un SVG donat el seu viewBox i una
+  // alçada màxima de partida. Emmagatzema les dimensions naturals a data-nat-*.
+  function svgInitSize(svgEl, maxH) {
+    var vb = (svgEl.getAttribute('viewBox') || '').split(/\s+/).map(Number);
+    var natW = vb[2] || 600, natH = vb[3] || 400;
+    var scale = Math.min(1.0, (maxH || 440) / natH);
+    svgEl.setAttribute('data-nat-w', natW);
+    svgEl.setAttribute('data-nat-h', natH);
+    svgEl.setAttribute('width',  Math.round(natW * scale));
+    svgEl.setAttribute('height', Math.round(natH * scale));
+    svgEl.style.display = 'block';
+    svgEl.style.maxWidth = '100%';
+    return Math.round(scale * 100);  // % inicial per al slider
+  }
+
   function buildZoom(svgEl) {
+    var initPct = svgInitSize(svgEl, 440);
     var row = document.createElement('div');
     row.className = 'mermaid-zoom-row';
     row.innerHTML = '<label class="mermaid-zoom-label">Mida <input type="range" ' +
-      'class="mermaid-zoom-slider" min="40" max="200" value="100">' +
-      '<span class="mermaid-zoom-pct">100%</span></label>';
+      'class="mermaid-zoom-slider" min="20" max="200" value="' + initPct + '">' +
+      '<span class="mermaid-zoom-pct">' + initPct + '%</span></label>';
     var sl = row.querySelector('.mermaid-zoom-slider'), sp = row.querySelector('.mermaid-zoom-pct');
-    var wrapper = svgEl.closest('.mermaid-wrapper') || svgEl.parentElement;
     sl.addEventListener('input', function () {
       var pct = +sl.value;
       sp.textContent = pct + '%';
-      // Escalat per amplada: el SVG creix i el wrapper fa scroll si cal
-      svgEl.style.width  = pct + '%';
-      svgEl.style.height = 'auto';
-      wrapper.style.maxHeight = pct > 100 ? '640px' : '';
-      wrapper.style.overflowX = pct > 100 ? 'auto' : '';
-      wrapper.style.overflowY = pct > 100 ? 'auto' : '';
+      var natW = parseFloat(svgEl.getAttribute('data-nat-w')) || 600;
+      var natH = parseFloat(svgEl.getAttribute('data-nat-h')) || 400;
+      svgEl.setAttribute('width',  Math.round(natW * pct / 100));
+      svgEl.setAttribute('height', Math.round(natH * pct / 100));
     });
     return row;
   }
