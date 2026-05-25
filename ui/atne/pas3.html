@@ -28,7 +28,7 @@
 <script src="/ui/atne/js/llm.js?v=20260419m" defer></script>
 <!-- Mermaid converter: càrrega lazy de Mermaid.js per a mapes conceptuals i esquemes visuals.
      El script no carrega Mermaid.js fins que no hi ha un complement d'aquest tipus actiu. -->
-<script src="/ui/atne/js/mermaid-converter.js?v=20260525n" defer></script>
+<script src="/ui/atne/js/mermaid-converter.js?v=20260525p" defer></script>
 <!-- DOMPurify: sanititza HTML que ve del LLM o de Supabase abans d'innerHTML. -->
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
 <script>
@@ -4479,6 +4479,12 @@
       '.illus-final-actions, .para-handle, .para-menu, ' +
       'button, input, select, textarea, [role="toolbar"], .toolbar, .edit-bar'
     ).forEach(el => el.remove());
+    // Si el toggle de pictogrames no és actiu, elimina imatges ARASAAC inline i
+    // el div de fallback (#adapted-text) del clone perquè no apareguin al PDF.
+    const _pictoToggle = document.querySelector('input[data-comp-toggle="pictogrames"]');
+    if (!_pictoToggle || !_pictoToggle.checked) {
+      mainClone.querySelectorAll('.arasaac-picto, .picto-fallback-inline').forEach(el => el.remove());
+    }
 
     // Converteix seqüències de <p> amb pipes `| cel | cel |` a <table> HTML real.
     // El parser `markdownToHtml` del llm.js no gestiona taules → al glossari es veuen
@@ -4537,15 +4543,33 @@
     }
 
     // 2) Preparar els complements actius
+    // Llegim la llista de complements activats pel docent (guardada en Pas 2).
+    // Serveix per filtrar: un toggle "checked" no garanteix que el complement
+    // hagi estat activat (els 3 hardcoded glossari/esquema/preguntes sempre estan al DOM).
+    let _pdfActivated = [];
+    try {
+      const _rawComp = localStorage.getItem('atne.complements');
+      if (_rawComp) {
+        const _obj = JSON.parse(_rawComp);
+        if (Array.isArray(_obj)) _pdfActivated = _obj;
+        else if (_obj && typeof _obj === 'object') _pdfActivated = Object.keys(_obj).filter(k => _obj[k]);
+      }
+    } catch (_) {}
     const compsHtml = [];
     const seenComps = new Set();
     document.querySelectorAll('[data-comp-toggle]').forEach(toggle => {
       if (!toggle.checked) return;
       const compId = toggle.dataset.compToggle;
       if (seenComps.has(compId)) return;
+      // Salta complements que no estaven activats pel docent en Pas 2.
+      // Excepció: 'docent' (argumentació+auditoria) sempre es genera.
+      if (_pdfActivated.length > 0 && compId !== 'docent' && !_pdfActivated.includes(compId)) return;
       seenComps.add(compId);
       const compView = document.getElementById('view-' + compId);
       if (!compView) return;
+      // Salta vistes sense contingut real (LLM no ha generat o és complement inline)
+      const _viewTxt = compView.textContent.replace(/\s+/g, ' ').trim();
+      if (!_viewTxt || _viewTxt.includes('Sense contingut') || _viewTxt.includes('aplica directament al text')) return;
       const clone = compView.cloneNode(true);
       clone.removeAttribute('hidden');
       clone.removeAttribute('id');
@@ -4622,6 +4646,8 @@
   /* Respectar la mida triada a la UI (S/M/L) i l'alineació (left/center/right).
      Conversió de px a mm (96 DPI): 240px≈63mm, 480px≈127mm. */
   .illus-final { display: block; width: fit-content; max-width: 100%; text-align: center; }
+  /* Pictogrames ARASAAC: limitar mida al PDF (sense CSS de shell.css, surten en grandària natural 300px) */
+  img.arasaac-picto { max-height: 40px; width: auto; vertical-align: middle; display: inline-block; margin: 0 2px; }
   .illus-final[data-size="small"]  img { max-width: 63mm;  width: 100%; height: auto; }
   .illus-final[data-size="medium"] img { max-width: 127mm; width: 100%; height: auto; }
   .illus-final[data-size="large"]  img { max-width: 100%;  width: 100%; height: auto; }

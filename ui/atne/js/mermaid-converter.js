@@ -351,13 +351,12 @@
           { fill: '#fff', 'font-weight': '700' }));
 
       } else if (n.type === 'prop') {
-        // Oval petit italic — UNA sola proposició per branca
-        var pw2 = Math.min(tw(n.label, CM.PFS) + 16, CM.NW);
-        grp.appendChild(el('rect', { x: n.x - pw2 / 2, y: n.y - n.ph / 2,
-          width: pw2, height: n.ph, rx: n.ph / 2,
-          fill: '#eef2ff', stroke: '#818cf8', 'stroke-width': 1 }));
+        // Text italic sobre la línia, sense oval ni quadre.
+        // Halo blanc (stroke blanc primer, fill blau sobre) emmascara la línia.
         grp.appendChild(mtext(n.pLines, n.x, n.y, CM.PFS,
-          { 'font-style': 'italic', fill: '#4338ca' }));
+          { 'font-style': 'italic', fill: '#4338ca',
+            stroke: '#ffffff', 'stroke-width': '5',
+            'stroke-linejoin': 'round', 'paint-order': 'stroke' }));
 
       } else {
         // Concepte
