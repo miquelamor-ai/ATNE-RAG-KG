@@ -635,6 +635,10 @@
       renderMermaidBlock(cont, newMd, type);
     });
     d.appendChild(s); d.appendChild(ta); d.appendChild(btn);
+    // Quan s'obre el details, desplaça el textarea a la vista automàticament
+    d.addEventListener('toggle', function () {
+      if (d.open) setTimeout(function () { ta.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 60);
+    });
     return d;
   }
 

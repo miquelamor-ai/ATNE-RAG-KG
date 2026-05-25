@@ -28,7 +28,7 @@
 <script src="/ui/atne/js/llm.js?v=20260419m" defer></script>
 <!-- Mermaid converter: càrrega lazy de Mermaid.js per a mapes conceptuals i esquemes visuals.
      El script no carrega Mermaid.js fins que no hi ha un complement d'aquest tipus actiu. -->
-<script src="/ui/atne/js/mermaid-converter.js?v=20260525q" defer></script>
+<script src="/ui/atne/js/mermaid-converter.js?v=20260525r" defer></script>
 <!-- DOMPurify: sanititza HTML que ve del LLM o de Supabase abans d'innerHTML. -->
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
 <script>
@@ -4543,33 +4543,14 @@
     }
 
     // 2) Preparar els complements actius
-    // Llegim la llista de complements activats pel docent (guardada en Pas 2).
-    // atne.complements guarda claus internes llargues (esquema_visual, mapa_conceptual…)
-    // però data-comp-toggle usa noms curts (esquema, mapa-conc…). Cal mapeig.
-    const _CHIP_TO_INTERNAL = {
-      'glossari': 'glossari', 'esquema': 'esquema_visual', 'preguntes': 'preguntes_comprensio',
-      'mapa-conc': 'mapa_conceptual', 'mapa-ment': 'mapa_mental', 'bastides': 'bastides',
-      'activitats': 'activitats_aprofundiment', 'pictogrames': 'pictogrames',
-    };
-    let _pdfActivated = [];
-    try {
-      const _rawComp = localStorage.getItem('atne.complements');
-      if (_rawComp) {
-        const _obj = JSON.parse(_rawComp);
-        if (Array.isArray(_obj)) _pdfActivated = _obj;
-        else if (_obj && typeof _obj === 'object') _pdfActivated = Object.keys(_obj).filter(k => _obj[k]);
-      }
-    } catch (_) {}
+    // Inclou tot complement amb toggle actiu i contingut real al seu panell.
+    // No cal filtrar per localStorage.atne.complements (pot estar desactualitzat mid-session).
     const compsHtml = [];
     const seenComps = new Set();
     document.querySelectorAll('[data-comp-toggle]').forEach(toggle => {
       if (!toggle.checked) return;
       const compId = toggle.dataset.compToggle;
       if (seenComps.has(compId)) return;
-      // Salta complements que no estaven activats pel docent en Pas 2.
-      // Excepció: 'docent' (argumentació+auditoria) sempre es genera.
-      const _internalId = _CHIP_TO_INTERNAL[compId] || compId;
-      if (_pdfActivated.length > 0 && compId !== 'docent' && !_pdfActivated.includes(_internalId)) return;
       seenComps.add(compId);
       const compView = document.getElementById('view-' + compId);
       if (!compView) return;
