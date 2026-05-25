@@ -103,7 +103,7 @@
       const label = text.length > 40 ? text.slice(0, 38) + '…' : text;
       while (stack.length > 0 && stack[stack.length - 1].level >= level) stack.pop();
       if (stack.length === 0) {
-        out.push('  ' + id + '["' + label + '"]');
+        out.push('  ' + id + '(["' + label + '"])');
       } else {
         out.push('  ' + id + '("' + label + '")');
         out.push('  ' + stack[stack.length - 1].id + ' --> ' + id);
@@ -137,17 +137,12 @@
     const levels = lines.map(l => indentLevel(l));
     const minLevel = Math.min.apply(null, levels);
 
-    // Parseja cada línia
     const parsed = [];
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const trimmed = line.trim().replace(/^-\s+/, '');
+      const trimmed = lines[i].trim().replace(/^-\s+/, '');
       const level = levels[i] - minLevel;
-      // Format [proposició] Concepte (futur)
       const inlineMatch = trimmed.match(/^\[([^\]]+)\]\s+(.+)$/);
-      // Format **Text** (branca-proposició actual del SKILL)
       const boldMatch = !inlineMatch && trimmed.match(/^\*\*(.+)\*\*$/);
-
       let text, isBold = false, inlineProp = null;
       if (inlineMatch) {
         inlineProp = inlineMatch[1].trim();
@@ -163,57 +158,75 @@
 
     if (parsed.length === 0) return null;
 
-    const out = ['flowchart TD'];
-    let nodeId = 0;
-    const conceptStack = [];   // { level, id } — nodes concepte visibles
-    const propAtLevel = {};    // nivel → proposició en curs
+    // Cada proposició es converteix en un NODE INTERMEDI (no en etiqueta d'aresta).
+    // Així "es classifica en" apareix una sola vegada i bifurca als fills,
+    // en lloc de repetir-se a cada aresta.
+    //   Concepte arrel → (node-proposició) → Concepte fill A
+    //                  ↘ Concepte fill B
+    const out = [
+      'flowchart TD',
+      '  classDef rootC fill:#ede9fe,stroke:#6d28d9,stroke-width:2px,color:#3b0764,font-weight:700',
+      '  classDef concept fill:#f8fafc,stroke:#64748b,color:#1e293b',
+      '  classDef prop fill:#f1f5f9,stroke:#94a3b8,stroke-dasharray:4 2,color:#475569,font-size:11px,font-style:italic',
+    ];
+
+    let cId = 0, pId = 0;
+    const conceptStack = [];  // { level, id }
+    const propNodeAt = {};    // level → id del node-proposició actiu
 
     for (let i = 0; i < parsed.length; i++) {
       const { level, text, isBold, inlineProp } = parsed[i];
-      const label = text.length > 40 ? text.slice(0, 38) + '…' : text;
-      const escaped = escapeMermaidLabel(label);
 
       if (i === 0) {
-        // Sempre el primer ítem és el concepte arrel (oval)
-        const id = 'c' + nodeId++;
-        out.push('  ' + id + '([' + escaped + '])');
+        // Concepte arrel — forma estadi (pill)
+        const id = 'c' + cId++;
+        const esc = escapeMermaidLabel(text.length > 40 ? text.slice(0, 38) + '…' : text);
+        out.push('  ' + id + '(["' + esc + '"]):::rootC');
         conceptStack.push({ level, id });
 
-      } else if (isBold) {
-        // Branca en negreta = PROPOSICIÓ (no genera node visual)
-        propAtLevel[level] = text.length > 35 ? text.slice(0, 33) + '…' : text;
-        // Neteja proposicions de nivells més profunds
-        Object.keys(propAtLevel).forEach(function (l) {
-          if (parseInt(l) > level) delete propAtLevel[l];
-        });
+      } else if (isBold || inlineProp) {
+        // PROPOSICIÓ → node intermedi paralel·lelogram (visualment distint dels conceptes)
+        const propLabel = isBold ? text : inlineProp;
+        const esc = escapeMermaidLabel(propLabel.length > 38 ? propLabel.slice(0, 36) + '…' : propLabel);
+        const pid = 'p' + pId++;
 
-      } else {
-        // Concepte fill → rectangle arrodonit + aresta amb proposició
-        const id = 'c' + nodeId++;
-        out.push('  ' + id + '("' + escaped + '")');
-
-        // Troba el node-pare concepte més proper (nivell inferior)
+        // Pare concepte: pop fins que el top sigui estrictament inferior a level
         while (conceptStack.length > 1 && conceptStack[conceptStack.length - 1].level >= level) {
           conceptStack.pop();
         }
+        const parent = conceptStack[conceptStack.length - 1];
 
-        if (conceptStack.length > 0) {
-          const parent = conceptStack[conceptStack.length - 1];
-          // Determina la proposició: inline > negreta intermèdia > genèric
-          let prop = inlineProp;
-          if (!prop) {
-            for (let l = level - 1; l > parent.level; l--) {
-              if (propAtLevel[l]) { prop = propAtLevel[l]; break; }
-            }
+        out.push('  ' + pid + '[/"' + esc + '"/]:::prop');
+        out.push('  ' + parent.id + ' --> ' + pid);
+
+        // Registra el node-proposició actiu per a aquest nivell
+        Object.keys(propNodeAt).forEach(function(l) {
+          if (parseInt(l) >= level) delete propNodeAt[l];
+        });
+        propNodeAt[level] = pid;
+
+      } else {
+        // CONCEPTE fill — rectangle arrodonit
+        const id = 'c' + cId++;
+        const esc = escapeMermaidLabel(text.length > 40 ? text.slice(0, 38) + '…' : text);
+        out.push('  ' + id + '("' + esc + '"):::concept');
+
+        // Connecta des del node-proposició actiu al nivell immediat superior,
+        // o directament des del pare concepte si no hi ha proposició.
+        const prop = propNodeAt[level - 1];
+        if (prop) {
+          out.push('  ' + prop + ' --> ' + id);
+        } else {
+          while (conceptStack.length > 1 && conceptStack[conceptStack.length - 1].level >= level) {
+            conceptStack.pop();
           }
-          if (!prop) prop = 'inclou';
-          out.push('  ' + parent.id + ' -->|"' + escapeMermaidLabel(prop) + '"| ' + id);
+          out.push('  ' + conceptStack[conceptStack.length - 1].id + ' --> ' + id);
         }
         conceptStack.push({ level, id });
       }
     }
 
-    return nodeId > 0 ? out.join('\n') : null;
+    return cId > 0 ? out.join('\n') : null;
   }
 
   // ── Dispatcher ──────────────────────────────────────────────────────────
