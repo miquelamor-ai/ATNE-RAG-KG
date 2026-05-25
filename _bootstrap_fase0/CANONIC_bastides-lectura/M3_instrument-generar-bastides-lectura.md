@@ -24,7 +24,7 @@ notebooklm_review:
   aplicades_des_d_inici: [patro-canonic-pilots-noticia-glossari-opinio, fidelitat-gradada-C2, aclariment-us-lectura-vs-produccio-C1, metadades-cella, cas-especial-V2-compartit-V3-dedicat]
   aplicades_post_review: [C1-terminologia-frase-buit-A1-resum-i-autoavaluacio, C2-pausa-obligatoria-explicita-hipotesi-en-curs-B1plus]
   comentari_key: "Pilot 4 aporta la lògica de control intra-pipeline (descriptor cross_source dependent del pipeline) i consolida el model 3 moments × 3 plànols com a estàndard de mediació cognitiva ATNE. Quart pilot Fase A validat amb la mateixa estructura canònica."
-  pregunta_oberta_miquel: "Pas 4.2 cross_source amb preguntes_comprensio — quan els dos complements estan actius simultàniament, `build_skills.py` ha de generar feedback condicional al docent si detecta duplicitat, o l'IA ho resol silenciosament per disseny? Decisió arquitectònica pendent — afecta tots els futurs instruments de mediació amb dependència intra-pipeline."
+  decisio_arquitectonica_mineriarag_20260525: "RESOLTA. Opció híbrida: (1) Prevenció per disseny — bastides llegeix l'output de preguntes_comprensio al moment de generació i produeix preguntes ortogonals (vygotskià). (2) Fallback dedup silenciós amb traça — si arriba duplicitat, ATNE dedupea amb regla de prioritat (preguntes_comprensio guanya, bastides es replanteja) + log a metadades. (3) NO warning runtime al docent (soroll sense valor accionable). Patró cross_source intra-pipeline confirmat com a patró canònic a corpus-spec v2.7 (mineriaRAG). Patró d'absència de fidelitat per a instruments d'orientació també confirmat al spec."
 ---
 
 # Generar bastides de lectura
