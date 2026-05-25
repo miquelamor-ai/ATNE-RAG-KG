@@ -41,8 +41,22 @@ ARASAAC_ATTRIBUTION = (
 )
 
 # Marcadors que el LLM ha d'emetre.
-# Accepta tant [PICTO: terme] com [PICTOGRAMA: terme] per robustesa.
+# Accepta [PICTO: terme] o [PICTO: terme_display|terme_cerca]
+# El format amb | permet mostrar el terme en l'idioma del document (esquerre)
+# i usar el terme de cerca ARASAAC (dret, normalment castellà per cobertura).
 MARKER_RE = re.compile(r"\[PICTO(?:GRAMA)?:\s*([^\]]+)\]", re.IGNORECASE)
+
+
+def _parse_marker(raw: str) -> tuple[str, str]:
+    """Retorna (display_term, search_term) del contingut d'un marcador.
+
+    Si el marcador conté '|' (ex: 'gat|gato'), retorna ('gat', 'gato').
+    Si no, usa el mateix terme per a display i cerca.
+    """
+    parts = raw.split("|", 1)
+    if len(parts) == 2:
+        return parts[0].strip(), parts[1].strip()
+    return raw.strip(), raw.strip()
 
 # Emoji de fallback quan ARASAAC no troba res per al terme
 _FALLBACK_EMOJI = "\U0001f4dd"  # 📝
@@ -135,10 +149,13 @@ def _arasaac_search(keyword: str, lang: str = "ca", timeout: int = 5) -> Optiona
 
 # ── Substitució de marcadors ──────────────────────────────────────────────────
 
-def _marker_to_html(keyword: str, img_url: Optional[str]) -> str:
-    """Converteix un resultat de cerca en HTML o emoji de fallback."""
+def _marker_to_html(display_term: str, img_url: Optional[str]) -> str:
+    """Converteix un resultat de cerca en HTML o emoji de fallback.
+
+    display_term: terme en l'idioma del document (per a alt/title).
+    """
     if img_url:
-        kw_escaped = keyword.replace('"', "&quot;")
+        kw_escaped = display_term.replace('"', "&quot;")
         return (
             f'<img src="{img_url}" '
             f'alt="{kw_escaped}" '
@@ -147,19 +164,23 @@ def _marker_to_html(keyword: str, img_url: Optional[str]) -> str:
             f'title="{kw_escaped} — {ARASAAC_ATTRIBUTION}">'
         )
     # Fallback: emoji neutre en <span> amb classe per poder eliminar-lo al PDF
-    kw_esc = keyword.replace('"', "&quot;")
+    kw_esc = display_term.replace('"', "&quot;")
     return f'<span class="picto-fallback-text" title="{kw_esc}">{_FALLBACK_EMOJI}</span>'
 
 
-def resolve_pictogram_markers(text: str, lang: str = "ca", max_workers: int = 4) -> str:
+def resolve_pictogram_markers(text: str, lang: str = "es", max_workers: int = 4) -> str:
     """Substitueix tots els marcadors [PICTO: terme] del text per img ARASAAC.
+
+    Suporta dos formats de marcador:
+      [PICTO: gato]          → cerca "gato" en lang, alt="gato"
+      [PICTO: gat|gato]      → cerca "gato" en lang, alt="gat" (display en idioma del doc)
 
     Processa els marcadors en paral·lel (ThreadPoolExecutor) per minimitzar
     la latència total quan hi ha múltiples pictogrames al document.
 
     Args:
         text:        text que conté marcadors [PICTO: terme].
-        lang:        idioma del terme (per defecte 'ca' = català).
+        lang:        idioma de cerca ARASAAC (per defecte 'es' — millor cobertura).
         max_workers: màxim de fils paral·lels per a les crides ARASAAC.
 
     Returns:
@@ -170,26 +191,32 @@ def resolve_pictogram_markers(text: str, lang: str = "ca", max_workers: int = 4)
     if not matches:
         return text
 
-    # Recollim termes únics per evitar crides duplicades
-    keywords = list({m.group(1).strip() for m in matches})
+    # Parsejem cada marcador per obtenir (display, search)
+    raw_to_parsed: dict[str, tuple[str, str]] = {}
+    for m in matches:
+        raw = m.group(1)
+        raw_to_parsed[raw] = _parse_marker(raw)
+
+    # Recollim termes de cerca únics per evitar crides duplicades
+    search_terms = list({search for _, search in raw_to_parsed.values()})
 
     # Resolem en paral·lel
-    keyword_to_url: dict[str, Optional[str]] = {}
+    search_to_url: dict[str, Optional[str]] = {}
     with ThreadPoolExecutor(max_workers=max_workers) as ex:
-        futures = {ex.submit(_arasaac_search, kw, lang): kw for kw in keywords}
+        futures = {ex.submit(_arasaac_search, kw, lang): kw for kw in search_terms}
         for f, kw in futures.items():
             try:
-                keyword_to_url[kw] = f.result(timeout=10)
+                search_to_url[kw] = f.result(timeout=10)
             except Exception as exc:
                 print(f"[arasaac] timeout/error per '{kw}': {exc}", flush=True)
-                keyword_to_url[kw] = None
+                search_to_url[kw] = None
 
-    # Substitució d'esquerra a dreta (preservant posicions)
-    # Recorrem de dreta a esquerra per mantenir els índexs vàlids.
+    # Substitució de dreta a esquerra per mantenir els índexs vàlids.
     result = text
     for m in reversed(list(MARKER_RE.finditer(text))):
-        kw = m.group(1).strip()
-        html = _marker_to_html(kw, keyword_to_url.get(kw))
+        raw = m.group(1)
+        display, search = raw_to_parsed[raw]
+        html = _marker_to_html(display, search_to_url.get(search))
         result = result[: m.start()] + html + result[m.end():]
 
     return result

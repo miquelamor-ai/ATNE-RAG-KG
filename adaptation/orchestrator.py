@@ -325,7 +325,7 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
             if _n_markers_before:
                 cb({"type": "step", "step": "pictograms",
                     "msg": f"Resolent {_n_markers_before} pictograma(es) ARASAAC..."})
-                adapted = resolve_pictogram_markers(adapted, lang="es")
+                adapted = resolve_pictogram_markers(adapted)
         except Exception as _picto_err:
             print(f"[pictograms] resolucio fallida (fallback emoji): {_picto_err}", flush=True)
 
