@@ -1,7 +1,8 @@
-# Arrancada propera sessió ATNE — continuació consolidació 33 instruments
+# Arrancada propera sessió ATNE — continuació consolidació 35 instruments
 
-**Origen**: tancament sessió ATNE 2026-05-25 (vespre).
+**Origen**: tancament sessió ATNE 2026-05-25 (vespre+nit, dues onades).
 **Per a**: propera sessió ATNE amb memòria fresca (qualsevol moment a partir de 2026-05-26).
+**Actualitzat**: 2026-05-25 nit (segona onada — pilot 4 fet i validat).
 
 ---
 
@@ -25,9 +26,12 @@
 | Pilot 1 — `write-noticia` | ✅ Validat + ja al corpusFJE |
 | Pilot 2 — `generate-glossari` | ✅ Validat + ja al corpusFJE |
 | **Pilot 3 — `write-opinio`** | ✅ **Validat localment (NotebookLM SÍ amb correccions menors) — PENDENT PUSH al corpusFJE** |
-| **Pilot 4 — `generate-bastides-lectura`** | 🔴 **PENDENT — tasca prioritària propera sessió** |
+| **Pilot 4 — `generate-bastides-lectura`** | ✅ **Validat NotebookLM (SÍ amb correccions menors, aplicades) — PENDENT PUSH al corpusFJE** |
 | Q1 — pre-A1 vs `expressar-preferencies` | ✅ Decisió Miquel: postura D (instrument futur nou) |
 | Q2 — contrarelat de l'odi | ✅ Decisió Miquel: opció A.1 (gènere propi únic) |
+| mineriaRAG llum verda 2 nous instruments | ✅ Procedir com si validats, citant fonts al cos M\*.md |
+| Encaix Fase B 2 nous | ✅ Híbrid: `expressar-preferencies` a lot B.6 · `write-contrarelat-odi` últim lot pre-Fase C |
+| Corpus FJE | 35 → **37 instruments** (35 originals + 2 nous) |
 
 ## Què cal fer a la propera sessió
 
@@ -45,18 +49,23 @@ Cal:
 3. Esperar el commit-bot de la GitHub Action.
 4. Validar `_derivats_v2/SKILL.md` i `_derivats_v2/prompt_adapter.md` regenerats.
 
-### Tasca 2 (~45 min) — Fase A pilot 4: `generate-bastides-lectura`
+### Tasca 2 — ✅ FETA 2026-05-25 nit — Fase A pilot 4: `generate-bastides-lectura`
 
-⚠️ **CAS ESPECIAL**: només existeix V3, no hi ha V2 dedicat — només `V2_bastides` (compartit lectura+producció).
+**Estat**: completada. M\*.md canònic a `_bootstrap_fase0/CANONIC_bastides-lectura/`, validat NotebookLM (sí-amb-correccions-menors), correccions C1 (terminologia "Frase-buit") + C2 (pausa obligatòria explícita a hipòtesi en curs) aplicades. Commits `65cf8e9` + `b668888` ja a `origin/main`.
 
-Procés:
-1. Llegir `_bootstrap_fase0/V2_bastides/` i extreure'n la part de lectura.
-2. Llegir `_bootstrap_fase0/V3_bastides-lectura/`.
-3. Fusionar en M\*.md canònic seguint patró validat (3 pilots anteriors).
-4. Aplicar des de l'inici: aclariment d'ús lectura vs producció (C1), fidelitat gradada (C2), metadades de cel·la, Pas N-1 transversals + Pas N metacognició.
-5. Validar amb NotebookLM Fase 0.
-6. Aplicar correccions.
-7. Coordinar push al corpusFJE: `skills/mediacio/generate-bastides-lectura/M3_instrument-generar-bastides-lectura.md`.
+**Cas especial confirmat operatiu**: la fusió V2 compartit + V3 dedicat funciona retenint només la dimensió lectura. Patró aplicable a `generate-bastides-produccio` quan toqui (Fase B).
+
+**Novetat arquitectònica validada per NotebookLM**: descriptor `cross_source` **intra-pipeline** (no contra text font, sinó contra output d'altres complements del pipeline). Qualificat com a "**innovació arquitectònica necessària**" → quedar com a **patró canònic per a tots els instruments de mediació amb dependències intra-pipeline**.
+
+**Pendent operatiu**: push del fitxer canònic al corpusFJE: `skills/mediacio/generate-bastides-lectura/M3_instrument-generar-bastides-lectura.md` (coordinació Miquel).
+
+### Tasca 2 bis — Pregunta oberta arquitectònica per a Miquel + mineriaRAG
+
+NotebookLM ha plantejat una pregunta de disseny que cal resoldre abans que es generalitzi el patró `cross_source` intra-pipeline:
+
+> **Pas 4.2** (no duplicar `preguntes_comprensio`): quan `bastides` i `preguntes_comprensio` estan actius simultàniament i `build_skills.py` detecta duplicitat — ha de **generar feedback condicional al docent** (avís de duplicitat) o ha de **resoldre-ho silenciosament l'IA per disseny**?
+
+Afecta: tots els futurs instruments de mediació amb dependència intra-pipeline. **Decisió pendent** — passar a mineriaRAG perquè és la seva àrea (validation runtime).
 
 ### Tasca 3 — Validació conjunta Fase A per part de Miquel
 
