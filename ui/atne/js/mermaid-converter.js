@@ -37,7 +37,7 @@
 
   function txt(s, attrs) { var t = el('text', attrs); t.textContent = s; return t; }
 
-  function tw(label, fs) { return label.length * (fs || 12) * 0.57; }
+  function tw(label, fs) { return label.length * (fs || 12) * 0.62; }
 
   function wrap(label, maxPx, fs) {
     var cw = (fs || 12) * 0.57, max = Math.max(7, Math.floor(maxPx / cw));
@@ -98,27 +98,25 @@
     return root;
   }
 
-  // Aplana l'arbre en nodes + edges
-  // Nodes bold (no arrel) → nodes proposició (isProp=true), sense caixa, text cursiu
-  // L'arrel sempre és node concepte, fins i tot si és bold al markdown
+  // treeToGraph — estil CmapTools: proposicions com a etiquetes sobre la fletxa
+  // Nodes bold intermedis → la seva etiqueta es passa als fills com a `lbl` de l'aresta
+  // L'arrel sempre és node concepte (fins i tot si és bold al markdown)
   function treeToGraph(root) {
     var nodes = [], edges = [], cnt = 0;
-    function visit(node, parentId) {
+    function visit(node, parentId, propLabel) {
       if (!node) return;
       var isRoot = (parentId === null);
       if (node.bold && !isRoot) {
-        var pid = 'p' + cnt++;
-        nodes.push({ id: pid, label: node.label, isProp: true, lineIdx: node.lineIdx });
-        edges.push({ s: parentId, t: pid });
-        node.children.forEach(function (c) { visit(c, pid); });
+        // Proposició → transfereix l'etiqueta als fills directes
+        node.children.forEach(function (c) { visit(c, parentId, node.label); });
       } else {
         var id = 'c' + cnt++;
         nodes.push({ id: id, label: node.label, root: isRoot, lineIdx: node.lineIdx });
-        if (!isRoot) edges.push({ s: parentId, t: id });
-        node.children.forEach(function (c) { visit(c, id); });
+        if (!isRoot) edges.push({ s: parentId, t: id, lbl: propLabel || '' });
+        node.children.forEach(function (c) { visit(c, id, ''); });
       }
     }
-    visit(root, null);
+    visit(root, null, '');
     return { nodes: nodes, edges: edges };
   }
 
@@ -242,154 +240,128 @@
   // MAPA CONCEPTUAL — Novak, top-down
   // ─────────────────────────────────────────────────────────────────────────────
 
-  // Mapa conceptual — constants
+  // Mapa conceptual — constants (estil CmapTools)
   var CM = {
-    RW: 148, RH: 40, RR: 10,   // root: amplada, alçada, radi cantonades
-    NW: 108, NH: 34, NR: 7,    // nodes concepte
-    PH: 15,                     // alçada zona text proposició
-    HG: 32,                     // gap horitzontal entre columnes
-    VG: 38,                     // gap vertical arrel → proposicions
-    PG: 12,                     // gap proposició → primer fill
-    LG: 8,                      // gap entre fills verticals
-    M:  28,                     // marge exterior
-    PFS: 11,                    // font-size proposicions
+    RW: 148, RH: 40, RR: 10,   // root
+    NW: 120, NH: 36, NR: 8,    // amplada FIXA per a tots els nodes concepte
+    HG: 50,                     // gap horitzontal → colW=170, sense solapament amb NW=120
+    VG1: 52, VG2: 36, LG: 10,
+    M: 32, PFS: 10,
   };
 
   function buildConceptMap(md) {
     var g = treeToGraph(parseTree(md));
     if (!g.nodes.length) return null;
 
-    var byId = {}, kids = {};
-    g.nodes.forEach(function (n) { byId[n.id] = n; kids[n.id] = []; });
-    g.edges.forEach(function (e) { if (kids[e.s]) kids[e.s].push(e.t); });
-
-    // ── Layout: arrel al centre, proposicions en columnes, fills apilats verticalment ──
-    var rootId  = g.nodes[0].id;
-    var propIds = kids[rootId] || [];
-    var nCols   = Math.max(1, propIds.length);
-    var colW    = Math.max(CM.NW, CM.RW / nCols + CM.HG) + CM.HG;
-    var totalW  = nCols * colW;
-
-    byId[rootId].x = totalW / 2;
-    byId[rootId].y = 0;
-
-    propIds.forEach(function (pid, i) {
-      var prop = byId[pid];
-      prop.x   = i * colW + colW / 2;
-      prop.y   = CM.RH / 2 + CM.VG + CM.PH / 2;
-
-      // Acumulador vertical: tots els fills i néts van en la mateixa columna
-      var cy = prop.y + CM.PH / 2 + CM.PG;
-      (kids[pid] || []).forEach(function (lid) {
-        byId[lid].x = prop.x;
-        byId[lid].y = cy + CM.NH / 2;
-        cy += CM.NH;
-        // Néts (3r nivell) → directament a sota del pare, mateixa columna
-        (kids[lid] || []).forEach(function (slid) {
-          cy += CM.LG;
-          byId[slid].x = prop.x;
-          byId[slid].y = cy + CM.NH / 2;
-          cy += CM.NH;
-        });
-        cy += CM.LG;
-      });
+    var byId = {}, childMap = {};
+    g.nodes.forEach(function (n) {
+      byId[n.id] = n; childMap[n.id] = [];
+      // Pre-càlcul línies + alçada dinàmica (text pot requerir 2+ línies)
+      n.lines = wrap(n.label, CM.NW - 18, 12);
+      n.nh    = Math.max(CM.NH, n.lines.length * 16 + 10);
+    });
+    g.edges.forEach(function (e) {
+      if (childMap[e.s]) childMap[e.s].push(e.t);
     });
 
-    // Centra l'arrel sobre totes les proposicions (independentment del nombre)
-    if (propIds.length) {
-      var propXs = propIds.map(function (pid) { return byId[pid].x; });
-      byId[rootId].x = (Math.min.apply(null, propXs) + Math.max.apply(null, propXs)) / 2;
+    var rootId = g.nodes[0].id;
+    var l1Ids  = childMap[rootId] || [];
+    var colW   = CM.NW + CM.HG;   // 170 — columnes ben separades
+
+    function colH(nid) {
+      var n = byId[nid], subs = childMap[nid] || [];
+      if (!subs.length) return n.nh;
+      return n.nh + subs.reduce(function (s, sid) { return s + CM.VG2 + colH(sid); }, 0);
+    }
+    function placeColumn(nid, cx, startY) {
+      var n = byId[nid];
+      n.x = cx; n.y = startY + n.nh / 2;
+      var subs = childMap[nid] || [], cy = startY + n.nh + CM.LG;
+      subs.forEach(function (sid) { placeColumn(sid, cx, cy); cy += colH(sid) + CM.LG; });
     }
 
-    // ── ViewBox ──
-    var all = g.nodes.filter(function (n) { return n.x !== undefined; });
-    var xs  = all.map(function (n) { return n.x; });
-    var ys  = all.map(function (n) { return n.y; });
+    l1Ids.forEach(function (nid, i) { placeColumn(nid, i * colW + colW / 2, CM.RH / 2 + CM.VG1); });
+
+    byId[rootId].y = 0;
+    if (l1Ids.length) {
+      var xs1 = l1Ids.map(function (id) { return byId[id].x; });
+      byId[rootId].x = (Math.min.apply(null, xs1) + Math.max.apply(null, xs1)) / 2;
+    } else {
+      byId[rootId].x = colW / 2;
+    }
+
+    var all = g.nodes;
+    var xs  = all.map(function (n) { return n.x || 0; });
+    var ys  = all.map(function (n) { return n.y || 0; });
+    var nhs = all.map(function (n) { return n.nh || CM.NH; });
     var x0  = Math.min.apply(null, xs) - CM.NW / 2 - CM.M;
     var y0  = Math.min.apply(null, ys) - CM.RH / 2 - CM.M;
     var x1  = Math.max.apply(null, xs) + CM.NW / 2 + CM.M;
-    var y1  = Math.max.apply(null, ys) + CM.NH / 2 + CM.M;
+    var y1  = Math.max.apply(null, ys) + Math.max.apply(null, nhs) / 2 + CM.M;
 
     var uid = 'cm' + (Math.random() * 1e9 | 0);
     var svg = el('svg', { viewBox: [x0, y0, x1 - x0, y1 - y0].join(' '), xmlns: NS,
-      width: '100%', style: 'max-height:580px;display:block',
-      'font-family': pageFont() });
+      width: '100%', style: 'max-height:600px;display:block', 'font-family': pageFont() });
 
     var defs = el('defs');
-    // Ombra subtil per als nodes
     defs.appendChild(el('filter', { id: uid + '-sh', x: '-20%', y: '-20%', width: '140%', height: '140%' }, [
-      el('feDropShadow', { dx: 0, dy: 1, stdDeviation: 2.5, 'flood-opacity': 0.10 }),
+      el('feDropShadow', { dx: 0, dy: 1, stdDeviation: 2.5, 'flood-opacity': 0.11 }),
     ]));
-    // Fletxa de punta neta
-    defs.appendChild(el('marker', { id: uid + '-arr', viewBox: '0 0 10 10', refX: 9, refY: 5,
-      markerWidth: 5, markerHeight: 5, orient: 'auto-start-reverse' },
-      [el('path', { d: 'M0,1 L9,5 L0,9 L2.5,5 Z', fill: '#818cf8' })]));
+    defs.appendChild(el('marker', { id: uid + '-arr', viewBox: '0 0 8 8', refX: 7, refY: 4,
+      markerWidth: 5, markerHeight: 5, orient: 'auto' },
+      [el('path', { d: 'M0,1 L7,4 L0,7 L2,4 Z', fill: '#818cf8' })]));
     svg.appendChild(defs);
 
-    // ── Arestes ──
     var gE = el('g');
     g.edges.forEach(function (e) {
-      var sn = byId[e.s], tn = byId[e.t];
-      if (!sn || tn.x === undefined) return;
-
-      var isRootEdge = sn.root;
-      var sx = sn.x, sy = sn.y + (isRootEdge ? CM.RH / 2 : CM.PH / 2 + 2);
-      var tx = tn.x, ty = tn.isProp ? tn.y - CM.PH / 2 - 2 : tn.y - CM.NH / 2;
-
+      var sn = byId[e.s], tn = byId[e.t]; if (!sn || !tn) return;
+      var sx = sn.x, sy = sn.y + (sn.root ? CM.RH / 2 : sn.nh / 2);
+      var tx = tn.x, ty = tn.y - tn.nh / 2 - 3;
       var d;
-      if (Math.abs(sx - tx) < 2) {
-        // Mateixa columna: línia recta vertical
+      if (Math.abs(sx - tx) < 3) {
         d = 'M ' + sx + ' ' + sy + ' L ' + tx + ' ' + ty;
       } else {
-        // Columna diferent: bezier suau
-        var my = sy + (ty - sy) * 0.55;
-        d = 'M ' + sx + ' ' + sy + ' C ' + sx + ' ' + my + ' ' + tx + ' ' + my + ' ' + tx + ' ' + ty;
+        var cy2 = sy + (ty - sy) * 0.6;
+        d = 'M ' + sx + ' ' + sy + ' C ' + sx + ' ' + cy2 + ' ' + tx + ' ' + cy2 + ' ' + tx + ' ' + ty;
       }
       gE.appendChild(el('path', { d: d, stroke: '#a5b4fc', 'stroke-width': 1.5,
         fill: 'none', 'marker-end': 'url(#' + uid + '-arr)' }));
+      if (e.lbl) {
+        var lx = (sx + tx) / 2, ly = (sy + ty) / 2;
+        var lw = Math.min(tw(e.lbl, CM.PFS) + 10, 120);
+        gE.appendChild(el('rect', { x: lx - lw / 2, y: ly - CM.PFS - 1,
+          width: lw, height: CM.PFS + 6, fill: '#fff', rx: 3, 'fill-opacity': 0.92 }));
+        gE.appendChild(txt(e.lbl, { x: lx, y: ly + 1, 'font-size': CM.PFS,
+          'font-style': 'italic', 'text-anchor': 'middle', 'dominant-baseline': 'central',
+          fill: '#4338ca', 'font-family': pageFont() }));
+      }
     });
     svg.appendChild(gE);
 
-    // ── Nodes ──
     var gN = el('g');
     g.nodes.forEach(function (n) {
       if (n.x === undefined) return;
       var grp = nodeGroup(n);
       var title = document.createElementNS(NS, 'title');
       title.textContent = 'Clic per editar'; grp.appendChild(title);
+      grp.setAttribute('filter', 'url(#' + uid + '-sh)');
 
-      if (n.isProp) {
-        // Proposició: text cursiu centrat, sense caixa
-        var lines = wrap(n.label, colW - 16, CM.PFS);
-        grp.appendChild(mtext(lines, n.x, n.y, CM.PFS, {
-          fill: '#4338ca', 'font-style': 'italic', 'font-weight': '600' }));
-        // subratllat proporcional
-        var uw = Math.min(tw(n.label, CM.PFS), colW - 20) * 0.85;
-        grp.appendChild(el('line', {
-          x1: n.x - uw / 2, y1: n.y + CM.PFS * 0.9,
-          x2: n.x + uw / 2, y2: n.y + CM.PFS * 0.9,
-          stroke: '#818cf8', 'stroke-width': 1, 'stroke-opacity': 0.5 }));
-
-      } else if (n.root) {
-        // Arrel: rectangle arrodonit fosc, text blanc
-        grp.setAttribute('filter', 'url(#' + uid + '-sh)');
+      if (n.root) {
         grp.appendChild(el('rect', {
           x: n.x - CM.RW / 2, y: n.y - CM.RH / 2,
           width: CM.RW, height: CM.RH, rx: CM.RR,
           fill: '#312e81', stroke: '#6366f1', 'stroke-width': 1.5 }));
         grp.appendChild(mtext(wrap(n.label, CM.RW - 24, 13), n.x, n.y, 13,
-          { fill: '#fff', 'font-weight': '700', 'letter-spacing': '0.3px' }));
-
+          { fill: '#fff', 'font-weight': '700' }));
       } else {
-        // Concepte fill: rectangle clar
-        grp.setAttribute('filter', 'url(#' + uid + '-sh)');
-        var nw = Math.max(CM.NW, tw(n.label, 12) + 28);
+        var hasChildren = childMap[n.id] && childMap[n.id].length;
+        var fill   = hasChildren ? '#eef2ff' : '#f8f7ff';
+        var stroke = hasChildren ? '#818cf8' : '#c4b5fd';
+        // Amplada FIXA CM.NW — mai desborda la columna
         grp.appendChild(el('rect', {
-          x: n.x - nw / 2, y: n.y - CM.NH / 2,
-          width: nw, height: CM.NH, rx: CM.NR,
-          fill: '#f5f3ff', stroke: '#a5b4fc', 'stroke-width': 1 }));
-        grp.appendChild(mtext(wrap(n.label, nw - 18, 12), n.x, n.y, 12,
-          { fill: '#1e1b4b' }));
+          x: n.x - CM.NW / 2, y: n.y - n.nh / 2, width: CM.NW, height: n.nh, rx: CM.NR,
+          fill: fill, stroke: stroke, 'stroke-width': 1 }));
+        grp.appendChild(mtext(n.lines, n.x, n.y, 12, { fill: '#1e1b4b' }));
       }
       gN.appendChild(grp);
     });
@@ -477,20 +449,26 @@
 
       if (node.depth === 0) {
         grp.setAttribute('filter', 'url(#' + uid + '-sh)');
-        grp.appendChild(el('rect', { x: node.x - MM.RW / 2, y: node.y - MM.RH / 2,
-          width: MM.RW, height: MM.RH, rx: MM.RR, fill: 'url(#' + uid + '-rg)' }));
-        grp.appendChild(txt(node.label, { x: node.x, y: node.y, 'font-size': 14, 'font-weight': '700',
-          'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#fff', 'letter-spacing': '0.3px' }));
+        // Arrel: text amb wrapping perquè fonts amples (monospace) no desborden
+        var rootLines = wrap(node.label, MM.RW - 16, 12);
+        var rootRH = Math.max(MM.RH, rootLines.length * 16 + 10);
+        grp.appendChild(el('rect', { x: node.x - MM.RW / 2, y: node.y - rootRH / 2,
+          width: MM.RW, height: rootRH, rx: MM.RR, fill: 'url(#' + uid + '-rg)' }));
+        grp.appendChild(mtext(rootLines, node.x, node.y, 12,
+          { fill: '#fff', 'font-weight': '700', 'letter-spacing': '0.3px' }));
       } else {
         var color = node.color || '#64748b';
         var fs = node.depth === 1 ? 13 : 11;
         var nh = node.depth === 1 ? MM.L1H : MM.LNH;
-        var ntw = Math.max(60, tw(node.label, fs)) + 18;
+        // Cap l'amplada de L1 a 160 px per evitar que etiquetes llargues trenquin el layout
+        var ntw = Math.min(Math.max(60, tw(node.label, fs)) + 18, 160);
         if (node.depth === 1) {
-          grp.appendChild(el('rect', { x: node.x - ntw / 2, y: node.y - nh / 2, width: ntw, height: nh,
-            rx: nh / 2, fill: color + '18', stroke: color, 'stroke-width': 2 }));
-          grp.appendChild(txt(node.label, { x: node.x, y: node.y, 'font-size': fs, 'font-weight': '600',
-            'text-anchor': 'middle', 'dominant-baseline': 'central', fill: color }));
+          var l1Lines = wrap(node.label, ntw - 20, fs);
+          var l1h = Math.max(nh, l1Lines.length * Math.ceil(fs * 1.4) + 8);
+          grp.appendChild(el('rect', { x: node.x - ntw / 2, y: node.y - l1h / 2, width: ntw, height: l1h,
+            rx: l1h / 2, fill: color + '18', stroke: color, 'stroke-width': 2 }));
+          grp.appendChild(mtext(l1Lines, node.x, node.y, fs,
+            { fill: color, 'font-weight': '600', 'text-anchor': 'middle', 'dominant-baseline': 'central' }));
         } else {
           var lw2 = tw(node.label, fs) + 4;
           grp.appendChild(el('line', { x1: node.x - lw2 / 2, y1: node.y + nh / 2 - 2,
@@ -505,8 +483,10 @@
         child.parent = node;
         var color = child.color || '#94a3b8';
         var dirX  = child.x > node.x ? 1 : -1;
-        var pw = node.depth === 0 ? MM.RW : Math.max(60, tw(node.label, node.depth === 1 ? 13 : 11)) + 18;
-        var cw2 = Math.max(60, tw(child.label, child.depth === 1 ? 13 : 11)) + 18;
+        var pw = node.depth === 0 ? MM.RW :
+                 Math.min(Math.max(60, tw(node.label, node.depth === 1 ? 13 : 11)) + 18, 160);
+        var cw2 = child.depth >= 2 ? Math.max(60, tw(child.label, 11)) + 18 :
+                  Math.min(Math.max(60, tw(child.label, 13)) + 18, 160);
         var sx = node.x + dirX * pw / 2, sy = node.y;
         var tx = child.x - dirX * cw2 / 2, ty = child.y;
         var w1 = node.depth === 0 ? MM.W0 : child.depth === 1 ? MM.W1 : MM.W2;
@@ -534,23 +514,36 @@
     var tree = parseTree(md);
     if (!tree) return null;
 
-    function shH(node) {
-      if (!node.children || !node.children.length) return SC.NH + SC.VG;
-      return node.children.reduce(function (s, c) { return s + shH(c); }, 0);
+    function nodeNW(depth) { return depth === 0 ? SC.RW : SC.NW; }
+    function nodeNH(node, depth) {
+      var ls = wrap(node.label, nodeNW(depth) - 16, 12);
+      return Math.max(depth === 0 ? SC.RH : SC.NH, ls.length * 16 + 8);
+    }
+    function shH(node, depth) {
+      var nh = nodeNH(node, depth);
+      if (!node.children || !node.children.length) return nh + SC.VG;
+      return node.children.reduce(function (s, c) { return s + shH(c, depth + 1); }, 0);
     }
     function place(node, x, sy, depth) {
-      var h = shH(node); node.x = x; node.y = sy + h / 2 - SC.VG / 2; node.depth = depth;
-      var nw = depth === 0 ? SC.RW : SC.NW, cy = sy;
-      (node.children || []).forEach(function (c) { var ch = shH(c); place(c, x + nw + SC.HG, cy, depth + 1); cy += ch; });
+      var h = shH(node, depth);
+      node.x = x; node.y = sy + h / 2 - SC.VG / 2; node.depth = depth;
+      node.nw = nodeNW(depth); node.nh = nodeNH(node, depth);
+      var cy = sy;
+      (node.children || []).forEach(function (c) {
+        var ch = shH(c, depth + 1);
+        place(c, x + node.nw + SC.HG, cy, depth + 1); cy += ch;
+      });
     }
     place(tree, 0, 0, 0);
 
     function allNodes(n) { return [n].concat((n.children || []).reduce(function (a, c) { return a.concat(allNodes(c)); }, [])); }
     var all = allNodes(tree);
-    var ys = all.map(function (n) { return n.y; });
-    var x0 = -SC.M, y0 = Math.min.apply(null, ys) - SC.RH - SC.M;
-    var x1 = Math.max.apply(null, all.map(function (n) { return n.x + SC.RW; })) + SC.M;
-    var y1 = Math.max.apply(null, ys) + SC.RH + SC.M;
+    var ys  = all.map(function (n) { return n.y; });
+    var nhs = all.map(function (n) { return n.nh; });
+    var x0  = -SC.M;
+    var y0  = Math.min.apply(null, ys) - Math.max.apply(null, nhs) / 2 - SC.M;
+    var x1  = Math.max.apply(null, all.map(function (n) { return n.x + n.nw; })) + SC.M;
+    var y1  = Math.max.apply(null, ys) + Math.max.apply(null, nhs) / 2 + SC.M;
 
     var uid = 'sc' + (Math.random() * 1e9 | 0);
     var svg = el('svg', { viewBox: [x0, y0, x1 - x0, y1 - y0].join(' '), xmlns: NS,
@@ -567,7 +560,7 @@
     var gL = el('g'), gN = el('g', { filter: 'url(#' + uid + '-sh)' });
     all.forEach(function (n) {
       var d = Math.min(n.depth, SC_F.length - 1);
-      var nw = n.depth === 0 ? SC.RW : SC.NW, nh = n.depth === 0 ? SC.RH : SC.NH;
+      var nw = n.nw, nh = n.nh;
       (n.children || []).forEach(function (c) {
         var sx = n.x + nw, sy = n.y, tx = c.x, ty = c.y, mx = (sx + tx) / 2;
         gL.appendChild(el('path', { d: 'M ' + sx + ' ' + sy + ' C ' + mx + ' ' + sy + ' ' + mx + ' ' + ty + ' ' + tx + ' ' + ty,
@@ -635,6 +628,7 @@
   function renderMermaidBlock(cont, mdRaw, compType) {
     if (cont.querySelector('.diagram-wrapper')) return;
     if (cont.classList.contains('schema')) cont.classList.add('mermaid-active');
+    cont.dataset.compType = compType;
 
     var outer = document.createElement('div');
     outer.className = 'mermaid-wrapper diagram-wrapper';
@@ -672,6 +666,17 @@
   window.ATNE_MERMAID = {
     renderMermaidBlock:          renderMermaidBlock,
     renderAllMermaidComplements: function () {},
+    // Re-renderitza tots els diagrames ja existents (e.g., quan canvia la font)
+    reRenderAll: function () {
+      document.querySelectorAll('[data-comp-type][data-md]').forEach(function (cont) {
+        var md   = cont.dataset.md;
+        var type = cont.dataset.compType;
+        if (!md || !type) return;
+        cont.classList.remove('mermaid-active');
+        cont.innerHTML = '';
+        renderMermaidBlock(cont, md, type);
+      });
+    },
   };
 
 })();
