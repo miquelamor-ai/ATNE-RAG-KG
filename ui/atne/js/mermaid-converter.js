@@ -123,12 +123,14 @@
       // Sagnia de 2 espais per nivell (Mermaid mindmap requereix consistència)
       const indent = '  '.repeat(level + 1); // +1 perquè el root és el nivell 0
 
+      // Limita labels llargs per evitar desbordament del node Mermaid
+      const labelMindmap = text.length > 50 ? text.slice(0, 48) + '…' : text;
       if (!rootEmitted) {
         // Primer node: root amb doble parèntesi (node rodó destacat)
-        mermaidLines.push('  root((' + text + '))');
+        mermaidLines.push('  root((' + labelMindmap + '))');
         rootEmitted = true;
       } else {
-        mermaidLines.push(indent + text);
+        mermaidLines.push(indent + labelMindmap);
       }
     }
 
@@ -348,8 +350,13 @@
     wrapper.appendChild(mermaidDiv);
     wrapper.appendChild(details);
 
-    // Substitueix el contingut del contenidor
+    // Substitueix el contingut del contenidor.
+    // Si és un .schema (grid 2 columnes), canviem a display:block perquè
+    // el diagrama no quedi tallat a la meitat de l'amplada.
     cont.innerHTML = '';
+    if (cont.classList.contains('schema')) {
+      cont.classList.add('mermaid-active');
+    }
     cont.appendChild(wrapper);
 
     // Demana Mermaid i renderitza. mermaid.run() retorna Promise — captura
