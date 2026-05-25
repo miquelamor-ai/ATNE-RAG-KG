@@ -28,7 +28,7 @@
 <script src="/ui/atne/js/llm.js?v=20260419m" defer></script>
 <!-- Mermaid converter: càrrega lazy de Mermaid.js per a mapes conceptuals i esquemes visuals.
      El script no carrega Mermaid.js fins que no hi ha un complement d'aquest tipus actiu. -->
-<script src="/ui/atne/js/mermaid-converter.js" defer></script>
+<script src="/ui/atne/js/mermaid-converter.js?v=20260525" defer></script>
 <!-- DOMPurify: sanititza HTML que ve del LLM o de Supabase abans d'innerHTML. -->
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
 <script>
@@ -3747,8 +3747,13 @@
         console.log('[ATNE][onResult][DIAG] ev_keys=' + Object.keys(ev).join(','));
         // Parse de les seccions del resultat (Text adaptat + Glossari + Esquema + Preguntes)
         const parsed = window.ATNE_LLM.parseAdaptedSections(ev.adapted || '');
+        // Diagnòstic detallat: mostra quines seccions ha generat el LLM i la seva longitud.
+        // Útil per detectar seccions que el LLM omet (ABSENT) malgrat estar activades.
+        const _compKeys = Object.keys(parsed.complements || {});
+        const _compDebug = _compKeys.map(k => k + '=' + ((parsed.complements[k] || '').length)).join(' | ');
         console.log('[ATNE][onResult][DIAG] parsed_main_len=' + ((parsed.main || '').length) +
-          ' parsed_keys=' + Object.keys(parsed).join(','));
+          ' sections=[' + _compKeys.join(', ') + ']');
+        console.log('[ATNE][onResult][DIAG] section_lengths: ' + _compDebug);
         const md2html = window.ATNE_LLM.markdownToHtml;
 
         // Si el docent ha demanat "mantenir text adaptat actual", restaurem

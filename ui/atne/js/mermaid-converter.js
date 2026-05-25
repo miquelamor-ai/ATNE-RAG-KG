@@ -299,7 +299,13 @@
    */
   function renderMermaidBlock(cont, mdRaw, compType) {
     const mermaidSyntax = convertMarkdownToMermaid(mdRaw, compType);
-    if (!mermaidSyntax) return; // fallback: deixa el text com estava
+    if (!mermaidSyntax) {
+      console.warn('[ATNE Mermaid] conversió→null per', compType,
+        '— len=' + (mdRaw||'').length,
+        '— preview=' + JSON.stringify((mdRaw||'').slice(0, 200)));
+      return; // fallback: deixa el text com estava
+    }
+    console.log('[ATNE Mermaid] conversió OK per', compType, '— syntax len=', mermaidSyntax.length);
 
     // Construeix el DOM: wrapper + bloc mermaid + details fallback
     const wrapper = document.createElement('div');
@@ -386,6 +392,7 @@
    * Recorre els contenidors coneguts i aplica renderMermaidBlock si escau.
    */
   function renderAllMermaidComplements() {
+    console.log('[ATNE Mermaid] renderAllMermaidComplements() cridat');
     const targets = [
       { sel: '#view-mapa-conc .generic-md',  type: 'mapa_conceptual' },
       { sel: '#view-mapa-ment .generic-md',  type: 'mapa_mental' },
@@ -393,9 +400,16 @@
     ];
     targets.forEach(function (t) {
       const cont = document.querySelector(t.sel);
-      if (!cont) return;
+      if (!cont) {
+        console.log('[ATNE Mermaid] element no trobat:', t.sel);
+        return;
+      }
       const mdRaw = cont.dataset.md;
-      if (!mdRaw || !mdRaw.trim()) return;
+      if (!mdRaw || !mdRaw.trim()) {
+        console.log('[ATNE Mermaid] dataset.md buit per', t.type);
+        return;
+      }
+      console.log('[ATNE Mermaid] processant', t.type, '— md len=', mdRaw.length);
       renderMermaidBlock(cont, mdRaw, t.type);
     });
   }
