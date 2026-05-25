@@ -316,44 +316,47 @@
     }
     console.log('[ATNE Mermaid] conversió OK per', compType, '— syntax len=', mermaidSyntax.length);
 
-    // Construeix el DOM: wrapper + bloc mermaid + details fallback
+    // Construeix el DOM: wrapper + bloc mermaid + panell d'edició
     const wrapper = document.createElement('div');
     wrapper.className = 'mermaid-wrapper';
 
     const mermaidDiv = document.createElement('div');
     mermaidDiv.className = 'mermaid-diagram';
     mermaidDiv.setAttribute('data-mermaid-syntax', mermaidSyntax);
-    // El text que Mermaid.js renderitza ha d'estar al innerHTML
     mermaidDiv.textContent = mermaidSyntax;
 
-    // Botó toggle text/diagrama
-    const toggleBtn = document.createElement('button');
-    toggleBtn.type = 'button';
-    toggleBtn.className = 'mermaid-toggle-btn';
-    toggleBtn.textContent = 'Veure com a text';
-    toggleBtn.setAttribute('aria-pressed', 'false');
-
-    // Details de fallback (text original)
+    // Panell d'edició: <details> col·lapsable amb textarea + botó re-render
     const details = document.createElement('details');
-    details.className = 'mermaid-fallback-details';
-    const summary = document.createElement('summary');
-    summary.textContent = 'Text pla (còpia per a PDF)';
-    const pre = document.createElement('pre');
-    pre.className = 'mermaid-fallback-pre';
-    pre.textContent = mdRaw;
-    details.appendChild(summary);
-    details.appendChild(pre);
+    details.className = 'mermaid-edit-details';
 
-    // Toggle handler
-    toggleBtn.addEventListener('click', function () {
-      const showText = toggleBtn.getAttribute('aria-pressed') === 'false';
-      toggleBtn.setAttribute('aria-pressed', showText ? 'true' : 'false');
-      toggleBtn.textContent = showText ? 'Veure com a diagrama' : 'Veure com a text';
-      mermaidDiv.style.display = showText ? 'none' : '';
-      details.open = showText;
+    const summary = document.createElement('summary');
+    summary.className = 'mermaid-edit-toggle';
+    summary.textContent = '✏️ Editar font del diagrama';
+
+    const textarea = document.createElement('textarea');
+    textarea.className = 'mermaid-edit-textarea';
+    textarea.value = mdRaw;
+    textarea.rows = 8;
+    textarea.spellcheck = false;
+    textarea.setAttribute('aria-label', 'Font markdown del diagrama');
+
+    const reRenderBtn = document.createElement('button');
+    reRenderBtn.type = 'button';
+    reRenderBtn.className = 'mermaid-rerender-btn';
+    reRenderBtn.textContent = 'Refés el mapa';
+    reRenderBtn.addEventListener('click', function () {
+      const newMd = textarea.value.trim();
+      if (!newMd) return;
+      cont.dataset.md = newMd;
+      cont.classList.remove('mermaid-active');
+      cont.innerHTML = '';
+      renderMermaidBlock(cont, newMd, compType);
     });
 
-    wrapper.appendChild(toggleBtn);
+    details.appendChild(summary);
+    details.appendChild(textarea);
+    details.appendChild(reRenderBtn);
+
     wrapper.appendChild(mermaidDiv);
     wrapper.appendChild(details);
 
@@ -373,7 +376,6 @@
       console.warn('[ATNE Mermaid] fallback:', reason);
       details.open = true;
       mermaidDiv.style.display = 'none';
-      toggleBtn.style.display = 'none'; // no hi ha diagrama on alternar
     };
     loadMermaid(function () {
       try {
