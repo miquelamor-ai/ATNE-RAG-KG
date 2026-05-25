@@ -985,6 +985,43 @@ SEMPRE GENERAR — Taula comparativa breu dels canvis principals:
 Màxim 5-6 files amb els canvis més significatius.
 """)
 
+    # Recordatori final per evitar omissions (detectat 2026-05-25 al pilot:
+    # amb SKILLs ON i 5+ complements activats, Mistral ometia bastides/mapa
+    # conceptual/mapa mental). Els LLMs respecten millor les normes properes
+    # a la generació, per això repetim la checklist al final amb instrucció
+    # imperativa.
+    _COMP_HEADERS = {
+        "glossari": "Glossari",
+        "esquema_visual": "Esquema visual",
+        "mapa_conceptual": "Mapa conceptual",
+        "mapa_mental": "Mapa mental",
+        "preguntes_comprensio": "Preguntes de comprensió",
+        "bastides": "Bastides",
+        "activitats_aprofundiment": "Activitats d'aprofundiment",
+        "pictogrames": "Pictogrames",
+        "illustracions": "Il·lustracions",
+        "negretes": None,  # ja integrat al text
+        "definicions_integrades": None,  # ja integrat al text
+        "traduccio_l1": None,  # ja al glossari
+        "resum": "Resum",
+    }
+    _comp_actius_final = [_COMP_HEADERS[k] for k, v in comp.items()
+                          if v and _COMP_HEADERS.get(k)]
+    if _comp_actius_final:
+        _lines = [f"{i+2}. ## {c}" for i, c in enumerate(_comp_actius_final)]
+        n = len(_comp_actius_final)
+        output_sections.append(f"""
+## CHECKLIST DE GENERACIÓ — OBLIGATORI
+
+Has de generar TOTES les seccions ## següents (en aquest ordre), independentment de la longitud del text adaptat:
+1. ## Text adaptat
+{chr(10).join(_lines)}
+{n+2}. ## Argumentació pedagògica
+{n+3}. ## Notes d'auditoria
+
+Si t'oblides cap secció, l'usuari rep una targeta buida. PROHIBIT ometre seccions activades. Si el contingut és curt, fes-lo curt però NO l'ometis.
+""")
+
     # Reforç crític per a gèneres on la FORMA és contingut (poema, teatre,
     # recepta…). Sense això, smoke tests 2026-04-20 mostraven que el LLM
     # aplanava poemes a prosa quan MECR era baix, contradient la regla del

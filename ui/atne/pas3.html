@@ -3042,15 +3042,35 @@
     }
     // Complements extra (mapa conceptual/mental, bastides, activitats, pictogrames):
     // renderitzar a la vista genèrica creada per syncComplementChips().
+    // Llegim localStorage per saber quins complements estan ACTIVATS pel docent,
+    // perquè així podem distingir "no activat" vs "activat però LLM no ha generat".
+    let _activatedKeys = [];
+    try {
+      const raw = localStorage.getItem('atne.complements');
+      if (raw) {
+        const obj = JSON.parse(raw);
+        if (Array.isArray(obj)) _activatedKeys = obj;
+        else if (obj && typeof obj === 'object') _activatedKeys = Object.keys(obj).filter(k => obj[k]);
+      }
+    } catch (_) {}
     Object.keys(COMP_META).forEach(key => {
       if (['glossari', 'esquema_visual', 'preguntes_comprensio'].includes(key)) return;
-      if (!complements[key]) return;
       const meta = COMP_META[key];
       const view = document.getElementById('view-' + meta.chip);
       if (!view) return;
       const cont = view.querySelector('.generic-md');
-      if (cont) { cont.dataset.md = complements[key]; cont.innerHTML = md2html(complements[key]); }
-      updateChipDot(meta.chip, 'ok');
+      if (!cont) return;
+      const hasContent = complements[key] && complements[key].trim().length > 0;
+      const isActivated = _activatedKeys.includes(key);
+      if (hasContent) {
+        cont.dataset.md = complements[key];
+        cont.innerHTML = md2html(complements[key]);
+        updateChipDot(meta.chip, 'ok');
+      } else if (isActivated) {
+        // Activat pel docent però LLM no ha generat → empty state clar
+        cont.innerHTML = '<div style="color:var(--ink-400);font-style:italic;padding:24px;text-align:center;font-size:var(--fs-sm)">Sense contingut. El model no ha generat aquest complement.</div>';
+        updateChipDot(meta.chip, 'warn');
+      }
     });
 
     // Renderitza mapes conceptuals i esquemes visuals amb Mermaid.js (lazy).
