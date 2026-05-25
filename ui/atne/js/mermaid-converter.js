@@ -142,15 +142,17 @@
 
   /**
    * Converteix un bloc de text markdown jeràrquic a un diagrama Mermaid
-   * de tipus "flowchart LR" (horitzontal, adequat per a seqüències/processos).
+   * de tipus "flowchart" (LR horitzontal per a esquemes; TD vertical per a mapes conceptuals).
    *
    * Cada item de primer nivell es converteix en un node principal;
    * els subnivells en nodes fills connectats amb fletxes.
    *
-   * @param {string} mdText  Text markdown (sense la capçalera)
-   * @returns {string|null}  Sintaxi Mermaid o null si no és parseable
+   * @param {string} mdText       Text markdown (sense la capçalera)
+   * @param {string} [direction]  'LR' (per defecte) o 'TD' per a mapa conceptual
+   * @returns {string|null}       Sintaxi Mermaid o null si no és parseable
    */
-  function markdownToFlowchart(mdText) {
+  function markdownToFlowchart(mdText, direction) {
+    direction = direction || 'LR';
     const rawLines = mdText.split('\n');
     const lines = rawLines.filter(l => {
       const trimmed = l.trim();
@@ -162,7 +164,7 @@
     const levels = lines.map(l => indentLevel(l));
     const minLevel = Math.min(...levels);
 
-    const mermaidLines = ['flowchart LR'];
+    const mermaidLines = ['flowchart ' + direction];
     let nodeId = 0;
     // Pila per mantenir el pare de cada nivell: { level, id }
     const parentStack = [];
@@ -226,10 +228,15 @@
     if (!body) return null;
 
     try {
-      if (type === 'mapa_conceptual' || type === 'mapa_mental') {
+      if (type === 'mapa_mental') {
+        // Mapa mental (Buzan): radial, associació lliure → mindmap
         return markdownToMindmap(body);
+      } else if (type === 'mapa_conceptual') {
+        // Mapa conceptual (Novak): jerarquia conceptual → flowchart TD (arbre vertical)
+        return markdownToFlowchart(body, 'TD');
       } else if (type === 'esquema_visual') {
-        return markdownToFlowchart(body);
+        // Esquema: seqüència/procés → flowchart LR (horitzontal)
+        return markdownToFlowchart(body, 'LR');
       }
       return null;
     } catch (e) {
