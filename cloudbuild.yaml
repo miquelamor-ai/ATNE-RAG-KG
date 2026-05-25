@@ -28,7 +28,7 @@ steps:
       - --cpu=1
       - --min-instances=0
       - --max-instances=10
-      - --update-env-vars=ATNE_MODEL=mistral,ATNE_USE_SKILLS=true
+      - --update-env-vars=ATNE_MODEL=gemini-2.5-flash,ATNE_USE_SKILLS=true
 
 images:
   - ${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/${_SERVICE_NAME}:$COMMIT_SHA
