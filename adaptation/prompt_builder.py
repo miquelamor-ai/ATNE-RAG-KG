@@ -439,14 +439,25 @@ El text complet adaptat segons tots els paràmetres indicats.
             if isinstance(v, dict) and v.get("actiu")
         ]
         if _skills_on:
-            # SKILLs ON: generate-glossari SKILL aporta el format complet
-            # (gradació BICS/CALP per MECR, variant bilingüe per nouvingut+L1,
-            # nombre de termes graduat). Aquí només marquem la secció com a
-            # activada perquè el LLM no s'oblidi de generar-la.
-            output_sections.append(f"""
+            # SKILLs ON: la SKILL aporta context detallat. AQUÍ donem
+            # format ACCIONABLE perquè el LLM no ometi la secció.
+            if is_nouvingut and l1:
+                output_sections.append(f"""
 ## Glossari
-ACTIVAT — Vegeu les instruccions detallades a la SKILL generate-glossari
-(format gradat per MECR{', variant bilingüe ' + l1_display if is_nouvingut and l1 else ''}).
+ACTIVAT — Format OBLIGATORI: taula markdown 3 columnes:
+| Terme | Traducció ({l1_display}) | Explicació senzilla |
+
+Inclou 5-10 termes clau (gradat per MECR). Traducció REAL a {l1_display} en alfabet original.
+Vegeu SKILL generate-glossari per al detall pedagògic.
+""")
+            else:
+                output_sections.append(f"""
+## Glossari
+ACTIVAT — Format OBLIGATORI: taula markdown 2 columnes:
+| Terme | Explicació senzilla |
+
+Inclou 5-10 termes clau (gradat per MECR).
+Vegeu SKILL generate-glossari per al detall pedagògic.
 """)
         elif is_nouvingut and l1:
             output_sections.append(f"""
@@ -671,12 +682,22 @@ REGLES CRÍTIQUES:
         adequacio_linia = "- Arguments, connectors lògics, contrast de fonts."
 
     if comp.get("preguntes_comprensio") and _skills_on:
-        # SKILLs ON: generate-preguntes-comprensio aporta les instruccions
-        # detallades (3 moments × 3 plànols, gradació MECR, Think Aloud).
+        # SKILLs ON: la SKILL aporta context detallat. AQUÍ donem format
+        # ACCIONABLE perquè el LLM no ometi la secció.
         output_sections.append("""
 ## Preguntes de comprensió
-ACTIVAT — Vegeu les instruccions detallades a la SKILL generate-preguntes-comprensio
-(3 moments × 3 plànols, gradació MECR, modulació literari/informatiu, modelatge Think Aloud).
+ACTIVAT — Format OBLIGATORI:
+
+### Abans de llegir
+- [1-2 preguntes: predicció + activar coneixements previs]
+
+### Durant la lectura
+- [1-2 preguntes per a moments clau del text]
+
+### Després de llegir
+- [3-5 preguntes cobrint plànol literal + inferencial + crític, gradades al MECR]
+
+Cada pregunta comença amb «- ». Vegeu SKILL generate-preguntes-comprensio per al detall pedagògic.
 """)
     elif comp.get("preguntes_comprensio"):
         # SKILLs OFF: bloc hardcoded legacy (backup funcional)
@@ -750,13 +771,23 @@ ACTIVAT — Genera 2-3 activitats de repte cognitiu per a {etapa_complement}:
 
     if comp.get("bastides") and _skills_on:
         # SKILLs ON: generate-bastides-lectura + generate-bastides-produccio
-        # aporten les instruccions detallades (3 plànols, blocs A/B/C, gradació MECR).
+        # aporten el context pedagògic detallat. AQUÍ donem instrucció de
+        # format ACCIONABLE perquè el LLM no ometi la secció (el context SKILL
+        # és al mig del prompt; el format va al final).
         output_sections.append("""
 ## Bastides
-ACTIVAT — Vegeu les instruccions detallades a les SKILLs
-generate-bastides-lectura (3 moments × 3 plànols) i, si hi ha tasca de
-producció activa, generate-bastides-produccio (blocs A/B/C: base
-d'orientació + catàleg de recursos + pauta d'interrogació).
+ACTIVAT — Format OBLIGATORI:
+
+### Bastides de lectura
+- **Abans:** [1 pista per activar coneixement previ o predir]
+- **Durant:** [1 pista per a un moment clau del text]
+- **Després:** [1 pista per consolidar o verificar]
+
+### Bastides de resposta (només si preguntes_comprensio o activitats actives)
+**Connectors útils:** [3-5 connectors gradats al MECR]
+**Frases model:** [2-3 iniciadors per a respondre]
+
+Vegeu SKILLs generate-bastides-lectura i generate-bastides-produccio per al detall pedagògic.
 """)
     elif comp.get("bastides"):
         # SKILLs OFF: bloc hardcoded legacy (backup funcional)
@@ -895,13 +926,25 @@ ACTIVAT — Genera un resum del text adaptat en 3-5 frases en {lang_label}.
 """)
 
     if comp.get("mapa_mental") and _skills_on:
-        # SKILLs ON: generate-mapa-mental aporta gradació MECR, format radial,
-        # distinció vs mapa conceptual, exemple B1 (Buzan + Novak).
+        # SKILLs ON: generate-mapa-mental aporta gradació MECR. AQUÍ donem
+        # format ACCIONABLE perquè el LLM no ometi la secció.
         output_sections.append("""
 ## Mapa mental
-ACTIVAT — Vegeu les instruccions detallades a la SKILL generate-mapa-mental
-(estructura radial, branques associatives, preguntes generadores, connexions
-transversals; gradació MECR pre-A1 → C1).
+ACTIVAT — Format OBLIGATORI (llista markdown radial, NO fletxes Unicode):
+
+```
+- **CONCEPTE CENTRAL**
+  - Branca 1
+    - Idea associada
+    - Pregunta generadora?
+  - Branca 2
+    - Connexió interdisciplinar
+```
+
+Pre-A1/A1: 2-3 branques, paraules clau + emojis.
+A2/B1+: 3-5 branques amb associacions i preguntes generadores.
+
+Vegeu SKILL generate-mapa-mental per al detall pedagògic.
 """)
     elif comp.get("mapa_mental"):
         # SKILLs OFF: bloc backup amb format compatible amb renderer Mermaid (mindmap).
