@@ -13,6 +13,17 @@
 
   var NS = 'http://www.w3.org/2000/svg';
 
+  // Llegeix la font seleccionada a ATNE (localStorage + window.ATNE_FONTS)
+  function pageFont() {
+    try {
+      var key = localStorage.getItem('atne.font_key');
+      if (key && window.ATNE_FONTS && window.ATNE_FONTS[key]) {
+        return window.ATNE_FONTS[key].css;
+      }
+    } catch (e) {}
+    return 'system-ui,-apple-system,sans-serif';
+  }
+
   // ─────────────────────────────────────────────────────────────────────────────
   // SVG UTILITIES
   // ─────────────────────────────────────────────────────────────────────────────
@@ -302,7 +313,7 @@
     var uid = 'cm' + (Math.random() * 1e9 | 0);
     var svg = el('svg', { viewBox: [x0, y0, x1 - x0, y1 - y0].join(' '), xmlns: NS,
       width: '100%', style: 'max-height:580px;display:block',
-      'font-family': 'system-ui,-apple-system,sans-serif' });
+      'font-family': pageFont() });
 
     var defs = el('defs');
     // Ombra subtil per als nodes
@@ -447,7 +458,7 @@
     var uid = 'mm' + (Math.random() * 1e9 | 0);
     var svg = el('svg', { viewBox: [x0, y0, x1 - x0, y1 - y0].join(' '), xmlns: NS,
       width: '100%', style: 'max-height:520px;display:block',
-      'font-family': 'system-ui,-apple-system,sans-serif' });
+      'font-family': pageFont() });
 
     var defs = el('defs');
     defs.appendChild(el('filter', { id: uid + '-sh', x: '-20%', y: '-20%', width: '140%', height: '140%' }, [
@@ -543,7 +554,7 @@
 
     var uid = 'sc' + (Math.random() * 1e9 | 0);
     var svg = el('svg', { viewBox: [x0, y0, x1 - x0, y1 - y0].join(' '), xmlns: NS,
-      width: '100%', style: 'max-height:480px;display:block', 'font-family': 'system-ui,sans-serif' });
+      width: '100%', style: 'max-height:480px;display:block', 'font-family': pageFont() });
 
     var defs = el('defs');
     defs.appendChild(el('filter', { id: uid + '-sh', x: '-20%', y: '-20%', width: '140%', height: '140%' }, [
