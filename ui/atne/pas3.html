@@ -3119,9 +3119,13 @@
         cont.innerHTML = '<div style="color:var(--ink-500);padding:24px;text-align:center;font-size:var(--fs-sm)">Aquest complement s\'aplica <strong>directament al text adaptat</strong> (marcadors visuals inline). Torna al text per veure\'l.</div>';
         updateChipDot(meta.chip, 'ok');
       } else if (isActivated) {
-        // Activat pel docent però LLM no ha generat → empty state clar
-        cont.innerHTML = '<div style="color:var(--ink-400);font-style:italic;padding:24px;text-align:center;font-size:var(--fs-sm)">Sense contingut. El model no ha generat aquest complement.</div>';
-        updateChipDot(meta.chip, 'warn');
+        // LLM no ha generat → amagar el xip (no confondre l'usuari amb un estat buit)
+        const emptyChip = document.querySelector('.cmp-chip[data-comp="' + meta.chip + '"]');
+        if (emptyChip) emptyChip.style.display = 'none';
+        // Si la view buida és la vista activa, tornar al text adaptat
+        if (typeof currentView !== 'undefined' && currentView === meta.chip) {
+          if (typeof setView === 'function') setView('single');
+        }
       }
     });
 
