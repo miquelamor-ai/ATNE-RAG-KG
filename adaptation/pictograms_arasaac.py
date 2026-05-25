@@ -146,8 +146,9 @@ def _marker_to_html(keyword: str, img_url: Optional[str]) -> str:
             f'loading="lazy" '
             f'title="{kw_escaped} — {ARASAAC_ATTRIBUTION}">'
         )
-    # Fallback: emoji neutre; no trenca el text
-    return _FALLBACK_EMOJI
+    # Fallback: emoji neutre en <span> amb classe per poder eliminar-lo al PDF
+    kw_esc = keyword.replace('"', "&quot;")
+    return f'<span class="picto-fallback-text" title="{kw_esc}">{_FALLBACK_EMOJI}</span>'
 
 
 def resolve_pictogram_markers(text: str, lang: str = "ca", max_workers: int = 4) -> str:

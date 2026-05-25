@@ -4483,7 +4483,7 @@
     // el div de fallback (#adapted-text) del clone perquè no apareguin al PDF.
     const _pictoToggle = document.querySelector('input[data-comp-toggle="pictogrames"]');
     if (!_pictoToggle || !_pictoToggle.checked) {
-      mainClone.querySelectorAll('.arasaac-picto, .picto-fallback-inline').forEach(el => el.remove());
+      mainClone.querySelectorAll('.arasaac-picto, .picto-fallback-inline, .picto-fallback-text').forEach(el => el.remove());
     }
 
     // Converteix seqüències de <p> amb pipes `| cel | cel |` a <table> HTML real.
