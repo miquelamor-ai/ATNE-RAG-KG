@@ -484,10 +484,14 @@ body.help-mode [data-help]:hover {
   max-width: 100%;
 }
 
-/* L'SVG generat per Mermaid: centra i adapta al contenidor */
+/* L'SVG generat per Mermaid: width natural perquè els labels no es tallin.
+   El contenidor pare (.mermaid-diagram) té overflow-x:auto i permet scroll
+   horitzontal quan l'SVG és més ample que el viewport (típic en LR flowcharts
+   amb noms llargs). NO usar max-width:100% perquè comprimeix l'SVG i Mermaid
+   trunca els labels per width insuficient. */
 .mermaid-diagram svg {
   display: block;
-  max-width: 100%;
+  min-width: 100%;
   height: auto;
   margin: 0 auto;
 }

@@ -25,6 +25,11 @@
       .replace(/\[/g, '［')
       .replace(/\]/g, '］')
       .replace(/"/g, "'")     // Mermaid node labels entre cometes: evitem cometes dobles
+      .replace(/:/g, ' —')    // Mermaid mindmap interpreta ':' com a separador → substituïm per '—'
+      .replace(/\{/g, '｛')
+      .replace(/\}/g, '｝')
+      .replace(/\|/g, '/')    // pipe trenca taules Mermaid
+      .replace(/[ ]/g, ' ') // nbsp → espai normal
       .trim();
   }
 
@@ -329,16 +334,33 @@
     cont.innerHTML = '';
     cont.appendChild(wrapper);
 
-    // Demana Mermaid i renderitza
+    // Demana Mermaid i renderitza. mermaid.run() retorna Promise — captura
+    // errors via .catch() i també verifica post-render si Mermaid ha pintat
+    // un SVG d'error (a vegades no llença excepció, només dibuixa "Syntax error").
+    const showFallback = function (reason) {
+      console.warn('[ATNE Mermaid] fallback:', reason);
+      details.open = true;
+      mermaidDiv.style.display = 'none';
+      toggleBtn.style.display = 'none'; // no hi ha diagrama on alternar
+    };
     loadMermaid(function () {
       try {
-        // mermaid.run() accepta un selector o una llista de nodes
-        window.mermaid.run({ nodes: [mermaidDiv] });
+        const result = window.mermaid.run({ nodes: [mermaidDiv] });
+        if (result && typeof result.then === 'function') {
+          result.then(function () {
+            // Verifica si el SVG resultant és un error de Mermaid
+            const svg = mermaidDiv.querySelector('svg');
+            const txt = svg ? svg.textContent || '' : '';
+            if (/syntax error|parse error/i.test(txt) ||
+                (svg && svg.querySelector('[class*="error"]'))) {
+              showFallback('SVG d\'error detectat');
+            }
+          }).catch(function (e) {
+            showFallback(e && e.message ? e.message : 'Promise rebutjada');
+          });
+        }
       } catch (e) {
-        console.warn('[ATNE Mermaid] run() error:', e);
-        // Fallback: mostra el text pla obrint el details
-        details.open = true;
-        mermaidDiv.style.display = 'none';
+        showFallback(e && e.message ? e.message : 'excepció síncrona');
       }
     });
   }

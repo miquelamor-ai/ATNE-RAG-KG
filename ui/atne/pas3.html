@@ -3053,6 +3053,12 @@
         else if (obj && typeof obj === 'object') _activatedKeys = Object.keys(obj).filter(k => obj[k]);
       }
     } catch (_) {}
+    // Complements INLINE (apareixen al text adaptat principal, no en secció ##):
+    // - pictogrames: marcadors [PICTO:] resolts pel backend ARASAAC inline al text
+    // - illustracions: marcadors [IMATGE:] resolts pel pipeline d'il·lustracions
+    // Per a aquests, NO mostrar "Sense contingut" — la card és una vista informativa,
+    // el contingut visual és al text adaptat.
+    const _INLINE_COMPS = new Set(['pictogrames', 'illustracions']);
     Object.keys(COMP_META).forEach(key => {
       if (['glossari', 'esquema_visual', 'preguntes_comprensio'].includes(key)) return;
       const meta = COMP_META[key];
@@ -3062,9 +3068,14 @@
       if (!cont) return;
       const hasContent = complements[key] && complements[key].trim().length > 0;
       const isActivated = _activatedKeys.includes(key);
+      const isInline = _INLINE_COMPS.has(key);
       if (hasContent) {
         cont.dataset.md = complements[key];
         cont.innerHTML = md2html(complements[key]);
+        updateChipDot(meta.chip, 'ok');
+      } else if (isInline && isActivated) {
+        // Pictogrames/il·lustracions són inline al text adaptat → missatge informatiu
+        cont.innerHTML = '<div style="color:var(--ink-500);padding:24px;text-align:center;font-size:var(--fs-sm)">Aquest complement s\'aplica <strong>directament al text adaptat</strong> (marcadors visuals inline). Torna al text per veure\'l.</div>';
         updateChipDot(meta.chip, 'ok');
       } else if (isActivated) {
         // Activat pel docent però LLM no ha generat → empty state clar

@@ -998,8 +998,11 @@ Màxim 5-6 files amb els canvis més significatius.
         "preguntes_comprensio": "Preguntes de comprensió",
         "bastides": "Bastides",
         "activitats_aprofundiment": "Activitats d'aprofundiment",
-        "pictogrames": "Pictogrames",
-        "illustracions": "Il·lustracions",
+        # Els següents són INLINE al text adaptat (no secció separada) →
+        # NO incloure al CHECKLIST per evitar que el LLM generi secció buida
+        # que el frontend interpreti com a "el model no ha generat aquest complement".
+        "pictogrames": None,  # marcadors [PICTO: terme] inline; resolts pel backend ARASAAC
+        "illustracions": None,  # marcadors [IMATGE: ...] inline; resolts per pipeline
         "negretes": None,  # ja integrat al text
         "definicions_integrades": None,  # ja integrat al text
         "traduccio_l1": None,  # ja al glossari
