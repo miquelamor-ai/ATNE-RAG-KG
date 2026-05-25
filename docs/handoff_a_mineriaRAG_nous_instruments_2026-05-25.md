@@ -186,8 +186,99 @@ Aquests **no formen part de la Fase A/B/C actuals**. Són **instruments addicion
 
 ---
 
-## Estat actual a ATNE
+## Estat actual a ATNE (a la redacció original — superat per secció següent)
 
 - Fase A en curs: pilot 3 (`write-opinio`) **completat amb validació NotebookLM**. Pilot 4 (`generate-bastides-lectura`) pendent.
 - Aquests dos instruments futurs (`expressar-preferencies` + `write-contrarelat-odi`) **NO bloquegen la consolidació dels 33 actuals**.
 - Decisió pedagògica de Miquel: **continuar amb Fase A i B/C amb els 35 actuals**, i tractar aquests 2 nous després.
+
+---
+
+## ⭐ Actualització post-resposta mineriaRAG (2026-05-25 nit)
+
+Aquesta secció documenta tot el que ha canviat **després** de la redacció inicial del handoff, gràcies a la resposta de mineriaRAG i a la sessió ATNE nit.
+
+### A. Resposta de mineriaRAG (rebuda i incorporada)
+
+**A.1 Aclariment numèric** (gràcies, era ambigu a la redacció inicial):
+- Total post-decisions: **35 → 37 instruments** (no 33→35). Els 35 originals + 2 nous = 37.
+
+**A.2 Llum verda als 2 nous instruments**:
+- mineriaRAG accepta procedir amb `expressar-preferencies` i `write-contrarelat-odi` **"com si validats"**, condicionat a **citar les fonts al cos del M\*.md**. La citació substitueix funcionalment el segell de l'autor.
+- Fonts a citar (literal al M\*.md):
+  - `expressar-preferencies` → Common Core W.K.1 + Kant *Crítica del Judici* §7 + Habermas (3 pretensions de validesa) + Toulmin 1958 + Kuhn 1991.
+  - `write-contrarelat-odi` → Izquierdo Grau (UAB 2019) + GREDICS (Santisteban).
+- **Desbloca**: la construcció dels 2 instruments es pot fer **abans de Fase C** (no cal esperar validació externa Izquierdo Grau + GREDICS + docents FJE Infantil + equip MALL).
+
+**A.3 Encaix Fase B (opció d híbrida)**:
+- `expressar-preferencies` → entra a Fase B com a lot propi o annexat al **lot B.6 (expressius/dialògics)**. Senzill, cobreix buit clar.
+- `write-contrarelat-odi` → **últim lot pre-Fase C**. Complex, mereix concentració, permet incorporar feedback intermedi (incloent possible retorn d'Izquierdo Grau si arriba).
+
+### B. Resposta a les "Preguntes a mineriaRAG" originals
+
+Repreneu la secció anterior — la majoria queden resoltes:
+
+| Pregunta original | Resposta de mineriaRAG |
+|---|---|
+| 1. Corpus admet 37 instruments? | ✅ Sí. Pendent: spec `corpus-spec.md` ha d'actualitzar el comptador. |
+| 2. Categorització | `expressar-preferencies` → `generes`. `write-contrarelat-odi` → `generes` (amb modalitat). |
+| 3. Quan els pugem? | ✅ **Abans de Fase C**: preferences a lot B.6, contrarelat com a últim lot pre-Fase C. |
+| 4. `moduls_relacionats` | Confirmar amb mineriaRAG: probablement [M3] i [M3, M8]. |
+| 5. `build_skills.py` admet | ✅ Sí, però veure secció C (pregunta oberta nova). |
+| 6. Coordinació validació externa | Esdevé **opcional** gràcies a A.2. Si arriba, s'incorpora; no bloqueja. |
+
+### C. Novetats arquitectòniques del Pilot 4 (per a mineriaRAG)
+
+El pilot 4 (`generate-bastides-lectura`) s'ha construït i validat amb NotebookLM (sí-amb-correccions-menors) la mateixa nit. Han emergit **dues decisions arquitectòniques noves** que afecten el patró M\*.md canònic i `build_skills.py`:
+
+**C.1 Patró `cross_source` intra-pipeline (NOU)**:
+
+El pilot 4 introdueix el **primer descriptor `cross_source` que no apunta al text font** sinó a **l'output d'un altre complement del pipeline**:
+
+```
+| 4.2 No duplicar `preguntes_comprensio` | cross_source | sí (output de preguntes_comprensio si actiu) | comparar semànticament: cap pregunta de bastides ha de coincidir amb cap pregunta del complement |
+```
+
+NotebookLM qualifica això d'**"innovació arquitectònica necessària"** i recomana fixar-ho com a **patró canònic per a tots els futurs instruments de mediació amb dependències intra-pipeline**.
+
+**Diferència amb el `cross_source` clàssic** (notícia 7.4 Fidelitat, glossari 5.5):
+- Clàssic: el descriptor depèn del **text font original**.
+- Nou (intra-pipeline): el descriptor depèn de **l'output d'un altre complement actiu del pipeline**.
+
+**Implicacions per a `build_skills.py`**:
+- Cal poder llegir `output[other_complement]` durant la validació, no només `source_text`.
+- Cal poder marcar dependències condicionals (només actives si l'altre complement està actiu).
+
+**C.2 Pregunta oberta nova per a mineriaRAG (decisió arquitectònica pendent)**:
+
+Quan `bastides` i `preguntes_comprensio` estan actius simultàniament i `build_skills.py` detecta duplicitat semàntica:
+
+> **¿`build_skills.py` ha de generar feedback condicional al docent (avís de duplicitat), o és millor que l'IA ho resolgui silenciosament per disseny?**
+
+És una decisió de filosofia de pipeline que afectarà **tots els futurs instruments de mediació amb dependència intra-pipeline**. Demanem el criteri de mineriaRAG abans de generalitzar el patró.
+
+**C.3 Patró d'absència de fidelitat per a instruments d'orientació**:
+
+També validat pel pilot 4: els instruments que **orienten un procés** (bastides, en aquest cas el procés lector) **no han de tenir descriptor de fidelitat al text font** (a diferència de notícia 7.4 i glossari 5.5). NotebookLM ho qualifica de decisió "valenta i sòlida".
+
+Aplica a tots els futurs instruments de mediació que no reformulin contingut.
+
+### D. Estat consolidat post-sessió (substitueix l'estat redactat inicialment)
+
+| Pilot Fase A | Estat |
+|---|---|
+| 1. `write-noticia` | ✅ validat + a corpusFJE |
+| 2. `generate-glossari` | ✅ validat + a corpusFJE |
+| 3. `write-opinio` | ✅ validat NotebookLM (sí-amb-correccions-menors) · 🔴 pendent push a corpusFJE |
+| 4. `generate-bastides-lectura` | ✅ validat NotebookLM (sí-amb-correccions-menors) · 🔴 pendent push a corpusFJE |
+
+**4 pilots Fase A a `origin/main` (ATNE)**. El patró M\*.md canònic queda consolidat amb 4 exemples diversos (gènere informatiu, mediació lèxica, gènere argumentatiu, mediació cognitiva). Es pot replicar mecànicament als 31 instruments restants de Fase B amb confiança.
+
+### E. Coordinació pendent
+
+| Acció | Responsable |
+|---|---|
+| Push de pilots 3+4 al `corpusFJE` (skills/genres/write-opinio + skills/mediacio/generate-bastides-lectura) | Miquel coordina amb mineriaRAG |
+| Resolució de la pregunta C.2 (feedback `build_skills.py`) | mineriaRAG + Miquel |
+| Decisió arquitectònica de generalització del patró `cross_source` intra-pipeline | mineriaRAG documenta a corpus-spec |
+| Construcció dels 2 instruments nous segons encaix Fase B híbrid | Properes sessions ATNE |
