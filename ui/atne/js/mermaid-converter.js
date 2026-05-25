@@ -87,25 +87,27 @@
     return root;
   }
 
-  // Aplana l'arbre en nodes + edges (proposicions com a etiquetes d'aresta)
+  // Aplana l'arbre en nodes + edges
+  // Nodes bold (no arrel) → nodes proposició (isProp=true), sense caixa, text cursiu
+  // L'arrel sempre és node concepte, fins i tot si és bold al markdown
   function treeToGraph(root) {
     var nodes = [], edges = [], cnt = 0;
-    function visit(node, parentId, prop) {
+    function visit(node, parentId) {
       if (!node) return;
-      if (node.bold) {
-        node.children.forEach(function (c) { visit(c, parentId, node.label); });
+      var isRoot = (parentId === null);
+      if (node.bold && !isRoot) {
+        var pid = 'p' + cnt++;
+        nodes.push({ id: pid, label: node.label, isProp: true, lineIdx: node.lineIdx });
+        edges.push({ s: parentId, t: pid });
+        node.children.forEach(function (c) { visit(c, pid); });
       } else {
         var id = 'c' + cnt++;
-        nodes.push({ id: id, label: node.label, root: parentId === null, lineIdx: node.lineIdx });
-        if (parentId !== null) edges.push({ s: parentId, t: id, lbl: prop || '' });
-        var curProp = '';
-        node.children.forEach(function (c) {
-          if (c.bold) { curProp = c.label; c.children.forEach(function (gc) { visit(gc, id, curProp); }); }
-          else { visit(c, id, curProp); }
-        });
+        nodes.push({ id: id, label: node.label, root: isRoot, lineIdx: node.lineIdx });
+        if (!isRoot) edges.push({ s: parentId, t: id });
+        node.children.forEach(function (c) { visit(c, id); });
       }
     }
-    visit(root, null, '');
+    visit(root, null);
     return { nodes: nodes, edges: edges };
   }
 
@@ -125,15 +127,19 @@
     return lines.join('\n');
   }
 
-  // Popup d'edició flotant
+  // Popup d'edició flotant — sempre dins del viewport
   function showEditPopup(nodeGroupEl, currentLabel, onSave) {
     var old = document.getElementById('atne-node-popup');
     if (old) old.remove();
 
     var bbox = nodeGroupEl.getBoundingClientRect();
-    var left = Math.max(4, bbox.left + bbox.width / 2 - 100);
-    var top  = bbox.top - 56;
+    var popW = 248, popH = 48;
+    var ww = window.innerWidth, wh = window.innerHeight;
+    var left = bbox.left + bbox.width / 2 - popW / 2;
+    var top  = bbox.top - popH - 8;
     if (top < 8) top = bbox.bottom + 6;
+    left = Math.max(4, Math.min(left, ww - popW - 4));
+    top  = Math.max(4, Math.min(top,  wh - popH - 4));
 
     var pop = document.createElement('div');
     pop.id = 'atne-node-popup';
@@ -225,7 +231,7 @@
   // MAPA CONCEPTUAL — Novak, top-down
   // ─────────────────────────────────────────────────────────────────────────────
 
-  var CM = { RX: 68, RY: 24, NW: 122, NH: 38, NR: 9, HG: 26, VG: 84, M: 36, PFS: 10 };
+  var CM = { RX: 68, RY: 24, NW: 122, NH: 38, NR: 9, HG: 26, VG: 52, PH: 14, M: 36, PFS: 11 };
 
   function buildConceptMap(md) {
     var g = treeToGraph(parseTree(md));
@@ -235,16 +241,23 @@
     g.nodes.forEach(function (n) { byId[n.id] = n; kids[n.id] = []; });
     g.edges.forEach(function (e) { if (kids[e.s]) kids[e.s].push(e.t); });
 
+    // Alçada d'un node (proposició = baixa, concepte = normal)
+    function nh(id) { return byId[id].isProp ? CM.PH : CM.NH; }
+
     function sw(id) {
       var cs = kids[id] || [];
       if (!cs.length) return CM.NW + CM.HG;
       return Math.max(CM.NW + CM.HG, cs.reduce(function (s, k) { return s + sw(k); }, 0));
     }
     function place(id, sx, y) {
-      var n = byId[id], s = sw(id);
+      var n = byId[id], s = sw(id), h = nh(id);
       n.x = sx + s / 2; n.y = y;
       var cx = sx;
-      (kids[id] || []).forEach(function (k) { var ks = sw(k); place(k, cx, y + CM.NH + CM.VG); cx += ks; });
+      var gap = n.isProp ? CM.PH : CM.VG;
+      (kids[id] || []).forEach(function (k) {
+        var ks = sw(k), kh = nh(k);
+        place(k, cx, y + h / 2 + gap + kh / 2); cx += ks;
+      });
     }
     place(g.nodes[0].id, 0, 0);
 
@@ -255,7 +268,7 @@
 
     var uid = 'cm' + (Math.random() * 1e9 | 0);
     var svg = el('svg', { viewBox: [x0, y0, x1 - x0, y1 - y0].join(' '), xmlns: NS,
-      width: '100%', style: 'max-height:540px;display:block',
+      width: '100%', style: 'max-height:560px;display:block',
       'font-family': 'Georgia,"Times New Roman",serif' });
 
     var defs = el('defs');
@@ -279,36 +292,42 @@
     var gE = el('g');
     g.edges.forEach(function (e) {
       var sn = byId[e.s], tn = byId[e.t]; if (!sn || !tn) return;
-      var sx = sn.x, sy = sn.y + (sn.root ? CM.RY : CM.NH / 2);
-      var tx = tn.x, ty = tn.y - CM.NH / 2, my = (sy + ty) / 2;
+      var snH = sn.root ? CM.RY : nh(sn.id) / 2;
+      var tnH = tn.isProp ? CM.PH / 2 : CM.NH / 2;
+      var sx = sn.x, sy = sn.y + (sn.root ? CM.RY : snH);
+      var tx = tn.x, ty = tn.y - tnH;
+      var my = (sy + ty) / 2;
       var d = 'M ' + sx + ' ' + sy + ' C ' + sx + ' ' + my + ' ' + tx + ' ' + my + ' ' + tx + ' ' + ty;
       gE.appendChild(el('path', { d: d, stroke: '#a78bfa', 'stroke-width': 1.5, fill: 'none',
         'stroke-opacity': 0.7, 'marker-end': 'url(#' + uid + '-arr)' }));
-      if (e.lbl) {
-        var lx = (sx + tx) / 2, ly = (sy + ty) / 2 - 5, lw = tw(e.lbl, CM.PFS) + 10;
-        gE.appendChild(el('rect', { x: lx - lw / 2, y: ly - CM.PFS - 2, width: lw, height: CM.PFS + 6,
-          fill: '#fff', rx: 3, 'fill-opacity': 0.9 }));
-        gE.appendChild(txt(e.lbl, { x: lx, y: ly - 2, 'font-size': CM.PFS, 'font-style': 'italic',
-          'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#5b21b6',
-          'font-family': 'system-ui,sans-serif' }));
-      }
     });
     svg.appendChild(gE);
 
-    // Nodes (editable)
-    var gN = el('g', { filter: 'url(#' + uid + '-sh)' });
+    // Nodes
+    var gN = el('g');
     g.nodes.forEach(function (n) {
       var grp = nodeGroup(n);
-      // Tooltip SVG natiu
       var title = document.createElementNS(NS, 'title');
       title.textContent = 'Clic per editar'; grp.appendChild(title);
 
-      if (n.root) {
+      if (n.isProp) {
+        // Node proposició: text cursiu, sense caixa, subratllat subtil
+        var propLbl = wrap(n.label, 160, CM.PFS);
+        grp.appendChild(mtext(propLbl, n.x, n.y, CM.PFS, {
+          fill: '#5b21b6', 'font-style': 'italic', 'font-weight': '600',
+          'font-family': 'system-ui,sans-serif'
+        }));
+        var uw = Math.min(tw(n.label, CM.PFS), 160) * 0.88;
+        grp.appendChild(el('line', { x1: n.x - uw / 2, y1: n.y + 8, x2: n.x + uw / 2, y2: n.y + 8,
+          stroke: '#a78bfa', 'stroke-width': 1, 'stroke-opacity': 0.55 }));
+      } else if (n.root) {
+        grp.setAttribute('filter', 'url(#' + uid + '-sh)');
         grp.appendChild(el('ellipse', { cx: n.x, cy: n.y, rx: CM.RX, ry: CM.RY,
           fill: 'url(#' + uid + '-rg)', stroke: '#6d28d9', 'stroke-width': 2 }));
         grp.appendChild(mtext(wrap(n.label, CM.RX * 1.7, 13), n.x, n.y, 13,
           { fill: '#fff', 'font-weight': 'bold' }));
       } else {
+        grp.setAttribute('filter', 'url(#' + uid + '-sh)');
         var nw = Math.max(CM.NW, tw(n.label, 12) + 30);
         grp.appendChild(el('rect', { x: n.x - nw / 2, y: n.y - CM.NH / 2, width: nw, height: CM.NH,
           rx: CM.NR, fill: 'url(#' + uid + '-ng)', stroke: '#94a3b8', 'stroke-width': 1 }));
