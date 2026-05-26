@@ -77,8 +77,8 @@ Aquests fitxers han de carregar-se al context (o resumir-se):
 
 ### Mediació (11 restants)
 
-- [ ] B.7.1 — `generate-pictogrames`
-- [ ] B.7.2 — `generate-illustracions`
+- [x] B.7.1 — `generate-pictogrames` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
+- [x] B.7.2 — `generate-illustracions` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
 - [ ] B.8.1 — `generate-bastides-produccio` *(cas especial — vegeu §9)*
 - [ ] B.8.2 — `generate-plantilles-genere`
 - [ ] B.9.1 — `generate-preguntes-comprensio` *(cross_source intra-pipeline amb bastides-lectura)*
