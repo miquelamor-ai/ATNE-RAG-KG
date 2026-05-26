@@ -174,3 +174,6 @@ L'Examen ignasià del Pas 8 no es una llista de preguntes que cal respondre per 
 - **Decret 175/2022, Generalitat de Catalunya** — competencia ciutadana, pensament critic, convivencia democratica.
 - **UNESCO** (2021): *Think Critically, Click Wisely! Media and Information Literacy Curriculum* — alfabetitzacio mediatica critica.
 - **GREDICS** (UAB): Grup de Recerca en Didactica de les Ciencies Socials — projecte *Enseñar y aprender a interpretar conflictos contemporaneos*.
+- **Massip, M., Garcia-Ruiz, R. & Gonzalez-Monfort, N.** (2021): "Contrariar l'odi: una proposta didactica per a l'Educació Secundaria". *Bellaterra Journal of Teaching and Learning Language and Literature*, 14(2). UAB/GREDICS. Estudi empíric amb 307 alumnes ESO — evidencia d'aplicació a l'aula de les estrategies Izquierdo Grau.
+- **Tuck, S. & Silverman, A.** (2016): *The Counter-Narrative Handbook*. Institute for Strategic Dialogue (ISD). Manual operatiu pas a pas per a la producció de counter-narratives — complement pràctic a la taxonomia Benesch. Programa *Extreme Dialogue*.
+- **Consell de l'Audiovisual de Catalunya (eduCAC)** (2023): *Discursos d'odi als espais digitals*. Unitat didactica en catala integrada al curriculum catala. Font institucional per al context FJE.
