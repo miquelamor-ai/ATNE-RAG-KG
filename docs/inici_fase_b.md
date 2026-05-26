@@ -79,8 +79,8 @@ Aquests fitxers han de carregar-se al context (o resumir-se):
 
 - [x] B.7.1 — `generate-pictogrames` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
 - [x] B.7.2 — `generate-illustracions` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
-- [ ] B.8.1 — `generate-bastides-produccio` *(cas especial — vegeu §9)*
-- [ ] B.8.2 — `generate-plantilles-genere`
+- [x] B.8.1 — `generate-bastides-produccio` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
+- [x] B.8.2 — `generate-plantilles-genere` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
 - [ ] B.9.1 — `generate-preguntes-comprensio` *(cross_source intra-pipeline amb bastides-lectura)*
 - [ ] B.9.2 — `generate-activitats-aprofundiment`
 - [ ] B.9.3 — `generate-resum-graduat` *(cas especial — vegeu §9)*
