@@ -4906,13 +4906,18 @@ async def export_doc(payload: dict = Body(...)):
         "mapa_conceptual":          "Mapa conceptual",
         "mapa_mental":              "Mapa mental",
         "bastides":                 "Bastides (scaffolding)",
+        "plantilles_genere":        "Plantilla de gènere",
+        "resum_graduat":            "Resum graduat",
+        "cartes_conversacionals":   "Cartes conversacionals",
+        "rubriques":                "Rúbriques d'autoavaluació",
         "activitats_aprofundiment": "Activitats d'aprofundiment",
         "pictogrames":              "Pictogrames",
     }
     _COMP_ORDER: list[str] = [
         "glossari", "esquema_visual", "mapa_conceptual", "mapa_mental",
-        "bastides", "preguntes_comprensio", "activitats_aprofundiment",
-        "pictogrames",
+        "bastides", "plantilles_genere", "resum_graduat",
+        "preguntes_comprensio", "cartes_conversacionals", "rubriques",
+        "activitats_aprofundiment", "pictogrames",
     ]
 
     def _complements_as_markdown() -> str:

@@ -1061,6 +1061,14 @@
       'suports': 'bastides',
       'activitats daprofundiment': 'activitats_aprofundiment',
       'activitats aprofundiment': 'activitats_aprofundiment',
+      'plantilla de genere': 'plantilles_genere',
+      'plantilles de genere': 'plantilles_genere',
+      'plantilla genere': 'plantilles_genere',
+      'resum graduat': 'resum_graduat',
+      'cartes conversacionals': 'cartes_conversacionals',
+      'rubriques dautoavaluacio': 'rubriques',
+      'rubriques autoavaluacio': 'rubriques',
+      'rubriques': 'rubriques',
       'pictogrames': 'pictogrames',
       'traduccio l1': 'traduccio_l1',
       'auditoria': 'auditoria',
@@ -1094,6 +1102,10 @@
         else if (/\besquema|diagrama/.test(titleNorm)) key = 'esquema_visual';
         else if (/bastid|scaffolding/.test(titleNorm)) key = 'bastides';
         else if (/aprofundiment|enriquiment/.test(titleNorm)) key = 'activitats_aprofundiment';
+        else if (/\bplantilla|\bplantilles/.test(titleNorm)) key = 'plantilles_genere';
+        else if (/\bresum.*graduat|graduat.*resum/.test(titleNorm)) key = 'resum_graduat';
+        else if (/\bcartes.*conv|conv.*cartes/.test(titleNorm)) key = 'cartes_conversacionals';
+        else if (/\brubric/.test(titleNorm)) key = 'rubriques';
         else if (/argumentaci/.test(titleNorm)) key = 'argumentacio';
         else if (/auditoria/.test(titleNorm)) key = 'auditoria';
         else if (/pictogram/.test(titleNorm)) key = 'pictogrames';

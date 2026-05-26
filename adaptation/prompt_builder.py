@@ -1001,6 +1001,10 @@ Màxim 5-6 files amb els canvis més significatius.
         "mapa_mental": "Mapa mental",
         "preguntes_comprensio": "Preguntes de comprensió",
         "bastides": "Bastides",
+        "plantilles_genere": "Plantilla de gènere",
+        "resum_graduat": "Resum graduat",
+        "cartes_conversacionals": "Cartes conversacionals",
+        "rubriques": "Rúbriques d'autoavaluació",
         "activitats_aprofundiment": "Activitats d'aprofundiment",
         # Els següents són INLINE al text adaptat (no secció separada) →
         # NO incloure al CHECKLIST per evitar que el LLM generi secció buida

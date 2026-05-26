@@ -2897,6 +2897,10 @@
     mapa_conceptual:           { chip: 'mapa-conc',  chipLabel: 'Mapa conceptual',       cardTitle: 'Mapa conceptual' },
     mapa_mental:               { chip: 'mapa-ment',  chipLabel: 'Mapa mental',           cardTitle: 'Mapa mental' },
     bastides:                  { chip: 'bastides',   chipLabel: 'Bastides',              cardTitle: 'Bastides (scaffolding)' },
+    plantilles_genere:         { chip: 'plantilla',  chipLabel: 'Plantilla',             cardTitle: 'Plantilla de gènere' },
+    resum_graduat:             { chip: 'resum-grad', chipLabel: 'Resum graduat',         cardTitle: 'Resum graduat' },
+    cartes_conversacionals:    { chip: 'cartes',     chipLabel: 'Cartes',                cardTitle: 'Cartes conversacionals' },
+    rubriques:                 { chip: 'rubriques',  chipLabel: 'Rúbriques',             cardTitle: "Rúbriques d'autoavaluació" },
     activitats_aprofundiment:  { chip: 'activitats', chipLabel: 'Activitats',            cardTitle: "Activitats d'aprofundiment" },
     pictogrames:               { chip: 'pictogrames',chipLabel: 'Pictogrames',           cardTitle: 'Pictogrames' },
   };
@@ -4286,6 +4290,8 @@
           'glossari':'glossari','esquema':'esquema_visual',
           'preguntes':'preguntes_comprensio','mapa-conc':'mapa_conceptual',
           'mapa-ment':'mapa_mental','bastides':'bastides',
+          'plantilla':'plantilles_genere','resum-grad':'resum_graduat',
+          'cartes':'cartes_conversacionals','rubriques':'rubriques',
           'activitats':'activitats_aprofundiment','pictogrames':'pictogrames',
         };
         const TITLES_ = {
@@ -4293,11 +4299,17 @@
           preguntes_comprensio:'Preguntes de comprensió',
           mapa_conceptual:'Mapa conceptual', mapa_mental:'Mapa mental',
           bastides:'Bastides (scaffolding)',
+          plantilles_genere:'Plantilla de gènere',
+          resum_graduat:'Resum graduat',
+          cartes_conversacionals:'Cartes conversacionals',
+          rubriques:"Rúbriques d'autoavaluació",
           activitats_aprofundiment:"Activitats d'aprofundiment",
           pictogrames:'Pictogrames',
         };
         const ORDER_ = ['glossari','esquema_visual','mapa_conceptual','mapa_mental',
-                        'bastides','preguntes_comprensio','activitats_aprofundiment','pictogrames'];
+                        'bastides','plantilles_genere','resum_graduat',
+                        'preguntes_comprensio','cartes_conversacionals','rubriques',
+                        'activitats_aprofundiment','pictogrames'];
         const collected = {};
         document.querySelectorAll('.comp-card[data-comp]').forEach(card => {
           const k = card.dataset.comp;
@@ -4386,6 +4398,10 @@
         'mapa-conc':  'mapa_conceptual',
         'mapa-ment':  'mapa_mental',
         'bastides':   'bastides',
+        'plantilla':  'plantilles_genere',
+        'resum-grad': 'resum_graduat',
+        'cartes':     'cartes_conversacionals',
+        'rubriques':  'rubriques',
         'activitats': 'activitats_aprofundiment',
         'pictogrames':'pictogrames',
       };
