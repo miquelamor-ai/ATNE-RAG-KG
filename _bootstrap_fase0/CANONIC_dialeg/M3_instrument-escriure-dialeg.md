@@ -1,7 +1,7 @@
 ---
 modul: M3
 titol: "Escriure/adaptar un diàleg"
-tipus: instrument
+tipus: genere-discursiu
 categoria_principal: generes
 categories_secundaries: []
 descripcio: "Instrument per adaptar o generar un dialeg teatral: personatges llistats a l'inici, torns atribuïts per nom en negreta, acotacions al present en 3a persona, subtext explícit i conflicte graduat. HCL Narrar (language-in-action). No s'adapta a pre-A1. Rúbrica gradada 7 passos × 5 nivells MECR (A1→C1)."

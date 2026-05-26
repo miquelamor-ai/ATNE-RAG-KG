@@ -1,7 +1,7 @@
 ---
 modul: M3
 titol: "Escriure/adaptar una ressenya"
-tipus: instrument
+tipus: genere-discursiu
 categoria_principal: generes
 categories_secundaries: []
 descripcio: "Instrument per adaptar o generar una ressenya: descripció sempre abans de la valoració, separació explícita fets/judicis, arguments valoratius amb evidències de l'obra, recomanació concreta (per a qui) i sense spoilers. HCL Interpretar/Valorar + Descriure + Argumentar (B1+). No s'adapta a pre-A1. Rúbrica gradada 8 passos × 5 nivells MECR (A1→C1)."

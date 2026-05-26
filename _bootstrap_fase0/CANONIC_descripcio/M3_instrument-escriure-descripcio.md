@@ -1,7 +1,7 @@
 ---
 modul: M3
 titol: "Escriure/adaptar una descripció"
-tipus: instrument
+tipus: genere-discursiu
 categoria_principal: generes
 categories_secundaries: []
 descripcio: "Instrument per adaptar o generar una descripció: presentació de les característiques d'un objecte, persona, lloc o fenomen en ordre espacial i amb concreció progressiva. HCL Descriure + Explicar (relació entre característiques, B1+). S'adapta a pre-A1 (enumeració oral mediada per l'adult, sense text escrit). Rúbrica gradada 7 passos × 6 nivells MECR (pre-A1→C1)."

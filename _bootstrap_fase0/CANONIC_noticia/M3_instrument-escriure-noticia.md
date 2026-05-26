@@ -1,7 +1,7 @@
 ---
 modul: M3
 titol: "Escriure/adaptar una notícia"
-tipus: instrument
+tipus: genere-discursiu
 categoria_principal: generes
 categories_secundaries: []
 descripcio: "Instrument per adaptar o generar una notícia periodística (piràmide invertida + 5W). Rúbrica gradada 8 passos × 6 nivells MECR amb dimensions internes."

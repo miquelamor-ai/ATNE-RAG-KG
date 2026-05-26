@@ -1,7 +1,7 @@
 ---
 modul: M3
 titol: "Escriure/adaptar una carta"
-tipus: instrument
+tipus: genere-discursiu
 categoria_principal: generes
 categories_secundaries: []
 descripcio: "Instrument per adaptar o generar una carta formal o informal: estructura de 7 parts (encapçalament-salutació-motiu-cos-petició-comiat-signatura), motiu al primer paràgraf, una sola petició i registre ajustat al destinatari. HCL Justificar (formal, B1+) + Narrar+Descriure (informal, A1-A2). Translanguaging admès a A1-A2 (carta informal, expressions L1 entre claudàtors). No s'adapta a pre-A1. Rúbrica gradada 7 passos × 5 nivells MECR (A1→C1)."

@@ -1,7 +1,7 @@
 ---
 modul: M3
 titol: "Escriure/adaptar un text divulgatiu"
-tipus: instrument
+tipus: genere-discursiu
 categoria_principal: generes
 categories_secundaries: []
 descripcio: "Instrument per adaptar o generar un text divulgatiu: explicació narrativitzada d'un fenomen científic o tècnic per a un públic no especialitzat. HCL Explicar (causa-efecte accessible) + Justificar (B2+). No s'adapta a pre-A1. Rúbrica gradada 8 passos × 5 nivells MECR (A1→C1)."

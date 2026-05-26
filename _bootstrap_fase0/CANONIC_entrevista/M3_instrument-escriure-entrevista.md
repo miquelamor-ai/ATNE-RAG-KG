@@ -1,7 +1,7 @@
 ---
 modul: M3
 titol: "Escriure/adaptar una entrevista"
-tipus: instrument
+tipus: genere-discursiu
 categoria_principal: generes
 categories_secundaries: []
 descripcio: "Instrument per adaptar o generar una entrevista: gènere dialogat d'informació amb format pregunta/resposta invariant, presentació de l'entrevistat, i primera persona a les respostes. HCL Descriure (qui és l'entrevistat i quines idees defensa) + Argumentar (B1+). No s'adapta a pre-A1. Rúbrica gradada 7 passos × 5 nivells MECR (A1→C1)."

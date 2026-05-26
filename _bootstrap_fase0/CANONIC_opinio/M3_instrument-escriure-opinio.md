@@ -1,7 +1,7 @@
 ---
 modul: M3
 titol: "Escriure/adaptar un article d'opinió"
-tipus: instrument
+tipus: genere-discursiu
 categoria_principal: generes
 categories_secundaries: []
 descripcio: "Instrument per adaptar o generar un article d'opinió argumentatiu (tesi + arguments + evidències + connectors). No s'adapta a pre-A1 — l'argumentació requereix base lingüística A1 mínima. Rúbrica gradada 9 passos × 5 nivells MECR (A1→C1+) amb dimensions internes."

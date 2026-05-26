@@ -1,7 +1,7 @@
 ---
 modul: M3
 titol: "Escriure/adaptar un conte"
-tipus: instrument
+tipus: genere-discursiu
 categoria_principal: generes
 categories_secundaries: []
 descripcio: "Instrument per adaptar o generar un conte narratiu breu (situació-conflicte-clímax-resolució). HCL Narrar: seqüenciació causal, personatge amb motivació, emoció nomenada, diàleg atribuït. Rúbrica gradada 9 passos × 6 nivells MECR."

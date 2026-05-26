@@ -1,7 +1,7 @@
 ---
 modul: M3
 titol: "Escriure/adaptar una biografia"
-tipus: instrument
+tipus: genere-discursiu
 categoria_principal: generes
 categories_secundaries: []
 descripcio: "Instrument per adaptar o generar una biografia: narració cronològica de la vida d'una persona real, centrada en 3-5 fets rellevants i el seu llegat. HCL Narrar + Explicar (llegat B1+). No s'adapta a pre-A1. Rúbrica gradada 8 passos × 5 nivells MECR (A1→C1)."

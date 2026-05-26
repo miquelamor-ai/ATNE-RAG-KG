@@ -1,7 +1,7 @@
 ---
 modul: M3
 titol: "Escriure/adaptar un manual"
-tipus: instrument
+tipus: genere-discursiu
 categoria_principal: generes
 categories_secundaries: []
 descripcio: "Instrument per adaptar o generar un manual: text expositiu organitzat en apartats progressius (simple→complex) amb termes tècnics definits, exemples concrets primer i connectors causals explícits. HCL Explicar + Descriure (conceptes nous). No s'adapta a pre-A1. Rúbrica gradada 7 passos × 5 nivells MECR (A1→C1)."

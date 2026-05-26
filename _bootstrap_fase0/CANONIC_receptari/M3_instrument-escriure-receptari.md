@@ -1,7 +1,7 @@
 ---
 modul: M3
 titol: "Escriure/adaptar una recepta"
-tipus: instrument
+tipus: genere-discursiu
 categoria_principal: generes
 categories_secundaries: []
 descripcio: "Instrument per adaptar o generar una recepta: text instructiu culinari amb llista d'ingredients ordenada per ús, passos numerats amb verb imperatiu, indicadors sensorials per pas i resultat esperat. HCL Narrar processal + Descriure (ingredients, textures). No s'adapta a pre-A1. Rúbrica gradada 8 passos × 5 nivells MECR (A1→C1)."

@@ -1,7 +1,7 @@
 ---
 modul: M3
 titol: "Expressar preferències"
-tipus: instrument
+tipus: genere-discursiu
 categoria_principal: generes
 categories_secundaries: []
 descripcio: "Instrument per expressar preferencies personals (gènere expressiu de BICS): preferència principal en 1a persona, referent específic i concret, grau d'intensitat i suport multimodal (pictograma + paraula). HCL Valorar/Preferir (BICS). Pre-A1 SÍ (oral, concret, mediat). Multimodal obligatori. Rubrica gradada 6 passos × 2 nivells MECR (pre-A1→A1). A A2+ evoluciona cap a write-opinio."

@@ -1,7 +1,7 @@
 ---
 modul: M3
 titol: "Escriure/adaptar una fàbula"
-tipus: instrument
+tipus: genere-discursiu
 categoria_principal: generes
 categories_secundaries: []
 descripcio: "Instrument per adaptar o generar una fàbula: narració breu amb personatges arquetípics i moral explícita al final. HCL Narrar + Interpretar/Valorar. No s'adapta a pre-A1. Rúbrica gradada 7 passos × 5 nivells MECR (A1→C1)."

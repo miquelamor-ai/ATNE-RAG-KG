@@ -1,7 +1,7 @@
 ---
 modul: M3
 titol: "Escriure/adaptar una entrada enciclopèdica"
-tipus: instrument
+tipus: genere-discursiu
 categoria_principal: generes
 categories_secundaries: []
 descripcio: "Instrument per adaptar o generar una entrada enciclopèdica: definició nuclear amb fórmula categoria+especificitat, explicació ampliada i exemple concret. HCL Descriure (definir). No s'adapta a pre-A1. Rúbrica gradada 6 passos × 5 nivells MECR (A1→C1)."

@@ -1,7 +1,7 @@
 ---
 modul: M3
 titol: "Escriure/adaptar una crònica"
-tipus: instrument
+tipus: genere-discursiu
 categoria_principal: generes
 categories_secundaries: []
 descripcio: "Instrument per adaptar o generar una crònica: narració testimonial d'un esdeveniment real des de la perspectiva d'un cronista, amb marcadors temporals explícits i separació neta fets/valoració. HCL Narrar + Descriure sensorial + Interpretar/Valorar (B2+). No s'adapta a pre-A1. Rúbrica gradada 7 passos × 5 nivells MECR (A1→C1)."

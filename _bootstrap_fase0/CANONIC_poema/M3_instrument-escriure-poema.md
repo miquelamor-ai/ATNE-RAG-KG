@@ -1,7 +1,7 @@
 ---
 modul: M3
 titol: "Escriure/adaptar un poema"
-tipus: instrument
+tipus: genere-discursiu
 categoria_principal: generes
 categories_secundaries: []
 descripcio: "Instrument per adaptar o generar un poema (gènere líric): preservacio de l'estructura estrofica i la divisio en versos, metafores concretes i visuals, simplificacio de vocabulari mantenint el ritme i la veu poetica. HCL Descriure (expressiva). Pre-A1 SÍ (oral i ludic, mediat per adult). Rubrica gradada 7 passos × 6 nivells MECR (pre-A1→C1)."

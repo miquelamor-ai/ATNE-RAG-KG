@@ -1,7 +1,7 @@
 ---
 modul: M3
 titol: "Escriure/adaptar un contrarelat de l'odi"
-tipus: instrument
+tipus: genere-discursiu
 categoria_principal: generes
 categories_secundaries: []
 descripcio: "Instrument per adaptar o generar un contrarelat de l'odi: resposta argumentativa que desmunta discursos d'odi amb empatia, veritat verificable i narrativa alternativa. Basat en Izquierdo Grau (UAB 2019), Benesch (8 estrategies), marc ignasia (CG36 reconciliacio triple, PPI, Fratelli tutti) i Decret 175/2022. Modalitat configurable: counterspeech directe / counter-narrative indirecte. No s'aplica a pre-A1. Rubrica gradada 8 passos x 5 nivells MECR (A1->C1)."

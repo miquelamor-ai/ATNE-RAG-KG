@@ -1,7 +1,7 @@
 ---
 modul: M3
 titol: "Escriure/adaptar un assaig"
-tipus: instrument
+tipus: genere-discursiu
 categoria_principal: generes
 categories_secundaries: []
 descripcio: "Instrument per adaptar o generar un assaig argumentatiu-reflexiu: tesi explícita a la introducció, arguments ordenats amb evidències, refutació d'una postura contrària (A2+), connectors argumentatius progressius i conclusió tancada. HCL Argumentar + Interpretar/Valorar (A1-A2). No s'adapta a pre-A1. Rúbrica gradada 9 passos × 5 nivells MECR (A1→C1)."

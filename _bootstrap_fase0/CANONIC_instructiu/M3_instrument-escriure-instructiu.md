@@ -1,7 +1,7 @@
 ---
 modul: M3
 titol: "Escriure/adaptar un text instructiu"
-tipus: instrument
+tipus: genere-discursiu
 categoria_principal: generes
 categories_secundaries: []
 descripcio: "Instrument per adaptar o generar un text instructiu: guia pas a pas per realitzar una acció amb materials en llista prèvia, verb imperatiu per pas, ordre cronològic estricte i resultat esperat. HCL Narrar processal + Descriure (materials). No s'adapta a pre-A1. Rúbrica gradada 7 passos × 5 nivells MECR (A1→C1)."

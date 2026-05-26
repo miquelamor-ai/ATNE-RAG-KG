@@ -1,7 +1,7 @@
 ---
 modul: M3
 titol: "Escriure/adaptar una entrada de diari"
-tipus: instrument
+tipus: genere-discursiu
 categoria_principal: generes
 categories_secundaries: []
 descripcio: "Instrument per adaptar o generar una entrada de diari: narració en primera persona amb tres blocs obligatoris (fets/emocions/reflexió) i separació neta entre blocs. HCL Narrar + Interpretar/Valorar. Variant acadèmica des de B1+. No s'adapta a pre-A1. Rúbrica gradada 7 passos × 5 nivells MECR (A1→C1)."

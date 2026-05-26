@@ -1,7 +1,7 @@
 ---
 modul: M3
 titol: "Escriure/adaptar un reglament"
-tipus: instrument
+tipus: genere-discursiu
 categoria_principal: generes
 categories_secundaries: []
 descripcio: "Instrument per adaptar o generar un reglament: text normatiu organitzat per temes amb normes en veu imperativa directa, una norma per ítem, positiu primer i conseqüències separades. HCL Narrar prescriptiva + Justificar (B1+) + Argumentar (B1+). No s'adapta a pre-A1. Rúbrica gradada 8 passos × 5 nivells MECR (A1→C1)."

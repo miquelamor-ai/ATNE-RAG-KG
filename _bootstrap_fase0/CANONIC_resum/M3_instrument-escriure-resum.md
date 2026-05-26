@@ -1,7 +1,7 @@
 ---
 modul: M3
 titol: "Escriure/adaptar un resum"
-tipus: instrument
+tipus: genere-discursiu
 categoria_principal: generes
 categories_secundaries: []
 descripcio: "Instrument per adaptar o generar un resum (gènere autònom de condensació): idea principal al primer paràgraf sense preàmbul, conservació de la veu original de l'autor, connectors lògics que reprodueixen l'estructura del text font i proporció respectada. HCL Explicar (reformulació fidel i condensada). No s'adapta a pre-A1. Rúbrica gradada 6 passos × 5 nivells MECR (A1→C1)."
