@@ -286,6 +286,10 @@
         });
       } else {
         n.x = cx; n.y = startY + n.nh / 2;
+        var cy = startY + n.nh + CM.VG2;
+        (childMap[nid] || []).forEach(function (sid) {
+          var cn = byId[sid]; cn.x = cx; cn.y = cy + cn.nh / 2; cy += cn.nh + CM.LG;
+        });
       }
     }
 
