@@ -71,7 +71,7 @@ Les **4 dimensions civils** (Miquel, 2026) que estructura el contrarelat ignasi�
 4. **Universalitat** — apel·la a drets humans universals com a marc comu (*Fratelli tutti* + DUDH 1948).
 
 **Aclariment d'us — que descriu aquesta rubrica.**
-Aquesta rubrica descriu el **contrarelat que ATNE genera per a la LECTURA i model de l'alumne** (ADAPTACIÓ ARGUMENTATIVA CRITICA). **No descriu la producció autonoma de l'alumne**: la rubrica avalua el text generat per ATNE com a model; l'alumne el llegeix, analitza l'estrategia i en pot fer un de propi com a activitat derivada. La producció autónoma de l'alumne s'avalua amb l'instrument `generate-rubriques`.
+Aquesta rubrica descriu el **contrarelat que es genera per a la LECTURA i model de l'alumne** (ADAPTACIÓ ARGUMENTATIVA CRITICA). **No descriu la producció autonoma de l'alumne**: la rubrica avalua el text generat com a model; l'alumne el llegeix, analitza l'estrategia i en pot fer un de propi com a activitat derivada. La producció autónoma de l'alumne s'avalua amb l'instrument `generate-rubriques`.
 **Sub-granularitat dins d'A1**: variable `fase_lectora: alfabetica_emergent` → suport visual i oral maxim; `fase_lectora: alfabetica_fluida` → lectura autonoma del text model.
 
 ## Detecció
@@ -138,12 +138,12 @@ Aquesta rubrica descriu el **contrarelat que ATNE genera per a la LECTURA i mode
 - Error secondary: fact-checking que cita fets no relacionats amb la falsedat especifica del text font → cross_source ha de verificar rellevanca.
 - Distinció counterspeech / counter-narrative: verificar que si `modalitat: counter_narrative_indirecte`, el text NO fa referencia directa al discurs d'odi original (el CoE la defineix com "does not directly challenge hate speech"). LLM-jutge.
 - Empatia vers l'autor: no es demana justificar el discurs d'odi sino entendre la por o necessitat que hi ha al darrere. Si el LLM genera empatia que valida el discurs d'odi → error pedagogic greu.
-- Pre-A1: si el MECR declarat és pre-A1, el backend NO genera l'instrument. Documentar al log.
+- Pre-A1: si el MECR declarat és pre-A1, l'instrument no es genera. Documentar al log.
 
 ## Heurístiques docent
 
 **H1 — La prova de la reconciliació.**
-Llegeixo el contrarelat generat per ATNE i em pregunto: "Si l'autor del discurs d'odi llegis aixo, obriria la porta a revisar la seva posicio? O se sentiria atacat i es tancaria mes?" Un bon contrarelat no cerca la derrota de l'adversari sino una porta a la comprensió mútua. Si el text tanca portes, cal reescriure'l.
+Llegeixo el contrarelat generat i em pregunto: "Si l'autor del discurs d'odi llegis aixo, obriria la porta a revisar la seva posicio? O se sentiria atacat i es tancaria mes?" Un bon contrarelat no cerca la derrota de l'adversari sino una porta a la comprensió mútua. Si el text tanca portes, cal reescriure'l.
 
 **H2 — Empatia no és validació.**
 L'empatia vers l'autor del discurs d'odi és l'element mes difícil d'ensenyar. Explico a l'alumne: "Entendre per que algú diu una cosa dolenta no significa que la cosa sigui bona." L'empatia es possible al discurs d'odi perque sovint hi ha por, inseguretat o desinformació al darrere, no malicia pura. Aquesta comprensió és la diferencia entre el combat retòric i el contrarelat ignasià.

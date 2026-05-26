@@ -43,7 +43,7 @@ La fàbula és una narració breu amb personatges arquetípics (animals o ésser
 - *Eix oral/escrit*: la fàbula es presta a la lectura dramatitzada (A1-A2) per activar la percepció dels arquetips abans de la lectura autònoma.
 
 **Aclariment d'ús — què descriu aquesta rúbrica.**
-Aquesta rúbrica descriu la **fàbula adaptada per a la LECTURA** de l'alumne (el que presenta ATNE o el docent perquè l'alumne llegeixi). **No descriu la producció autònoma de l'alumne** — la producció és tasca d'un derivat propi. Principi pedagògic MALL: l'alumne llegeix models al màxim del seu abast i en produeix els seus textos; l'adaptació és tasca de l'assistent i del docent.
+Aquesta rúbrica descriu la **fàbula adaptada per a la LECTURA** de l'alumne (el que el docent presenta perquè l'alumne llegeixi). **No descriu la producció autònoma de l'alumne** — la producció és tasca d'un derivat propi. Principi pedagògic MALL: l'alumne llegeix models al màxim del seu abast i en produeix els seus textos; l'adaptació és tasca del docent.
 **Sub-granularitat dins de A1**: es treballa amb `fase_lectora: [alfabetica_emergent, alfabetica_fluida]`; no hi ha nivell logografic perquè la fàbula requereix base lecto-escriptora mínima.
 
 ## Detecció

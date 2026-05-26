@@ -30,7 +30,7 @@ notebooklm_review:
 
 ## Descripció
 
-El complement d'il·lustracions insereix marcadors `[IMATGE: concepte curt en catala]` al text adaptat perque el backend els resolgui en imatges. El backend prova tres vies en ordre: Wikimedia Commons (imatges reals amb llicencia lliure), FLUX.1-schnell (generacio IA), skip (si el concepte no és visualitzable). La il·lustració no decora — ancla conceptes que son difícils de descriure verbalment.
+El complement d'il·lustracions insereix marcadors `[IMATGE: concepte curt en catala]` al text adaptat perquè es resolguin en imatges. Es proven tres vies en ordre: Wikimedia Commons (imatges reals amb llicencia lliure), FLUX.1-schnell (generació IA), skip (si el concepte no és visualitzable). La il·lustració no decora — ancla conceptes que son difícils de descriure verbalment.
 
 **Tipologia MALL**: Mediacio (suport multimodal cognitiu).
 **HCL associada**: cap HCL productiva — el complement suporta l'acces i l'ancoratge conceptual del text.
@@ -42,13 +42,13 @@ El complement d'il·lustracions insereix marcadors `[IMATGE: concepte curt en ca
 [IMATGE: concepte curt en catala]
 ```
 - Delimitadors obligatoris: `[IMATGE:` a l'inici, `]` al final.
-- Idioma: catala. El backend tradueix si cal.
+- Idioma: catala. Es tradueix si cal.
 - En linia propia, DAVANT del paragraf on s'introdueix el concepte (pre-A1/A1) o al costat (A2+).
 - Longitud: 3-8 paraules. Concepte nuclear, no descripcio d'escena.
 - Mai dins de llistes, taules, bastides, glossaris, pictogrames o altres complements.
-- Mai incloure estil, paleta, viewpoint o enquadrament (el backend ho afegeix automaticament).
+- Mai incloure estil, paleta, viewpoint o enquadrament (s'afegeix automaticament).
 
-**Els 7 presets d'estil** (el docent tria al Pas 2; si no, el backend aplica el default per MECR + assignatura):
+**Els 7 presets d'estil** (el docent tria al Pas 2; si no, s'aplica el default per MECR + assignatura):
 
 | Preset | Per a qui / quan |
 |---|---|
@@ -70,7 +70,7 @@ El complement d'il·lustracions insereix marcadors `[IMATGE: concepte curt en ca
 - *Preset com a coherencia de registre*: triar el preset adequat al context (aquarel·la per a primaria, vectorial per a ESO) és una decisio pedagogica sobre el registre visual. Un poema il·lustrat amb infografic isometric envia un missatge contradictori.
 
 **Aclariment d'us — que descriu aquesta rubrica.**
-Aquesta rubrica descriu el **complement d'il·lustracions generat per al text adaptat**. **No descriu la produccio autonoma de l'alumne**: el marcador el genera el LLM, la imatge la resol el backend. El registre d'us és del docent (observacio de si l'alumne usa el suport visual durant la lectura).
+Aquesta rubrica descriu el **complement d'il·lustracions generat per al text adaptat**. **No descriu la produccio autonoma de l'alumne**: els marcadors s'insereixen al text adaptat i les imatges es generen automàticament. El registre d'us és del docent (observacio de si l'alumne usa el suport visual durant la lectura).
 
 ## Detecció
 
@@ -121,13 +121,13 @@ Aquesta rubrica descriu el **complement d'il·lustracions generat per al text ad
 | 1 Nombre d'il·lustracions | `countable` | no | comptar marcadors `[IMATGE:]` al text; verificar que esta dins del rang per nivell (pre-A1: ≤5; A1: ≤4; A2: ≤3; B1: ≤2; B2: ≤2; C1: ≤1) |
 | 2 Posicio al text | `structural` | no | pre-A1/A1: verificar que el marcador precedeix el paragraf (linia propia DAVANT); A2+: verificar que no hi ha marcadors en linia propia aillats (han d'anar dins del context del paragraf) |
 | 3 Especificitat del marcador | `qualitative` | **si** | LLM-jutge sobre si el concepte del marcador és concret i visualitzable (positiu) o vague i abstracte (negatiu); detectar marcadors massa genèrics ("[IMATGE: ciencies]"); cross_source: verificar que el concepte del marcador esta present i és central al text font |
-| 4 Preset d'estil | `binary` | no | binary: el preset seleccionat és coherent amb el MECR i la materia (aquarel·la per primaria, vectorial per ESO+); si no s'especifica, el backend aplica el default adequat |
+| 4 Preset d'estil | `binary` | no | binary: el preset seleccionat és coherent amb el MECR i la materia (aquarel·la per primaria, vectorial per ESO+); si no s'especifica, s'aplica el default adequat |
 | 5 Autoavaluacio mediada | `metacognitive` | no | pre-A1: registre docent d'observacio; A1+: derivar a vista d'autoavaluacio alumne |
 
 **Notes:**
 - Format del marcador: `[IMATGE: concepte curt]`. L'absencia del delimitador de tancament `]` o un marcador dins d'una llista/taula son errors detectables per regex.
 - Conceptes micro/abstractes: detectables per LLM-jutge. Si el marcador conté "cel·lula", "atom", "molecula", "justicia", "infinit" → alertar el docent per si vol ometre o reformular.
-- Diferencia `[IMATGE:]` vs `[PICTO:]`: el backend processa separadament. Mai barrejar els dos sistemes en el mateix fragment per al mateix concepte.
+- Diferencia `[IMATGE:]` vs `[PICTO:]`: es processen separadament. Mai barrejar els dos sistemes en el mateix fragment per al mateix concepte.
 - Pre-A1: si el text no te conceptes visualitzables, millor usar `pictogrames` que il·lustracions (mes ràpid i sense demora de generacio).
 
 ## Heurístiques docent
@@ -151,5 +151,5 @@ Quan dubto entre usar pictograma o il·lustració, em pregunto: "Necessite supor
 
 - MALL (Model d'Aprenentatge de Llengues i Literacitat): multimodalitat, principi "imatge a l'esquerra", ancoratge visual ZDP.
 - Mayer, R.E. (2009): *Multimedia Learning* — principi de contigüitat imatge-text; principi de redundancia; principi de coherencia (eliminar elements visuals sense valor informatiu).
-- Regles de Lectura Facil ATNE: imatge davant del text, un element visual per concepte clau.
+- Regles de Lectura Fàcil: imatge davant del text, un element visual per concepte clau.
 - Decret 175/2022 (curriculum Catalunya): competencia digital i multimodalitat com a dimensio de la comunicacio lingüística.

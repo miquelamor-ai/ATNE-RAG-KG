@@ -50,7 +50,7 @@ Les preguntes de comprensió lectora segueixen el **model MALL de 3 moments × 3
 - *Multimodalitat*: a pre-A1 i A1, les consignes d'acció i les imatges substitueixen el text escrit. El repte cognitiu (inferir, valorar) no requereix producció escrita.
 
 **Aclariment d'ús — què descriu aquesta rúbrica.**
-Aquesta rúbrica descriu les **preguntes que ATNE genera per guiar la comprensió del text adaptat** (LECTURA ACTIVA). **No descriu l'avaluació del docent ni la producció autònoma de l'alumne**. El complement no és un examen: l'alumne usa les preguntes per llegir millor, no per ser avaluat.
+Aquesta rúbrica descriu les **preguntes que es generen per guiar la comprensió del text adaptat** (LECTURA ACTIVA). **No descriu l'avaluació del docent ni la producció autònoma de l'alumne**. El complement no és un examen: l'alumne usa les preguntes per llegir millor, no per ser avaluat.
 **Sub-granularitat dins de pre-A1**: `fase_lectora: logografica` → consignes d'assenyalar/dibuixar, mediació oral total. `fase_lectora: alfabetica_emergent` → consigna escrita simple, 1-2 paraules de resposta.
 
 ## Detecció

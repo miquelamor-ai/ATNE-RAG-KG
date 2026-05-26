@@ -39,7 +39,7 @@ El TOLC (Translation for Other Learning Contexts, Cummins) usa la **L1 de l'alum
 **Activació condicional crítica**: el complement es genera ÚNICAMENT si:
 1. El perfil de l'alumne té `nouvingut: true` actiu.
 2. La L1 de l'alumne és **coneguda** (declarada al perfil).
-Si la L1 no és declarada → el backend retorna advertència i no genera el complement. Si el docent activa TOLC sense perfil nouvingut → el complement salta silenciosament.
+Si la L1 no és declarada → es retorna advertència i no es genera el complement. Si el docent activa TOLC sense perfil nouvingut → el complement salta silenciosament.
 
 **Alfabet original de la L1**: escriure les paraules en àrab, xinès, urdú, ciríl·lic, armeni o qualsevol altre alfabet en la seva forma original (no transliterada) és un acte de **reconeixement de la llengua de l'alumne**. La transliteració pot ser útil però no substitueix l'alfabet original.
 
@@ -53,7 +53,7 @@ Si la L1 no és declarada → el backend retorna advertència i no genera el com
 - *Consigna de transferència com a producció mediada*: a nivells inicials (dictat a l'adult, pre-A1/A1), la consigna de transferència és una forma de producció mediada. A nivells avançats (mediació complexa, B2-C1), és producció plena de mediació lingüística.
 
 **Aclariment d'ús — què descriu aquesta rúbrica.**
-Aquesta rúbrica descriu el **bloc TOLC que ATNE genera per a l'alumne nouvingut** (MEDIACIÓ PLURILINGÜE). **No descriu l'avaluació del docent ni la competència en L1**: el docent observa si l'alumne usa la taula durant la lectura i si la consigna de transferència li permet avançar.
+Aquesta rúbrica descriu el **bloc TOLC que es genera per a l'alumne nouvingut** (MEDIACIÓ PLURILINGÜE). **No descriu l'avaluació del docent ni la competència en L1**: el docent observa si l'alumne usa la taula durant la lectura i si la consigna de transferència li permet avançar.
 **Sub-granularitat dins de pre-A1**: `fase_lectora: logografica` → activació oral + assenyalar; `fase_lectora: alfabetica_emergent` → 1-2 paraules escrites en català.
 
 ## Detecció
@@ -75,7 +75,7 @@ Aquesta rúbrica descriu el **bloc TOLC que ATNE genera per a l'alumne nouvingut
 
 **Anti-senyals** (quan NO activar):
 - Perfil nouvingut no actiu → el complement no es genera.
-- L1 desconeguda → el backend retorna advertència, no genera.
+- L1 desconeguda → es retorna advertència, no es genera.
 - Objectiu és glossari de català monolingüe → `glossari`.
 - Objectiu és bastides de lectura generals → `bastides_lectura`.
 
@@ -107,7 +107,7 @@ Aquesta rúbrica descriu el **bloc TOLC que ATNE genera per a l'alumne nouvingut
 | 5 Caràcter voluntari | `binary` + `qualitative` | no | binary: presencia de clàusula de voluntarietat ("si vols", "si pots", "comparteix-ho si vols" o equivalent) en totes les consignes; detecció inicial per regex + LLM-jutge de seguiment (to realment no impositiu); absencia = error crític; qualitative: LLM-jutge sobre si el to de la consigna és genuïnament voluntari (positiu) o voluntari de paraula però impositiu de forma ("Ara escriu en la teva llengua" sense "si vols" = negatiu) |
 
 **Notes:**
-- Activació condicional: si el perfil no té `nouvingut: true` o L1 desconeguda → el backend salta el complement. Documentar al log.
+- Activació condicional: si el perfil no té `nouvingut: true` o L1 desconeguda → el complement es salta. Documentar al log.
 - Alfabet original: la transliteració és acceptable ADICIONALMENT però no substitueix l'alfabet original. Detectar per LLM-jutge si l'alfabet és coherent amb la L1 declarada.
 - Observació negativa: "en la teva llengua no hi ha..." és un error pedagògic que invalidiza la L1. Detectar per regex + LLM-jutge.
 - Màxim 5 parells a la taula: si n'hi ha 6 o més, l'alumne es perd. Detectar per countable.

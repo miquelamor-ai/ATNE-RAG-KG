@@ -55,7 +55,7 @@ Les cartes conversacionals bastiden la **participació oral** (o escrita en form
 - *Sintetitzador com a metacognició col·lectiva*: el rol del Sintetitzador és l'única funció metacognitiva del grup. "El que no hem resolt és ___" externalitza la consciència dels límits del coneixement col·lectiu. A C1, inclou la dimensió de fiabilitat de les fonts.
 
 **Aclariment d'ús — què descriu aquesta rúbrica.**
-Aquesta rúbrica descriu les **cartes conversacionals que ATNE genera per bastir el debat** (MEDIACIÓ DE LA PRODUCCIÓ ORAL). **No descriu l'avaluació del debat ni la qualitat de la participació de l'alumne**: el docent observa si l'alumne usa les cartes i si la conversa avança amb estructura.
+Aquesta rúbrica descriu les **cartes conversacionals que es generen per bastir el debat** (MEDIACIÓ DE LA PRODUCCIÓ ORAL). **No descriu l'avaluació del debat ni la qualitat de la participació de l'alumne**: el docent observa si l'alumne usa les cartes i si la conversa avança amb estructura.
 
 ## Detecció
 

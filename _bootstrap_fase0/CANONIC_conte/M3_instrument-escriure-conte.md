@@ -43,7 +43,7 @@ El conte és un gènere narratiu breu amb estructura de cinc parts (situació in
 - *Eix oral/escrit*: el conte es treballa primer oralment (narrar en veu alta) i després es passa a la producció escrita. Recomanat fins a A2.
 
 **Aclariment d'ús — què descriu aquesta rúbrica.**
-Aquesta rúbrica descriu el **conte adaptat per a la LECTURA** de l'alumne (el que presenta ATNE o el docent perquè l'alumne llegeixi). **No descriu la producció autònoma de l'alumne** — la producció narrativa de l'alumne s'avalua amb un derivat propi (rúbrica d'avaluació formativa). Principi pedagògic MALL: l'alumne llegeix models bons al màxim del seu abast i en produeix els seus textos; l'adaptació és tasca de l'assistent i del docent.
+Aquesta rúbrica descriu el **conte adaptat per a la LECTURA** de l'alumne (el que el docent presenta perquè l'alumne llegeixi). **No descriu la producció autònoma de l'alumne** — la producció narrativa de l'alumne s'avalua amb un derivat propi (rúbrica d'avaluació formativa). Principi pedagògic MALL: l'alumne llegeix models bons al màxim del seu abast i en produeix els seus textos; l'adaptació és tasca del docent.
 **Sub-granularitat dins de pre-A1 i A1**: es treballa amb la variable independent `fase_lectora` del frontmatter (logografica · alfabetica_emergent · alfabetica_fluida), no amb columnes addicionals.
 
 ## Detecció
@@ -114,7 +114,7 @@ Cada dimensió té un **tipus de descriptor** que condiciona com s'ha de transfo
 | 7 Diàleg — Atribució i funció | `binary` (per existència) + `structural` | no | detectar marques de diàleg ("va dir", "va preguntar"); verificar atribució per nom (A2+). A A1, diàleg és opcional: no penalitzar l'absència ni incloure'l a l'autoavaluació del derivat. A C1+, el subtext requereix la intenció autoral com a entrada: si no es declara, el derivat marca la cel·la com `revisio-humana` en lloc de LLM-jutge |
 | 8.1 Criteris — Cronologia lineal | `binary` + `structural` | no | detectar anacronia no marcada; verificar que connectors temporals sostenen l'ordre |
 | 8.2 Criteris — Temps verbals | `qualitative` + `binary` | no | LLM-jutge: consistència de temps narratius; detectar barreja no intencionada passat/present. Excepció C1+: el present narratiu és recurs estilístic vàlid si és consistent — no marcar com a error |
-| 8.3 Criteris — Fidelitat al text font | `cross_source` | **sí** (text original si adaptació) | comparació semàntica gradada per nivell: pre-A1→A2 personatge+acció nuclear; B1 conflicte+to; B2-C1 matís emocional+veu narrativa. Només aplica quan ATNE adapta, no quan genera de zero |
+| 8.3 Criteris — Fidelitat al text font | `cross_source` | **sí** (text original si adaptació) | comparació semàntica gradada per nivell: pre-A1→A2 personatge+acció nuclear; B1 conflicte+to; B2-C1 matís emocional+veu narrativa. Només aplica quan s'adapta un text, no quan es genera de zero |
 | 9 Autoavaluació metacognitiva | `metacognitive` | no | derivar a vista d'autoavaluació alumne + registre docent de la qualitat de la reflexió |
 
 **Notes:**

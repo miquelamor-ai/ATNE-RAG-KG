@@ -62,7 +62,7 @@ Un marc narratiu per a un text expositiu genera un resum incoherent per al tipus
 - *Bastida retirable (ZDP)*: el marc es retira progressivament: A2 (marc complet), B1 (marc minimal), B2 (criteris), C1 (reflexió). La bastida té vocació d'extingir-se quan l'alumne internalitza l'estructura del resum.
 
 **Aclariment d'ús — què descriu aquesta rúbrica.**
-Aquesta rúbrica descriu el **marc de resum graduat que ATNE genera per guiar la producció del resum** (PRODUCCIÓ MEDIADA). **No descriu el resum autònom de l'alumne ni l'avaluació del docent**: el docent observa si l'alumne omple els forats amb les seves pròpies paraules (no copiant) i si el resultat és coherent amb el text font.
+Aquesta rúbrica descriu el **marc de resum graduat que es genera per guiar la producció del resum** (PRODUCCIÓ MEDIADA). **No descriu el resum autònom de l'alumne ni l'avaluació del docent**: el docent observa si l'alumne omple els forats amb les seves pròpies paraules (no copiant) i si el resultat és coherent amb el text font.
 **Sub-granularitat dins de pre-A1**: `fase_lectora: logografica` → recapitulació oral total (el docent escriu el que l'alumne diu). `fase_lectora: alfabetica_emergent` → recapitulació oral + 1-2 paraules escrites per l'alumne.
 
 ## Detecció

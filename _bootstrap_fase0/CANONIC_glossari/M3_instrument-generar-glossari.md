@@ -42,7 +42,7 @@ El glossari és un instrument de **mediació lèxica** que acompanya el text ada
 - *CALP de Cummins*: la gradació de la complexitat de la definició és la implementació directa del concepte de llengua acadèmica.
 
 **Aclariment d'ús — què descriu aquesta rúbrica.**
-Aquesta rúbrica descriu el **glossari adaptat per a la LECTURA** de l'alumne (què presenta ATNE o el docent perquè l'alumne consulti). **No descriu la producció autònoma de l'alumne** — això es treballa amb un derivat propi (rúbrica d'avaluació formativa), pertinent per al cas de **glossari col·laboratiu** (B1+ ; vegeu H4) on l'alumnat construeix el glossari sota la guia del docent.
+Aquesta rúbrica descriu el **glossari adaptat per a la LECTURA** de l'alumne (què el docent presenta perquè l'alumne consulti). **No descriu la producció autònoma de l'alumne** — això es treballa amb un derivat propi (rúbrica d'avaluació formativa), pertinent per al cas de **glossari col·laboratiu** (B1+ ; vegeu H4) on l'alumnat construeix el glossari sota la guia del docent.
 **Sub-granularitat dins de pre-A1 i A1**: es treballa amb la variable independent `fase_lectora` del frontmatter (logografica · alfabetica_emergent · alfabetica_fluida), no amb columnes addicionals.
 
 ## Detecció

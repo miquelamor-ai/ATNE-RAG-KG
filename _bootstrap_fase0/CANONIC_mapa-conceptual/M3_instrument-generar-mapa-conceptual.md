@@ -57,7 +57,7 @@ Quan l'objectiu és comprendre el text → `mapa_conceptual`. Quan l'objectiu é
 - *Mapa com a metacognició*: construir el mapa DESPRÉS de llegir és diferent que llegir el mapa construït per un altre. La construcció activa (l'alumne organitza) desenvolupa comprensió profunda; la lectura passiva d'un mapa donat desenvolupa reconeixement.
 
 **Aclariment d'ús — què descriu aquesta rúbrica.**
-Aquesta rúbrica descriu el **mapa conceptual / esquema visual que ATNE genera com a organitzador del text adaptat** (COMPRENSIÓ ESTRUCTURADA). **No descriu la producció creativa de l'alumne**: el mapa és generat per ATNE a partir del text adaptat; l'alumne el llegeix, l'usa com a bastida de comprensió i en pot fer un de propi com a activitat posterior.
+Aquesta rúbrica descriu el **mapa conceptual / esquema visual que es genera com a organitzador del text adaptat** (COMPRENSIÓ ESTRUCTURADA). **No descriu la producció creativa de l'alumne**: el mapa es genera a partir del text adaptat; l'alumne el llegeix, l'usa com a bastida de comprensió i en pot fer un de propi com a activitat posterior.
 **Sub-granularitat dins de pre-A1**: `fase_lectora: logografica` → esquema de 2 imatges (imatge → paraula); `fase_lectora: alfabetica_emergent` → esquema de 2-3 nodes amb paraula curta.
 
 ## Detecció
@@ -129,7 +129,7 @@ Llegeixo les branques principals del mapa i em pregunto: "Diuen la relació o di
 Per als alumnes emergents, la pregunta no és "com es relacionen?" sinó "en quin ordre va?" o "quines parts té?". L'esquema visual treballa la seqüència temporal o les parts d'un tot: 1r passa X, 2n passa Y, 3r passa Z. Introduir jerarquia lògica (causes → efectes) a pre-A1 és una sobrecàrrega cognitiva innecessària.
 
 **H3 — Cap ASCII-art, mai.**
-L'ASCII-art (caixes amb │ ├ └ i fletxes) és visualment impactant però no és accessible (no es pot exportar, no té semàntica, trenca la cadena de producció ATNE). El markdown jeràrquic (# → - → espais d'indentació) és senzill, exportable a qualsevol eina de mapes mentals i coherent amb el flux ATNE.
+L'ASCII-art (caixes amb │ ├ └ i fletxes) és visualment impactant però no és accessible (no es pot exportar, no té semàntica, trenca la cadena de producció). El markdown jeràrquic (# → - → espais d'indentació) és senzill, exportable a qualsevol eina de mapes mentals i coherent amb el flux de l'eina.
 
 **H4 — Mapa conceptual vs. mapa mental: la pregunta del contingut.**
 Em pregunto: "L'alumne ha de comprendre el text o ha d'expandir-se més lluny del text?" Si la resposta és "comprendre el text" → mapa conceptual (contingut del text). Si la resposta és "connectar amb el que sap i generar preguntes noves" → mapa mental (instrument separat, B1+).

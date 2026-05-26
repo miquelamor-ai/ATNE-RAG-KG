@@ -37,7 +37,7 @@ Les bastides de producció guien el procés d'escriptura de l'alumne en tres blo
 **Activació condicional**: ÚNICAMENT si hi ha producció activa al Pas 2. Si el docent activa "bastides" sense activar `preguntes_comprensio` o `activitats_aprofundiment`, aquest complement NO genera res. La senyera: "Sense producció no hi ha bastida de producció."
 **Principi rector**: el Bloc A SEMPRE és disciplinar i específic del gènere i la matèria. Mai "introduccio / cos / conclusio". Una base d'orientació genèrica és pitjor que cap: desorientació disfressada d'estructura.
 
-**No s'adapta a pre-A1 (D6)**: zero escriptura autònoma a fase logografica i alfabetica emergent primerenca. La producció requereix tenir la mecànica de la frase interioritzada com a mínim en la seva forma rudimentaria. A pre-A1 no hi ha cap bloc generat; si el docent activa el complement, el backend el salta silenciosament.
+**No s'adapta a pre-A1 (D6)**: zero escriptura autònoma a fase logografica i alfabetica emergent primerenca. La producció requereix tenir la mecànica de la frase interioritzada com a mínim en la seva forma rudimentaria. A pre-A1 no hi ha cap bloc generat; si el docent activa el complement, es salta silenciosament.
 
 **Diferència crítica amb bastides-lectura:**
 - `bastides-lectura`: sempre actiu quan el docent activa "bastides"; guia el PROCÉS LECTOR.
@@ -51,7 +51,7 @@ Les bastides de producció guien el procés d'escriptura de l'alumne en tres blo
 - *Bastida retirable (ZDP)*: el Bloc A es retira quan l'alumne ha internalitzat l'estructura del gènere. El Bloc B es retira quan l'alumne usa els connectors sense necessitat de consulta. El Bloc C es retira quan l'alumne s'autoavaluà espontàniament. La bastida té vocació d'extingir-se.
 
 **Aclariment d'ús — què descriu aquesta rúbrica.**
-Aquesta rúbrica descriu les **bastides que ATNE genera per orientar la producció escrita de l'alumne** (PRODUCCIÓ). **No descriu la producció autònoma de l'alumne ni l'avaluació del docent**: el docent observa si l'alumne usa la bastida com a suport i si la seva producció millorat amb ella.
+Aquesta rúbrica descriu les **bastides que es generen per orientar la producció escrita de l'alumne** (PRODUCCIÓ). **No descriu la producció autònoma de l'alumne ni l'avaluació del docent**: el docent observa si l'alumne usa la bastida com a suport i si la seva producció millorat amb ella.
 **Sub-granularitat dins de A1**: es treballa amb `fase_lectora: alfabetica_emergent` (frases simples, bastida mínima) i `alfabetica_fluida` (frases completes, bastida plena).
 
 ## Detecció
@@ -106,7 +106,7 @@ Aquesta rúbrica descriu les **bastides que ATNE genera per orientar la producci
 | 4 Autoavaluació mediada | `metacognitive` | no | A1: registre docent d'observació; A2+: derivar a vista d'autoavaluació de l'alumne |
 
 **Notes:**
-- Activació condicional: el backend SALT el complement si no hi ha producció activa. Documentar al log de generació.
+- Activació condicional: el complement es salta si no hi ha producció activa. Documentar al log de generació.
 - Bloc A genèric: detectar "introduccio / cos / conclusio" per regex + LLM-jutge. És l'error mes freqüent i el de major impacte pedagògic.
 - Connectors de nivell superior: `no obstant`, `atès que`, `tanmateix` son NOMES B2+. Detectar per regex si apareixen a A1-B1.
 - Interacció intra-pipeline: si `bastides` i `preguntes_comprensio` son actius simultàniament, les bastides de producció llegeixen l'output de preguntes_comprensio i generen ítems ortogonals (no duplicats). Patró cross_source intra-pipeline confirmat al corpus-spec v2.7 (mineriaRAG).

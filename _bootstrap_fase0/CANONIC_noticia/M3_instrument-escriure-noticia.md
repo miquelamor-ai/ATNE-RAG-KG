@@ -43,7 +43,7 @@ La notícia periodística és un gènere informatiu que relata fets reals seguin
 - *Eix oral / escrit*: a pre-A1 i A1, lectura en veu alta mediada per adult. A A2+, lectura autònoma possible.
 
 **Aclariment d'ús — què descriu aquesta rúbrica.**
-Aquesta rúbrica descriu el **text adaptat per a la LECTURA** de l'alumne (què presenta ATNE o el docent perquè l'alumne llegeixi). **No descriu la producció autònoma de l'alumne** — això és tasca d'un derivat propi (rúbrica d'avaluació formativa), que pot tenir descriptors diferents als nivells baixos. Principi pedagògic MALL: l'alumne llegeix models bons al màxim del seu abast i en produeix els seus textos; són els docents i assistents qui adapten textos.
+Aquesta rúbrica descriu el **text adaptat per a la LECTURA** de l'alumne (què el docent presenta perquè l'alumne llegeixi). **No descriu la producció autònoma de l'alumne** — això és tasca d'un derivat propi (rúbrica d'avaluació formativa), que pot tenir descriptors diferents als nivells baixos. Principi pedagògic MALL: l'alumne llegeix models bons al màxim del seu abast i en produeix els seus textos; és el docent qui adapta els textos.
 **Sub-granularitat dins de pre-A1 i A1**: es treballa amb la variable independent `fase_lectora` del frontmatter (logografica · alfabetica_emergent · alfabetica_fluida), no amb columnes addicionals.
 
 ## Detecció
@@ -130,7 +130,7 @@ Cada dimensió té un **tipus de descriptor** que condiciona com s'ha de transfo
 **Notes:**
 - Els descriptors `countable`, `enumerable`, `binary` i `structural` són **automatitzables sense LLM** (regex + parser).
 - Els `qualitative` requereixen **LLM-jutge** o equivalent; són els punts de variància entre execucions.
-- `cross_source` (7.4 Fidelitat) **bloqueja** la derivació si no s'ha conservat el text font al pipeline ATNE — atenció a l'arquitectura de dades de la sessió de pilot.
+- `cross_source` (7.4 Fidelitat) **bloqueja** la derivació si no s'ha conservat el text font al pipeline — atenció a l'arquitectura de dades de la sessió de pilot.
 - `metacognitive` (Pas 8) requereix **dues sortides** al derivat avaluatiu: l'autoavaluació de l'alumne + el registre docent de la qualitat d'aquesta autoavaluació.
 
 ## Heurístiques docent

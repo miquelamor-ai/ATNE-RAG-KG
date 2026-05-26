@@ -55,7 +55,7 @@ Les activitats d'aprofundiment porten l'alumne **una passa més enllà del text*
 - *Aprofundiment ≠ mes del mateix*: 3 preguntes literals de comprensió adicionals NO son aprofundiment. L'aprofundiment exigeix un salt qualitatiu en el nivell de pensament, no quantitatiu en el volum de preguntes.
 
 **Aclariment d'ús — què descriu aquesta rúbrica.**
-Aquesta rúbrica descriu les **activitats d'aprofundiment que ATNE genera per a l'alumne** (contingut post-lectura). **No descriu la producció autònoma de l'alumne ni l'avaluació del docent**: el docent observa si l'alumne completa l'activitat i si la seva resposta demostra aprofundiment real.
+Aquesta rúbrica descriu les **activitats d'aprofundiment que es generen per a l'alumne** (contingut post-lectura). **No descriu la producció autònoma de l'alumne ni l'avaluació del docent**: el docent observa si l'alumne completa l'activitat i si la seva resposta demostra aprofundiment real.
 **Sub-granularitat dins de pre-A1**: `fase_lectora: logografica` → activitats totalment físiques i manipulatives (ordenar, tocar, dramatitzar). `fase_lectora: alfabetica_emergent` → activitats físiques + dibuix + 1-2 paraules escrites.
 
 ## Detecció

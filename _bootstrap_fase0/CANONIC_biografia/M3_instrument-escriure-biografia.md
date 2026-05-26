@@ -43,7 +43,7 @@ La biografia és una narració cronològica de la vida d'una persona real, centr
 - *Llegat com a transició HCL Narrar → Explicar*: a B1+, el llegat no és una descripció ("és famosa per...") sinó una explicació ("la seva contribució és important perquè..."). Marca el pas de contar fets a explicar causes i conseqüències.
 
 **Aclariment d'ús — què descriu aquesta rúbrica.**
-Aquesta rúbrica descriu la **biografia adaptada per a la LECTURA** de l'alumne (el que presenta ATNE o el docent perquè l'alumne llegeixi). **No descriu la producció autònoma de l'alumne** — la producció biogràfica de l'alumne s'avalua amb un derivat propi. Principi pedagògic MALL: l'alumne llegeix models al màxim del seu abast i en produeix els seus textos.
+Aquesta rúbrica descriu la **biografia adaptada per a la LECTURA** de l'alumne (el que el docent presenta perquè l'alumne llegeixi). **No descriu la producció autònoma de l'alumne** — la producció biogràfica de l'alumne s'avalua amb un derivat propi. Principi pedagògic MALL: l'alumne llegeix models al màxim del seu abast i en produeix els seus textos.
 **Sub-granularitat dins de A1**: es treballa amb `fase_lectora: [alfabetica_emergent, alfabetica_fluida]`; no hi ha nivell logografic perquè el gènere requereix base lecto-escriptora mínima.
 
 ## Detecció

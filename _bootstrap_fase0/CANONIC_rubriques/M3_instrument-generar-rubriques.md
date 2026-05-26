@@ -30,7 +30,7 @@ notebooklm_review:
 
 ## Descripció
 
-La rúbrica generada per ATNE és **alumne-facing**: escrita en **primera persona**, per a l'alumne, amb l'escala FJE: **NA** (No Assolit) · **AS** (Assolit Suficient) · **AN** (Assolit Notable) · **AE** (Assolit Excel·lent). Quan l'alumne llegeix "He argumentat la meva postura amb 2 evidències del text", aprèn QUÈ s'espera d'ell ABANS d'escriure. La rúbrica és una **bastida d'anticipació** i una eina d'autoregulació, no un formulari d'avaluació del docent.
+La rúbrica generada és **alumne-facing**: escrita en **primera persona**, per a l'alumne, amb l'escala FJE: **NA** (No Assolit) · **AS** (Assolit Suficient) · **AN** (Assolit Notable) · **AE** (Assolit Excel·lent). Quan l'alumne llegeix "He argumentat la meva postura amb 2 evidències del text", aprèn QUÈ s'espera d'ell ABANS d'escriure. La rúbrica és una **bastida d'anticipació** i una eina d'autoregulació, no un formulari d'avaluació del docent.
 
 **Tipologia MALL**: Mediació (autoavaluació i metacognició).
 **HCL principals**: Avaluar · Autoregular · Reflexionar metacognitivament.
@@ -60,7 +60,7 @@ Les dues eines son complementàries: bastida durant → rúbrica després.
 - *Metacognició com a aprenentatge*: el procés de marcar la rúbrica (decidir en quin nivell estàs) és en si mateix un acte de comprensió. L'alumne que se situa a AS i sap per qué (li falta evidència) aprèn més que l'alumne que se situa a AN sense saber-ne el motiu.
 
 **Aclariment d'ús — què descriu aquesta rúbrica.**
-Aquesta rúbrica descriu les **rúbriques d'autoavaluació que ATNE genera per a l'alumne** (AUTOAVALUACIÓ MEDIADA). **No descriu la rúbrica del docent per a l'avaluació sumativa**: la rúbrica ATNE és per a l'alumne, no per al docent. Si el docent vol rúbriques per avaluar (perspectiva externa), ha d'usar les eines d'avaluació de centre.
+Aquesta rúbrica descriu les **rúbriques d'autoavaluació que es generen per a l'alumne** (AUTOAVALUACIÓ MEDIADA). **No descriu la rúbrica del docent per a l'avaluació sumativa**: la rúbrica d'autoavaluació és per a l'alumne, no per al docent. Si el docent vol rúbriques per avaluar (perspectiva externa), ha d'usar les eines d'avaluació de centre.
 **Sub-granularitat dins de pre-A1**: `fase_lectora: logografica` → checklist d'imatges (dibuix sí/no); `fase_lectora: alfabetica_emergent` → checklist de paraules curtes (sí/no).
 
 ## Detecció
@@ -83,7 +83,7 @@ Aquesta rúbrica descriu les **rúbriques d'autoavaluació que ATNE genera per a
 
 **Anti-senyals** (quan NO activar):
 - Pauta d'interrogació durant el procés d'escriptura → `bastides_produccio` Bloc C.
-- Rúbrica del docent per a avaluació sumativa → eina docent externa, fora del scope ATNE.
+- Rúbrica del docent per a avaluació sumativa → eina docent externa, fora d'aquest instrument.
 - El text és molt curt i l'autoavaluació seria trivial → 1-2 preguntes orals del docent.
 
 ## Modulació per nivell
@@ -142,4 +142,4 @@ A pre-A1, el checklist ✅/❌ és mediat per l'adult. "Mira el que has dibuixat
 - MALL (Model d'Aprenentatge de Llengues i Literacitat): autoavaluació, metacognició, co-construcció de criteris, bastida d'anticipació.
 - Black, P. & Wiliam, D. (1998): "Inside the Black Box: Raising Standards Through Classroom Assessment" — avaluació formativa i autoavaluació com a eines d'aprenentatge.
 - Decret 175/2022 (curriculum Catalunya): competencia en aprendre a aprendre, autoregulacio i reflexio metacognitiva.
-- Escala FJE (Jesuites Educacio): NA/AS/AN/AE — marc avaluatiu institucional ATNE.
+- Escala FJE (Jesuites Educacio): NA/AS/AN/AE — marc avaluatiu institucional FJE.

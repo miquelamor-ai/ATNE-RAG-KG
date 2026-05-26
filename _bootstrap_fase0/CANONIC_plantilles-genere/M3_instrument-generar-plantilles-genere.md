@@ -51,7 +51,7 @@ L'alumne que usa la base d'orientació sap QUÈ fer en cada pas. L'alumne que us
 - *Forats específics com a ancoratge al contingut*: els buits genèrics desconnecten la plantilla del text que l'alumne ha llegit. Els forats específics ("En [nom del personatge del text]...") mantenen el vincle entre la comprensió lectora i la producció escrita.
 
 **Aclariment d'ús — què descriu aquesta rúbrica.**
-Aquesta rúbrica descriu la **plantilla que ATNE genera perquè l'alumne produeixi el seu text** (PRODUCCIÓ MEDIADA). **No descriu la producció autònoma de l'alumne**: la plantilla és el suport, la producció de l'alumne és el resultat. El docent observa si l'alumne completa els forats amb contingut rellevant del text treballat.
+Aquesta rúbrica descriu la **plantilla que es genera perquè l'alumne produeixi el seu text** (PRODUCCIÓ MEDIADA). **No descriu la producció autònoma de l'alumne**: la plantilla és el suport, la producció de l'alumne és el resultat. El docent observa si l'alumne completa els forats amb contingut rellevant del text treballat.
 **Sub-granularitat dins de pre-A1**: `fase_lectora: logografica` → plantilla visual pura (dibuixar/enganxar). `fase_lectora: alfabetica_emergent` → plantilla amb 1-2 paraules per forat, mediat per adult.
 
 ## Detecció

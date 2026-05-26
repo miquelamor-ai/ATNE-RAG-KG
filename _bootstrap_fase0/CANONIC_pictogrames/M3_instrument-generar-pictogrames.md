@@ -55,7 +55,7 @@ El complement de pictogrames afegeix suport visual al text adaptat per facilitar
 ```
 - El terme catala apareix com a etiqueta visible per a l'alumne.
 - El terme castella va a la cerca ARASAAC (cobertura molt superior).
-- Compatible amb format antic sense `|` (el backend usa el terme únic per a la cerca).
+- Compatible amb format antic sense `|` (s'usa el terme únic per a la cerca).
 - Format emoji: emoji directament inline o al glossari.
 
 **Connexions MALL transversals:**
@@ -130,8 +130,8 @@ Aquesta rubrica descriu el **complement de pictogrames generat per al text adapt
 | 7 Autoavaluacio mediada | `metacognitive` | no | pre-A1: registre docent d'observacio; A1+: derivar a vista d'autoavaluacio alumne |
 
 **Notes:**
-- Format ARASAAC: `[PICTO: terme_catala|terme_castella]`. Compatible amb format antic sense `|` (el backend usa el terme unic). El terme catala apareix com a etiqueta visible; el terme castella va a la cerca ARASAAC (cobertura superior).
-- Format emoji: unicode directament al text (inline A1) o al glossari visual (A2+). Cap marcador especial — el backend no processa emojis, el LLM els insereix directament.
+- Format ARASAAC: `[PICTO: terme_catala|terme_castella]`. Compatible amb format antic sense `|` (s'usa el terme unic). El terme catala apareix com a etiqueta visible; el terme castella va a la cerca ARASAAC (cobertura superior).
+- Format emoji: unicode directament al text (inline A1) o al glossari visual (A2+). Cap marcador especial — els emojis s'insereixen directament al text generat.
 - Modalitat per perfil: el camp `modalitat: [emoji, arasaac]` al `variables_configurables` permet que el sistema seleccioni el mode automaticament (TEA → arasaac; general → emoji per defecte).
 - Paratext d'anticipacio (Pas 5): altament recomanat a pre-A1. La sequencia pedagogica optima és: veure el pictograma → escoltar la paraula (docent) → llegir la paraula al text.
 

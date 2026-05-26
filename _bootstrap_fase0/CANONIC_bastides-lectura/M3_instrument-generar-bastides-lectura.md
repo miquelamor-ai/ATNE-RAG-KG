@@ -44,7 +44,7 @@ Les bastides de lectura són **suports temporals i retirables** que guien l'alum
 - *Bastida retirable (Vygotsky)*: la bastida té vocació d'extingir-se. El docent la introdueix les primeres 2-3 sessions i progressivament elimina els ítems que l'alumne ja fa sol. Una bastida que no es retira es converteix en dependència.
 
 **Aclariment d'ús — què descriu aquesta rúbrica.**
-Aquesta rúbrica descriu les **bastides que ATNE o el docent presenten a l'alumne perquè llegeixi un text adaptat** (LECTURA). **No descriu la producció autònoma de l'alumne** — això és tasca del derivat propi (rúbrica d'avaluació formativa) i, si la tasca implica escriure, del pilot complementari `bastides-produccio`.
+Aquesta rúbrica descriu les **bastides que es presenten a l'alumne perquè llegeixi un text adaptat** (LECTURA). **No descriu la producció autònoma de l'alumne** — això és tasca del derivat propi (rúbrica d'avaluació formativa) i, si la tasca implica escriure, del pilot complementari `bastides-produccio`.
 **Sub-granularitat dins de pre-A1 i A1**: es treballa amb la variable independent `fase_lectora` del frontmatter (logografica · alfabetica_emergent · alfabetica_fluida), no amb columnes addicionals.
 
 ## Detecció
