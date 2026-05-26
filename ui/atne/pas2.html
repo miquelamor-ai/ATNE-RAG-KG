@@ -2786,7 +2786,11 @@
     { id: 'mapa_conceptual',       label: 'Mapa conceptual',              desc: '"Llegir per comprendre" · jerarquia i relacions (A2+)' },
     { id: 'preguntes_comprensio',  label: 'Preguntes de comprensió',      desc: 'Literal · inferencial · crítica (3 moments)' },
     { id: 'bastides',              label: 'Bastides lingüístiques',       desc: 'Suports de lectura estratègica i producció escrita' },
+    { id: 'plantilles_genere',     label: 'Plantilla de gènere',          desc: 'Estructura predefinida per guiar la producció escrita del gènere' },
+    { id: 'resum_graduat',         label: 'Resum graduat',                desc: 'Marc amb forats graduats per sintetitzar el text adaptat' },
     { id: 'activitats_aprofundiment', label: 'Activitats d\'aprofundiment', desc: 'Connexions interdisciplinars · altes capacitats' },
+    { id: 'cartes_conversacionals',label: 'Cartes conversacionals',       desc: 'Rols i iniciadors per a debat estructurat oral (A2+)' },
+    { id: 'rubriques',             label: 'Rúbriques d\'autoavaluació',   desc: 'Escala FJE (NA/AS/AN/AE) per anticipar i autoavaluar la producció' },
     { id: 'mapa_mental',           label: 'Mapa mental',                  desc: '"Llegir per connectar" · associació radial divergent (B1+)' },
     { id: 'pictogrames',           label: 'Pictogrames',                  desc: 'ARASAAC · pre-A1/A1: inline; A2+: glossari visual' },
     { id: 'illustracions',         label: 'Il·lustracions IA <span class="badge-experimental">experimental</span>', desc: 'Imatge IA per a conceptes visuals · 1-3 min' }
@@ -2794,41 +2798,36 @@
 
   // Matriu canònica FJE — font: ui/saber-ne.html §7 (Complements per condició)
   // Columnes mapejades a IDs de COMPLEMENT_DEFS:
-  //   glossari | esquema_visual | bastides | mapa_conceptual | preguntes_comprensio | activitats_aprofundiment | pictogrames
+  //   glossari | esquema_visual | bastides | mapa_conceptual | preguntes_comprensio | activitats_aprofundiment
+  //   | pictogrames | mapa_mental | plantilles_genere | resum_graduat | cartes_conversacionals | rubriques
   // Nota: "Negretes", "Def.integr." i "Trad.L1" són variables de prompt, no complements UI.
-  // Nota: mapa_mental (antic AC) substituït per mapa_conceptual seguint la matriu canònica.
-  // Chip `lv` = nivell MECR informatiu (no és una condició), s'ignora aquí.
-  //
-  // Canvis vs versió anterior:
-  //   - Cobertura ampliada de 4 a 12 condicions
-  //   - AC: mapa_mental → mapa_conceptual (canvi canònic)
-  //   - Afegides: tea, di, tdl, aud, vis, tdc, vuln, emo
-  //   - Condicions desconegudes: retornen el set bàsic (glossari + preguntes_comprensio)
+  // Nota: TOLC = badge automàtic (nouvingut + L1), no chip seleccionable (decisió post-pilot).
+  // Nota: cartes_conversacionals = elecció docent (depèn de l'activitat, no del perfil) → no auto-activar.
   //
   // Tests inline (validen la matriu — verificar manualment si es modifica):
-  //   TDAH      → glossari, esquema_visual, bastides, preguntes_comprensio               (bastides ✓)
-  //   Nouvingut → glossari, esquema_visual, bastides, preguntes_comprensio, pictogrames  (trad_L1 és variable de prompt, no complement)
-  //   AC        → glossari, esquema_visual, mapa_conceptual, preguntes_comprensio, activitats_aprofundiment, mapa_mental (✓ divergència)
-  //   TEA       → glossari, esquema_visual, bastides, preguntes_comprensio, pictogrames  (pictogrames ✓)
-  //   DI        → glossari, esquema_visual, bastides, pictogrames                        (sense preguntes_comprensio ✓)
+  //   TDAH      → glossari, esquema_visual, bastides, preguntes_comprensio
+  //   Nouvingut → glossari, esquema_visual, bastides, preguntes_comprensio, pictogrames, plantilles_genere, resum_graduat
+  //   AC        → glossari, esquema_visual, mapa_conceptual, preguntes_comprensio, activitats_aprofundiment, mapa_mental, rubriques
+  //   TEA       → glossari, esquema_visual, bastides, preguntes_comprensio, pictogrames, rubriques
+  //   DI        → glossari, esquema_visual, bastides, pictogrames, plantilles_genere, resum_graduat
   const MATRIU_CONDICIONS = {
-    //            [glossari, esquema, bastides, mapa_conc, preguntes, aprofund, pictogrames, mapa_mental]
-    tea:  [true,  true,  true,  false, true,  false, true,  false],
-    tdah: [true,  true,  true,  false, true,  false, false, false],
-    disl: [true,  true,  true,  false, true,  false, false, false],
-    di:   [true,  true,  true,  false, false, false, true,  false],
-    tdl:  [true,  true,  true,  false, true,  false, false, false],
-    ac:   [true,  true,  false, true,  true,  true,  false, true],  // mapa_mental ✓ (divergència, Buzan)
-    aud:  [true,  true,  true,  false, true,  false, true,  false],
-    vis:  [true,  false, false, false, true,  false, false, false],
-    tdc:  [true,  false, false, false, true,  false, false, false],
-    cat:  [true,  true,  true,  false, true,  false, true,  false],
-    vuln: [true,  true,  true,  false, true,  false, false, false],
-    emo:  [true,  true,  true,  false, true,  false, false, false],
+    //            [gloss, esq,   bast,  mapa_c, preg,  aprof, picto, mapa_m, plant, resum, cartes, rubr]
+    tea:  [true,  true,  true,  false, true,  false, true,  false, false, false, false, true ],
+    tdah: [true,  true,  true,  false, true,  false, false, false, false, false, false, false],
+    disl: [true,  true,  true,  false, true,  false, false, false, true,  false, false, false],
+    di:   [true,  true,  true,  false, false, false, true,  false, true,  true,  false, false],
+    tdl:  [true,  true,  true,  false, true,  false, false, false, true,  false, false, false],
+    ac:   [true,  true,  false, true,  true,  true,  false, true,  false, false, false, true ],  // mapa_mental ✓ (Buzan), rubriques ✓ (metareflexió)
+    aud:  [true,  true,  true,  false, true,  false, true,  false, false, false, false, false],
+    vis:  [true,  false, false, false, true,  false, false, false, false, false, false, false],
+    tdc:  [true,  false, false, false, true,  false, false, false, false, false, false, false],
+    cat:  [true,  true,  true,  false, true,  false, true,  false, true,  true,  false, false],  // nouvingut: plantilles + resum
+    vuln: [true,  true,  true,  false, true,  false, false, false, false, false, false, false],
+    emo:  [true,  true,  true,  false, true,  false, false, false, false, false, false, false],
   };
-  // Ordre: [glossari, esquema_visual, bastides, mapa_conceptual, preguntes_comprensio, activitats_aprofundiment, pictogrames, mapa_mental]
-  // Nota: mapa_mental auto-actiu NOMÉS per AC (pensament divergent, Buzan 1974). Resta de perfils: elecció del docent.
-  const MATRIU_KEYS = ['glossari', 'esquema_visual', 'bastides', 'mapa_conceptual', 'preguntes_comprensio', 'activitats_aprofundiment', 'pictogrames', 'mapa_mental'];
+  // Ordre columnes: [glossari, esquema_visual, bastides, mapa_conceptual, preguntes_comprensio, activitats_aprofundiment, pictogrames, mapa_mental, plantilles_genere, resum_graduat, cartes_conversacionals, rubriques]
+  // Nota: mapa_mental auto-actiu NOMÉS per AC. cartes_conversacionals mai auto-actives (elecció docent).
+  const MATRIU_KEYS = ['glossari', 'esquema_visual', 'bastides', 'mapa_conceptual', 'preguntes_comprensio', 'activitats_aprofundiment', 'pictogrames', 'mapa_mental', 'plantilles_genere', 'resum_graduat', 'cartes_conversacionals', 'rubriques'];
 
   function defaultComplementsForProfile(p) {
     const cat = p?.cat || '';
