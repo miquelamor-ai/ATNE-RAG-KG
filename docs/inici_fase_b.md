@@ -84,10 +84,10 @@ Aquests fitxers han de carregar-se al context (o resumir-se):
 - [x] B.9.1 — `generate-preguntes-comprensio` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26) *(cross_source intra-pipeline amb bastides-lectura)*
 - [x] B.9.2 — `generate-activitats-aprofundiment` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
 - [x] B.9.3 — `generate-resum-graduat` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26) *(cas especial — translanguaging:false confirmat)*
-- [ ] B.10.1 — `generate-mapa-conceptual`
-- [ ] B.10.2 — `generate-cartes-conversacionals`
-- [ ] B.10.3 — `generate-tolc`
-- [ ] B.10.4 — `generate-rubriques`
+- [x] B.10.1 — `generate-mapa-conceptual` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
+- [x] B.10.2 — `generate-cartes-conversacionals` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
+- [x] B.10.3 — `generate-tolc` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
+- [x] B.10.4 — `generate-rubriques` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
 
 **NO consolidar**: `generate-bastides` (sense -lectura/-produccio) — deprecada al SKILL.md actual.
 
