@@ -285,7 +285,8 @@ def build_persona_audience(profile: dict, context: dict, mecr: str) -> str:
     return "\n".join(lines)
 
 
-def build_system_prompt(profile: dict, context: dict, params: dict, rag_context: str = "") -> str:
+def build_system_prompt(profile: dict, context: dict, params: dict, rag_context: str = "",
+                        adapter_only: bool = False) -> str:
     """Munta el system prompt en 4 capes — instruccions graduades del catàleg de 98."""
     parts = []
     mecr = params.get("mecr_sortida", "B2")
@@ -364,10 +365,11 @@ def build_system_prompt(profile: dict, context: dict, params: dict, rag_context:
         if skills_loader.is_skills_enabled():
             # Roots per defecte: corpusFJE (submodule) — font única des 2026-05-17.
             _all_skills = skills_loader.load_skills(skills_loader.default_skills_roots())
-            # MVP single-call: carreguem adapter + complements en un sol prompt.
-            # Quan migrem a multiagent, cada agent carregarà només el seu rol.
+            # adapter_only=True (2a crida separada): nomes SKILLs d'adaptacio.
+            # adapter_only=False (crida unica legacy): adapter + complements junts.
+            _roles = ("adapter",) if adapter_only else ("adapter", "complements")
             _active = []
-            for _role in ("adapter", "complements"):
+            for _role in _roles:
                 _active.extend(skills_loader.select_active(
                     _all_skills, profile, params, agent_role=_role
                 ))
@@ -413,6 +415,28 @@ COMPLEMENTS A GENERAR (a més del text adaptat):
         _skills_on = _sl.is_skills_enabled()
     except Exception:
         _skills_on = False
+
+    # Crida 1 (adapter_only): genera nomes text adaptat + argumentacio + auditoria.
+    # Els complements es generaran en una 2a crida separada (build_complements_prompt).
+    if adapter_only:
+        parts.append("""
+## Argumentació pedagògica
+SEMPRE GENERAR — Explica les decisions pedagògiques (adaptació lingüística, atenció a la diversitat, suport multimodal, gradació cognitiva, rigor curricular). Breu, 3-5 punts.
+
+## Notes d'auditoria
+SEMPRE GENERAR — Taula comparativa dels canvis principals:
+| Aspecte | Original | Adaptat | Motiu |
+Màxim 5-6 files.
+
+## CHECKLIST DE GENERACIÓ — OBLIGATORI
+Genera únicament:
+1. ## Text adaptat
+2. ## Argumentació pedagògica
+3. ## Notes d'auditoria
+
+El text adaptat ha de ser un text didàctic acabat, llegible directament per l'alumne, sense intromissions del sistema.
+""")
+        return "\n".join(parts)
 
     output_sections = []
     output_sections.append("""
@@ -1080,4 +1104,96 @@ El text adaptat ha de ser un text didàctic acabat, llegible directament per l'a
     parts.append("\n".join(output_sections))
 
     return "\n".join(parts)
+
+
+def build_complements_prompt(profile: dict, context: dict, params: dict) -> str:
+    """System prompt per a la 2a crida LLM dedicada als complements pedagògics.
+
+    Rep el text ja adaptat com a missatge d'usuari (no en el system prompt).
+    Retorna string buit si no hi ha complements actius o SKILLs desactivats
+    (en aquest cas l'orquestrador no fa la 2a crida).
+    """
+    comp = params.get("complements", {})
+    comp_actius = {k for k, v in comp.items() if v}
+    if not comp_actius:
+        return ""
+
+    try:
+        import skills_loader
+        if not skills_loader.is_skills_enabled():
+            return ""
+    except Exception:
+        return ""
+
+    mecr = params.get("mecr_sortida", "B2")
+    lang = params.get("lang", "ca")
+    genre = params.get("genere_discursiu") or context.get("genere_discursiu") or ""
+    chars = profile.get("caracteristiques", {})
+    active_profiles = [k for k, v in chars.items() if isinstance(v, dict) and v.get("actiu")]
+    _nouv = chars.get("nouvingut", {})
+    l1 = _nouv.get("L1", "") or _nouv.get("l1", "")
+
+    lang_label = get_lang_label(lang)
+    parts = [
+        f"Ets un generador de complements pedagògics per a textos educatius adaptats ({lang_label}).\n"
+        "Reps un text ja adaptat i has de generar ÚNICAMENT els complements sol·licitats, "
+        "sense reproduir ni modificar el text adaptat.",
+        f"MECR de l'alumne: {mecr}"
+        + (f" | Condicions: {', '.join(active_profiles)}" if active_profiles else "")
+        + (f" | Gènere: {genre}" if genre else ""),
+    ]
+    if l1:
+        parts.append(f"L1 de l'alumne: {l1} — usa-la als glossaris bilingües (columna Traducció).")
+
+    # SKILLs de complements (aporten instruccions detallades per a cada complement)
+    try:
+        _all = skills_loader.load_skills(skills_loader.default_skills_roots())
+        _active = skills_loader.select_active(_all, profile, params, agent_role="complements")
+        if _active:
+            _names = ", ".join(s.name for s in _active)
+            print(f"[complements_call] SKILLs ({len(_active)}): {_names}", flush=True)
+            parts.append(skills_loader.render_skill_block(_active))
+        else:
+            # Cap SKILL activa — no val la pena fer la 2a crida
+            return ""
+    except Exception as _e:
+        print(f"[complements_call] skills error: {_e}", flush=True)
+        return ""
+
+    # CHECKLIST — enumera les seccions a generar (sense "Text adaptat")
+    _COMP_TITLES = {
+        "glossari": "Glossari",
+        "esquema_visual": "Esquema visual",
+        "mapa_conceptual": "Mapa conceptual",
+        "mapa_mental": "Mapa mental",
+        "preguntes_comprensio": "Preguntes de comprensió",
+        "bastides": "Bastides",
+        "plantilles_genere": "Plantilla de gènere",
+        "resum_graduat": "Resum graduat",
+        "cartes_conversacionals": "Cartes conversacionals",
+        "rubriques": "Rúbriques d'autoavaluació",
+        "activitats_aprofundiment": "Activitats d'aprofundiment",
+        "pictogrames": None,   # marcadors inline; resolts per ARASAAC
+        "illustracions": None, # marcadors inline; resolts per pipeline imatges
+        "negretes": None,
+        "definicions_integrades": None,
+        "traduccio_l1": None,
+        "resum": "Resum",
+    }
+    _seccions = [_COMP_TITLES[k] for k in comp_actius if _COMP_TITLES.get(k)]
+    if not _seccions:
+        return ""
+
+    _lines = [f"{i+1}. ## {s}" for i, s in enumerate(_seccions)]
+    n = len(_seccions)
+    parts.append(f"""
+CHECKLIST DE GENERACIÓ — OBLIGATORI
+Genera TOTES les seccions ## següents basant-te en el text adaptat que reps:
+{chr(10).join(_lines)}
+
+Títols exactes (sense prefixos ni emojis). Sub-apartats amb ###.
+PROHIBIT reproduir el text adaptat. PROHIBIT ometre seccions. Si el contingut és curt, fes-lo curt però NO l'ometis.
+""")
+
+    return "\n\n".join(parts)
 

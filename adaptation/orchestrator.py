@@ -30,7 +30,7 @@ from adaptation.post_process import (
     post_process_adaptation,
 )
 from adaptation.pricing import estimate_cost_eur
-from adaptation.prompt_builder import build_system_prompt
+from adaptation.prompt_builder import build_system_prompt, build_complements_prompt
 
 
 # ── Buffer d'inspecció d'adaptacions (només memòria) ───────────────────────
@@ -115,9 +115,21 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
 
     lang = params.get("lang", "ca")
 
+    # Determina si fem 2 crides separades (adapter + complements).
+    # Condicio: SKILLs actives + almenys 1 complement seleccionat.
+    # Si no, fem crida unica (comportament legacy).
+    _comp_params = params.get("complements", {}) if isinstance(params, dict) else {}
+    _has_complements = any(_comp_params.values())
+    try:
+        import skills_loader as _sl_check
+        _two_call = _sl_check.is_skills_enabled() and _has_complements
+    except Exception:
+        _two_call = False
+
     # System prompt — sense RAG, les instruccions graduades són el motor
     cb({"type": "step", "step": "search", "msg": "Preparant instruccions d'adaptació..."})
-    system_prompt = build_system_prompt(profile, context, params, rag_context="")
+    system_prompt = build_system_prompt(profile, context, params, rag_context="",
+                                        adapter_only=_two_call)
     _filtered = instruction_filter.get_instructions(profile, params, context=context)
     _instruction_ids = [
         instr["id"]
@@ -328,6 +340,47 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
                 adapted = resolve_pictogram_markers(adapted)
         except Exception as _picto_err:
             print(f"[pictograms] resolucio fallida (fallback emoji): {_picto_err}", flush=True)
+
+    # 6c. 2a crida LLM per a complements (quan _two_call=True)
+    # El text adaptat ja està net (post-process + ARASAAC). L'enviem com a
+    # context per a la generació de glossari, preguntes, bastides, etc.
+    if _two_call:
+        _comp_system = build_complements_prompt(profile, context, params)
+        if _comp_system:
+            _comp_model = server._model_for("complements")
+            _, _comp_spec = _resolve_model(_comp_model)
+            _comp_labels = {
+                "gpt-4.1-mini": "GPT-4.1 mini",
+                "gpt-4o-mini":  "GPT-4o mini",
+                "gpt-4o":       "GPT-4o",
+                "gemini-2.5-flash": "Gemini 2.5 Flash",
+            }
+            _comp_label = _comp_labels.get(_comp_spec, _comp_spec)
+            cb({"type": "step", "step": "complements",
+                "msg": f"Generant complements amb {_comp_label}..."})
+            try:
+                _comp_user = (
+                    f"TEXT ADAPTAT:\n{adapted}\n\n"
+                    "Genera els complements pedagògics sol·licitats."
+                )
+                _comp_raw = _call_llm(_comp_model, _comp_system, _comp_user,
+                                      temperature=0.3, max_tokens=8192)
+                _comp_clean = clean_gemini_output(_comp_raw)
+                _comp_clean = _post_process_llm_output(_comp_clean, lang=lang)
+                # Resolucio pictogrames als complements (si n'hi ha marcadors)
+                if _comp_params.get("pictogrames") and "[PICTO" in _comp_clean:
+                    try:
+                        from adaptation.pictograms_arasaac import resolve_pictogram_markers
+                        _comp_clean = resolve_pictogram_markers(_comp_clean)
+                    except Exception as _pe:
+                        print(f"[complements_call] pictograms error: {_pe}", flush=True)
+                # Afegim els complements al text adaptat (el frontend parseja el conjunt)
+                adapted = adapted.rstrip() + "\n\n" + _comp_clean.strip()
+                print(f"[complements_call] generat {len(_comp_clean)} chars", flush=True)
+            except Exception as _comp_err:
+                cb({"type": "step", "step": "warning",
+                    "msg": f"Avís: complements fallits ({_comp_err}). Text adaptat conservat."})
+                print(f"[complements_call] error: {_comp_err}", flush=True)
 
     # 7. Pipeline de qualitat català (LanguageTool + llegibilitat + LLM Auditor)
     quality_enabled = params.get("quality_check", True)

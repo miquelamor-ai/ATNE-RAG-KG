@@ -106,7 +106,7 @@ _MODEL_CONFIG: dict[str, str] = {
     "adapt": ATNE_MODEL,
     "adapt_flash": ATNE_MODEL,   # mode Flash (prompt MVP)
     "refine": ATNE_MODEL,
-    "complements": ATNE_MODEL,
+    "complements": "gpt-4.1-mini",  # 2a crida: model rapid per a glossari/preguntes/bastides
     "auditor": "gpt-4o-mini",
     # Fase il·lustracions: tradueix concept catala → query EN + brief FLUX.
     # Default Gemma 4 31B (free tier) — Gemma 3 discontinuat per Google el 2026-05.
