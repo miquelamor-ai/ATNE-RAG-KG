@@ -81,9 +81,9 @@ Aquests fitxers han de carregar-se al context (o resumir-se):
 - [x] B.7.2 — `generate-illustracions` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
 - [x] B.8.1 — `generate-bastides-produccio` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
 - [x] B.8.2 — `generate-plantilles-genere` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
-- [ ] B.9.1 — `generate-preguntes-comprensio` *(cross_source intra-pipeline amb bastides-lectura)*
-- [ ] B.9.2 — `generate-activitats-aprofundiment`
-- [ ] B.9.3 — `generate-resum-graduat` *(cas especial — vegeu §9)*
+- [x] B.9.1 — `generate-preguntes-comprensio` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26) *(cross_source intra-pipeline amb bastides-lectura)*
+- [x] B.9.2 — `generate-activitats-aprofundiment` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26)
+- [x] B.9.3 — `generate-resum-graduat` (v4.0.0-canonic, NLM si-amb-correccions-menors, 2026-05-26) *(cas especial — translanguaging:false confirmat)*
 - [ ] B.10.1 — `generate-mapa-conceptual`
 - [ ] B.10.2 — `generate-cartes-conversacionals`
 - [ ] B.10.3 — `generate-tolc`
