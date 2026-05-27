@@ -211,18 +211,20 @@ def build_judge_prompt(case: dict, text_original: str, output: dict, rubric: dic
 
     escala_block = "\n".join(f"   {k}: {v}" for k, v in rubric["escala"].items())
 
-    # Concatena tots els 'delta' events per obtenir el text adaptat complet
+    # Obtenir text adaptat final. Prioritat: event 'result.adapted' (sempre
+    # complet, inclou Call 1 + Call 2 + post-process). Fallback: concatenar
+    # deltes (per si algun mode no emet result).
     events_all = output.get("events", [])
-    text_chunks = []
-    complements_chunks = []
+    adapted_text = ""
     for ev in events_all:
-        if ev.get("type") == "delta" and ev.get("text"):
-            text_chunks.append(ev["text"])
-        elif ev.get("type") in ("complement", "complements", "complement_block"):
-            complements_chunks.append(json.dumps(ev, ensure_ascii=False)[:500])
-    adapted_text = "".join(text_chunks)[:8000] or "(sense text adaptat)"
-    complements_summary = ("\n\n--- Complements detectats ---\n" + "\n".join(complements_chunks)[:2000]) if complements_chunks else ""
-    output_str = f"### TEXT ADAPTAT:\n{adapted_text}{complements_summary}"
+        if ev.get("type") == "result" and ev.get("adapted"):
+            adapted_text = ev["adapted"]
+            break
+    if not adapted_text:
+        chunks = [ev["text"] for ev in events_all if ev.get("type") == "delta" and ev.get("text")]
+        adapted_text = "".join(chunks)
+    adapted_text = (adapted_text or "(sense text adaptat)")[:10000]
+    output_str = f"### TEXT ADAPTAT:\n{adapted_text}"
 
     return f"""Ets un **avaluador adversarial de qualitat pedagògica** d'un sistema
 d'adaptació de textos educatius (ATNE) per a alumnat amb necessitats educatives
