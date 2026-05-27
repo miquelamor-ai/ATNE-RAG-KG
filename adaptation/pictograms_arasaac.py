@@ -168,7 +168,7 @@ def _marker_to_html(display_term: str, img_url: Optional[str]) -> str:
     return f'<span class="picto-fallback-text" title="{kw_esc}">{_FALLBACK_EMOJI}</span>'
 
 
-def resolve_pictogram_markers(text: str, lang: str = "es", max_workers: int = 4) -> str:
+def resolve_pictogram_markers(text: str, lang: str = "ca", max_workers: int = 4) -> str:
     """Substitueix tots els marcadors [PICTO: terme] del text per img ARASAAC.
 
     Suporta dos formats de marcador:
