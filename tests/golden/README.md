@@ -52,12 +52,41 @@ Mentre escrivíem el harness ja n'hem trobat un parell:
 
 Aquestes són troballes diagnòstiques del propi exercici de muntar el harness.
 
-## Què NO fa (Fase B en endavant)
+## Què NO fa la Fase A (Fase B en endavant)
 
 - ❌ No crida `/api/adapt` ni cap LLM (cost zero, però no valida output real).
-- ❌ No avalua qualitat pedagògica del text adaptat (Capa 4 — LLM-as-Judge).
-- ❌ No mesura mida del prompt en tokens (Capa 4 — budget).
-- ❌ No genera dashboard `/admin/health` (Capa 5).
+- ❌ No avalua qualitat pedagògica del text adaptat (això és Fase B — LLM-as-Judge).
+- ❌ No mesura mida del prompt en tokens (futur — budget).
+- ❌ No genera dashboard `/admin/health` (futur — Capa 5).
+
+## Fase B — LLM-as-Judge (cost monetari)
+
+Disponible a [run_phase_b.py](run_phase_b.py). Per cada cas del Golden Suite:
+
+1. Crida `/api/adapt` real per generar text adaptat + complements.
+2. Demana al judge LLM (Gemini Flash per defecte) que apliqui [judge_rubric.yaml](judge_rubric.yaml) sobre l'output.
+3. Aggrega tots els judgments en un report ([_phase_b_report.md](_phase_b_report.md)).
+
+**Pre-requisits**:
+- Servidor ATNE up a `http://localhost:8000` (o passar `--server URL`).
+- `.env` amb `GEMINI_API_KEY`.
+
+**Comandes**:
+
+```bash
+python tests/golden/run_phase_b.py --plan         # mostra pla, NO executa (cost zero)
+python tests/golden/run_phase_b.py --full         # generate + judge + aggregate
+python tests/golden/run_phase_b.py --generate     # només genera adaptacions
+python tests/golden/run_phase_b.py --judge        # només judge sobre outputs ja generats
+python tests/golden/run_phase_b.py --aggregate    # només refà el report (sense crides LLM)
+python tests/golden/run_phase_b.py --case C01_tea_b1_noticia --full   # un sol cas
+```
+
+**Cost primera passada**: ~0.03 € (15 casos × 1 text × 2 crides LLM amb Gemini Flash). Negligible. Si s'escala a 24 gèneres × 12 condicions × 3 textos = ~0.6 €.
+
+**Rúbrica**: 6 criteris (adequació MECR, perfil aplicat, complements coherents, fidelitat semàntica, estructura gènere, llegibilitat LF) amb escala 0-5 i pautes explícites perquè el judge sigui consistent.
+
+**Output schema**: JSON per cada judgment a [judgments/](judgments/) (gitignorat). Aggregator genera un score global ponderat per cas + flags d'alertes greus.
 
 ## Quan executar-lo
 

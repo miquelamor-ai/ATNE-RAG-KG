@@ -1,0 +1,146 @@
+# =============================================================================
+# tests/golden/judge_rubric.yaml — Rúbrica adversarial Fase B
+# =============================================================================
+# Rúbrica que un LLM judge aplica sobre el text adaptat de cada cas golden.
+# Inspirada en project_rubrica_avaluacio_millores: 6 criteris, escala E0-E5,
+# pautes explícites perquè el judge sigui consistent entre execucions.
+#
+# El judge rep:
+#   - El text original (input).
+#   - El perfil + params del cas (què esperàvem).
+#   - El text adaptat (output del LLM principal).
+#   - Els complements generats (glossari, mapa, etc.).
+#   - Aquesta rúbrica.
+#
+# Retorna JSON estructurat amb {criteri: {score: 0-5, comment, evidence}}.
+# =============================================================================
+
+meta:
+  versio: "1.0.0"
+  generat_at: "2026-05-27"
+  judge_model: "gemini-2.5-flash"   # consistència > diversitat per al judge
+  judge_temperature: 0.0            # determinista per minimitzar variància
+  font: "project_rubrica_avaluacio_millores (memòria) + saber-ne+ §7"
+
+# Escala canònica — comuna a tots els criteris
+escala:
+  5: "Excel·lent — totalment alineat amb el canon, sense observacions"
+  4: "Bo — alineat amb 1-2 observacions menors"
+  3: "Acceptable — compleix l'essencial, té marge clar de millora"
+  2: "Insuficient — desviació rellevant del canon"
+  1: "Defecte greu — contradiu canon pedagògic o regla MALL"
+  0: "No avaluable — output buit, error o irrellevant al cas"
+
+# Pesos relatius (suma 100). Permet calcular score agregat ponderat.
+pesos:
+  C1_adequacio_mecr: 20
+  C2_perfil_aplicat: 20
+  C3_complements_coherents: 20
+  C4_fidelitat_semantica: 15
+  C5_estructura_genere: 15
+  C6_legibilitat_lf: 10
+
+# Criteris
+criteris:
+
+  C1_adequacio_mecr:
+    titol: "Adequació al nivell MECR"
+    pregunta_judge: |
+      El text adaptat respecta el nivell MECR demanat?
+      Lèxic i sintaxi són del nivell, o massa fàcil/difícil?
+    pautes:
+      - "Comprova vocabulari freqüent al nivell (CEFR-CA)."
+      - "Comprova llargada de frase: pre-A1 ≤8p, A1 ≤12p, A2 ≤16p, B1 ≤25p."
+      - "Pre-A1: només Present, evita subordinades, una idea/frase."
+      - "Si el text té terminologia, els termes intocables NO es simplifiquen."
+    output_camps: ["score", "comment", "evidence"]
+
+  C2_perfil_aplicat:
+    titol: "Transformacions de perfil aplicades"
+    pregunta_judge: |
+      Es noten transformacions específiques de les condicions del perfil?
+      Per exemple: dislèxia → frases curtes; TEA → llenguatge literal sense
+      metàfores; TDAH → llistes numerades i marcadors clars.
+    pautes:
+      - "TEA: zero ironia/sarcasme; afegir explicació de figures retòriques si cal."
+      - "TDAH: estructura amb numeració, paràgrafs curts (<60p)."
+      - "Dislèxia: evitar paraules compostes llargues, preferir derivades curtes."
+      - "DI: pre-supòsit cognitiu mínim, definicions integrades al text."
+      - "Nouvingut: lèxic concret abans que abstracte; verbs alta freqüència."
+      - "AC: profunditzar lèxicament i sintàcticament, no rebaixar."
+    output_camps: ["score", "comment", "evidence"]
+
+  C3_complements_coherents:
+    titol: "Complements coherents amb perfil i nivell"
+    pregunta_judge: |
+      Els complements generats (glossari, mapes, pictogrames, etc.) són
+      coherents amb el perfil i el nivell MECR demanats? Tenen el format
+      esperat per la matriu canònica saber-ne+ §7?
+    pautes:
+      - "Glossari: bilingüe si nouvingut amb L1 declarada; monolingüe altrament."
+      - "Pictogrames: inline a pre-A1/A1; glossari lateral a A2+."
+      - "Mapa conceptual: només des d'A2+ (Novak)."
+      - "Mapa mental: només des de B1+ (Buzan) — AC predominant."
+      - "Plantilles de gènere: estructura específica del gènere demanat."
+      - "Bastides de producció: només si hi ha producció demanada."
+    output_camps: ["score", "comment", "evidence"]
+
+  C4_fidelitat_semantica:
+    titol: "Fidelitat semàntica al text original"
+    pregunta_judge: |
+      El text adaptat conserva la informació, l'argument i els fets del text
+      original, sense inventar dades ni perdre idees clau?
+    pautes:
+      - "Cap dada inventada (noms, dates, xifres, citacions)."
+      - "Idees principals preservades; idees secundàries poden simplificar-se."
+      - "Si Acces extrem, l'idea-pas-d'idea-per-frase pot reorganitzar però no canviar significat."
+    output_camps: ["score", "comment", "evidence"]
+
+  C5_estructura_genere:
+    titol: "Estructura del gènere discursiu demanat"
+    pregunta_judge: |
+      El text adaptat segueix l'estructura canònica del gènere demanat
+      (notícia, conte, instructiu, etc.)?
+    pautes:
+      - "Notícia: titular + lead 5W + cos invertit."
+      - "Conte: planteig + nus + desenllaç + protagonistes clars."
+      - "Instructiu: objectiu + materials + passos numerats + verificació."
+      - "Diàleg: torns clars, dos parlants identificats, registre coherent."
+      - "Si SKILL write-* activa, el text ha de seguir la seva pauta."
+    output_camps: ["score", "comment", "evidence"]
+
+  C6_legibilitat_lf:
+    titol: "Llegibilitat i regles LF (si Accés)"
+    pregunta_judge: |
+      Si el DUA és Accés (Lectura Fàcil), es respecten les regles LF?
+      Si és Core o Enriquiment, la llegibilitat general és bona?
+    pautes_acces:
+      - "Només punts (.) i dos punts (:). NO ; … ? !"
+      - "Veu activa sempre, subjecte explícit."
+      - "Termes tècnics en negreta + explicació immediata."
+      - "Una idea per frase."
+      - "Dates completes; NO números romans."
+    pautes_core_enriquiment:
+      - "Coherència de cohesió: marcadors discursius coherents."
+      - "Variació lèxica adequada al MECR."
+      - "Paràgrafs amb idea central clara."
+    output_camps: ["score", "comment", "evidence"]
+
+# Format de l'output del judge — JSON Schema simplificat
+output_schema:
+  type: object
+  required: ["case_id", "scores"]
+  properties:
+    case_id: { type: string }
+    scores:
+      type: object
+      required: ["C1_adequacio_mecr", "C2_perfil_aplicat", "C3_complements_coherents", "C4_fidelitat_semantica", "C5_estructura_genere", "C6_legibilitat_lf"]
+      additionalProperties:
+        type: object
+        required: ["score", "comment"]
+        properties:
+          score: { type: integer, minimum: 0, maximum: 5 }
+          comment: { type: string, maxLength: 500 }
+          evidence: { type: string, maxLength: 500 }
+    score_global: { type: number, minimum: 0, maximum: 5 }
+    flags: { type: array, items: { type: string } }   # alertes greus (E0/E1)

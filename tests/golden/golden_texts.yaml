@@ -1,0 +1,41 @@
+# =============================================================================
+# tests/golden/golden_texts.yaml — Textos font per a la Fase B
+# =============================================================================
+# Cada cas del Golden Suite es passa per `/api/adapt` amb UN d'aquests textos
+# com a input. Començar amb 1 text canònic per a tots els casos (variància
+# de perfil/MECR/gènere → variància d'output). Afegir més textos si Fase B
+# revela que els resultats depenen massa del text font.
+#
+# Criteris: text neutre, ~200 paraules, registre estàndard B1-B2, sense
+# noms propis sensibles, vocabulari mixt (concret + abstracte) perquè el
+# judge pugui avaluar lèxic adequat a tots els MECRs.
+# =============================================================================
+
+textos:
+
+  fotosintesi_b1:
+    descripcio: "Explicació científica nivell B1 — bo per ESO i adaptació multinivell"
+    paraules_aprox: 195
+    materia: "ciències naturals"
+    text: |
+      La fotosíntesi és el procés pel qual les plantes verdes, les algues i alguns
+      bacteris transformen l'energia de la llum del sol en energia química. Aquest
+      procés és essencial per a la vida a la Terra, perquè produeix l'oxigen que
+      respirem i és la base de la cadena alimentària.
+
+      La reacció es produeix dins dels cloroplasts, uns orgànuls de les cèl·lules
+      vegetals que contenen clorofil·la. La clorofil·la és el pigment verd que
+      capta la llum del sol. Quan la llum arriba a les fulles, la planta absorbeix
+      diòxid de carboni de l'aire pels estomes i aigua del sòl per les arrels.
+
+      Amb aquests dos elements i amb l'energia lluminosa, la planta produeix
+      glucosa (un tipus de sucre) i allibera oxigen com a producte de rebuig. La
+      glucosa serveix d'aliment a la mateixa planta o s'emmagatzema en forma de
+      midó.
+
+      Sense fotosíntesi, l'atmosfera no tindria prou oxigen i els éssers vius que
+      respiren no podrien existir. Per això la conservació dels boscos i dels
+      oceans és tan important: són els grans productors d'oxigen del planeta.
+
+  # Espai reservat per a futurs textos (afegir si la Fase B revela necessitat
+  # de varietat — p.ex. text humanístic, text literari, text instructiu).
