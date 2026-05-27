@@ -1239,6 +1239,14 @@
               <button class="rec-f" data-filter="historia">Història</button>
               <button class="rec-f" data-filter="llengua">Llengua</button>
               <button class="rec-f" data-filter="last-week">Última setmana</button>
+              <!-- Xip "Exemples" (2026-05-27): mostra els 10 textos canon (font: data/demo_examples.json) -->
+              <button class="rec-f" data-filter="exemples">📚 Exemples</button>
+            </div>
+            <!-- Secció Exemples (oculta per defecte, mostrada en clicar xip "Exemples") -->
+            <div id="examples-section" style="display:none">
+              <div class="rec-subtitle" style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-500);margin:12px 0 6px;padding:0 2px;">📚 Textos d'exemple canònics</div>
+              <div class="rec-count" id="examples-count">Resultats · 10</div>
+              <div class="rec-list" id="examples-list"></div>
             </div>
             <!-- Esborranys desats al servidor (pre-adaptació). Veure /api/drafts.
                  La secció s'amaga si no hi ha esborranys. -->
@@ -2525,12 +2533,108 @@
   }
 
   // Bug 2 — Handlers genèrics dels chips de filtre (no-op silenciós si no hi ha cache)
+  // Xip "exemples" (2026-05-27): mode especial — amaga drafts/historial i mostra
+  // els 10 textos canon del JSON. Cap altre filtre interactua amb ell.
+  let __ATNE_EXAMPLES_CACHE = null;
+  async function loadExamplesJson() {
+    if (__ATNE_EXAMPLES_CACHE) return __ATNE_EXAMPLES_CACHE;
+    try {
+      const res = await fetch('/ui/atne/data/demo_examples.json', { cache: 'force-cache' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const d = await res.json();
+      __ATNE_EXAMPLES_CACHE = d.textos || {};
+      return __ATNE_EXAMPLES_CACHE;
+    } catch (e) {
+      console.warn('[examples] no s\'ha pogut carregar demo_examples.json:', e);
+      return {};
+    }
+  }
+  async function renderExamplesList() {
+    const list = document.getElementById('examples-list');
+    const count = document.getElementById('examples-count');
+    if (!list) return;
+    const textos = await loadExamplesJson();
+    const tids = Object.keys(textos);
+    if (count) count.textContent = 'Resultats · ' + tids.length;
+    if (tids.length === 0) {
+      list.innerHTML = '<div style="padding:16px;color:var(--ink-400);font-size:13px">No s\'ha pogut carregar la llista d\'exemples.</div>';
+      return;
+    }
+    list.innerHTML = tids.map(tid => {
+      const t = textos[tid];
+      const partsMeta = [
+        t.materia ? t.materia.charAt(0).toUpperCase() + t.materia.slice(1) : '',
+        t.curs || '',
+        t.paraules_aprox ? t.paraules_aprox + 'p' : '',
+      ].filter(Boolean).join(' · ');
+      const title = (t.descripcio || tid).split(' — ')[0];
+      return (
+        '<div class="rec-item" data-ex-tid="' + tid + '" style="cursor:pointer">'
+        + '<div class="rec-body">'
+        +   '<div class="rec-t" style="display:flex;align-items:center;gap:6px">'
+        +     '<span style="display:inline-block;background:#fff3c4;color:#7a5c00;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;letter-spacing:.04em">📚 EXEMPLE</span>'
+        +     '<span>' + title + '</span>'
+        +   '</div>'
+        +   '<div class="rec-m">' + partsMeta + '</div>'
+        + '</div>'
+        + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>'
+        + '</div>'
+      );
+    }).join('');
+    list.querySelectorAll('.rec-item[data-ex-tid]').forEach(item => {
+      item.addEventListener('click', () => {
+        const tid = item.dataset.exTid;
+        const t = textos[tid];
+        if (!t) return;
+        const ta = document.getElementById('write-ta');
+        if (ta) {
+          ta.value = t.text;
+          ta.dispatchEvent(new Event('input', { bubbles: true }));
+          ta.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        const title = document.getElementById('doc-title');
+        if (title && t.descripcio) {
+          const dashIdx = t.descripcio.indexOf(' — ');
+          title.value = dashIdx > 0 ? t.descripcio.slice(0, dashIdx) : t.descripcio;
+        }
+        // Materia
+        const mat = document.querySelector('.doc-materia-inp');
+        if (mat && t.materia) mat.value = t.materia;
+        // Canvia al mode Escriure
+        const writeTab = document.querySelector('.mode-tab[data-mode="write"]');
+        if (writeTab) writeTab.click();
+      });
+    });
+  }
+  function setExamplesMode(on) {
+    const ex = document.getElementById('examples-section');
+    const drafts = document.getElementById('drafts-section');
+    const histSub = document.getElementById('history-subtitle');
+    const recCount = document.getElementById('rec-count');
+    const recList = document.getElementById('rec-list');
+    if (ex) ex.style.display = on ? '' : 'none';
+    // Drafts: respecten la seva propia visibilitat (style.display ja gestionat per loadDrafts())
+    if (drafts && on) drafts.style.display = 'none';
+    if (histSub) histSub.style.display = on ? 'none' : '';
+    if (recCount) recCount.style.display = on ? 'none' : '';
+    if (recList) recList.style.display = on ? 'none' : '';
+  }
+
   document.querySelectorAll('.rec-filters .rec-f[data-filter]').forEach(chip => {
     chip.addEventListener('click', () => {
       document.querySelectorAll('.rec-filters .rec-f').forEach(c => c.classList.remove('on'));
       chip.classList.add('on');
       recCurrentFilter = chip.dataset.filter || 'all';
-      if (window.__ATNE_HISTORY_CACHE) renderHistoryList();
+      if (recCurrentFilter === 'exemples') {
+        setExamplesMode(true);
+        renderExamplesList();
+      } else {
+        setExamplesMode(false);
+        // Drafts es restauren a la propera càrrega; per ara, recarrega historial
+        if (window.__ATNE_HISTORY_CACHE) renderHistoryList();
+        // Restaura visibilitat de drafts si n'hi ha
+        if (typeof loadDrafts === 'function') loadDrafts();
+      }
     });
   });
   // Bug 2 — Cerca en directe
