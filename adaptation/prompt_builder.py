@@ -1283,6 +1283,83 @@ PROHIBIT reproduir el text adaptat. PROHIBIT ometre seccions. Si el contingut é
     # A la crida 2 dels complements, sense SKILL i amb només "## Esquema visual" al
     # checklist, els LLMs generaven la capçalera però deixaven el cos buit. Reforcem
     # amb instrucció explícita de format + nombre de nodes graduat per MECR.
+    # Fix 2026-05-27 — Bug rubriques mai generades:
+    # Tot i tenir SKILL i checklist, gpt-4.1-mini ometia la seccio.
+    # Reforcem amb format taula explicit + escala FJE concreta.
+    if "rubriques" in comp_actius:
+        _mecr_r = (mecr or "B1").upper().replace("Ç", "C")
+        _r_format = ""
+        if _mecr_r in ("PRE-A1",):
+            _r_format = (
+                "**Format checklist binari** (pre-A1, NO escala FJE):\n"
+                "- [ ] He fet [accio observable 1]\n"
+                "- [ ] He fet [accio observable 2]\n"
+                "- [ ] He fet [accio observable 3]\n"
+                "2-3 items, primera persona, accions fisiques visibles."
+            )
+        elif _mecr_r == "A1":
+            _r_format = (
+                "**Format taula 3 nivells** (A1, sense vocabulari FJE):\n"
+                "| Criteri | Encara no | Si | Si, i alguna cosa mes |\n"
+                "|---|---|---|---|\n"
+                "| He escrit [tasca 1] | | | |\n"
+                "| He usat [tasca 2] | | | |\n"
+                "2-3 criteris accionables, primera persona."
+            )
+        else:
+            _r_format = (
+                "**Format taula escala FJE** (A2+):\n"
+                "| Criteri | NA (No Assolit) | AS (Assolit Suficient) | AN (Assolit Notable) | AE (Assolit Excel·lent) |\n"
+                "|---|---|---|---|---|\n"
+                "| He [accio observable 1] | [descriptor NA] | [descriptor AS] | [descriptor AN] | [descriptor AE — salt qualitatiu] |\n"
+                "| He [accio observable 2] | ... | ... | ... | ... |\n"
+                "| He [accio observable 3] | ... | ... | ... | ... |\n"
+                f"{'4-5' if _mecr_r in ('B1','B2') else '3-4'} criteris × 4 nivells. "
+                "Primera persona SEMPRE ('He escrit...', no 'Has escrit'). "
+                "AE = salt qualitatiu (originalitat, transferencia), NO 'AN + esforç'."
+            )
+        parts.append(f"""
+## INSTRUCCIO ESPECIFICA — Rubriques d'autoavaluacio (OBLIGATORIA)
+Genera OBLIGATORIAMENT la seccio `## Rubriques d'autoavaluacio` per a un alumne {_mecr_r}.
+Es una rubrica ALUMNE-FACING (per a que l'alumne autoavalui la seva propia produccio
+basada en el text adaptat), NO una rubrica per al docent.
+
+{_r_format}
+
+PROHIBIT generar la capçalera "## Rubriques d'autoavaluacio" amb el cos buit.
+PROHIBIT usar segona ("Has fet") o tercera persona ("L'alumne ha fet").
+""")
+
+    # Fix 2026-05-27 — Bug mapa mental confus:
+    # Reforcem amb format Buzan radial concret (no llista jerarquica = mapa conceptual).
+    if "mapa_mental" in comp_actius:
+        parts.append("""
+## INSTRUCCIO ESPECIFICA — Mapa mental (OBLIGATORIA)
+Genera OBLIGATORIAMENT la seccio `## Mapa mental` amb format **radial Buzan**:
+1 concepte central + 4-6 branques primaries + sub-branques associatives.
+
+FORMAT OBLIGATORI (text/markdown — el frontend renderitza com a graf radial):
+```
+- **[CONCEPTE CENTRAL]** (idea principal del text)
+  - **Branca 1: [tema associat]**
+    - [associacio lliure 1a]
+    - [associacio lliure 1b]
+  - **Branca 2: [tema associat]**
+    - [associacio lliure 2a]
+    - [pregunta generadora]
+  - **Branca 3: [connexio interdisciplinar]**
+    - [pont amb altra materia]
+  - **Branca 4: [pregunta oberta divergent]**
+    - [hipotesi alternativa]
+```
+
+DIFERENCIA del mapa conceptual:
+- Mapa CONCEPTUAL: jerarquia + relacions etiquetades (estructura, convergent).
+- Mapa MENTAL: associacio lliure + connexions creatives (divergent, Buzan-style).
+PROHIBIT generar el mateix contingut que mapa_conceptual si tots dos estan activats.
+PROHIBIT capçalera "## Mapa mental" amb cos buit.
+""")
+
     if "esquema_visual" in comp_actius:
         _mecr_c3 = (mecr or "B1").upper().replace("Ç", "C")
         _esquema_nodes_map = {
