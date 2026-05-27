@@ -308,6 +308,8 @@ Sigues estricte. La teva feina és protegir l'alumne real.
 def _judge_provider_for_model(model: str) -> str:
     """Auto-detecció del provider segons el nom del model."""
     m = (model or "").lower()
+    if m == "claude-cli" or m.startswith("cli:") or m == "claude":
+        return "claude-cli"
     if m.startswith("claude-") or "sonnet" in m or "opus" in m or "haiku" in m:
         return "anthropic"
     if m.startswith("gpt-") or m.startswith("o1"):
@@ -324,6 +326,48 @@ def call_judge(prompt: str, model: str, api_key: str | None) -> dict:
     - Anthropic (claude-*, sonnet, opus, haiku): ANTHROPIC_API_KEY
     """
     provider = _judge_provider_for_model(model)
+
+    if provider == "claude-cli":
+        # Invoca el CLI de Claude Code (subscripcio del usuari, cost 0 extra)
+        import subprocess, shutil
+        # Cerca el binari claude. shutil.which mira el PATH; si falla, provem
+        # rutes comunes a Windows.
+        claude_bin = shutil.which("claude")
+        if not claude_bin:
+            for candidate in [
+                os.path.expanduser("~/Desktop/nodejs/claude"),
+                os.path.expanduser("~/Desktop/nodejs/claude.cmd"),
+                os.path.expanduser("~/AppData/Local/Anthropic/claude.exe"),
+                os.path.expanduser("~/.npm-global/claude.cmd"),
+                "C:/Users/miquel.amor/Desktop/nodejs/claude.cmd",
+            ]:
+                if os.path.exists(candidate):
+                    claude_bin = candidate
+                    break
+        if not claude_bin:
+            raise RuntimeError("claude CLI no trobat (cercat: PATH, Desktop/nodejs, AppData/Local/Anthropic)")
+        try:
+            # Passem el prompt via stdin per evitar el límit Windows de
+            # llargada de la línia de comandes (~8000 chars).
+            # Usem --bare per minimitzar overhead (sense hooks, sense
+            # CLAUDE.md autodiscovery, etc.).
+            proc = subprocess.run(
+                [claude_bin, "-p"],
+                input=prompt,
+                capture_output=True, text=True, timeout=240,
+                encoding="utf-8", errors="replace",
+            )
+            if proc.returncode != 0:
+                raise RuntimeError(f"claude CLI exit {proc.returncode}: {proc.stderr[:300]}")
+            text = proc.stdout.strip()
+        except subprocess.TimeoutExpired:
+            raise RuntimeError("claude CLI timeout (240s)")
+        # Extreu el JSON principal (Claude pot afegir text abans/després)
+        start = text.find("{")
+        end = text.rfind("}")
+        if start >= 0 and end > start:
+            text = text[start:end + 1]
+        return json.loads(text)
 
     if provider == "google":
         key = api_key or os.getenv("GEMINI_API_KEY") or os.getenv("GEMMA4_API_KEY")
