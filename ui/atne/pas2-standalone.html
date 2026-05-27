@@ -1263,36 +1263,12 @@ body {
               <button class="rec-f">Llengua</button>
               <button class="rec-f">Última setmana</button>
             </div>
-            <div class="rec-count">Resultats · 4</div>
-            <div class="rec-list">
-              <div class="rec-item">
-                <div class="rec-body">
-                  <div class="rec-t">La Revolució Industrial</div>
-                  <div class="rec-m">Història · 3r ESO · Adaptat fa 2d</div>
-                </div>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>
-              </div>
-              <div class="rec-item">
-                <div class="rec-body">
-                  <div class="rec-t">El cicle de l'aigua</div>
-                  <div class="rec-m">Ciències · 1r ESO · Adaptat fa 1s</div>
-                </div>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>
-              </div>
-              <div class="rec-item">
-                <div class="rec-body">
-                  <div class="rec-t">Les cèl·lules</div>
-                  <div class="rec-m">Biologia · 4t ESO · Adaptat fa 3d</div>
-                </div>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>
-              </div>
-              <div class="rec-item">
-                <div class="rec-body">
-                  <div class="rec-t">La història de Roma</div>
-                  <div class="rec-m">Història · 1r ESO · Adaptat fa 4d</div>
-                </div>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>
-              </div>
+            <!-- rec-list popular dinàmicament des d'ui/atne/data/demo_examples.json -->
+            <div class="rec-count" id="rec-count">Resultats · 10</div>
+            <div class="rec-list" id="rec-list-examples">
+              <!-- Items dels 10 textos d'exemple s'injecten via JS al init.
+                   Els originals 4 hardcoded s'han substituit per textos del
+                   JSON canon (2026-05-27). -->
             </div>
           </div>
         </div>
@@ -1500,11 +1476,11 @@ body {
   }
   updateWC();
 
-  // ── Selector de textos demo (2026-05-27) ──────────────────────────────
-  // Font: ui/atne/data/demo_examples.json. Lazy-fetch al primer clic.
-  (function initDemoTexts() {
+  // ── Demos canon (2026-05-27): selector + llista de Recuperar ──────────
+  // Font: ui/atne/data/demo_examples.json.
+  (function initDemoExamples() {
     let cache = null;
-    async function loadJson() {
+    async function loadTexts() {
       if (cache) return cache;
       try {
         const res = await fetch('./data/demo_examples.json', { cache: 'force-cache' });
@@ -1513,28 +1489,93 @@ body {
         cache = data.textos || {};
         return cache;
       } catch (e) {
-        console.warn('[demo-texts] no s\'ha pogut carregar demo_examples.json:', e);
+        console.warn('[demo-examples] no s\'ha pogut carregar demo_examples.json:', e);
         return {};
       }
     }
+
+    // Carrega un text al textarea + tanca details + actualitza títol.
+    function applyText(t) {
+      const ta = document.getElementById('write-ta');
+      if (ta) {
+        ta.value = t.text;
+        ta.dispatchEvent(new Event('input', { bubbles: true }));
+        ta.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      // Actualitza títol del document amb la descripció (curt)
+      const title = document.getElementById('doc-title');
+      if (title && t.descripcio) {
+        // Pren la primera meitat de la descripció fins al guió, o sencera
+        const dashIdx = t.descripcio.indexOf(' — ');
+        title.value = dashIdx > 0 ? t.descripcio.slice(0, dashIdx) : t.descripcio;
+      }
+      // Tanca details
+      const det = document.getElementById('demo-texts-toggle');
+      if (det) det.open = false;
+    }
+
+    // 1) Handler dels botons del selector "Carregar text d'exemple"
     document.querySelectorAll('.dt-example').forEach(btn => {
       btn.addEventListener('click', async (ev) => {
         ev.preventDefault();
         const tid = btn.dataset.tid;
         if (!tid) return;
-        const textos = await loadJson();
+        const textos = await loadTexts();
         const t = textos[tid];
-        if (!t) { console.warn('[demo-texts] no trobat:', tid); return; }
-        const ta = document.getElementById('write-ta');
-        if (ta) {
-          ta.value = t.text;
-          ta.dispatchEvent(new Event('input', { bubbles: true }));
-          ta.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-        const det = document.getElementById('demo-texts-toggle');
-        if (det) det.open = false;
+        if (!t) { console.warn('[demo-examples] no trobat:', tid); return; }
+        applyText(t);
       });
     });
+
+    // 2) Renderitzar la llista del mode "Recuperar" amb els 10 textos +
+    //    badge EXEMPLE. Substitueix els 4 hardcoded antics.
+    (async function renderRecList() {
+      const list = document.getElementById('rec-list-examples');
+      const count = document.getElementById('rec-count');
+      if (!list) return;
+      const textos = await loadTexts();
+      const tids = Object.keys(textos);
+      if (tids.length === 0) {
+        list.innerHTML = '<div style="padding:16px;color:#888;font-size:13px">No s\'ha pogut carregar la llista d\'exemples.</div>';
+        return;
+      }
+      if (count) count.textContent = 'Resultats · ' + tids.length;
+      list.innerHTML = tids.map(tid => {
+        const t = textos[tid];
+        // Meta tipus "Història · ESO 4t · 200p"
+        const partsMeta = [
+          t.materia ? t.materia.charAt(0).toUpperCase() + t.materia.slice(1) : '',
+          t.curs || '',
+          t.paraules_aprox ? t.paraules_aprox + 'p' : '',
+        ].filter(Boolean).join(' · ');
+        const title = (t.descripcio || tid).split(' — ')[0];
+        return (
+          '<div class="rec-item" data-rec-tid="' + tid + '" style="cursor:pointer">'
+          + '<div class="rec-body">'
+          +   '<div class="rec-t" style="display:flex;align-items:center;gap:6px">'
+          +     '<span style="display:inline-block;background:#fff3c4;color:#7a5c00;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;letter-spacing:.04em">📚 EXEMPLE</span>'
+          +     '<span>' + title + '</span>'
+          +   '</div>'
+          +   '<div class="rec-m">' + partsMeta + '</div>'
+          + '</div>'
+          + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>'
+          + '</div>'
+        );
+      }).join('');
+
+      // Handler per clic d'un rec-item: aplica text i canvia a mode Escriure
+      list.querySelectorAll('.rec-item[data-rec-tid]').forEach(item => {
+        item.addEventListener('click', async () => {
+          const tid = item.dataset.recTid;
+          const t = textos[tid];
+          if (!t) return;
+          applyText(t);
+          // Canvia al mode Escriure (simula clic al .mode-tab data-mode="write")
+          const writeTab = document.querySelector('.mode-tab[data-mode="write"]');
+          if (writeTab) writeTab.click();
+        });
+      });
+    })();
   })();
 </script>
 </body>
