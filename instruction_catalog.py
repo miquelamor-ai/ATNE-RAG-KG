@@ -35,6 +35,7 @@ MACRODIRECTIVES = {
             "A-01", "A-02", "A-03", "A-04", "A-05", "A-06",
             "A-14", "A-15", "A-16", "A-17", "A-18", "A-19",
             "A-20", "A-21", "A-22", "A-23", "A-29", "A-30",
+            "A-31",  # NOU 2026-05-27: no MAJÚSCULES (UNE 153101)
         ],
     },
     "SINTAXI": {
@@ -43,6 +44,7 @@ MACRODIRECTIVES = {
         "instruccions_possibles": [
             "A-07", "A-08", "A-09", "A-10", "A-11",
             "A-12", "A-13", "A-24", "A-25", "A-26", "A-28",
+            "A-32", "A-33", "A-34",  # NOUS 2026-05-27: no ;/...; veu activa; idea per frase (UNE 153101)
         ],
     },
     "ESTRUCTURA": {
@@ -133,9 +135,43 @@ CATALOG = {
         "suppress_if_profile": ["dislexia"],  # H-08 ja cobreix això
     },
     "A-02": {
-        "text": "Termes tècnics en **negreta** amb definició entre parèntesis la primera vegada.",
+        "text": "Termes tècnics en **negreta** amb definició entre parèntesis la primera vegada. Ex: **fotosíntesi** (procés...).",
         "activation": "SEMPRE",
         "macro": "LEXIC",
+        # Fix 2026-05-27 (auditoria MALL): UNE 153101 prohibeix parèntesi a DUA Accés.
+        # A-30 cobreix l'alternativa (definició com a frase nova).
+        "suppress_if_dua": ["Accés"],
+    },
+    "A-30": {
+        "text": "Definicions de termes tècnics com a FRASE NOVA (no parèntesi). Ex: 'Les **estomes** són forats petits.' (UNE 153101, DUA Accés)",
+        "activation": "SEMPRE",
+        "macro": "LEXIC",
+        # Inversa de A-02: només activa a DUA Accés.
+        "suppress_if_dua": ["Core", "Enriquiment"],
+    },
+    "A-31": {
+        "text": "NO usis MAJÚSCULES sostingudes per emfasitzar (ni a títols ni a paraules). Usa **negreta** si cal èmfasi. (UNE 153101)",
+        "activation": "SEMPRE",
+        "macro": "LEXIC",
+        "suppress_if_dua": ["Enriquiment"],  # només Accés + Core
+    },
+    "A-32": {
+        "text": "NO usis punt i coma (;), ni el·lipsis (...), ni cometes irreflexives. Si cita, introdueix amb 'L'autor diu:' (UNE 153101)",
+        "activation": "SEMPRE",
+        "macro": "SINTAXI",
+        "suppress_if_dua": ["Enriquiment"],  # només Accés + Core
+    },
+    "A-33": {
+        "text": "Veu activa sempre. NO usis passiva reflexa ('es fa', 's'utilitza', 'es produeix'). Usa subjecte explícit: 'La planta produeix...'",
+        "activation": "SEMPRE",
+        "macro": "SINTAXI",
+        "suppress_if_dua": ["Enriquiment"],
+    },
+    "A-34": {
+        "text": "DUA Accés: una idea per frase, subjecte explícit sempre. Si tornes a parlar del mateix, REPETEIX el nom (no pronoms ambigus).",
+        "activation": "SEMPRE",
+        "macro": "SINTAXI",
+        "suppress_if_dua": ["Core", "Enriquiment"],
     },
     "A-03": {
         "text": "Repetició lèxica coherent: un terme = un concepte. NO variïs per elegància (no sinònims).",

@@ -49,13 +49,33 @@ _ATNE_ADAPTATIONS_MAX = 20
 
 # ── Verify: jutge ràpid post-adaptació ─────────────────────────────────────
 
-VERIFY_SYSTEM = """Ets un avaluador pedagògic ràpid. Avalua una adaptació de text educatiu amb 3 criteris breus (1-5 cadascun):
-- Q (Qualitat textual): coherència, correcció gramatical, llegibilitat
-- P (Perfil): s'ha aplicat bé al perfil de l'alumne declarat
-- C (Curricular): preserva el contingut original sense errors
+VERIFY_SYSTEM = """Ets un avaluador pedagògic rigorós ancorat al model MALL/FJE. Avalua una adaptació de text educatiu amb 3 criteris (1-5):
+
+- Q (Qualitat MALL): compleix les regles UNE 153101 i les del nivell MECR? Mira:
+  * DUA Accés/A1/A2: NO parèntesi a definicions, NO punt i coma, NO el·lipsis, NO MAJÚSCULES, NO veu passiva reflexa
+  * Frases ≤12p a A1/A2, ≤18p a B1, ≤25p a B2
+  * NO paraules genèriques ("cosa", "un tipus de", "serveix per") a DUA Accés
+  Penalitza si veus aquestes violacions. Q=5 només si NO en veus cap.
+
+- P (Perfil aplicat): es noten transformacions específiques visibles per al perfil?
+  * TDAH: chunking, barres progrés, llistes numerades, paràgrafs curts
+  * TEA: zero metàfores, estructura predictible, literal
+  * Dislèxia: frases curtes, una idea per frase
+  * DI: pictogrames + frases molt simples + repetició
+  * Nouvingut: glossari L1, definicions inline simples
+  * AC: profundització, no infantilització
+  P=5 només si les transformacions són evidents i específiques.
+
+- C (Curricular): preserva contingut sense inventar ni perdre dades clau.
+  Penalitza si veus dades inventades (noms, xifres) o pèrdua d'idees curriculars.
+
+També compta i reporta violacions concretes al camp "v":
+- v_paren: nombre de definicions amb parèntesi a DUA Accés (0 si DUA != Accés)
+- v_frases_llargues: nombre de frases que superen el límit MECR
+- v_paraules: nombre de paraules genèriques prohibides
 
 Retorna NOMÉS aquest JSON:
-{"Q":1-5,"P":1-5,"C":1-5,"j":"una frase justificació"}"""
+{"Q":1-5,"P":1-5,"C":1-5,"j":"frase justificació concreta","v":{"paren":N,"frases_llargues":N,"paraules":N}}"""
 
 
 def _verify_adaptation(verify_model: str, text_original: str, text_adapted: str, profile: dict, params: dict):

@@ -232,7 +232,13 @@ def _check_subvar_conditions(instr: dict, profile_data: dict, mecr: str, chars: 
 
 
 def _should_suppress(instr: dict, active_profiles: list[str], dua: str) -> bool:
-    """Comprova si una instrucció SEMPRE s'ha de suprimir per un perfil actiu."""
+    """Comprova si una instrucció SEMPRE s'ha de suprimir per un perfil actiu o DUA."""
+    # NOU 2026-05-27: suppress_if_dua → suprimir si DUA està a la llista
+    # (ex: A-02 parèntesi suprimit a DUA Accés per UNE 153101).
+    suppress_dua = instr.get("suppress_if_dua", [])
+    if dua in suppress_dua:
+        return True
+
     suppress_list = instr.get("suppress_if", [])
     if not suppress_list:
         return False
