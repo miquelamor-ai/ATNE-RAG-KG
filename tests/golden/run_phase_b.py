@@ -542,16 +542,18 @@ def aggregate(rubric: dict, args) -> None:
         scores = j.get("scores", {})
         if not scores:
             continue
-        weighted = sum(s["score"] * pesos.get(cid, 0) for cid, s in scores.items()) / total_pes
+        # Tolerar judgments amb claus extres no canòniques o sense 'score'
+        valid_scores = {cid: s for cid, s in scores.items() if isinstance(s, dict) and "score" in s}
+        weighted = sum(s["score"] * pesos.get(cid, 0) for cid, s in valid_scores.items()) / total_pes
         rows.append({
             "id": jud_path.stem,
             "case_id": j.get("case_id", "?"),
             "text_id": jud_path.stem.split("__", 1)[1] if "__" in jud_path.stem else "?",
             "summary": j.get("summary", ""),
             "score_global": round(weighted, 2),
-            "scores": {cid: s["score"] for cid, s in scores.items()},
-            "comments": {cid: s.get("comment", "") for cid, s in scores.items()},
-            "evidence": {cid: s.get("evidence", "") for cid, s in scores.items()},
+            "scores": {cid: s["score"] for cid, s in valid_scores.items()},
+            "comments": {cid: s.get("comment", "") for cid, s in valid_scores.items()},
+            "evidence": {cid: s.get("evidence", "") for cid, s in valid_scores.items()},
             "flags": j.get("flags", []),
         })
 
