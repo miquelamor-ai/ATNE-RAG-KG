@@ -42,6 +42,7 @@ casos:
     expected_skills:
       - generate-glossari
       - generate-bastides-lectura
+      - generate-bastides-produccio
       - generate-preguntes-comprensio
       - generate-pictogrames
       - generate-rubriques
@@ -65,6 +66,7 @@ casos:
     expected_skills:
       - generate-glossari
       - generate-bastides-lectura
+      - generate-bastides-produccio
       - generate-preguntes-comprensio
       - write-dialeg
 
@@ -87,6 +89,7 @@ casos:
     expected_skills:
       - generate-glossari
       - generate-bastides-lectura
+      - generate-bastides-produccio
       - generate-preguntes-comprensio
       - generate-plantilles-genere
       - write-conte
@@ -135,6 +138,7 @@ casos:
     expected_skills:
       - generate-glossari
       - generate-bastides-lectura
+      - generate-bastides-produccio
       - generate-preguntes-comprensio
       - generate-plantilles-genere
       - write-descripcio
@@ -185,6 +189,7 @@ casos:
     expected_skills:
       - generate-glossari
       - generate-bastides-lectura
+      - generate-bastides-produccio
       - generate-preguntes-comprensio
       - generate-pictogrames
       - write-cronica
@@ -254,6 +259,7 @@ casos:
     expected_skills:
       - generate-glossari
       - generate-bastides-lectura
+      - generate-bastides-produccio
       - generate-preguntes-comprensio
       - generate-pictogrames
       - generate-plantilles-genere
@@ -278,6 +284,7 @@ casos:
     expected_skills:
       - generate-glossari
       - generate-bastides-lectura
+      - generate-bastides-produccio
       - generate-preguntes-comprensio
       - write-opinio
 
@@ -298,6 +305,7 @@ casos:
     expected_skills:
       - generate-glossari
       - generate-bastides-lectura
+      - generate-bastides-produccio
       - generate-preguntes-comprensio
       - write-diari
 
@@ -326,6 +334,7 @@ casos:
     expected_skills:
       - generate-glossari
       - generate-bastides-lectura
+      - generate-bastides-produccio
       - generate-mapa-conceptual
       - generate-preguntes-comprensio
       - generate-activitats-aprofundiment
@@ -359,9 +368,11 @@ casos:
     expected_skills:
       - generate-glossari
       - generate-bastides-lectura
+      - generate-bastides-produccio
       - generate-preguntes-comprensio
       - generate-pictogrames
       - generate-plantilles-genere
+      - generate-tolc          # nouvingut + L1 declarada → auto-activa
       - write-conte
 
   - id: "C15_grup_multinivell"
@@ -388,9 +399,11 @@ casos:
     expected_skills:
       - generate-glossari
       - generate-bastides-lectura
+      - generate-bastides-produccio
       - generate-mapa-conceptual
       - generate-preguntes-comprensio
       - generate-pictogrames
       - generate-activitats-aprofundiment
       - generate-plantilles-genere
+      - generate-tolc          # nouvingut + L1 declarada → auto-activa
       - write-noticia

@@ -135,7 +135,29 @@ def _get_nested(obj: Any, path: str) -> Any:
 
 
 def _match_trigger(trigger: dict, context: dict) -> bool:
-    """Avalua una condició declarativa. Suporta: equals, in, not_equals, exists, truthy."""
+    """Avalua una condició declarativa.
+
+    Suporta:
+    - Combinadors (no requereixen path): all_of, any_of, not.
+    - Triggers simples (requereixen path): equals, in, not_equals, exists, truthy.
+
+    Els combinadors es poden anidar (un all_of pot contenir any_of, etc.).
+    """
+    # ── Combinadors ──────────────────────────────────────────────────────
+    if "all_of" in trigger:
+        subs = trigger["all_of"]
+        if not isinstance(subs, list) or not subs:
+            return False
+        return all(_match_trigger(sub, context) for sub in subs)
+    if "any_of" in trigger:
+        subs = trigger["any_of"]
+        if not isinstance(subs, list) or not subs:
+            return False
+        return any(_match_trigger(sub, context) for sub in subs)
+    if "not" in trigger:
+        return not _match_trigger(trigger["not"], context)
+
+    # ── Triggers simples (requereixen path) ──────────────────────────────
     path = trigger.get("path")
     if not path:
         return False
