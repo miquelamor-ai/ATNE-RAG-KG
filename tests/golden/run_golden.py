@@ -104,11 +104,14 @@ def static_matrix_check(matrix: dict) -> tuple[list[str], list[str], list[str]]:
     Comprovacions estàtiques entre matriu canònica i claus backend conegudes.
     Retorna (gaps_text, backend_only, canon_only).
     """
-    # Backend keys autoritatius — extrets de ui/atne/js/llm.js ALL_CHAR_KEYS
+    # Backend keys autoritatius — extrets de ui/atne/js/llm.js ALL_CHAR_KEYS.
+    # Actualitzar aquesta llista si canvia ALL_CHAR_KEYS al frontend.
     BACKEND_CHAR_KEYS = {
         "tdah", "dislexia", "nouvingut", "altes_capacitats",
         "tea", "di", "discapacitat_auditiva", "discapacitat_visual",
         "tdl", "discalculia",
+        # Afegides 2026-05-27 per cobrir matriu canònica §7 sencera.
+        "dispraxia", "vulnerabilitat", "emocional",
     }
     canon_keys = set(matrix["condicions"].keys())
     # Mapping curt → backend

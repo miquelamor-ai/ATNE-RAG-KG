@@ -47,16 +47,16 @@ condicions:
     chars_key: "discapacitat_visual"
   tdc:
     label: "Trastorn del Desenvolupament de la Coordinació / dispràxia"
-    chars_key: null   # GAP — no és a ALL_CHAR_KEYS (llm.js:46-50)
+    chars_key: "dispraxia"
   cat:
     label: "Nouvingut (catalanitzar/L2)"
     chars_key: "nouvingut"
   vuln:
     label: "Vulnerabilitat socioeconòmica"
-    chars_key: null   # GAP — no és a ALL_CHAR_KEYS
+    chars_key: "vulnerabilitat"
   emo:
     label: "Necessitats emocionals"
-    chars_key: null   # GAP — no és a ALL_CHAR_KEYS
+    chars_key: "emocional"
   # Condicions backend NO presents a la matriu canònica (gap invers):
   discalculia:
     label: "Discalcúlia"

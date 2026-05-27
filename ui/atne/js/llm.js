@@ -29,7 +29,13 @@
     tdl:  'tdl',
     au:   'discapacitat_auditiva',
     vi:   'discapacitat_visual',
-    discalculia: 'discalculia'
+    discalculia: 'discalculia',
+    // Condicions canòniques de la matriu saber-ne+ §7 afegides 2026-05-27.
+    // Sense ALL_CHAR_KEYS no es podien enviar al backend (detectat pel
+    // harness golden — gaps estàtics matriu vs codi).
+    tdc:  'dispraxia',
+    vuln: 'vulnerabilitat',
+    emo:  'emocional',
   };
   // Mapeig complet data-dx → clau canònica del backend (instruction_filter)
   // Inclou claus curtes (legacy) i llargues (nou format) per a backward compat.
@@ -39,14 +45,18 @@
     ac: 'altes_capacitats', tea: 'tea', di: 'di',
     au: 'discapacitat_auditiva', vi: 'discapacitat_visual',
     tdl: 'tdl', discalculia: 'discalculia',
+    tdc: 'dispraxia', vuln: 'vulnerabilitat', emo: 'emocional',
     // Claus llargues (nou format unificat)
     dislexia: 'dislexia', nouvingut: 'nouvingut', altes_capacitats: 'altes_capacitats',
     discapacitat_auditiva: 'discapacitat_auditiva', discapacitat_visual: 'discapacitat_visual',
+    dispraxia: 'dispraxia', vulnerabilitat: 'vulnerabilitat', emocional: 'emocional',
   };
   const ALL_CHAR_KEYS = [
     'tdah', 'dislexia', 'nouvingut', 'altes_capacitats',
     'tea', 'di', 'discapacitat_auditiva', 'discapacitat_visual',
-    'tdl', 'discalculia'
+    'tdl', 'discalculia',
+    // Afegides 2026-05-27 per cobrir la matriu canònica saber-ne+ §7 sencera.
+    'dispraxia', 'vulnerabilitat', 'emocional',
   ];
 
   // Timeout per defecte de les crides SSE (3 min). Si el backend no respon
