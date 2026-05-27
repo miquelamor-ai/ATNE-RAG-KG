@@ -1,26 +1,230 @@
 # =============================================================================
-# tests/golden/golden_texts.yaml — Textos font per a la Fase B
+# tests/golden/golden_texts.yaml — REGENERAT AUTOMÀTICAMENT (v3.0.0)
 # =============================================================================
-# Font canònica: els textos demo precarregats al frontend ATNE.
-# Sincronitza amb: ui/atne/pas2-standalone.html (textarea#write-ta).
-#
-# Principi: el harness valida exactament el que el docent veu a l'aplicació.
-# Si afegeixes un text demo nou al Pas 2 de ATNE, copia'l aquí. Si elimines
-# un text de ATNE, elimina'l aquí.
-#
-# NOTA (2026-05-27): ara mateix ATNE només precarrega 1 text demo (Rev.
-# Industrial, 52 paraules). Per a la Fase B rigorosa caldria ampliar el
-# catàleg d'exemples al Pas 2 de ATNE. Quan ho fem, aquí afegirem els nous.
+# NO EDITAR A MÀ. Font canon: ui/atne/data/demo_examples.json
+# Per regenerar: python tests/golden/sync_from_json.py
 # =============================================================================
 
 textos:
 
-  revolucio_industrial_demo:
-    descripcio: "Text demo precarregat a pas2-standalone.html (Matèria: Història · ESO 4)"
-    font_atne: "ui/atne/pas2-standalone.html:1151 (textarea#write-ta)"
-    paraules_aprox: 52
-    materia: "història"
-    nivell_origen: "ESO 4"
-    registre: "expositiu-divulgatiu"
+  infantil_i3_canco:
+    descripcio: "Joc lingüístic d'Infantil I3 — repetició i ritme"
+    font_atne: "ui/atne/data/demo_examples.json (textos.infantil_i3_canco)"
+    etapa: "infantil"
+    curs: "I3"
+    fase_lectora: "logografica"
+    mecr_origen: "pre-A1"
+    genere: "canco"
+    materia: "llengua"
+    paraules_aprox: 20
     text: |
-      La Revolució Industrial és el període de transformació profunda de les formes de producció que va començar al Regne Unit cap al 1760 i es va estendre per Europa i Amèrica del Nord durant el segle XIX. Aquest canvi va suposar la transició d'una economia agrària a una industrial, amb l'aparició de les primeres fàbriques i de la màquina de vapor.
+      Mira el sol.
+      El sol és groc.
+      Mira l'arbre.
+      L'arbre és verd.
+      Mira el cel.
+      El cel és blau.
+      Tot és bonic.
+
+  infantil_i4_conte:
+    descripcio: "Conte simple d'Infantil I4 — personatges + acció"
+    font_atne: "ui/atne/data/demo_examples.json (textos.infantil_i4_conte)"
+    etapa: "infantil"
+    curs: "I4"
+    fase_lectora: "logografica"
+    mecr_origen: "pre-A1"
+    genere: "conte"
+    materia: "llengua"
+    paraules_aprox: 35
+    text: |
+      En Marc té un gos.
+      El gos es diu Pep.
+      En Marc i en Pep van al parc.
+      Al parc juguen amb una pilota.
+      La pilota és vermella.
+      La pilota salta molt amunt.
+
+  infantil_i5_descripcio:
+    descripcio: "Descripció d'animal Infantil I5 — frases simples SVO"
+    font_atne: "ui/atne/data/demo_examples.json (textos.infantil_i5_descripcio)"
+    etapa: "infantil"
+    curs: "I5"
+    fase_lectora: "logografica"
+    mecr_origen: "pre-A1"
+    genere: "descripcio"
+    materia: "medi natural"
+    paraules_aprox: 40
+    text: |
+      L'elefant és un animal molt gran.
+      Té quatre potes fortes.
+      Té una trompa llarga.
+      La trompa li serveix per beure aigua i agafar fruites.
+      L'elefant viu a l'Àfrica i a l'Àsia.
+      Menja herba i fulles.
+
+  primaria_ci_instructiu:
+    descripcio: "Instructiu Primer Cicle Primària — fer un titella"
+    font_atne: "ui/atne/data/demo_examples.json (textos.primaria_ci_instructiu)"
+    etapa: "primaria"
+    curs: "1r-2n Primària"
+    fase_lectora: "alfabetica_emergent"
+    mecr_origen: "A1"
+    genere: "instructiu"
+    materia: "plàstica / medi"
+    paraules_aprox: 80
+    text: |
+      Com fer un titella de mitja
+      
+      Necessites:
+      - Una mitja vella
+      - Dos botons
+      - Una agulla i fil
+      - Una mica de farciment
+      
+      Passos:
+      1. Posa el farciment dins de la mitja.
+      2. Lliga el cap amb un fil.
+      3. Cus dos botons per als ulls.
+      4. Dibuixa la boca amb un retolador.
+      
+      Ja tens el teu titella. Pots fer-li veu i jugar amb ell.
+
+  primaria_cm_conte:
+    descripcio: "Conte narratiu Segon Cicle Primària — gat i ratolí amb diàleg"
+    font_atne: "ui/atne/data/demo_examples.json (textos.primaria_cm_conte)"
+    etapa: "primaria"
+    curs: "3r-4t Primària"
+    fase_lectora: "alfabetica_fluida"
+    mecr_origen: "A2"
+    genere: "conte"
+    materia: "llengua i literatura"
+    paraules_aprox: 150
+    text: |
+      El gat i el ratolí
+      
+      A la cuina d'una casa antiga vivia un gat gros i un ratolí petit. El gat passava el dia dormint, però sempre vigilava amb un ull obert.
+      
+      Un matí, el ratolí va sortir del seu forat per buscar formatge. Va caminar a poc a poc, sense fer soroll. De cop, el gat es va despertar.
+      
+      — T'he enxampat! — va dir el gat.
+      — Espera — va dir el ratolí —. Si em deixes anar, et donaré una sorpresa.
+      
+      El gat va riure. No es creia un ratolí. Però tenia curiositat. Va obrir la pota i el ratolí va córrer cap al forat. Des de dins, el ratolí va deixar caure una llesca de formatge.
+      
+      — Aquí tens la sorpresa! — va dir.
+      
+      El gat va menjar el formatge content. Des d'aquell dia, el gat i el ratolí van ser amics.
+
+  instructiu_horts:
+    descripcio: "Instructiu Cicle Superior Primària — plantar una llavor"
+    font_atne: "ui/atne/data/demo_examples.json (textos.instructiu_horts)"
+    etapa: "primaria"
+    curs: "5è-6è Primària"
+    fase_lectora: "alfabetica_fluida"
+    mecr_origen: "A2"
+    genere: "instructiu"
+    materia: "medi natural"
+    paraules_aprox: 145
+    text: |
+      Com plantar una llavor de mongeta a classe
+      
+      Materials que necessites:
+      - Un got transparent
+      - Un cotó
+      - Una llavor de mongeta seca
+      - Aigua
+      
+      Passos:
+      
+      1. Mulla el cotó amb aigua. No ha de quedar encharcat, només humit.
+      2. Posa el cotó moll dins del got. Aplana'l una mica al fons.
+      3. Posa la llavor entre el cotó i la paret de vidre del got. Així podràs veure com creix.
+      4. Posa el got a prop d'una finestra, on rebi llum del sol.
+      5. Cada dia, comprova si el cotó encara està humit. Si està sec, afegeix una mica d'aigua.
+      
+      Després de tres o quatre dies, la llavor s'obrirà i sortirà una arrel blanca. A la setmana, la planta tindrà fulles verdes.
+      
+      Anota cada dia què veus. Pots fer dibuixos o fotografies. És el teu primer experiment científic.
+
+  conte_germanes:
+    descripcio: "Fragment narratiu literari ESO — diàleg + descripció + emoció"
+    font_atne: "ui/atne/data/demo_examples.json (textos.conte_germanes)"
+    etapa: "ESO"
+    curs: "1r ESO"
+    fase_lectora: "alfabetica_fluida"
+    mecr_origen: "A2"
+    genere: "conte"
+    materia: "llengua i literatura"
+    paraules_aprox: 175
+    text: |
+      La Marta i la Júlia eren germanes, però gairebé no es parlaven. Vivien al mateix pis, però cadascuna al seu món. La Marta dibuixava tot el dia; la Júlia tocava el piano a la seva habitació.
+      
+      Una nit de tempesta, l'electricitat va marxar. La casa va quedar a les fosques. La Júlia va sortir del seu refugi amb una espelma i va veure la Marta dreta al passadís, espantada.
+      
+      — No tinguis por — va dir la Júlia.
+      — Sóc gran. No tinc por de la tempesta — va respondre la Marta.
+      
+      Però les seves mans tremolaven una mica.
+      
+      Es van asseure al sofà del menjador. La llum de l'espelma feia ballar les ombres a les parets. La Júlia va dir:
+      
+      — Quan érem petites, m'agradava que dibuixessis al meu costat. Tu pintaves i jo mirava.
+      
+      La Marta no va contestar. Va treure un llapis de la butxaca i un paper de sobre la taula. Va començar a dibuixar el rostre de la seva germana a la llum de l'espelma. La Júlia va somriure.
+
+  fotosintesi:
+    descripcio: "Explicació científica ESO — base canònica"
+    font_atne: "ui/atne/data/demo_examples.json (textos.fotosintesi)"
+    etapa: "ESO"
+    curs: "3r ESO"
+    fase_lectora: "alfabetica_fluida"
+    mecr_origen: "B1"
+    genere: "divulgatiu"
+    materia: "ciències naturals"
+    paraules_aprox: 195
+    text: |
+      La fotosíntesi és el procés pel qual les plantes verdes, les algues i alguns bacteris transformen l'energia de la llum del sol en energia química. Aquest procés és essencial per a la vida a la Terra, perquè produeix l'oxigen que respirem i és la base de la cadena alimentària.
+      
+      La reacció es produeix dins dels cloroplasts, uns orgànuls de les cèl·lules vegetals que contenen clorofil·la. La clorofil·la és el pigment verd que capta la llum del sol. Quan la llum arriba a les fulles, la planta absorbeix diòxid de carboni de l'aire pels estomes i aigua del sòl per les arrels.
+      
+      Amb aquests dos elements i amb l'energia lluminosa, la planta produeix glucosa (un tipus de sucre) i allibera oxigen com a producte de rebuig. La glucosa serveix d'aliment a la mateixa planta o s'emmagatzema en forma de midó.
+      
+      Sense fotosíntesi, l'atmosfera no tindria prou oxigen i els éssers vius que respiren no podrien existir. Per això la conservació dels boscos i dels oceans és tan important: són els grans productors d'oxigen del planeta.
+
+  revolucio_industrial:
+    descripcio: "Text històric ESO — narrativa amb causes i conseqüències (versió ampliada del demo de pas2-standalone)"
+    font_atne: "ui/atne/data/demo_examples.json (textos.revolucio_industrial)"
+    etapa: "ESO"
+    curs: "4t ESO"
+    fase_lectora: "alfabetica_fluida"
+    mecr_origen: "B2"
+    genere: "divulgatiu"
+    materia: "història"
+    paraules_aprox: 220
+    text: |
+      La Revolució Industrial va començar a Anglaterra a mitjan segle XVIII i es va estendre durant el segle XIX per Europa i Amèrica del Nord. Va ser un conjunt de transformacions econòmiques, tecnològiques i socials que van canviar profundament la manera com la gent vivia, treballava i es relacionava.
+      
+      L'origen es troba en la combinació de diversos factors. Primer, els avenços tècnics: la màquina de vapor, perfeccionada per James Watt, va permetre mecanitzar la indústria tèxtil i, més tard, el transport. Segon, la disponibilitat de carbó i ferro, especialment a la regió central anglesa. Tercer, una agricultura més productiva, que alliberava mà d'obra cap a les fàbriques de les ciutats.
+      
+      Les conseqüències van ser profundes. Les ciutats van créixer ràpidament i van aparèixer barris obrers en condicions sovint insalubres. Va sorgir una nova classe social, el proletariat industrial, amb jornades llargues i salaris baixos. Al mateix temps, la burgesia industrial es va enriquir i va consolidar el seu poder polític.
+      
+      Aquest procés també va alterar la relació amb la natura: el consum massiu de combustibles fòssils va començar a marcar el clima del planeta. Per això, alguns historiadors consideren la Revolució Industrial l'inici de l'època anomenada Antropocè.
+
+  argumentatiu_pantalles:
+    descripcio: "Text argumentatiu Batxillerat — opinió raonada amb contrarèplica"
+    font_atne: "ui/atne/data/demo_examples.json (textos.argumentatiu_pantalles)"
+    etapa: "batxillerat"
+    curs: "Batxillerat"
+    fase_lectora: "alfabetica_fluida"
+    mecr_origen: "C1"
+    genere: "opinio"
+    materia: "ètica / ciutadania"
+    paraules_aprox: 245
+    text: |
+      L'omnipresència de les pantalles a la vida quotidiana ha generat un debat intens sobre el seu impacte cognitiu i social, especialment en l'etapa escolar. Hi ha qui defensa que limitar l'ús de dispositius digitals protegeix la concentració i la salut mental dels adolescents; altres sostenen que aquest plantejament és anacrònic i que la veritable competència del segle XXI consisteix a aprendre a navegar críticament un entorn permanentment connectat.
+      
+      Els arguments a favor de la restricció s'apoyen en evidència emergent. Estudis recents associen l'ús intensiu de xarxes socials amb increments de simptomatologia ansiosa, sobretot entre adolescents joves. La fragmentació de l'atenció, derivada de notificacions constants, redueix la capacitat de lectura profunda i de raonament sostingut. En conseqüència, diversos països europeus han optat per limitar o prohibir el telèfon mòbil als centres educatius.
+      
+      Tanmateix, una restricció estricta pot generar efectes col·laterals. Si l'escola exclou completament l'entorn digital, perd l'oportunitat d'ensenyar criteris de discriminació informativa, hàbits de privacitat digital i alfabetització crítica davant les xarxes generatives. L'alumnat acabarà igualment exposat a aquests entorns; la qüestió és si ho farà amb o sense acompanyament educatiu.
+      
+      Probablement la resposta més raonable no sigui la prohibició absoluta ni la integració acrítica, sinó un model que ensenyi a usar i, alhora, a desconnectar. La competència digital implica també la competència de l'absència.

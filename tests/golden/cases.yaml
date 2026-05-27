@@ -1,41 +1,25 @@
 # =============================================================================
-# tests/golden/cases.yaml — Casos golden (versió ATNE-fidel)
+# tests/golden/cases.yaml — REGENERAT AUTOMÀTICAMENT (v3.0.0)
 # =============================================================================
-# Font canònica: els perfils demo que es veuen al Pas 1 de ATNE.
-# Sincronitza amb: ui/atne/pas1.html:961-1005 (window.ATNE_PROFILES).
-#
-# Principi: el harness valida exactament els perfils que el docent veu al
-# selector del Pas 1. Si afegeixes un perfil demo nou a ATNE, copia'l aquí
-# i el harness el validarà.
-#
-# 11 perfils (4 principals + 4 demo persones + 3 grups). MECR derivat del
-# curs segons COURSE_TO_MECR (profile-canonical.js). DUA i gènere fixats al
-# text demo (Rev. Industrial → divulgatiu històric, ESO 4).
-#
-# Per cada cas el harness valida:
-#   (1) Skills actives = expected_skills (semàntica de triggers)
-#   (2) Defaults UI alineats amb matrix.yaml (canon)
-#   (3) instruction_filter.get_instructions() no peta
+# NO EDITAR A MÀ. Font canon: ui/atne/data/demo_examples.json
+# Per regenerar: python tests/golden/sync_from_json.py
 # =============================================================================
 
 meta:
-  versio: "2.0.0"
+  versio: "3.0.0"
   generat_at: "2026-05-27"
-  font: "ui/atne/pas1.html:961-1005 (window.ATNE_PROFILES)"
-  text_canonic: "revolucio_industrial_demo (golden_texts.yaml)"
-  total_casos: 11
+  font: "ui/atne/data/demo_examples.json (perfils)"
+  total_casos: 17
 
 casos:
 
-  # ─── 4 perfils principals (no demo, però són exemples del Pas 1) ───────
-
-  - id: "marc_tdah_b1_divulgatiu"
-    descripcio: "El Pilot · 14 anys · 3r ESO A · TDAH · B1 Intermedi"
-    font_atne: "pas1.html:961 (marc)"
+  - id: "marc"
+    descripcio: "El Pilot · 3r ESO A · tdah"
+    font_atne: "ui/atne/data/demo_examples.json (perfils.marc)"
     condicions_curtes: ["tdah"]
     profile:
       caracteristiques:
-        tdah: { actiu: true }
+        tdah: {"actiu": true}
     params:
       mecr_sortida: "B1"
       dua: "Core"
@@ -46,19 +30,19 @@ casos:
         bastides: true
         preguntes_comprensio: true
     expected_skills:
-      - generate-glossari
       - generate-bastides-lectura
       - generate-bastides-produccio
+      - generate-glossari
       - generate-preguntes-comprensio
       - write-divulgatiu
 
-  - id: "mireia_dislexia_a2_divulgatiu"
-    descripcio: "La Narradora · 12 anys · 1r ESO B · Dislèxia · Decodificació"
-    font_atne: "pas1.html:965 (mireia)"
+  - id: "mireia"
+    descripcio: "La Narradora · 1r ESO B · disl"
+    font_atne: "ui/atne/data/demo_examples.json (perfils.mireia)"
     condicions_curtes: ["disl"]
     profile:
       caracteristiques:
-        dislexia: { actiu: true }
+        dislexia: {"actiu": true}
     params:
       mecr_sortida: "A2"
       dua: "Core"
@@ -70,23 +54,23 @@ casos:
         preguntes_comprensio: true
         plantilles_genere: true
     expected_skills:
-      - generate-glossari
       - generate-bastides-lectura
       - generate-bastides-produccio
-      - generate-preguntes-comprensio
+      - generate-glossari
       - generate-plantilles-genere
+      - generate-preguntes-comprensio
       - write-divulgatiu
 
-  - id: "liu_nouvingut_a1_divulgatiu"
-    descripcio: "El Pont · 13 anys · 2n ESO C · Català L2 · Vocab. bàsic"
-    font_atne: "pas1.html:969 (liu)"
+  - id: "liu"
+    descripcio: "El Pont · 2n ESO C · cat"
+    font_atne: "ui/atne/data/demo_examples.json (perfils.liu)"
     condicions_curtes: ["cat"]
     profile:
       caracteristiques:
-        nouvingut: { actiu: true }
+        nouvingut: {"actiu": true}
     params:
-      mecr_sortida: "A1"
-      dua: "Accés"
+      mecr_sortida: "B1"
+      dua: "Core"
       genere_discursiu: "divulgatiu"
       complements:
         glossari: true
@@ -97,22 +81,22 @@ casos:
         plantilles_genere: true
         resum_graduat: true
     expected_skills:
-      - generate-glossari
       - generate-bastides-lectura
       - generate-bastides-produccio
-      - generate-preguntes-comprensio
+      - generate-glossari
       - generate-pictogrames
       - generate-plantilles-genere
+      - generate-preguntes-comprensio
       - generate-resum-graduat
       - write-divulgatiu
 
-  - id: "pol_aacc_b2_divulgatiu"
-    descripcio: "El Roure · 15 anys · 4t ESO A · Altes Capacitats"
-    font_atne: "pas1.html:973 (pol)"
+  - id: "pol"
+    descripcio: "El Roure · 4t ESO A · ac"
+    font_atne: "ui/atne/data/demo_examples.json (perfils.pol)"
     condicions_curtes: ["ac"]
     profile:
       caracteristiques:
-        altes_capacitats: { actiu: true }
+        altes_capacitats: {"actiu": true}
     params:
       mecr_sortida: "B2"
       dua: "Enriquiment"
@@ -126,23 +110,21 @@ casos:
         mapa_mental: true
         rubriques: true
     expected_skills:
+      - generate-activitats-aprofundiment
       - generate-glossari
       - generate-mapa-conceptual
-      - generate-preguntes-comprensio
-      - generate-activitats-aprofundiment
       - generate-mapa-mental
+      - generate-preguntes-comprensio
       - generate-rubriques
       - write-divulgatiu
 
-  # ─── 4 perfils demo individuals (demo:true) ─────────────────────────────
-
-  - id: "ex_tdah_estel_b1_divulgatiu"
-    descripcio: "L'Estel · 14 anys · 3r ESO · TDAH (demo)"
-    font_atne: "pas1.html:977 (ex_tdah)"
+  - id: "ex_tdah"
+    descripcio: "L'Estel · 3r ESO · tdah"
+    font_atne: "ui/atne/data/demo_examples.json (perfils.ex_tdah)"
     condicions_curtes: ["tdah"]
     profile:
       caracteristiques:
-        tdah: { actiu: true }
+        tdah: {"actiu": true}
     params:
       mecr_sortida: "B1"
       dua: "Core"
@@ -153,28 +135,21 @@ casos:
         bastides: true
         preguntes_comprensio: true
     expected_skills:
-      - generate-glossari
       - generate-bastides-lectura
       - generate-bastides-produccio
+      - generate-glossari
       - generate-preguntes-comprensio
       - write-divulgatiu
 
-  - id: "ex_l2_viatger_pre_a1_divulgatiu"
-    descripcio: "El Viatger · 12 anys · 1r ESO · Català L2 · Pre-A1 · L1 àrab · 2 mesos · sense alfabet llatí"
-    font_atne: "pas1.html:981 (ex_l2)"
+  - id: "ex_l2"
+    descripcio: "El Viatger · 1r ESO · cat"
+    font_atne: "ui/atne/data/demo_examples.json (perfils.ex_l2)"
     condicions_curtes: ["cat"]
     profile:
       caracteristiques:
-        nouvingut:
-          actiu: true
-          l1: "Àrab"
-          pais: "Marroc"
-          mesos_catalunya: 3
-          alfabet_llati: false
-          alfabetitzacio_l1: true
-          escolaritzacio: "regular"
+        nouvingut: {"actiu": true, "l1": "Àrab", "pais": "Marroc", "mesos_range": "Menys de 6 mesos", "alfabet_llati": false, "alfabetitzacio_l1": true, "escolaritzacio": "regular"}
     params:
-      mecr_sortida: "pre-A1"
+      mecr_sortida: "A2"
       dua: "Accés"
       genere_discursiu: "divulgatiu"
       complements:
@@ -186,23 +161,23 @@ casos:
         plantilles_genere: true
         resum_graduat: true
     expected_skills:
-      - generate-glossari
       - generate-bastides-lectura
       - generate-bastides-produccio
-      - generate-preguntes-comprensio
+      - generate-glossari
       - generate-pictogrames
       - generate-plantilles-genere
+      - generate-preguntes-comprensio
       - generate-resum-graduat
-      - generate-tolc          # nouvingut + L1 declarada → auto-activa
+      - generate-tolc
       - write-divulgatiu
 
-  - id: "ex_tea_astronom_a2_divulgatiu"
-    descripcio: "L'Astrònom · 10 anys · 5è Primària · TEA (demo)"
-    font_atne: "pas1.html:986 (ex_tea)"
+  - id: "ex_tea"
+    descripcio: "L'Astrònom · 5è Primària · tea"
+    font_atne: "ui/atne/data/demo_examples.json (perfils.ex_tea)"
     condicions_curtes: ["tea"]
     profile:
       caracteristiques:
-        tea: { actiu: true }
+        tea: {"actiu": true}
     params:
       mecr_sortida: "A2"
       dua: "Core"
@@ -215,21 +190,21 @@ casos:
         pictogrames: true
         rubriques: true
     expected_skills:
-      - generate-glossari
       - generate-bastides-lectura
       - generate-bastides-produccio
-      - generate-preguntes-comprensio
+      - generate-glossari
       - generate-pictogrames
+      - generate-preguntes-comprensio
       - generate-rubriques
       - write-divulgatiu
 
-  - id: "ex_aacc_exploradora_b2_divulgatiu"
-    descripcio: "L'Exploradora · 15 anys · 4t ESO · Altes Capacitats (demo)"
-    font_atne: "pas1.html:990 (ex_aacc)"
+  - id: "ex_aacc"
+    descripcio: "L'Exploradora · 4t ESO · ac"
+    font_atne: "ui/atne/data/demo_examples.json (perfils.ex_aacc)"
     condicions_curtes: ["ac"]
     profile:
       caracteristiques:
-        altes_capacitats: { actiu: true }
+        altes_capacitats: {"actiu": true}
     params:
       mecr_sortida: "B2"
       dua: "Enriquiment"
@@ -243,24 +218,47 @@ casos:
         mapa_mental: true
         rubriques: true
     expected_skills:
+      - generate-activitats-aprofundiment
       - generate-glossari
       - generate-mapa-conceptual
-      - generate-preguntes-comprensio
-      - generate-activitats-aprofundiment
       - generate-mapa-mental
+      - generate-preguntes-comprensio
       - generate-rubriques
       - write-divulgatiu
 
-  # ─── 3 grups demo (type:group) ─────────────────────────────────────────
-
-  - id: "ex_pri_grup_5e_primaria"
-    descripcio: "5è Primària B · 18 alumnes · Ritmes diversos · 1 TDAH · 1 L2"
-    font_atne: "pas1.html:994 (ex_pri)"
-    condicions_curtes: ["tdah", "cat"]
+  - id: "ex_di"
+    descripcio: "La Constructora · 6è Primària · di"
+    font_atne: "ui/atne/data/demo_examples.json (perfils.ex_di)"
+    condicions_curtes: ["di"]
     profile:
       caracteristiques:
-        tdah: { actiu: true }
-        nouvingut: { actiu: true }
+        di: {"actiu": true, "grau": "moderat"}
+    params:
+      mecr_sortida: "B1"
+      dua: "Accés"
+      genere_discursiu: "divulgatiu"
+      complements:
+        glossari: true
+        esquema_visual: true
+        bastides: true
+        pictogrames: true
+        plantilles_genere: true
+        resum_graduat: true
+    expected_skills:
+      - generate-bastides-lectura
+      - generate-glossari
+      - generate-pictogrames
+      - generate-plantilles-genere
+      - generate-resum-graduat
+      - write-divulgatiu
+
+  - id: "ex_tdl"
+    descripcio: "El Ressonador · 5è Primària · tdl"
+    font_atne: "ui/atne/data/demo_examples.json (perfils.ex_tdl)"
+    condicions_curtes: ["tdl"]
+    profile:
+      caracteristiques:
+        tdl: {"actiu": true, "modalitat": "comprensiu"}
     params:
       mecr_sortida: "A2"
       dua: "Core"
@@ -270,27 +268,110 @@ casos:
         esquema_visual: true
         bastides: true
         preguntes_comprensio: true
-        pictogrames: true
         plantilles_genere: true
-        resum_graduat: true
     expected_skills:
-      - generate-glossari
       - generate-bastides-lectura
       - generate-bastides-produccio
-      - generate-preguntes-comprensio
-      - generate-pictogrames
+      - generate-glossari
       - generate-plantilles-genere
-      - generate-resum-graduat
+      - generate-preguntes-comprensio
       - write-divulgatiu
 
-  - id: "ex_eso_grup_2n_eso"
-    descripcio: "2n ESO C · 22 alumnes · 3 nivells MECR · 2 L2 · 1 TEA"
-    font_atne: "pas1.html:998 (ex_eso)"
-    condicions_curtes: ["tea", "cat"]
+  - id: "ex_aud"
+    descripcio: "La Mirada · 2n ESO B · au"
+    font_atne: "ui/atne/data/demo_examples.json (perfils.ex_aud)"
+    condicions_curtes: ["au"]
     profile:
       caracteristiques:
-        tea: { actiu: true }
-        nouvingut: { actiu: true }
+        discapacitat_auditiva: {"actiu": true, "grau": "sever", "comunicacio": "LSC"}
+    params:
+      mecr_sortida: "B1"
+      dua: "Core"
+      genere_discursiu: "divulgatiu"
+      complements:
+        glossari: true
+        esquema_visual: true
+        bastides: true
+        preguntes_comprensio: true
+        pictogrames: true
+    expected_skills:
+      - generate-bastides-lectura
+      - generate-bastides-produccio
+      - generate-glossari
+      - generate-pictogrames
+      - generate-preguntes-comprensio
+      - write-divulgatiu
+
+  - id: "ex_vis"
+    descripcio: "La Veu · 3r ESO · vi"
+    font_atne: "ui/atne/data/demo_examples.json (perfils.ex_vis)"
+    condicions_curtes: ["vi"]
+    profile:
+      caracteristiques:
+        discapacitat_visual: {"actiu": true, "grau": "baixa_visio"}
+    params:
+      mecr_sortida: "B1"
+      dua: "Core"
+      genere_discursiu: "divulgatiu"
+      complements:
+        glossari: true
+        preguntes_comprensio: true
+    expected_skills:
+      - generate-glossari
+      - generate-preguntes-comprensio
+      - write-divulgatiu
+
+  - id: "ex_discal"
+    descripcio: "El Cartògraf · 5è Primària · discalculia"
+    font_atne: "ui/atne/data/demo_examples.json (perfils.ex_discal)"
+    condicions_curtes: ["discalculia"]
+    profile:
+      caracteristiques:
+        discalculia: {"actiu": true}
+    params:
+      mecr_sortida: "A2"
+      dua: "Core"
+      genere_discursiu: "divulgatiu"
+      complements:
+        glossari: true
+        esquema_visual: true
+        preguntes_comprensio: true
+    expected_skills:
+      - generate-glossari
+      - generate-preguntes-comprensio
+      - write-divulgatiu
+
+  - id: "ex_emo"
+    descripcio: "El Refugi · 2n ESO · emo"
+    font_atne: "ui/atne/data/demo_examples.json (perfils.ex_emo)"
+    condicions_curtes: ["emo"]
+    profile:
+      caracteristiques:
+        emocional: {"actiu": true}
+    params:
+      mecr_sortida: "B1"
+      dua: "Core"
+      genere_discursiu: "divulgatiu"
+      complements:
+        glossari: true
+        esquema_visual: true
+        bastides: true
+        preguntes_comprensio: true
+    expected_skills:
+      - generate-bastides-lectura
+      - generate-bastides-produccio
+      - generate-glossari
+      - generate-preguntes-comprensio
+      - write-divulgatiu
+
+  - id: "ex_pri"
+    descripcio: "5è Primària B · Grup classe · 18 alumnes · group"
+    font_atne: "ui/atne/data/demo_examples.json (perfils.ex_pri)"
+    condicions_curtes: ["tdah", "cat"]
+    profile:
+      caracteristiques:
+        tdah: {"actiu": true}
+        nouvingut: {"actiu": true}
     params:
       mecr_sortida: "B1"
       dua: "Core"
@@ -302,26 +383,58 @@ casos:
         preguntes_comprensio: true
         pictogrames: true
         plantilles_genere: true
-        rubriques: true
+        resum_graduat: true
     expected_skills:
-      - generate-glossari
       - generate-bastides-lectura
       - generate-bastides-produccio
-      - generate-preguntes-comprensio
+      - generate-glossari
       - generate-pictogrames
       - generate-plantilles-genere
+      - generate-preguntes-comprensio
+      - generate-resum-graduat
+      - write-divulgatiu
+
+  - id: "ex_eso"
+    descripcio: "2n ESO C · Grup classe · 22 alumnes · group"
+    font_atne: "ui/atne/data/demo_examples.json (perfils.ex_eso)"
+    condicions_curtes: ["cat", "tea"]
+    profile:
+      caracteristiques:
+        nouvingut: {"actiu": true}
+        tea: {"actiu": true}
+    params:
+      mecr_sortida: "B1"
+      dua: "Core"
+      genere_discursiu: "divulgatiu"
+      complements:
+        glossari: true
+        esquema_visual: true
+        bastides: true
+        preguntes_comprensio: true
+        pictogrames: true
+        plantilles_genere: true
+        resum_graduat: true
+        rubriques: true
+    expected_skills:
+      - generate-bastides-lectura
+      - generate-bastides-produccio
+      - generate-glossari
+      - generate-pictogrames
+      - generate-plantilles-genere
+      - generate-preguntes-comprensio
+      - generate-resum-graduat
       - generate-rubriques
       - write-divulgatiu
 
-  - id: "ex_fp_grup_gm_administracio"
-    descripcio: "GM Administració 1r · 15 alumnes · Com. empresarial · Velocitats diverses · 1 TDAH"
-    font_atne: "pas1.html:1002 (ex_fp)"
+  - id: "ex_fp"
+    descripcio: "GM Administració 1r · Com. empresarial · 15 alumnes · group"
+    font_atne: "ui/atne/data/demo_examples.json (perfils.ex_fp)"
     condicions_curtes: ["tdah"]
     profile:
       caracteristiques:
-        tdah: { actiu: true }
+        tdah: {"actiu": true}
     params:
-      mecr_sortida: "B2"
+      mecr_sortida: "B1"
       dua: "Core"
       genere_discursiu: "divulgatiu"
       complements:
@@ -330,8 +443,8 @@ casos:
         bastides: true
         preguntes_comprensio: true
     expected_skills:
-      - generate-glossari
       - generate-bastides-lectura
       - generate-bastides-produccio
+      - generate-glossari
       - generate-preguntes-comprensio
       - write-divulgatiu
