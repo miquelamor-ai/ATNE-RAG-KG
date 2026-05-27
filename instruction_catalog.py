@@ -36,6 +36,7 @@ MACRODIRECTIVES = {
             "A-14", "A-15", "A-16", "A-17", "A-18", "A-19",
             "A-20", "A-21", "A-22", "A-23", "A-29", "A-30",
             "A-31",  # NOU 2026-05-27: no MAJÚSCULES (UNE 153101)
+            "A-35",  # NOU 2026-05-27: definició com frase nova (UNE 153101, DUA Accés). Renombrat de A-30 (collision)
         ],
     },
     "SINTAXI": {
@@ -142,11 +143,11 @@ CATALOG = {
         # A-30 cobreix l'alternativa (definició com a frase nova).
         "suppress_if_dua": ["Accés"],
     },
-    "A-30": {
+    "A-35": {
         "text": "Definicions de termes tècnics com a FRASE NOVA (no parèntesi). Ex: 'Les **estomes** són forats petits.' (UNE 153101, DUA Accés)",
         "activation": "SEMPRE",
         "macro": "LEXIC",
-        # Inversa de A-02: només activa a DUA Accés.
+        # Inversa de A-02: només activa a DUA Accés. (Renombrat de A-30 a A-35 2026-05-27: A-30 ja existia per anglicismes)
         "suppress_if_dua": ["Core", "Enriquiment"],
     },
     "A-31": {
