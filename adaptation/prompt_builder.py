@@ -419,7 +419,32 @@ COMPLEMENTS A GENERAR (a més del text adaptat):
     # Crida 1 (adapter_only): genera nomes text adaptat + argumentacio + auditoria.
     # Els complements es generaran en una 2a crida separada (build_complements_prompt).
     if adapter_only:
-        parts.append("""
+        # ⚠️ Recordatori del gènere demanat al FINAL del prompt (recency bias):
+        # detectat 2026-05-27 amb harness Fase B + Sonnet judge — quan el
+        # genere no és divulgatiu/expositiu (ex: entrevista, opinió, conte,
+        # poema), el LLM ignorava la SKILL WRITE-* del mig del prompt i
+        # generava sempre text didàctic expositiu (la directiva del final
+        # guanyava). C5 Estructura: 0.86/5.
+        _genere_param = (params.get("genere_discursiu") or "").strip()
+        _genere_block = ""
+        if _genere_param:
+            _genere_label = _genere_param.replace("_", " ").replace("-", " ").upper()
+            _genere_block = f"""
+## ⚠️ GÈNERE DISCURSIU OBLIGATORI: {_genere_label}
+El text adaptat HA DE SEGUIR l'estructura canònica del gènere "{_genere_param}",
+tal com es defineix a la SKILL ACTIVA de més amunt al system prompt.
+- Si el gènere és entrevista: format de torns Pregunta/Resposta entre entrevistador i entrevistat.
+- Si el gènere és opinió: tesi clara + arguments + conclusió.
+- Si el gènere és conte/fàbula/poema: narrativa amb personatges i estructura literària.
+- Si el gènere és instructiu/receptari/manual: materials + passos numerats + verificació.
+- Si el gènere és diàleg: dos parlants identificats amb torns clars.
+- Si el gènere és divulgatiu/expositiu: prosa estructurada amb idees jerarquitzades.
+
+PROHIBIT generar prosa expositiva genèrica si el gènere és un altre. La forma del
+gènere és tan important com el contingut adaptat.
+"""
+
+        parts.append(f"""
 ## Argumentació pedagògica
 SEMPRE GENERAR — Explica les decisions pedagògiques (adaptació lingüística, atenció a la diversitat, suport multimodal, gradació cognitiva, rigor curricular). Breu, 3-5 punts.
 
@@ -427,14 +452,14 @@ SEMPRE GENERAR — Explica les decisions pedagògiques (adaptació lingüística
 SEMPRE GENERAR — Taula comparativa dels canvis principals:
 | Aspecte | Original | Adaptat | Motiu |
 Màxim 5-6 files.
-
+{_genere_block}
 ## CHECKLIST DE GENERACIÓ — OBLIGATORI
 Genera únicament:
-1. ## Text adaptat
+1. ## Text adaptat — amb l'ESTRUCTURA del gènere "{_genere_param or 'demanat'}"
 2. ## Argumentació pedagògica
 3. ## Notes d'auditoria
 
-El text adaptat ha de ser un text didàctic acabat, llegible directament per l'alumne, sense intromissions del sistema.
+El text adaptat ha de ser llegible directament per l'alumne, sense intromissions del sistema, i ha de respectar el FORMAT del gènere demanat.
 """)
         return "\n".join(parts)
 
@@ -1098,8 +1123,8 @@ Dins de la secció «## Text adaptat», NO afegeixis:
 - Comentaris meta sobre l'adaptació («Aquí simplifiquem…», «Hem suprimit…»). Aquestes notes pertanyen exclusivament a «## Notes d'auditoria».
 - Indicacions per al docent dins del text. Si vols donar context al docent, fes-ho a «## Argumentació pedagògica».
 
-El text adaptat ha de ser un text didàctic acabat, llegible directament per l'alumne, sense intromissions del sistema. Si el bloc de complements actius està buit, NO inventis exercicis ni activitats per omplir.
-""")
+El text adaptat ha de ser llegible directament per l'alumne i ha de RESPECTAR EL FORMAT del gènere demanat ("{}"). Si el bloc de complements actius està buit, NO inventis exercicis ni activitats per omplir.
+""".format(params.get("genere_discursiu", "divulgatiu")))
 
     parts.append("\n".join(output_sections))
 
