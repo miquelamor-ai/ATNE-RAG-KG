@@ -429,6 +429,44 @@ COMPLEMENTS A GENERAR (a més del text adaptat):
         _genere_block = ""
         if _genere_param:
             _genere_label = _genere_param.replace("_", " ").replace("-", " ").upper()
+            # Fix 2026-05-27 (Bug 3): reforç específic per a "notícia" — sense aquest
+            # reforç, el LLM ignorava l'estructura periodística canònica (titular + lead
+            # 5W + cos en piràmide invertida + cita) i generava prosa expositiva amb
+            # preguntes. Vegeu cas mireia C5_estructura_genere=1/5.
+            _genere_lower = _genere_param.lower()
+            _is_noticia = "notic" in _genere_lower or "notíc" in _genere_lower
+            _noticia_block = ""
+            if _is_noticia:
+                _noticia_block = """
+### 🗞️ FORMAT OBLIGATORI per a NOTÍCIA (piràmide invertida)
+El text adaptat HA DE SEGUIR aquesta estructura, NO és opcional:
+
+1. **TITULAR** (1a línia, format `# Titular`):
+   - Frase informativa amb subjecte + verb d'acció + complement.
+   - NO és el tema genèric ("La fotosíntesi"), sinó el FET noticiable
+     ("Els científics descobreixen com les plantes generen oxigen").
+   - Sense adjectius valoratius. Llargada segons MECR.
+
+2. **LEAD** (1r paràgraf, sense títol propi):
+   - Respon a les 5W en una sola frase o dues curtes:
+     QUI · QUÈ · QUAN · ON · PER QUÈ (cobertura segons MECR: A1=2W, A2=4W, B1+=5W).
+   - És el resum complet del fet més important. Si el lector només llegís el lead,
+     ja sabria l'essencial.
+
+3. **COS** (paràgrafs següents, piràmide invertida):
+   - Detalls per ordre DECREIXENT de rellevància (el més important PRIMER).
+   - Cada paràgraf afegeix un detall menys central que l'anterior.
+   - Pot incloure 1 cita directa atribuïda ("Segons [persona], '…'") a partir d'A2.
+
+4. **CONTEXT FINAL** (opcional, últim paràgraf):
+   - Antecedents o conseqüències. La part més prescindible.
+
+PROHIBIT:
+- Generar el text com a prosa expositiva tipus llibre de text ("La fotosíntesi és...").
+- Estructurar el cos amb preguntes ("**On passa aquest procés?**", "**Què necessita la planta?**").
+  Això és gènere DIVULGATIU/EXPOSITIU, NO notícia.
+- Ometre el titular o el lead 5W.
+"""
             _genere_block = f"""
 ## ⚠️ GÈNERE DISCURSIU OBLIGATORI: {_genere_label}
 El text adaptat HA DE SEGUIR l'estructura canònica del gènere "{_genere_param}",
@@ -438,8 +476,9 @@ tal com es defineix a la SKILL ACTIVA de més amunt al system prompt.
 - Si el gènere és conte/fàbula/poema: narrativa amb personatges i estructura literària.
 - Si el gènere és instructiu/receptari/manual: materials + passos numerats + verificació.
 - Si el gènere és diàleg: dos parlants identificats amb torns clars.
+- Si el gènere és notícia: titular + lead 5W + cos en piràmide invertida + cita opcional.
 - Si el gènere és divulgatiu/expositiu: prosa estructurada amb idees jerarquitzades.
-
+{_noticia_block}
 PROHIBIT generar prosa expositiva genèrica si el gènere és un altre. La forma del
 gènere és tan important com el contingut adaptat.
 """
@@ -1218,6 +1257,45 @@ Genera TOTES les seccions ## següents basant-te en el text adaptat que reps:
 
 Títols exactes (sense prefixos ni emojis). Sub-apartats amb ###.
 PROHIBIT reproduir el text adaptat. PROHIBIT ometre seccions. Si el contingut és curt, fes-lo curt però NO l'ometis.
+""")
+
+    # Fix 2026-05-27 (Bug 1 — esquema_visual buit en 2-call):
+    # esquema_visual NO té SKILL pròpia (vegeu tests/golden/matrix.yaml: skill: null).
+    # A la crida 2 dels complements, sense SKILL i amb només "## Esquema visual" al
+    # checklist, els LLMs generaven la capçalera però deixaven el cos buit. Reforcem
+    # amb instrucció explícita de format + nombre de nodes graduat per MECR.
+    if "esquema_visual" in comp_actius:
+        _mecr_c3 = (mecr or "B1").upper().replace("Ç", "C")
+        _esquema_nodes_map = {
+            "PRE-A1": "2-3 nodes. Seqüències temporals bàsiques (abans→després) o relacions imatge→paraula.",
+            "A1":     "3-4 nodes. Enumeració de qualitats o parts d'un objecte (descripció simple).",
+            "A2":     "4-6 nodes. Seqüència de passos d'instrucció o esdeveniments cronològics.",
+            "B1":     "6-8 nodes. Relacions causa-efecte o hipòtesi-evidència.",
+        }
+        _esquema_nodes = _esquema_nodes_map.get(
+            _mecr_c3,
+            "Nombre de nodes a criteri docent. Modelitza processos complexos."
+        )
+        parts.append(f"""
+## INSTRUCCIÓ ESPECÍFICA — Esquema visual (OBLIGATÒRIA)
+Si esquema_visual=true, GENERA OBLIGATÒRIAMENT 3-5 nodes amb relacions; NO deixis la secció buida.
+Per a {_mecr_c3}: {_esquema_nodes}
+
+Format OBLIGATORI: llista markdown amb sagnia. NO usar fletxes Unicode (→, ↓) ni ASCII-art (│ ├ └).
+El frontend ATNE detecta aquest format i el renderitza com a diagrama SVG (Mermaid flowchart LR).
+
+Exemple de format (adapta'l al text rebut):
+```
+- Tema central
+  - Subtema 1
+    - Detall A
+  - Subtema 2
+    - Detall B
+- Conclusió
+```
+
+PROHIBIT generar la capçalera "## Esquema visual" amb el cos buit. Si no saps quins nodes
+posar, extreu-los del text adaptat (idees principals + relacions causa-efecte o seqüencials).
 """)
 
     return "\n\n".join(parts)

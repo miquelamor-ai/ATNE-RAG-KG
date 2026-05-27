@@ -420,6 +420,60 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
                 # Afegim els complements al text adaptat (el frontend parseja el conjunt)
                 adapted = adapted.rstrip() + "\n\n" + _comp_clean.strip()
                 print(f"[complements_call] generat {len(_comp_clean)} chars", flush=True)
+
+                # Fix 2026-05-27: filtre post-output que elimina seccions ## no
+                # autoritzades pel cas. El LLM tendeix a generar tot el que sap
+                # encara que no es demani (vist a mireia: bastides actiu però
+                # genera també ## Preguntes; marc: glossari activat + preguntes
+                # duplicades). Aquest filtre defensiu manté només les seccions
+                # corresponents als complements actius del cas.
+                import re as _re_filter
+                # Mapping complement → títol de secció (formes principals que el LLM emet)
+                _section_aliases = {
+                    "glossari": [r"^## Glossari\b"],
+                    "esquema_visual": [r"^## Esquema visual\b", r"^## Esquema\b"],
+                    "bastides": [r"^## Bastides\b", r"^## Suports per llegir\b"],
+                    "mapa_conceptual": [r"^## Mapa conceptual\b"],
+                    "mapa_mental": [r"^## Mapa mental\b"],
+                    "preguntes_comprensio": [r"^## Preguntes de comprensió\b", r"^## Preguntes\b"],
+                    "activitats_aprofundiment": [r"^## Activitats d'aprofundiment\b"],
+                    "pictogrames": [r"^## Pictogrames\b"],
+                    "plantilles_genere": [r"^## Plantilla", r"^## Plantilles"],
+                    "resum_graduat": [r"^## Resum graduat\b"],
+                    "cartes_conversacionals": [r"^## Cartes conversacionals\b"],
+                    "rubriques": [r"^## R[úu]briques\b"],
+                    "tolc": [r"^## TOLC\b", r"^## Transllenguatge\b"],
+                }
+                # Seccions sempre permeses (no són complements)
+                _always_allow = [
+                    r"^## Text adaptat\b",
+                    r"^## Argumentaci[óo] pedag[òo]gica\b",
+                    r"^## Notes d'auditoria\b",
+                ]
+                # Secció permeses = always + aliases dels complements demanats
+                _allowed_patterns = list(_always_allow)
+                for _k, _v in _comp_params.items():
+                    if _v and _k in _section_aliases:
+                        _allowed_patterns.extend(_section_aliases[_k])
+                _allowed_re = _re_filter.compile("|".join(_allowed_patterns), _re_filter.M)
+                # Tots els títols ## que apareixen al adapted
+                _all_titles_re = _re_filter.compile(r"^## [^\n]+", _re_filter.M)
+                _stripped_sections = []
+                _segments = _re_filter.split(r"(?m)(^## [^\n]+)\n", adapted)
+                # _segments: [prefix, title1, body1, title2, body2, ...]
+                _new_parts = [_segments[0]]
+                _i = 1
+                while _i < len(_segments):
+                    _title = _segments[_i]
+                    _body = _segments[_i + 1] if _i + 1 < len(_segments) else ""
+                    if _allowed_re.match(_title):
+                        _new_parts.append(_title + "\n" + _body)
+                    else:
+                        _stripped_sections.append(_title)
+                    _i += 2
+                if _stripped_sections:
+                    print(f"[post_filter] Seccions eliminades (no autoritzades): {_stripped_sections}", flush=True)
+                    adapted = "".join(_new_parts)
             except Exception as _comp_err:
                 cb({"type": "step", "step": "warning",
                     "msg": f"Avís: complements fallits ({_comp_err}). Text adaptat conservat."})
