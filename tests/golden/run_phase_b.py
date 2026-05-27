@@ -303,24 +303,93 @@ Sigues estricte. La teva feina és protegir l'alumne real.
 """
 
 
-def call_judge(prompt: str, model: str, api_key: str | None) -> dict:
-    """Crida el judge LLM. Implementació mínima per a Gemini Flash via REST."""
-    if not api_key:
-        raise RuntimeError("Falta GEMINI_API_KEY al .env")
+def _judge_provider_for_model(model: str) -> str:
+    """Auto-detecció del provider segons el nom del model."""
+    m = (model or "").lower()
+    if m.startswith("claude-") or "sonnet" in m or "opus" in m or "haiku" in m:
+        return "anthropic"
+    if m.startswith("gpt-") or m.startswith("o1"):
+        return "openai"
+    return "google"  # default per a gemini-*
 
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
-    body = {
-        "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {
+
+def call_judge(prompt: str, model: str, api_key: str | None) -> dict:
+    """Crida el judge LLM. Detecta provider automàticament del nom del model.
+
+    Suportats:
+    - Google (gemini-*): GEMINI_API_KEY
+    - OpenAI (gpt-*, o1-*): OPENAI_API_KEY
+    - Anthropic (claude-*, sonnet, opus, haiku): ANTHROPIC_API_KEY
+    """
+    provider = _judge_provider_for_model(model)
+
+    if provider == "google":
+        key = api_key or os.getenv("GEMINI_API_KEY") or os.getenv("GEMMA4_API_KEY")
+        if not key:
+            raise RuntimeError("Falta GEMINI_API_KEY al .env")
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
+        body = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "temperature": JUDGE_TEMPERATURE,
+                "responseMimeType": "application/json",
+            },
+        }
+        r = requests.post(url, json=body, timeout=120)
+        r.raise_for_status()
+        data = r.json()
+        text = data["candidates"][0]["content"]["parts"][0]["text"]
+        return json.loads(text)
+
+    if provider == "openai":
+        key = os.getenv("OPENAI_API_KEY")
+        if not key:
+            raise RuntimeError("Falta OPENAI_API_KEY al .env")
+        url = "https://api.openai.com/v1/chat/completions"
+        body = {
+            "model": model,
             "temperature": JUDGE_TEMPERATURE,
-            "responseMimeType": "application/json",
-        },
-    }
-    r = requests.post(url, json=body, timeout=120)
-    r.raise_for_status()
-    data = r.json()
-    text = data["candidates"][0]["content"]["parts"][0]["text"]
-    return json.loads(text)
+            "response_format": {"type": "json_object"},
+            "messages": [
+                {"role": "system", "content": "Ets un avaluador adversarial. Retornes NOMÉS JSON estricte."},
+                {"role": "user", "content": prompt},
+            ],
+        }
+        headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
+        r = requests.post(url, json=body, headers=headers, timeout=120)
+        r.raise_for_status()
+        data = r.json()
+        text = data["choices"][0]["message"]["content"]
+        return json.loads(text)
+
+    if provider == "anthropic":
+        key = os.getenv("ANTHROPIC_API_KEY")
+        if not key:
+            raise RuntimeError("Falta ANTHROPIC_API_KEY al .env")
+        url = "https://api.anthropic.com/v1/messages"
+        body = {
+            "model": model,
+            "max_tokens": 4096,
+            "temperature": JUDGE_TEMPERATURE,
+            "messages": [{"role": "user", "content": prompt}],
+        }
+        headers = {
+            "x-api-key": key,
+            "anthropic-version": "2023-06-01",
+            "Content-Type": "application/json",
+        }
+        r = requests.post(url, json=body, headers=headers, timeout=120)
+        r.raise_for_status()
+        data = r.json()
+        text = data["content"][0]["text"]
+        # Claude pot afegir text abans/després del JSON; intenta extreure el JSON principal
+        start = text.find("{")
+        end = text.rfind("}")
+        if start >= 0 and end > start:
+            text = text[start:end + 1]
+        return json.loads(text)
+
+    raise RuntimeError(f"Provider desconegut per al model: {model}")
 
 
 def generate_outputs(cases: list[dict], texts: dict, args) -> None:
@@ -360,15 +429,28 @@ def judge_outputs(cases: list[dict], texts: dict, rubric: dict, args) -> None:
             text_body = texts["textos"][text_id]["text"]
             prompt = build_judge_prompt(case, text_body, output, rubric)
             print(f"[judge] {case['id']} × {text_id} … ", end="", flush=True)
-            try:
-                judgment = call_judge(prompt, args.judge_model, api_key)
-                jud_path = JUDGMENTS_DIR / f"{case['id']}__{text_id}.json"
-                jud_path.write_text(json.dumps(judgment, ensure_ascii=False, indent=2), encoding="utf-8")
-                scores = judgment.get("scores", {})
-                avg = sum(s["score"] for s in scores.values()) / max(len(scores), 1)
-                print(f"OK score~{avg:.1f}")
-            except Exception as e:
-                print(f"ERROR: {e}")
+            # Retry simple per a errors temporals (503/429)
+            last_err = None
+            judgment = None
+            for attempt in range(3):
+                try:
+                    judgment = call_judge(prompt, args.judge_model, api_key)
+                    break
+                except Exception as e:
+                    last_err = e
+                    msg = str(e).lower()
+                    if any(t in msg for t in ("503", "429", "timeout", "connection")):
+                        time.sleep(5 * (attempt + 1))  # backoff: 5s, 10s, 15s
+                        continue
+                    break
+            if judgment is None:
+                print(f"ERROR: {last_err}")
+                continue
+            jud_path = JUDGMENTS_DIR / f"{case['id']}__{text_id}.json"
+            jud_path.write_text(json.dumps(judgment, ensure_ascii=False, indent=2), encoding="utf-8")
+            scores = judgment.get("scores", {})
+            avg = sum(s.get("score", 0) for s in scores.values()) / max(len(scores), 1) if scores else 0
+            print(f"OK score~{avg:.1f}")
 
 
 def _score_icon(score: int | float | None) -> str:
