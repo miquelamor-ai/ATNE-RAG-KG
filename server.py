@@ -102,16 +102,16 @@ from adaptation.llm_clients import (
 # startup i el PUT d'admin l'escriuen, i el PUT només muta claus atòmiques
 # → segur per accés concurrent des dels SSE workers sense lock.
 _MODEL_CONFIG: dict[str, str] = {
-    "generate": ATNE_MODEL,
-    "adapt": ATNE_MODEL,
-    "adapt_flash": ATNE_MODEL,   # mode Flash (prompt MVP)
-    "refine": ATNE_MODEL,
-    "complements": "gpt-4.1-mini",  # 2a crida: model rapid per a glossari/preguntes/bastides
-    "auditor": "gpt-4o-mini",
-    # Fase il·lustracions: tradueix concept catala → query EN + brief FLUX.
-    # Default Gemma 4 31B (free tier) — Gemma 3 discontinuat per Google el 2026-05.
-    # Configurable des d'/admin com la resta de fases.
-    "illustration_translate": "gemma-4-31b-it",
+    # Tasques grans (obediència crítica per UNE+MECR+perfil): GPT-4o.
+    # Decidit 2026-05-27 després que Gemma 4 31B fallés rigor a A1 inicial.
+    "generate": "gpt-4o",
+    "adapt": "gpt-4o",
+    "adapt_flash": "gpt-4o",     # mode Flash (prompt MVP) — també GPT-4o
+    "refine": "gpt-4o",
+    # Tasques petites/mecàniques: GPT-4.1-mini (barat, suficient).
+    "complements": "gpt-4.1-mini",        # 2a crida: glossari/preguntes/bastides
+    "auditor": "gpt-4.1-mini",            # verify (era gpt-4o-mini)
+    "illustration_translate": "gpt-4.1-mini",  # traduccio CA→EN per FLUX
 }
 
 
