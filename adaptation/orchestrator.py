@@ -363,8 +363,11 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
                     f"TEXT ADAPTAT:\n{adapted}\n\n"
                     "Genera els complements pedagògics sol·licitats."
                 )
-                _comp_raw = _call_llm(_comp_model, _comp_system, _comp_user,
-                                      temperature=0.3, max_tokens=8192)
+                # Fix 2026-05-27: _call_llm() no accepta temperature/max_tokens
+                # kwargs (signatura: model_id, system_prompt, text). Sense aquest
+                # fix la 2a crida petava i NO es generaven mai complements
+                # (detectat pel harness Fase B: 22/24 casos amb REGLA:MATRIU).
+                _comp_raw = _call_llm(_comp_model, _comp_system, _comp_user)
                 _comp_clean = clean_gemini_output(_comp_raw)
                 _comp_clean = _post_process_llm_output(_comp_clean, lang=lang)
                 # Resolucio pictogrames als complements (si n'hi ha marcadors)
