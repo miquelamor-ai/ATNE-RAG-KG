@@ -1,524 +1,68 @@
 # =============================================================================
-# tests/golden/cases.yaml — Casos golden Fase A
+# tests/golden/cases.yaml — Casos golden (versió ATNE-fidel)
 # =============================================================================
-# 15 casos representatius (1 per condició × 12 + 3 compostos multi-condició).
-# Cada cas és un "perfil canònic" amb el que ha de funcionar el sistema.
+# Font canònica: els perfils demo que es veuen al Pas 1 de ATNE.
+# Sincronitza amb: ui/atne/pas1.html:961-1005 (window.ATNE_PROFILES).
+#
+# Principi: el harness valida exactament els perfils que el docent veu al
+# selector del Pas 1. Si afegeixes un perfil demo nou a ATNE, copia'l aquí
+# i el harness el validarà.
+#
+# 11 perfils (4 principals + 4 demo persones + 3 grups). MECR derivat del
+# curs segons COURSE_TO_MECR (profile-canonical.js). DUA i gènere fixats al
+# text demo (Rev. Industrial → divulgatiu històric, ESO 4).
 #
 # Per cada cas el harness valida:
 #   (1) Skills actives = expected_skills (semàntica de triggers)
-#   (2) Complements per defecte = matrix.yaml (alineació codi vs canon)
-#   (3) Instruction_filter no peta i activa macrodirectives plausibles
-#
-# Si afegeixes un cas, també afegeix una secció `expected_skills` mínima per
-# justificar què hi esperaves trobar. La primera execució te'l dirà si erres.
+#   (2) Defaults UI alineats amb matrix.yaml (canon)
+#   (3) instruction_filter.get_instructions() no peta
 # =============================================================================
 
 meta:
-  versio: "1.1.0"
+  versio: "2.0.0"
   generat_at: "2026-05-27"
-  total_casos: 25
+  font: "ui/atne/pas1.html:961-1005 (window.ATNE_PROFILES)"
+  text_canonic: "revolucio_industrial_demo (golden_texts.yaml)"
+  total_casos: 11
 
 casos:
 
-  # ─── 12 condicions individuals ──────────────────────────────────────────
+  # ─── 4 perfils principals (no demo, però són exemples del Pas 1) ───────
 
-  - id: "C01_tea_b1_noticia"
-    descripcio: "TEA nivell 2 + B1 + notícia"
-    condicions_curtes: ["tea"]
-    profile:
-      caracteristiques:
-        tea: { actiu: true, suport_nivell: 2 }
-    params:
-      mecr_sortida: "B1"
-      dua: "Core"
-      genere_discursiu: "noticia"
-      complements:   # els que el docent activaria — coherent amb matriu defaults
-        glossari: true
-        esquema_visual: true
-        bastides: true
-        preguntes_comprensio: true
-        pictogrames: true
-        rubriques: true
-    expected_skills:
-      - generate-glossari
-      - generate-bastides-lectura
-      - generate-bastides-produccio
-      - generate-preguntes-comprensio
-      - generate-pictogrames
-      - generate-rubriques
-      - write-noticia
-
-  - id: "C02_tdah_a2_dialeg"
-    descripcio: "TDAH moderat + A2 + diàleg"
+  - id: "marc_tdah_b1_divulgatiu"
+    descripcio: "El Pilot · 14 anys · 3r ESO A · TDAH · B1 Intermedi"
+    font_atne: "pas1.html:961 (marc)"
     condicions_curtes: ["tdah"]
-    profile:
-      caracteristiques:
-        tdah: { actiu: true, grau: "moderat" }
-    params:
-      mecr_sortida: "A2"
-      dua: "Core"
-      genere_discursiu: "dialeg"
-      complements:
-        glossari: true
-        esquema_visual: true
-        bastides: true
-        preguntes_comprensio: true
-    expected_skills:
-      - generate-glossari
-      - generate-bastides-lectura
-      - generate-bastides-produccio
-      - generate-preguntes-comprensio
-      - write-dialeg
-
-  - id: "C03_dislexia_a2_conte"
-    descripcio: "Dislèxia fonològica + A2 + conte"
-    condicions_curtes: ["disl"]
-    profile:
-      caracteristiques:
-        dislexia: { actiu: true, tipus_dislexia: "fonologica", grau: "moderat" }
-    params:
-      mecr_sortida: "A2"
-      dua: "Core"
-      genere_discursiu: "conte"
-      complements:
-        glossari: true
-        esquema_visual: true
-        bastides: true
-        preguntes_comprensio: true
-        plantilles_genere: true
-    expected_skills:
-      - generate-glossari
-      - generate-bastides-lectura
-      - generate-bastides-produccio
-      - generate-preguntes-comprensio
-      - generate-plantilles-genere
-      - write-conte
-
-  - id: "C04_di_a1_instructiu"
-    descripcio: "DI moderada + A1 + instructiu"
-    condicions_curtes: ["di"]
-    profile:
-      caracteristiques:
-        di: { actiu: true, grau: "moderat" }
-    params:
-      mecr_sortida: "A1"
-      dua: "Accés"
-      genere_discursiu: "instructiu"
-      complements:
-        glossari: true
-        esquema_visual: true
-        bastides: true
-        pictogrames: true
-        plantilles_genere: true
-        resum_graduat: true
-    expected_skills:
-      - generate-glossari
-      - generate-bastides-lectura
-      - generate-pictogrames
-      - generate-plantilles-genere
-      - generate-resum-graduat
-      - write-instructiu
-
-  - id: "C05_tdl_a2_descripcio"
-    descripcio: "TDL receptiu + A2 + descripció"
-    condicions_curtes: ["tdl"]
-    profile:
-      caracteristiques:
-        tdl: { actiu: true, modalitat: "comprensiu" }
-    params:
-      mecr_sortida: "A2"
-      dua: "Core"
-      genere_discursiu: "descripcio"
-      complements:
-        glossari: true
-        esquema_visual: true
-        bastides: true
-        preguntes_comprensio: true
-        plantilles_genere: true
-    expected_skills:
-      - generate-glossari
-      - generate-bastides-lectura
-      - generate-bastides-produccio
-      - generate-preguntes-comprensio
-      - generate-plantilles-genere
-      - write-descripcio
-
-  - id: "C06_ac_b2_assaig"
-    descripcio: "Altes capacitats + B2 + assaig (perfil enriquiment)"
-    condicions_curtes: ["ac"]
-    profile:
-      caracteristiques:
-        altes_capacitats: { actiu: true, tipus: "academica" }
-    params:
-      mecr_sortida: "B2"
-      dua: "Enriquiment"
-      genere_discursiu: "assaig"
-      complements:
-        glossari: true
-        esquema_visual: true
-        mapa_conceptual: true
-        preguntes_comprensio: true
-        activitats_aprofundiment: true
-        mapa_mental: true
-        rubriques: true
-    expected_skills:
-      - generate-glossari
-      - generate-mapa-conceptual
-      - generate-preguntes-comprensio
-      - generate-activitats-aprofundiment
-      - generate-mapa-mental
-      - generate-rubriques
-      - write-assaig
-
-  - id: "C07_aud_b1_cronica"
-    descripcio: "Discapacitat auditiva (LSC) + B1 + crònica"
-    condicions_curtes: ["aud"]
-    profile:
-      caracteristiques:
-        discapacitat_auditiva: { actiu: true, grau: "sever", comunicacio: "LSC" }
-    params:
-      mecr_sortida: "B1"
-      dua: "Core"
-      genere_discursiu: "cronica"
-      complements:
-        glossari: true
-        esquema_visual: true
-        bastides: true
-        preguntes_comprensio: true
-        pictogrames: true
-    expected_skills:
-      - generate-glossari
-      - generate-bastides-lectura
-      - generate-bastides-produccio
-      - generate-preguntes-comprensio
-      - generate-pictogrames
-      - write-cronica
-
-  - id: "C08_vis_b1_carta"
-    descripcio: "Discapacitat visual (baixa visió) + B1 + carta"
-    condicions_curtes: ["vis"]
-    profile:
-      caracteristiques:
-        discapacitat_visual: { actiu: true, grau: "baixa_visio" }
-    params:
-      mecr_sortida: "B1"
-      dua: "Core"
-      genere_discursiu: "carta"
-      complements:
-        glossari: true
-        preguntes_comprensio: true
-    expected_skills:
-      - generate-glossari
-      - generate-preguntes-comprensio
-      - write-carta
-
-  # ─── Condicions sense suport backend (GAPs documentats) ────────────────
-
-  - id: "C09_tdc_b1_instructiu"
-    descripcio: "Dispràxia + B1 + instructiu — GAP: tdc NO és a ALL_CHAR_KEYS"
-    condicions_curtes: ["tdc"]
-    gap_known: "tdc no té chars_key (veure matrix.yaml condicions.tdc.chars_key=null)"
-    profile:
-      caracteristiques: {}   # cap clau de backend pot representar tdc avui
-    params:
-      mecr_sortida: "B1"
-      dua: "Core"
-      genere_discursiu: "instructiu"
-      complements:
-        glossari: true
-        preguntes_comprensio: true
-    expected_skills:
-      - generate-glossari
-      - generate-preguntes-comprensio
-      - write-instructiu
-
-  - id: "C10_cat_pre_a1_noticia"
-    descripcio: "Nouvingut pre-A1, L1 àrab, 3 mesos a Catalunya, sense alfabet llatí"
-    condicions_curtes: ["cat"]
-    profile:
-      caracteristiques:
-        nouvingut:
-          actiu: true
-          l1: "àrab"
-          pais: "Marroc"
-          mesos_catalunya: 3
-          alfabet_llati: false
-          alfabetitzacio_l1: true
-    params:
-      mecr_sortida: "pre-A1"
-      dua: "Accés"
-      genere_discursiu: "noticia"
-      complements:
-        glossari: true
-        esquema_visual: true
-        bastides: true
-        preguntes_comprensio: true
-        pictogrames: true
-        plantilles_genere: true
-        resum_graduat: true
-    expected_skills:
-      - generate-glossari
-      - generate-bastides-lectura
-      - generate-bastides-produccio
-      - generate-preguntes-comprensio
-      - generate-pictogrames
-      - generate-plantilles-genere
-      - generate-resum-graduat
-      - generate-tolc          # nouvingut + L1 → TOLC s'ha d'activar
-      - write-noticia
-
-  - id: "C11_vuln_b1_opinio"
-    descripcio: "Vulnerabilitat + B1 + opinió — GAP: vuln NO és a ALL_CHAR_KEYS"
-    condicions_curtes: ["vuln"]
-    gap_known: "vuln no té chars_key"
-    profile:
-      caracteristiques: {}
-    params:
-      mecr_sortida: "B1"
-      dua: "Core"
-      genere_discursiu: "opinio"
-      complements:
-        glossari: true
-        bastides: true
-        preguntes_comprensio: true
-    expected_skills:
-      - generate-glossari
-      - generate-bastides-lectura
-      - generate-bastides-produccio
-      - generate-preguntes-comprensio
-      - write-opinio
-
-  - id: "C12_emo_a2_diari"
-    descripcio: "Necessitats emocionals + A2 + diari — GAP: emo NO és a ALL_CHAR_KEYS"
-    condicions_curtes: ["emo"]
-    gap_known: "emo no té chars_key"
-    profile:
-      caracteristiques: {}
-    params:
-      mecr_sortida: "A2"
-      dua: "Core"
-      genere_discursiu: "diari"
-      complements:
-        glossari: true
-        bastides: true
-        preguntes_comprensio: true
-    expected_skills:
-      - generate-glossari
-      - generate-bastides-lectura
-      - generate-bastides-produccio
-      - generate-preguntes-comprensio
-      - write-diari
-
-  # ─── Casos compostos (2e, multi-condició) ──────────────────────────────
-
-  - id: "C13_ac_tdah_b1_assaig"
-    descripcio: "2e — Altes capacitats + TDAH + B1 + assaig"
-    condicions_curtes: ["ac", "tdah"]
-    profile:
-      caracteristiques:
-        altes_capacitats: { actiu: true }
-        tdah: { actiu: true, grau: "moderat" }
-    params:
-      mecr_sortida: "B1"
-      dua: "Enriquiment"
-      genere_discursiu: "assaig"
-      complements:
-        glossari: true
-        esquema_visual: true
-        mapa_conceptual: true
-        preguntes_comprensio: true
-        activitats_aprofundiment: true
-        mapa_mental: true
-        rubriques: true
-        bastides: true
-    expected_skills:
-      - generate-glossari
-      - generate-bastides-lectura
-      - generate-bastides-produccio
-      - generate-mapa-conceptual
-      - generate-preguntes-comprensio
-      - generate-activitats-aprofundiment
-      - generate-mapa-mental
-      - generate-rubriques
-      - write-assaig
-
-  - id: "C14_disl_cat_a1_conte"
-    descripcio: "Dislèxia + Nouvingut L1 castellà + A1 + conte"
-    condicions_curtes: ["disl", "cat"]
-    profile:
-      caracteristiques:
-        dislexia: { actiu: true, tipus_dislexia: "mixta" }
-        nouvingut:
-          actiu: true
-          l1: "castellà"
-          mesos_catalunya: 18
-          alfabet_llati: true
-          familia_linguistica: "romanica"
-    params:
-      mecr_sortida: "A1"
-      dua: "Accés"
-      genere_discursiu: "conte"
-      complements:
-        glossari: true
-        esquema_visual: true
-        bastides: true
-        preguntes_comprensio: true
-        pictogrames: true
-        plantilles_genere: true
-    expected_skills:
-      - generate-glossari
-      - generate-bastides-lectura
-      - generate-bastides-produccio
-      - generate-preguntes-comprensio
-      - generate-pictogrames
-      - generate-plantilles-genere
-      - generate-tolc          # nouvingut + L1 declarada → auto-activa
-      - write-conte
-
-  - id: "C15_grup_multinivell"
-    descripcio: "Grup multinivell — TDAH + AC + Nouvingut (Core, A2, gènere notícia)"
-    condicions_curtes: ["tdah", "ac", "cat"]
     profile:
       caracteristiques:
         tdah: { actiu: true }
-        altes_capacitats: { actiu: true }
-        nouvingut: { actiu: true, l1: "anglès" }
     params:
-      mecr_sortida: "A2"
+      mecr_sortida: "B1"
       dua: "Core"
-      genere_discursiu: "noticia"
+      genere_discursiu: "divulgatiu"
       complements:
         glossari: true
         esquema_visual: true
         bastides: true
-        mapa_conceptual: true
         preguntes_comprensio: true
-        pictogrames: true
-        activitats_aprofundiment: true
-        plantilles_genere: true
     expected_skills:
       - generate-glossari
       - generate-bastides-lectura
       - generate-bastides-produccio
-      - generate-mapa-conceptual
       - generate-preguntes-comprensio
-      - generate-pictogrames
-      - generate-activitats-aprofundiment
-      - generate-plantilles-genere
-      - generate-tolc          # nouvingut + L1 declarada → auto-activa
-      - write-noticia
+      - write-divulgatiu
 
-  # ─── Ampliació v1.1.0 (2026-05-27): cobertura gèneres + MECRs alts + extrems ──
-
-  - id: "C16_ac_c1_poema"
-    descripcio: "Altes capacitats (creativa) + C1 + poema · MECR alt, estètic"
-    condicions_curtes: ["ac"]
-    profile:
-      caracteristiques:
-        altes_capacitats: { actiu: true, tipus: "creativa" }
-    params:
-      mecr_sortida: "C1"
-      dua: "Enriquiment"
-      genere_discursiu: "poema"
-      complements:
-        glossari: true
-        mapa_conceptual: true
-        preguntes_comprensio: true
-        activitats_aprofundiment: true
-        mapa_mental: true
-        rubriques: true
-    expected_skills:
-      - generate-glossari
-      - generate-mapa-conceptual
-      - generate-preguntes-comprensio
-      - generate-activitats-aprofundiment
-      - generate-mapa-mental
-      - generate-rubriques
-      - write-poema
-
-  - id: "C17_dislexia_b1_biografia"
-    descripcio: "Dislèxia mixta + B1 + biografia · narrativa estructurada"
+  - id: "mireia_dislexia_a2_divulgatiu"
+    descripcio: "La Narradora · 12 anys · 1r ESO B · Dislèxia · Decodificació"
+    font_atne: "pas1.html:965 (mireia)"
     condicions_curtes: ["disl"]
     profile:
       caracteristiques:
-        dislexia: { actiu: true, tipus_dislexia: "mixta", grau: "moderat" }
-    params:
-      mecr_sortida: "B1"
-      dua: "Core"
-      genere_discursiu: "biografia"
-      complements:
-        glossari: true
-        esquema_visual: true
-        bastides: true
-        preguntes_comprensio: true
-        plantilles_genere: true
-    expected_skills:
-      - generate-glossari
-      - generate-bastides-lectura
-      - generate-bastides-produccio
-      - generate-preguntes-comprensio
-      - generate-plantilles-genere
-      - write-biografia
-
-  - id: "C18_di_a1_fabula"
-    descripcio: "DI moderada + A1 + faula · narratiu simple amb moral"
-    condicions_curtes: ["di"]
-    profile:
-      caracteristiques:
-        di: { actiu: true, grau: "moderat" }
-    params:
-      mecr_sortida: "A1"
-      dua: "Accés"
-      genere_discursiu: "fabula"
-      complements:
-        glossari: true
-        esquema_visual: true
-        bastides: true
-        pictogrames: true
-        plantilles_genere: true
-        resum_graduat: true
-    expected_skills:
-      - generate-glossari
-      - generate-bastides-lectura
-      - generate-pictogrames
-      - generate-plantilles-genere
-      - generate-resum-graduat
-      - write-fabula
-
-  - id: "C19_tea_b2_informe"
-    descripcio: "TEA nivell 1 + B2 + informe · científic estructurat"
-    condicions_curtes: ["tea"]
-    profile:
-      caracteristiques:
-        tea: { actiu: true, suport_nivell: 1 }
-    params:
-      mecr_sortida: "B2"
-      dua: "Core"
-      genere_discursiu: "informe"
-      complements:
-        glossari: true
-        esquema_visual: true
-        bastides: true
-        preguntes_comprensio: true
-        rubriques: true
-    expected_skills:
-      - generate-glossari
-      - generate-bastides-lectura
-      - generate-bastides-produccio
-      - generate-preguntes-comprensio
-      - generate-rubriques
-      - write-informe
-
-  - id: "C20_tdah_a2_receptari"
-    descripcio: "TDAH lleu + A2 + receptari · instructiu visual"
-    condicions_curtes: ["tdah"]
-    profile:
-      caracteristiques:
-        tdah: { actiu: true, grau: "lleu" }
+        dislexia: { actiu: true }
     params:
       mecr_sortida: "A2"
       dua: "Core"
-      genere_discursiu: "receptari"
+      genere_discursiu: "divulgatiu"
       complements:
         glossari: true
         esquema_visual: true
@@ -531,103 +75,15 @@ casos:
       - generate-bastides-produccio
       - generate-preguntes-comprensio
       - generate-plantilles-genere
-      - write-receptari
+      - write-divulgatiu
 
-  - id: "C21_aud_b1_entrevista"
-    descripcio: "Discapacitat auditiva (LSC) + B1 + entrevista · oral mediat"
-    condicions_curtes: ["aud"]
-    profile:
-      caracteristiques:
-        discapacitat_auditiva: { actiu: true, grau: "sever", comunicacio: "LSC" }
-    params:
-      mecr_sortida: "B1"
-      dua: "Core"
-      genere_discursiu: "entrevista"
-      complements:
-        glossari: true
-        esquema_visual: true
-        bastides: true
-        preguntes_comprensio: true
-        pictogrames: true
-    expected_skills:
-      - generate-glossari
-      - generate-bastides-lectura
-      - generate-bastides-produccio
-      - generate-preguntes-comprensio
-      - generate-pictogrames
-      - write-entrevista
-
-  - id: "C22_cat_a1_ressenya"
-    descripcio: "Nouvingut L1 castellà + A1 + ressenya · lectura crítica iniciada"
+  - id: "liu_nouvingut_a1_divulgatiu"
+    descripcio: "El Pont · 13 anys · 2n ESO C · Català L2 · Vocab. bàsic"
+    font_atne: "pas1.html:969 (liu)"
     condicions_curtes: ["cat"]
     profile:
       caracteristiques:
-        nouvingut:
-          actiu: true
-          l1: "castellà"
-          pais: "Equador"
-          mesos_catalunya: 12
-          alfabet_llati: true
-          familia_linguistica: "romanica"
-    params:
-      mecr_sortida: "A1"
-      dua: "Core"
-      genere_discursiu: "ressenya"
-      complements:
-        glossari: true
-        esquema_visual: true
-        bastides: true
-        preguntes_comprensio: true
-        pictogrames: true
-        plantilles_genere: true
-    expected_skills:
-      - generate-glossari
-      - generate-bastides-lectura
-      - generate-bastides-produccio
-      - generate-preguntes-comprensio
-      - generate-pictogrames
-      - generate-plantilles-genere
-      - generate-tolc          # nouvingut + L1 declarada
-      - write-ressenya
-
-  - id: "C23_ac_c2_assaig_enriquiment"
-    descripcio: "Altes capacitats (acadèmica) + C2 + assaig · Enriquiment màxim"
-    condicions_curtes: ["ac"]
-    profile:
-      caracteristiques:
-        altes_capacitats: { actiu: true, tipus: "academica" }
-    params:
-      mecr_sortida: "C2"
-      dua: "Enriquiment"
-      genere_discursiu: "assaig"
-      complements:
-        glossari: true
-        mapa_conceptual: true
-        preguntes_comprensio: true
-        activitats_aprofundiment: true
-        mapa_mental: true
-        rubriques: true
-    expected_skills:
-      - generate-glossari
-      - generate-mapa-conceptual
-      - generate-preguntes-comprensio
-      - generate-activitats-aprofundiment
-      - generate-mapa-mental
-      - generate-rubriques
-      - write-assaig
-
-  - id: "C24_grup_acces_divulgatiu"
-    descripcio: "Grup multinivell (TDAH + dislèxia + nouvingut) + DUA Accés + divulgatiu"
-    condicions_curtes: ["tdah", "disl", "cat"]
-    profile:
-      caracteristiques:
-        tdah: { actiu: true, grau: "moderat" }
-        dislexia: { actiu: true, tipus_dislexia: "fonologica" }
-        nouvingut:
-          actiu: true
-          l1: "àrab"
-          mesos_catalunya: 6
-          alfabet_llati: false
+        nouvingut: { actiu: true }
     params:
       mecr_sortida: "A1"
       dua: "Accés"
@@ -648,25 +104,234 @@ casos:
       - generate-pictogrames
       - generate-plantilles-genere
       - generate-resum-graduat
-      - generate-tolc          # nouvingut + L1 declarada
       - write-divulgatiu
 
-  - id: "C25_discalculia_a2_manual"
-    descripcio: "Discalcúlia + A2 + manual · cobreix GAP invers (al backend, no a matriu §7)"
-    condicions_curtes: ["discalculia"]
-    gap_known: "discalculia fora_matriu (no a saber-ne+ §7) — defaults pedagògics pendents decisió"
+  - id: "pol_aacc_b2_divulgatiu"
+    descripcio: "El Roure · 15 anys · 4t ESO A · Altes Capacitats"
+    font_atne: "pas1.html:973 (pol)"
+    condicions_curtes: ["ac"]
     profile:
       caracteristiques:
-        discalculia: { actiu: true }
+        altes_capacitats: { actiu: true }
     params:
-      mecr_sortida: "A2"
-      dua: "Core"
-      genere_discursiu: "manual"
+      mecr_sortida: "B2"
+      dua: "Enriquiment"
+      genere_discursiu: "divulgatiu"
       complements:
         glossari: true
         esquema_visual: true
+        mapa_conceptual: true
+        preguntes_comprensio: true
+        activitats_aprofundiment: true
+        mapa_mental: true
+        rubriques: true
+    expected_skills:
+      - generate-glossari
+      - generate-mapa-conceptual
+      - generate-preguntes-comprensio
+      - generate-activitats-aprofundiment
+      - generate-mapa-mental
+      - generate-rubriques
+      - write-divulgatiu
+
+  # ─── 4 perfils demo individuals (demo:true) ─────────────────────────────
+
+  - id: "ex_tdah_estel_b1_divulgatiu"
+    descripcio: "L'Estel · 14 anys · 3r ESO · TDAH (demo)"
+    font_atne: "pas1.html:977 (ex_tdah)"
+    condicions_curtes: ["tdah"]
+    profile:
+      caracteristiques:
+        tdah: { actiu: true }
+    params:
+      mecr_sortida: "B1"
+      dua: "Core"
+      genere_discursiu: "divulgatiu"
+      complements:
+        glossari: true
+        esquema_visual: true
+        bastides: true
         preguntes_comprensio: true
     expected_skills:
       - generate-glossari
+      - generate-bastides-lectura
+      - generate-bastides-produccio
       - generate-preguntes-comprensio
-      - write-manual
+      - write-divulgatiu
+
+  - id: "ex_l2_viatger_pre_a1_divulgatiu"
+    descripcio: "El Viatger · 12 anys · 1r ESO · Català L2 · Pre-A1 · L1 àrab · 2 mesos · sense alfabet llatí"
+    font_atne: "pas1.html:981 (ex_l2)"
+    condicions_curtes: ["cat"]
+    profile:
+      caracteristiques:
+        nouvingut:
+          actiu: true
+          l1: "Àrab"
+          pais: "Marroc"
+          mesos_catalunya: 3
+          alfabet_llati: false
+          alfabetitzacio_l1: true
+          escolaritzacio: "regular"
+    params:
+      mecr_sortida: "pre-A1"
+      dua: "Accés"
+      genere_discursiu: "divulgatiu"
+      complements:
+        glossari: true
+        esquema_visual: true
+        bastides: true
+        preguntes_comprensio: true
+        pictogrames: true
+        plantilles_genere: true
+        resum_graduat: true
+    expected_skills:
+      - generate-glossari
+      - generate-bastides-lectura
+      - generate-bastides-produccio
+      - generate-preguntes-comprensio
+      - generate-pictogrames
+      - generate-plantilles-genere
+      - generate-resum-graduat
+      - generate-tolc          # nouvingut + L1 declarada → auto-activa
+      - write-divulgatiu
+
+  - id: "ex_tea_astronom_a2_divulgatiu"
+    descripcio: "L'Astrònom · 10 anys · 5è Primària · TEA (demo)"
+    font_atne: "pas1.html:986 (ex_tea)"
+    condicions_curtes: ["tea"]
+    profile:
+      caracteristiques:
+        tea: { actiu: true }
+    params:
+      mecr_sortida: "A2"
+      dua: "Core"
+      genere_discursiu: "divulgatiu"
+      complements:
+        glossari: true
+        esquema_visual: true
+        bastides: true
+        preguntes_comprensio: true
+        pictogrames: true
+        rubriques: true
+    expected_skills:
+      - generate-glossari
+      - generate-bastides-lectura
+      - generate-bastides-produccio
+      - generate-preguntes-comprensio
+      - generate-pictogrames
+      - generate-rubriques
+      - write-divulgatiu
+
+  - id: "ex_aacc_exploradora_b2_divulgatiu"
+    descripcio: "L'Exploradora · 15 anys · 4t ESO · Altes Capacitats (demo)"
+    font_atne: "pas1.html:990 (ex_aacc)"
+    condicions_curtes: ["ac"]
+    profile:
+      caracteristiques:
+        altes_capacitats: { actiu: true }
+    params:
+      mecr_sortida: "B2"
+      dua: "Enriquiment"
+      genere_discursiu: "divulgatiu"
+      complements:
+        glossari: true
+        esquema_visual: true
+        mapa_conceptual: true
+        preguntes_comprensio: true
+        activitats_aprofundiment: true
+        mapa_mental: true
+        rubriques: true
+    expected_skills:
+      - generate-glossari
+      - generate-mapa-conceptual
+      - generate-preguntes-comprensio
+      - generate-activitats-aprofundiment
+      - generate-mapa-mental
+      - generate-rubriques
+      - write-divulgatiu
+
+  # ─── 3 grups demo (type:group) ─────────────────────────────────────────
+
+  - id: "ex_pri_grup_5e_primaria"
+    descripcio: "5è Primària B · 18 alumnes · Ritmes diversos · 1 TDAH · 1 L2"
+    font_atne: "pas1.html:994 (ex_pri)"
+    condicions_curtes: ["tdah", "cat"]
+    profile:
+      caracteristiques:
+        tdah: { actiu: true }
+        nouvingut: { actiu: true }
+    params:
+      mecr_sortida: "A2"
+      dua: "Core"
+      genere_discursiu: "divulgatiu"
+      complements:
+        glossari: true
+        esquema_visual: true
+        bastides: true
+        preguntes_comprensio: true
+        pictogrames: true
+        plantilles_genere: true
+        resum_graduat: true
+    expected_skills:
+      - generate-glossari
+      - generate-bastides-lectura
+      - generate-bastides-produccio
+      - generate-preguntes-comprensio
+      - generate-pictogrames
+      - generate-plantilles-genere
+      - generate-resum-graduat
+      - write-divulgatiu
+
+  - id: "ex_eso_grup_2n_eso"
+    descripcio: "2n ESO C · 22 alumnes · 3 nivells MECR · 2 L2 · 1 TEA"
+    font_atne: "pas1.html:998 (ex_eso)"
+    condicions_curtes: ["tea", "cat"]
+    profile:
+      caracteristiques:
+        tea: { actiu: true }
+        nouvingut: { actiu: true }
+    params:
+      mecr_sortida: "B1"
+      dua: "Core"
+      genere_discursiu: "divulgatiu"
+      complements:
+        glossari: true
+        esquema_visual: true
+        bastides: true
+        preguntes_comprensio: true
+        pictogrames: true
+        plantilles_genere: true
+        rubriques: true
+    expected_skills:
+      - generate-glossari
+      - generate-bastides-lectura
+      - generate-bastides-produccio
+      - generate-preguntes-comprensio
+      - generate-pictogrames
+      - generate-plantilles-genere
+      - generate-rubriques
+      - write-divulgatiu
+
+  - id: "ex_fp_grup_gm_administracio"
+    descripcio: "GM Administració 1r · 15 alumnes · Com. empresarial · Velocitats diverses · 1 TDAH"
+    font_atne: "pas1.html:1002 (ex_fp)"
+    condicions_curtes: ["tdah"]
+    profile:
+      caracteristiques:
+        tdah: { actiu: true }
+    params:
+      mecr_sortida: "B2"
+      dua: "Core"
+      genere_discursiu: "divulgatiu"
+      complements:
+        glossari: true
+        esquema_visual: true
+        bastides: true
+        preguntes_comprensio: true
+    expected_skills:
+      - generate-glossari
+      - generate-bastides-lectura
+      - generate-bastides-produccio
+      - generate-preguntes-comprensio
+      - write-divulgatiu

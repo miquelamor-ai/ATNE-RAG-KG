@@ -1,168 +1,26 @@
 # =============================================================================
 # tests/golden/golden_texts.yaml — Textos font per a la Fase B
 # =============================================================================
-# Cada text es passa per `/api/adapt` sota cada cas del Golden Suite.
-# Varietat textual = més capacitat de detectar regressions específiques de
-# tipus de text (els bugs solen ser sensibles al gènere font, no només al
-# perfil).
+# Font canònica: els textos demo precarregats al frontend ATNE.
+# Sincronitza amb: ui/atne/pas2-standalone.html (textarea#write-ta).
 #
-# Criteris generals:
-#   - Registre estàndard, ~150-250 paraules.
-#   - Sense noms propis sensibles ni dades personals.
-#   - Vocabulari mixt (concret + abstracte) perquè el judge pugui avaluar
-#     adequació lèxica a tots els MECRs.
-#   - Estructura clara del gènere font (ajuda el judge a avaluar C5).
+# Principi: el harness valida exactament el que el docent veu a l'aplicació.
+# Si afegeixes un text demo nou al Pas 2 de ATNE, copia'l aquí. Si elimines
+# un text de ATNE, elimina'l aquí.
 #
-# Costos: cada text afegit MULTIPLICA el cost Fase B (25 casos × N textos).
-# Amb 5 textos i 25 casos = 125 combinacions × 2 crides = ~0.25€ per passada.
-# Per fer un smoke ràpid: `--text fotosintesi_b1` (filtra a un sol text).
+# NOTA (2026-05-27): ara mateix ATNE només precarrega 1 text demo (Rev.
+# Industrial, 52 paraules). Per a la Fase B rigorosa caldria ampliar el
+# catàleg d'exemples al Pas 2 de ATNE. Quan ho fem, aquí afegirem els nous.
 # =============================================================================
 
 textos:
 
-  fotosintesi_b1:
-    descripcio: "Explicació científica (ciències naturals) — base canònica"
-    paraules_aprox: 195
-    materia: "ciències naturals"
-    registre: "expositiu-científic"
-    text: |
-      La fotosíntesi és el procés pel qual les plantes verdes, les algues i alguns
-      bacteris transformen l'energia de la llum del sol en energia química. Aquest
-      procés és essencial per a la vida a la Terra, perquè produeix l'oxigen que
-      respirem i és la base de la cadena alimentària.
-
-      La reacció es produeix dins dels cloroplasts, uns orgànuls de les cèl·lules
-      vegetals que contenen clorofil·la. La clorofil·la és el pigment verd que
-      capta la llum del sol. Quan la llum arriba a les fulles, la planta absorbeix
-      diòxid de carboni de l'aire pels estomes i aigua del sòl per les arrels.
-
-      Amb aquests dos elements i amb l'energia lluminosa, la planta produeix
-      glucosa (un tipus de sucre) i allibera oxigen com a producte de rebuig. La
-      glucosa serveix d'aliment a la mateixa planta o s'emmagatzema en forma de
-      midó.
-
-      Sense fotosíntesi, l'atmosfera no tindria prou oxigen i els éssers vius que
-      respiren no podrien existir. Per això la conservació dels boscos i dels
-      oceans és tan important: són els grans productors d'oxigen del planeta.
-
-  revolucio_industrial_b2:
-    descripcio: "Text històric (ciències socials) — narrativa explicativa amb causes/conseqüències"
-    paraules_aprox: 220
+  revolucio_industrial_demo:
+    descripcio: "Text demo precarregat a pas2-standalone.html (Matèria: Història · ESO 4)"
+    font_atne: "ui/atne/pas2-standalone.html:1151 (textarea#write-ta)"
+    paraules_aprox: 52
     materia: "història"
-    registre: "expositiu-humanístic"
+    nivell_origen: "ESO 4"
+    registre: "expositiu-divulgatiu"
     text: |
-      La Revolució Industrial va començar a Anglaterra a mitjan segle XVIII i es
-      va estendre durant el segle XIX per Europa i Amèrica del Nord. Va ser un
-      conjunt de transformacions econòmiques, tecnològiques i socials que van
-      canviar profundament la manera com la gent vivia, treballava i es relacionava.
-
-      L'origen es troba en la combinació de diversos factors. Primer, els avenços
-      tècnics: la màquina de vapor, perfeccionada per James Watt, va permetre
-      mecanitzar la indústria tèxtil i, més tard, el transport. Segon, la
-      disponibilitat de carbó i ferro, especialment a la regió central anglesa.
-      Tercer, una agricultura més productiva, que alliberava mà d'obra cap a les
-      fàbriques de les ciutats.
-
-      Les conseqüències van ser profundes. Les ciutats van créixer ràpidament i
-      van aparèixer barris obrers en condicions sovint insalubres. Va sorgir una
-      nova classe social, el proletariat industrial, amb jornades llargues i
-      salaris baixos. Al mateix temps, la burgesia industrial es va enriquir i va
-      consolidar el seu poder polític.
-
-      Aquest procés també va alterar la relació amb la natura: el consum massiu
-      de combustibles fòssils va començar a marcar el clima del planeta. Per
-      això, alguns historiadors consideren la Revolució Industrial l'inici de
-      l'època anomenada Antropocè.
-
-  conte_germanes_a2:
-    descripcio: "Fragment narratiu (literatura) — diàleg + descripció + emoció"
-    paraules_aprox: 175
-    materia: "llengua i literatura"
-    registre: "narratiu-literari"
-    text: |
-      La Marta i la Júlia eren germanes, però gairebé no es parlaven. Vivien al
-      mateix pis, però cadascuna al seu món. La Marta dibuixava tot el dia; la
-      Júlia tocava el piano a la seva habitació.
-
-      Una nit de tempesta, l'electricitat va marxar. La casa va quedar a les
-      fosques. La Júlia va sortir del seu refugi amb una espelma i va veure la
-      Marta dreta al passadís, espantada.
-
-      — No tinguis por — va dir la Júlia.
-      — Sóc gran. No tinc por de la tempesta — va respondre la Marta.
-
-      Però les seves mans tremolaven una mica.
-
-      Es van asseure al sofà del menjador. La llum de l'espelma feia ballar les
-      ombres a les parets. La Júlia va dir:
-
-      — Quan érem petites, m'agradava que dibuixessis al meu costat. Tu pintaves
-      i jo mirava.
-
-      La Marta no va contestar. Va treure un llapis de la butxaca i un paper de
-      sobre la taula. Va començar a dibuixar el rostre de la seva germana a la
-      llum de l'espelma. La Júlia va somriure.
-
-  instructiu_horts_a1:
-    descripcio: "Text instructiu pràctic (ciències/medi) — passos numerats amb materials"
-    paraules_aprox: 145
-    materia: "medi natural"
-    registre: "instructiu-pràctic"
-    text: |
-      Com plantar una llavor de mongeta a classe
-
-      Materials que necessites:
-      - Un got transparent
-      - Un cotó
-      - Una llavor de mongeta seca
-      - Aigua
-
-      Passos:
-
-      1. Mulla el cotó amb aigua. No ha de quedar encharcat, només humit.
-      2. Posa el cotó moll dins del got. Aplana'l una mica al fons.
-      3. Posa la llavor entre el cotó i la paret de vidre del got. Així podràs
-         veure com creix.
-      4. Posa el got a prop d'una finestra, on rebi llum del sol.
-      5. Cada dia, comprova si el cotó encara està humit. Si està sec, afegeix
-         una mica d'aigua.
-
-      Després de tres o quatre dies, la llavor s'obrirà i sortirà una arrel
-      blanca. A la setmana, la planta tindrà fulles verdes.
-
-      Anota cada dia què veus. Pots fer dibuixos o fotografies. És el teu primer
-      experiment científic.
-
-  argumentatiu_pantalles_c1:
-    descripcio: "Text argumentatiu (ciutadania/ètica) — opinió raonada amb contrarèplica"
-    paraules_aprox: 245
-    materia: "ètica / ciutadania"
-    registre: "argumentatiu-reflexiu"
-    text: |
-      L'omnipresència de les pantalles a la vida quotidiana ha generat un debat
-      intens sobre el seu impacte cognitiu i social, especialment en l'etapa
-      escolar. Hi ha qui defensa que limitar l'ús de dispositius digitals
-      protegeix la concentració i la salut mental dels adolescents; altres
-      sostenen que aquest plantejament és anacrònic i que la veritable
-      competència del segle XXI consisteix a aprendre a navegar críticament un
-      entorn permanentment connectat.
-
-      Els arguments a favor de la restricció s'apoyen en evidència emergent.
-      Estudis recents associen l'ús intensiu de xarxes socials amb increments
-      de simptomatologia ansiosa, sobretot entre adolescents joves. La
-      fragmentació de l'atenció, derivada de notificacions constants, redueix
-      la capacitat de lectura profunda i de raonament sostingut. En conseqüència,
-      diversos països europeus han optat per limitar o prohibir el telèfon mòbil
-      als centres educatius.
-
-      Tanmateix, una restricció estricta pot generar efectes col·laterals. Si
-      l'escola exclou completament l'entorn digital, perd l'oportunitat
-      d'ensenyar criteris de discriminació informativa, hàbits de privacitat
-      digital i alfabetització crítica davant les xarxes generatives.
-      L'alumnat acabarà igualment exposat a aquests entorns; la qüestió és si
-      ho farà amb o sense acompanyament educatiu.
-
-      Probablement la resposta més raonable no sigui la prohibició absoluta ni
-      la integració acrítica, sinó un model que ensenyi a usar i, alhora, a
-      desconnectar. La competència digital implica també la competència de
-      l'absència.
+      La Revolució Industrial és el període de transformació profunda de les formes de producció que va començar al Regne Unit cap al 1760 i es va estendre per Europa i Amèrica del Nord durant el segle XIX. Aquest canvi va suposar la transició d'una economia agrària a una industrial, amb l'aparició de les primeres fàbriques i de la màquina de vapor.
