@@ -79,14 +79,32 @@ python tests/golden/run_phase_b.py --full         # generate + judge + aggregate
 python tests/golden/run_phase_b.py --generate     # només genera adaptacions
 python tests/golden/run_phase_b.py --judge        # només judge sobre outputs ja generats
 python tests/golden/run_phase_b.py --aggregate    # només refà el report (sense crides LLM)
-python tests/golden/run_phase_b.py --case C01_tea_b1_noticia --full   # un sol cas
+
+# Filtres (smoke ràpid):
+python tests/golden/run_phase_b.py --case C01_tea_b1_noticia --full        # 1 cas, tots els textos
+python tests/golden/run_phase_b.py --text fotosintesi_b1 --full            # tots els casos, 1 text
+python tests/golden/run_phase_b.py --case C01_tea_b1_noticia --text fotosintesi_b1 --full   # 1×1, ~0.002€
 ```
 
-**Cost primera passada**: ~0.03 € (15 casos × 1 text × 2 crides LLM amb Gemini Flash). Negligible. Si s'escala a 24 gèneres × 12 condicions × 3 textos = ~0.6 €.
+**Cost** (Gemini Flash, ~3000 tokens/crida):
+
+| Configuració | Combos | Crides | Cost |
+|---|---|---|---|
+| 1 cas × 1 text (smoke) | 1 | 2 | ~0.002 € |
+| 25 casos × 1 text (smoke gran) | 25 | 50 | ~0.05 € |
+| 25 casos × 5 textos (passada plena) | 125 | 250 | ~0.25 € |
 
 **Rúbrica**: 6 criteris (adequació MECR, perfil aplicat, complements coherents, fidelitat semàntica, estructura gènere, llegibilitat LF) amb escala 0-5 i pautes explícites perquè el judge sigui consistent.
 
-**Output schema**: JSON per cada judgment a [judgments/](judgments/) (gitignorat). Aggregator genera un score global ponderat per cas + flags d'alertes greus.
+**Textos font** (5): fotosintesi (B1, ciències), revolucio_industrial (B2, història), conte_germanes (A2, literatura), instructiu_horts (A1, medi), argumentatiu_pantalles (C1, ètica).
+
+**Visualització del report** ([_phase_b_report.md](_phase_b_report.md) regenerat a cada execució):
+- 🎯 Resum executiu (OK / crítics / flags)
+- 🌡️ Heatmap criteri × cas amb emojis (🟢🟡🟠🔴)
+- 📈 Mitjana per criteri (detecta criteris febles globalment)
+- ⚠️ Top flags per categoria (E0/E1/REGLA)
+- 🔴 Detall casos crítics (score < 2.5) amb evidència citacional
+- 📝 Sumaris d'una línia per a tots els casos
 
 ## Quan executar-lo
 

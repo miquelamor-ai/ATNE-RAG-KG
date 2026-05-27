@@ -162,44 +162,81 @@ def build_judge_prompt(case: dict, text_original: str, output: dict, rubric: dic
     output_str = json.dumps(output.get("events", [])[-3:], ensure_ascii=False, indent=2)[:6000]
 
     return f"""Ets un **avaluador adversarial de qualitat pedagògica** d'un sistema
-d'adaptació de textos educatius per a alumnat amb necessitats educatives diverses.
-La teva feina és identificar **on falla** el sistema, no on encerta.
+d'adaptació de textos educatius (ATNE) per a alumnat amb necessitats educatives
+diverses (FJE — Fundació Jesuïtes Educació). La teva feina és identificar **on
+falla** el sistema, NO on encerta.
 
-# Cas avaluat
-- ID: {case['id']}
+# Context del cas
+- ID: `{case['id']}`
 - Descripció: {case['descripcio']}
-- Perfil: {json.dumps(case['profile']['caracteristiques'], ensure_ascii=False)}
-- Params: MECR={case['params']['mecr_sortida']}, DUA={case['params']['dua']}, gènere={case['params']['genere_discursiu']}
+- Perfil alumne: {json.dumps(case['profile']['caracteristiques'], ensure_ascii=False)}
+- Nivell MECR demanat: **{case['params']['mecr_sortida']}**
+- Nivell DUA: **{case['params']['dua']}**
+- Gènere discursiu: **{case['params']['genere_discursiu']}**
 - Complements demanats: {list((case['params'].get('complements') or {}).keys())}
 
-# Text original
+# Text original (input al sistema)
+```
 {text_original}
+```
 
-# Output del sistema (últimes events SSE de /api/adapt)
+# Output del sistema (events SSE finals de /api/adapt)
+```
 {output_str}
+```
 
-# Rúbrica
-Aplica aquests 6 criteris amb l'escala 0-5 següent:
+# Rúbrica d'avaluació
+Aplica aquests 6 criteris amb l'escala 0-5:
 {escala_block}
 
 Criteris a avaluar:
 {crit_block}
 
-# Format de resposta (JSON estricte, NOMÉS JSON, sense markdown)
+# Format estricte de resposta
+
+Respon **NOMÉS JSON** (sense fence markdown, sense text introductori, sense
+text al final). Per cada criteri:
+- `score`: enter 0-5
+- `comment`: 1-2 frases concretes (màx 200 caràcters)
+- `evidence`: cita textual breu del text adaptat o complement on es veu el
+  problema/encert. Si no pots citar, "no observable" (màx 200 caràcters).
+
+Camp `summary` (NOU): 1 frase de 80-120 caràcters que sintetitzi el principal
+problema (o "OK" si tot és correcte). Pensa-la com a headline llegible.
+
+Camp `flags` (NOU): llista d'alertes greus (només si score ≤ 1 a algun criteri,
+o si veus contradicció clara amb regles MALL/DUA/saber-ne+). Formats vàlids:
+- "E0:<criteri>:<motiu curt>" (output buit/inservible)
+- "E1:<criteri>:<motiu curt>" (defecte greu pedagògic)
+- "REGLA:<MALL|DUA|LF|MATRIU>:<motiu curt>" (contradicció amb canon)
+
+Estructura JSON:
 {{
   "case_id": "{case['id']}",
+  "summary": "...",
   "scores": {{
-    "C1_adequacio_mecr":       {{"score": <0-5>, "comment": "...", "evidence": "..."}},
-    "C2_perfil_aplicat":       {{"score": <0-5>, "comment": "...", "evidence": "..."}},
-    "C3_complements_coherents":{{"score": <0-5>, "comment": "...", "evidence": "..."}},
-    "C4_fidelitat_semantica":  {{"score": <0-5>, "comment": "...", "evidence": "..."}},
-    "C5_estructura_genere":    {{"score": <0-5>, "comment": "...", "evidence": "..."}},
-    "C6_legibilitat_lf":       {{"score": <0-5>, "comment": "...", "evidence": "..."}}
+    "C1_adequacio_mecr":        {{"score": <0-5>, "comment": "...", "evidence": "..."}},
+    "C2_perfil_aplicat":        {{"score": <0-5>, "comment": "...", "evidence": "..."}},
+    "C3_complements_coherents": {{"score": <0-5>, "comment": "...", "evidence": "..."}},
+    "C4_fidelitat_semantica":   {{"score": <0-5>, "comment": "...", "evidence": "..."}},
+    "C5_estructura_genere":     {{"score": <0-5>, "comment": "...", "evidence": "..."}},
+    "C6_legibilitat_lf":        {{"score": <0-5>, "comment": "...", "evidence": "..."}}
   }},
   "flags": ["..."]
 }}
 
-Sigues estricte. 5 només si és impecable per al canon. 3 és "acceptable amb marge". Si veus una contradicció amb les regles MALL/DUA, afegeix-la a flags.
+# Criteris de severitat
+- **5** només si és impecable per al canon. **3** és "acceptable amb marge".
+- Si el text adaptat té el mateix nivell MECR que l'original (no s'ha adaptat),
+  baixa C1 i C2 a 1.
+- Si un complement esperat (segons matriu saber-ne+ §7) no apareix a l'output,
+  marca C3 ≤ 2 i afegeix flag REGLA:MATRIU.
+- Si veus dades inventades (noms/dates/xifres) que no eren al text original,
+  C4 = 0 i flag E1:C4.
+- Si DUA=Accés però el text té punt i coma o exclamacions, C6 ≤ 2 i flag
+  REGLA:LF.
+
+Sigues estricte. La teva feina és protegir l'alumne real.
 """
 
 
@@ -268,10 +305,40 @@ def judge_outputs(cases: list[dict], texts: dict, rubric: dict, args) -> None:
                 print(f"ERROR: {e}")
 
 
+def _score_icon(score: int | float | None) -> str:
+    """Mapeja un score 0-5 a un emoji visual per al heatmap."""
+    if score is None or score == "-":
+        return "⬜"
+    s = float(score)
+    if s >= 4.5:
+        return "🟢"
+    if s >= 3.5:
+        return "🟢"
+    if s >= 2.5:
+        return "🟡"
+    if s >= 1.5:
+        return "🟠"
+    return "🔴"
+
+
+def _criteri_label(cid: str) -> str:
+    """ID -> etiqueta curta per a capçaleres."""
+    return {
+        "C1_adequacio_mecr":        "C1 MECR",
+        "C2_perfil_aplicat":        "C2 Perfil",
+        "C3_complements_coherents": "C3 Complem",
+        "C4_fidelitat_semantica":   "C4 Fidelitat",
+        "C5_estructura_genere":     "C5 Estruct",
+        "C6_legibilitat_lf":        "C6 Llegib",
+    }.get(cid, cid)
+
+
 def aggregate(rubric: dict, args) -> None:
-    """Llegeix tots els judgments i genera _phase_b_report.md"""
+    """Llegeix tots els judgments i genera _phase_b_report.md amb visualització."""
     pesos = rubric.get("pesos", {})
     total_pes = sum(pesos.values()) or 1
+    crit_ids = list(rubric.get("criteris", {}).keys())
+
     rows = []
     for jud_path in sorted(JUDGMENTS_DIR.glob("*.json")):
         try:
@@ -285,31 +352,110 @@ def aggregate(rubric: dict, args) -> None:
         rows.append({
             "id": jud_path.stem,
             "case_id": j.get("case_id", "?"),
+            "text_id": jud_path.stem.split("__", 1)[1] if "__" in jud_path.stem else "?",
+            "summary": j.get("summary", ""),
             "score_global": round(weighted, 2),
             "scores": {cid: s["score"] for cid, s in scores.items()},
+            "comments": {cid: s.get("comment", "") for cid, s in scores.items()},
+            "evidence": {cid: s.get("evidence", "") for cid, s in scores.items()},
             "flags": j.get("flags", []),
         })
 
-    out = ["# Fase B · Informe LLM-as-Judge\n"]
+    out = ["# 📊 Fase B · Informe LLM-as-Judge\n"]
     if not rows:
         out.append("Cap judgment desat encara. Executa `--full` o `--judge`.")
-    else:
-        out.append(f"_{len(rows)} judgments avaluats · model judge: {args.judge_model}_\n")
-        out.append("| Cas | Global | C1 | C2 | C3 | C4 | C5 | C6 | Flags |")
-        out.append("|-----|--------|----|----|----|----|----|----|-------|")
-        for r in rows:
-            s = r["scores"]
-            flag = ", ".join(r["flags"][:2]) if r["flags"] else "—"
-            out.append(
-                f"| `{r['case_id']}` | **{r['score_global']:.2f}** | "
-                f"{s.get('C1_adequacio_mecr','-')} | {s.get('C2_perfil_aplicat','-')} | "
-                f"{s.get('C3_complements_coherents','-')} | {s.get('C4_fidelitat_semantica','-')} | "
-                f"{s.get('C5_estructura_genere','-')} | {s.get('C6_legibilitat_lf','-')} | {flag} |"
-            )
+        md = "\n".join(out)
+        print(md)
+        (HERE / "_phase_b_report.md").write_text(md, encoding="utf-8")
+        return
+
+    # ── Resum executiu ──
+    avg_global = sum(r["score_global"] for r in rows) / len(rows)
+    n_crit = sum(1 for r in rows if r["score_global"] < 2.5)
+    n_ok = sum(1 for r in rows if r["score_global"] >= 3.5)
+    n_flags = sum(len(r["flags"]) for r in rows)
+    out.append(f"_{len(rows)} judgments · model judge: `{args.judge_model}` · "
+               f"score global mitjà: **{avg_global:.2f}/5**_\n")
+    out.append("## 🎯 Resum executiu\n")
+    out.append(f"| Casos | OK (≥3.5) | Crítics (<2.5) | Flags totals |")
+    out.append(f"|-------|-----------|----------------|--------------|")
+    out.append(f"| {len(rows)} | 🟢 {n_ok} | 🔴 {n_crit} | ⚠️ {n_flags} |\n")
+
+    # ── Heatmap ──
+    out.append("## 🌡️ Heatmap qualitat (criteri × cas)\n")
+    out.append("Llegenda: 🟢 ≥3.5 · 🟡 2.5-3.4 · 🟠 1.5-2.4 · 🔴 <1.5 · ⬜ no avaluable\n")
+    headers = ["Cas", "Global"] + [_criteri_label(c) for c in crit_ids]
+    out.append("| " + " | ".join(headers) + " |")
+    out.append("|" + "|".join(["---"] * len(headers)) + "|")
+    for r in rows:
+        scores_row = []
+        for cid in crit_ids:
+            sc = r["scores"].get(cid)
+            scores_row.append(f"{_score_icon(sc)} {sc if sc is not None else '-'}")
+        global_icon = _score_icon(r["score_global"])
+        out.append(f"| `{r['case_id']}` | {global_icon} **{r['score_global']:.2f}** | "
+                   + " | ".join(scores_row) + " |")
+
+    # ── Mitjana per criteri ──
+    out.append("\n## 📈 Mitjana per criteri\n")
+    out.append("| Criteri | Mitjana | Pes (%) | Cas pitjor | Cas millor |")
+    out.append("|---------|---------|---------|------------|------------|")
+    for cid in crit_ids:
+        vals = [(r["scores"].get(cid), r["case_id"]) for r in rows if r["scores"].get(cid) is not None]
+        if not vals:
+            continue
+        avg = sum(v for v, _ in vals) / len(vals)
+        worst = min(vals, key=lambda t: t[0])
+        best = max(vals, key=lambda t: t[0])
+        out.append(f"| {_criteri_label(cid)} | {_score_icon(avg)} **{avg:.2f}** | "
+                   f"{pesos.get(cid, '-')} | `{worst[1]}` ({worst[0]}) | "
+                   f"`{best[1]}` ({best[0]}) |")
+
+    # ── Top flags ──
+    flag_count: dict[str, int] = {}
+    for r in rows:
+        for f in r["flags"]:
+            key = f.split(":", 2)[0] + ":" + (f.split(":", 2)[1] if ":" in f else "?")
+            flag_count[key] = flag_count.get(key, 0) + 1
+    if flag_count:
+        out.append("\n## ⚠️ Top flags (categoria · freqüència)\n")
+        out.append("| Categoria | Freqüència |")
+        out.append("|-----------|------------|")
+        for k, v in sorted(flag_count.items(), key=lambda kv: -kv[1]):
+            out.append(f"| `{k}` | {v} |")
+
+    # ── Casos crítics (detall) ──
+    critics = [r for r in rows if r["score_global"] < 2.5]
+    if critics:
+        out.append("\n## 🔴 Casos crítics (score global < 2.5)\n")
+        for r in critics:
+            out.append(f"### `{r['case_id']}` — Global: **{r['score_global']:.2f}**")
+            if r["summary"]:
+                out.append(f"> {r['summary']}")
+            out.append("")
+            out.append("**Scores per criteri:**")
+            for cid in crit_ids:
+                sc = r["scores"].get(cid)
+                cm = r["comments"].get(cid, "")
+                ev = r["evidence"].get(cid, "")
+                out.append(f"- {_criteri_label(cid)}: {_score_icon(sc)} **{sc}** — {cm}")
+                if ev and ev != "no observable":
+                    out.append(f"    - _Evidència:_ \"{ev[:200]}\"")
+            if r["flags"]:
+                out.append(f"\n**Flags:** {', '.join(r['flags'])}")
+            out.append("")
+
+    # ── Detall de tots els casos amb summary ──
+    out.append("\n## 📝 Sumaris per cas\n")
+    for r in rows:
+        summary = r["summary"] or "—"
+        out.append(f"- {_score_icon(r['score_global'])} `{r['case_id']}` "
+                   f"(text: `{r['text_id']}`) → **{r['score_global']:.2f}** · {summary}")
 
     md = "\n".join(out)
     print(md)
     (HERE / "_phase_b_report.md").write_text(md, encoding="utf-8")
+    print(f"\n[phase_b] Informe escrit a: {HERE / '_phase_b_report.md'}", file=sys.stderr)
 
 
 def main():
