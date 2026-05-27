@@ -474,7 +474,10 @@ tal com es defineix a la SKILL ACTIVA de més amunt al system prompt.
 - Si el gènere és entrevista: format de torns Pregunta/Resposta entre entrevistador i entrevistat.
 - Si el gènere és opinió: tesi clara + arguments + conclusió.
 - Si el gènere és conte/fàbula/poema: narrativa amb personatges i estructura literària.
-- Si el gènere és instructiu/receptari/manual: materials + passos numerats + verificació.
+- Si el gènere és instructiu/receptari/manual: materials + passos numerats + bloc final
+  `### Per acabar` (A1-A2) o `### Resultat esperat` (A2+) amb 1-2 frases que diuen
+  què s'ha obtingut. PROHIBIT deixar la frase de tancament com a paràgraf solt fora
+  d'estructura: ha d'anar dins un encapçalament propi.
 - Si el gènere és diàleg: dos parlants identificats amb torns clars.
 - Si el gènere és notícia: titular + lead 5W + cos en piràmide invertida + cita opcional.
 - Si el gènere és divulgatiu/expositiu: prosa estructurada amb idees jerarquitzades.
@@ -594,16 +597,23 @@ ACTIVAT — Ja integrat al glossari (columna de traducció a {l1_display}). No c
         # no son pictogrames AAC". Veure adaptation/pictograms_arasaac.py.
         _picto_map = {
             "PRE-A1": (
-                "1-2 marcadors PER FRASE per als noms i verbs clau. "
-                "Col·loca'ls INLINE, immediatament al costat de la paraula "
-                "(associació directa grafia-pictograma). "
-                "Afegeix 1 marcador paratextual al marge esquerre per anticipar "
-                "el sentit de cada paràgraf."
+                "1-2 marcadors PER FRASE per als noms i verbs clau (8-10 max per text). "
+                "POSICIO OBLIGATORIA: el marcador `[PICTO: ...]` ha d'anar SEMPRE "
+                "ABANS de la paraula (a l'esquerra), NO despres. "
+                "L'alumne ha de veure el pictograma PRIMER i llavors llegir la paraula "
+                "(anticipacio visual segons UNE 153101). "
+                "Exemple correcte: `[PICTO: gat|gato] el gat dorm`. "
+                "Exemple INCORRECTE: `el gat [PICTO: gat|gato] dorm`. "
+                "Afegeix tambe una seccio `### Vocabulari del text (mira primer!)` al "
+                "principi amb la llista pictograma·paraula per anticipar."
             ),
             "A1": (
-                "1 marcador per frase o per terme tècnic nou. "
-                "Situa'ls al GLOSSARI VISUAL al peu del text. "
-                "L'alumne descodifica primer, el pictograma reforça."
+                "4-6 marcadors per text, 1 per paraula nova o concepte clau. "
+                "POSICIO OBLIGATORIA: el marcador `[PICTO: ...]` va INLINE DAVANT "
+                "del terme clau (a l'esquerra), NO despres. "
+                "Exemple correcte: `[PICTO: mitja|calcetin] una mitja vella`. "
+                "Exemple INCORRECTE: `una mitja vella [PICTO: mitja|calcetin]`. "
+                "NO usis glossari visual al peu — aixo es per A2+."
             ),
             "A2": (
                 "Marcadors al glossari visual (peu del text). "
@@ -874,6 +884,15 @@ ACTIVAT — Format OBLIGATORI:
 - **Abans:** [1 pista per activar coneixement previ o predir]
 - **Durant:** [1 pista per a un moment clau del text]
 - **Després:** [1 pista per consolidar o verificar]
+
+🚫 REGLA CRITICA — NO REPETIR EL TEXT:
+Les bastides son **estrategies de control metacognitiu**, NO un re-llistat dels continguts del text.
+- NO copies els passos d'un instructiu ni els fets d'una noticia.
+- NO repeteixis les accions ja dites al "## Text adaptat".
+- SI dones estrategies transferibles: ✅ "Comprova si has fet tots els passos en ordre",
+  ✅ "Senyala el verb d'accio de cada pas", ✅ "Marca el material que ja tens".
+- Si el text es INSTRUCTIU, les bastides "Durant" han de ser **estrategies executives**
+  (autoregulació de la tasca), no la llista de passos.
 
 ### Bastides de resposta (només si preguntes_comprensio o activitats actives)
 **Connectors útils:** [3-5 connectors gradats al MECR]
