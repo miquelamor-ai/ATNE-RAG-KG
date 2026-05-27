@@ -94,7 +94,7 @@ MATRIU_PER_CHAR = {
     "nouvingut":     [1,1,1,0,1,0,1,0,1,1,0,0],
     "vulnerabilitat":[1,1,1,0,1,0,0,0,0,0,0,0],
     "emocional":     [1,1,1,0,1,0,0,0,0,0,0,0],
-    "discalculia":   [1,1,0,0,1,0,0,0,0,0,0,0],  # fallback (no a §7 canònic)
+    "discalculia":   [1,1,1,0,1,0,0,0,1,0,0,0],  # afegida a §7 (2026-05-27): patró similar a TDL
 }
 
 
@@ -117,9 +117,10 @@ def expected_skills_for_case(profile: dict, params: dict) -> list[str]:
     complements = params.get("complements", {})
     skills = set()
 
-    # SKILL write-{genere}
-    if params.get("genere_discursiu"):
-        skills.add(f"write-{params['genere_discursiu']}")
+    # SKILL del gènere (write-{genere} per defecte, irregulars al mapping)
+    genere = params.get("genere_discursiu")
+    if genere:
+        skills.add(GENRE_TO_SKILL_NAME.get(genere, f"write-{genere}"))
 
     # SKILLs generate-{complement} segons triggers
     mapping = {
@@ -187,7 +188,51 @@ def profile_to_caracteristiques(p: dict) -> dict:
     return chars
 
 
-def build_case(pid: str, p: dict, genere_default: str = "divulgatiu") -> dict:
+## Mapping perfil → gènere assignat per al test (cobreix 17 gèneres dels 24)
+## Triat per coherència pedagògica perfil↔gènere.
+PERFIL_TO_GENRE = {
+    "marc":      "divulgatiu",       # TDAH ESO B1 → text didàctic
+    "mireia":    "noticia",          # Dislèxia ESO A2 → estructura inverted-pyramid
+    "liu":       "instructiu",       # Nouvingut B1 → passos numerats clars
+    "pol":       "assaig",           # AC B2 → anàlisi crítica
+    "ex_tdah":   "cronica",          # TDAH demo → cronologia clara
+    "ex_l2":     "descripcio",       # pre-A1 nouvingut → frases SVO concretes
+    "ex_tea":    "conte",            # TEA Primària → narrativa estructurada
+    "ex_aacc":   "opinio",           # AC demo → argumentació
+    "ex_di":     "fabula",           # DI → narratiu amb moral simple
+    "ex_tdl":    "dialeg",           # TDL receptiu → diàleg estructurat
+    "ex_aud":    "entrevista",       # Aud LSC → entrevista (Q&A)
+    "ex_vis":    "carta",            # Vis → estructura simple sense diagrames
+    "ex_discal": "receptari",        # Discalcúlia → passos amb quantitats
+    "ex_emo":    "diari",            # Emocional → expressió personal
+    "ex_pri":    "biografia",        # Grup Primària → personatge
+    "ex_eso":    "informe",          # Grup ESO multinivell → text expositiu
+    "ex_fp":     "manual",           # Grup FP → manual professional
+}
+
+## Casos extra per cobrir els 7 gèneres restants (perfils existents amb gènere diferent)
+## NOTA: el genere_discursiu ha de coincidir amb genre_key del SKILL.md (NO el nom del skill).
+## Veure GENRE_TO_SKILL_NAME per a noms irregulars.
+EXTRA_GENRE_CASES = [
+    ("poema",                  "pol",       "AACC + poema (registre estètic, MECR alt)"),
+    ("ressenya",               "marc",      "TDAH + ressenya (estructura curta crítica)"),
+    ("resum",                  "mireia",    "Dislèxia + resum (síntesi guiada)"),
+    ("reglament",              "ex_tdl",    "TDL + reglament (estructura clara obligacions)"),
+    ("enciclopedic",           "ex_aacc",   "AACC + enciclopèdic (profunditat conceptual)"),
+    ("contrarelat_odi",        "pol",       "AACC + contrarelat_odi (anàlisi crítica)"),
+    ("expressar-preferencies", "liu",       "Nouvingut + expressar-preferencies (gustos personals)"),
+]
+
+## Noms reals dels SKILLs per a gèneres irregulars (no segueixen patró write-{genre_key})
+GENRE_TO_SKILL_NAME = {
+    # contrarelat_odi: trigger usa underscore però name té guions
+    "contrarelat_odi": "write-contrarelat-odi",
+    # expressar-preferencies: no té prefix write-
+    "expressar-preferencies": "expressar-preferencies",
+}
+
+
+def build_case(pid: str, p: dict, genere_default: str = "divulgatiu", extra_descripcio: str | None = None) -> dict:
     """Construeix un cas del Golden Suite des d'un perfil."""
     chars = profile_to_caracteristiques(p)
     mecr = derive_mecr(p.get("course", ""))
@@ -206,9 +251,10 @@ def build_case(pid: str, p: dict, genere_default: str = "divulgatiu") -> dict:
         "genere_discursiu": genere_default,
         "complements": complements,
     }
+    descripcio = extra_descripcio or f"{p.get('name','?')} · {p.get('course','?')} · {p.get('cat','?')}"
     case = {
         "id": pid,
-        "descripcio": f"{p.get('name','?')} · {p.get('course','?')} · {p.get('cat','?')}",
+        "descripcio": descripcio,
         "font_atne": f"ui/atne/data/demo_examples.json (perfils.{pid})",
         "condicions_curtes": [p.get("cat")] if p.get("cat") and p.get("cat") != "group" else [c["cat"] for c in p.get("chips", []) if c.get("cat") != "lv"],
         "profile": {"caracteristiques": chars},
@@ -229,22 +275,36 @@ def main():
 
     # ── cases.yaml ──────────────────────────────────────────────────────
     casos = []
+    # 17 casos perfils, cadascun amb el seu gènere assignat
     for pid, p in perfils.items():
-        casos.append(build_case(pid, p))
+        genere = PERFIL_TO_GENRE.get(pid, "divulgatiu")
+        casos.append(build_case(pid, p, genere_default=genere))
+
+    # 7 casos extra per cobrir els 7 gèneres restants
+    for genere, perfil_base, desc in EXTRA_GENRE_CASES:
+        if perfil_base not in perfils:
+            print(f"[sync] AVÍS: perfil base '{perfil_base}' no existeix per genere '{genere}'")
+            continue
+        p = perfils[perfil_base]
+        extra_id = f"extra_genere_{genere.replace('-', '_')}"
+        c = build_case(perfil_base, p, genere_default=genere, extra_descripcio=desc)
+        c["id"] = extra_id
+        c["font_atne"] = f"genere-coverage extra (perfil base: {perfil_base})"
+        casos.append(c)
 
     # Format YAML manualment (sense pyyaml.dump per controlar ordre i strings)
     lines = [
         "# =============================================================================",
-        "# tests/golden/cases.yaml — REGENERAT AUTOMÀTICAMENT (v3.0.0)",
+        "# tests/golden/cases.yaml — REGENERAT AUTOMÀTICAMENT (v3.1.0)",
         "# =============================================================================",
         "# NO EDITAR A MÀ. Font canon: ui/atne/data/demo_examples.json",
         "# Per regenerar: python tests/golden/sync_from_json.py",
         "# =============================================================================",
         "",
         "meta:",
-        '  versio: "3.0.0"',
+        '  versio: "3.1.0"',
         '  generat_at: "2026-05-27"',
-        '  font: "ui/atne/data/demo_examples.json (perfils)"',
+        '  font: "ui/atne/data/demo_examples.json (perfils) + PERFIL_TO_GENRE + EXTRA_GENRE_CASES"',
         f'  total_casos: {len(casos)}',
         "",
         "casos:",

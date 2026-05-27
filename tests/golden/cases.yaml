@@ -1,15 +1,15 @@
 # =============================================================================
-# tests/golden/cases.yaml — REGENERAT AUTOMÀTICAMENT (v3.0.0)
+# tests/golden/cases.yaml — REGENERAT AUTOMÀTICAMENT (v3.1.0)
 # =============================================================================
 # NO EDITAR A MÀ. Font canon: ui/atne/data/demo_examples.json
 # Per regenerar: python tests/golden/sync_from_json.py
 # =============================================================================
 
 meta:
-  versio: "3.0.0"
+  versio: "3.1.0"
   generat_at: "2026-05-27"
-  font: "ui/atne/data/demo_examples.json (perfils)"
-  total_casos: 17
+  font: "ui/atne/data/demo_examples.json (perfils) + PERFIL_TO_GENRE + EXTRA_GENRE_CASES"
+  total_casos: 24
 
 casos:
 
@@ -46,7 +46,7 @@ casos:
     params:
       mecr_sortida: "A2"
       dua: "Core"
-      genere_discursiu: "divulgatiu"
+      genere_discursiu: "noticia"
       complements:
         glossari: true
         esquema_visual: true
@@ -59,7 +59,7 @@ casos:
       - generate-glossari
       - generate-plantilles-genere
       - generate-preguntes-comprensio
-      - write-divulgatiu
+      - write-noticia
 
   - id: "liu"
     descripcio: "El Pont · 2n ESO C · cat"
@@ -71,7 +71,7 @@ casos:
     params:
       mecr_sortida: "B1"
       dua: "Core"
-      genere_discursiu: "divulgatiu"
+      genere_discursiu: "instructiu"
       complements:
         glossari: true
         esquema_visual: true
@@ -88,7 +88,7 @@ casos:
       - generate-plantilles-genere
       - generate-preguntes-comprensio
       - generate-resum-graduat
-      - write-divulgatiu
+      - write-instructiu
 
   - id: "pol"
     descripcio: "El Roure · 4t ESO A · ac"
@@ -100,7 +100,7 @@ casos:
     params:
       mecr_sortida: "B2"
       dua: "Enriquiment"
-      genere_discursiu: "divulgatiu"
+      genere_discursiu: "assaig"
       complements:
         glossari: true
         esquema_visual: true
@@ -116,7 +116,7 @@ casos:
       - generate-mapa-mental
       - generate-preguntes-comprensio
       - generate-rubriques
-      - write-divulgatiu
+      - write-assaig
 
   - id: "ex_tdah"
     descripcio: "L'Estel · 3r ESO · tdah"
@@ -128,7 +128,7 @@ casos:
     params:
       mecr_sortida: "B1"
       dua: "Core"
-      genere_discursiu: "divulgatiu"
+      genere_discursiu: "cronica"
       complements:
         glossari: true
         esquema_visual: true
@@ -139,7 +139,7 @@ casos:
       - generate-bastides-produccio
       - generate-glossari
       - generate-preguntes-comprensio
-      - write-divulgatiu
+      - write-cronica
 
   - id: "ex_l2"
     descripcio: "El Viatger · 1r ESO · cat"
@@ -151,7 +151,7 @@ casos:
     params:
       mecr_sortida: "A2"
       dua: "Accés"
-      genere_discursiu: "divulgatiu"
+      genere_discursiu: "descripcio"
       complements:
         glossari: true
         esquema_visual: true
@@ -169,7 +169,7 @@ casos:
       - generate-preguntes-comprensio
       - generate-resum-graduat
       - generate-tolc
-      - write-divulgatiu
+      - write-descripcio
 
   - id: "ex_tea"
     descripcio: "L'Astrònom · 5è Primària · tea"
@@ -181,7 +181,7 @@ casos:
     params:
       mecr_sortida: "A2"
       dua: "Core"
-      genere_discursiu: "divulgatiu"
+      genere_discursiu: "conte"
       complements:
         glossari: true
         esquema_visual: true
@@ -196,7 +196,7 @@ casos:
       - generate-pictogrames
       - generate-preguntes-comprensio
       - generate-rubriques
-      - write-divulgatiu
+      - write-conte
 
   - id: "ex_aacc"
     descripcio: "L'Exploradora · 4t ESO · ac"
@@ -208,7 +208,7 @@ casos:
     params:
       mecr_sortida: "B2"
       dua: "Enriquiment"
-      genere_discursiu: "divulgatiu"
+      genere_discursiu: "opinio"
       complements:
         glossari: true
         esquema_visual: true
@@ -224,7 +224,7 @@ casos:
       - generate-mapa-mental
       - generate-preguntes-comprensio
       - generate-rubriques
-      - write-divulgatiu
+      - write-opinio
 
   - id: "ex_di"
     descripcio: "La Constructora · 6è Primària · di"
@@ -236,7 +236,7 @@ casos:
     params:
       mecr_sortida: "B1"
       dua: "Accés"
-      genere_discursiu: "divulgatiu"
+      genere_discursiu: "fabula"
       complements:
         glossari: true
         esquema_visual: true
@@ -250,7 +250,7 @@ casos:
       - generate-pictogrames
       - generate-plantilles-genere
       - generate-resum-graduat
-      - write-divulgatiu
+      - write-fabula
 
   - id: "ex_tdl"
     descripcio: "El Ressonador · 5è Primària · tdl"
@@ -262,7 +262,7 @@ casos:
     params:
       mecr_sortida: "A2"
       dua: "Core"
-      genere_discursiu: "divulgatiu"
+      genere_discursiu: "dialeg"
       complements:
         glossari: true
         esquema_visual: true
@@ -275,7 +275,7 @@ casos:
       - generate-glossari
       - generate-plantilles-genere
       - generate-preguntes-comprensio
-      - write-divulgatiu
+      - write-dialeg
 
   - id: "ex_aud"
     descripcio: "La Mirada · 2n ESO B · au"
@@ -287,7 +287,7 @@ casos:
     params:
       mecr_sortida: "B1"
       dua: "Core"
-      genere_discursiu: "divulgatiu"
+      genere_discursiu: "entrevista"
       complements:
         glossari: true
         esquema_visual: true
@@ -300,7 +300,7 @@ casos:
       - generate-glossari
       - generate-pictogrames
       - generate-preguntes-comprensio
-      - write-divulgatiu
+      - write-entrevista
 
   - id: "ex_vis"
     descripcio: "La Veu · 3r ESO · vi"
@@ -312,14 +312,14 @@ casos:
     params:
       mecr_sortida: "B1"
       dua: "Core"
-      genere_discursiu: "divulgatiu"
+      genere_discursiu: "carta"
       complements:
         glossari: true
         preguntes_comprensio: true
     expected_skills:
       - generate-glossari
       - generate-preguntes-comprensio
-      - write-divulgatiu
+      - write-carta
 
   - id: "ex_discal"
     descripcio: "El Cartògraf · 5è Primària · discalculia"
@@ -331,15 +331,20 @@ casos:
     params:
       mecr_sortida: "A2"
       dua: "Core"
-      genere_discursiu: "divulgatiu"
+      genere_discursiu: "receptari"
       complements:
         glossari: true
         esquema_visual: true
+        bastides: true
         preguntes_comprensio: true
+        plantilles_genere: true
     expected_skills:
+      - generate-bastides-lectura
+      - generate-bastides-produccio
       - generate-glossari
+      - generate-plantilles-genere
       - generate-preguntes-comprensio
-      - write-divulgatiu
+      - write-receptari
 
   - id: "ex_emo"
     descripcio: "El Refugi · 2n ESO · emo"
@@ -351,7 +356,7 @@ casos:
     params:
       mecr_sortida: "B1"
       dua: "Core"
-      genere_discursiu: "divulgatiu"
+      genere_discursiu: "diari"
       complements:
         glossari: true
         esquema_visual: true
@@ -362,7 +367,7 @@ casos:
       - generate-bastides-produccio
       - generate-glossari
       - generate-preguntes-comprensio
-      - write-divulgatiu
+      - write-diari
 
   - id: "ex_pri"
     descripcio: "5è Primària B · Grup classe · 18 alumnes · group"
@@ -375,7 +380,7 @@ casos:
     params:
       mecr_sortida: "B1"
       dua: "Core"
-      genere_discursiu: "divulgatiu"
+      genere_discursiu: "biografia"
       complements:
         glossari: true
         esquema_visual: true
@@ -392,7 +397,7 @@ casos:
       - generate-plantilles-genere
       - generate-preguntes-comprensio
       - generate-resum-graduat
-      - write-divulgatiu
+      - write-biografia
 
   - id: "ex_eso"
     descripcio: "2n ESO C · Grup classe · 22 alumnes · group"
@@ -405,7 +410,7 @@ casos:
     params:
       mecr_sortida: "B1"
       dua: "Core"
-      genere_discursiu: "divulgatiu"
+      genere_discursiu: "informe"
       complements:
         glossari: true
         esquema_visual: true
@@ -424,7 +429,7 @@ casos:
       - generate-preguntes-comprensio
       - generate-resum-graduat
       - generate-rubriques
-      - write-divulgatiu
+      - write-informe
 
   - id: "ex_fp"
     descripcio: "GM Administració 1r · Com. empresarial · 15 alumnes · group"
@@ -436,7 +441,7 @@ casos:
     params:
       mecr_sortida: "B1"
       dua: "Core"
-      genere_discursiu: "divulgatiu"
+      genere_discursiu: "manual"
       complements:
         glossari: true
         esquema_visual: true
@@ -447,4 +452,190 @@ casos:
       - generate-bastides-produccio
       - generate-glossari
       - generate-preguntes-comprensio
-      - write-divulgatiu
+      - write-manual
+
+  - id: "extra_genere_poema"
+    descripcio: "AACC + poema (registre estètic, MECR alt)"
+    font_atne: "genere-coverage extra (perfil base: pol)"
+    condicions_curtes: ["ac"]
+    profile:
+      caracteristiques:
+        altes_capacitats: {"actiu": true}
+    params:
+      mecr_sortida: "B2"
+      dua: "Enriquiment"
+      genere_discursiu: "poema"
+      complements:
+        glossari: true
+        esquema_visual: true
+        mapa_conceptual: true
+        preguntes_comprensio: true
+        activitats_aprofundiment: true
+        mapa_mental: true
+        rubriques: true
+    expected_skills:
+      - generate-activitats-aprofundiment
+      - generate-glossari
+      - generate-mapa-conceptual
+      - generate-mapa-mental
+      - generate-preguntes-comprensio
+      - generate-rubriques
+      - write-poema
+
+  - id: "extra_genere_ressenya"
+    descripcio: "TDAH + ressenya (estructura curta crítica)"
+    font_atne: "genere-coverage extra (perfil base: marc)"
+    condicions_curtes: ["tdah"]
+    profile:
+      caracteristiques:
+        tdah: {"actiu": true}
+    params:
+      mecr_sortida: "B1"
+      dua: "Core"
+      genere_discursiu: "ressenya"
+      complements:
+        glossari: true
+        esquema_visual: true
+        bastides: true
+        preguntes_comprensio: true
+    expected_skills:
+      - generate-bastides-lectura
+      - generate-bastides-produccio
+      - generate-glossari
+      - generate-preguntes-comprensio
+      - write-ressenya
+
+  - id: "extra_genere_resum"
+    descripcio: "Dislèxia + resum (síntesi guiada)"
+    font_atne: "genere-coverage extra (perfil base: mireia)"
+    condicions_curtes: ["disl"]
+    profile:
+      caracteristiques:
+        dislexia: {"actiu": true}
+    params:
+      mecr_sortida: "A2"
+      dua: "Core"
+      genere_discursiu: "resum"
+      complements:
+        glossari: true
+        esquema_visual: true
+        bastides: true
+        preguntes_comprensio: true
+        plantilles_genere: true
+    expected_skills:
+      - generate-bastides-lectura
+      - generate-bastides-produccio
+      - generate-glossari
+      - generate-plantilles-genere
+      - generate-preguntes-comprensio
+      - write-resum
+
+  - id: "extra_genere_reglament"
+    descripcio: "TDL + reglament (estructura clara obligacions)"
+    font_atne: "genere-coverage extra (perfil base: ex_tdl)"
+    condicions_curtes: ["tdl"]
+    profile:
+      caracteristiques:
+        tdl: {"actiu": true, "modalitat": "comprensiu"}
+    params:
+      mecr_sortida: "A2"
+      dua: "Core"
+      genere_discursiu: "reglament"
+      complements:
+        glossari: true
+        esquema_visual: true
+        bastides: true
+        preguntes_comprensio: true
+        plantilles_genere: true
+    expected_skills:
+      - generate-bastides-lectura
+      - generate-bastides-produccio
+      - generate-glossari
+      - generate-plantilles-genere
+      - generate-preguntes-comprensio
+      - write-reglament
+
+  - id: "extra_genere_enciclopedic"
+    descripcio: "AACC + enciclopèdic (profunditat conceptual)"
+    font_atne: "genere-coverage extra (perfil base: ex_aacc)"
+    condicions_curtes: ["ac"]
+    profile:
+      caracteristiques:
+        altes_capacitats: {"actiu": true}
+    params:
+      mecr_sortida: "B2"
+      dua: "Enriquiment"
+      genere_discursiu: "enciclopedic"
+      complements:
+        glossari: true
+        esquema_visual: true
+        mapa_conceptual: true
+        preguntes_comprensio: true
+        activitats_aprofundiment: true
+        mapa_mental: true
+        rubriques: true
+    expected_skills:
+      - generate-activitats-aprofundiment
+      - generate-glossari
+      - generate-mapa-conceptual
+      - generate-mapa-mental
+      - generate-preguntes-comprensio
+      - generate-rubriques
+      - write-enciclopedic
+
+  - id: "extra_genere_contrarelat_odi"
+    descripcio: "AACC + contrarelat_odi (anàlisi crítica)"
+    font_atne: "genere-coverage extra (perfil base: pol)"
+    condicions_curtes: ["ac"]
+    profile:
+      caracteristiques:
+        altes_capacitats: {"actiu": true}
+    params:
+      mecr_sortida: "B2"
+      dua: "Enriquiment"
+      genere_discursiu: "contrarelat_odi"
+      complements:
+        glossari: true
+        esquema_visual: true
+        mapa_conceptual: true
+        preguntes_comprensio: true
+        activitats_aprofundiment: true
+        mapa_mental: true
+        rubriques: true
+    expected_skills:
+      - generate-activitats-aprofundiment
+      - generate-glossari
+      - generate-mapa-conceptual
+      - generate-mapa-mental
+      - generate-preguntes-comprensio
+      - generate-rubriques
+      - write-contrarelat-odi
+
+  - id: "extra_genere_expressar_preferencies"
+    descripcio: "Nouvingut + expressar-preferencies (gustos personals)"
+    font_atne: "genere-coverage extra (perfil base: liu)"
+    condicions_curtes: ["cat"]
+    profile:
+      caracteristiques:
+        nouvingut: {"actiu": true}
+    params:
+      mecr_sortida: "B1"
+      dua: "Core"
+      genere_discursiu: "expressar-preferencies"
+      complements:
+        glossari: true
+        esquema_visual: true
+        bastides: true
+        preguntes_comprensio: true
+        pictogrames: true
+        plantilles_genere: true
+        resum_graduat: true
+    expected_skills:
+      - expressar-preferencies
+      - generate-bastides-lectura
+      - generate-bastides-produccio
+      - generate-glossari
+      - generate-pictogrames
+      - generate-plantilles-genere
+      - generate-preguntes-comprensio
+      - generate-resum-graduat

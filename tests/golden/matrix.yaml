@@ -57,11 +57,9 @@ condicions:
   emo:
     label: "Necessitats emocionals"
     chars_key: "emocional"
-  # Condicions backend NO presents a la matriu canònica (gap invers):
   discalculia:
     label: "Discalcúlia"
-    chars_key: "discapacitat_intellectual"   # alias? cal aclarir; figura a ALL_CHAR_KEYS però no a matriu §7
-    fora_matriu: true
+    chars_key: "discalculia"   # afegida a §7 (2026-05-27)
 
 # Complements canònics (ordre = columnes de MATRIU_CONDICIONS a pas2.html:2814)
 complements:
@@ -97,6 +95,8 @@ defaults_per_condicio:
   cat:  [true, true, true, false, true, false, true, false, true,  true,  false, false]
   vuln: [true, true, true, false, true, false, false, false, false, false, false, false]
   emo:  [true, true, true, false, true, false, false, false, false, false, false, false]
+  # Discalcúlia (afegida a §7 2026-05-27) — patró similar a TDL
+  discalculia: [true, true, true, false, true, false, false, false, true, false, false, false]
 
 # Gèneres canònics disponibles (skills write-*).
 # Font: corpus/external/corpusFJE/skills/generes/
