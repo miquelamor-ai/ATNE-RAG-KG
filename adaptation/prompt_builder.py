@@ -1080,15 +1080,68 @@ Exemple de format:
 """)
 
     # Sempre: argumentació pedagògica + auditoria
+    # Taxonomia A-G canonica (font: ui/saber-ne.html §"Categories d'adaptacio").
+    # Decisio Miquel 2026-05-27: substituir 5 categories generiques per
+    # aquesta taxonomia rica que connecta amb el coneixement docent FJE.
     output_sections.append("""
 ## Argumentació pedagògica
-SEMPRE GENERAR — Explica les decisions pedagògiques preses, organitzades per àrees:
-1. **Adaptació lingüística**: què s'ha simplificat i per què (nivell MECR, tipus de frases, vocabulari)
-2. **Atenció a la diversitat**: com s'han tingut en compte les necessitats específiques (dislèxia, TEA, nouvingut, etc.)
-3. **Suport multimodal**: quins canals s'han activat (visual, lingüístic, cognitiu) i per què
-4. **Gradació cognitiva**: com s'ha organitzat la progressió (de reconeixement a producció)
-5. **Rigor curricular**: quins continguts s'han mantingut íntegres i per què
-Breu, 3-5 punts amb explicació de 1-2 frases cadascun.
+SEMPRE GENERAR — Justifica les decisions usant la taxonomia canonica FJE.
+Genera 1 card per a CADA categoria on hi hagi hagut intervencio (omet les que no apliquen).
+Per a cada card: identifica les sub-areas concretes (codi+nom) i justifica amb terminologia
+pedagogica (MALL/DUA/UNE), NO descriptivament ("hem fet X").
+
+Categories (usa nomes les que apliquen al cas concret):
+
+**A. Adaptació Lingüística**
+- Sub-arees: A1 Lèxic · A2 Sintaxi · A3 Cohesio · A4 Registre
+- Que cobreix: triar vocabulari, construir frases, organitzar connectors, ajustar el to.
+- Format card: indica quina/es sub-area/es s'han activat (ex: "A1+A2") i justifica.
+
+**B. Estructura i Organització**
+- Sub-arees: B1 Segmentacio · B2 Jerarquia · B3 Ordre · B4 Senyalitzacio
+- Que cobreix: dividir el text, usar titols i llistes, ordre general↔particular.
+
+**C. Suport Cognitiu**
+- Sub-arees: C1 Carrega cognitiva · C2 Scaffolding · C3 Coneixements previs · C4 Metacognicio
+- Que cobreix: reduir la sobrecarrega, bastides, activar previs, autoavaluacio.
+
+**D. Multimodalitat**
+- Sub-arees: D1 Suport visual · D2 Organitzadors grafics · D3 Redundancia canals
+- Que cobreix: pictogrames, esquemes, taules, diagrames que faciliten comprensio per multiples vies.
+
+**E. Contingut Curricular**
+- Sub-arees: E1 Terminologia · E2 Rigor conceptual · E3 Exemples · E4 Contextualitzacio
+- Que cobreix: que es manté del rigor i que s'adapta sense perdre la materia.
+
+**F. Avaluació i Comprensió**
+- Sub-arees: F1 Preguntes · F2 Activitats · F3 Autoavaluacio
+- Que cobreix: preguntes graduades i activitats d'aprofundiment.
+
+**G. Personalització Lingüística** (nomes per a nouvinguts/L2)
+- Sub-arees: G1 Suport L1 · G2 Adaptacio cultural
+- Que cobreix: glossaris bilingues, referents culturals propers, exemples de l'experiencia de l'alumne.
+
+FORMAT OBLIGATORI per card (encapçalament H3 + body):
+```
+### A. Adaptació Lingüística — A1+A2
+[Justificacio en 1-2 frases amb terminologia pedagogica real, NO descriptiva.]
+
+### B. Estructura i Organització — B1+B2
+[Justificacio...]
+```
+
+EXEMPLE CORRECTE:
+### A. Adaptació Lingüística — A1+A2
+S'ha reduit el lèxic a vocabulari frequent (BICS) per evitar carrega lexica
+abans de la descodificacio. Sintaxi a SVO amb verbs en present d'indicatiu
+per facilitar el processament a pre-A1 sense subordinacio.
+
+EXEMPLE INCORRECTE:
+**Adaptació lingüística**: Hem fet frases curtes i senzilles.
+(Massa generic, sense codis, sense fonamentacio.)
+
+Omet les categories que no apliquen. NO inventis sub-arees no llistades.
+Cada card comença SEMPRE per `### [LLETRA]. [Nom] — [codis]`.
 
 ## Notes d'auditoria
 SEMPRE GENERAR — Taula comparativa breu dels canvis principals:

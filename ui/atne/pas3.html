@@ -3165,8 +3165,42 @@
 
     // Mapa de títols cap a (icona SVG, accent color). Reconeix variants de
     // l'LLM (lingüística/llenguatge, diversitat/inclusió, etc.) per match parcial.
+    // Taxonomia A-G canonica (font: saber-ne.html §"Categories d'adaptacio").
+    // L'ordre importa: el primer match guanya. Els codis ([A-G]\.\s) van primer
+    // perque son inequivocs; segueixen fallbacks per al format legacy de 5 cat.
     const dimMap = [
-      { key:'lingüística|llenguatge|lingüístic', label:'Adaptació lingüística',
+      // Nous codis taxonomia A-G (2026-05-27)
+      { key:'^a\\.|adaptació lingüística|adaptacio linguistica',
+        label:'A. Adaptació Lingüística',
+        icon:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+        mod:'M3', modName:'Llengua', anchor:'mecr' },
+      { key:'^b\\.|estructura.*organització|estructura.*organitzacio',
+        label:'B. Estructura i Organització',
+        icon:'<path d="M3 3h18v6H3zM3 13h18v6H3z"/><path d="M3 9v4M21 9v4"/>',
+        mod:'M3', modName:'Llengua', anchor:'lectura-facil' },
+      { key:'^c\\.|suport cognitiu|càrrega cognitiva|carrega cognitiva|scaffolding',
+        label:'C. Suport Cognitiu',
+        icon:'<path d="M3 20h4v-6H3zM10 20h4V10h-4zM17 20h4V4h-4z"/>',
+        mod:'M2', modName:'Mètode', anchor:'mites' },
+      { key:'^d\\.|multimodal|suport visual|organitzadors gràfics',
+        label:'D. Multimodalitat',
+        icon:'<circle cx="12" cy="12" r="3"/><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/>',
+        mod:'M5', modName:'Tecnopedagogia', anchor:'ajuts' },
+      { key:'^e\\.|contingut curricular|rigor conceptual|terminologia',
+        label:'E. Contingut Curricular',
+        icon:'<path d="M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6z"/>',
+        mod:'M4', modName:'Contingut curricular', anchor:'mites' },
+      { key:'^f\\.|avaluació.*comprensió|avaluacio.*comprensio|preguntes.*activitats|autoavaluació',
+        label:'F. Avaluació i Comprensió',
+        icon:'<path d="M9 11l3 3 7-7"/><circle cx="12" cy="12" r="10"/>',
+        mod:'M6', modName:'Avaluació', anchor:'mites' },
+      { key:'^g\\.|personalització lingüística|personalitzacio linguistica|suport l1|adaptació cultural',
+        label:'G. Personalització Lingüística',
+        icon:'<circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/>',
+        mod:'M3', modName:'Llengua', anchor:'mall-tilc-tolc' },
+      // Fallbacks per al format legacy (5 categories sense codi)
+      { key:'lingüística|llenguatge|lingüístic',
+        label:'Adaptació lingüística',
         icon:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
         mod:'M3', modName:'Llengua', anchor:'mecr' },
       { key:'diversitat|inclusió|inclusio|necessitats|nese|nouvingut|dislex|tdah|tea',
