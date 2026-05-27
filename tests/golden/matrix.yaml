@@ -1,0 +1,143 @@
+# =============================================================================
+# tests/golden/matrix.yaml — Matriu canònica d'esperança (Fase A del harness)
+# =============================================================================
+# Font de veritat per validar que el sistema fa el que ha de fer per a cada
+# condició + nivell. Aquesta matriu reprodueix saber-ne+ §7 i es compara amb:
+#   1) MATRIU_CONDICIONS de ui/atne/pas2.html (defaults UI)
+#   2) Activació de skills per a perfil + complements
+#   3) Macrodirectives activades per instruction_filter
+#
+# Si modifiques aquest fitxer, recorda: és contracte. El que canviï aquí canvia
+# l'expectativa contra la qual el harness valida tot el sistema.
+# =============================================================================
+
+meta:
+  font: "ui/saber-ne.html §7 (canonical) + ui/atne/pas2.html:2813-2828"
+  generat_at: "2026-05-26"
+  versio: "1.0.0"
+
+# Mapping IDs curts (saber-ne+ §7, MATRIU_CONDICIONS) → claus backend (caracteristiques.*)
+# Quan una entrada té `chars_key: null` significa que la condició NO té representació
+# al backend actual (gap a investigar — la condició és pedagògicament al canon
+# però el frontend no la pot enviar al backend).
+condicions:
+  tea:
+    label: "Trastorn de l'Espectre Autista"
+    chars_key: "tea"
+  tdah:
+    label: "TDAH"
+    chars_key: "tdah"
+  disl:
+    label: "Dislèxia"
+    chars_key: "dislexia"
+  di:
+    label: "Discapacitat intel·lectual"
+    chars_key: "di"
+  tdl:
+    label: "Trastorn del Desenvolupament del Llenguatge"
+    chars_key: "tdl"
+  ac:
+    label: "Altes capacitats"
+    chars_key: "altes_capacitats"
+  aud:
+    label: "Discapacitat auditiva"
+    chars_key: "discapacitat_auditiva"
+  vis:
+    label: "Discapacitat visual"
+    chars_key: "discapacitat_visual"
+  tdc:
+    label: "Trastorn del Desenvolupament de la Coordinació / dispràxia"
+    chars_key: null   # GAP — no és a ALL_CHAR_KEYS (llm.js:46-50)
+  cat:
+    label: "Nouvingut (catalanitzar/L2)"
+    chars_key: "nouvingut"
+  vuln:
+    label: "Vulnerabilitat socioeconòmica"
+    chars_key: null   # GAP — no és a ALL_CHAR_KEYS
+  emo:
+    label: "Necessitats emocionals"
+    chars_key: null   # GAP — no és a ALL_CHAR_KEYS
+  # Condicions backend NO presents a la matriu canònica (gap invers):
+  discalculia:
+    label: "Discalcúlia"
+    chars_key: "discapacitat_intellectual"   # alias? cal aclarir; figura a ALL_CHAR_KEYS però no a matriu §7
+    fora_matriu: true
+
+# Complements canònics (ordre = columnes de MATRIU_CONDICIONS a pas2.html:2814)
+complements:
+  glossari:               { col: 0,  skill: "generate-glossari",               nom: "Glossari" }
+  esquema_visual:         { col: 1,  skill: null,                              nom: "Esquema visual" }   # no té SKILL pròpia (es genera dins l'adapter)
+  bastides:               { col: 2,  skill: "generate-bastides-lectura",       nom: "Bastides lingüístiques" }
+  mapa_conceptual:        { col: 3,  skill: "generate-mapa-conceptual",        nom: "Mapa conceptual" }
+  preguntes_comprensio:   { col: 4,  skill: "generate-preguntes-comprensio",   nom: "Preguntes de comprensió" }
+  activitats_aprofundiment: { col: 5, skill: "generate-activitats-aprofundiment", nom: "Activitats d'aprofundiment" }
+  pictogrames:            { col: 6,  skill: "generate-pictogrames",            nom: "Pictogrames ARASAAC" }
+  mapa_mental:            { col: 7,  skill: "generate-mapa-mental",            nom: "Mapa mental" }
+  plantilles_genere:      { col: 8,  skill: "generate-plantilles-genere",      nom: "Plantilla de gènere" }
+  resum_graduat:          { col: 9,  skill: "generate-resum-graduat",          nom: "Resum graduat" }
+  cartes_conversacionals: { col: 10, skill: "generate-cartes-conversacionals", nom: "Cartes conversacionals" }
+  rubriques:              { col: 11, skill: "generate-rubriques",              nom: "Rúbriques d'autoavaluació" }
+
+# Matriu d'esperança: per cada condició, quins complements s'han d'auto-activar
+# per defecte. Reproduïda EXACTAMENT de pas2.html:2814-2827. Si canvia allà,
+# canvia aquí (i el test ho detectarà).
+#
+# Llegenda: true = activar per defecte · false = no auto-activar (opt-in docent)
+defaults_per_condicio:
+  #     gloss  esq   bast  mapaC preg  aprof picto mapaM plant resum cartes rubr
+  tea:  [true, true, true, false, true, false, true, false, false, false, false, true ]
+  tdah: [true, true, true, false, true, false, false, false, false, false, false, false]
+  disl: [true, true, true, false, true, false, false, false, true,  false, false, false]
+  di:   [true, true, true, false, false, false, true, false, true,  true,  false, false]
+  tdl:  [true, true, true, false, true, false, false, false, true,  false, false, false]
+  ac:   [true, true, false, true, true, true, false, true,  false, false, false, true ]
+  aud:  [true, true, true, false, true, false, true, false, false, false, false, false]
+  vis:  [true, false, false, false, true, false, false, false, false, false, false, false]
+  tdc:  [true, false, false, false, true, false, false, false, false, false, false, false]
+  cat:  [true, true, true, false, true, false, true, false, true,  true,  false, false]
+  vuln: [true, true, true, false, true, false, false, false, false, false, false, false]
+  emo:  [true, true, true, false, true, false, false, false, false, false, false, false]
+
+# Gèneres canònics disponibles (skills write-*).
+# Font: corpus/external/corpusFJE/skills/generes/
+generes_canonics:
+  - noticia
+  - cronica
+  - opinio
+  - assaig
+  - conte
+  - fabula
+  - poema
+  - dialeg
+  - entrevista
+  - diari
+  - carta
+  - biografia
+  - ressenya
+  - resum
+  - informe
+  - descripcio
+  - instructiu
+  - receptari
+  - manual
+  - reglament
+  - enciclopedic
+  - divulgatiu
+  - contrarelat-odi
+  - expressar-preferencies
+
+# MECRs canònics (ordre creixent de complexitat)
+mecrs_canonics:
+  - "pre-A1"
+  - "A1"
+  - "A2"
+  - "B1"
+  - "B2"
+  - "C1"
+  - "C2"
+
+# Nivells DUA canònics
+dua_canonics:
+  - "Accés"
+  - "Core"
+  - "Enriquiment"
