@@ -1,0 +1,278 @@
+{
+  "_meta": {
+    "versio": "1.0.0",
+    "generat_at": "2026-05-27",
+    "descripcio": "Font canonica unica de perfils i textos demo d'ATNE. Llegit per pas1.html, pas2.html i tests/golden/.",
+    "sync_targets": [
+      "ui/atne/pas1.html (window.ATNE_PROFILES)",
+      "ui/atne/pas2.html (selector de textos demo)",
+      "ui/atne/pas2-standalone.html (idem)",
+      "tests/golden/cases.yaml (regenerat des d'aqui)",
+      "tests/golden/golden_texts.yaml (regenerat des d'aqui)"
+    ],
+    "principi": "Modificar nomes aqui. Despres copiar als targets de sync."
+  },
+
+  "perfils": {
+    "marc": {
+      "id": "marc", "type": "person", "name": "El Pilot",
+      "age": "14", "course": "3r ESO A", "avatar": "Pi", "cat": "tdah",
+      "chips": [{"label": "TDAH", "cat": "tdah"}, {"label": "B1 · Intermedi", "cat": "lv"}],
+      "behaviors": ["Es distreu amb textos llargs", "Respon sense llegir tot", "Fatiga lectora al final"],
+      "aids": ["Fragmentar el text", "Una idea per frase", "Instruccions numerades", "Vocabulari freqüent"]
+    },
+    "mireia": {
+      "id": "mireia", "type": "person", "name": "La Narradora",
+      "age": "12", "course": "1r ESO B", "avatar": "Na", "cat": "disl",
+      "chips": [{"label": "Dislèxia", "cat": "disl"}, {"label": "Decodificació", "cat": "lv"}],
+      "behaviors": ["Confon lletres similars (b/d, p/q)", "Lectura lenta", "Es cansa al cap d'un paràgraf"],
+      "aids": ["Tipografia accessible", "Interlineat ampli", "Fragmentar el text", "Marcar paraules clau"]
+    },
+    "liu": {
+      "id": "liu", "type": "person", "name": "El Pont",
+      "age": "13", "course": "2n ESO C", "avatar": "Po", "cat": "cat",
+      "chips": [{"label": "Català L2", "cat": "cat"}, {"label": "Vocab. bàsic", "cat": "lv"}],
+      "behaviors": ["Vocabulari escàs", "Dificultats amb connectors", "Necessita suport visual"],
+      "aids": ["Glossari integrat", "Vocabulari freqüent", "Definicions al marge", "Pictogrames"]
+    },
+    "pol": {
+      "id": "pol", "type": "person", "name": "El Roure",
+      "age": "15", "course": "4t ESO A", "avatar": "Ro", "cat": "ac",
+      "chips": [{"label": "Altes capacitats", "cat": "ac"}],
+      "behaviors": ["Acaba molt ràpid i es desmotiva", "Busca reptes", "Pregunta coses complexes"],
+      "aids": ["Profunditzacio", "Referències externes", "Preguntes obertes", "Recerca autònoma"]
+    },
+    "ex_tdah": {
+      "id": "ex_tdah", "type": "person", "name": "L'Estel", "demo": true,
+      "age": "14", "course": "3r ESO", "avatar": "Es", "cat": "tdah",
+      "chips": [{"label": "TDAH", "cat": "tdah"}],
+      "behaviors": ["Dificultats atencionals i de planificació", "Fatiga ràpida", "Necessita textos curts i estructurats"],
+      "aids": ["Fragmentar el text en blocs petits", "Una idea per frase", "Marques visuals", "Instruccions numerades"]
+    },
+    "ex_l2": {
+      "id": "ex_l2", "type": "person", "name": "El Viatger", "demo": true,
+      "age": "12", "course": "1r ESO", "avatar": "Vi", "cat": "cat",
+      "chips": [{"label": "Català L2", "cat": "cat"}, {"label": "Pre-A1 · 2 mesos", "cat": "lv"}],
+      "behaviors": ["Arribat fa 2 mesos", "Vocabulari molt escàs en català", "Bona motivació i escolarització prèvia"],
+      "aids": ["Glossari amb traducció àrab", "Pictogrames i suport visual", "Frases SVO curtes", "Vocabulari freqüent"],
+      "subvariables": {
+        "nouvingut": {
+          "l1": "Àrab", "pais": "Marroc", "mesos_range": "Menys de 6 mesos",
+          "alfabet_llati": false, "alfabetitzacio_l1": true, "escolaritzacio": "regular"
+        }
+      }
+    },
+    "ex_tea": {
+      "id": "ex_tea", "type": "person", "name": "L'Astrònom", "demo": true,
+      "age": "10", "course": "5è Primària", "avatar": "As", "cat": "tea",
+      "chips": [{"label": "TEA", "cat": "tea"}],
+      "behaviors": ["Necessita estructura clara i predictible", "Sensible al llenguatge ambigu o metafòric", "Fort en comprensió literal"],
+      "aids": ["Estructura molt explícita", "Evitar metàfores i ironies", "Seqüències pas a pas", "Títols descriptius"]
+    },
+    "ex_aacc": {
+      "id": "ex_aacc", "type": "person", "name": "L'Exploradora", "demo": true,
+      "age": "15", "course": "4t ESO", "avatar": "Ex", "cat": "ac",
+      "chips": [{"label": "Altes capacitats", "cat": "ac"}],
+      "behaviors": ["Llegeix textos d'adults", "Fa connexions creatives i interdisciplinars", "Busca profunditat i repte"],
+      "aids": ["Aprofundiment conceptual", "Preguntes obertes", "Connexions interdisciplinars", "Fonts i recerca autònoma"]
+    },
+
+    "ex_di": {
+      "id": "ex_di", "type": "person", "name": "La Constructora", "demo": true,
+      "age": "11", "course": "6è Primària", "avatar": "Co", "cat": "di",
+      "chips": [{"label": "DI moderada", "cat": "di"}],
+      "behaviors": [
+        "Necessita instruccions concretes i visualitzables",
+        "Aprèn millor amb exemples reals que amb abstraccions",
+        "Mostra fatiga davant textos densos"
+      ],
+      "aids": [
+        "Una idea per frase",
+        "Vocabulari freqüent i conegut",
+        "Pictogrames de suport",
+        "Resum visual al final"
+      ],
+      "subvariables": {"di": {"grau": "moderat"}}
+    },
+    "ex_tdl": {
+      "id": "ex_tdl", "type": "person", "name": "El Ressonador", "demo": true,
+      "age": "10", "course": "5è Primària", "avatar": "Re", "cat": "tdl",
+      "chips": [{"label": "TDL receptiu", "cat": "tdl"}],
+      "behaviors": [
+        "Entén abans del que pot expressar",
+        "Confusió davant frases llargues o complexes",
+        "Necessita temps per processar el missatge"
+      ],
+      "aids": [
+        "Frases curtes SVO",
+        "Vocabulari freqüent",
+        "Suport visual amb pictogrames",
+        "Repetició estratègica dels termes clau"
+      ],
+      "subvariables": {"tdl": {"modalitat": "comprensiu"}}
+    },
+    "ex_aud": {
+      "id": "ex_aud", "type": "person", "name": "La Mirada", "demo": true,
+      "age": "13", "course": "2n ESO B", "avatar": "Mi", "cat": "au",
+      "chips": [{"label": "Disc. auditiva", "cat": "au"}, {"label": "LSC", "cat": "lv"}],
+      "behaviors": [
+        "Comunica preferentment en LSC",
+        "Català escrit com a segona llengua",
+        "Necessita suport visual fort i estructura predictible"
+      ],
+      "aids": [
+        "Pictogrames i imatges",
+        "Vocabulari freqüent",
+        "Glossari amb il·lustracions",
+        "Estructures simples sense ironia"
+      ],
+      "subvariables": {"discapacitat_auditiva": {"grau": "sever", "comunicacio": "LSC"}}
+    },
+    "ex_vis": {
+      "id": "ex_vis", "type": "person", "name": "La Veu", "demo": true,
+      "age": "14", "course": "3r ESO", "avatar": "Ve", "cat": "vi",
+      "chips": [{"label": "Disc. visual", "cat": "vi"}, {"label": "Baixa visió", "cat": "lv"}],
+      "behaviors": [
+        "Necessita text amb mida ampliada i alt contrast",
+        "Es fatiga visualment amb columnes estretes",
+        "Pot beneficiar-se d'audiodescripció"
+      ],
+      "aids": [
+        "Tipografia ampla i alt contrast",
+        "Evitar columnes estretes",
+        "Audiodescripció disponible",
+        "Estructura textual clara sense diagrames visuals densos"
+      ],
+      "subvariables": {"discapacitat_visual": {"grau": "baixa_visio"}}
+    },
+    "ex_discal": {
+      "id": "ex_discal", "type": "person", "name": "El Cartògraf", "demo": true,
+      "age": "10", "course": "5è Primària", "avatar": "Cr", "cat": "discalculia",
+      "chips": [{"label": "Discalcúlia", "cat": "discalculia"}],
+      "behaviors": [
+        "Bo amb mapes visuals i orientació espacial",
+        "Dificultats amb xifres, càlculs i quantitats",
+        "Tendeix a fer representacions gràfiques per entendre"
+      ],
+      "aids": [
+        "Substituir xifres per text sempre que es pugui",
+        "Representacions visuals i espacials",
+        "Comparacions concretes (no abstractes)",
+        "Procediments visualitzables pas a pas"
+      ],
+      "subvariables": {"discalculia": {"actiu": true}}
+    },
+    "ex_emo": {
+      "id": "ex_emo", "type": "person", "name": "El Refugi", "demo": true,
+      "age": "13", "course": "2n ESO", "avatar": "Rf", "cat": "emo",
+      "chips": [{"label": "Necessitats emocionals", "cat": "emo"}],
+      "behaviors": [
+        "Ansietat davant textos llargs o desconeguts",
+        "Necessita predictibilitat i seguretat",
+        "Bloqueig amb temes carregats emocionalment"
+      ],
+      "aids": [
+        "Estructura predictible amb apartats clars",
+        "Avís previ si hi ha temes sensibles",
+        "Punts d'ancoratge per tornar enrere",
+        "Espais de pausa explícits al text"
+      ],
+      "subvariables": {"emocional": {"actiu": true}}
+    },
+
+    "ex_pri": {
+      "id": "ex_pri", "type": "group", "name": "5è Primària B · Grup classe", "demo": true,
+      "age": null, "course": "18 alumnes", "avatar": "5B", "cat": "group",
+      "chips": [{"label": "Ritmes diversos", "cat": "lv"}, {"label": "1 TDAH", "cat": "tdah"}, {"label": "1 L2", "cat": "cat"}],
+      "behaviors": ["Ritmes de lectura diversos", "1 alumne amb TDAH necessita textos curts", "1 alumne nouvingut amb vocabulari limitat"],
+      "aids": ["Glossari de termes clau", "Fragmentar en blocs", "Pictogrames de suport", "Una idea per paràgraf"]
+    },
+    "ex_eso": {
+      "id": "ex_eso", "type": "group", "name": "2n ESO C · Grup classe", "demo": true,
+      "age": null, "course": "22 alumnes", "avatar": "2C", "cat": "group",
+      "chips": [{"label": "3 nivells MECR", "cat": "lv"}, {"label": "2 L2", "cat": "cat"}, {"label": "1 TEA", "cat": "tea"}],
+      "behaviors": ["3 nivells MECR: A1, B1 i B2", "2 alumnes L2 recent incorporats", "1 alumne TEA necessita estructura molt explícita"],
+      "aids": ["Estructura clara amb encapçalaments", "Glossari multilingüe", "Seqüències explícites", "Evitar ambigüitats"]
+    },
+    "ex_fp": {
+      "id": "ex_fp", "type": "group", "name": "GM Administració 1r · Com. empresarial", "demo": true,
+      "age": null, "course": "15 alumnes", "avatar": "GM", "cat": "group",
+      "chips": [{"label": "Velocitats diverses", "cat": "lv"}, {"label": "1 TDAH", "cat": "tdah"}],
+      "behaviors": ["Velocitats de lectura molt diverses", "1 alumne amb TDAH", "Motivació alta quan el context és laboral i pràctic"],
+      "aids": ["Exemples del context professional", "Textos curts i directes", "Estructures tabulars", "Instruccions numerades"]
+    }
+  },
+
+  "textos": {
+    "infantil_i3_canco": {
+      "descripcio": "Joc lingüístic d'Infantil I3 — repetició i ritme",
+      "etapa": "infantil", "curs": "I3", "fase_lectora": "logografica",
+      "mecr_origen": "pre-A1", "genere": "canco", "materia": "llengua",
+      "paraules_aprox": 20,
+      "text": "Mira el sol.\nEl sol és groc.\nMira l'arbre.\nL'arbre és verd.\nMira el cel.\nEl cel és blau.\nTot és bonic."
+    },
+    "infantil_i4_conte": {
+      "descripcio": "Conte simple d'Infantil I4 — personatges + acció",
+      "etapa": "infantil", "curs": "I4", "fase_lectora": "logografica",
+      "mecr_origen": "pre-A1", "genere": "conte", "materia": "llengua",
+      "paraules_aprox": 35,
+      "text": "En Marc té un gos.\nEl gos es diu Pep.\nEn Marc i en Pep van al parc.\nAl parc juguen amb una pilota.\nLa pilota és vermella.\nLa pilota salta molt amunt."
+    },
+    "infantil_i5_descripcio": {
+      "descripcio": "Descripció d'animal Infantil I5 — frases simples SVO",
+      "etapa": "infantil", "curs": "I5", "fase_lectora": "logografica",
+      "mecr_origen": "pre-A1", "genere": "descripcio", "materia": "medi natural",
+      "paraules_aprox": 40,
+      "text": "L'elefant és un animal molt gran.\nTé quatre potes fortes.\nTé una trompa llarga.\nLa trompa li serveix per beure aigua i agafar fruites.\nL'elefant viu a l'Àfrica i a l'Àsia.\nMenja herba i fulles."
+    },
+    "primaria_ci_instructiu": {
+      "descripcio": "Instructiu Primer Cicle Primària — fer un titella",
+      "etapa": "primaria", "curs": "1r-2n Primària", "fase_lectora": "alfabetica_emergent",
+      "mecr_origen": "A1", "genere": "instructiu", "materia": "plàstica / medi",
+      "paraules_aprox": 80,
+      "text": "Com fer un titella de mitja\n\nNecessites:\n- Una mitja vella\n- Dos botons\n- Una agulla i fil\n- Una mica de farciment\n\nPassos:\n1. Posa el farciment dins de la mitja.\n2. Lliga el cap amb un fil.\n3. Cus dos botons per als ulls.\n4. Dibuixa la boca amb un retolador.\n\nJa tens el teu titella. Pots fer-li veu i jugar amb ell."
+    },
+    "primaria_cm_conte": {
+      "descripcio": "Conte narratiu Segon Cicle Primària — gat i ratolí amb diàleg",
+      "etapa": "primaria", "curs": "3r-4t Primària", "fase_lectora": "alfabetica_fluida",
+      "mecr_origen": "A2", "genere": "conte", "materia": "llengua i literatura",
+      "paraules_aprox": 150,
+      "text": "El gat i el ratolí\n\nA la cuina d'una casa antiga vivia un gat gros i un ratolí petit. El gat passava el dia dormint, però sempre vigilava amb un ull obert.\n\nUn matí, el ratolí va sortir del seu forat per buscar formatge. Va caminar a poc a poc, sense fer soroll. De cop, el gat es va despertar.\n\n— T'he enxampat! — va dir el gat.\n— Espera — va dir el ratolí —. Si em deixes anar, et donaré una sorpresa.\n\nEl gat va riure. No es creia un ratolí. Però tenia curiositat. Va obrir la pota i el ratolí va córrer cap al forat. Des de dins, el ratolí va deixar caure una llesca de formatge.\n\n— Aquí tens la sorpresa! — va dir.\n\nEl gat va menjar el formatge content. Des d'aquell dia, el gat i el ratolí van ser amics."
+    },
+    "instructiu_horts": {
+      "descripcio": "Instructiu Cicle Superior Primària — plantar una llavor",
+      "etapa": "primaria", "curs": "5è-6è Primària", "fase_lectora": "alfabetica_fluida",
+      "mecr_origen": "A2", "genere": "instructiu", "materia": "medi natural",
+      "paraules_aprox": 145,
+      "text": "Com plantar una llavor de mongeta a classe\n\nMaterials que necessites:\n- Un got transparent\n- Un cotó\n- Una llavor de mongeta seca\n- Aigua\n\nPassos:\n\n1. Mulla el cotó amb aigua. No ha de quedar encharcat, només humit.\n2. Posa el cotó moll dins del got. Aplana'l una mica al fons.\n3. Posa la llavor entre el cotó i la paret de vidre del got. Així podràs veure com creix.\n4. Posa el got a prop d'una finestra, on rebi llum del sol.\n5. Cada dia, comprova si el cotó encara està humit. Si està sec, afegeix una mica d'aigua.\n\nDesprés de tres o quatre dies, la llavor s'obrirà i sortirà una arrel blanca. A la setmana, la planta tindrà fulles verdes.\n\nAnota cada dia què veus. Pots fer dibuixos o fotografies. És el teu primer experiment científic."
+    },
+    "conte_germanes": {
+      "descripcio": "Fragment narratiu literari ESO — diàleg + descripció + emoció",
+      "etapa": "ESO", "curs": "1r ESO", "fase_lectora": "alfabetica_fluida",
+      "mecr_origen": "A2", "genere": "conte", "materia": "llengua i literatura",
+      "paraules_aprox": 175,
+      "text": "La Marta i la Júlia eren germanes, però gairebé no es parlaven. Vivien al mateix pis, però cadascuna al seu món. La Marta dibuixava tot el dia; la Júlia tocava el piano a la seva habitació.\n\nUna nit de tempesta, l'electricitat va marxar. La casa va quedar a les fosques. La Júlia va sortir del seu refugi amb una espelma i va veure la Marta dreta al passadís, espantada.\n\n— No tinguis por — va dir la Júlia.\n— Sóc gran. No tinc por de la tempesta — va respondre la Marta.\n\nPerò les seves mans tremolaven una mica.\n\nEs van asseure al sofà del menjador. La llum de l'espelma feia ballar les ombres a les parets. La Júlia va dir:\n\n— Quan érem petites, m'agradava que dibuixessis al meu costat. Tu pintaves i jo mirava.\n\nLa Marta no va contestar. Va treure un llapis de la butxaca i un paper de sobre la taula. Va començar a dibuixar el rostre de la seva germana a la llum de l'espelma. La Júlia va somriure."
+    },
+    "fotosintesi": {
+      "descripcio": "Explicació científica ESO — base canònica",
+      "etapa": "ESO", "curs": "3r ESO", "fase_lectora": "alfabetica_fluida",
+      "mecr_origen": "B1", "genere": "divulgatiu", "materia": "ciències naturals",
+      "paraules_aprox": 195,
+      "text": "La fotosíntesi és el procés pel qual les plantes verdes, les algues i alguns bacteris transformen l'energia de la llum del sol en energia química. Aquest procés és essencial per a la vida a la Terra, perquè produeix l'oxigen que respirem i és la base de la cadena alimentària.\n\nLa reacció es produeix dins dels cloroplasts, uns orgànuls de les cèl·lules vegetals que contenen clorofil·la. La clorofil·la és el pigment verd que capta la llum del sol. Quan la llum arriba a les fulles, la planta absorbeix diòxid de carboni de l'aire pels estomes i aigua del sòl per les arrels.\n\nAmb aquests dos elements i amb l'energia lluminosa, la planta produeix glucosa (un tipus de sucre) i allibera oxigen com a producte de rebuig. La glucosa serveix d'aliment a la mateixa planta o s'emmagatzema en forma de midó.\n\nSense fotosíntesi, l'atmosfera no tindria prou oxigen i els éssers vius que respiren no podrien existir. Per això la conservació dels boscos i dels oceans és tan important: són els grans productors d'oxigen del planeta."
+    },
+    "revolucio_industrial": {
+      "descripcio": "Text històric ESO — narrativa amb causes i conseqüències (versió ampliada del demo de pas2-standalone)",
+      "etapa": "ESO", "curs": "4t ESO", "fase_lectora": "alfabetica_fluida",
+      "mecr_origen": "B2", "genere": "divulgatiu", "materia": "història",
+      "paraules_aprox": 220,
+      "text": "La Revolució Industrial va començar a Anglaterra a mitjan segle XVIII i es va estendre durant el segle XIX per Europa i Amèrica del Nord. Va ser un conjunt de transformacions econòmiques, tecnològiques i socials que van canviar profundament la manera com la gent vivia, treballava i es relacionava.\n\nL'origen es troba en la combinació de diversos factors. Primer, els avenços tècnics: la màquina de vapor, perfeccionada per James Watt, va permetre mecanitzar la indústria tèxtil i, més tard, el transport. Segon, la disponibilitat de carbó i ferro, especialment a la regió central anglesa. Tercer, una agricultura més productiva, que alliberava mà d'obra cap a les fàbriques de les ciutats.\n\nLes conseqüències van ser profundes. Les ciutats van créixer ràpidament i van aparèixer barris obrers en condicions sovint insalubres. Va sorgir una nova classe social, el proletariat industrial, amb jornades llargues i salaris baixos. Al mateix temps, la burgesia industrial es va enriquir i va consolidar el seu poder polític.\n\nAquest procés també va alterar la relació amb la natura: el consum massiu de combustibles fòssils va començar a marcar el clima del planeta. Per això, alguns historiadors consideren la Revolució Industrial l'inici de l'època anomenada Antropocè."
+    },
+    "argumentatiu_pantalles": {
+      "descripcio": "Text argumentatiu Batxillerat — opinió raonada amb contrarèplica",
+      "etapa": "batxillerat", "curs": "Batxillerat", "fase_lectora": "alfabetica_fluida",
+      "mecr_origen": "C1", "genere": "opinio", "materia": "ètica / ciutadania",
+      "paraules_aprox": 245,
+      "text": "L'omnipresència de les pantalles a la vida quotidiana ha generat un debat intens sobre el seu impacte cognitiu i social, especialment en l'etapa escolar. Hi ha qui defensa que limitar l'ús de dispositius digitals protegeix la concentració i la salut mental dels adolescents; altres sostenen que aquest plantejament és anacrònic i que la veritable competència del segle XXI consisteix a aprendre a navegar críticament un entorn permanentment connectat.\n\nEls arguments a favor de la restricció s'apoyen en evidència emergent. Estudis recents associen l'ús intensiu de xarxes socials amb increments de simptomatologia ansiosa, sobretot entre adolescents joves. La fragmentació de l'atenció, derivada de notificacions constants, redueix la capacitat de lectura profunda i de raonament sostingut. En conseqüència, diversos països europeus han optat per limitar o prohibir el telèfon mòbil als centres educatius.\n\nTanmateix, una restricció estricta pot generar efectes col·laterals. Si l'escola exclou completament l'entorn digital, perd l'oportunitat d'ensenyar criteris de discriminació informativa, hàbits de privacitat digital i alfabetització crítica davant les xarxes generatives. L'alumnat acabarà igualment exposat a aquests entorns; la qüestió és si ho farà amb o sense acompanyament educatiu.\n\nProbablement la resposta més raonable no sigui la prohibició absoluta ni la integració acrítica, sinó un model que ensenyi a usar i, alhora, a desconnectar. La competència digital implica també la competència de l'absència."
+    }
+  }
+}
