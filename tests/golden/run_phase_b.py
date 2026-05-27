@@ -59,6 +59,19 @@ except ImportError as e:
     print(f"ERROR: cal instal·lar {e.name}. pip install pyyaml requests")
     sys.exit(2)
 
+# Carrega .env per a GEMINI_API_KEY i altres
+try:
+    from dotenv import load_dotenv
+    load_dotenv(ROOT / ".env")
+except ImportError:
+    pass  # python-dotenv no instal·lat → confiem en l'entorn extern
+
+# Carrega test-token si existeix (per a /api/adapt amb auth Supabase)
+_TEST_TOKEN_PATH = ROOT / "tests" / ".test-token"
+TEST_TOKEN = None
+if _TEST_TOKEN_PATH.exists():
+    TEST_TOKEN = _TEST_TOKEN_PATH.read_text(encoding="utf-8").strip()
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Paths i constants
 # ─────────────────────────────────────────────────────────────────────────────
@@ -118,13 +131,15 @@ def call_adapt_http(server: str, case: dict, text_body: str, text_id: str) -> di
         "profile": case["profile"],
         "params": case["params"],
         "text": text_body,
-        # Camps que el backend pot exigir:
         "etapa": case["params"].get("etapa", "ESO"),
         "materia": "ciències naturals",
     }
     url = f"{server.rstrip('/')}{ADAPT_ENDPOINT}"
+    headers = {}
+    if TEST_TOKEN:
+        headers["Authorization"] = f"Bearer {TEST_TOKEN}"
     t0 = time.time()
-    resp = requests.post(url, json=payload, timeout=180, stream=True)
+    resp = requests.post(url, json=payload, headers=headers, timeout=180, stream=True)
     chunks = []
     for line in resp.iter_lines(decode_unicode=True):
         if line and line.startswith("data:"):
@@ -140,6 +155,43 @@ def call_adapt_http(server: str, case: dict, text_body: str, text_id: str) -> di
         "status_code": resp.status_code,
         "elapsed_s": round(elapsed, 2),
         "events": chunks,
+    }
+
+
+def call_adapt_direct(case: dict, text_body: str, text_id: str) -> dict:
+    """Crida run_adaptation() directament (sense HTTP, sense auth).
+
+    Útil per al harness Fase B en local — bypassa l'auth Supabase/LaNet
+    cridant la lògica Python directament. Aquest és el mateix codi que
+    executa /api/adapt internament.
+    """
+    from adaptation.orchestrator import run_adaptation
+    events: list[dict] = []
+    def cb(ev):
+        events.append(ev)
+    t0 = time.time()
+    try:
+        run_adaptation(
+            text=text_body,
+            profile=case["profile"],
+            context={
+                "etapa": case["params"].get("etapa", "ESO"),
+                "materia": "ciències naturals",
+            },
+            params=case["params"],
+            progress_callback=cb,
+        )
+        status = 200
+    except Exception as e:
+        events.append({"type": "error", "msg": f"{type(e).__name__}: {e}"})
+        status = 500
+    elapsed = time.time() - t0
+    return {
+        "case_id": case["id"],
+        "text_id": text_id,
+        "status_code": status,
+        "elapsed_s": round(elapsed, 2),
+        "events": events,
     }
 
 
@@ -159,7 +211,18 @@ def build_judge_prompt(case: dict, text_original: str, output: dict, rubric: dic
 
     escala_block = "\n".join(f"   {k}: {v}" for k, v in rubric["escala"].items())
 
-    output_str = json.dumps(output.get("events", [])[-3:], ensure_ascii=False, indent=2)[:6000]
+    # Concatena tots els 'delta' events per obtenir el text adaptat complet
+    events_all = output.get("events", [])
+    text_chunks = []
+    complements_chunks = []
+    for ev in events_all:
+        if ev.get("type") == "delta" and ev.get("text"):
+            text_chunks.append(ev["text"])
+        elif ev.get("type") in ("complement", "complements", "complement_block"):
+            complements_chunks.append(json.dumps(ev, ensure_ascii=False)[:500])
+    adapted_text = "".join(text_chunks)[:8000] or "(sense text adaptat)"
+    complements_summary = ("\n\n--- Complements detectats ---\n" + "\n".join(complements_chunks)[:2000]) if complements_chunks else ""
+    output_str = f"### TEXT ADAPTAT:\n{adapted_text}{complements_summary}"
 
     return f"""Ets un **avaluador adversarial de qualitat pedagògica** d'un sistema
 d'adaptació de textos educatius (ATNE) per a alumnat amb necessitats educatives
@@ -270,10 +333,13 @@ def generate_outputs(cases: list[dict], texts: dict, args) -> None:
             text = texts["textos"][text_id]
             print(f"[generate] {case['id']} × {text_id} … ", end="", flush=True)
             try:
-                out = call_adapt_http(args.server, case, text["text"], text_id)
+                if args.direct:
+                    out = call_adapt_direct(case, text["text"], text_id)
+                else:
+                    out = call_adapt_http(args.server, case, text["text"], text_id)
                 out_path = OUTPUTS_DIR / f"{case['id']}__{text_id}.json"
                 out_path.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
-                print(f"OK ({out['elapsed_s']}s, {len(out['events'])} events)")
+                print(f"OK ({out['elapsed_s']}s, {len(out['events'])} events, status={out.get('status_code','?')})")
             except Exception as e:
                 print(f"ERROR: {e}")
 
