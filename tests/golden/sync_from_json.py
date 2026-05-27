@@ -82,19 +82,21 @@ COMP_KEYS = [
     "cartes_conversacionals", "rubriques",
 ]
 MATRIU_PER_CHAR = {
-    "tea":           [1,1,1,0,1,0,1,0,0,0,0,1],
-    "tdah":          [1,1,1,0,1,0,0,0,0,0,0,0],
-    "dislexia":      [1,1,1,0,1,0,0,0,1,0,0,0],
-    "di":            [1,1,1,0,0,0,1,0,1,1,0,0],
-    "tdl":           [1,1,1,0,1,0,0,0,1,0,0,0],
-    "altes_capacitats":[1,1,0,1,1,1,0,1,0,0,0,1],
-    "discapacitat_auditiva":[1,1,1,0,1,0,1,0,0,0,0,0],
+    # Matriu §7 v2 (2026-05-27) — Opció D validada NotebookLM
+    # Bastides i preguntes mai alhora; visual exclusiu per MECR
+    "tea":           [1,1,1,0,0,0,1,0,0,0,0,0],
+    "tdah":          [1,1,0,0,1,0,0,0,0,0,0,0],
+    "dislexia":      [1,1,1,0,0,0,0,0,0,0,0,0],
+    "di":            [1,1,1,0,0,0,1,0,0,0,0,0],
+    "tdl":           [1,1,1,0,0,0,0,0,0,0,0,0],
+    "altes_capacitats":[1,0,0,1,1,1,0,1,0,0,0,1],
+    "discapacitat_auditiva":[1,0,0,0,1,0,1,0,0,0,0,0],
     "discapacitat_visual": [1,0,0,0,1,0,0,0,0,0,0,0],
     "dispraxia":     [1,0,0,0,1,0,0,0,0,0,0,0],
-    "nouvingut":     [1,1,1,0,1,0,1,0,1,1,0,0],
-    "vulnerabilitat":[1,1,1,0,1,0,0,0,0,0,0,0],
-    "emocional":     [1,1,1,0,1,0,0,0,0,0,0,0],
-    "discalculia":   [1,1,1,0,1,0,0,0,1,0,0,0],  # afegida a §7 (2026-05-27): patró similar a TDL
+    "nouvingut":     [1,0,1,0,0,0,1,0,0,0,0,0],
+    "vulnerabilitat":[1,1,0,0,1,0,0,0,0,0,0,0],
+    "emocional":     [1,0,0,0,1,0,0,0,0,0,0,0],
+    "discalculia":   [1,1,1,0,0,0,0,0,0,0,0,0],
 }
 
 

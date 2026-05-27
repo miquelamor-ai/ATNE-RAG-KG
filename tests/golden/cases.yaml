@@ -27,11 +27,8 @@ casos:
       complements:
         glossari: true
         esquema_visual: true
-        bastides: true
         preguntes_comprensio: true
     expected_skills:
-      - generate-bastides-lectura
-      - generate-bastides-produccio
       - generate-glossari
       - generate-preguntes-comprensio
       - write-divulgatiu
@@ -51,14 +48,9 @@ casos:
         glossari: true
         esquema_visual: true
         bastides: true
-        preguntes_comprensio: true
-        plantilles_genere: true
     expected_skills:
       - generate-bastides-lectura
-      - generate-bastides-produccio
       - generate-glossari
-      - generate-plantilles-genere
-      - generate-preguntes-comprensio
       - write-noticia
 
   - id: "liu"
@@ -74,20 +66,12 @@ casos:
       genere_discursiu: "instructiu"
       complements:
         glossari: true
-        esquema_visual: true
         bastides: true
-        preguntes_comprensio: true
         pictogrames: true
-        plantilles_genere: true
-        resum_graduat: true
     expected_skills:
       - generate-bastides-lectura
-      - generate-bastides-produccio
       - generate-glossari
       - generate-pictogrames
-      - generate-plantilles-genere
-      - generate-preguntes-comprensio
-      - generate-resum-graduat
       - write-instructiu
 
   - id: "pol"
@@ -103,7 +87,6 @@ casos:
       genere_discursiu: "assaig"
       complements:
         glossari: true
-        esquema_visual: true
         mapa_conceptual: true
         preguntes_comprensio: true
         activitats_aprofundiment: true
@@ -132,11 +115,8 @@ casos:
       complements:
         glossari: true
         esquema_visual: true
-        bastides: true
         preguntes_comprensio: true
     expected_skills:
-      - generate-bastides-lectura
-      - generate-bastides-produccio
       - generate-glossari
       - generate-preguntes-comprensio
       - write-cronica
@@ -154,20 +134,12 @@ casos:
       genere_discursiu: "descripcio"
       complements:
         glossari: true
-        esquema_visual: true
         bastides: true
-        preguntes_comprensio: true
         pictogrames: true
-        plantilles_genere: true
-        resum_graduat: true
     expected_skills:
       - generate-bastides-lectura
-      - generate-bastides-produccio
       - generate-glossari
       - generate-pictogrames
-      - generate-plantilles-genere
-      - generate-preguntes-comprensio
-      - generate-resum-graduat
       - generate-tolc
       - write-descripcio
 
@@ -186,16 +158,11 @@ casos:
         glossari: true
         esquema_visual: true
         bastides: true
-        preguntes_comprensio: true
         pictogrames: true
-        rubriques: true
     expected_skills:
       - generate-bastides-lectura
-      - generate-bastides-produccio
       - generate-glossari
       - generate-pictogrames
-      - generate-preguntes-comprensio
-      - generate-rubriques
       - write-conte
 
   - id: "ex_aacc"
@@ -211,7 +178,6 @@ casos:
       genere_discursiu: "opinio"
       complements:
         glossari: true
-        esquema_visual: true
         mapa_conceptual: true
         preguntes_comprensio: true
         activitats_aprofundiment: true
@@ -242,14 +208,10 @@ casos:
         esquema_visual: true
         bastides: true
         pictogrames: true
-        plantilles_genere: true
-        resum_graduat: true
     expected_skills:
       - generate-bastides-lectura
       - generate-glossari
       - generate-pictogrames
-      - generate-plantilles-genere
-      - generate-resum-graduat
       - write-fabula
 
   - id: "ex_tdl"
@@ -267,14 +229,9 @@ casos:
         glossari: true
         esquema_visual: true
         bastides: true
-        preguntes_comprensio: true
-        plantilles_genere: true
     expected_skills:
       - generate-bastides-lectura
-      - generate-bastides-produccio
       - generate-glossari
-      - generate-plantilles-genere
-      - generate-preguntes-comprensio
       - write-dialeg
 
   - id: "ex_aud"
@@ -290,13 +247,9 @@ casos:
       genere_discursiu: "entrevista"
       complements:
         glossari: true
-        esquema_visual: true
-        bastides: true
         preguntes_comprensio: true
         pictogrames: true
     expected_skills:
-      - generate-bastides-lectura
-      - generate-bastides-produccio
       - generate-glossari
       - generate-pictogrames
       - generate-preguntes-comprensio
@@ -336,14 +289,9 @@ casos:
         glossari: true
         esquema_visual: true
         bastides: true
-        preguntes_comprensio: true
-        plantilles_genere: true
     expected_skills:
       - generate-bastides-lectura
-      - generate-bastides-produccio
       - generate-glossari
-      - generate-plantilles-genere
-      - generate-preguntes-comprensio
       - write-receptari
 
   - id: "ex_emo"
@@ -359,12 +307,8 @@ casos:
       genere_discursiu: "diari"
       complements:
         glossari: true
-        esquema_visual: true
-        bastides: true
         preguntes_comprensio: true
     expected_skills:
-      - generate-bastides-lectura
-      - generate-bastides-produccio
       - generate-glossari
       - generate-preguntes-comprensio
       - write-diari
@@ -387,16 +331,12 @@ casos:
         bastides: true
         preguntes_comprensio: true
         pictogrames: true
-        plantilles_genere: true
-        resum_graduat: true
     expected_skills:
       - generate-bastides-lectura
       - generate-bastides-produccio
       - generate-glossari
       - generate-pictogrames
-      - generate-plantilles-genere
       - generate-preguntes-comprensio
-      - generate-resum-graduat
       - write-biografia
 
   - id: "ex_eso"
@@ -415,20 +355,11 @@ casos:
         glossari: true
         esquema_visual: true
         bastides: true
-        preguntes_comprensio: true
         pictogrames: true
-        plantilles_genere: true
-        resum_graduat: true
-        rubriques: true
     expected_skills:
       - generate-bastides-lectura
-      - generate-bastides-produccio
       - generate-glossari
       - generate-pictogrames
-      - generate-plantilles-genere
-      - generate-preguntes-comprensio
-      - generate-resum-graduat
-      - generate-rubriques
       - write-informe
 
   - id: "ex_fp"
@@ -445,11 +376,8 @@ casos:
       complements:
         glossari: true
         esquema_visual: true
-        bastides: true
         preguntes_comprensio: true
     expected_skills:
-      - generate-bastides-lectura
-      - generate-bastides-produccio
       - generate-glossari
       - generate-preguntes-comprensio
       - write-manual
@@ -467,7 +395,6 @@ casos:
       genere_discursiu: "poema"
       complements:
         glossari: true
-        esquema_visual: true
         mapa_conceptual: true
         preguntes_comprensio: true
         activitats_aprofundiment: true
@@ -496,11 +423,8 @@ casos:
       complements:
         glossari: true
         esquema_visual: true
-        bastides: true
         preguntes_comprensio: true
     expected_skills:
-      - generate-bastides-lectura
-      - generate-bastides-produccio
       - generate-glossari
       - generate-preguntes-comprensio
       - write-ressenya
@@ -520,14 +444,9 @@ casos:
         glossari: true
         esquema_visual: true
         bastides: true
-        preguntes_comprensio: true
-        plantilles_genere: true
     expected_skills:
       - generate-bastides-lectura
-      - generate-bastides-produccio
       - generate-glossari
-      - generate-plantilles-genere
-      - generate-preguntes-comprensio
       - write-resum
 
   - id: "extra_genere_reglament"
@@ -545,14 +464,9 @@ casos:
         glossari: true
         esquema_visual: true
         bastides: true
-        preguntes_comprensio: true
-        plantilles_genere: true
     expected_skills:
       - generate-bastides-lectura
-      - generate-bastides-produccio
       - generate-glossari
-      - generate-plantilles-genere
-      - generate-preguntes-comprensio
       - write-reglament
 
   - id: "extra_genere_enciclopedic"
@@ -568,7 +482,6 @@ casos:
       genere_discursiu: "enciclopedic"
       complements:
         glossari: true
-        esquema_visual: true
         mapa_conceptual: true
         preguntes_comprensio: true
         activitats_aprofundiment: true
@@ -596,7 +509,6 @@ casos:
       genere_discursiu: "contrarelat_odi"
       complements:
         glossari: true
-        esquema_visual: true
         mapa_conceptual: true
         preguntes_comprensio: true
         activitats_aprofundiment: true
@@ -624,18 +536,10 @@ casos:
       genere_discursiu: "expressar-preferencies"
       complements:
         glossari: true
-        esquema_visual: true
         bastides: true
-        preguntes_comprensio: true
         pictogrames: true
-        plantilles_genere: true
-        resum_graduat: true
     expected_skills:
       - expressar-preferencies
       - generate-bastides-lectura
-      - generate-bastides-produccio
       - generate-glossari
       - generate-pictogrames
-      - generate-plantilles-genere
-      - generate-preguntes-comprensio
-      - generate-resum-graduat

@@ -2925,28 +2925,31 @@
   // Nota: TOLC = badge automàtic (nouvingut + L1), no chip seleccionable (decisió post-pilot).
   // Nota: cartes_conversacionals = elecció docent (depèn de l'activitat, no del perfil) → no auto-activar.
   //
-  // Tests inline (validen la matriu — verificar manualment si es modifica):
-  //   TDAH      → glossari, esquema_visual, bastides, preguntes_comprensio
-  //   Nouvingut → glossari, esquema_visual, bastides, preguntes_comprensio, pictogrames, plantilles_genere, resum_graduat
-  //   AC        → glossari, esquema_visual, mapa_conceptual, preguntes_comprensio, activitats_aprofundiment, mapa_mental, rubriques
-  //   TEA       → glossari, esquema_visual, bastides, preguntes_comprensio, pictogrames, rubriques
-  //   DI        → glossari, esquema_visual, bastides, pictogrames, plantilles_genere, resum_graduat
+  // MATRIU §7 v2 (2026-05-27) — refeta segons validació pedagògica NotebookLM
+  // (Opció D: bastides i preguntes_comprensio mai activades alhora als defaults).
+  // Principis aplicats:
+  //   - BASTIDES als perfils d'aprenentatge inicial (estratègia lectora)
+  //   - PREGUNTES als perfils amb autonomia lectora (contingut del text)
+  //   - Mai BASTIDES + PREGUNTES alhora (eviten redundància plànol crític)
+  //   - Visual exclusiu per MECR: esquema (A1/A2) · mapa mental (B1) · mapa conceptual (B2+)
+  //   - AC: sense esquema, sense pictogrames (expertise reversal — infantilitza)
+  //   - "Menys és més" (MALL): defaults reduïts (mitjana 3 vs 5 abans)
   const MATRIU_CONDICIONS = {
     //            [gloss, esq,   bast,  mapa_c, preg,  aprof, picto, mapa_m, plant, resum, cartes, rubr]
-    tea:  [true,  true,  true,  false, true,  false, true,  false, false, false, false, true ],
-    tdah: [true,  true,  true,  false, true,  false, false, false, false, false, false, false],
-    disl: [true,  true,  true,  false, true,  false, false, false, true,  false, false, false],
-    di:   [true,  true,  true,  false, false, false, true,  false, true,  true,  false, false],
-    tdl:  [true,  true,  true,  false, true,  false, false, false, true,  false, false, false],
-    ac:   [true,  true,  false, true,  true,  true,  false, true,  false, false, false, true ],  // mapa_mental ✓ (Buzan), rubriques ✓ (metareflexió)
-    aud:  [true,  true,  true,  false, true,  false, true,  false, false, false, false, false],
-    vis:  [true,  false, false, false, true,  false, false, false, false, false, false, false],
-    tdc:  [true,  false, false, false, true,  false, false, false, false, false, false, false],
-    cat:  [true,  true,  true,  false, true,  false, true,  false, true,  true,  false, false],  // nouvingut: plantilles + resum
-    vuln: [true,  true,  true,  false, true,  false, false, false, false, false, false, false],
-    emo:  [true,  true,  true,  false, true,  false, false, false, false, false, false, false],
-    // Discalcúlia afegida a §7 (2026-05-27) — patró similar a TDL (estructura + esquema visual + plantilla)
-    discalculia: [true, true, true, false, true, false, false, false, true, false, false, false],
+    tea:  [true,  true,  true,  false, false, false, true,  false, false, false, false, false],  // 4 (Primària → bastides + pictogrames)
+    tdah: [true,  true,  false, false, true,  false, false, false, false, false, false, false],  // 3 (ESO autònom → preguntes)
+    disl: [true,  true,  true,  false, false, false, false, false, false, false, false, false],  // 3 (bastides)
+    di:   [true,  true,  true,  false, false, false, true,  false, false, false, false, false],  // 4 (bastides + pictogrames — concreció radical)
+    tdl:  [true,  true,  true,  false, false, false, false, false, false, false, false, false],  // 3 (bastides)
+    ac:   [true,  false, false, true,  true,  true,  false, true,  false, false, false, true ],  // 6 (mapa conceptual + mental + rúbriques — sense esquema/pictogrames)
+    aud:  [true,  false, false, false, true,  false, true,  false, false, false, false, false],  // 3 (preguntes + pictogrames — ESO B1 autònom)
+    vis:  [true,  false, false, false, true,  false, false, false, false, false, false, false],  // 2 (igual)
+    tdc:  [true,  false, false, false, true,  false, false, false, false, false, false, false],  // 2 (igual)
+    cat:  [true,  false, true,  false, false, false, true,  false, false, false, false, false],  // 3 (bastides + pictogrames — descodificació)
+    vuln: [true,  true,  false, false, true,  false, false, false, false, false, false, false],  // 3 (preguntes)
+    emo:  [true,  false, false, false, true,  false, false, false, false, false, false, false],  // 2 (preguntes — ESO autònom)
+    // Discalcúlia (afegida a §7 2026-05-27) — patró similar a TDL
+    discalculia: [true, true, true, false, false, false, false, false, false, false, false, false],  // 3 (bastides)
   };
   // Ordre columnes: [glossari, esquema_visual, bastides, mapa_conceptual, preguntes_comprensio, activitats_aprofundiment, pictogrames, mapa_mental, plantilles_genere, resum_graduat, cartes_conversacionals, rubriques]
   // Nota: mapa_mental auto-actiu NOMÉS per AC. cartes_conversacionals mai auto-actives (elecció docent).
@@ -3097,6 +3100,17 @@
         if (id === 'illustracions') {
           const wrap = document.getElementById('illus-style-wrap');
           if (wrap) wrap.style.display = cb.checked ? '' : 'none';
+        }
+        // Avís Opció D 2026-05-27 (validat NotebookLM): bastides + preguntes_comprensio
+        // alhora solapen pedagògicament. Toast suau no bloquejant.
+        if (cb.checked && (id === 'bastides' || id === 'preguntes_comprensio')) {
+          const other = id === 'bastides' ? 'preguntes_comprensio' : 'bastides';
+          if (complSelected.includes(other)) {
+            window.atneToast?.(
+              '⚠️ Bastides i Preguntes solapen pedagògicament (M2 instruments). Considera mantenir-ne només una segons l\'objectiu: <strong>Bastides</strong> = com llegir · <strong>Preguntes</strong> = què entendre del text.',
+              'info', 7000
+            );
+          }
         }
         // Actualització en temps real: el xip inferior i el localStorage es
         // refresquen a cada toggle (no només al clicar "Aplicar").
