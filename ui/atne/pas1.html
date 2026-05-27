@@ -1002,7 +1002,40 @@
     ex_fp:    { id:'ex_fp',    type:'group', name:'GM Administració 1r · Com. empresarial', age:null, course:'15 alumnes', avatar:'GM', cat:'group', demo:true,
                     chips:[{label:'Velocitats diverses',cat:'lv'},{label:'1 TDAH',cat:'tdah'}],
                     behaviors:['Velocitats de lectura molt diverses','1 alumne amb TDAH','Motivació alta quan el context és laboral i pràctic'],
-                    aids:['Exemples del context professional','Textos curts i directes','Estructures tabulars','Instruccions numerades'] }
+                    aids:['Exemples del context professional','Textos curts i directes','Estructures tabulars','Instruccions numerades'] },
+
+    // ── Perfils ampliats 2026-05-27 — cobreixen condicions canòniques §7 sense exemple previ ──
+    // Font canònica: ui/atne/data/demo_examples.json (sync manual mentre no migrem a fetch).
+    ex_di:    { id:'ex_di',    type:'person', name:'La Constructora', age:'11', course:'6è Primària', avatar:'Co', cat:'di', demo:true,
+                    chips:[{label:'DI moderada',cat:'di'}],
+                    behaviors:['Necessita instruccions concretes i visualitzables','Aprèn millor amb exemples reals que amb abstraccions','Mostra fatiga davant textos densos'],
+                    aids:['Una idea per frase','Vocabulari freqüent i conegut','Pictogrames de suport','Resum visual al final'],
+                    subvariables:{ di:{ grau:'moderat' } } },
+    ex_tdl:   { id:'ex_tdl',   type:'person', name:'El Ressonador', age:'10', course:'5è Primària', avatar:'Re', cat:'tdl', demo:true,
+                    chips:[{label:'TDL receptiu',cat:'tdl'}],
+                    behaviors:['Entén abans del que pot expressar','Confusió davant frases llargues o complexes','Necessita temps per processar el missatge'],
+                    aids:['Frases curtes SVO','Vocabulari freqüent','Suport visual amb pictogrames','Repetició estratègica dels termes clau'],
+                    subvariables:{ tdl:{ modalitat:'comprensiu' } } },
+    ex_aud:   { id:'ex_aud',   type:'person', name:'La Mirada', age:'13', course:'2n ESO B', avatar:'Mi', cat:'au', demo:true,
+                    chips:[{label:'Disc. auditiva',cat:'au'},{label:'LSC',cat:'lv'}],
+                    behaviors:['Comunica preferentment en LSC','Català escrit com a segona llengua','Necessita suport visual fort i estructura predictible'],
+                    aids:['Pictogrames i imatges','Vocabulari freqüent','Glossari amb il·lustracions','Estructures simples sense ironia'],
+                    subvariables:{ discapacitat_auditiva:{ grau:'sever', comunicacio:'LSC' } } },
+    ex_vis:   { id:'ex_vis',   type:'person', name:'La Veu', age:'14', course:'3r ESO', avatar:'Ve', cat:'vi', demo:true,
+                    chips:[{label:'Disc. visual',cat:'vi'},{label:'Baixa visió',cat:'lv'}],
+                    behaviors:['Necessita text amb mida ampliada i alt contrast','Es fatiga visualment amb columnes estretes','Pot beneficiar-se d\'audiodescripció'],
+                    aids:['Tipografia ampla i alt contrast','Evitar columnes estretes','Audiodescripció disponible','Estructura textual clara sense diagrames visuals densos'],
+                    subvariables:{ discapacitat_visual:{ grau:'baixa_visio' } } },
+    ex_discal:{ id:'ex_discal',type:'person', name:'El Cartògraf', age:'10', course:'5è Primària', avatar:'Cr', cat:'discalculia', demo:true,
+                    chips:[{label:'Discalcúlia',cat:'discalculia'}],
+                    behaviors:['Bo amb mapes visuals i orientació espacial','Dificultats amb xifres, càlculs i quantitats','Tendeix a fer representacions gràfiques per entendre'],
+                    aids:['Substituir xifres per text sempre que es pugui','Representacions visuals i espacials','Comparacions concretes (no abstractes)','Procediments visualitzables pas a pas'],
+                    subvariables:{ discalculia:{ actiu:true } } },
+    ex_emo:   { id:'ex_emo',   type:'person', name:'El Refugi', age:'13', course:'2n ESO', avatar:'Rf', cat:'emo', demo:true,
+                    chips:[{label:'Necessitats emocionals',cat:'emo'}],
+                    behaviors:['Ansietat davant textos llargs o desconeguts','Necessita predictibilitat i seguretat','Bloqueig amb temes carregats emocionalment'],
+                    aids:['Estructura predictible amb apartats clars','Avís previ si hi ha temes sensibles','Punts d\'ancoratge per tornar enrere','Espais de pausa explícits al text'],
+                    subvariables:{ emocional:{ actiu:true } } }
   };
 
   // Navegació: clicar fila o "Seleccionar" → desa perfil a localStorage i navega a Pas 2.
