@@ -1071,6 +1071,23 @@
               <textarea class="ta" id="write-ta" placeholder="Comença a escriure o enganxa el text aquí." data-help="p2-text"></textarea>
               <span class="wc" id="wc-card">52 paraules</span>
               <p style="margin:4px 0 0;font-size:11px;color:var(--ink-400);display:flex;align-items:center;gap:4px"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="12" height="12" style="flex-shrink:0"><path d="M8 1.5C5.5 1.5 4 3.5 4 5.5V7H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-1V5.5C12 3.5 10.5 1.5 8 1.5zm0 1C10 2.5 11 4 11 5.5V7H5V5.5C5 4 6 2.5 8 2.5z"/></svg>No incloguis noms ni dades identificatives al text.</p>
+
+              <!-- Selector de textos demo (afegit 2026-05-27) — font: ui/atne/data/demo_examples.json -->
+              <details id="demo-texts-toggle" style="margin-top:8px;font-size:12px">
+                <summary style="cursor:pointer;color:var(--ink-500);user-select:none;padding:4px 0">📄 Carregar text d'exemple…</summary>
+                <div id="demo-texts-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;margin-top:8px">
+                  <button type="button" class="dt-example" data-tid="infantil_i3_canco" style="text-align:left;padding:6px 10px;border:1px solid var(--paper-line);border-radius:var(--r-md);background:var(--paper);cursor:pointer;font-size:11px;color:var(--ink-700)">Infantil I3 · Cançó (logogràfica)</button>
+                  <button type="button" class="dt-example" data-tid="infantil_i4_conte" style="text-align:left;padding:6px 10px;border:1px solid var(--paper-line);border-radius:var(--r-md);background:var(--paper);cursor:pointer;font-size:11px;color:var(--ink-700)">Infantil I4 · Conte simple (logogràfica)</button>
+                  <button type="button" class="dt-example" data-tid="infantil_i5_descripcio" style="text-align:left;padding:6px 10px;border:1px solid var(--paper-line);border-radius:var(--r-md);background:var(--paper);cursor:pointer;font-size:11px;color:var(--ink-700)">Infantil I5 · Descripció animal (logogràfica)</button>
+                  <button type="button" class="dt-example" data-tid="primaria_ci_instructiu" style="text-align:left;padding:6px 10px;border:1px solid var(--paper-line);border-radius:var(--r-md);background:var(--paper);cursor:pointer;font-size:11px;color:var(--ink-700)">Primària CI · Instructiu (titella, A1)</button>
+                  <button type="button" class="dt-example" data-tid="primaria_cm_conte" style="text-align:left;padding:6px 10px;border:1px solid var(--paper-line);border-radius:var(--r-md);background:var(--paper);cursor:pointer;font-size:11px;color:var(--ink-700)">Primària CM · Conte gat i ratolí (A2)</button>
+                  <button type="button" class="dt-example" data-tid="instructiu_horts" style="text-align:left;padding:6px 10px;border:1px solid var(--paper-line);border-radius:var(--r-md);background:var(--paper);cursor:pointer;font-size:11px;color:var(--ink-700)">Primària CS · Plantar llavor (A2)</button>
+                  <button type="button" class="dt-example" data-tid="conte_germanes" style="text-align:left;padding:6px 10px;border:1px solid var(--paper-line);border-radius:var(--r-md);background:var(--paper);cursor:pointer;font-size:11px;color:var(--ink-700)">ESO 1r · Conte literari (A2)</button>
+                  <button type="button" class="dt-example" data-tid="fotosintesi" style="text-align:left;padding:6px 10px;border:1px solid var(--paper-line);border-radius:var(--r-md);background:var(--paper);cursor:pointer;font-size:11px;color:var(--ink-700)">ESO · Fotosíntesi (científic, B1)</button>
+                  <button type="button" class="dt-example" data-tid="revolucio_industrial" style="text-align:left;padding:6px 10px;border:1px solid var(--paper-line);border-radius:var(--r-md);background:var(--paper);cursor:pointer;font-size:11px;color:var(--ink-700)">ESO 4t · Revolució Industrial (B2)</button>
+                  <button type="button" class="dt-example" data-tid="argumentatiu_pantalles" style="text-align:left;padding:6px 10px;border:1px solid var(--paper-line);border-radius:var(--r-md);background:var(--paper);cursor:pointer;font-size:11px;color:var(--ink-700)">Batx · Argumentatiu pantalles (C1)</button>
+                </div>
+              </details>
             </div>
             <div class="opts">
               <span class="opt opt-materia" data-help="p2-materia"><span class="opt-k">Matèria</span><input type="text" class="doc-materia-inp" placeholder="Ex. Història"></span>
@@ -3171,6 +3188,48 @@
   }
 
   document.getElementById('help-btn')?.addEventListener('click', startTourP2);
+
+  // ── Selector de textos demo (2026-05-27) ──────────────────────────────
+  // Font: ui/atne/data/demo_examples.json. Lazy-fetch al primer clic.
+  (function initDemoTexts() {
+    let cache = null;
+    async function loadJson() {
+      if (cache) return cache;
+      try {
+        const res = await fetch('/ui/atne/data/demo_examples.json', { cache: 'force-cache' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        cache = data.textos || {};
+        return cache;
+      } catch (e) {
+        console.warn('[demo-texts] no s\'ha pogut carregar demo_examples.json:', e);
+        return {};
+      }
+    }
+    document.querySelectorAll('.dt-example').forEach(btn => {
+      btn.addEventListener('click', async (ev) => {
+        ev.preventDefault();
+        const tid = btn.dataset.tid;
+        if (!tid) return;
+        const textos = await loadJson();
+        const t = textos[tid];
+        if (!t) { console.warn('[demo-texts] no trobat:', tid); return; }
+        const ta = document.getElementById('write-ta');
+        if (ta) {
+          ta.value = t.text;
+          // Trigger comptador de paraules i listeners existents
+          ta.dispatchEvent(new Event('input', { bubbles: true }));
+          ta.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        // Omple matèria si està buida
+        const mat = document.querySelector('.doc-materia-inp');
+        if (mat && !mat.value && t.materia) mat.value = t.materia;
+        // Tanca el details
+        const det = document.getElementById('demo-texts-toggle');
+        if (det) det.open = false;
+      });
+    });
+  })();
 </script>
 </body>
 </html>
