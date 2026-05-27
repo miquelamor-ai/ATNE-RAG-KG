@@ -61,6 +61,11 @@ Retorna NOMÉS aquest JSON:
 def _verify_adaptation(verify_model: str, text_original: str, text_adapted: str, profile: dict, params: dict):
     """Autoavaluació ràpida amb 3 criteris. Retorna (mitjana, info)."""
     import json as _json
+    # Fix 2026-05-27 (bug Call 1 buit): si text adaptat és buit, retornem 0
+    # directament. Sense això el judge al·lucina (Q=3, P=4, C=5 sobre text
+    # buit) i el retry loop trenca, generant complements sobre buit.
+    if not (text_adapted or "").strip():
+        return 0.0, {"Q": 0, "P": 0, "C": 0, "j": "text adaptat buit (Call 1 sense contingut)", "model": verify_model}
     perfil_nom = profile.get("nom", "genèric")
     mecr = params.get("mecr_sortida", "B2")
     dua = params.get("dua", "Core")
@@ -238,6 +243,19 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
                 print(f"[adapt] Stream fallit, fallback no-stream: {_stream_err}", flush=True)
                 adapted_raw = _call_llm(active_model, system_prompt, user_text)
 
+            # Fix 2026-05-27 (bug Call 1 buit): si el stream termina sense
+            # excepció però amb 0 chunks útils (Gemma SAFETY/RECITATION o
+            # MAX_TOKENS sense contingut), fem fallback a no-stream. Sense
+            # això, adapted_raw="" passa silenciosament pel verify (que
+            # al·lucina un 4.0 sobre text buit) i Call 2 sobreescriu el
+            # buit amb complements genèrics sobre un text inexistent.
+            if not (adapted_raw or "").strip():
+                print(f"[adapt] Stream va retornar 0 chunks útils, fallback no-stream", flush=True)
+                try:
+                    adapted_raw = _call_llm(active_model, system_prompt, user_text)
+                except Exception as _no_stream_err:
+                    print(f"[adapt] Fallback no-stream també ha fallat: {_no_stream_err}", flush=True)
+
             import adaptation.llm_clients as _llm_mod
             # Si el stream ha funcionat, _LAST_LLM_USAGE no s'ha actualitzat
             # (només ho fa _call_llm). Estimem tokens i temps a partir de
@@ -344,7 +362,9 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
     # 6c. 2a crida LLM per a complements (quan _two_call=True)
     # El text adaptat ja està net (post-process + ARASAAC). L'enviem com a
     # context per a la generació de glossari, preguntes, bastides, etc.
-    if _two_call:
+    # Fix 2026-05-27: si Call 1 va quedar buida (bug ex_di), NO executem
+    # Call 2 per evitar generar complements genèrics sobre un text inexistent.
+    if _two_call and adapted.strip():
         _comp_system = build_complements_prompt(profile, context, params)
         if _comp_system:
             _comp_model = server._model_for("complements")
