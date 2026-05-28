@@ -158,12 +158,15 @@ def call_adapt_http(server: str, case: dict, text_body: str, text_id: str) -> di
     }
 
 
-def call_adapt_direct(case: dict, text_body: str, text_id: str) -> dict:
+def call_adapt_direct(case: dict, text_body: str, text_id: str, model_override: str = "") -> dict:
     """Crida run_adaptation() directament (sense HTTP, sense auth).
 
     Útil per al harness Fase B en local — bypassa l'auth Supabase/LaNet
     cridant la lògica Python directament. Aquest és el mateix codi que
     executa /api/adapt internament.
+
+    `model_override` permet forçar un model concret (gpt-4o, gemma-4-31b-it,
+    gpt-4o-mini, etc.) per al test multi-model.
     """
     from adaptation.orchestrator import run_adaptation
     events: list[dict] = []
@@ -180,6 +183,7 @@ def call_adapt_direct(case: dict, text_body: str, text_id: str) -> dict:
             },
             params=case["params"],
             progress_callback=cb,
+            model_override=model_override,
         )
         status = 200
     except Exception as e:
@@ -189,6 +193,7 @@ def call_adapt_direct(case: dict, text_body: str, text_id: str) -> dict:
     return {
         "case_id": case["id"],
         "text_id": text_id,
+        "model_used": model_override or "(default rotate)",
         "status_code": status,
         "elapsed_s": round(elapsed, 2),
         "events": events,
