@@ -70,7 +70,9 @@ except ImportError:
 _TEST_TOKEN_PATH = ROOT / "tests" / ".test-token"
 TEST_TOKEN = None
 if _TEST_TOKEN_PATH.exists():
-    TEST_TOKEN = _TEST_TOKEN_PATH.read_text(encoding="utf-8").strip()
+    # utf-8-sig + lstrip BOM: si el fitxer es va desar amb BOM, el ﻿ acabava
+    # a la capçalera "Bearer ﻿..." i requests peta en codificar-la com a latin-1.
+    TEST_TOKEN = _TEST_TOKEN_PATH.read_text(encoding="utf-8-sig").strip().lstrip("﻿")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Paths i constants
