@@ -1113,13 +1113,31 @@ Categories (usa nomes les que apliquen al cas concret):
 - Sub-arees: E1 Terminologia · E2 Rigor conceptual · E3 Exemples · E4 Contextualitzacio
 - Que cobreix: que es manté del rigor i que s'adapta sense perdre la materia.
 
-**F. Avaluació i Comprensió**
+**F. Avaluació i Comprensió** (depèn de complements actius — SKILLs)
 - Sub-arees: F1 Preguntes · F2 Activitats · F3 Autoavaluacio
 - Que cobreix: preguntes graduades i activitats d'aprofundiment.
+- IMPORTANT: el contingut detallat ve de les SKILLs canoniques activades
+  (generate-preguntes-comprensio, generate-rubriques, etc.), no del catalog
+  d'instruccions. Genera la card NOMES si hi ha complements F-actius
+  (preguntes_comprensio, activitats_aprofundiment, rubriques, etc.).
 
 **G. Personalització Lingüística** (nomes per a nouvinguts/L2)
 - Sub-arees: G1 Suport L1 · G2 Adaptacio cultural
 - Que cobreix: glossaris bilingues, referents culturals propers, exemples de l'experiencia de l'alumne.
+
+**H. Adaptacions per Perfil** (cor d'ATNE — instruccions especifiques per condicio)
+- Sub-arees: TEA · TDAH · Dislexia · DI · TDL · AACC · 2e · Disc.auditiva · Disc.visual · Discalculia · Vulnerabilitat · Dispraxia
+- Que cobreix: instruccions especifiques per a CADA condicio activa al perfil
+  (entre 5 i 12 per condicio). Aquesta es l'area MES extensa del prompt (>80 IDs).
+- FORMAT: indica nomes les condicions REALMENT actives al perfil
+  (ex: "H. TEA + TDAH" si el perfil te tots dos), no totes.
+
+**I. Meta-regles Transversals** (regles que combinen tot l'anterior)
+- Sub-arees: I1 Qualitat · I2 Integracio de perfils
+- Que cobreix: com es combinen instruccions de multiples condicions sense
+  contradiccions, regles de qualitat global (UNE, LF, MECR estricte).
+- Genera la card NOMES si hi ha perfil multi-condicio o conflicte declarat
+  entre regles.
 
 FORMAT OBLIGATORI per card (encapçalament H3 + body):
 ```
@@ -1128,6 +1146,9 @@ FORMAT OBLIGATORI per card (encapçalament H3 + body):
 
 ### B. Estructura i Organització — B1+B2
 [Justificacio...]
+
+### H. Adaptacions per Perfil — TDAH + Dislexia
+[Justificacio especifica per a CADA condicio activa al perfil rebut.]
 ```
 
 EXEMPLE CORRECTE:
