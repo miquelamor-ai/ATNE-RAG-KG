@@ -9,7 +9,7 @@ meta:
   versio: "3.1.0"
   generat_at: "2026-05-27"
   font: "ui/atne/data/demo_examples.json (perfils) + PERFIL_TO_GENRE + EXTRA_GENRE_CASES"
-  total_casos: 24
+  total_casos: 27
 
 casos:
 
@@ -381,6 +381,68 @@ casos:
       - generate-glossari
       - generate-preguntes-comprensio
       - write-manual
+
+  - id: "ex_inf"
+    descripcio: "La Llavor · I5 · cat"
+    font_atne: "ui/atne/data/demo_examples.json (perfils.ex_inf)"
+    condicions_curtes: ["cat"]
+    profile:
+      caracteristiques:
+        nouvingut: {"actiu": true, "l1": "Àrab", "pais": "Marroc", "mesos_range": "Menys de 6 mesos", "alfabet_llati": false, "alfabetitzacio_l1": false, "escolaritzacio": "regular"}
+    params:
+      mecr_sortida: "pre-A1"
+      dua: "Accés"
+      genere_discursiu: "conte"
+      complements:
+        glossari: true
+        bastides: true
+        pictogrames: true
+    expected_skills:
+      - generate-bastides-lectura
+      - generate-glossari
+      - generate-pictogrames
+      - generate-tolc
+      - write-conte
+
+  - id: "ex_ci"
+    descripcio: "L'Aprenent · 1r Primària · disl"
+    font_atne: "ui/atne/data/demo_examples.json (perfils.ex_ci)"
+    condicions_curtes: ["disl"]
+    profile:
+      caracteristiques:
+        dislexia: {"actiu": true}
+    params:
+      mecr_sortida: "A1"
+      dua: "Core"
+      genere_discursiu: "descripcio"
+      complements:
+        glossari: true
+        esquema_visual: true
+        bastides: true
+    expected_skills:
+      - generate-bastides-lectura
+      - generate-glossari
+      - write-descripcio
+
+  - id: "ex_cm"
+    descripcio: "L'Espurna · 3r Primària · tdah"
+    font_atne: "ui/atne/data/demo_examples.json (perfils.ex_cm)"
+    condicions_curtes: ["tdah"]
+    profile:
+      caracteristiques:
+        tdah: {"actiu": true}
+    params:
+      mecr_sortida: "A1"
+      dua: "Core"
+      genere_discursiu: "instructiu"
+      complements:
+        glossari: true
+        esquema_visual: true
+        preguntes_comprensio: true
+    expected_skills:
+      - generate-glossari
+      - generate-preguntes-comprensio
+      - write-instructiu
 
   - id: "extra_genere_poema"
     descripcio: "AACC + poema (registre estètic, MECR alt)"

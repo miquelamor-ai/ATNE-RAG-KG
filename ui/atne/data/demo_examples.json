@@ -200,6 +200,33 @@
       "chips": [{"label": "Velocitats diverses", "cat": "lv"}, {"label": "1 TDAH", "cat": "tdah"}],
       "behaviors": ["Velocitats de lectura molt diverses", "1 alumne amb TDAH", "Motivació alta quan el context és laboral i pràctic"],
       "aids": ["Exemples del context professional", "Textos curts i directes", "Estructures tabulars", "Instruccions numerades"]
+    },
+    "ex_inf": {
+      "id": "ex_inf", "type": "person", "name": "La Llavor", "demo": true,
+      "age": "5", "course": "I5", "avatar": "Ll", "cat": "cat",
+      "chips": [{"label": "Català L2", "cat": "cat"}, {"label": "Pre-A1 · Infantil", "cat": "lv"}],
+      "behaviors": ["Encara no llegeix de manera convencional (fase logogràfica)", "Comprèn amb suport visual i oral", "Aprèn vocabulari bàsic en català"],
+      "aids": ["Pictogrames com a text principal", "Lectura compartida amb l'adult", "Vocabulari concret i quotidià", "Frases molt curtes"],
+      "subvariables": {
+        "nouvingut": {
+          "l1": "Àrab", "pais": "Marroc", "mesos_range": "Menys de 6 mesos",
+          "alfabet_llati": false, "alfabetitzacio_l1": false, "escolaritzacio": "regular"
+        }
+      }
+    },
+    "ex_ci": {
+      "id": "ex_ci", "type": "person", "name": "L'Aprenent", "demo": true,
+      "age": "6", "course": "1r Primària", "avatar": "Ap", "cat": "disl",
+      "chips": [{"label": "Dislèxia", "cat": "disl"}, {"label": "A1 · Lectura inicial", "cat": "lv"}],
+      "behaviors": ["Comença a descodificar (fase alfabètica emergent)", "Confon lletres i sons similars", "Lectura molt lenta i esforçada"],
+      "aids": ["Tipografia accessible i interlineat ampli", "Paraules clau marcades", "Frases curtes SVO", "Suport visual amb pictogrames"]
+    },
+    "ex_cm": {
+      "id": "ex_cm", "type": "person", "name": "L'Espurna", "demo": true,
+      "age": "8", "course": "3r Primària", "avatar": "Ep", "cat": "tdah",
+      "chips": [{"label": "TDAH", "cat": "tdah"}, {"label": "A1 · Cicle mitjà", "cat": "lv"}],
+      "behaviors": ["Lectura fluida emergent però es distreu sovint", "Fatiga amb textos llargs", "Necessita objectius curts i clars"],
+      "aids": ["Textos curts i fragmentats", "Una idea per frase", "Objectiu visible per bloc", "Preguntes de comprensió simples"]
     }
   },
 

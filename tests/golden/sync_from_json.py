@@ -210,6 +210,10 @@ PERFIL_TO_GENRE = {
     "ex_pri":    "biografia",        # Grup Primària → personatge
     "ex_eso":    "informe",          # Grup ESO multinivell → text expositiu
     "ex_fp":     "manual",           # Grup FP → manual professional
+    # Perfils joves 2026-05-28 — cobreixen pre-A1/A1 (abans sense cap test)
+    "ex_inf":    "conte",            # Infantil I5 pre-A1 nouvingut → narrativa amb pictogrames
+    "ex_ci":     "descripcio",       # 1r Primària A1 dislèxia → descripció concreta SVO
+    "ex_cm":     "instructiu",       # 3r Primària A1 TDAH → passos curts numerats
 }
 
 ## Casos extra per cobrir els 7 gèneres restants (perfils existents amb gènere diferent)
