@@ -263,6 +263,12 @@
   .gl-item:hover .gl-edit{opacity:1}
   .gl-edit:hover{background:var(--ink-75);color:var(--primary)}
   .gl-edit svg{width:12px;height:12px}
+  /* Taules markdown renderitzades (glossari i altres complements) */
+  .md-table{width:100%;border-collapse:collapse;margin:4px 0;font-size:13.5px}
+  .md-table th{text-align:left;font-family:var(--serif);font-weight:700;font-size:13px;color:var(--ink-900);padding:8px 10px;border-bottom:2px solid var(--paper-line);white-space:nowrap}
+  .md-table td{padding:9px 10px;border-bottom:1px solid var(--paper-line);color:var(--ink-700);line-height:1.5;vertical-align:top}
+  .md-table tr:last-child td{border-bottom:0}
+  .md-table td:first-child{font-family:var(--serif);font-weight:700;color:var(--ink-900)}
 
   /* Schema */
   .schema{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -2640,9 +2646,83 @@
 
     selTb.classList.remove('on');
 
-    // Glossari: per ara no connectat (caldrà un endpoint propi); mantinc mock
+    // Glossari: genera una definició del terme seleccionat i l'afegeix a la
+    // card de Glossari (dataset.md = font de veritat per a l'export). Reutilitza
+    // /api/refine-text (cap endpoint nou). El docent decideix QUIN terme val la
+    // pena: la definició és curta, planera i graduada per MECR (no a cada paraula).
     if (action === 'glossari') {
-      window.regen && window.regen('Afegint al glossari…');
+      const term = fragmentText.trim().replace(/\s+/g, ' ');
+      const cont = document.querySelector('#view-glossari .gl-list');
+      const regenEl = document.getElementById('regen');
+      const regenT = document.getElementById('regen-t');
+      if (!cont) { window.atneToast?.('No s\'ha trobat el glossari', 'error'); return; }
+      if (regenT) regenT.textContent = 'Afegint «' + term + '» al glossari…';
+      if (regenEl) regenEl.classList.add('on');
+
+      // MECR per graduar la llargada de la definició (criteris glossari MALL).
+      let mecr = '';
+      try { mecr = localStorage.getItem('atne.active_level_mecr') || ''; } catch (_) {}
+      const MAX_PARAULES = { 'pre-A1': 6, 'A1': 8, 'A2': 10, 'B1': 12, 'B2': 15, 'C1': 20, 'C2': 20 };
+      const maxp = MAX_PARAULES[mecr] || 12;
+
+      let definicio = '';
+      if (window.ATNE_LLM && window.ATNE_LLM.refineText) {
+        const instruccio = 'Defineix el terme «' + term + '» per a un glossari escolar. '
+          + 'Retorna NOMÉS la definició, en català planer, en una sola frase de com a màxim ' + maxp + ' paraules. '
+          + 'No repeteixis el terme dins la definició i no usis el terme com a prefix. '
+          + 'No afegeixis cap etiqueta, guió ni cometes: només el text de la definició.';
+        try {
+          const res = await window.ATNE_LLM.refineText({ text: term, instruccio, mecr: mecr || undefined });
+          definicio = (res && res.text ? res.text : '').trim();
+        } catch (err) {
+          if (regenT) regenT.textContent = 'Error generant la definició: ' + (err.message || err);
+          setTimeout(() => { if (regenEl) regenEl.classList.remove('on'); }, 2500);
+          return;
+        }
+      }
+      // Neteja: treu cometes/guions sobrants i una possible repetició "Terme: ..."
+      definicio = definicio
+        .replace(/^["'«»\-\s]+|["'«»\s]+$/g, '')
+        .replace(new RegExp('^' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*[:.\\-–]\\s*', 'i'), '')
+        .trim();
+      if (!definicio) definicio = 'Definició pendent. Edita-la al glossari.';
+
+      // Afegeix la fila al glossari (evitant duplicats), EN EL MATEIX FORMAT que
+      // ja té: taula markdown (| Terme | Def |) o llista (- **t**: d). Així l'export
+      // es manté coherent (una sola taula, no taula + vinyeta solta).
+      const prev = (cont.dataset.md || '').trim();
+      const termEsc = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const esTaula = /^\s*\|.*\|\s*$/m.test(prev);
+      const dupRe = esTaula
+        ? new RegExp('^\\s*\\|\\s*\\**' + termEsc + '\\**\\s*\\|', 'im')
+        : new RegExp('^-\\s*\\*\\*' + termEsc + '\\*\\*\\s*:', 'im');
+      if (prev && dupRe.test(prev)) {
+        window.atneToast?.('«' + term + '» ja és al glossari', 'info');
+      } else {
+        const defCell = esTaula ? definicio.replace(/\|/g, '/') : definicio;
+        const fila = esTaula ? ('| ' + term + ' | ' + defCell + ' |') : ('- **' + term + '**: ' + definicio);
+        cont.dataset.md = prev ? (prev + '\n' + fila) : fila;
+        if (window.ATNE_LLM?.markdownToHtml) cont.innerHTML = window.ATNE_LLM.markdownToHtml(cont.dataset.md);
+        window.atneToast?.('«' + term + '» afegit al glossari', 'success');
+      }
+
+      // Activa el complement glossari: toggle d'export + xip visible + dot ok.
+      try {
+        const toggle = document.querySelector('#view-glossari input[data-comp-toggle="glossari"]');
+        if (toggle) toggle.checked = true;
+      } catch (_) {}
+      try {
+        const raw = localStorage.getItem('atne.complements');
+        let obj = {};
+        if (raw) { const p = JSON.parse(raw); obj = Array.isArray(p) ? p.reduce((o, k) => (o[k] = true, o), {}) : (p || {}); }
+        obj.glossari = true;
+        localStorage.setItem('atne.complements', JSON.stringify(obj));
+      } catch (_) {}
+      try { const chip = document.querySelector('.cmp-chip[data-comp="glossari"]'); if (chip) chip.style.display = ''; } catch (_) {}
+      try { updateChipDot('glossari', 'ok'); } catch (_) {}
+      try { window.ATNE_TRACK?.event?.('glossary_term_added', { mecr: mecr || null, chars: term.length }); } catch (_) {}
+
+      if (regenEl) regenEl.classList.remove('on');
       setTimeout(pushHistory, 100);
       return;
     }

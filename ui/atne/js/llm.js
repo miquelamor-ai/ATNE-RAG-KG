@@ -495,8 +495,42 @@
     const inline = s => s
       .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
       .replace(/(^|[\s(])_([^_]+)_/g, '$1<em>$2</em>');
-    for (let line of lines) {
-      line = line.trim();
+    // Taules markdown (| a | b | + separador |---|---|). htmlToMarkdown sap
+    // tornar-les a pipes, així que el cicle editar→desar del glossari es manté.
+    const _isSep = l => /^[\s|:-]+$/.test(l) && l.includes('-') && l.includes('|');
+    const _splitRow = r => {
+      let s = r.trim();
+      if (s.startsWith('|')) s = s.slice(1);
+      if (s.endsWith('|')) s = s.slice(0, -1);
+      return s.split('|').map(c => c.trim());
+    };
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i].trim();
+      // ── Taula markdown ──
+      if (line.includes('|') && i + 1 < lines.length && _isSep(lines[i + 1].trim())) {
+        if (inList) { out.push('</' + listTag + '>'); inList = false; }
+        const header = _splitRow(line);
+        i += 2;  // salta capçalera + separador
+        const bodyRows = [];
+        while (i < lines.length) {
+          const l = lines[i].trim();
+          if (!l.includes('|') || _isSep(l)) break;
+          bodyRows.push(_splitRow(l));
+          i++;
+        }
+        i--;  // compensa el i++ del for
+        let t = '<table class="md-table"><thead><tr>';
+        header.forEach(h => { t += '<th>' + inline(h) + '</th>'; });
+        t += '</tr></thead><tbody>';
+        bodyRows.forEach(r => {
+          t += '<tr>';
+          for (let c = 0; c < header.length; c++) t += '<td>' + inline(r[c] || '') + '</td>';
+          t += '</tr>';
+        });
+        t += '</tbody></table>';
+        out.push(t);
+        continue;
+      }
       const h1 = line.match(/^#\s+(.+)$/);
       const h2 = line.match(/^##\s+(.+)$/);
       const h3 = line.match(/^###\s+(.+)$/);
