@@ -139,16 +139,20 @@ CATALOG = {
         "text": "Termes tècnics en **negreta** amb definició entre parèntesis la primera vegada. Ex: **fotosíntesi** (procés...).",
         "activation": "SEMPRE",
         "macro": "LEXIC",
-        # Fix 2026-05-27 (auditoria MALL): UNE 153101 prohibeix parèntesi a DUA Accés.
-        # A-30 cobreix l'alternativa (definició com a frase nova).
-        "suppress_if_dua": ["Accés"],
+        # Calibració 2026-05-28 (veredicte NotebookLM jutge MALL): el parèntesi és
+        # "soroll visual" desaconsellat a Accés I Core. A Core es prefereix frase nova
+        # (A-35) o desnominalització (A-16). El parèntesi queda només a Enriquiment,
+        # com a forma compacta opcional per a lectors avançats.
+        "suppress_if_dua": ["Accés", "Core"],
     },
     "A-35": {
-        "text": "Definicions de termes tècnics com a FRASE NOVA (no parèntesi). Ex: 'Les **estomes** són forats petits.' (UNE 153101, DUA Accés)",
+        "text": "Definicions de termes tècnics com a FRASE NOVA (no parèntesi). Ex: 'Les **estomes** són forats petits.' (UNE 153101)",
         "activation": "SEMPRE",
         "macro": "LEXIC",
-        # Inversa de A-02: només activa a DUA Accés. (Renombrat de A-30 a A-35 2026-05-27: A-30 ja existia per anglicismes)
-        "suppress_if_dua": ["Core", "Enriquiment"],
+        # Calibració 2026-05-28 (veredicte NotebookLM jutge MALL): la frase nova és la
+        # forma canònica UNE 153101 a Accés I Core (no només Accés). Inversa d'A-02:
+        # només se suprimeix a Enriquiment, on el terme pot anar sense definició immediata.
+        "suppress_if_dua": ["Enriquiment"],
     },
     "A-31": {
         "text": "NO usis MAJÚSCULES sostingudes per emfasitzar (ni a títols ni a paraules). Usa **negreta** si cal èmfasi. (UNE 153101)",
