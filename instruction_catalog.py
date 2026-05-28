@@ -136,7 +136,7 @@ CATALOG = {
         "suppress_if_profile": ["dislexia"],  # H-08 ja cobreix això
     },
     "A-02": {
-        "text": "Termes tècnics en **negreta** amb definició entre parèntesis la primera vegada. Ex: **fotosíntesi** (procés...).",
+        "text": "Termes especialitzats (CALP) en **negreta** amb definició entre parèntesis la 1a vegada (només a Enriquiment). NOMÉS termes que l'alumne desconeix, MAI paraules comunes (BICS). Ex: **fotosíntesi** (procés...).",
         "activation": "SEMPRE",
         "macro": "LEXIC",
         # Calibració 2026-05-28 (veredicte NotebookLM jutge MALL): el parèntesi és
@@ -146,12 +146,13 @@ CATALOG = {
         "suppress_if_dua": ["Accés", "Core"],
     },
     "A-35": {
-        "text": "Definicions de termes tècnics com a FRASE NOVA (no parèntesi). Ex: 'Les **estomes** són forats petits.' (UNE 153101)",
+        "text": "Defineix dins del text NOMÉS termes especialitzats o curriculars (CALP) del text font que l'alumne probablement desconeix (ex: **fotosíntesi**, **hipòtesi**, **monarquia**). MAI paraules comunes o quotidianes (BICS: ferro, aigua, taula, casa). Prova de la substitució: si la frase s'entén canviant el mot per 'cosa', NO el defineixis. Defineix la 1a aparició com a FRASE NOVA breu (no parèntesi), sense repetir el terme dins la definició. La resta de termes de suport van al glossari, no al cos. (UNE 153101 · Cummins BICS/CALP)",
         "activation": "SEMPRE",
         "macro": "LEXIC",
-        # Calibració 2026-05-28 (veredicte NotebookLM jutge MALL): la frase nova és la
-        # forma canònica UNE 153101 a Accés I Core (no només Accés). Inversa d'A-02:
-        # només se suprimeix a Enriquiment, on el terme pot anar sense definició immediata.
+        # Refinament 2026-05-28 (veredicte NotebookLM jutge MALL): no n'hi ha prou amb
+        # "frase nova". El criteri clau és QUINS termes (CALP especialitzat, no BICS comú)
+        # i deixar la resta al glossari. Frase nova canònica UNE 153101 a Accés I Core
+        # (inversa d'A-02); només se suprimeix a Enriquiment (lector autònom).
         "suppress_if_dua": ["Enriquiment"],
     },
     "A-31": {
@@ -297,14 +298,14 @@ CATALOG = {
         },
     },
     "A-15": {
-        "text": "Scaffolding decreixent (Vygotsky): 1a aparició = terme + definició completa; 2a = terme + definició breu; 3a en endavant = terme sol.",
+        "text": "Scaffolding decreixent (Vygotsky), NOMÉS per a termes especialitzats (CALP), mai paraules comunes: 1a aparició = terme + definició completa; 2a = terme + definició breu; 3a en endavant = terme sol.",
         "activation": "NIVELL",
         "macro": "LEXIC",
         "mecr_detail": {
-            "pre-A1": "Scaffolding màxim: 1a aparició = terme + definició completa + exemple visual; 2a = terme + definició; 3a = terme sol amb recordatori ('recorda: X és...').",
-            "A1": "Scaffolding complet: 1a aparició = terme + definició completa; 2a = terme + definició breu; 3a en endavant = terme sol.",
-            "A2": "Scaffolding estàndard: 1a aparició = terme + definició; repeticions posteriors = terme sol.",
-            "B1": "Scaffolding lleuger: defineix un terme la 1a vegada; després usa'l sense definició.",
+            "pre-A1": "Scaffolding màxim (només termes especialitzats, no paraules comunes): 1a aparició = terme + definició completa + exemple visual; 2a = terme + definició; 3a = terme sol amb recordatori ('recorda: X és...').",
+            "A1": "Scaffolding complet (només termes especialitzats, no paraules comunes): 1a aparició = terme + definició completa; 2a = terme + definició breu; 3a en endavant = terme sol.",
+            "A2": "Scaffolding estàndard (només termes especialitzats, no paraules comunes): 1a aparició = terme + definició; repeticions posteriors = terme sol.",
+            "B1": "Scaffolding lleuger (només termes especialitzats): defineix un terme la 1a vegada; després usa'l sense definició.",
         },
     },
     "A-16": {
