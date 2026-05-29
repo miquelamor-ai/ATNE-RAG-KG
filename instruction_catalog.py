@@ -210,10 +210,19 @@ CATALOG = {
         },
     },
     "A-07": {
+        # Graduat 2026-05-28 (atac C1 sobre-simplificació): "una idea per frase" era
+        # SEMPRE i arrossegava B1+ a registre A1/A2. Ara es relaxa progressivament.
         "text": "Una idea per frase. Divideix frases llargues en unitats simples.",
-        "activation": "SEMPRE",
+        "activation": "NIVELL",
         "macro": "SINTAXI",
         "suppress_if": ["altes_capacitats"],
+        "mecr_detail": {
+            "pre-A1": "Una idea per frase. Frases molt curtes.",
+            "A1": "Una idea per frase. Divideix les frases llargues.",
+            "A2": "Predomini d'una idea per frase. Pots enllaçar 2 idees molt relacionades amb un connector.",
+            "B1": "Complexitat pròpia de B1: ni fragmentació excessiva (estil A1/A2) ni frases massa llargues. Subordinades simples quan calgui.",
+            "B2": "Complexitat pròpia de B2: subordinació natural quan el contingut ho demani. Evita només les frases inacabables.",
+        },
     },
     "A-08": {
         "text": "Veu activa obligatòria. Transforma passives en actives.",

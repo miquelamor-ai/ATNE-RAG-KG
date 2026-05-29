@@ -315,9 +315,22 @@ def build_system_prompt(profile: dict, context: dict, params: dict, rag_context:
         role_parts.append("i pedagog DUA: escrius amb precisió conceptual i màxima accessibilitat.")
         parts.append(" ".join(role_parts))
 
-    # T-04: Ancoratge MECR max-paraules just abans del catàleg d'instruccions.
+    # T-04: Ancoratge MECR just abans del catàleg. Bidireccional: SOSTRE (màx
+    # paraules) + TERRA (no simplificar per sota del nivell). El terra ataca la
+    # sobre-simplificació detectada (C1): el text sortia per sota del MECR demanat.
     _max_words = MECR_MAX_WORDS.get(mecr, 25)
-    parts.append(f"⚓ REGLA CRÍTICA (MECR {mecr}): màxim {_max_words} paraules per frase. Una idea per frase.")
+    if mecr in ("pre-A1", "A1", "A2"):
+        parts.append(
+            f"⚓ REGLA CRÍTICA (MECR {mecr}): màxim {_max_words} paraules per frase, una idea per frase. "
+            f"Mantén però el lèxic i el rigor conceptual propis de {mecr}: adapta AL nivell, no per sota."
+        )
+    else:
+        # B1+: terra I sostre alhora (equilibri; atac mesurat a la sobre-simplificació C1).
+        parts.append(
+            f"⚓ REGLA CRÍTICA (MECR {mecr}): frases de fins a {_max_words} paraules amb la complexitat pròpia "
+            f"de {mecr}, ni més simple ni més complexa. NO rebaixis el text per sota de {mecr} (evita l'estil "
+            f"fragmentat A1/A2), però tampoc no el compliquis més del compte. Ajusta't EXACTAMENT a {mecr}."
+        )
 
     # ═══ CAPES 2-3: INSTRUCCIONS FILTRADES (catàleg de 89 instruccions LLM) ═══
     # Filtra segons perfils actius, sub-variables, MECR, DUA i complements
