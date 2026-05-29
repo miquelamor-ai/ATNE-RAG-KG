@@ -84,8 +84,11 @@ JUDGMENTS_DIR = HERE / "judgments"
 SERVER_DEFAULT = "http://localhost:8000"
 ADAPT_ENDPOINT = "/api/adapt"
 
-# Model judge (sobreescriptible amb --judge-model)
-JUDGE_MODEL_DEFAULT = "gpt-4o-mini"  # OpenAI: sense rate limit del free tier de Gemini
+# Jutge per defecte: ENSEMBLE gpt-4.1-mini + claude-cli (mitjana per criteri).
+# gpt-4o-mini es va descartar com a jutge: donava C1=1 constant (massa fluix).
+# gpt-4.1-mini (OpenAI, eficient) + claude-cli (subscripció local, cost 0).
+JUDGE_MODEL_DEFAULT = "gpt-4.1-mini"               # judge únic (--single)
+JUDGE_ENSEMBLE_DEFAULT = "gpt-4.1-mini,claude-cli"  # ensemble per defecte
 JUDGE_TEMPERATURE = 0.0
 
 
@@ -721,13 +724,13 @@ def main():
     parser.add_argument("--text", help="Filtra un sol text font")
     parser.add_argument("--server", default=SERVER_DEFAULT, help="URL del servidor ATNE")
     parser.add_argument("--direct", action="store_true", help="(reservat) cridar funcions Python directament")
-    parser.add_argument("--judge-model", default=JUDGE_MODEL_DEFAULT, help="Model del judge (un de sol)")
-    parser.add_argument("--judge-models", default="", help="Ensemble: llista separada per comes (ex: gpt-4o-mini,claude-cli). Fa la mitjana per criteri.")
-    parser.add_argument("--ensemble", action="store_true", help="Drecera: ensemble gpt-4o-mini + claude-cli (sense Gemini)")
+    parser.add_argument("--judge-model", default=JUDGE_MODEL_DEFAULT, help="Judge únic (s'usa amb --single)")
+    parser.add_argument("--judge-models", default=JUDGE_ENSEMBLE_DEFAULT, help="Ensemble (per defecte gpt-4.1-mini,claude-cli). Mitjana per criteri.")
+    parser.add_argument("--single", action="store_true", help="Desactiva l'ensemble: usa només --judge-model")
     args = parser.parse_args()
 
-    if args.ensemble and not args.judge_models:
-        args.judge_models = "gpt-4o-mini,claude-cli"
+    if args.single:
+        args.judge_models = args.judge_model
 
     if not any([args.plan, args.generate, args.judge, args.full, args.aggregate]):
         # Per defecte: pla
