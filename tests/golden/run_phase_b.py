@@ -466,11 +466,59 @@ def generate_outputs(cases: list[dict], texts: dict, args) -> None:
                 print(f"ERROR: {e}")
 
 
+def _judge_with_retry(prompt: str, model: str, api_key: str | None):
+    """Crida un judge amb 3 reintents per a errors temporals (503/429/timeout).
+    Retorna el judgment o None si falla definitivament."""
+    last_err = None
+    for attempt in range(3):
+        try:
+            return call_judge(prompt, model, api_key)
+        except Exception as e:
+            last_err = e
+            msg = str(e).lower()
+            if any(t in msg for t in ("503", "429", "timeout", "connection")):
+                time.sleep(5 * (attempt + 1))  # backoff: 5s, 10s, 15s
+                continue
+            break
+    return ("__error__", last_err)  # marca d'error (per distingir de None no-cridat)
+
+
+def _ensemble_judgment(per_model: dict, rubric: dict) -> dict | None:
+    """Combina judgments de diversos models fent la MITJANA per criteri.
+    Només compta els models que han reeixit. Conserva el desglossament per_model."""
+    ok = {m: j for m, j in per_model.items()
+          if isinstance(j, dict) and j.get("scores")}
+    if not ok:
+        return None
+    crit_ids = list(rubric.get("criteris", {}).keys())
+    scores = {}
+    for cid in crit_ids:
+        vals, notes, breakdown = [], [], {}
+        for m, j in ok.items():
+            s = j.get("scores", {}).get(cid, {})
+            sc = s.get("score") if isinstance(s, dict) else None
+            breakdown[m] = sc
+            if isinstance(sc, (int, float)):
+                vals.append(float(sc))
+                if s.get("comment"):
+                    notes.append(f"[{m}] {s['comment']}")
+        if vals:
+            scores[cid] = {
+                "score": round(sum(vals) / len(vals), 1),
+                "comment": " · ".join(notes)[:400],
+                "per_model": breakdown,
+            }
+    return {"scores": scores, "model": "ensemble:" + "+".join(ok.keys()), "n_judges": len(ok)}
+
+
 def judge_outputs(cases: list[dict], texts: dict, rubric: dict, args) -> None:
     JUDGMENTS_DIR.mkdir(parents=True, exist_ok=True)
     api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GEMMA4_API_KEY")
     target_cases = [c for c in cases if (not args.case or c["id"] == args.case)]
     text_ids = [args.text] if args.text else list(texts["textos"].keys())
+    # Ensemble si s'han indicat múltiples models; si no, model únic.
+    models = [m.strip() for m in (args.judge_models or args.judge_model).split(",") if m.strip()]
+    ensemble = len(models) > 1
 
     for case in target_cases:
         for text_id in text_ids:
@@ -482,28 +530,29 @@ def judge_outputs(cases: list[dict], texts: dict, rubric: dict, args) -> None:
             text_body = texts["textos"][text_id]["text"]
             prompt = build_judge_prompt(case, text_body, output, rubric)
             print(f"[judge] {case['id']} × {text_id} … ", end="", flush=True)
-            # Retry simple per a errors temporals (503/429)
-            last_err = None
-            judgment = None
-            for attempt in range(3):
-                try:
-                    judgment = call_judge(prompt, args.judge_model, api_key)
-                    break
-                except Exception as e:
-                    last_err = e
-                    msg = str(e).lower()
-                    if any(t in msg for t in ("503", "429", "timeout", "connection")):
-                        time.sleep(5 * (attempt + 1))  # backoff: 5s, 10s, 15s
-                        continue
-                    break
-            if judgment is None:
-                print(f"ERROR: {last_err}")
-                continue
+
+            if ensemble:
+                per_model = {}
+                for m in models:
+                    r = _judge_with_retry(prompt, m, api_key)
+                    per_model[m] = None if (isinstance(r, tuple)) else r
+                judgment = _ensemble_judgment(per_model, rubric)
+                if judgment is None:
+                    print("ERROR: tots els jutges de l'ensemble han fallat")
+                    continue
+            else:
+                r = _judge_with_retry(prompt, models[0], api_key)
+                if isinstance(r, tuple) or r is None:
+                    print(f"ERROR: {r[1] if isinstance(r, tuple) else 'judge None'}")
+                    continue
+                judgment = r
+
             jud_path = JUDGMENTS_DIR / f"{case['id']}__{text_id}.json"
             jud_path.write_text(json.dumps(judgment, ensure_ascii=False, indent=2), encoding="utf-8")
             scores = judgment.get("scores", {})
             avg = sum(s.get("score", 0) for s in scores.values()) / max(len(scores), 1) if scores else 0
-            print(f"OK score~{avg:.1f}")
+            suffix = f" (ensemble {judgment.get('n_judges')} jutges)" if ensemble else ""
+            print(f"OK score~{avg:.1f}{suffix}")
 
 
 def _score_icon(score: int | float | None) -> str:
@@ -672,8 +721,13 @@ def main():
     parser.add_argument("--text", help="Filtra un sol text font")
     parser.add_argument("--server", default=SERVER_DEFAULT, help="URL del servidor ATNE")
     parser.add_argument("--direct", action="store_true", help="(reservat) cridar funcions Python directament")
-    parser.add_argument("--judge-model", default=JUDGE_MODEL_DEFAULT, help="Model del judge")
+    parser.add_argument("--judge-model", default=JUDGE_MODEL_DEFAULT, help="Model del judge (un de sol)")
+    parser.add_argument("--judge-models", default="", help="Ensemble: llista separada per comes (ex: gpt-4o-mini,claude-cli). Fa la mitjana per criteri.")
+    parser.add_argument("--ensemble", action="store_true", help="Drecera: ensemble gpt-4o-mini + claude-cli (sense Gemini)")
     args = parser.parse_args()
+
+    if args.ensemble and not args.judge_models:
+        args.judge_models = "gpt-4o-mini,claude-cli"
 
     if not any([args.plan, args.generate, args.judge, args.full, args.aggregate]):
         # Per defecte: pla
