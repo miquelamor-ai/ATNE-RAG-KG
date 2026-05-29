@@ -2936,12 +2936,12 @@
   //   - "Menys és més" (MALL): defaults reduïts (mitjana 3 vs 5 abans)
   const MATRIU_CONDICIONS = {
     //            [gloss, esq,   bast,  mapa_c, preg,  aprof, picto, mapa_m, plant, resum, cartes, rubr]
-    tea:  [true,  true,  true,  false, false, false, true,  false, false, false, false, false],  // 4 (Primària → bastides + pictogrames)
+    tea:  [false, true,  true,  false, false, false, true,  false, false, false, false, false],  // 3 (esquema+bastides+pictogrames; glossari fora: pictogrames ja fa mediació lèxica)
     tdah: [true,  true,  false, false, true,  false, false, false, false, false, false, false],  // 3 (ESO autònom → preguntes)
     disl: [true,  true,  true,  false, false, false, false, false, false, false, false, false],  // 3 (bastides)
-    di:   [true,  true,  true,  false, false, false, true,  false, false, false, false, false],  // 4 (bastides + pictogrames — concreció radical)
+    di:   [false, true,  true,  false, false, false, true,  false, false, false, false, false],  // 3 (esquema+bastides+pictogrames; glossari fora: pictograma resol el lèxic més directe)
     tdl:  [true,  true,  true,  false, false, false, false, false, false, false, false, false],  // 3 (bastides)
-    ac:   [true,  false, false, true,  true,  true,  false, true,  false, false, false, true ],  // 6 (mapa conceptual + mental + rúbriques — sense esquema/pictogrames)
+    ac:   [false, false, false, false, false, true,  false, true,  false, false, false, true ],  // 3 (aprofundiment+mapa mental+rúbriques; enriquir, no simplificar — fora glossari/preguntes/mapa conceptual)
     aud:  [true,  false, false, false, true,  false, true,  false, false, false, false, false],  // 3 (preguntes + pictogrames — ESO B1 autònom)
     vis:  [true,  false, false, false, true,  false, false, false, false, false, false, false],  // 2 (igual)
     tdc:  [true,  false, false, false, true,  false, false, false, false, false, false, false],  // 2 (igual)

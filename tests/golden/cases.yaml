@@ -86,18 +86,12 @@ casos:
       dua: "Enriquiment"
       genere_discursiu: "assaig"
       complements:
-        glossari: true
-        mapa_conceptual: true
-        preguntes_comprensio: true
         activitats_aprofundiment: true
         mapa_mental: true
         rubriques: true
     expected_skills:
       - generate-activitats-aprofundiment
-      - generate-glossari
-      - generate-mapa-conceptual
       - generate-mapa-mental
-      - generate-preguntes-comprensio
       - generate-rubriques
       - write-assaig
 
@@ -155,13 +149,11 @@ casos:
       dua: "Core"
       genere_discursiu: "conte"
       complements:
-        glossari: true
         esquema_visual: true
         bastides: true
         pictogrames: true
     expected_skills:
       - generate-bastides-lectura
-      - generate-glossari
       - generate-pictogrames
       - write-conte
 
@@ -177,18 +169,12 @@ casos:
       dua: "Enriquiment"
       genere_discursiu: "opinio"
       complements:
-        glossari: true
-        mapa_conceptual: true
-        preguntes_comprensio: true
         activitats_aprofundiment: true
         mapa_mental: true
         rubriques: true
     expected_skills:
       - generate-activitats-aprofundiment
-      - generate-glossari
-      - generate-mapa-conceptual
       - generate-mapa-mental
-      - generate-preguntes-comprensio
       - generate-rubriques
       - write-opinio
 
@@ -204,13 +190,11 @@ casos:
       dua: "Accés"
       genere_discursiu: "fabula"
       complements:
-        glossari: true
         esquema_visual: true
         bastides: true
         pictogrames: true
     expected_skills:
       - generate-bastides-lectura
-      - generate-glossari
       - generate-pictogrames
       - write-fabula
 
@@ -456,18 +440,12 @@ casos:
       dua: "Enriquiment"
       genere_discursiu: "poema"
       complements:
-        glossari: true
-        mapa_conceptual: true
-        preguntes_comprensio: true
         activitats_aprofundiment: true
         mapa_mental: true
         rubriques: true
     expected_skills:
       - generate-activitats-aprofundiment
-      - generate-glossari
-      - generate-mapa-conceptual
       - generate-mapa-mental
-      - generate-preguntes-comprensio
       - generate-rubriques
       - write-poema
 
@@ -543,18 +521,12 @@ casos:
       dua: "Enriquiment"
       genere_discursiu: "enciclopedic"
       complements:
-        glossari: true
-        mapa_conceptual: true
-        preguntes_comprensio: true
         activitats_aprofundiment: true
         mapa_mental: true
         rubriques: true
     expected_skills:
       - generate-activitats-aprofundiment
-      - generate-glossari
-      - generate-mapa-conceptual
       - generate-mapa-mental
-      - generate-preguntes-comprensio
       - generate-rubriques
       - write-enciclopedic
 
@@ -570,18 +542,12 @@ casos:
       dua: "Enriquiment"
       genere_discursiu: "contrarelat_odi"
       complements:
-        glossari: true
-        mapa_conceptual: true
-        preguntes_comprensio: true
         activitats_aprofundiment: true
         mapa_mental: true
         rubriques: true
     expected_skills:
       - generate-activitats-aprofundiment
-      - generate-glossari
-      - generate-mapa-conceptual
       - generate-mapa-mental
-      - generate-preguntes-comprensio
       - generate-rubriques
       - write-contrarelat-odi
 
