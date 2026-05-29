@@ -158,7 +158,7 @@ def clean_gemini_output(text: str) -> str:
             # És una secció principal si el títol és un dels principals
             is_main = any(kw in title_lower for kw in [
                 "text adaptat", "glossari", "esquema", "mapa conceptual",
-                "preguntes", "bastides", "activitats", "mapa mental",
+                "preguntes", "bastides", "suport", "activitats", "mapa mental",
                 "argumentació", "argumentacio", "notes d'auditoria",
                 "notes d'audit", "pictogrames", "traducció", "negretes",
                 "definicions",
@@ -190,15 +190,24 @@ def clean_gemini_output(text: str) -> str:
                   '### Després de llegir', text, flags=re.MULTILINE | re.IGNORECASE)
 
     # 5c. Xarxa de seguretat: si apareix un encapçalament «### Abans de llegir»
-    #     (o variants ja normalitzades a dalt) orfe — sense «## Preguntes de
-    #     comprensió» al davant — inserta el wrapper. Alguns LLMs ometen el «##»
-    #     pare quan el prompt els mostra el template de sub-seccions amb «###».
+    #     (o variants ja normalitzades a dalt) orfe — sense un «##» pare vàlid al
+    #     davant — inserta el wrapper «## Preguntes de comprensió». Alguns LLMs
+    #     ometen el «##» pare quan el prompt els mostra el template amb «###».
+    #     Fix 2026-05-29 (bug bastides buides): «### Abans/Durant/Després» també
+    #     són subseccions LEGÍTIMES de «## Bastides» (i «## Suports per llegir»).
+    #     Abans, aquesta xarxa inseria un «## Preguntes de comprensió» fantasma
+    #     entre «## Bastides» i les seves subseccions, buidant la bastida i fent
+    #     que l'orchestrator esborrés el «## Preguntes» no autoritzat → contingut
+    #     perdut. Per això NO disparem si el pare ja és bastides/suports/preguntes.
     m_abans = re.search(r'^###\s+Abans de llegir\b', text, flags=re.MULTILINE | re.IGNORECASE)
     if m_abans:
         preceding = text[: m_abans.start()]
         last_h2 = list(re.finditer(r'^##\s+(.+)$', preceding, flags=re.MULTILINE))
         last_title = last_h2[-1].group(1).lower() if last_h2 else ""
-        if "pregunt" not in last_title and "comprensi" not in last_title:
+        _valid_parent = any(
+            kw in last_title for kw in ("pregunt", "comprensi", "bastid", "suport")
+        )
+        if not _valid_parent:
             text = text[: m_abans.start()] + "## Preguntes de comprensió\n\n" + text[m_abans.start():]
 
     # 6. Netejar línies buides excessives

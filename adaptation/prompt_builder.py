@@ -1322,7 +1322,17 @@ def build_complements_prompt(profile: dict, context: dict, params: dict) -> str:
         if _active:
             _names = ", ".join(s.name for s in _active)
             print(f"[complements_call] SKILLs ({len(_active)}): {_names}", flush=True)
-            parts.append(skills_loader.render_skill_block(_active))
+            # Fix 2026-05-29: NO renderitzem el body de generate-bastides-* aquí.
+            # Son rúbriques-referència de ~17K (descriuen els 7 nivells MECR) que,
+            # a més, repeteixen "PROHIBIT generar ## Preguntes" (priming per negació).
+            # Resultat: el model abocava el contingut dels 3 moments sota
+            # "## Preguntes de comprensió" i deixava "## Bastides" buit (i
+            # l'orchestrator esborrava el "## Preguntes" no autoritzat → contingut
+            # perdut). La directiva Python lean de més avall cobreix el contingut
+            # operatiu per nivell. La SKILL es manté com a canon de referència.
+            _render = [s for s in _active if not s.name.startswith("generate-bastides")]
+            if _render:
+                parts.append(skills_loader.render_skill_block(_render))
         else:
             # Cap SKILL activa — no val la pena fer la 2a crida
             return ""
@@ -1363,6 +1373,135 @@ Genera TOTES les seccions ## següents basant-te en el text adaptat que reps:
 
 Títols exactes (sense prefixos ni emojis). Sub-apartats amb ###.
 PROHIBIT reproduir el text adaptat. PROHIBIT ometre seccions. Si el contingut és curt, fes-lo curt però NO l'ometis.
+""")
+
+    # Fix 2026-05-29 (Bug bastides buides en 2-call):
+    # El mecanisme real del buit era a clean_gemini_output §5c (post_process.py):
+    # una xarxa de seguretat inseria un "## Preguntes de comprensió" fantasma
+    # davant de qualsevol "### Abans de llegir", relocant el cos de bastides a una
+    # secció que l'orchestrator després esborrava (no autoritzada). Allà es
+    # resol l'arrel. Aquí donem el reforç que tots els germans estructurals
+    # (rubriques/mapa_mental/esquema_visual) ja tenien i bastides no: una directiva
+    # lean computada en Python, a prop de la generació, amb la llesca del nivell
+    # EXACTE (Python ja sap mecr/dua/nouvingut/producció). A més, deixem de
+    # renderitzar el body de ~17K de les SKILLs-rúbrica en aquesta crida (es queden
+    # com a canon de referència) i forcem el títol únic "## Bastides" (= checklist
+    # + filtre orchestrator), eliminant la triple ambiguïtat de títol de la SKILL
+    # (Bastides / Suports per llegir / Bastides — Estratègia lectora).
+    if "bastides" in comp_actius:
+        _mecr_b = (mecr or "B1").upper().replace("Ç", "C")
+        _dua_b = (params.get("dua") or "Core").strip()
+        _produccio_activa = bool(
+            comp.get("preguntes_comprensio") or comp.get("activitats_aprofundiment")
+        )
+        # Plantilla dels 3 moments per banda MECR (derivada de la SKILL canònica,
+        # reformulada com a directiva). Cada entrada: (abans, durant, després).
+        # CRÍTIC: ítems IMPERATIUS (verb d'acció, sense interrogants). Si es
+        # formulen com a preguntes («Què saps de…?») el model relabela la secció
+        # com a «## Preguntes de comprensió» i deixa «## Bastides» buida. Les
+        # bastides son ESTRATÈGIES (com llegir), no preguntes sobre el contingut.
+        _bastides_moments = {
+            "PRE-A1": (
+                "Mostra una imatge o el títol i deixa que l'alumne assenyali o anomeni el que veu.",
+                "Llegeix en veu alta mentre l'alumne assenyala, dramatitza o dibuixa. Sense lectura autònoma.",
+                "Demana-li que dibuixi o ordeni imatges del que ha entès (dictat oral a l'adult).",
+            ),
+            "A1": (
+                "Mira el títol, recorda el que ja saps del tema i predigues de què parlarà.",
+                "Llegeix amb l'adult, segueix amb el dit i subratlla 1 mot clau per paràgraf.",
+                "Completa la frase: «El text parla de ___».",
+            ),
+            "A2": (
+                "Recorda 2 coses que ja saps del tema i fixa't un propòsit: «Llegeix per identificar [X]».",
+                "Llegeix sol i marca al marge ✓ (entès) / ? (dubte) / ! (important).",
+                "Escriu un resum de 2-3 frases i explica una idea amb «Crec que … perquè …».",
+            ),
+            "B1": (
+                "Escriu la teva hipòtesi abans de llegir: «Crec que el text dirà ___ perquè ___».",
+                "Pren notes breus al marge i atura't a mitja lectura per revisar la teva hipòtesi.",
+                "Resumeix en 3-4 frases (idea principal + 2 secundàries) i valora si hi estàs d'acord, dient per què.",
+            ),
+            "B2+": (
+                "Identifica el gènere i la font, i anticipa quin pot ser el posicionament de l'autor.",
+                "Marca al marge el posicionament de l'autor i contrasta'l amb el que ja sabies.",
+                "Fes un resum jeràrquic, detecta pressuposicions i avalua si les dades són fiables.",
+            ),
+        }
+        if _mecr_b in ("B2", "C1", "C2"):
+            _band = "B2+"
+        elif _mecr_b in _bastides_moments:
+            _band = _mecr_b
+        else:
+            _band = "B1"
+        _ab, _du, _de = _bastides_moments[_band]
+
+        # Modulació DUA Accés + nivell baix → cap escriptura autònoma.
+        _no_escriptura = _band == "PRE-A1" or (_dua_b == "Accés" and _mecr_b in ("PRE-A1", "A1", "A2"))
+        _acces_line = (
+            "\n⚠️ DUA Accés / nivell baix: CAP escriptura autònoma. Substitueix «Escriu» per "
+            "accions físiques («Assenyala», «Tria entre 2 opcions», «Diu en veu alta»). Plànol crític PROHIBIT. "
+            "LF estricta UNE 153101: una idea per frase."
+            if _no_escriptura else ""
+        )
+        # Modificador NOUVINGUT (TILC/TOLC): comparació L1↔català ancorada al glossari.
+        _tilc_line = (
+            f"\n🌍 Nouvingut (L1 {l1}): inclou 1 iniciador comparat L1↔català per moment "
+            f"(ex: «En {l1}, com es diu [paraula]? Mira el glossari») i ancora explícitament al glossari."
+            if (l1 and _mecr_b in ("PRE-A1", "A1", "A2")) else ""
+        )
+
+        # Desambiguació bastides ↔ preguntes_comprensio. El model té un prior molt
+        # fort: tota estructura "abans/durant/després de llegir" la titula
+        # "## Preguntes de comprensió", encara que no es demani, i deixa
+        # "## Bastides" buida. Cal una redirecció explícita segons si preguntes
+        # està activa o no en aquest cas.
+        _preguntes_activa = bool(comp.get("preguntes_comprensio"))
+        if _preguntes_activa:
+            _disambig = (
+                "`## Bastides` (estratègies de COM llegir, en imperatiu) i `## Preguntes de comprensió` "
+                "(preguntes sobre el CONTINGUT) són seccions DIFERENTS; genera-les totes dues per separat. "
+                "Les 3 pistes d'estratègia (abans/durant/després) van a `## Bastides`, MAI barrejades amb les preguntes."
+            )
+        else:
+            _disambig = (
+                "⛔ Aquest cas NO demana preguntes de comprensió: NO generis cap secció `## Preguntes de comprensió` "
+                "ni cap variant. Les pistes dels 3 moments són BASTIDES i van EXCLUSIVAMENT sota `## Bastides`."
+            )
+
+        # Bloc de resposta (producció) — només si hi ha producció activa i no és pre-A1
+        # (a pre-A1 la SKILL -produccio no genera res). Mirall de la condició de la SKILL.
+        _resposta_block = ""
+        if _produccio_activa and _band != "PRE-A1":
+            _resposta_block = """
+### Bastides de resposta
+Genera també (perquè hi ha preguntes/activitats actives):
+- **Base d'orientació:** 3-4 passos del procés per construir la resposta del gènere treballat (GPS disciplinar, no «introducció/cos/conclusió» genèric).
+- **Connectors útils:** 3-5 connectors graduats al MECR.
+- **Frases per començar:** 2-3 iniciadors model (forats, NO la resposta sencera).
+"""
+
+        parts.append(f"""
+## INSTRUCCIÓ ESPECÍFICA — Bastides (OBLIGATÒRIA)
+Reprodueix EXACTAMENT aquest esquema: és la secció `## Bastides` SENCERA, amb la
+capçalera literal i les 3 subseccions. Omple cada ítem a partir del text adaptat que
+reps. Són pistes d'ESTRATÈGIA LECTORA (com llegir, transferibles a qualsevol text del
+mateix gènere/nivell), adaptades a {_mecr_b} — no un re-llistat dels fets del text.
+
+## Bastides
+
+### Abans de llegir — prepara la lectura
+- {_ab}
+
+### Durant la lectura — estratègies de lector
+- {_du}
+
+### Després de llegir — consolida i revisa
+- {_de}
+{_resposta_block}{_acces_line}{_tilc_line}
+
+{_disambig}
+PROHIBIT deixar `## Bastides` amb el cos buit o només amb la intro: omple SEMPRE els 3 moments amb 1-3 ítems cadascun.
+NO incloguis marcadors de pictogrames `[PICTO: …]` en aquesta secció.
 """)
 
     # Fix 2026-05-27 (Bug 1 — esquema_visual buit en 2-call):
