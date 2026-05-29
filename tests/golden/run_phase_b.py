@@ -85,7 +85,7 @@ SERVER_DEFAULT = "http://localhost:8000"
 ADAPT_ENDPOINT = "/api/adapt"
 
 # Model judge (sobreescriptible amb --judge-model)
-JUDGE_MODEL_DEFAULT = "gemini-2.5-flash"
+JUDGE_MODEL_DEFAULT = "gpt-4o-mini"  # OpenAI: sense rate limit del free tier de Gemini
 JUDGE_TEMPERATURE = 0.0
 
 
