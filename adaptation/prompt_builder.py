@@ -499,6 +499,75 @@ PROHIBIT generar prosa expositiva genèrica si el gènere és un altre. La forma
 gènere és tan important com el contingut adaptat.
 """
 
+        # Fix 2026-05-30 (Bug pictogrames absents en 2-call):
+        # En mode 2-call, build_system_prompt(adapter_only=True) salta el bloc
+        # complement output_sections — incloent la instrucció de pictogrames de
+        # la línia ~605 que ensenya el format `[PICTO: terme|terme_castellà]`
+        # graduat per MECR. La instrucció D-01 del catàleg sí entra (mencionant
+        # `[PICTO: terme]` un cop), però gpt-4o (model d'adapter) la ignora
+        # sistemàticament (0/4 markers a Fase B). gemma4 era més obedient.
+        # Solució (mirall de bastides): directiva computada en Python a prop
+        # de la generació, amb llesca del nivell MECR exacte, format estricte,
+        # exemples i anti-emoji-Unicode. La SKILL i el bloc legacy es mantenen
+        # als altres camins. La resolució HTTP a <img> ja es fa a
+        # orchestrator.py:378 (resolve_pictogram_markers sobre call 1).
+        _picto_block = ""
+        if comp.get("pictogrames"):
+            _mecr_pic = (mecr or "B1").upper().replace("Ç", "C")
+            # Cada banda: (rule, mode) — "inline" = marcadors davant els termes
+            # clau dins el text corrent; "glossari" = secció final amb la llista.
+            # NOTA: la canon SKILL diu "A2+: glossari peu, NO inline". A la pràctica
+            # gpt-4o ignora la regla "NO inline" i, si la imposem amb força,
+            # acaba ometent pictogrames del tot quan competeixen amb 5+ complements
+            # actius (cas ex_pri B1, 0/3 sistemàtic). Estratègia robusta: permet
+            # inline DAVANT del terme a TOTS els nivells; la gradació canònica
+            # actua sobre la QUANTITAT, no sobre presència/absència d'inline.
+            _PICTO_BANDS = {
+                "PRE-A1": (
+                    "1-2 marcadors per frase davant noms i verbs clau (8-10 max per text). "
+                    "POSICIÓ: SEMPRE abans de la paraula (`[PICTO: gat|gato] el gat dorm`, "
+                    "MAI després). Afegeix també una capçalera `### Vocabulari del text "
+                    "(mira primer!)` al començament amb la llista pictograma·paraula per "
+                    "anticipació visual (UNE 153101)."
+                ),
+                "A1": (
+                    "4-6 marcadors per text, 1 per paraula nova o concepte clau. "
+                    "POSICIÓ: INLINE DAVANT del terme (`[PICTO: mitja|calcetin] una mitja "
+                    "vella`, MAI després)."
+                ),
+                "A2": (
+                    "4-6 marcadors INLINE DAVANT dels termes tècnics o conceptes clau del text "
+                    "(`[PICTO: planta|planta] la planta verda`). Opcionalment, també pots "
+                    "afegir un `### Glossari visual` al final amb la llista pictograma·terme."
+                ),
+            }
+            _picto_rule = _PICTO_BANDS.get(
+                _mecr_pic,
+                (
+                    "4-5 marcadors INLINE DAVANT dels termes tècnics o conceptes clau del text "
+                    "(`[PICTO: clorofil·la|clorofila] la clorofil·la`). Només per a termes "
+                    "tècnics o conceptes clau, no per a vocabulari quotidià. Opcionalment, "
+                    "també pots afegir un `### Glossari visual` al final."
+                ),
+            )
+            _picto_block = f"""
+## ⚠️ PICTOGRAMES ARASAAC — OBLIGATORI a {_mecr_pic}
+ACTIVAT — Insereix marcadors `[PICTO: terme]` reals (NO emojis Unicode 🌞🌊🌱).
+Gradació per a {_mecr_pic}: {_picto_rule}
+
+Format OBLIGATORI del marcador: `[PICTO: terme_idioma_doc|terme_castellà]`
+- Esquerra del `|`: terme en l'idioma del document (català, castellà…).
+- Dreta del `|`: equivalent en castellà per a la cerca ARASAAC.
+- Terme curt (1-3 paraules), minúscules, concret i visualitzable (objecte, acció, ésser viu).
+- Exemples (text català): `[PICTO: sol|sol]` `[PICTO: aigua|agua]` `[PICTO: planta|planta]` `[PICTO: córrer|correr]` `[PICTO: clorofil·la|clorofila]`.
+- NO inventis emojis Unicode (🌞 🌊 🌱 ✨…): usa SEMPRE el marcador `[PICTO: …]`.
+- NO posis text ni puntuació dins del marcador, només els termes separats per `|`.
+- El backend els substitueix per imatges reals ARASAAC (CC BY-NC-SA 4.0).
+
+PROHIBIT generar una secció `## Pictogrames` separada: els marcadors viuen DINS de `## Text adaptat`.
+PROHIBIT deixar la sortida sense cap marcador `[PICTO:]` quan pictogrames és ACTIVAT.
+"""
+
         parts.append(f"""
 ## Argumentació pedagògica
 SEMPRE GENERAR — Explica les decisions pedagògiques (adaptació lingüística, atenció a la diversitat, suport multimodal, gradació cognitiva, rigor curricular). Breu, 3-5 punts.
@@ -508,6 +577,7 @@ SEMPRE GENERAR — Taula comparativa dels canvis principals:
 | Aspecte | Original | Adaptat | Motiu |
 Màxim 5-6 files.
 {_genere_block}
+{_picto_block}
 ## CHECKLIST DE GENERACIÓ — OBLIGATORI
 Genera únicament:
 1. ## Text adaptat — amb l'ESTRUCTURA del gènere "{_genere_param or 'demanat'}"
