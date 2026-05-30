@@ -24,6 +24,7 @@
 <link rel="stylesheet" href="/ui/driver.css"/>
 <script src="/ui/driver.iife.js"></script>
 <script src="/ui/atne/js/profile-canonical.js"></script>
+<script src="/ui/atne/js/complements-matriu.js?v=20260530a"></script>
 <script src="/ui/atne/js/llm.js?v=20260419j" defer></script>
 
 <style>
@@ -2917,63 +2918,25 @@
     { id: 'illustracions',         label: 'Il·lustracions IA <span class="badge-experimental">experimental</span>', desc: 'Imatge IA per a conceptes visuals · 1-3 min' }
   ];
 
-  // Matriu canònica FJE — font: ui/saber-ne.html §7 (Complements per condició)
-  // Columnes mapejades a IDs de COMPLEMENT_DEFS:
-  //   glossari | esquema_visual | bastides | mapa_conceptual | preguntes_comprensio | activitats_aprofundiment
-  //   | pictogrames | mapa_mental | plantilles_genere | resum_graduat | cartes_conversacionals | rubriques
-  // Nota: "Negretes", "Def.integr." i "Trad.L1" són variables de prompt, no complements UI.
-  // Nota: TOLC = badge automàtic (nouvingut + L1), no chip seleccionable (decisió post-pilot).
-  // Nota: cartes_conversacionals = elecció docent (depèn de l'activitat, no del perfil) → no auto-activar.
-  //
-  // MATRIU §7 v2 (2026-05-27) — refeta segons validació pedagògica NotebookLM
-  // (Opció D: bastides i preguntes_comprensio mai activades alhora als defaults).
-  // Principis aplicats:
-  //   - BASTIDES als perfils d'aprenentatge inicial (estratègia lectora)
-  //   - PREGUNTES als perfils amb autonomia lectora (contingut del text)
-  //   - Mai BASTIDES + PREGUNTES alhora (eviten redundància plànol crític)
-  //   - Visual exclusiu per MECR: esquema (A1/A2) · mapa mental (B1) · mapa conceptual (B2+)
-  //   - AC: sense esquema, sense pictogrames (expertise reversal — infantilitza)
-  //   - "Menys és més" (MALL): defaults reduïts (mitjana 3 vs 5 abans)
-  const MATRIU_CONDICIONS = {
-    //            [gloss, esq,   bast,  mapa_c, preg,  aprof, picto, mapa_m, plant, resum, cartes, rubr]
-    tea:  [false, true,  true,  false, false, false, true,  false, false, false, false, false],  // 3 (esquema+bastides+pictogrames; glossari fora: pictogrames ja fa mediació lèxica)
-    tdah: [true,  true,  false, false, true,  false, false, false, false, false, false, false],  // 3 (ESO autònom → preguntes)
-    disl: [true,  true,  true,  false, false, false, false, false, false, false, false, false],  // 3 (bastides)
-    di:   [false, true,  true,  false, false, false, true,  false, false, false, false, false],  // 3 (esquema+bastides+pictogrames; glossari fora: pictograma resol el lèxic més directe)
-    tdl:  [true,  true,  true,  false, false, false, false, false, false, false, false, false],  // 3 (bastides)
-    ac:   [false, false, false, false, false, true,  false, true,  false, false, false, true ],  // 3 (aprofundiment+mapa mental+rúbriques; enriquir, no simplificar — fora glossari/preguntes/mapa conceptual)
-    aud:  [true,  false, false, false, true,  false, true,  false, false, false, false, false],  // 3 (preguntes + pictogrames — ESO B1 autònom)
-    vis:  [true,  false, false, false, true,  false, false, false, false, false, false, false],  // 2 (igual)
-    tdc:  [true,  false, false, false, true,  false, false, false, false, false, false, false],  // 2 (igual)
-    cat:  [true,  false, true,  false, false, false, true,  false, false, false, false, false],  // 3 (bastides + pictogrames — descodificació)
-    vuln: [true,  true,  false, false, true,  false, false, false, false, false, false, false],  // 3 (preguntes)
-    emo:  [true,  false, false, false, true,  false, false, false, false, false, false, false],  // 2 (preguntes — ESO autònom)
-    // Discalcúlia (afegida a §7 2026-05-27) — patró similar a TDL
-    discalculia: [true, true, true, false, false, false, false, false, false, false, false, false],  // 3 (bastides)
-  };
-  // Ordre columnes: [glossari, esquema_visual, bastides, mapa_conceptual, preguntes_comprensio, activitats_aprofundiment, pictogrames, mapa_mental, plantilles_genere, resum_graduat, cartes_conversacionals, rubriques]
-  // Nota: mapa_mental auto-actiu NOMÉS per AC. cartes_conversacionals mai auto-actives (elecció docent).
-  const MATRIU_KEYS = ['glossari', 'esquema_visual', 'bastides', 'mapa_conceptual', 'preguntes_comprensio', 'activitats_aprofundiment', 'pictogrames', 'mapa_mental', 'plantilles_genere', 'resum_graduat', 'cartes_conversacionals', 'rubriques'];
-
+  // Matriu canònica + modulació MECR → ui/atne/js/complements-matriu.js
+  // (mòdul compartit per testabilitat amb Node i possible reutilització).
+  // Font: ui/saber-ne.html §7, NotebookLM 2026-05-27 (Opció D), modulació
+  // MECR low 2026-05-30 (cas titella: dislèxia A1+1r primària).
+  const MATRIU_CONDICIONS = window.ComplementsMatriu.MATRIU_CONDICIONS;
+  const MATRIU_KEYS       = window.ComplementsMatriu.MATRIU_KEYS;
+  // Wrapper que injecta el MECR efectiu actual (tria docent al Pas 2 ⩾ baseline del perfil).
   function defaultComplementsForProfile(p) {
-    const cat = p?.cat || '';
-    const chips = (p?.chips || []).map(c => c.cat).filter(Boolean);
-    const has = c => cat === c || chips.includes(c) || cat === 'group-' + c;
-
-    // Agreguem les columnes de cada condició present per unió (OR lògic)
-    const active = new Array(MATRIU_KEYS.length).fill(false);
-    let anyKnown = false;
-    for (const cond of Object.keys(MATRIU_CONDICIONS)) {
-      if (has(cond)) {
-        anyKnown = true;
-        MATRIU_CONDICIONS[cond].forEach((v, i) => { if (v) active[i] = true; });
-      }
-    }
-
-    // Fallback: cap condició reconeguda → set bàsic
-    if (!anyKnown) return ['glossari', 'preguntes_comprensio'];
-
-    return MATRIU_KEYS.filter((_, i) => active[i]);
+    return window.ComplementsMatriu.defaultComplementsForProfile(p, currentMecr());
+  }
+  function currentMecr() {
+    try {
+      const ui = localStorage.getItem('atne.doc_nivell');
+      if (ui) return ui;
+    } catch (_) {}
+    return (profile && (profile.adaptacio || profile.mecr_sortida || profile.mecr)) || '';
+  }
+  function currentMecrBand() {
+    return window.ComplementsMatriu.mecrBand(currentMecr());
   }
 
   // Estat actual dels complements seleccionats (persistit a localStorage).
@@ -2982,8 +2945,10 @@
   // els complements d'un TDAH en un grup AACC).
   function loadComplementsState() {
     try {
-      const storedPid = localStorage.getItem('atne.complements_for_pid');
+      const storedPid  = localStorage.getItem('atne.complements_for_pid');
+      const storedBand = localStorage.getItem('atne.complements_for_mecr_band');
       const raw = localStorage.getItem('atne.complements');
+      const curBand = currentMecrBand();
       // Cap dada: defaults per al perfil actual
       if (!raw) return defaultComplementsForProfile(profile);
       // Hi ha complements desats però sense pid conegut → no sabem de quin
@@ -2992,13 +2957,16 @@
         localStorage.removeItem('atne.complements');
         return defaultComplementsForProfile(profile);
       }
-      // Pid diferent → invalidem
-      if (storedPid !== currentPid) {
+      // Pid diferent o banda MECR canviada → invalidem (els defaults són
+      // (perfil, MECR-band)-dependents des de 2026-05-30: low canvia
+      // l'auto-suggestió per perfils visuals).
+      if (storedPid !== currentPid || storedBand !== curBand) {
         localStorage.removeItem('atne.complements');
         localStorage.removeItem('atne.complements_for_pid');
+        localStorage.removeItem('atne.complements_for_mecr_band');
         return defaultComplementsForProfile(profile);
       }
-      // Mateix pid: carreguem l'estat previ
+      // Mateix pid + banda: carreguem l'estat previ
       const obj = JSON.parse(raw);
       if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
         return Object.keys(obj).filter(k => obj[k]);
@@ -3011,11 +2979,13 @@
 
   function saveComplementsState() {
     // Desem com a objecte {id:true} pel format que consumeix el Pas 3/backend.
-    // Recordem el pid per detectar canvis de perfil a la propera càrrega.
+    // Recordem pid + banda MECR per detectar canvis de perfil o nivell a la
+    // propera càrrega (els defaults són (perfil, MECR-band)-dependents).
     const obj = {};
     complSelected.forEach(id => obj[id] = true);
     localStorage.setItem('atne.complements', JSON.stringify(obj));
     localStorage.setItem('atne.complements_for_pid', currentPid);
+    localStorage.setItem('atne.complements_for_mecr_band', currentMecrBand());
     updateComplementsLabel();
   }
   function updateComplementsLabel() {
