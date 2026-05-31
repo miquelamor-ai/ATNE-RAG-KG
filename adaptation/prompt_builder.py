@@ -513,6 +513,15 @@ gènere és tan important com el contingut adaptat.
         # exemples i anti-emoji-Unicode. La SKILL i el bloc legacy es mantenen
         # als altres camins. La resolució HTTP a <img> ja es fa a
         # orchestrator.py:378 (resolve_pictogram_markers sobre call 1).
+        #
+        # Phase 2 experiment 2026-05-31: provat eliminar amb slicing actiu.
+        # Resultat: 0/8 runs OK sense ella — CONFIRMAT. La SKILL té
+        # agent_role:complements → no es carrega al call 1 → el slicing del
+        # prompt_adapter NO té res a aplicar aquí. Sense la directiva, el
+        # canon de pictogrames està absent del call 1. Directiva NECESSÀRIA
+        # per gap arquitectònic (no per gap canon). Solució canon (mineriaRAG):
+        # crear `generate-pictogrames-adapter` amb agent_role:adapter, o
+        # promoure els pictogrames a adapter-role al M3 actual.
         _picto_block = ""
         if comp.get("pictogrames"):
             _mecr_pic = (mecr or "B1").upper().replace("Ç", "C")
@@ -1461,6 +1470,12 @@ PROHIBIT reproduir el text adaptat. PROHIBIT ometre seccions. Si el contingut é
     # com a canon de referència) i forcem el títol únic "## Bastides" (= checklist
     # + filtre orchestrator), eliminant la triple ambiguïtat de títol de la SKILL
     # (Bastides / Suports per llegir / Bastides — Estratègia lectora).
+    #
+    # Phase 2 experiment 2026-05-31: provat eliminar amb slicing actiu (b065b96).
+    # Resultat: 8/10 runs OK sense ella; ex_ci falla 2/2 (1r primària·disl·A1·
+    # descripcio·text curt). Directiva PARCIALMENT redundant però mantinguda
+    # per cobrir el cas-específic. Pendent estudi del SKILL §A1 disl per veure
+    # quin forat al canon explica la fallada d'ex_ci.
     if "bastides" in comp_actius:
         _mecr_b = (mecr or "B1").upper().replace("Ç", "C")
         _dua_b = (params.get("dua") or "Core").strip()
@@ -1587,6 +1602,14 @@ NO incloguis marcadors de pictogrames `[PICTO: …]` en aquesta secció.
     # quotidians + a vegades castellanismes a les definicions ("titella →
     # Muñeco"). Mirall de bastides: directiva Python a prop de la generació
     # que fa prominents aquestes dues regles amb exemples concrets.
+    #
+    # Phase 2 experiment 2026-05-31: provat eliminar aquest bloc amb el
+    # slicing per nivell actiu (commit b065b96). Resultat: 0/3 runs passen
+    # — el model genera 8 termes amb 4 quotidians. Confirmat que la directiva
+    # APORTA VALOR EMPÍRIC sobre el slicing pur. Acció pendent (per mineriaRAG):
+    # pujar al M3 §5 d'A1 els exemples concrets (mitja/botó/agulla/fil) i
+    # el sostre estricte ("MÀXIM 2 termes a A1+etapa inicial") com a part del
+    # canon. Si el M3 es reforça, aquesta directiva passarà a ser redundant.
     if "glossari" in comp_actius:
         _mecr_gl = (mecr or "B1").upper().replace("Ç", "C")
         _is_low_gl = _mecr_gl in ("PRE-A1", "A1")
@@ -1722,6 +1745,11 @@ PROHIBIT generar el mateix contingut que mapa_conceptual si tots dos estan activ
 PROHIBIT capçalera "## Mapa mental" amb cos buit.
 """)
 
+    # Phase 2 experiment 2026-05-31: provat eliminar amb slicing actiu.
+    # Resultat: 0/2 runs OK sense ella — arrel cau a "Mitja vella" en lloc
+    # de "Titella" (el bug original del cas titella). esquema_visual NO té
+    # SKILL canon al corpusFJE; aquesta directiva és l'ÚNICA font. Gap canon:
+    # cal crear `generate-esquema-visual/M3_instrument-*.md` a mineriaRAG.
     if "esquema_visual" in comp_actius:
         _mecr_c3 = (mecr or "B1").upper().replace("Ç", "C")
         _esquema_nodes_map = {
