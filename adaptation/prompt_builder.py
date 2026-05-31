@@ -501,27 +501,12 @@ PROHIBIT generar prosa expositiva genèrica si el gènere és un altre. La forma
 gènere és tan important com el contingut adaptat.
 """
 
-        # Fix 2026-05-30 (Bug pictogrames absents en 2-call):
-        # En mode 2-call, build_system_prompt(adapter_only=True) salta el bloc
-        # complement output_sections — incloent la instrucció de pictogrames de
-        # la línia ~605 que ensenya el format `[PICTO: terme|terme_castellà]`
-        # graduat per MECR. La instrucció D-01 del catàleg sí entra (mencionant
-        # `[PICTO: terme]` un cop), però gpt-4o (model d'adapter) la ignora
-        # sistemàticament (0/4 markers a Fase B). gemma4 era més obedient.
-        # Solució (mirall de bastides): directiva computada en Python a prop
-        # de la generació, amb llesca del nivell MECR exacte, format estricte,
-        # exemples i anti-emoji-Unicode. La SKILL i el bloc legacy es mantenen
-        # als altres camins. La resolució HTTP a <img> ja es fa a
-        # orchestrator.py:378 (resolve_pictogram_markers sobre call 1).
-        #
-        # Phase 2 experiment 2026-05-31: provat eliminar amb slicing actiu.
-        # Resultat: 0/8 runs OK sense ella — CONFIRMAT. La SKILL té
-        # agent_role:complements → no es carrega al call 1 → el slicing del
-        # prompt_adapter NO té res a aplicar aquí. Sense la directiva, el
-        # canon de pictogrames està absent del call 1. Directiva NECESSÀRIA
-        # per gap arquitectònic (no per gap canon). Solució canon (mineriaRAG):
-        # crear `generate-pictogrames-adapter` amb agent_role:adapter, o
-        # promoure els pictogrames a adapter-role al M3 actual.
+        # Phase 2 retry 2026-05-31: provat sense aquesta directiva amb el nou
+        # canon (pictogrames ara agent_role:adapter, carregat al call 1).
+        # Resultat: 0/8 — el SKILL es carrega però el seu cos descriptiu no
+        # és prou imperatiu per a gpt-4o. Cal el format estricte i exemples
+        # de la directiva Python. Pendent (mineriaRAG): reescriure el M3 amb
+        # estil més directiu per al §A1.
         _picto_block = ""
         if comp.get("pictogrames"):
             _mecr_pic = (mecr or "B1").upper().replace("Ç", "C")
@@ -1457,25 +1442,11 @@ Títols exactes (sense prefixos ni emojis). Sub-apartats amb ###.
 PROHIBIT reproduir el text adaptat. PROHIBIT ometre seccions. Si el contingut és curt, fes-lo curt però NO l'ometis.
 """)
 
-    # Fix 2026-05-29 (Bug bastides buides en 2-call):
-    # El mecanisme real del buit era a clean_gemini_output §5c (post_process.py):
-    # una xarxa de seguretat inseria un "## Preguntes de comprensió" fantasma
-    # davant de qualsevol "### Abans de llegir", relocant el cos de bastides a una
-    # secció que l'orchestrator després esborrava (no autoritzada). Allà es
-    # resol l'arrel. Aquí donem el reforç que tots els germans estructurals
-    # (rubriques/mapa_mental/esquema_visual) ja tenien i bastides no: una directiva
-    # lean computada en Python, a prop de la generació, amb la llesca del nivell
-    # EXACTE (Python ja sap mecr/dua/nouvingut/producció). A més, deixem de
-    # renderitzar el body de ~17K de les SKILLs-rúbrica en aquesta crida (es queden
-    # com a canon de referència) i forcem el títol únic "## Bastides" (= checklist
-    # + filtre orchestrator), eliminant la triple ambiguïtat de títol de la SKILL
-    # (Bastides / Suports per llegir / Bastides — Estratègia lectora).
-    #
-    # Phase 2 experiment 2026-05-31: provat eliminar amb slicing actiu (b065b96).
-    # Resultat: 8/10 runs OK sense ella; ex_ci falla 2/2 (1r primària·disl·A1·
-    # descripcio·text curt). Directiva PARCIALMENT redundant però mantinguda
-    # per cobrir el cas-específic. Pendent estudi del SKILL §A1 disl per veure
-    # quin forat al canon explica la fallada d'ex_ci.
+    # Phase 2 retry 2026-05-31 (post canvis canon corpusFJE 981d9a0):
+    # 4/10 sense la directiva (pitjor que 8/10 abans del canvi canon!). El
+    # nou SKILL generate-esquema-visual (també complements-role) compete amb
+    # bastides per l'atenció del model i degrada el resultat. Directiva
+    # mantinguda i pendent estudi de l'efecte cross-SKILL.
     if "bastides" in comp_actius:
         _mecr_b = (mecr or "B1").upper().replace("Ç", "C")
         _dua_b = (params.get("dua") or "Core").strip()
@@ -1593,23 +1564,14 @@ NO incloguis marcadors de pictogrames `[PICTO: …]` en aquesta secció.
 """)
 
     # Fix 2026-05-31 (Cas titella — glossari ple de paraules quotidianes):
-    # La SKILL generate-glossari té dues regles canòniques crítiques que es
-    # perden a la pràctica:
-    #   - M3 §5 "Selecció pertinent: cap paraula quotidiana òbvia"
-    #   - M3 §5 "Llengua de definició: Català"
-    # Davant un text receptari ("Necessites: mitja, botons, agulla, fil…")
-    # i un perfil dislèxia A1, el model genera taula de 6 termes amb 4
-    # quotidians + a vegades castellanismes a les definicions ("titella →
-    # Muñeco"). Mirall de bastides: directiva Python a prop de la generació
-    # que fa prominents aquestes dues regles amb exemples concrets.
-    #
-    # Phase 2 experiment 2026-05-31: provat eliminar aquest bloc amb el
-    # slicing per nivell actiu (commit b065b96). Resultat: 0/3 runs passen
-    # — el model genera 8 termes amb 4 quotidians. Confirmat que la directiva
-    # APORTA VALOR EMPÍRIC sobre el slicing pur. Acció pendent (per mineriaRAG):
-    # pujar al M3 §5 d'A1 els exemples concrets (mitja/botó/agulla/fil) i
-    # el sostre estricte ("MÀXIM 2 termes a A1+etapa inicial") com a part del
-    # canon. Si el M3 es reforça, aquesta directiva passarà a ser redundant.
+    # Phase 2 retry 2026-05-31 (post canvis canon corpusFJE 981d9a0):
+    # Hem reforçat el M3 §5 amb exemples concrets de quotidians i llengua
+    # generalitzada multi-idioma. Tot i així el test test_glossari falla
+    # 0/3 sense la directiva: el model resol la tensió §Nombre vs §Selecció
+    # pertinent fent prevaler el sostre superior (5-8 termes A1). El canon
+    # encara necessita un sostre numèric estricte que sobrescrigui el §Nombre
+    # quan el text és majoritàriament quotidià. Pendent (mineriaRAG): afegir
+    # al §Nombre d'A1 una nota "max 2 si el text és majoritàriament quotidià".
     if "glossari" in comp_actius:
         _mecr_gl = (mecr or "B1").upper().replace("Ç", "C")
         _is_low_gl = _mecr_gl in ("PRE-A1", "A1")
@@ -1745,44 +1707,13 @@ PROHIBIT generar el mateix contingut que mapa_conceptual si tots dos estan activ
 PROHIBIT capçalera "## Mapa mental" amb cos buit.
 """)
 
-    # Phase 2 experiment 2026-05-31: provat eliminar amb slicing actiu.
-    # Resultat: 0/2 runs OK sense ella — arrel cau a "Mitja vella" en lloc
-    # de "Titella" (el bug original del cas titella). esquema_visual NO té
-    # SKILL canon al corpusFJE; aquesta directiva és l'ÚNICA font. Gap canon:
-    # cal crear `generate-esquema-visual/M3_instrument-*.md` a mineriaRAG.
-    if "esquema_visual" in comp_actius:
-        _mecr_c3 = (mecr or "B1").upper().replace("Ç", "C")
-        _esquema_nodes_map = {
-            "PRE-A1": "2-3 nodes. Seqüències temporals bàsiques (abans→després) o relacions imatge→paraula.",
-            "A1":     "3-4 nodes. Enumeració de qualitats o parts d'un objecte (descripció simple).",
-            "A2":     "4-6 nodes. Seqüència de passos d'instrucció o esdeveniments cronològics.",
-            "B1":     "6-8 nodes. Relacions causa-efecte o hipòtesi-evidència.",
-        }
-        _esquema_nodes = _esquema_nodes_map.get(
-            _mecr_c3,
-            "Nombre de nodes a criteri docent. Modelitza processos complexos."
-        )
-        parts.append(f"""
-## INSTRUCCIÓ ESPECÍFICA — Esquema visual (OBLIGATÒRIA)
-Si esquema_visual=true, GENERA OBLIGATÒRIAMENT 3-5 nodes amb relacions; NO deixis la secció buida.
-Per a {_mecr_c3}: {_esquema_nodes}
-
-Format OBLIGATORI: llista markdown amb sagnia. NO usar fletxes Unicode (→, ↓) ni ASCII-art (│ ├ └).
-El frontend ATNE detecta aquest format i el renderitza com a diagrama SVG (Mermaid flowchart LR).
-
-Exemple de format (adapta'l al text rebut):
-```
-- Tema central
-  - Subtema 1
-    - Detall A
-  - Subtema 2
-    - Detall B
-- Conclusió
-```
-
-PROHIBIT generar la capçalera "## Esquema visual" amb el cos buit. Si no saps quins nodes
-posar, extreu-los del text adaptat (idees principals + relacions causa-efecte o seqüencials).
-""")
+    # Directiva esquema_visual eliminada 2026-05-31 (Phase 2 retry post canon
+    # 981d9a0). La SKILL nova generate-esquema-visual amb la regla "node central
+    # = producte/objectiu per a gèneres procedimentals" cobreix el cas del titella
+    # via slicing del prompt_adapter (test 2/2). Primera directiva Python que es
+    # pot eliminar gràcies a l'enriquiment del canon. Cas històric: si tornés a
+    # aparèixer regressió, la directiva era a aquest punt (vegeu commit ANTERIOR
+    # de prompt_builder.py o l'historial de directives eliminades a docs/).
 
     return "\n\n".join(parts)
 

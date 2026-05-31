@@ -73,15 +73,27 @@ Després de connectar el slicing, hem provat d'eliminar les directives Python un
 | **pictogrames call 1** | **0/8 ❌** | La SKILL té `agent_role: complements` → no es carrega al call 1. El slicing no té res a aplicar. **Gap arquitectònic**: pictogrames hauria de tenir versió amb `agent_role: adapter` per call 1. |
 | **esquema_visual** | **0/2 ❌** | NO existeix `generate-esquema-visual/` al corpusFJE. Sense directiva, l'arrel cau a "Mitja vella" (el bug original del titella). **Gap canon total**: cal crear el SKILL al corpusFJE. |
 
-### 3.2 Conclusió de Phase 2
+### 3.2 Phase 2 retry (post canvis canon corpusFJE 981d9a0)
 
-**Cap directiva és eliminable.** Cada una és necessària empíricament, per un dels tres motius:
+Després d'aplicar els 4 canvis canon proposats al corpusFJE (commit 981d9a0), hem repetit l'experiment d'eliminar les directives Python. **Resultats consolidats**:
 
-1. **Gap canon (regla existent però genèrica)**: glossari, bastides. La regla està al M3 però manca explicitació concreta (exemples, sostres numèrics, casos límit).
-2. **Gap canon total (SKILL inexistent)**: esquema_visual. Cap M3 al corpusFJE.
-3. **Gap arquitectònic (agent_role inadequat per al call)**: pictogrames call 1. La SKILL existeix però amb role que no es carrega al call necessari.
+| Directiva | Pre-canon (slicing sol) | Post-canon (slicing + canon reforçat) | Decisió |
+|---|---|---|---|
+| **esquema_visual** | 0/2 ❌ | **2/2 ✅** | **ELIMINADA** (commit pendent) |
+| **glossari** | 0/3 ❌ | 0/3 ❌ | Mantinguda — tensió §Nombre vs §Selecció pertinent |
+| **bastides** | 8/10 ⚠️ | **4/10 ⬇️** | Mantinguda — efecte cross-SKILL del nou esquema-visual al call 2 |
+| **pictogrames** | 0/8 ❌ | 0/8 ❌ | Mantinguda — canvi agent_role NO és suficient; canon descriptiu, no imperatiu |
 
-**Aquest és l'aprenentatge útil de Phase 2**: les capes Python no són sobreengineering — són un inventari empíric de forats reals al canon/arquitectura. Si mineriaRAG cobreix aquests forats al M3 corresponent, ATNE podrà eliminar-les progressivament.
+**Aprenentatges:**
+1. Crear un SKILL nou complet amb regles imperatives explícites (com el nostre `generate-esquema-visual` amb "node central = producte") **SÍ** permet eliminar la directiva Python correspondent. Aquest és el camí més robust.
+2. **Afegir exemples concrets al §A1** (com vam fer al glossari) **no és suficient** si hi ha tensions amb altres seccions del mateix M3 (cas §Nombre 5-8 vs §Selecció pertinent). Cal resoldre les tensions amb regles d'ordre clar.
+3. **Canviar `agent_role`** d'un SKILL existent (cas pictogrames) **no és suficient** si el cos descriptiu del SKILL no inclou format imperatiu + exemples concrets. Cal complementar amb reescriptura del M3.
+4. **Efecte cross-SKILL** detectat: afegir un SKILL nou (esquema-visual a complements-role) ha degradat el rendiment de bastides (8/10 → 4/10) per competència per atenció al prompt. **Cal monitoritzar tipus i quantitat de SKILLs simultanis carregats al call 2**.
+
+**Conclusió de Phase 2:** una de quatre directives eliminada. Tres mantingudes amb diagnòstic empíric clar del que cal pujar al canon en cicles posteriors:
+- Glossari §Nombre A1: afegir nota "max 2 si text és majoritàriament quotidià".
+- Bastides: investigar interaccions cross-SKILL al call 2.
+- Pictogrames M3: reescriure §A1 amb estil imperatiu i exemples (format `[PICTO:]`, anti-emojis).
 
 ---
 
