@@ -1704,11 +1704,25 @@
   }
 
   // ── Selector de tipografia (delegat a fonts.js) ──────────────────────────
-  function applyDocFont(name) {
+  // opts.manual = true → la tria és del docent (override permanent fins que
+  // canviï explícitament). Per defecte (false): aplicació automàtica per perfil
+  // o restauració d'estat, NO marca preferència manual.
+  // Bug fix 2026-05-31 (cas titella tipografia): abans, qualsevol applyDocFont
+  // escrivia atne.font_key i atneAutoFont la respectava com a "manual" — la
+  // primera auto-aplicació es congelava i Lexend no apareixia per al perfil
+  // dislèxia. Ara separem dues claus: font_manual_key (tria explícita) vs
+  // font_key (informativa de què s'està veient ara).
+  function applyDocFont(name, opts) {
+    opts = opts || {};
     const fonts = window.ATNE_FONTS || {};
     if (!fonts[name]) name = 'inter';
     const css = fonts[name].css;
-    try { localStorage.setItem('atne.font_key', name); } catch(e){}
+    try {
+      localStorage.setItem('atne.font_key', name);
+      if (opts.manual) {
+        localStorage.setItem('atne.font_manual_key', name);
+      }
+    } catch(e){}
     document.querySelectorAll('#adapted-text, .center-body').forEach(el => {
       el.style.fontFamily = css;
     });
@@ -1720,7 +1734,8 @@
   }
   document.querySelectorAll('.font-opt').forEach(o => {
     o.addEventListener('click', () => {
-      applyDocFont(o.dataset.font);
+      // Click del docent = preferència explícita.
+      applyDocFont(o.dataset.font, { manual: true });
       document.getElementById('font-selector')?.classList.remove('open');
     });
   });
@@ -1948,10 +1963,13 @@
     // Grups → sidebar amb capçalera de grup + llista VERSIONS
     if (p.type === 'group') {
       renderGroupSidebar(p);
-      // Aplicar tipografia per defecte (sense perfil NEE individual, usem Atkinson)
-      // Grups: auto-switch per Inter (neutre), respecta preferència manual
-      const savedFont = localStorage.getItem('atne.font_key') || localStorage.getItem('atne.doc_font');
-      applyDocFont(savedFont || 'inter');
+      // Grups: sense perfil NEE individual → no hi ha auto-switch per
+      // condició. Respectem NOMÉS la preferència MANUAL del docent (no la
+      // font auto-aplicada per un perfil individual anterior, que podria
+      // contaminar el grup).
+      const manualFont = localStorage.getItem('atne.font_manual_key')
+                      || localStorage.getItem('atne.doc_font');
+      applyDocFont(manualFont || 'inter');
       return;
     }
 

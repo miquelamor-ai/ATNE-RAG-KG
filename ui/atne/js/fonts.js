@@ -129,10 +129,27 @@
   // La font s'aplica a l'element .adapted-output (o l'id passat).
   var TARGET_SELECTOR = '.adapted-output, .result-content, #adapted-text, .adapt-result';
 
-  window.atneSetFont = function (key) {
+  // atneSetFont(key, opts)
+  //   opts.manual = true  → desa també la tria com a preferència explícita del
+  //                          docent (override permanent fins que canviï el dropdown).
+  //   opts.manual = false (default) → només desa la font aplicada actualment,
+  //                          però NO marca preferència manual. Així una aplicació
+  //                          automàtica per perfil no es comporta com a override.
+  //
+  // Bug fix 2026-05-31 (cas titella tipografia): abans, qualsevol crida a
+  // atneSetFont escrivia 'atne.font_key' i atneAutoFont la llegia com a
+  // "preferència manual" — resultat: la primera auto-aplicació es congelava
+  // i mai més no canviava amb el perfil. Ara distingim les dues claus.
+  window.atneSetFont = function (key, opts) {
+    opts = opts || {};
     var font = window.ATNE_FONTS[key];
     if (!font) return;
-    try { localStorage.setItem('atne.font_key', key); } catch (e) {}
+    try {
+      localStorage.setItem('atne.font_key', key); // font aplicada actualment (informativa)
+      if (opts.manual) {
+        localStorage.setItem('atne.font_manual_key', key); // tria explícita del docent
+      }
+    } catch (e) {}
     document.querySelectorAll(TARGET_SELECTOR).forEach(function (el) {
       el.style.fontFamily = font.css;
     });
@@ -162,11 +179,13 @@
       });
     });
 
-    // Si hi ha una font desada manualment pel docent, la respectem
-    var saved = null;
-    try { saved = localStorage.getItem('atne.font_key'); } catch(e) {}
-    var finalKey = saved || best || 'inter';
-    window.atneSetFont(finalKey);
+    // Override MANUAL del docent (tria explícita via dropdown) té prioritat.
+    // Però la font aplicada per una invocació auto anterior NO compta com a
+    // override — aquí està el fix respecte a la versió anterior.
+    var manual = null;
+    try { manual = localStorage.getItem('atne.font_manual_key'); } catch(e) {}
+    var finalKey = manual || best || 'inter';
+    window.atneSetFont(finalKey, { manual: false }); // aplicació automàtica, no és override
     return finalKey;
   };
 
@@ -175,8 +194,14 @@
     var container = document.getElementById(containerId);
     if (!container) return;
 
+    // Mostrem la TRIA MANUAL si existeix; si no, la font aplicada (informativa).
+    // Així el dropdown reflecteix la preferència explícita del docent.
     var saved = 'inter';
-    try { saved = localStorage.getItem('atne.font_key') || 'inter'; } catch(e) {}
+    try {
+      saved = localStorage.getItem('atne.font_manual_key')
+           || localStorage.getItem('atne.font_key')
+           || 'inter';
+    } catch(e) {}
 
     var sel = document.createElement('select');
     sel.id = 'atne-font-sel';
@@ -193,8 +218,9 @@
     });
 
     sel.addEventListener('change', function () {
-      localStorage.setItem('atne.font_key', sel.value);
-      window.atneSetFont(sel.value);
+      // El canvi del docent és una preferència explícita: marca-la com a manual
+      // perquè perduri per sobre de l'auto-switch en navegacions posteriors.
+      window.atneSetFont(sel.value, { manual: true });
     });
 
     // Label
@@ -204,8 +230,10 @@
     label.appendChild(sel);
     container.appendChild(label);
 
-    // Aplica la font guardada
-    window.atneSetFont(saved);
+    // Aplica la font inicial (no la marca com a manual: només restaurem
+    // l'estat. Si era originalment manual ja s'haurà escrit la clau manual
+    // anteriorment; si no, ho deixem sense override).
+    window.atneSetFont(saved, { manual: false });
   };
 
 })();
