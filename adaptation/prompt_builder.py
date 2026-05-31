@@ -389,7 +389,9 @@ def build_system_prompt(profile: dict, context: dict, params: dict, rag_context:
             if _active:
                 _names = ", ".join(s.name for s in _active)
                 print(f"[skills] actives ({len(_active)}): {_names}", flush=True)
-                parts.append(skills_loader.render_skill_block(_active))
+                # Slicing per nivell MECR (2026-05-31): el loader extreu la llesca
+                # del nivell actiu si prompt_adapter.md existeix; fallback al body sencer.
+                parts.append(skills_loader.render_skill_block(_active, mecr=mecr))
     except Exception as _e:
         # Fail-safe: si el loader peta, seguim sense skills (comportament actual).
         print(f"[skills] error (ignorat): {_e}", flush=True)
@@ -1402,7 +1404,8 @@ def build_complements_prompt(profile: dict, context: dict, params: dict) -> str:
             # operatiu per nivell. La SKILL es manté com a canon de referència.
             _render = [s for s in _active if not s.name.startswith("generate-bastides")]
             if _render:
-                parts.append(skills_loader.render_skill_block(_render))
+                # Slicing per nivell MECR (2026-05-31): igual que la 1a crida.
+                parts.append(skills_loader.render_skill_block(_render, mecr=mecr))
         else:
             # Cap SKILL activa — no val la pena fer la 2a crida
             return ""
