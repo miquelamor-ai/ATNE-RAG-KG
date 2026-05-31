@@ -1574,6 +1574,69 @@ PROHIBIT deixar `## Bastides` amb el cos buit o només amb la intro: omple SEMPR
 NO incloguis marcadors de pictogrames `[PICTO: …]` en aquesta secció.
 """)
 
+    # Fix 2026-05-31 (Cas titella — glossari ple de paraules quotidianes):
+    # La SKILL generate-glossari té dues regles canòniques crítiques que es
+    # perden a la pràctica:
+    #   - M3 §5 "Selecció pertinent: cap paraula quotidiana òbvia"
+    #   - M3 §5 "Llengua de definició: Català"
+    # Davant un text receptari ("Necessites: mitja, botons, agulla, fil…")
+    # i un perfil dislèxia A1, el model genera taula de 6 termes amb 4
+    # quotidians + a vegades castellanismes a les definicions ("titella →
+    # Muñeco"). Mirall de bastides: directiva Python a prop de la generació
+    # que fa prominents aquestes dues regles amb exemples concrets.
+    if "glossari" in comp_actius:
+        _mecr_gl = (mecr or "B1").upper().replace("Ç", "C")
+        _is_low_gl = _mecr_gl in ("PRE-A1", "A1")
+        _has_pictos = bool(comp.get("pictogrames"))
+        _picto_note = (
+            " Si pictogrames està ACTIVAT, el vocabulari quotidià es resol via "
+            "pictograma inline (mediació visual), NO al glossari."
+            if _has_pictos else ""
+        )
+        _quotidia_block = (
+            f"""
+🔴 FILTRE DE SELECCIÓ LÈXICA (regla canònica SKILL §5, prominent a {_mecr_gl}):
+SOSTRE ESTRICTE: a {_mecr_gl}, **MÀXIM 2 termes** al glossari. Si en tens 4
+candidats en ment, és senyal que n'estàs incloent de quotidians.
+
+EXCLOU del glossari tot el vocabulari QUOTIDIÀ que un alumne de {_mecr_gl}+etapa
+inicial JA coneix. Exemples que NO van al glossari:
+  • Objectes domèstics i materials comuns: **mitja, botó, agulla, fil, retolador,
+    llapis, paper, taula, casa, porta, plat, got…**
+  • Parts del cos: cap, mà, ulls, boca, peu…
+  • Verbs d'acció bàsics: posar, lligar, dibuixar, jugar, mirar, fer…
+  • Connectors, quantificadors i adjectius generals.{_picto_note}
+
+⚠️ AMBIGÜITAT FIDELITAT-vs-QUOTIDIÀ: la regla SKILL "fidelitat al lèxic nuclear
+del text" NO obliga a definir tots els termes centrals del text. Obliga que els
+que DEFINEIXIS hi siguin literalment. **Si un terme central és quotidià, OMET-LO
+del glossari** — el pictograma o el coneixement previ s'encarreguen del suport
+lèxic. A {_mecr_gl}, quotidià > fidelitat.
+
+INCLOU NOMÉS termes que siguin: (a) realment tècnics o de la disciplina,
+(b) inusuals per al nivell, o (c) específics del text fora del lèxic quotidià.
+Si el text no en conté cap de realment nou, escriu sota la capçalera
+`## Glossari` la nota: **«Aquest text no necessita glossari nou per al teu nivell.»**
+i prou. Millor 0-2 termes ben triats que 4-6 termes redundants.
+"""
+            if _is_low_gl else ""
+        )
+        parts.append(f"""
+## INSTRUCCIÓ ESPECÍFICA — Glossari (OBLIGATÒRIA)
+Reforç de regles canòniques del SKILL generate-glossari que es perden quan hi
+ha molts complements actius simultàniament.
+{_quotidia_block}
+🔴 LLENGUA DE LES DEFINICIONS — CATALÀ ESTRICTE:
+Cada cel·la d'explicació ha de ser en català. CAP castellanisme com a definició
+(NO «Muñeco» per definir «titella», NO «calcetín» per «mitja», NO «aguja» per
+«agulla», NO «hilo» per «fil»). Si no saps la paraula catalana exacta, descriu-la
+sense usar la paraula castellana («ninot petit de drap que es mou amb la mà»)
+o omet el terme.
+
+🔴 FIDELITAT AL TEXT: tots els termes del glossari han d'aparèixer LITERALMENT
+al `## Text adaptat`. NO inventis termes que no hi siguin.
+""")
+
     # Fix 2026-05-27 (Bug 1 — esquema_visual buit en 2-call):
     # esquema_visual NO té SKILL pròpia (vegeu tests/golden/matrix.yaml: skill: null).
     # A la crida 2 dels complements, sense SKILL i amb només "## Esquema visual" al
