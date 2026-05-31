@@ -8,7 +8,18 @@
 
 ## TL;DR
 
-La decisió oberta del 31/05 (A reescriure 37 M3 imperatiu / B compilador / C rúbrica JSON amb llistes) **queda tancada** a favor d'una nova **opció E**: rúbrica JSON simplificada al backend + **vàlvula humana al Pas 3 d'ATNE** (botó esborrar entries + toggles columnes). Validat amb **39 crides reals** la nit del 31/05.
+La decisió oberta del 31/05 sobre el **glossari** (A reescriure 37 M3 imperatiu / B compilador / C rúbrica JSON amb llistes) **queda tancada** a favor d'una **opció E específica per al glossari**.
+
+**Distinció important a tenir present durant tota la reunió**:
+
+| Concepte | Què és | Per a què SKILL |
+|---|---|---|
+| **Opció E** (auto + post-edició) | Solució específica per al glossari: rúbrica simplificada al backend + 4 controls UX al Pas 3 (botó X + 3 toggles) | **NOMÉS GLOSSARI** |
+| **Patró JSON estructurat** | Tècnica de codificació: rúbrica com a camps tipats en lloc de prosa descriptiva | **Potencialment 37 SKILLs** (decisió D3) |
+
+L'opció E inclou el patró JSON però hi afegeix la vàlvula humana. Bastides usa només el patró JSON (sense post-edició — el LLM fa la feina bé). Cada SKILL pot anar amb una o altra solució segons el seu problema.
+
+Validat amb **39 crides reals** la nit del 31/05.
 
 Per al 8/06: **4 decisions arquitectòniques** + **2 decisions pedagògiques** per consensuar.
 
@@ -24,9 +35,9 @@ Per al 8/06: **4 decisions arquitectòniques** + **2 decisions pedagògiques** p
 | **E** | **Auto al backend (rúbrica simple) + post-edició docent al Pas 3** | **ATNE proposa, docent decideix**. Resol el cas titella sense necessitat d'enumerar res |
 
 Pilot empíric (39 crides, GPT-4o + Gemma 4):
-- Opció C amb llistes: **0/4 PASS** al cas titella (mitja/agulla/fil tornaven a sortir)
-- Opció E + R4 al Pas 2: **resol arquitectònicament** (no oferint glossari quan no toca per a 1r-3r primària sense condicions)
-- Bastides amb JSON estructural: **12/12 PASS** + 3 bugs pedagògics del baseline detectats (L1 inventada, format heterogeni, castellanismes)
+- **Glossari** opció C amb llistes: **0/4 PASS** al cas titella (mitja/agulla/fil tornaven a sortir)
+- **Glossari** opció E + R4 al Pas 2: **resol arquitectònicament** (no oferint glossari quan no toca per a 1r-3r primària sense condicions)
+- **Bastides** amb només patró JSON (sense opció E — cap post-edició necessària): **12/12 PASS** + 3 bugs pedagògics del baseline detectats (L1 inventada, format heterogeni, castellanismes). Demostra que el patró JSON sol és suficient quan el problema és estructural, no qualitatiu.
 
 ---
 
@@ -43,10 +54,14 @@ El M3 actual té cel·les qualitatives en prosa ("paraules quotidianes òbvies")
 - **Opció B**: M3 es simplifica per coherència amb el JSON
 - **Recomanació**: A — M3 segueix sent canon humà; JSON v2 és la versió operativa per al LLM
 
-### D3 · El patró JSON s'estén a les 37 SKILLs?
-Bastides validat 12/12. Glossari validat. Resten 35.
-- **Opció A**: aplicar a totes 37 (un sol cop, batch)
-- **Opció B**: només a les que tenen bugs coneguts (glossari, bastides, pictogrames + 3-4 més detectats)
+### D3 · El patró JSON estructurat s'estén a les 37 SKILLs?
+
+> **Atenció: aquí parlem del patró JSON com a tècnica de codificació, no de l'opció E.** L'opció E (post-edició) només es justifica si el problema és qualitatiu (com el glossari). Bastides ja demostra que el patró JSON sol (sense opció E) supera el baseline en SKILLs amb problemes estructurals.
+
+Bastides validat 12/12 amb només JSON. Glossari validat amb JSON + opció E. Resten 35 SKILLs.
+
+- **Opció A**: aplicar a totes 37 (un sol cop, batch). Cada SKILL avalua si necessita només JSON o JSON+post-edició.
+- **Opció B**: només a les que tenen bugs coneguts (glossari amb opció E, bastides amb JSON sol, pictogrames + 3-4 més detectats)
 - **Opció C**: només a glossari per ara; resta després del pilot
 - **Recomanació pendent** — depèn capacitat mineriaRAG
 
@@ -59,6 +74,8 @@ Pictogrames té `agent_role=adapter` (no `complements`) → s'insereix INLINE al
 ---
 
 ## 2 decisions pedagògiques (validar amb mineriaRAG)
+
+> **Totes dues són específiques del glossari** (formen part de la solució opció E).
 
 ### P1 · Format "només L1 + transliteració" per a nouvingut emergent
 Pedagògicament defensable per MALL/translanguaging (Cummins & Early 2011, ja citat al M3 línia 152). El M3 línia 87 diu "*la traducció directa és el pont*". Proposta:
@@ -111,12 +128,15 @@ python tests/pilot_glossari_2026_05_31/pilot_bastides.py        # extensió bast
 
 ## Resum executiu
 
-**Què ja està fet**: la decisió arquitectònica oberta està tancada amb evidència empírica. El cas titella resolt sense necessitat d'enumerar paraules quotidianes. R4 ja al codi.
+**Què ja està fet**:
+- Decisió arquitectònica oberta del 31/05 **per al glossari** tancada amb evidència empírica (opció E).
+- Patró JSON estructurat validat com a tècnica genèrica aplicable a altres SKILLs (bastides 12/12 sense opció E).
+- Cas titella resolt sense necessitat d'enumerar paraules quotidianes. R4 ja al codi.
 
 **Què ens demana mineriaRAG**:
-1. Confirmar la direcció (opció E vs alternativa)
-2. Decidir si genera els derivats `rubrica_*.json` automàticament
-3. Decidir l'abast (37 SKILLs / 3-4 / només glossari)
-4. Validar pedagògicament P1 i P2
+1. Confirmar l'**opció E específica per al glossari** (D2 + P1 + P2)
+2. Decidir l'abast del **patró JSON estructurat** a les altres SKILLs (D3) — recordar: ≠ opció E
+3. Decidir si genera els derivats `rubrica_*.json` automàticament del M3 (D1)
+4. Decidir pictogrames (D4 — `agent_role=adapter`, problema diferent)
 
 **Sortida desitjada de la reunió**: pla d'implementació clar per a la setmana 9-13/06.
