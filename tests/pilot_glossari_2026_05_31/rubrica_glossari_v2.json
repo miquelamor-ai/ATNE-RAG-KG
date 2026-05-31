@@ -1,0 +1,158 @@
+{
+  "_meta": {
+    "name": "rubrica_glossari",
+    "version": "2.0.0-pilot",
+    "font_canonic": "corpusFJE/skills/mediacio/generate-glossari/M3_instrument-generar-glossari.md",
+    "font_version": "4.0.0-canonic",
+    "generat_at": "2026-05-31",
+    "estrategia": "OPCIO E — Auto + post-edició humana",
+    "diferencies_amb_v1": [
+      "ELIMINAT case_overrides amb llistes finites (mitja/botó/agulla...) — substituït per vàlvula humana al Pas 3.",
+      "AFEGIT criteri 'tipologia_obligatoria' per nivell (només CALP/tècnic/poc freqüent) — el LLM no decideix 'què és quotidià', només 'què és tècnic/CALP'.",
+      "AFEGIT regla matisada per nouvingut amb L1: també BICS rellevants per traducció (no només CALP).",
+      "AFEGIT formats columna L1 i transliteració condicionals al perfil."
+    ],
+    "us": "Aquesta rúbrica es genera amb el LLM (rúbrica simple → 2 cols / 3 cols / 4 cols segons perfil). El docent edita al Pas 3 (X per esborrar entries, toggles L1 i transliteració)."
+  },
+  "principi_general": {
+    "regla_seleccio_simple": "Inclou només termes que SÍ siguin tècnics, CALP, d'especialitat o de baixa freqüència per al nivell MECR objectiu. NO incloguis termes BICS (vocabulari quotidià freqüent), EXCEPTE si l'alumne és nouvingut amb L1 i el terme és rellevant per ancoratge translingüístic.",
+    "no_judici_qualitatiu_complex": "El LLM no ha d'enumerar exclusions exhaustives. La decisió final la pren el docent al Pas 3 (esborrar entries que no vol, afegir-ne via menú flotant). Confiança total a la vàlvula humana."
+  },
+  "transversals": {
+    "no_circularitat": {
+      "type": "binary",
+      "rule": "El terme NO pot aparèixer dins de la seva pròpia definició."
+    },
+    "llengua_definicio": {
+      "type": "binary",
+      "rule": "La definició ha d'estar en la llengua de SORTIDA del text adaptat (per defecte català). MAI cap mot d'una altra llengua dins la cel·la d'explicació."
+    },
+    "fidelitat_text_font": {
+      "type": "cross_source",
+      "rule": "Tots els termes del glossari han d'aparèixer literalment al text adaptat. A B1+ s'admeten col·locacions i derivacions del lèxic nuclear."
+    },
+    "format_output": {
+      "type": "structural",
+      "h2_exact": "## Glossari",
+      "no_subtitols_H3": true,
+      "regla_columnes_default": {
+        "monolingue_2col": "Per defecte (sense L1 declarada al perfil)",
+        "bilingue_3col": "Si profile.caracteristiques.nouvingut.L1 declarada amb alfabet llatí",
+        "bilingue_translit_4col": "Si profile.caracteristiques.nouvingut.L1 declarada amb alfabet no llatí"
+      },
+      "format_alternatiu_nouvingut_emergent": {
+        "principi_MALL_translanguaging": "Cummins & Early (2011): per a nouvinguts pre-A1/A1, la traducció a L1 és el PONT cognitiu real. L'explicació en català pot ser inútil (l'alumne encara no llegeix prou).",
+        "preA1_nouvingut": {
+          "format_recomanat": "Terme | Pictograma | L1 alfabet original | Transliteració (si no llatí)",
+          "explicacio_catala": "NO (no aporta a aquest nivell — l'alumne no llegeix prou català)"
+        },
+        "A1_nouvingut": {
+          "format_default": "Terme | Explicació curta CA | L1 | Transliteració (si no llatí)",
+          "format_alternatiu_opcional": "Terme | L1 | Transliteració (sense explicació CA, decisió docent al Pas 3 via toggle)"
+        },
+        "A2_plus_nouvingut": {
+          "format_recomanat": "Estàndard: Terme | Explicació CA | L1 | Transliteració (si no llatí)",
+          "raonament": "A partir d'A2 l'alumne ja pot beneficiar-se de l'explicació en català"
+        }
+      }
+    }
+  },
+  "regla_seleccio_per_perfil": {
+    "alumne_general": {
+      "inclou_si": ["lexic_CALP", "tecnic_especialitat", "baix_frequencia_per_nivell"],
+      "exclou_explicitament": ["BICS_quotidia_general"]
+    },
+    "alumne_nouvingut_amb_L1": {
+      "inclou_si": [
+        "lexic_CALP",
+        "tecnic_especialitat",
+        "baix_frequencia_per_nivell",
+        "BICS_rellevant_per_text (NOMÉS si activable amb L1 — el valor pedagògic ve de la traducció)"
+      ],
+      "raonament": "Per al nouvingut amb L1 declarada, fins i tot un mot quotidià pot ser útil al glossari si la traducció a L1 activa coneixement previ (TOLC, translanguaging). Però NO incloure mots quotidians sense valor traductor."
+    },
+    "alumne_AACC_o_capacitat_alta": {
+      "inclou_si": ["lexic_CALP_alt_nivell", "termes_meta_discursius"],
+      "exclou_explicitament": ["BICS_quotidia", "tecnicismes_basics_ja_dominats"]
+    }
+  },
+  "levels": {
+    "pre-A1": {
+      "etiqueta": "Emergent",
+      "min_terms": 3,
+      "max_terms": 5,
+      "max_paraules_definicio": 6,
+      "format_estructura": "llista_emoji_negreta (no taula)",
+      "tipologia_inclou": ["objecte_concret_si_es_nou", "nom_curricular_basic"]
+    },
+    "A1": {
+      "etiqueta": "Inicial",
+      "min_terms": 5,
+      "max_terms": 8,
+      "max_paraules_definicio": 8,
+      "format_estructura": "taula_markdown",
+      "tipologia_inclou": ["nom_curricular_principal", "verb_curricular_principal"]
+    },
+    "A2": {
+      "etiqueta": "Funcional",
+      "min_terms": 8,
+      "max_terms": 10,
+      "max_paraules_definicio": 10,
+      "format_estructura": "taula_markdown",
+      "tipologia_inclou": ["nom", "verb", "adjectiu_clau_disciplinar"]
+    },
+    "B1": {
+      "etiqueta": "Estratègic",
+      "min_terms": 10,
+      "max_terms": 12,
+      "max_paraules_definicio": 12,
+      "format_estructura": "taula_markdown",
+      "tipologia_inclou": ["habilitat_cognitiva_marcada", "concepte_disciplinar"],
+      "exemples": ["hipòtesi", "causa", "conseqüència"]
+    },
+    "B2": {
+      "etiqueta": "Acadèmic",
+      "min_terms": 12,
+      "max_terms": 15,
+      "max_paraules_definicio": 15,
+      "format_estructura": "taula_markdown_ordre_alfabetic",
+      "tipologia_inclou": ["CALP_especialitat", "col_locacio_disciplinar"]
+    },
+    "C1+": {
+      "etiqueta": "Crític",
+      "min_terms": 15,
+      "max_terms": 18,
+      "max_paraules_definicio": 20,
+      "format_estructura": "taula_markdown_ordre_alfabetic",
+      "tipologia_inclou": ["CALP_especialitat", "meta_discursiu", "conceptual_abstracte"]
+    }
+  },
+  "alfabets_no_llatins_que_activen_translit": [
+    "àrab", "ar", "arabic",
+    "xinès", "zh", "chinese", "mandarí",
+    "urdú", "ur", "urdu",
+    "ciríl·lic", "rus", "ucraïnès", "bielorús", "ru", "uk",
+    "armeni", "hy", "armenian",
+    "hebreu", "he", "hebrew",
+    "japonès", "ja", "japanese",
+    "coreà", "ko", "korean",
+    "tai", "th", "thai",
+    "georgià", "ka", "georgian",
+    "amhàric", "am", "amharic",
+    "bengalí", "bn", "bengali",
+    "hindi", "hi"
+  ],
+  "post_edicio_pas3": {
+    "valvula_humana": true,
+    "accions_disponibles_per_docent": [
+      "esborrar_entry (botó X per fila)",
+      "afegir_entry (selecció text adaptat + menú flotant 'Afegir al glossari' — JA EXISTEIX)",
+      "editar_definicio (botó editar inline — JA EXISTEIX)",
+      "toggle_columna_explicacio_catala (NOU — visible per a nouvingut pre-A1/A1, default OFF a pre-A1, ON a A1)",
+      "toggle_columna_L1 (NOU — només visible si L1 declarada)",
+      "toggle_columna_transliteracio (NOU — només visible si L1 alfabet no llatí)"
+    ],
+    "comportament_toggles": "Els toggles operen client-side amb columnes ja generades pel LLM. No requereixen regeneració. Si el docent desactiva L1, la columna s'amaga al render i s'exclou de l'export PDF.",
+    "filosofia": "ATNE proposa, docent decideix. El LLM mai ha d'encertar perfectament 'què és tècnic per a aquest alumne' — només ha de proposar una primera versió raonable que el docent ajusta en segons."
+  }
+}

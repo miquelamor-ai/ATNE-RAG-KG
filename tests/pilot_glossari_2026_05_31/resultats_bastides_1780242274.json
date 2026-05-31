@@ -1,0 +1,222 @@
+{
+  "bastides_A1": {
+    "A": [
+      {
+        "ok": true,
+        "reason": "OK",
+        "h3_keys": [
+          "Abans",
+          "Durant",
+          "Després"
+        ],
+        "h3_counts": {
+          "Abans": 1,
+          "Durant": 1,
+          "Després": 1
+        },
+        "section": "## Bastides\n\n\n### Abans de llegir — prepara la lectura\n- Mira el títol, recorda el que ja saps del tema i predigues de què parlarà.\n\n\n### Durant la lectura — estratègies de lector\n- Llegeix amb l'adult, segueix amb el dit i subratlla 1 mot clau per paràgraf.\n\n\n### Després de llegir — consolida i revisa\n- Completa la frase: «El text parla de com l'aigua canvia de forma i es mou en un cicle».",
+        "items_preguntes": [],
+        "elapsed_s": 4.5
+      },
+      {
+        "ok": true,
+        "reason": "OK",
+        "h3_keys": [
+          "Abans",
+          "Durant",
+          "Després"
+        ],
+        "h3_counts": {
+          "Abans": 1,
+          "Durant": 1,
+          "Després": 1
+        },
+        "section": "## Bastides\n\n\n### Abans de llegir — prepara la lectura\n- Mira el títol, recorda el que ja saps del tema i predigues de què parlarà.\n\n\n### Durant la lectura — estratègies de lector\n- Llegeix amb l'adult, segueix amb el dit i subratlla 1 mot clau per paràgraf.\n\n\n### Després de llegir — consolida i revisa\n- Completa la frase: «El text parla de com l'aigua canvia de forma i es mou en un cicle».",
+        "items_preguntes": [],
+        "elapsed_s": 1.7
+      }
+    ],
+    "B": [
+      {
+        "ok": true,
+        "reason": "OK",
+        "h3_keys": [
+          "Abans",
+          "Durant",
+          "Després"
+        ],
+        "h3_counts": {
+          "Abans": 1,
+          "Durant": 1,
+          "Després": 1
+        },
+        "section": "## Suports per llegir\n\n\n### Abans\n- Mira el títol, recorda el que ja saps del tema i predigues de què parlarà.\n\n\n### Durant\n- Llegeix amb l'adult, segueix amb el dit i subratlla 1 mot clau per paràgraf.\n\n\n### Després\n- Completa la frase: «El text parla de ___».",
+        "items_preguntes": [],
+        "elapsed_s": 2.1
+      },
+      {
+        "ok": true,
+        "reason": "OK",
+        "h3_keys": [
+          "Abans",
+          "Durant",
+          "Després"
+        ],
+        "h3_counts": {
+          "Abans": 1,
+          "Durant": 1,
+          "Després": 1
+        },
+        "section": "## Suports per llegir\n\n\n### Abans\n- Mira el títol, recorda el que ja saps del tema i predigues de què parlarà.\n\n\n### Durant\n- Llegeix amb l'adult, segueix amb el dit i subratlla 1 mot clau per paràgraf.\n\n\n### Després\n- Completa la frase: «El text parla de ___.»",
+        "items_preguntes": [],
+        "elapsed_s": 1.7
+      }
+    ],
+    "C": [
+      {
+        "ok": true,
+        "reason": "OK",
+        "h3_keys": [
+          "Abans",
+          "Durant",
+          "Després"
+        ],
+        "h3_counts": {
+          "Abans": 2,
+          "Durant": 2,
+          "Després": 2
+        },
+        "section": "## Suports per llegir\n\n\n### Abans\n- Mira el títol i predigues de què parlarà el text.\n- Recorda moments en què haguessis vist pluja o núvols.\n\n\n### Durant\n- Llegeix amb l'adult i segueix el text amb el dit.\n- Subratlla un mot clau per cada paràgraf.\n\n\n### Després\n- Completa la frase: «El text parla de ___».\n- Dibuixa el camí de l'aigua des del mar fins als núvols.",
+        "items_preguntes": [],
+        "elapsed_s": 32.7
+      },
+      {
+        "ok": true,
+        "reason": "OK",
+        "h3_keys": [
+          "Abans",
+          "Durant",
+          "Després"
+        ],
+        "h3_counts": {
+          "Abans": 2,
+          "Durant": 2,
+          "Després": 2
+        },
+        "section": "## Suports per llegir\n\n\n### Abans\n- Mira el títol \"El cicle de l'aigua\" i predigues de què parlarà el text.\n- Recorda el que ja saps sobre la pluja i els núvols.\n\n\n### Durant\n- Llegeix el text amb l'adult i segueix les paraules amb el dit.\n- Subratlla un mot clau per cada paràgraf.\n\n\n### Després\n- Completa la frase: «El text parla de ___».\n- Dibuixa el camí de l'aigua des del mar fins als núvols.",
+        "items_preguntes": [],
+        "elapsed_s": 26.7
+      }
+    ]
+  },
+  "bastides_B1": {
+    "A": [
+      {
+        "ok": true,
+        "reason": "OK",
+        "h3_keys": [
+          "Abans",
+          "Durant",
+          "Després"
+        ],
+        "h3_counts": {
+          "Abans": 1,
+          "Durant": 1,
+          "Després": 1
+        },
+        "section": "## Bastides\n\n\n### Abans de llegir — prepara la lectura\n- Escriu la teva hipòtesi abans de llegir: «Crec que el text dirà sobre com estava organitzada la societat al regne d'Aragó durant l'Edat Mitjana perquè el títol menciona aquest període històric i el regne d'Aragó».\n\n\n### Durant la lectura — estratègies de lector\n- Pren notes breus al marge i atura't a mitja lectura per revisar la teva hipòtesi.\n\n\n### Després de llegir — consolida i revisa\n- Resumeix en 3-4 frases (idea principal + 2 secundàries) i valora si hi estàs d'acord, dient per què.",
+        "items_preguntes": [],
+        "elapsed_s": 2.4
+      },
+      {
+        "ok": true,
+        "reason": "OK",
+        "h3_keys": [
+          "Abans",
+          "Durant",
+          "Després"
+        ],
+        "h3_counts": {
+          "Abans": 1,
+          "Durant": 1,
+          "Després": 1
+        },
+        "section": "## Bastides\n\n\n### Abans de llegir — prepara la lectura\n- Escriu la teva hipòtesi abans de llegir: «Crec que el text dirà sobre com era la societat durant l'Edat Mitjana al regne d'Aragó perquè el títol menciona aquest període i lloc específics».\n\n\n### Durant la lectura — estratègies de lector\n- Pren notes breus al marge i atura't a mitja lectura per revisar la teva hipòtesi. Observa com es descriuen els diferents estaments i la seva evolució al llarg del temps.\n\n\n### Després de llegir — consolida i revisa\n- Resumeix en 3-4 frases (idea principal + 2 secundàries) i valora si hi estàs d'acord, dient per què. L'Edat Mitjana al regne d'Aragó estava marcada per una societat dividida en tres estaments: noblesa, clergat i poble. Aquesta estructura era justificada per l'Església i dificultava el canvi social. A partir del segle XII, la burgesia va començar a qüestionar aquest ordre, preparant el camí cap a una societat més urbana i comercial. Estic d'acord amb aquesta visió perquè mostra com els canvis econòmics poden influir en l'estructura social.",
+        "items_preguntes": [],
+        "elapsed_s": 3.0
+      }
+    ],
+    "B": [
+      {
+        "ok": true,
+        "reason": "OK",
+        "h3_keys": [
+          "Abans",
+          "Durant",
+          "Després"
+        ],
+        "h3_counts": {
+          "Abans": 3,
+          "Durant": 3,
+          "Després": 3
+        },
+        "section": "## Bastides — Estratègia lectora\n\n\n### Abans\n- Mira el títol i predigues de què parlarà el text.\n- Observa les paraules clau com \"Edat Mitjana\", \"regne d'Aragó\" i \"burgesia\" i escriu la teva hipòtesi: «Crec que el text dirà ___ perquè ___».\n- Revisa les imatges o gràfics, si n'hi ha, per anticipar el contingut del text.\n\n\n### Durant\n- Llegeix fins a la part on es menciona la divisió en estaments i atura't aquí ⏸. Escriu la teva hipòtesi en curs: «Fins aquí, crec que el text dirà ___».\n- Subratlla les paraules o frases que descriuen els tres estaments de la societat.\n- Atura't aquí i pren notes sobre com la burgesia comença a qüestionar l'ordre feudal.\n\n\n### Després\n- Resumeix en 3-4 frases: Explica la idea principal sobre l'evolució de la societat durant l'Edat Mitjana i dues idees secundàries sobre el paper de l'Església i el naixement de la burgesia.\n- Reflexiona sobre si estàs d'acord amb la descripció del text sobre la influència de la burgesia i explica per què.\n- Compara la societat medieval amb la societat actual i identifica una similitud i una diferència.",
+        "items_preguntes": [],
+        "elapsed_s": 4.0
+      },
+      {
+        "ok": true,
+        "reason": "OK",
+        "h3_keys": [
+          "Abans",
+          "Durant",
+          "Després"
+        ],
+        "h3_counts": {
+          "Abans": 3,
+          "Durant": 3,
+          "Després": 3
+        },
+        "section": "## Bastides — Estratègia lectora\n\n\n### Abans\n- Mira el títol i predigues de què parlarà el text sobre l'Edat Mitjana al regne d'Aragó.\n- Observa les paraules clau com \"nobles\", \"clergat\" i \"burgesia\" i pensa en el seu significat.\n- Escriu la teva hipòtesi abans de llegir: «Crec que el text dirà ___ perquè ___».\n\n\n### Durant\n- Llegeix el primer paràgraf i subratlla les paraules que descriuen els tres estaments.\n- ⏸ Atura't aquí i escriu la teva hipòtesi en curs: «Fins aquí, crec que el text dirà ___».\n- Pren notes breus sobre com la burgesia va començar a canviar l'ordre feudal.\n\n\n### Després\n- Resumeix en 3-4 frases: explica la idea principal sobre la divisió social i dues idees secundàries sobre el paper de l'Església i el creixement de les ciutats.\n- Reflexiona sobre si estàs d'acord amb la justificació de l'ordre social per part de l'Església i per què.\n- Comenta com la transició cap a una societat urbana va preparar el camí pel Renaixement.",
+        "items_preguntes": [],
+        "elapsed_s": 4.3
+      }
+    ],
+    "C": [
+      {
+        "ok": true,
+        "reason": "OK",
+        "h3_keys": [
+          "Abans",
+          "Durant",
+          "Després"
+        ],
+        "h3_counts": {
+          "Abans": 2,
+          "Durant": 2,
+          "Després": 1
+        },
+        "section": "## Bastides — Estratègia lectora\n\n\n### Abans\n- Mira el títol i predigues de què tractarà l'organització social del regne d'Aragó.\n- Escriu la teva hipòtesi abans de llegir: «Crec que el text dirà ___ perquè ___».\n\n\n### Durant\n- Pren notes breus al marge sobre les característiques dels tres estaments.\n- ⏸ ATURA'T AQUÍ: a mig text, escriu la teva hipòtesi en curs: «Fins aquí, crec que el text dirà ___».\n\n\n### Després\n- Resumeix el text en 3-4 frases (idea principal sobre l'evolució de l'Edat Mitjana a Aragó + 2 idees secundàries sobre els estaments i la burgesia) i valora si hi estàs d'acord, dient per què.",
+        "items_preguntes": [],
+        "elapsed_s": 31.7
+      },
+      {
+        "ok": true,
+        "reason": "OK",
+        "h3_keys": [
+          "Abans",
+          "Durant",
+          "Després"
+        ],
+        "h3_counts": {
+          "Abans": 2,
+          "Durant": 2,
+          "Després": 2
+        },
+        "section": "## Bastides — Estratègia lectora\n\n\n### Abans\n- Mira el títol i predigues quin tipus d'organització social hi havia al regne d'Aragó.\n- Escriu la teva hipòtesi abans de llegir: «Crec que el text dirà ___ perquè ___».\n\n\n### Durant\n- Subratlla els tres estaments socials i la funció de cadascun.\n- ⏸ ATURA'T AQUÍ: a mig text, escriu la teva hipòtesi en curs: «Fins aquí, crec que el text dirà ___».\n\n\n### Després\n- Resumeix el text en 3-4 frases (idea principal sobre l'evolució de l'Edat Mitjana i 2 idees secundàries sobre els estaments i la burgesia).\n- Valora si estàs d'acord amb la justificació de l'Església sobre la desigualtat i explica per què.",
+        "items_preguntes": [],
+        "elapsed_s": 47.9
+      }
+    ]
+  }
+}

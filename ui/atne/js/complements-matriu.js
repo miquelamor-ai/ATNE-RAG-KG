@@ -69,6 +69,11 @@
     return 'high';
   }
 
+  // Cursos de primaria inicial on R4 s'aplica (text sovint BICS quotidia,
+  // glossari afegeix carrega lectora innecessaria si l'alumne no te condicio
+  // que el justifiqui).
+  var PRIMARIA_INICIAL_CURSOS = ['1r Primària', '2n Primària', '3r Primària'];
+
   /**
    * Retorna la llista de complement-IDs auto-suggerits per a (perfil, MECR).
    *
@@ -83,6 +88,10 @@
    *            Nouvinguts mantenen glossari (bilingüe és central per L2);
    *            TDL manté glossari (gap lèxic és el seu nucli).
    *   3) Sense condicions reconegudes: fallback bàsic ['glossari','preguntes_comprensio'].
+   *      - R4 (31/05 nit, post-pilot opció E): si fallback + nivell low + 1r-3r
+   *        primaria → nomes ['preguntes_comprensio'] (glossari no per defecte
+   *        per a textos quotidians a primaria inicial sense condicio especifica).
+   *        El docent pot activar-lo manualment al Pas 2 si vol.
    */
   function defaultComplementsForProfile(p, mecr) {
     var cat = (p && p.cat) || '';
@@ -99,7 +108,14 @@
         MATRIU_CONDICIONS[cond].forEach(function (v, i) { if (v) active[i] = true; });
       }
     });
-    if (!anyKnown) return ['glossari', 'preguntes_comprensio'];
+    if (!anyKnown) {
+      // R4: 1r-3r primaria + low MECR sense condicions → sense glossari per defecte
+      var cursR4 = (p && (p.curs || p.cursUI)) || '';
+      if (mecrBand(mecr) === 'low' && PRIMARIA_INICIAL_CURSOS.indexOf(cursR4) !== -1) {
+        return ['preguntes_comprensio'];
+      }
+      return ['glossari', 'preguntes_comprensio'];
+    }
 
     // 2) Modulació MECR
     var band = mecrBand(mecr);

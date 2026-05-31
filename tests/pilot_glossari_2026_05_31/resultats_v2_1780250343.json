@@ -1,0 +1,247 @@
+{
+  "titella": {
+    "Bv2": [
+      {
+        "ok": false,
+        "reason": "quotidianes=['agulla', 'botons', 'mitja']",
+        "cols": 2,
+        "n_terms": 5,
+        "terms": [
+          "titella",
+          "mitja",
+          "botons",
+          "agulla",
+          "farciment"
+        ],
+        "section": "## Glossari\n\n| Terme | Explicació |\n| :--- | :--- |\n| Titella | Joguina que es mou amb les mans. |\n| Mitja | Peça de roba per cobrir el peu. |\n| Botons | Objectes rodons per tancar roba. |\n| Agulla | Eina per cosir amb fil. |\n| Farciment | Material per omplir objectes. |",
+        "elapsed_s": 4.2
+      },
+      {
+        "ok": false,
+        "reason": "quotidianes=['agulla', 'botons', 'retolador']",
+        "cols": 2,
+        "n_terms": 5,
+        "terms": [
+          "titella",
+          "farciment",
+          "agulla",
+          "retolador",
+          "botons"
+        ],
+        "section": "## Glossari\n\n| Terme | Explicació |\n| :--- | :--- |\n| Titella | Figura per jugar o fer teatre. |\n| Farciment | Material per omplir objectes. |\n| Agulla | Eina per cosir amb fil. |\n| Retolador | Eina per dibuixar o escriure. |\n| Botons | Peces petites per tancar roba o decorar. |",
+        "elapsed_s": 1.9
+      }
+    ],
+    "Cv2": [
+      {
+        "ok": false,
+        "reason": "quotidianes=['agulla', 'botons', 'fil', 'retolador']",
+        "cols": 2,
+        "n_terms": 7,
+        "terms": [
+          "farciment",
+          "agulla",
+          "fil",
+          "cus",
+          "botons",
+          "lliga",
+          "retolador"
+        ],
+        "section": "## Glossari\n\n| Terme | Explicació |\n| :--- | :--- |\n| Farciment | Material per omplir l'interior d'una cosa |\n| Agulla | Eina petita i punxant per cosir |\n| Fil | Cordó molt prim per unir teixits |\n| Cus | Unir teixits amb agulla i fil |\n| Botons | Peça petita per tancar la roba |\n| Lliga | Fer un nus amb un fil |\n| Retolador | Eina per dibuixar amb tinta |",
+        "elapsed_s": 33.4
+      },
+      {
+        "ok": false,
+        "reason": "quotidianes=['agulla', 'fil', 'retolador']",
+        "cols": 2,
+        "n_terms": 6,
+        "terms": [
+          "farciment",
+          "agulla",
+          "fil",
+          "cus",
+          "lliga",
+          "retolador"
+        ],
+        "section": "## Glossari\n\n| Terme | Explicació |\n| :--- | :--- |\n| Farciment | Material per omplir l'interior d'una cosa |\n| Agulla | Eina petita i punxant per cosir |\n| Fil | Cordó molt prim per unir teixits |\n| Cus | Unir teixits amb agulla i fil |\n| Lliga | Fer un nus per tancar alguna cosa |\n| Retolador | Eina per dibuixar o escriure |",
+        "elapsed_s": 31.0
+      }
+    ]
+  },
+  "fotosintesi": {
+    "Bv2": [
+      {
+        "ok": true,
+        "reason": "OK",
+        "cols": 4,
+        "n_terms": 9,
+        "terms": [
+          "fotosíntesi",
+          "clorofil·la",
+          "diòxid de carboni",
+          "estomes",
+          "glucosa",
+          "oxigen",
+          "arrels",
+          "fulles",
+          "llum del sol"
+        ],
+        "section": "## Glossari\n\n| Terme | Explicació | Traducció (àrab) | Transliteració |\n| :--- | :--- | :--- | :--- |\n| Fotosíntesi | Procés per fer menjar amb llum. | التركيب الضوئي | al-tarkib al-daw'i |\n| Clorofil·la | Substància verda a les fulles. | الكلوروفيل | al-klorofil |\n| Diòxid de carboni | Gas de l'aire que plantes usen. | ثاني أكسيد الكربون | thani oksid al-karbon |\n| Estomes | Forats petits a les fulles. | الثغور | al-thugur |\n| Glucosa | Sucre que dona energia a plantes. | الجلوكوز | al-jlukoz |\n| Oxigen | Gas que plantes alliberen a l'aire. | الأكسجين | al-oksijin |\n| Arrels | Part de la planta que absorbeix aigua. | الجذور | al-judur |\n| Fulles | Part de la planta on passa fotosíntesi. | الأوراق | al-awraq |\n| Llum del sol | Energia que plantes necessiten. | ضوء الشمس | daw' al-shams |",
+        "elapsed_s": 2.6
+      },
+      {
+        "ok": true,
+        "reason": "OK",
+        "cols": 4,
+        "n_terms": 10,
+        "terms": [
+          "fotosíntesi",
+          "clorofil·la",
+          "diòxid de carboni",
+          "estomes",
+          "glucosa",
+          "arrels",
+          "oxigen",
+          "substància",
+          "llum del sol",
+          "fulles"
+        ],
+        "section": "## Glossari\n\n| Terme | Explicació | Traducció (àrab) | Transliteració |\n| :--- | :--- | :--- | :--- |\n| Fotosíntesi | Procés per fer menjar amb llum. | التركيب الضوئي | Al-tarkib al-daw'i |\n| Clorofil·la | Substància verda a les fulles. | الكلوروفيل | Al-klorofīl |\n| Diòxid de carboni | Gas de l'aire necessari per plantes. | ثاني أكسيد الكربون | Thānī 'uksīd al-kārbon |\n| Estomes | Forats petits a les fulles. | الثغور | Al-thughūr |\n| Glucosa | Sucre que dona energia a plantes. | الجلوكوز | Al-jalūkūz |\n| Arrels | Part de la planta sota terra. | الجذور | Al-judhūr |\n| Oxigen | Gas que les plantes alliberen. | الأكسجين | Al-uksajīn |\n| Substància | Material que forma alguna cosa. | مادة | Mādda |\n| Llum del sol | Energia que ve del sol. | ضوء الشمس | Daw' al-shams |\n| Fulles | Parts verdes de la planta. | الأوراق | Al-awrāq |",
+        "elapsed_s": 2.8
+      }
+    ],
+    "Cv2": [
+      {
+        "ok": true,
+        "reason": "OK",
+        "cols": 4,
+        "n_terms": 10,
+        "terms": [
+          "fotosíntesi",
+          "diòxid de carboni",
+          "clorofil·la",
+          "captura",
+          "arrels",
+          "estomes",
+          "glucosa",
+          "residu",
+          "allibera",
+          "oxigen"
+        ],
+        "section": "## Glossari\n\n| Terme | Explicació | Traducció (àrab) | Transliteració |\n| :--- | :--- | :--- | :--- |\n| Fotosíntesi | Procés per fabricar aliment amb llum solar | عملية التمثيل الضوئي | 'amaliyyat at-tamthīl aḍ-ḍawʾī |\n| Diòxid de carboni | Gas de l'aire que absorbeixen les plantes | ثاني أكسيد الكربون | thānī aksīd al-karbūn |\n| Clorofil·la | Part verda de la planta que recull la llum | كلوروفيل | klōrōfīl |\n| Captura | Agafar o recollir una cosa | يلتقط | yaltaqiṭ |\n| Arrels | Part de la planta que està sota la terra | جذور | judhūr |\n| Estomes | Forats molt petits a les fulles | ثغور | thughūr |\n| Glucosa | Tipus de sucre que serveix d'energia | جلوكوز | jlukūz |\n| Residu | Cosa que sobra després d'un procés | بقايا | baqāyā |\n| Allibera | Deixar sortir una substància | يطلق | yuṭliq |\n| Oxigen | Gas que necessitem per respirar | أكسجين | oksijīn |",
+        "elapsed_s": 33.9
+      },
+      {
+        "ok": true,
+        "reason": "OK",
+        "cols": 4,
+        "n_terms": 10,
+        "terms": [
+          "fotosíntesi",
+          "diòxid de carboni",
+          "clorofil·la",
+          "captura",
+          "arrels",
+          "estomes",
+          "glucosa",
+          "energia",
+          "residu",
+          "allibera"
+        ],
+        "section": "## Glossari\n\n| Terme | Explicació | Traducció (àrab) | Transliteració |\n| :--- | :--- | :--- | :--- |\n| Fotosíntesi | Procés per fabricar aliment amb llum solar | عملية التمثيل الضوئي | 'amaliyat at-tamthil ad-daw'i |\n| Diòxid de carboni | Gas de l'aire que absorbeixen les plantes | ثاني أكسيد الكربون | thani aksid al-karbun |\n| Clorofil·la | Part verda de la planta que recull la llum | كلوروفيل | klorofil |\n| Captura | Agafar o recollir una cosa | يلتقط | yaltaqit |\n| Arrels | Part de la planta que està sota la terra | جذور | judhur |\n| Estomes | Forats molt petits a les fulles | ثغور | thughur |\n| Glucosa | Tipus de sucre que serveix d'aliment | جلوكوز | glukoz |\n| Energia | Força necessària per viure i créixer | طاقة | taqa |\n| Residu | Cosa que sobra després d'un procés | بقايا | baqaya |\n| Allibera | Deixar sortir una substància | يطلق | yutliq |",
+        "elapsed_s": 34.1
+      }
+    ]
+  },
+  "democracia": {
+    "Bv2": [
+      {
+        "ok": true,
+        "reason": "OK",
+        "cols": 2,
+        "n_terms": 11,
+        "terms": [
+          "democràcia",
+          "àgora",
+          "ciutadà",
+          "metec",
+          "eclèsia",
+          "bulé",
+          "pèricles",
+          "misthos",
+          "segle v abans de crist",
+          "kratos",
+          "demos"
+        ],
+        "section": "## Glossari\n\n| Terme | Explicació |\n| :--- | :--- |\n| Democràcia | Sistema de govern on el poble decideix. |\n| Àgora | Plaça pública on es reunien a Atenes. |\n| Ciutadà | Persona amb drets polítics a Atenes. |\n| Metec | Estranger sense drets polítics a Atenes. |\n| Eclèsia | Assemblea principal de la democràcia atenenca. |\n| Bulé | Consell de 500 ciutadans escollits per sorteig. |\n| Pèricles | Polític atenenc que va fer reformes importants. |\n| Misthos | Pagament als ciutadans per participar en política. |\n| Segle V abans de Crist | Període històric quan va començar la democràcia a Atenes. |\n| Kratos | Paraula grega que significa poder. |\n| Demos | Paraula grega que significa poble. |",
+        "elapsed_s": 2.1
+      },
+      {
+        "ok": true,
+        "reason": "OK",
+        "cols": 2,
+        "n_terms": 10,
+        "terms": [
+          "democràcia",
+          "àgora",
+          "ciutadà",
+          "metec",
+          "eclèsia",
+          "bulé",
+          "pèricles",
+          "misthos",
+          "institució",
+          "sorteig"
+        ],
+        "section": "## Glossari\n\n| Terme | Explicació |\n| :--- | :--- |\n| Democràcia | Sistema de govern on el poder és del poble. |\n| Àgora | Plaça pública on es reunien els ciutadans. |\n| Ciutadà | Persona amb drets polítics a Atenes. |\n| Metec | Estranger sense drets polítics a Atenes. |\n| Eclèsia | Assemblea principal de la democràcia atenenca. |\n| Bulé | Consell de 500 ciutadans escollits per sorteig. |\n| Pèricles | Polític atenenc que va fer reformes importants. |\n| Misthos | Pagament als ciutadans per assistir a l'assemblea. |\n| Institució | Organització establerta amb una funció específica. |\n| Sorteig | Mètode per escollir persones de manera aleatòria. |",
+        "elapsed_s": 1.9
+      }
+    ],
+    "Cv2": [
+      {
+        "ok": true,
+        "reason": "OK",
+        "cols": 2,
+        "n_terms": 12,
+        "terms": [
+          "democràcia",
+          "demos",
+          "kratos",
+          "ciutadans",
+          "àgora",
+          "metecs",
+          "drets polítics",
+          "institució",
+          "eclèsia",
+          "bulé",
+          "sorteig",
+          "misthos"
+        ],
+        "section": "## Glossari\n\n| Terme | Explicació |\n| :--- | :--- |\n| Democràcia | Sistema polític on el poble té el poder. |\n| Demos | Paraula grega que significa poble. |\n| Kratos | Paraula grega que significa poder. |\n| Ciutadans | Persones que tenen drets i deveres en una ciutat. |\n| Àgora | Plaça pública on es reunia la gent a Grècia. |\n| Metecs | Estrangers que vivien a les ciutats gregues. |\n| Drets polítics | Possibilitat de participar en el govern d'un país. |\n| Institució | Organisme oficial que regula la vida d'una societat. |\n| Eclèsia | Assemblea de ciutadans on es decidien les lleis. |\n| Bulé | Consell de ciutadans que preparava les reunions de l'assemblea. |\n| Sorteig | Mètode per triar persones d'una manera casual. |\n| Misthos | Pagament per permetre que els pobres participessin en política. |",
+        "elapsed_s": 33.4
+      },
+      {
+        "ok": true,
+        "reason": "OK",
+        "cols": 2,
+        "n_terms": 12,
+        "terms": [
+          "democràcia",
+          "demos",
+          "kratos",
+          "ciutadans",
+          "àgora",
+          "metecs",
+          "drets polítics",
+          "institució",
+          "eclèsia",
+          "bulé",
+          "sorteig",
+          "misthos"
+        ],
+        "section": "## Glossari\n\n| Terme | Explicació |\n| :--- | :--- |\n| democràcia | Sistema polític on el poder pertany al poble |\n| demos | Paraula grega que significa poble |\n| kratos | Paraula grega que significa poder |\n| ciutadans | Persones que tenen drets i obligacions en una ciutat |\n| àgora | Plaça pública on es reunia la gent a Grècia |\n| metecs | Estrangers que vivien a Atenes però no eren ciutadans |\n| drets polítics | Possibilitat de participar en el govern i votar |\n| institució | Organisme creat per organitzar la societat o l'estat |\n| eclèsia | Assemblea principal on es decidien les lleis a Atenes |\n| bulé | Consell de ciutadans que preparava les reunions de l'eclèsia |\n| sorteig | Mètode per triar persones d'una manera aleatòria |\n| misthos | Pagament per permetre que els pobres participessin en política |",
+        "elapsed_s": 32.8
+      }
+    ]
+  }
+}

@@ -1,0 +1,237 @@
+{
+  "_meta": {
+    "name": "rubrica_glossari",
+    "version": "1.0.0-pilot",
+    "font_canonic": "corpusFJE/skills/mediacio/generate-glossari/M3_instrument-generar-glossari.md",
+    "font_version": "4.0.0-canonic",
+    "generat_at": "2026-05-31",
+    "nivell_extraccio": "Nivell 1 — extracció pura sense rewriting; els descriptors qualitatius es mantenen com a strings però els descriptors countable/enumerable/binary s'estructuren com a constraints operatius",
+    "us": "Aquest JSON s'injecta al system prompt en comptes del prompt_adapter.md descriptiu. El model rep camps tipats (max_terms, exclude_lists, banned_languages) en lloc de prosa."
+  },
+  "transversals": {
+    "no_circularitat": {
+      "type": "binary",
+      "rule": "El terme NO pot aparèixer dins de la seva pròpia definició."
+    },
+    "llengua_definicio": {
+      "type": "binary",
+      "rule": "La definició ha d'estar en la mateixa llengua que el text adaptat (per defecte català). MAI cap paraula d'una altra llengua dins la cel·la d'explicació.",
+      "banned_in_catalan_definition": [
+        "muñeco", "muñeca", "calcetín", "calcetin", "calcetines",
+        "aguja", "agujas", "hilo", "boton", "botones",
+        "rotulador", "trapo", "juguete", "jugar con él",
+        "doll", "sock", "needle", "thread", "button"
+      ]
+    },
+    "fidelitat_text_font": {
+      "type": "cross_source",
+      "rule": "Tots els termes seleccionats han d'aparèixer literalment al text adaptat. A B1+ s'admeten col·locacions i derivacions del lèxic nuclear."
+    },
+    "format_output": {
+      "type": "structural",
+      "rule": "Sempre títol H2 exacte '## Glossari'. Sense subtítols H3. Sense text introductori abans de la taula.",
+      "exact_h2_title": "## Glossari"
+    }
+  },
+  "levels": {
+    "pre-A1": {
+      "etiqueta": "Emergent",
+      "seleccio": {
+        "min_terms": 3,
+        "max_terms": 5,
+        "tipologia_lexica": ["objecte_concret", "nom_concret"],
+        "tipologia_excloure": ["tecnicisme", "abstracte"]
+      },
+      "format": {
+        "estructura": "llista_emoji_negreta",
+        "taula": false,
+        "suport_visual_obligatori": true,
+        "columnes": ["emoji", "terme_negreta"]
+      },
+      "definicio": {
+        "max_paraules": 6,
+        "recursos": "paraules_immediates_experiencia_alumne",
+        "no_repetir_terme": true
+      },
+      "variant_bilingue_si_L1": {
+        "afegeix_L1_alfabet_original": true,
+        "notes_contrastives": false
+      },
+      "autoavaluacio": "He mirat les imatges del glossari quan al text he trobat una paraula que no he reconegut."
+    },
+    "A1": {
+      "etiqueta": "Inicial",
+      "seleccio": {
+        "min_terms": 5,
+        "max_terms": 8,
+        "tipologia_lexica": ["nom_principal_text", "verb_accio_principal_text"],
+        "tipologia_excloure": ["tecnicisme_no_explicat"]
+      },
+      "format": {
+        "estructura": "taula_markdown",
+        "taula": true,
+        "columnes_monolingue": ["Terme", "Explicació"],
+        "columnes_bilingue": ["Terme", "Explicació", "Traducció (L1)"]
+      },
+      "definicio": {
+        "max_paraules": 8,
+        "vocabulari_target_mecr": "A1",
+        "no_repetir_terme": true,
+        "no_tecnicismes": true
+      },
+      "variant_bilingue_si_L1": {
+        "afegeix_L1_alfabet_original": true,
+        "notes_contrastives": false
+      },
+      "autoavaluacio": "Quan llegint el text he trobat una paraula difícil, he anat al glossari a buscar-la abans de demanar ajuda."
+    },
+    "A2": {
+      "etiqueta": "Funcional",
+      "seleccio": {
+        "min_terms": 8,
+        "max_terms": 10,
+        "tipologia_lexica": ["nom", "verb", "adjectiu_clau"]
+      },
+      "format": {
+        "estructura": "taula_markdown",
+        "taula": true,
+        "columnes_monolingue": ["Terme", "Explicació"],
+        "columnes_bilingue": ["Terme", "Explicació", "Traducció (L1)"]
+      },
+      "definicio": {
+        "max_paraules": 10,
+        "vocabulari_target_mecr": "A2",
+        "permet_analogia_simple": true,
+        "permet_exemple_concret": true
+      },
+      "variant_bilingue_si_L1": {
+        "afegeix_L1_alfabet_original": true,
+        "notes_contrastives": "breu_si_no_equivalent_exacte"
+      },
+      "autoavaluacio": "He fet servir el glossari per entendre el text. He intentat dir el significat amb les meves paraules a algú."
+    },
+    "B1": {
+      "etiqueta": "Estratègic",
+      "seleccio": {
+        "min_terms": 10,
+        "max_terms": 12,
+        "tipologia_lexica": ["nom", "verb", "habilitat_cognitiva_marcada"],
+        "exemples_habilitat_cognitiva": ["hipòtesi", "causa", "conseqüència"]
+      },
+      "format": {
+        "estructura": "taula_markdown",
+        "taula": true,
+        "columnes_monolingue": ["Terme", "Explicació"],
+        "columnes_opcionals": ["Exemple en frase"]
+      },
+      "definicio": {
+        "max_paraules": 12,
+        "vocabulari_target_mecr": "B1",
+        "permet_vocabulari_tecnic_amb_exemple": true
+      },
+      "variant_bilingue_si_L1": {
+        "notes_contrastives": "conceptual_si_categoria_difereix"
+      },
+      "autoavaluacio": "He reflexionat sobre si sabia usar els termes del glossari en una frase pròpia, i així he sabut quins encara no domino."
+    },
+    "B2": {
+      "etiqueta": "Acadèmic",
+      "seleccio": {
+        "min_terms": 12,
+        "max_terms": 15,
+        "tipologia_lexica": ["CALP", "lexic_especialitat", "col_locacio"],
+        "exemples_col_locacio": ["realitzar una hipòtesi", "establir una conclusió"]
+      },
+      "format": {
+        "estructura": "taula_markdown",
+        "ordre_alfabetic": true,
+        "columnes_monolingue": ["Terme", "Explicació"],
+        "columnes_opcionals": ["Exemple en frase"]
+      },
+      "definicio": {
+        "max_paraules": 15,
+        "vocabulari_target_mecr": "B2",
+        "permet_referenciar_altre_terme_glossari": true
+      },
+      "variant_bilingue_si_L1": {
+        "notes_contrastives": "morfosintactiques_o_collocacio"
+      },
+      "autoavaluacio": "He pensat quina diferència hi ha entre els termes del glossari que es poden confondre i com triaria un o l'altre."
+    },
+    "C1+": {
+      "etiqueta": "Crític",
+      "seleccio": {
+        "min_terms": 15,
+        "max_terms": 18,
+        "tipologia_lexica": ["CALP_especialitat", "meta_discursiu", "conceptual_abstracte"]
+      },
+      "format": {
+        "estructura": "taula_markdown",
+        "ordre_alfabetic": true,
+        "columnes_monolingue": ["Terme", "Explicació"],
+        "columnes_opcionals": ["Referència creuada"]
+      },
+      "definicio": {
+        "max_paraules": 20,
+        "permet_etimologia_breu": true,
+        "permet_distincio_termes_similars": true
+      },
+      "variant_bilingue_si_L1": {
+        "columna_L1": "opcional"
+      },
+      "autoavaluacio": "He reflexionat sobre com s'usaria el terme en un altre context i si la definició encara seria vàlida."
+    }
+  },
+  "case_overrides": {
+    "A1_primaria_inicial_vocabulari_quotidia": {
+      "trigger": {
+        "mecr_in": ["pre-A1", "A1"],
+        "etapa_in": ["Infantil", "Primària"],
+        "curs_in_inicial": ["1r", "2n", "3r"]
+      },
+      "exclude_categories": {
+        "objectes_domestics": [
+          "mitja", "botó", "botons", "agulla", "agulles", "fil",
+          "retolador", "llapis", "paper", "plat", "got",
+          "casa", "taula", "porta", "cadira", "llit", "tovallola",
+          "mocador", "sabata", "samarreta"
+        ],
+        "parts_cos": [
+          "cap", "mà", "mans", "ulls", "boca", "peu", "peus",
+          "cara", "nas", "orelles", "braç", "cames"
+        ],
+        "verbs_accio_basics": [
+          "posar", "lligar", "dibuixar", "jugar", "mirar", "fer",
+          "anar", "venir", "agafar", "deixar", "obrir", "tancar"
+        ]
+      },
+      "max_terms_si_aplica": 2,
+      "fallback_si_zero_termes_nous": "Aquest text no necessita glossari nou per al teu nivell.",
+      "alternativa_recomanada": "pictogrames"
+    }
+  },
+  "checks_automatics_post_generacio": [
+    {
+      "name": "no_castellanismes_en_catala",
+      "type": "regex_word_boundary",
+      "applies_when": "lang == 'ca'",
+      "fails_if_found": ["muñeco", "muñeca", "calcetín", "aguja", "hilo", "boton", "rotulador", "juguete"]
+    },
+    {
+      "name": "no_termes_quotidians_si_override_actiu",
+      "type": "set_intersection",
+      "applies_when": "override A1_primaria_inicial_vocabulari_quotidia trigger compleix",
+      "fails_if_term_in_lists": ["objectes_domestics", "parts_cos", "verbs_accio_basics"]
+    },
+    {
+      "name": "no_circularitat",
+      "type": "term_in_definition",
+      "fails_if_term_substring_of_definition": true
+    },
+    {
+      "name": "rang_nombre_termes",
+      "type": "count_range",
+      "uses": "levels.{mecr}.seleccio.{min_terms,max_terms}"
+    }
+  ]
+}

@@ -1,0 +1,437 @@
+{
+  "titella": {
+    "A": [
+      {
+        "ok": true,
+        "reason": "FALLBACK (nota sense taula)",
+        "terms": [],
+        "n_terms": 0,
+        "section": "## Glossari\n\nAquest text no necessita glossari nou per al teu nivell.",
+        "fallback": true,
+        "elapsed_s": 8.6
+      },
+      {
+        "ok": true,
+        "reason": "FALLBACK (nota sense taula)",
+        "terms": [],
+        "n_terms": 0,
+        "section": "## Glossari\n\nAquest text no necessita glossari nou per al teu nivell.",
+        "fallback": true,
+        "elapsed_s": 2.6
+      }
+    ],
+    "B": [
+      {
+        "ok": true,
+        "reason": "FALLBACK (nota sense taula)",
+        "terms": [],
+        "n_terms": 0,
+        "section": "## Glossari\n\nAquest text no necessita glossari nou per al teu nivell.",
+        "fallback": true,
+        "elapsed_s": 2.1
+      },
+      {
+        "ok": true,
+        "reason": "FALLBACK (nota sense taula)",
+        "terms": [],
+        "n_terms": 0,
+        "section": "## Glossari\n\nAquest text no necessita glossari nou per al teu nivell.",
+        "fallback": true,
+        "elapsed_s": 2.3
+      }
+    ],
+    "C": [
+      {
+        "ok": false,
+        "reason": "quotidianes=['farciment']",
+        "n_terms": 2,
+        "terms": [
+          "titella",
+          "farciment"
+        ],
+        "quotidianes": [
+          "farciment"
+        ],
+        "castellanismes": [],
+        "rang_esperat": [
+          1,
+          2
+        ],
+        "section": "## Glossari\n\n| Terme | Explicació |\n| :--- | :--- |\n| titella | Personatge de tela per jugar |\n| farciment | Material per omplir una cosa |",
+        "elapsed_s": 42.4
+      },
+      {
+        "ok": false,
+        "reason": "quotidianes=['farciment']",
+        "n_terms": 2,
+        "terms": [
+          "titella",
+          "farciment"
+        ],
+        "quotidianes": [
+          "farciment"
+        ],
+        "castellanismes": [],
+        "rang_esperat": [
+          1,
+          2
+        ],
+        "section": "## Glossari\n\n| Terme | Explicació |\n| :--- | :--- |\n| Titella | Personatge de tela que es mou. |\n| Farciment | Material per omplir un objecte. |",
+        "elapsed_s": 89.5
+      }
+    ]
+  },
+  "fotosintesi": {
+    "A": [
+      {
+        "ok": false,
+        "reason": "castellanismes=['planta']; rang_fora=20 (esperat 8-10)",
+        "n_terms": 20,
+        "terms": [
+          "explicació",
+          "traducció",
+          "explicació",
+          "traducció",
+          "explicació",
+          "traducció",
+          "explicació",
+          "traducció",
+          "explicació",
+          "traducció",
+          "explicació",
+          "traducció",
+          "explicació",
+          "traducció",
+          "explicació",
+          "traducció",
+          "explicació",
+          "traducció",
+          "explicació",
+          "traducció"
+        ],
+        "quotidianes": [],
+        "castellanismes": [
+          "planta"
+        ],
+        "rang_esperat": [
+          8,
+          10
+        ],
+        "section": "## Glossari\n\n\n### Fotosíntesi\n- **Explicació**: Procés on plantes fan menjar amb llum.\n- **Traducció**: التركيب الضوئي\n\n\n### Clorofil·la\n- **Explicació**: Substància verda a les fulles que captura llum.\n- **Traducció**: الكلوروفيل\n\n\n### Diòxid de carboni\n- **Explicació**: Gas de l'aire que plantes usen per menjar.\n- **Traducció**: ثاني أكسيد الكربون\n\n\n### Estomes\n- **Explicació**: Forats petits a les fulles per entrar gasos.\n- **Traducció**: الثغور\n\n\n### Glucosa\n- **Explicació**: Sucre que dona energia a la planta.\n- **Traducció**: الجلوكوز\n\n\n### Oxigen\n- **Explicació**: Gas que plantes alliberen i humans respirem.\n- **Traducció**: الأكسجين\n\n\n### Arrels\n- **Explicació**: Part de la planta sota terra que absorbeix aigua.\n- **Traducció**: الجذور\n\n\n### Fulles\n- **Explicació**: Part verda de la planta on passa la fotosíntesi.\n- **Traducció**: الأوراق\n\n\n### Llum del sol\n- **Explicació**: Energia del sol que plantes necessiten per créixer.\n- **Traducció**: ضوء الشمس\n\n\n### Aigua\n- **Explicació**: Líquid que plantes absorbeixen per créixer.\n- **Traducció**: الماء",
+        "elapsed_s": 4.2
+      },
+      {
+        "ok": false,
+        "reason": "castellanismes=['planta']",
+        "n_terms": 10,
+        "terms": [
+          "traducció:",
+          "traducció:",
+          "traducció:",
+          "traducció:",
+          "traducció:",
+          "traducció:",
+          "traducció:",
+          "traducció:",
+          "traducció:",
+          "traducció:"
+        ],
+        "quotidianes": [],
+        "castellanismes": [
+          "planta"
+        ],
+        "rang_esperat": [
+          8,
+          10
+        ],
+        "section": "## Glossari\n\n\n### Fotosíntesi\nProcés on les plantes fan menjar amb llum.  \n**Traducció:** التركيب الضوئي\n\n\n### Clorofil·la\nSubstància verda a les fulles que captura llum.  \n**Traducció:** الكلوروفيل\n\n\n### Diòxid de carboni\nGas de l'aire que les plantes usen per fer menjar.  \n**Traducció:** ثاني أكسيد الكربون\n\n\n### Estomes\nForats petits a les fulles per on entra l'aire.  \n**Traducció:** الثغور\n\n\n### Glucosa\nSucre que dona energia a la planta.  \n**Traducció:** الجلوكوز\n\n\n### Oxigen\nGas que les plantes alliberen i nosaltres respirem.  \n**Traducció:** الأكسجين\n\n\n### Arrels\nPart de la planta sota terra que agafa aigua.  \n**Traducció:** الجذور\n\n\n### Fulles\nPart verda de la planta on passa la fotosíntesi.  \n**Traducció:** الأوراق\n\n\n### Llum del sol\nEnergia que ve del sol i ajuda les plantes.  \n**Traducció:** ضوء الشمس\n\n\n### Energia\nForça que fa que les coses passin i funcionin.  \n**Traducció:** طاقة",
+        "elapsed_s": 4.2
+      }
+    ],
+    "B": [
+      {
+        "ok": false,
+        "reason": "castellanismes=['planta']",
+        "n_terms": 8,
+        "terms": [
+          "fotosíntesi",
+          "clorofil·la",
+          "diòxid de carboni",
+          "fulles",
+          "arrels",
+          "estomes",
+          "glucosa",
+          "oxigen"
+        ],
+        "quotidianes": [],
+        "castellanismes": [
+          "planta"
+        ],
+        "rang_esperat": [
+          8,
+          10
+        ],
+        "section": "## Glossari\n\n| Terme               | Explicació                                             | Traducció (L1)         |\n|---------------------|--------------------------------------------------------|------------------------|\n| Fotosíntesi         | Procés on les plantes fan menjar amb llum solar.       | التركيب الضوئي          |\n| Clorofil·la         | Substància verda a les fulles que captura la llum.     | الكلوروفيل            |\n| Diòxid de carboni   | Gas que les plantes utilitzen per fer menjar.          | ثاني أكسيد الكربون     |\n| Fulles              | Part de la planta on passa la fotosíntesi.             | أوراق                  |\n| Arrels              | Part de la planta que absorbeix l'aigua del sòl.       | جذور                   |\n| Estomes             | Forats petits a les fulles per on entra el gas.        | ثغور                   |\n| Glucosa             | Sucre que dona energia a la planta.                    | الجلوكوز               |\n| Oxigen              | Gas que les plantes alliberen a l'aire.                | الأكسجين               |",
+        "elapsed_s": 3.2
+      },
+      {
+        "ok": false,
+        "reason": "castellanismes=['planta']",
+        "n_terms": 8,
+        "terms": [
+          "fotosíntesi",
+          "clorofil·la",
+          "diòxid de carboni",
+          "arrels",
+          "estomes",
+          "glucosa",
+          "oxigen",
+          "energia"
+        ],
+        "quotidianes": [],
+        "castellanismes": [
+          "planta"
+        ],
+        "rang_esperat": [
+          8,
+          10
+        ],
+        "section": "## Glossari\n\n| Terme               | Explicació                                           | Traducció (L1)     |\n|---------------------|------------------------------------------------------|--------------------|\n| Fotosíntesi         | Procés per fer menjar amb llum, aigua i aire.        | التركيب الضوئي     |\n| Clorofil·la         | Substància verda a les fulles que captura la llum.    | الكلوروفيل        |\n| Diòxid de carboni   | Gas de l'aire que les plantes necessiten.            | ثاني أكسيد الكربون |\n| Arrels              | Part de la planta que agafa aigua del terra.         | الجذور            |\n| Estomes             | Forats petits a les fulles per on entra l'aire.      | الثغور            |\n| Glucosa             | Sucre que dona energia a la planta.                  | الجلوكوز          |\n| Oxigen              | Gas que les plantes alliberen a l'aire.              | الأكسجين          |\n| Energia             | Força que fa que les plantes creixin i visquin.      | الطاقة            |",
+        "elapsed_s": 3.6
+      }
+    ],
+    "C": [
+      {
+        "ok": false,
+        "reason": "castellanismes=['planta']",
+        "n_terms": 10,
+        "terms": [
+          "fotosíntesi",
+          "diòxid de carboni",
+          "clorofil·la",
+          "captura",
+          "arrels",
+          "estomes",
+          "glucosa",
+          "residu",
+          "allibera",
+          "oxigen"
+        ],
+        "quotidianes": [],
+        "castellanismes": [
+          "planta"
+        ],
+        "rang_esperat": [
+          8,
+          10
+        ],
+        "section": "## Glossari\n\n| Terme | Explicació | Traducció (L1) |\n| :--- | :--- | :--- |\n| Fotosíntesi | Procés per fabricar aliment amb llum. | التمثيل الضوئي |\n| Diòxid de carboni | Gas que hi ha a l'aire. | ثاني أكسيد الكربون |\n| Clorofil·la | Part verda que recull la llum. | كلوروفيل |\n| Captura | Agafar una cosa per tenir-la. | يلتقط |\n| Arrels | Part de la planta sota la terra. | جذور |\n| Estomes | Forats molt petits de les fulles. | ثغور |\n| Glucosa | Tipus de sucre que dona energia. | جلوكوز |\n| Residu | Cosa que sobra després d'un procés. | بقايا |\n| Allibera | Deixar sortir una cosa. | يطلق |\n| Oxigen | Gas necessari per respirar. | أكسجين |",
+        "elapsed_s": 42.5
+      },
+      {
+        "ok": false,
+        "reason": "castellanismes=['planta']",
+        "n_terms": 10,
+        "terms": [
+          "fotosíntesi",
+          "diòxid de carboni",
+          "substància",
+          "clorofil·la",
+          "captura",
+          "arrels",
+          "estomes",
+          "glucosa",
+          "residu",
+          "allibera"
+        ],
+        "quotidianes": [],
+        "castellanismes": [
+          "planta"
+        ],
+        "rang_esperat": [
+          8,
+          10
+        ],
+        "section": "## Glossari\n\n| Terme | Explicació | Traducció (L1) |\n| :--- | :--- | :--- |\n| Fotosíntesi | Procés per fabricar el menjar de la planta. | التمثيل الضوئي |\n| Diòxid de carboni | Gas que hi ha a l'aire. | ثاني أكسيد الكربون |\n| Substància | Material amb propietats concretes. | مادة |\n| Clorofil·la | Part verda que recull la llum solar. | كلوروفيل |\n| Captura | Agafar o recollir una cosa. | يلتقط |\n| Arrels | Part de la planta que està sota terra. | جذور |\n| Estomes | Forats molt petits a les fulles. | ثغور |\n| Glucosa | Tipus de sucre que dona energia. | جلوكوز |\n| Residu | Cosa que sobra després d'un procés. | بقايا |\n| Allibera | Deixar sortir una cosa. | يطلق |",
+        "elapsed_s": 40.6
+      }
+    ]
+  },
+  "democracia": {
+    "A": [
+      {
+        "ok": false,
+        "reason": "castellanismes=['voto', 'democracia ateniense']; rang_fora=13 (esperat 10-12)",
+        "n_terms": 13,
+        "terms": [
+          "termes",
+          "democràcia",
+          "demos",
+          "kratos",
+          "àgora",
+          "ciutadà",
+          "eclèsia",
+          "bulé",
+          "metecs",
+          "misthos",
+          "pèricles",
+          "segle v abans de crist",
+          "votacions"
+        ],
+        "quotidianes": [],
+        "castellanismes": [
+          "voto",
+          "democracia ateniense"
+        ],
+        "rang_esperat": [
+          10,
+          12
+        ],
+        "section": "## Glossari\n\n| Termes                   | Definició                                                                                                                                   | L1 (Español)                                                                                          |\n|--------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|\n| Democràcia               | Sistema polític on el poder és del poble.                                                                                                   | Democracia: Sistema político donde el poder es del pueblo.                                            |\n| Demos                    | Paraula grega que significa poble.                                                                                                          | Demos: Palabra griega que significa pueblo.                                                           |\n| Kratos                   | Paraula grega que significa poder.                                                                                                          | Kratos: Palabra griega que significa poder.                                                           |\n| Àgora                    | Plaça pública on es reunien els ciutadans per debatre.                                                                                      | Ágora: Plaza pública donde se reunían los ciudadanos para debatir.                                    |\n| Ciutadà                  | Persona amb drets polítics en una democràcia.                                                                                               | Ciudadano: Persona con derechos políticos en una democracia.                                          |\n| Eclèsia                  | Assemblea principal de la democràcia atenenca.                                                                                              | Eclesia: Asamblea principal de la democracia ateniense.                                               |\n| Bulé                     | Consell de 500 ciutadans escollits per sorteig.                                                                                             | Bulé: Consejo de 500 ciudadanos elegidos por sorteo.                                                  |\n| Metecs                   | Estrangers que vivien a Atenes sense drets polítics.                                                                                        | Metecos: Extranjeros que vivían en Atenas sin derechos políticos.                                     |\n| Misthos                  | Pagament als ciutadans pobres per participar en l'assemblea.                                                                                | Misthos: Pago a los ciudadanos pobres para participar en la asamblea.                                 |\n| Pèricles                 | Polític atenenc que va impulsar reformes democràtiques.                                                                                     | Pericles: Político ateniense que impulsó reformas democráticas.                                       |\n| Segle V abans de Crist   | Període de temps entre l'any 500 i 401 abans de Crist.                                                                                      | Siglo V antes de Cristo: Período de tiempo entre el año 500 y 401 antes de Cristo.                    |\n| Votacions                | Procés de decidir alguna cosa mitjançant el vot.                                                                                            | Votaciones: Proceso de decidir algo mediante el voto.                                                 |\n\nNotes contrastives: \n- El concepte de \"ciutadà\" a Atenes era més restringit que l'actual, ja que només incloïa homes adults nascuts a la ciutat.",
+        "elapsed_s": 5.9
+      },
+      {
+        "ok": false,
+        "reason": "castellanismes=['votación']; rang_fora=13 (esperat 10-12)",
+        "n_terms": 13,
+        "terms": [
+          "termes",
+          "democràcia",
+          "demos",
+          "kratos",
+          "àgora",
+          "ciutadà",
+          "metec",
+          "eclèsia",
+          "bulé",
+          "pèricles",
+          "misthos",
+          "segle v a.c.",
+          "votació"
+        ],
+        "quotidianes": [],
+        "castellanismes": [
+          "votación"
+        ],
+        "rang_esperat": [
+          10,
+          12
+        ],
+        "section": "## Glossari\n\n| Termes          | Definició                                                                                                                                       | L1 (Español)                                                                                                  |\n|-----------------|------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|\n| Democràcia      | Sistema de govern on el poble té el poder.                                                                                                      | Democracia: Sistema de gobierno donde el pueblo tiene el poder.                                               |\n| Demos           | Paraula grega que significa poble.                                                                                                              | Demos: Palabra griega que significa pueblo.                                                                   |\n| Kratos          | Paraula grega que significa poder.                                                                                                              | Kratos: Palabra griega que significa poder.                                                                   |\n| Àgora           | Plaça pública on els ciutadans es reunien per debatre.                                                                                          | Ágora: Plaza pública donde los ciudadanos se reunían para debatir.                                            |\n| Ciutadà         | Persona amb drets polítics a Atenes, com votar.                                                                                                | Ciudadano: Persona con derechos políticos en Atenas, como votar.                                              |\n| Metec           | Estranger que vivia a Atenes sense drets polítics.                                                                                              | Meteco: Extranjero que vivía en Atenas sin derechos políticos.                                                |\n| Eclèsia         | Assemblea principal on participaven tots els ciutadans.                                                                                         | Eclesia: Asamblea principal donde participaban todos los ciudadanos.                                          |\n| Bulé            | Consell de 500 ciutadans escollits per sorteig.                                                                                                 | Bulé: Consejo de 500 ciudadanos elegidos por sorteo.                                                          |\n| Pèricles        | Polític atenenc que va impulsar reformes democràtiques.                                                                                         | Pericles: Político ateniense que impulsó reformas democráticas.                                               |\n| Misthos         | Pagament als ciutadans pobres per assistir a l'assemblea.                                                                                       | Misthos: Pago a los ciudadanos pobres para asistir a la asamblea.                                             |\n| Segle V a.C.    | Període de temps entre l'any 500 i 401 abans de Crist.                                                                                          | Siglo V a.C.: Período de tiempo entre el año 500 y 401 antes de Cristo.                                       |\n| Votació         | Procés de decidir alguna cosa mitjançant vots.                                                                                                  | Votación: Proceso de decidir algo mediante votos.                                                             |",
+        "elapsed_s": 6.1
+      }
+    ],
+    "B": [
+      {
+        "ok": true,
+        "reason": "OK",
+        "n_terms": 12,
+        "terms": [
+          "democràcia",
+          "àgora",
+          "ciutadà",
+          "metecs",
+          "eclèsia",
+          "bulé",
+          "pèricles",
+          "misthos",
+          "assemblea",
+          "votacions",
+          "reformes",
+          "drets polítics"
+        ],
+        "quotidianes": [],
+        "castellanismes": [],
+        "rang_esperat": [
+          10,
+          12
+        ],
+        "section": "## Glossari\n\n| Terme        | Explicació                                                                 |\n|--------------|-----------------------------------------------------------------------------|\n| Democràcia   | Sistema polític on el poder és del poble.                                   |\n| Àgora        | Plaça pública on es reunien els ciutadans a Atenes.                         |\n| Ciutadà      | Persona amb drets polítics en una democràcia.                               |\n| Metecs       | Estrangers residents a Atenes sense drets polítics.                         |\n| Eclèsia      | Assemblea màxima de ciutadans a Atenes.                                     |\n| Bulé         | Consell de 500 ciutadans escollits per sorteig.                             |\n| Pèricles     | Polític atenenc que va impulsar reformes democràtiques.                     |\n| Misthos      | Pagament als ciutadans pobres per participar en l'assemblea.                |\n| Assemblea    | Reunió de persones per debatre i prendre decisions.                         |\n| Votacions    | Procés de decidir mitjançant el vot dels ciutadans.                         |\n| Reformes     | Canvis per millorar un sistema o institució.                                |\n| Drets polítics | Capacitat de participar en les decisions polítiques d'un país.           |",
+        "elapsed_s": 3.5
+      },
+      {
+        "ok": true,
+        "reason": "OK",
+        "n_terms": 12,
+        "terms": [
+          "democràcia",
+          "àgora",
+          "ciutadà",
+          "metec",
+          "eclèsia",
+          "bulé",
+          "pèricles",
+          "misthos",
+          "reformes",
+          "votacions",
+          "estrangers",
+          "institució"
+        ],
+        "quotidianes": [],
+        "castellanismes": [],
+        "rang_esperat": [
+          10,
+          12
+        ],
+        "section": "## Glossari\n\n| Terme         | Explicació                                                                 |\n|---------------|-----------------------------------------------------------------------------|\n| Democràcia    | Sistema on el poble té el poder de decidir.                                |\n| Àgora         | Plaça pública on es reunien els ciutadans a Atenes.                        |\n| Ciutadà       | Persona amb drets polítics en una comunitat.                               |\n| Metec         | Estranger a Atenes sense drets polítics.                                   |\n| Eclèsia       | Assemblea principal de ciutadans a Atenes.                                 |\n| Bulé          | Consell de 500 ciutadans escollits per sorteig.                            |\n| Pèricles      | Polític atenenc que va impulsar reformes democràtiques.                    |\n| Misthos       | Pagament als ciutadans pobres per participar a l'assemblea.                |\n| Reformes      | Canvis per millorar un sistema o institució.                               |\n| Votacions     | Procés de decidir mitjançant el vot dels ciutadans.                        |\n| Estrangers    | Persones que no són natives del lloc on viuen.                             |\n| Institució    | Organització establerta amb una funció específica.                         |",
+        "elapsed_s": 4.4
+      }
+    ],
+    "C": [
+      {
+        "ok": true,
+        "reason": "OK",
+        "n_terms": 12,
+        "terms": [
+          "democràcia",
+          "àgora",
+          "debatien",
+          "metecs",
+          "drets polítics",
+          "institució",
+          "eclèsia",
+          "bulé",
+          "sorteig",
+          "impulsar",
+          "reformes",
+          "misthos"
+        ],
+        "quotidianes": [],
+        "castellanismes": [],
+        "rang_esperat": [
+          10,
+          12
+        ],
+        "section": "## Glossari\n\n| Terme | Explicació |\n| :--- | :--- |\n| Democràcia | Sistema polític on el poble té el poder. |\n| Àgora | Plaça pública on es reunia la gent a Atenes. |\n| Debatien | Discutir diferents opinions per arribar a un acord. |\n| Metecs | Persones estrangeres que vivien a la ciutat grega. |\n| Drets polítics | Facultats legals per votar i participar en el govern. |\n| Institució | Organisme oficial que regula la vida d'una societat. |\n| Eclèsia | Assemblea de ciutadans que decidia les lleis. |\n| Bulé | Consell de ciutadans que preparava el treball de l'assemblea. |\n| Sorteig | Mètode per triar persones d'una manera aleatòria. |\n| Impulsar | Promoure o donar força a un projecte o canvi. |\n| Reformes | Canvis fets per millorar una llei o sistema. |\n| Misthos | Pagament per permetre la participació dels ciutadans pobres. |",
+        "elapsed_s": 51.0
+      },
+      {
+        "ok": true,
+        "reason": "OK",
+        "n_terms": 12,
+        "terms": [
+          "democràcia",
+          "àgora",
+          "debatien",
+          "metecs",
+          "drets polítics",
+          "eclèsia",
+          "assemblea",
+          "bulé",
+          "sorteig",
+          "impulsar",
+          "reformes",
+          "misthos"
+        ],
+        "quotidianes": [],
+        "castellanismes": [],
+        "rang_esperat": [
+          10,
+          12
+        ],
+        "section": "## Glossari\n\n| Terme | Explicació |\n| :--- | :--- |\n| Democràcia | Sistema polític on el poble té el poder. |\n| Àgora | Plaça pública on es reunia la gent a Grècia. |\n| Debatien | Discutir diferents opinions per arribar a un acord. |\n| Metecs | Persones estrangeres que vivien a la ciutat grega. |\n| Drets polítics | Facultats legals per participar en el govern. |\n| Eclèsia | Reunió de tots els ciutadans per prendre decisions. |\n| Assemblea | Grup de persones reunides per debatre i votar. |\n| Bulé | Consell de ciutadans que preparava les lleis. |\n| Sorteig | Mètode per triar algú per azar. |\n| Impulsar | Promoure o donar força a un projecte o canvi. |\n| Reformes | Canvis fets per millorar una llei o sistema. |\n| Misthos | Pagament per permetre la participació dels ciutadans pobres. |",
+        "elapsed_s": 43.5
+      }
+    ]
+  }
+}

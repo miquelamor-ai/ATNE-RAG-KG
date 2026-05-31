@@ -1,0 +1,226 @@
+{
+  "_meta": {
+    "name": "rubrica_bastides_lectura",
+    "version": "1.0.0-pilot",
+    "font_canonic": "corpusFJE/skills/mediacio/generate-bastides-lectura/M3_instrument-generar-bastides-lectura.md",
+    "font_version": "4.0.0-canonic",
+    "generat_at": "2026-05-31",
+    "us": "Aquest JSON s'injecta al system prompt en comptes del prompt_adapter.md descriptiu + directiva Python. Resol específicament: (1) format estructural 3 moments fix, (2) volum max 3 ítems/moment, (3) imperativitat dels ítems (no preguntes que el LLM relabela com a '## Preguntes')."
+  },
+  "transversals": {
+    "format_obligatori": {
+      "type": "structural",
+      "rule": "Sempre títol H2 exacte '## Suports de lectura' amb 3 subseccions H3 obligatories: 'Abans', 'Durant', 'Després'.",
+      "h2_exact": "## Suports de lectura",
+      "h3_exact": ["### Abans", "### Durant", "### Després"]
+    },
+    "volum_max_per_moment": {
+      "type": "countable",
+      "rule": "Màxim 3 ítems per cada subsecció (Abans/Durant/Després). Pre-A1: 1-2 ítems gestuals/orals.",
+      "max_items_per_section": 3,
+      "max_items_per_section_preA1": 2
+    },
+    "imperativitat_items": {
+      "type": "binary",
+      "rule": "Cada ítem ha de ser una INSTRUCCIÓ IMPERATIVA (verb d'acció en imperatiu o forma 'has de + verb'). MAI formulat com a pregunta (cap interrogant). Les preguntes són del complement preguntes_comprensio, no de bastides.",
+      "exemples_correctes": [
+        "Mira el títol i predigues de què parlarà el text.",
+        "Llegeix amb l'adult i subratlla 1 mot clau per paràgraf.",
+        "Atura't aquí i escriu la teva hipòtesi: 'Crec que el text dirà ___'."
+      ],
+      "exemples_incorrectes_PROHIBITS": [
+        "Què saps del tema?",
+        "De què parlarà el text?",
+        "Per què creus que l'autor pensa això?"
+      ],
+      "regex_check": "Cap caracter '?' a l'inici o final d'ítem; cap obertura amb interrogatius (Què/Per què/Com/Quan/On/Qui)."
+    },
+    "especificitat_proposit": {
+      "type": "qualitative + cross_source",
+      "rule": "El propòsit de lectura ha de referenciar contingut concret del text actual, no ser genèric ('llegeix el text', 'comprèn el text').",
+      "anti_exemples_PROHIBITS": [
+        "Llegeix el text amb atenció.",
+        "Llegeix per entendre.",
+        "Comprèn el contingut."
+      ]
+    },
+    "no_duplicar_preguntes_comprensio": {
+      "type": "cross_source",
+      "rule": "Si el complement preguntes_comprensio està actiu al mateix pipeline, cap ítem de bastides ha de coincidir semànticament amb cap pregunta. Bastides = procediment (com llegir); preguntes_comprensio = contingut (què diu el text)."
+    }
+  },
+  "levels": {
+    "pre-A1": {
+      "etiqueta": "Emergent",
+      "modalitat_lectora": "Adult llegeix en veu alta; alumne assenyala/dramatitza/dibuixa. ZERO lectura autònoma.",
+      "abans": {
+        "max_items": 2,
+        "tipus_ajuts": ["activacio_amb_imatge", "proposit_oral_de_adult"],
+        "exemple_canonic_abans": "Mira la imatge i assenyala el que veus."
+      },
+      "durant": {
+        "max_items": 1,
+        "modalitat_obligatoria": "lectura_mediada_per_adult",
+        "exemple_canonic": "Escolta el text mentre el mestre llegeix i assenyala el que entens."
+      },
+      "despres": {
+        "max_items": 2,
+        "ajuts_obligatoris": ["dibuix_o_dramatitzacio"],
+        "exemple_canonic": "Dibuixa el que has entès del text."
+      },
+      "marca_pausa_obligatoria_durant": false,
+      "frase_buit_obligatoria_despres": false
+    },
+    "A1": {
+      "etiqueta": "Inicial",
+      "abans": {
+        "max_items": 3,
+        "exemple_canonic": "Mira el títol, recorda el que ja saps del tema i predigues de què parlarà."
+      },
+      "durant": {
+        "max_items": 3,
+        "modalitat": "lectura_mediada",
+        "marca_obligatoria": "subratllar_1_mot_clau_per_paragraf",
+        "exemple_canonic": "Llegeix amb l'adult, segueix amb el dit i subratlla 1 mot clau per paràgraf."
+      },
+      "despres": {
+        "max_items": 3,
+        "frase_buit_obligatoria": true,
+        "frase_buit_template": "El text parla de ___.",
+        "exemple_canonic": "Completa la frase: «El text parla de ___»."
+      },
+      "marca_pausa_obligatoria_durant": false
+    },
+    "A2": {
+      "etiqueta": "Funcional",
+      "abans": {
+        "max_items": 3,
+        "exemple_canonic": "Recorda 2 coses que ja saps del tema i fixa't un propòsit: «Llegeix per identificar ___»."
+      },
+      "durant": {
+        "max_items": 3,
+        "modalitat": "lectura_autonoma_possible",
+        "marca_obligatoria": "marcar_check_dubte_important",
+        "marca_simbols": ["✓", "?", "!"],
+        "exemple_canonic": "Llegeix sol i marca al marge ✓ (entès) / ? (dubte) / ! (important)."
+      },
+      "despres": {
+        "max_items": 3,
+        "resum_obligatori": {
+          "min_frases": 2,
+          "max_frases": 3
+        },
+        "exemple_canonic": "Escriu un resum de 2-3 frases i explica una idea amb «Crec que ___ perquè ___»."
+      },
+      "marca_pausa_obligatoria_durant": false
+    },
+    "B1": {
+      "etiqueta": "Estratègic",
+      "abans": {
+        "max_items": 3,
+        "hipotesi_escrita_obligatoria": true,
+        "hipotesi_template": "Crec que el text dirà ___ perquè ___.",
+        "exemple_canonic": "Escriu la teva hipòtesi abans de llegir: «Crec que el text dirà ___ perquè ___»."
+      },
+      "durant": {
+        "max_items": 3,
+        "marca_pausa_obligatoria": true,
+        "simbols_pausa": ["⏸", "ATURA'T AQUÍ"],
+        "instruccio_pausa": "A mig text, escriu la teva hipòtesi en curs: «Fins aquí, crec que el text dirà ___».",
+        "exemple_canonic": "Pren notes breus al marge i atura't a mitja lectura per revisar la teva hipòtesi."
+      },
+      "despres": {
+        "max_items": 3,
+        "resum_estructurat_obligatori": {
+          "min_frases": 3,
+          "max_frases": 4,
+          "estructura": "idea_principal + 2_secundaries"
+        },
+        "exemple_canonic": "Resumeix en 3-4 frases (idea principal + 2 secundàries) i valora si hi estàs d'acord, dient per què."
+      }
+    },
+    "B2": {
+      "etiqueta": "Acadèmic",
+      "abans": {
+        "max_items": 3,
+        "elements_obligatoris": ["identificacio_genere_i_font", "anticipacio_posicionament_autor"],
+        "exemple_canonic": "Identifica el gènere i la font, i anticipa quin pot ser el posicionament de l'autor."
+      },
+      "durant": {
+        "max_items": 3,
+        "marca_pausa_obligatoria": true,
+        "instruccio_pausa_revisio": "Compara la teva hipòtesi inicial amb el que llegeixes ara i actualitza-la.",
+        "exemple_canonic": "Marca al marge el posicionament de l'autor i contrasta'l amb el que ja sabies."
+      },
+      "despres": {
+        "max_items": 3,
+        "elements_obligatoris": ["resum_jerarquic", "deteccio_pressuposicions", "avaluacio_fiabilitat_dades"],
+        "exemple_canonic": "Fes un resum jeràrquic, detecta pressuposicions i avalua si les dades són fiables."
+      }
+    },
+    "C1+": {
+      "etiqueta": "Crític",
+      "abans": {
+        "max_items": 3,
+        "elements_obligatoris": ["formula_propies_preguntes_lectura"],
+        "exemple_canonic": "Formula 2 preguntes pròpies que vulguis que el text et respongui."
+      },
+      "durant": {
+        "max_items": 3,
+        "marca_pausa_obligatoria": true,
+        "instruccio_pausa_reformulacio": "Si la teva hipòtesi falla, escriu què revela el text que tu no sabies.",
+        "exemple_canonic": "Contrasta activament el que llegeixes amb el que ja sabies, anotant les divergències."
+      },
+      "despres": {
+        "max_items": 3,
+        "elements_obligatoris": ["analisi_enquadrament", "fonts_addicionals_per_validar"],
+        "exemple_canonic": "Identifica què queda fora del marc del text i quines altres fonts caldrien per validar la informació."
+      }
+    }
+  },
+  "case_overrides": {
+    "DUA_acces_nivell_baix_no_escriptura_autonoma": {
+      "trigger": {
+        "dua_equals": "Accés",
+        "mecr_in": ["pre-A1", "A1", "A2"]
+      },
+      "modulacio": {
+        "no_escriptura_autonoma": true,
+        "reemplaça_escriure_per": "dibuixa, assenyala, ordena imatges, dictat oral a l'adult",
+        "nota_a_l_inici": "Les bastides d'escriptura es substitueixen per dibuix/oral/assenyalar perquè el perfil DUA Accés a nivell baix no admet producció escrita autònoma."
+      }
+    }
+  },
+  "checks_automatics_post_generacio": [
+    {
+      "name": "format_seccions_obligatori",
+      "type": "structural",
+      "must_contain_h2": "## Suports de lectura",
+      "must_contain_h3": ["### Abans", "### Durant", "### Després"]
+    },
+    {
+      "name": "volum_items_per_seccio",
+      "type": "countable",
+      "max_items_per_h3": 3,
+      "uses_field": "levels.{mecr}.{seccio}.max_items"
+    },
+    {
+      "name": "no_preguntes",
+      "type": "regex",
+      "applies_to": "cada_item_dins_seccions",
+      "fails_if_regex": "\\?\\s*$|^(Què|Per què|Com|Quan|On|Qui|Quin|Quina|Per a què)\\b"
+    },
+    {
+      "name": "pausa_obligatoria_B1_plus",
+      "type": "structural",
+      "applies_when": "mecr in [B1, B2, C1+]",
+      "must_contain_in_durant": ["⏸", "Atura't", "atura't", "ATURA'T", "atura"]
+    },
+    {
+      "name": "frase_buit_A1",
+      "type": "structural",
+      "applies_when": "mecr == A1",
+      "must_contain_in_despres_any_of": ["El text parla de ___", "text parla de"]
+    }
+  ]
+}
