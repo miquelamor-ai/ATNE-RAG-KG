@@ -71,8 +71,9 @@
 
   // Cursos de primaria inicial on R4 s'aplica (text sovint BICS quotidia,
   // glossari afegeix carrega lectora innecessaria si l'alumne no te condicio
-  // que el justifiqui).
-  var PRIMARIA_INICIAL_CURSOS = ['1r Primària', '2n Primària', '3r Primària'];
+  // que el justifiqui). Alineat amb M3_instrument-generar-glossari.md §74
+  // (decisio Miquel 2026-05-31 — anteriorment 1r-3r al codi).
+  var PRIMARIA_INICIAL_CURSOS = ['1r Primària', '2n Primària'];
 
   /**
    * Retorna la llista de complement-IDs auto-suggerits per a (perfil, MECR).
@@ -92,11 +93,32 @@
    *        primaria → nomes ['preguntes_comprensio'] (glossari no per defecte
    *        per a textos quotidians a primaria inicial sense condicio especifica).
    *        El docent pot activar-lo manualment al Pas 2 si vol.
+   *      - A5 (resposta mineriaRAG 2026-05-31): excepció a R4 per a nouvingut amb
+   *        L1 declarada — el glossari (BICS quotidians + L1 + pictograma) és
+   *        precisament el que toca per a adquisició L2. Detecta nouvingut via
+   *        profile.conditions[key=nouvingut], subvariables.nouvingut/l2, o
+   *        p.l1 + p.cat (chip 'cat' ja activaria anyKnown, però conditions modernes
+   *        poden no tenir chip i cal caçar-les igualment).
    */
   function defaultComplementsForProfile(p, mecr) {
     var cat = (p && p.cat) || '';
     var chips = (p && p.chips) ? p.chips.map(function (c) { return (c && c.cat) || ''; }).filter(Boolean) : [];
     function has(c) { return cat === c || chips.indexOf(c) !== -1 || cat === ('group-' + c); }
+
+    // Detecta nouvingut amb L1 declarada (estructura moderna conditions o subvariables).
+    // Si el perfil declara nouvingut via chip 'cat', anyKnown=true i la R4 no entra,
+    // així que aquesta check només cobreix els casos on conditions/subvariables
+    // declaren nouvingut sense el chip legacy.
+    function nouvingutAmbL1() {
+      if (!p) return false;
+      var conds = Array.isArray(p.conditions) ? p.conditions : [];
+      var nouCond = conds.find ? conds.find(function (c) { return c && c.key === 'nouvingut'; }) : null;
+      var sv = p.subvariables || {};
+      var nouSv = sv.nouvingut || sv.l2 || {};
+      var isL2 = !!nouCond || has('cat');
+      var l1 = (nouCond && nouCond.l1) || nouSv.l1 || p.l1 || '';
+      return isL2 && !!l1;
+    }
 
     // 1) Base
     var active = new Array(MATRIU_KEYS.length);
@@ -112,6 +134,8 @@
       // R4: 1r-3r primaria + low MECR sense condicions → sense glossari per defecte
       var cursR4 = (p && (p.curs || p.cursUI)) || '';
       if (mecrBand(mecr) === 'low' && PRIMARIA_INICIAL_CURSOS.indexOf(cursR4) !== -1) {
+        // A5: si nouvingut amb L1 declarada, R4 NO aplica — el glossari és central per L2.
+        if (nouvingutAmbL1()) return ['glossari', 'preguntes_comprensio'];
         return ['preguntes_comprensio'];
       }
       return ['glossari', 'preguntes_comprensio'];

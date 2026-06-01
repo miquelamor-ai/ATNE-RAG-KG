@@ -777,6 +777,11 @@ app.include_router(_drafts_router)
 from routes.adaptations import router as _adaptations_router  # noqa: E402
 app.include_router(_adaptations_router)
 
+# Cache de transliteracions verificades (A6, 2026-06-01).
+# Taula `atne_translits`. Vegeu adaptation/translit_cache.py per a la lògica.
+from routes.translits import router as _translits_router  # noqa: E402
+app.include_router(_translits_router)
+
 
 # ── Pàgines HTML ────────────────────────────────────────────────────────────
 

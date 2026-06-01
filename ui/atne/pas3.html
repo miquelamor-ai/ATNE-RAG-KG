@@ -270,6 +270,36 @@
   .md-table tr:last-child td{border-bottom:0}
   .md-table td:first-child{font-family:var(--serif);font-weight:700;color:var(--ink-900)}
 
+  /* A3 — Barra de toggles de columnes del glossari (mineriaRAG 31/05). Permet
+     al docent activar/desactivar Català, Pictograma, L1 i Transliteració per
+     personalitzar el glossari segons l'alumne. */
+  .gl-cols-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:8px 12px;margin:6px 0 10px;background:var(--cream);border:1px solid var(--paper-line);border-radius:var(--r-md);font-size:13px}
+  .gl-cols-label{color:var(--ink-600);font-weight:500;font-size:12.5px;letter-spacing:.02em;text-transform:uppercase;margin-right:4px}
+  .gl-col-toggle{display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:var(--ink-700);padding:3px 6px;border-radius:6px;transition:.12s}
+  .gl-col-toggle:hover{background:var(--ink-75)}
+  .gl-col-toggle input{cursor:pointer;accent-color:var(--primary);width:14px;height:14px;margin:0}
+  .gl-col-toggle.disabled{opacity:.4;cursor:not-allowed}
+  .gl-col-toggle.disabled input{cursor:not-allowed}
+  /* Regles d'ocultació de columnes (aplicades al contenidor .gl-list).
+     Les classes gl-col-* s'afegeixen a <th> i <td> per heurística sobre
+     el text de la capçalera al render (renderGlossariCols). */
+  .gl-list.gl-hide-ca       .md-table th.gl-col-ca,       .gl-list.gl-hide-ca       .md-table td.gl-col-ca       { display: none; }
+  .gl-list.gl-hide-picto    .md-table th.gl-col-picto,    .gl-list.gl-hide-picto    .md-table td.gl-col-picto    { display: none; }
+  .gl-list.gl-hide-l1       .md-table th.gl-col-l1,       .gl-list.gl-hide-l1       .md-table td.gl-col-l1       { display: none; }
+  .gl-list.gl-hide-translit .md-table th.gl-col-translit, .gl-list.gl-hide-translit .md-table td.gl-col-translit { display: none; }
+  /* A6 (preparat 2026-06-01) — badge per a transliteracions no verificades.
+     El badge només apareix si la cel·la rep data-verified="false" (atribut que
+     posa el render dinàmic quan A6 estigui actiu i el cache atne_translits no
+     té encara una correcció docent). Mentrestant, no apareix res. */
+  .md-table td.gl-col-translit[data-verified="false"] { position: relative; padding-right: 22px; }
+  .md-table td.gl-col-translit[data-verified="false"]::after {
+    content: "?"; position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    width: 14px; height: 14px; border-radius: 50%; background: #fef3c7; color: #92400e;
+    font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+    line-height: 1; cursor: help;
+  }
+  .md-table td.gl-col-translit[data-verified="false"]:hover::after { background: #fde68a; }
+
   /* Schema */
   .schema{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .schema.mermaid-active{display:block}
@@ -1213,6 +1243,17 @@
                 </span>
                 <span class="comp-switch-status">Actiu per a aquesta versió</span>
               </label>
+              <!-- A3: 4 toggles de columnes (mineriaRAG 31/05). El docent decideix quines
+                   columnes mostrar i exportar. Detecció heurística per nom de capçalera;
+                   els toggles per columnes absents queden inactius. Estat persistit a
+                   localStorage per (perfil, banda MECR). -->
+              <div class="gl-cols-bar" id="gl-cols-bar" data-help="p3-glossari-cols" hidden>
+                <span class="gl-cols-label">Columnes visibles</span>
+                <label class="gl-col-toggle"><input type="checkbox" data-gl-col="ca" checked><span>Català</span></label>
+                <label class="gl-col-toggle"><input type="checkbox" data-gl-col="picto"><span>Pictograma</span></label>
+                <label class="gl-col-toggle"><input type="checkbox" data-gl-col="l1"><span>L1</span></label>
+                <label class="gl-col-toggle"><input type="checkbox" data-gl-col="translit"><span>Translit.</span></label>
+              </div>
               <div class="comp-head">
                 <div class="comp-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h12a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M4 14a4 4 0 0 1 4-4h12"/></svg></div>
                 <div>
@@ -3141,6 +3182,225 @@
     document.querySelectorAll('.comp-card').forEach(enableCompEdit);
   }
 
+  // ─────────────────────────────────────────────────────────────────────
+  // A3 — Toggles de columnes del glossari (mineriaRAG 31/05).
+  //
+  // El glossari pot tenir fins a 5 columnes lògiques (Terme · Català · Pictograma ·
+  // L1 · Translit). Avui el LLM genera 2-4 columnes amb noms heterogenis segons
+  // el SKILL canon i el perfil. Fins que arribi el refactor A2 (esquema rubrica.json
+  // canònic), identifiquem cada columna heurísticament pel text de la capçalera
+  // i li afegim una classe gl-col-* perquè el CSS pugui ocultar-la segons toggle.
+  //
+  // L'estat dels 4 toggles es persisteix a localStorage per (perfil, banda MECR).
+  // Defaults inicials calculats segons mineriaRAG:
+  //   - CA: ON sempre.
+  //   - Pictograma: ON si nivell ≤ A1 o perfil amb necessitat visual.
+  //   - L1: ON si perfil.l1 declarada.
+  //   - Translit: ON si L1 té alfabet no llatí.
+  // ─────────────────────────────────────────────────────────────────────
+
+  const GL_COL_PATTERNS = [
+    { id: 'picto',    re: /pictograma|picto|imatge|emoji|icona|símbol|simbol/i },
+    { id: 'translit', re: /translit|romanitz|pronunci|fon[èe]tic/i },
+    { id: 'l1',       re: /\bL1\b|tradu(c|cci)|original|llengua\s*familiar|àrab|arab|xin[èe]s|urd[uú]|punjab|cir[íi]l|armeni|hebreu|amazic|amazig|wolof|fula/i },
+    { id: 'ca',       re: /catal[àa]|definici|explicaci|significat|sentit|concept|en\s*catal[àa]|en\s*castell[àa]|en\s*angl[èe]s/i },
+  ];
+
+  function tagGlossariColumns(cont) {
+    if (!cont) return;
+    const table = cont.querySelector('.md-table');
+    if (!table) return;
+    const headers = Array.from(table.querySelectorAll('thead th'));
+    if (!headers.length) return;
+    // La primera columna sempre és Terme (mai s'amaga). Les següents les identifiquem.
+    const colMap = headers.map((th, idx) => {
+      if (idx === 0) return null;  // Terme
+      const txt = (th.textContent || '').trim();
+      for (const p of GL_COL_PATTERNS) {
+        if (p.re.test(txt)) return p.id;
+      }
+      return null;  // Columna no identificada → no s'amaga (deixem-la visible per seguretat)
+    });
+    headers.forEach((th, idx) => {
+      const id = colMap[idx];
+      if (id) th.classList.add('gl-col-' + id);
+    });
+    table.querySelectorAll('tbody tr').forEach(tr => {
+      Array.from(tr.children).forEach((td, idx) => {
+        const id = colMap[idx];
+        if (id) td.classList.add('gl-col-' + id);
+      });
+    });
+    // Marquem al contenidor quines columnes existeixen realment per inhabilitar
+    // els toggles de columnes absents (no té sentit "amagar" el que no hi és).
+    cont.dataset.glCols = colMap.filter(Boolean).join(',');
+  }
+
+  function glossariColsStateKey() {
+    // Persisteix per (perfil, banda MECR) — un perfil canviat ha de re-aplicar defaults.
+    const pid = (function () {
+      try { return localStorage.getItem('atne.profile_id') || 'default'; } catch (_) { return 'default'; }
+    })();
+    return 'atne.gl_cols.' + pid;
+  }
+
+  function defaultGlossariColsForProfile() {
+    // Llegim el perfil actiu (mateix esquema que el Pas 2) per derivar defaults.
+    let profile = null;
+    try {
+      const raw = localStorage.getItem('atne.active_profile') || localStorage.getItem('atne.profile');
+      if (raw) profile = JSON.parse(raw);
+    } catch (_) {}
+    const conds = (profile && Array.isArray(profile.conditions)) ? profile.conditions : [];
+    const nouCond = conds.find(c => c && c.key === 'nouvingut') || null;
+    const sv = (profile && profile.subvariables) || {};
+    const nouSv = sv.nouvingut || sv.l2 || {};
+    const chips = (profile && Array.isArray(profile.chips)) ? profile.chips.map(c => (c && c.cat) || '') : [];
+    const isNouvingut = !!nouCond || chips.includes('cat') ||
+                       (profile && (profile.cat === 'cat' || profile.cat === 'group-cat'));
+    const l1 = (nouCond && nouCond.l1) || nouSv.l1 || (profile && profile.l1) || '';
+    const mecr = (profile && (profile.adaptacio || profile.mecr_sortida || profile.mecr)) || '';
+    const isLowMECR = ['pre-A1', 'A1'].includes(mecr);
+    // VISUAL_NEED segons complements-matriu.js
+    const VISUAL_NEED = ['disl', 'di', 'tdl', 'cat', 'tea', 'vis', 'discalculia'];
+    const hasVisualNeed = VISUAL_NEED.some(c => chips.includes(c) || (profile && profile.cat === c));
+    // Alfabets no-llatins — alineat amb la taula canon de mineriaRAG
+    // (docs/transliteracio_standards_l1_2026-05-31.md, esborrany). 16 L1s
+    // amb estàndard de translit definit. Els alies catalans estan inclosos
+    // a la regex per detectar L1s que el docent declari amb el nom comú.
+    const NON_LATIN_L1 = /^(àrab|arab|xin[èe]s|chinese|mandar[íi]|urdú|urdu|pendjab|punjab|hindi|bengal[íi]|rus(?!ès)|ucra[ïi]n|b[úu]lgar|japon|coreà|corea|hebreu|hebrew|tai|thai|amh[àa]ric|armeni|georgi|farsi|persa|pasht)/i;
+    const needsTranslit = !!l1 && NON_LATIN_L1.test(l1);
+
+    return {
+      ca:       true,
+      picto:    isLowMECR || hasVisualNeed,
+      l1:       isNouvingut && !!l1,
+      translit: needsTranslit,
+    };
+  }
+
+  function loadGlossariColsState() {
+    try {
+      const raw = localStorage.getItem(glossariColsStateKey());
+      if (raw) {
+        const obj = JSON.parse(raw);
+        if (obj && typeof obj === 'object') return obj;
+      }
+    } catch (_) {}
+    return defaultGlossariColsForProfile();
+  }
+
+  function saveGlossariColsState(state) {
+    try { localStorage.setItem(glossariColsStateKey(), JSON.stringify(state)); } catch (_) {}
+  }
+
+  function applyGlossariColsState() {
+    const cont = document.querySelector('#view-glossari .gl-list');
+    const bar = document.getElementById('gl-cols-bar');
+    if (!cont) return;
+    const state = loadGlossariColsState();
+    const presentCols = new Set((cont.dataset.glCols || '').split(',').filter(Boolean));
+    // Apliquem classes d'ocultació al contenidor (només per columnes presents).
+    ['ca', 'picto', 'l1', 'translit'].forEach(id => {
+      const hide = presentCols.has(id) && !state[id];
+      cont.classList.toggle('gl-hide-' + id, hide);
+    });
+    // Mostrem la barra si hi ha alguna columna present més enllà del Terme.
+    if (bar) {
+      bar.hidden = presentCols.size === 0;
+      bar.querySelectorAll('input[data-gl-col]').forEach(input => {
+        const id = input.dataset.glCol;
+        const present = presentCols.has(id);
+        input.checked = !!state[id];
+        const label = input.closest('.gl-col-toggle');
+        if (label) label.classList.toggle('disabled', !present);
+        input.disabled = !present;
+        if (!present) input.title = 'Columna no generada per al perfil actual';
+        else input.removeAttribute('title');
+      });
+    }
+  }
+
+  function initGlossariColsToggles() {
+    const bar = document.getElementById('gl-cols-bar');
+    if (!bar || bar.dataset.bound === '1') return;
+    bar.dataset.bound = '1';
+    bar.querySelectorAll('input[data-gl-col]').forEach(input => {
+      input.addEventListener('change', () => {
+        if (input.disabled) return;
+        const id = input.dataset.glCol;
+        const state = loadGlossariColsState();
+        state[id] = !!input.checked;
+        saveGlossariColsState(state);
+        applyGlossariColsState();
+        try {
+          window.ATNE_TRACK?.event?.('glossari_col_toggle', { col: id, on: !!input.checked });
+        } catch (_) {}
+      });
+    });
+  }
+  // Init en càrrega del Pas 3.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGlossariColsToggles, { once: true });
+  } else {
+    initGlossariColsToggles();
+  }
+
+  // ───────────────────────────────────────────────────────────────────────
+  // A6 (preparat 2026-06-01) — vàlvula docent per a transliteracions.
+  //
+  // Quan A6 estigui plenament actiu, el backend marcarà cada cel·la col-translit
+  // amb data-verified="false" o "true" segons el cache `atne_translits`. El
+  // docent corregeix la translit editant inline (comportament d'edició existent
+  // a enableCompEdit). En guardar, si la cel·la era unverified, fem un POST a
+  // /api/translits/verify perquè el cache l'aprengui per a futures crides.
+  //
+  // Mentre el backend no envia data-verified, aquesta lògica és no-op: cap
+  // cel·la té l'atribut i el badge no apareix. El handler `commitTranslitEdit`
+  // exposat a window.ATNE_TRANSLIT permet integració progressiva.
+  // ───────────────────────────────────────────────────────────────────────
+
+  async function commitTranslitEdit(cellEl) {
+    if (!cellEl || !cellEl.classList?.contains('gl-col-translit')) return false;
+    const newValue = (cellEl.textContent || '').trim();
+    if (!newValue) return false;
+    // Cerca terme i L1 de la mateixa fila. La columna Terme sempre és la 1a;
+    // la columna L1 té classe gl-col-l1.
+    const tr = cellEl.closest('tr');
+    if (!tr) return false;
+    const termeCell = tr.querySelector('td:first-child');
+    const l1Cell = tr.querySelector('td.gl-col-l1');
+    const terme = (termeCell?.textContent || '').trim();
+    // L1: del data-attribute del contenidor (posat per A6 quan toqui) o del text de la cel·la l1.
+    const cont = cellEl.closest('.gl-list');
+    const l1FromContainer = cont?.dataset?.glL1 || '';
+    const l1 = l1FromContainer || (l1Cell?.textContent || '').trim();
+    const estandard = cont?.dataset?.glTranslitEstandard || '';
+    if (!terme || !l1) return false;
+    try {
+      const resp = await fetch('/api/translits/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ terme, l1, transliteracio: newValue, estandard: estandard || undefined }),
+      });
+      if (!resp.ok) {
+        console.warn('[ATNE] verify translit HTTP', resp.status);
+        return false;
+      }
+      // Marca la cel·la com verified=true i treu el badge.
+      cellEl.setAttribute('data-verified', 'true');
+      try { window.atneToast?.('Transliteració desada al cache · disponible per a tothom.', 'success'); } catch (_) {}
+      try { window.ATNE_TRACK?.event?.('translit_verified', { l1, estandard: estandard || null }); } catch (_) {}
+      return true;
+    } catch (e) {
+      console.warn('[ATNE] verify translit error', e);
+      return false;
+    }
+  }
+
+  // Exposat per a integració futura amb enableCompEdit (A6 complet).
+  window.ATNE_TRANSLIT = { commitTranslitEdit };
+
   function applyComplementsToViews(complements) {
     if (!complements || !window.ATNE_LLM?.markdownToHtml) return;
     const md2html = window.ATNE_LLM.markdownToHtml;
@@ -3148,7 +3408,12 @@
     // Glossari
     if (complements.glossari) {
       const cont = document.querySelector('#view-glossari .gl-list');
-      if (cont) { cont.dataset.md = complements.glossari; cont.innerHTML = md2html(complements.glossari); }
+      if (cont) {
+        cont.dataset.md = complements.glossari;
+        cont.innerHTML = md2html(complements.glossari);
+        tagGlossariColumns(cont);
+        applyGlossariColsState();
+      }
       updateChipDot('glossari', 'ok');
     }
     // Esquema visual
@@ -4793,6 +5058,19 @@
   section.pdf-comp h3, section.pdf-comp h4 { font-size: 11pt; margin: 3mm 0 2mm; }
   section.pdf-comp .gl-list, section.pdf-comp .q-list { list-style: none; padding: 0; margin: 0; }
   section.pdf-comp .gl-item, section.pdf-comp .q-item { margin-bottom: 3mm; }
+  /* A3 — ocultació de columnes del glossari al PDF segons toggles del Pas 3.
+     Les classes gl-hide-* venen heretades del clon de #view-glossari, i les
+     classes gl-col-* són als <th>/<td> via tagGlossariColumns(). */
+  section.pdf-comp .gl-list.gl-hide-ca       .md-table th.gl-col-ca,
+  section.pdf-comp .gl-list.gl-hide-ca       .md-table td.gl-col-ca,
+  section.pdf-comp .gl-list.gl-hide-picto    .md-table th.gl-col-picto,
+  section.pdf-comp .gl-list.gl-hide-picto    .md-table td.gl-col-picto,
+  section.pdf-comp .gl-list.gl-hide-l1       .md-table th.gl-col-l1,
+  section.pdf-comp .gl-list.gl-hide-l1       .md-table td.gl-col-l1,
+  section.pdf-comp .gl-list.gl-hide-translit .md-table th.gl-col-translit,
+  section.pdf-comp .gl-list.gl-hide-translit .md-table td.gl-col-translit { display: none !important; }
+  /* Amaga la barra de toggles UI al PDF (si per algun motiu acaba al clone). */
+  section.pdf-comp .gl-cols-bar { display: none !important; }
   /* Reset de classes originals que restringien l'amplada */
   .doc-read, .cmp-view, .center-body { max-width: none !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
   /* Amagar qualsevol element residual d'edició */

@@ -96,7 +96,28 @@ _MODEL_ALIASES: dict[str, tuple[str, str]] = {
     "qwen/qwen3-30b-a3b:free":            ("openrouter", "qwen/qwen3-30b-a3b:free"),
     "deepseek/deepseek-chat-v3-0324:free":("openrouter", "deepseek/deepseek-chat-v3-0324:free"),
     "deepseek":          ("openrouter", "deepseek/deepseek-chat-v3-0324:free"),
+    "xiaomi/mimo-v2.5-pro":               ("openrouter", "xiaomi/mimo-v2.5-pro"),
+    "xiaomi/mimo-v2.5":                   ("openrouter", "xiaomi/mimo-v2.5"),
+    "mimo-v2.5-pro":     ("openrouter", "xiaomi/mimo-v2.5-pro"),
+    "mimo-v2.5":         ("openrouter", "xiaomi/mimo-v2.5"),
 }
+
+
+def _openrouter_extra_body(specific_model: str) -> dict:
+    """Retorna kwargs extra per a la crida a OpenRouter segons el model.
+
+    Models reasoning (MiMo v2.5/Pro, DeepSeek Reasoner, o1/o3) emeten chunks
+    `reasoning` separats que ATNE no necessita. `reasoning.exclude: true` fa
+    que el model raoni internament però NO emeti els reasoning chunks pel
+    wire, evitant el race condition on tot el budget se'n va en reasoning
+    abans del primer content chunk. Validat empíricament 2026-06-01 com a
+    única config que dona stream estable (vs `effort:low` que era flaky).
+    Ref: github litellm#8631, openrouter docs reasoning-tokens.
+    """
+    m = specific_model.lower()
+    if any(p in m for p in ("mimo-v2.5", "deepseek-reasoner", "/o1-", "/o3-")):
+        return {"extra_body": {"reasoning": {"exclude": True}}}
+    return {}
 
 
 def _resolve_model(model_id: str) -> tuple[str, str]:
@@ -119,6 +140,10 @@ def _resolve_model(model_id: str) -> tuple[str, str]:
         return ("openrouter", model_id.strip())
     if key.startswith("deepseek"):
         return ("openrouter", "deepseek/deepseek-chat-v3-0324:free")
+    if key.startswith("xiaomi/"):
+        return ("openrouter", model_id.strip())
+    if key.startswith("mimo"):
+        return ("openrouter", "xiaomi/mimo-v2.5-pro")
     if key.startswith("gemma-4-26"):
         return ("gemma4", "gemma-4-26b-a4b-it")
     if key.startswith("gemma"):
@@ -301,11 +326,12 @@ def _call_llm(model_id: str, system_prompt: str, text: str) -> str:
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": f"TEXT ORIGINAL A ADAPTAR:\n\n{text}"},
                     ],
-                    max_tokens=2048, temperature=0.4,
+                    max_tokens=8192, temperature=0.4,
                     extra_headers={
                         "HTTP-Referer": "https://atne.fje.cat",
                         "X-Title": "ATNE",
                     },
+                    **_openrouter_extra_body(specific_model),
                 )
                 _openrouter_key_idx = (idx + 1) % len(OPENROUTER_API_KEYS)
                 _LAST_LLM_USAGE.update({"tokens_in": (resp.usage.prompt_tokens if resp.usage else 0) or 0, "tokens_out": (resp.usage.completion_tokens if resp.usage else 0) or 0, "llm_ms": int((time.time() - _t0_llm) * 1000), "provider": "openrouter"})
@@ -461,6 +487,7 @@ def _call_llm_raw(
                         "HTTP-Referer": "https://atne.fje.cat",
                         "X-Title": "ATNE",
                     },
+                    **_openrouter_extra_body(specific_model),
                 )
                 _openrouter_key_idx = (idx + 1) % len(OPENROUTER_API_KEYS)
                 return resp.choices[0].message.content or ""
@@ -587,6 +614,7 @@ def _call_llm_stream(
                             "HTTP-Referer": "https://atne.fje.cat",
                             "X-Title": "ATNE",
                         },
+                        **_openrouter_extra_body(specific_model),
                     )
                     _openrouter_key_idx = (idx + 1) % len(OPENROUTER_API_KEYS)
                     for chunk in stream:

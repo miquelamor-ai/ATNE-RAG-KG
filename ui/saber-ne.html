@@ -1741,8 +1741,49 @@
             <li><strong>Traducció de consignes bàsiques</strong>: paraules com "Llegeix" / اقرأ, "Respon" / أجب dins del text adaptat (a nivells inicials)</li>
             <li><strong>Pistes etimològiques translingües</strong>: si la L1 és romànica (italià, romanès...), ATNE aprofita les arrels llatines i gregues compartides per connectar conceptes</li>
             <li><strong>Patró "pictograma + L1 + català"</strong>: a pre-A1, capçalera <em>"Per llegir junts"</em> per a lectura compartida amb un adult acompanyant — un LIT light que valida la llengua de l'alumne</li>
+            <li><strong>Toggles de columnes al Pas 3</strong> (des de 2026-05-31): el docent decideix quines columnes mostrar del glossari per a aquest alumne concret — Català · Pictograma · L1 · Transliteració. Defaults condicionals segons perfil; el docent ajusta amb un clic.</li>
           </ul>
-          <p class="text-body" style="margin:0;color:var(--ink-700);font-size:13px"><strong>Avui aquesta activació és invisible al docent</strong> — passa al motor de generació. La transparència UI és un proper pas previst.</p>
+          <p class="text-body" style="margin:0;color:var(--ink-700);font-size:13px">L'activació de fons passa al motor; <strong>les 4 columnes del glossari són visibles i editables al Pas 3</strong> via els toggles UX nous.</p>
+        </div>
+      </div>
+
+      <!-- Estàndards de transliteració per L1 -->
+      <div>
+        <p class="overline mb-4">Estàndards de transliteració per llengua</p>
+        <div class="card" style="padding:var(--sp-6);background:var(--paper-bg);border:1px solid var(--paper-line)">
+          <p class="text-body" style="margin:0 0 var(--sp-4) 0;color:var(--ink-700);font-size:13.5px">Quan la L1 de l'alumne usa un alfabet no llatí, ATNE genera la <strong>transliteració</strong> dels termes del glossari per ajudar el docent a llegir-los i pronunciar-los. Cada llengua té un estàndard adoptat — triat perquè (1) un docent català el pugui llegir sense diacrítics impossibles, (2) la família el reconegui, i (3) el motor el reprodueixi de forma fiable.</p>
+          <table class="md-table" style="width:100%;border-collapse:collapse;margin:var(--sp-3) 0;font-size:13px">
+            <thead>
+              <tr style="border-bottom:2px solid var(--paper-line)">
+                <th style="text-align:left;padding:8px 10px;font-family:var(--serif);font-weight:700">Llengua</th>
+                <th style="text-align:left;padding:8px 10px;font-family:var(--serif);font-weight:700">Estàndard</th>
+                <th style="text-align:left;padding:8px 10px;font-family:var(--serif);font-weight:700">Exemple</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td style="padding:8px 10px;border-bottom:1px solid var(--paper-line)">Àrab</td><td style="padding:8px 10px;border-bottom:1px solid var(--paper-line)">ALA-LC simplificat</td><td style="padding:8px 10px;border-bottom:1px solid var(--paper-line)"><code>كتاب → kitab</code></td></tr>
+              <tr><td style="padding:8px 10px;border-bottom:1px solid var(--paper-line)">Xinès mandarí</td><td style="padding:8px 10px;border-bottom:1px solid var(--paper-line)">Pinyin amb tons</td><td style="padding:8px 10px;border-bottom:1px solid var(--paper-line)"><code>学校 → xuéxiào</code></td></tr>
+              <tr><td style="padding:8px 10px;border-bottom:1px solid var(--paper-line)">Urdú</td><td style="padding:8px 10px;border-bottom:1px solid var(--paper-line)">Roman Urdu (informal)</td><td style="padding:8px 10px;border-bottom:1px solid var(--paper-line)"><code>کتاب → kitaab</code></td></tr>
+              <tr><td style="padding:8px 10px;border-bottom:1px solid var(--paper-line)">Ucraïnès / Rus</td><td style="padding:8px 10px;border-bottom:1px solid var(--paper-line)">BGN/PCGN</td><td style="padding:8px 10px;border-bottom:1px solid var(--paper-line)"><code>школа → shkola</code></td></tr>
+              <tr><td style="padding:8px 10px;border-bottom:1px solid var(--paper-line)">Japonès</td><td style="padding:8px 10px;border-bottom:1px solid var(--paper-line)">Hepburn</td><td style="padding:8px 10px;border-bottom:1px solid var(--paper-line)"><code>学校 → gakkō</code></td></tr>
+              <tr><td style="padding:8px 10px;border-bottom:1px solid var(--paper-line)">Hebreu</td><td style="padding:8px 10px;border-bottom:1px solid var(--paper-line)">Fonètica simplificada</td><td style="padding:8px 10px;"><code>ספר → sefer</code></td></tr>
+            </tbody>
+          </table>
+          <p class="text-body" style="margin:var(--sp-3) 0 0 0;color:var(--ink-700);font-size:12.5px;font-style:italic">Llistat parcial. ATNE cobreix 16 llengües amb alfabet no llatí (àrab, xinès, urdú, pendjabi, hindi, bengalí, rus, ucraïnès, búlgar, japonès, coreà, hebreu, tai, amhàric, armeni, georgià) i creix per evidència real als centres FJE. L1s amb alfabet llatí (romanès, anglès, francès, espanyol, mandinga, fula...) no necessiten transliteració.</p>
+        </div>
+      </div>
+
+      <!-- Vàlvula docent -->
+      <div>
+        <p class="overline mb-4">El docent corregeix; ATNE recorda</p>
+        <div class="card" style="padding:var(--sp-6);background:#fffbeb;border-left:4px solid #d97706">
+          <p class="text-body" style="margin:0 0 var(--sp-3) 0;color:var(--ink-700);font-size:13.5px">La transliteració és l'<strong>única excepció pactada</strong> a la regla d'extracció determinista d'ATNE: els estàndards són canon, però la transliteració concreta de cada terme la fa el motor i pot equivocar-se. Per això hi ha una <strong>vàlvula docent</strong>:</p>
+          <ul class="text-body" style="margin:0 0 var(--sp-3) var(--sp-4);padding:0;color:var(--ink-700);line-height:var(--lh-body);font-size:13px">
+            <li>Cada transliteració arriba marcada com a <strong>no verificada</strong> (símbol discret).</li>
+            <li>El docent pot editar-la inline al Pas 3 (com qualsevol cel·la del glossari).</li>
+            <li>Quan la corregeix, queda marcada com <strong>verificada</strong> i ATNE la recorda per a futurs glossaris amb el mateix terme i la mateixa L1 — sense haver de tornar a passar pel motor.</li>
+          </ul>
+          <p class="text-body" style="margin:0;color:var(--ink-700);font-size:12.5px;font-style:italic">Així el coneixement validat d'un docent FJE serveix a tots els altres docents FJE. La cobertura millora per ús real, no per teoria.</p>
         </div>
       </div>
 
