@@ -432,6 +432,21 @@ def get_format_output(rubrica: dict) -> dict:
     return (rubrica.get("transversals") or {}).get("format_output") or {}
 
 
+def get_forma_sobre_mecr(rubrica: dict) -> str:
+    """Retorna el text de `transversals.forma_sobre_mecr.rule` (o '').
+
+    T1 (canonitzat 2026-06-01, corpusFJE de53387): la regla "la forma del gènere
+    guanya sobre el MECR" és transversal als gèneres-forma (poema, diàleg,
+    receptari, reglament, instructiu, manual). La PRESÈNCIA d'aquest transversal
+    al rubrica.json identifica un gènere-forma → ATNE ja no manté la llista
+    `_form_genres` hardcoded. Reemplaça el bloc Python `if _is_form_genre:`.
+    """
+    if not rubrica:
+        return ""
+    fsm = (rubrica.get("transversals") or {}).get("forma_sobre_mecr") or {}
+    return (fsm.get("rule") or "").strip()
+
+
 # ── Vista canon consolidada per al prompt_builder (A2 cascada · 2026-06-01) ──
 
 # Mapping UI complement key → nom de skill canònica. Centralitza el que abans

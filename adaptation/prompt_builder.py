@@ -72,6 +72,40 @@ def _sl_canon(skill_name: str, mecr: str | None):
         return _Empty()
 
 
+# T1 (2026-06-01): mapeig genere_discursiu → nom de skill write-*. La majoria
+# segueix `write-{genere}`; els irregulars es llisten explícitament (alineat amb
+# GENRE_TO_SKILL_NAME de tests/golden/sync_from_json.py).
+_GENRE_TO_SKILL = {
+    "contrarelat_odi": "write-contrarelat-odi",
+    "expressar-preferencies": "expressar-preferencies",
+    # Aliases plausibles amb accent/sinònim → skill canònica (el selector pas2
+    # envia la forma sense accent, però una API externa podria enviar l'alias).
+    "diàleg": "write-dialeg",
+    "recepta": "write-receptari",
+}
+
+
+def _forma_sobre_mecr_canon(genre: str | None) -> str:
+    """Retorna el text de la regla `forma_sobre_mecr` del canon per a `genre`, o ''.
+
+    T1 canonitzat (corpusFJE de53387): la regla viu a `transversals.forma_sobre_mecr`
+    dels rubrica.json dels gèneres-forma. La PRESÈNCIA del transversal identifica el
+    gènere-forma — ATNE ja no manté la llista `_form_genres` hardcoded. Mai llança:
+    si no es pot resoldre la skill o el canon, retorna '' (cap regla → comportament
+    correcte: només els gèneres-forma del canon la reben).
+    """
+    g = (genre or "").strip().lower()
+    if not g:
+        return ""
+    skill_name = _GENRE_TO_SKILL.get(g, "write-" + g.replace(" ", "-"))
+    try:
+        import skills_loader as _sl
+        rub = _sl.load_rubrica(skill_name)
+        return _sl.get_forma_sobre_mecr(rub)
+    except Exception:
+        return ""
+
+
 def build_persona_audience(profile: dict, context: dict, mecr: str) -> str:
     """
     Genera narrativa concreta de l'alumne (persona-audience pattern).
@@ -1365,34 +1399,26 @@ Has de generar TOTES les seccions ## següents (en aquest ordre), independentmen
 Si t'oblides cap secció, l'usuari rep una targeta buida. PROHIBIT ometre seccions activades. Si el contingut és curt, fes-lo curt però NO l'ometis.
 """)
 
-    # A2 cascada · 2026-06-01 — «el JSON mana»: el detall per gènere-forma
-    # (versos del poema, torns de teatre, passos de recepta...) ja el descriu la
-    # SKILL write-* del canon. El reforç hardcoded extens (parking #59) s'ha
-    # arxivat a docs/reforcos_generes_arxiu_20260601.md. Es manté NOMÉS el
-    # principi transversal anti-aplanament (la forma guanya sobre el MECR), que
-    # no és duplicació de cap rubrica concret sinó una regla de conflicte global.
-    _form_genres = {
-        "poema", "poesia", "vers", "cançó", "canço", "song",
-        "teatre", "guió teatral", "guio teatral", "monòleg", "monoleg", "diàleg", "dialeg",
-        "recepta", "receptari",
-        "reglament", "norma", "instructiu", "manual",
-        "fitxa tècnica", "fitxa tecnica",
-    }
-    _genre_lower = (genre or "").lower()
-    _is_form_genre = any(g in _genre_lower for g in _form_genres)
-    if _is_form_genre:
+    # T1 · CANONITZAT 2026-06-01 (corpusFJE de53387): la regla transversal
+    # «la forma del gènere guanya sobre el MECR» ja viu al canon com a
+    # `transversals.forma_sobre_mecr` dels 6 gèneres-forma (poema, diàleg,
+    # receptari, reglament, instructiu, manual). ATNE la LLEGEIX del rubrica.json
+    # (anàleg a get_format_output) en lloc de mantenir-la hardcoded. La PRESÈNCIA
+    # del transversal identifica el gènere-forma → s'elimina la llista
+    # `_form_genres`. El bloc Python anterior (`if _is_form_genre:`) queda arxivat
+    # a docs/reforcos_generes_arxiu_20260601.md.
+    _fsm_rule = _forma_sobre_mecr_canon(genre)
+    if _fsm_rule:
         output_sections.append(f"""
 REGLA TRANSVERSAL — La FORMA del gènere «{genre}» guanya sobre el nivell MECR:
-si hi ha conflicte entre simplificar al MECR i preservar l'estructura formal del
-gènere (versos, torns, passos numerats, camps), GUANYA LA FORMA. Pots simplificar
-VOCABULARI, però segueix l'estructura canònica que defineix la SKILL del gènere
-més amunt. Millor un text mínimament adaptat però FORMALMENT íntegre.
+{_fsm_rule}
 """)
 
-    # TRANSVERSAL-EN-TRÀNSIT T2 (vegeu docs/reforcos_generes_arxiu_20260601.md):
-    # "no inventar contingut no demanat" és una regla transversal de format de
-    # sortida del pipeline 2-call d'ATNE. Es manté ACTIVA. Pendent decidir amb
-    # mineriaRAG si entra a `transversals` del canon o queda com a regla ATNE.
+    # T2 · CONFIRMADA com a regla de plataforma ATNE 2026-06-01 (senyal mineriaRAG
+    # de53387): "no inventar contingut no demanat" governa el format de sortida del
+    # pipeline 2-call (què va dins «## Text adaptat» vs «## Notes d'auditoria»), NO
+    # el marc pedagògic MALL → NO puja al canon, es queda a ATNE. Ja no és
+    # "en-trànsit": és regla de plataforma confirmada.
     output_sections.append("""
 Omet les seccions NO activades. No generis seccions buides.
 Títols: usa literalment «## Text adaptat», «## Glossari», «## Esquema visual», «## Mapa conceptual», «## Mapa mental», «## Preguntes de comprensió», «## Bastides», «## Activitats d'aprofundiment», «## Argumentació pedagògica», «## Notes d'auditoria». Sense prefixos numèrics, emojis ni qualificadors. Sub-apartats amb «###».

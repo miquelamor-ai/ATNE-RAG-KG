@@ -271,30 +271,26 @@ rubrica.json conté `format_output` (38×), `fidelitat_text_font` (22×) i 4 pun
 (`no_circularitat`, `no_recursivitat`, `llengua_definicio`, `seleccio_pertinent`).
 **NO existeix cap transversal de "forma > MECR" ni de "no inventar contingut".**
 
-## T1 — Preserva la forma del gènere sobre el MECR (ACTIVA, reduïda)
-- Ubicació: prompt_builder.py, bloc `if _is_form_genre:` (~L.1382).
-- Estat: REDUÏDA a la versió mínima (principi transversal); el detall per gènere
-  s'ha tret perquè el canon write-* ja el descriu.
-- **Acció mineriaRAG**: afegir un transversal (proposta de nom: `forma_sobre_mecr`)
-  als rubrica.json dels gèneres-forma (poema, teatre, recepta, instructiu, manual,
-  reglament, fitxa tècnica) → "Si hi ha conflicte entre simplificar al MECR i
-  preservar l'estructura formal del gènere, guanya la forma."
-- Quan hi sigui: ATNE el llegirà del canon i retirarà el bloc Python.
+## T1 — Preserva la forma del gènere sobre el MECR ✅ CANONITZAT (2026-06-01)
+- **TANCAT**. mineriaRAG ha canonitzat `forma_sobre_mecr` (type `structural`) als
+  6 rubrica.json de gènere-forma (write-poema, write-dialeg, write-receptari,
+  write-reglament, write-instructiu, write-manual). corpusFJE de53387.
+- ATNE ho consumeix: `skills_loader.get_forma_sobre_mecr(rubrica)` +
+  `prompt_builder._forma_sobre_mecr_canon(genre)`. El bloc Python `if _is_form_genre:`
+  i la llista `_form_genres` s'han ELIMINAT. La detecció "és gènere-forma?" es deriva
+  ara de la PRESÈNCIA del transversal al canon (no llista hardcoded).
+- Verificat: els 6 gèneres del selector pas2 detecten la regla; cap regressió
+  (harness golden 27 casos 0 FAIL). Text del canon ⊇ semàntica del bloc antic.
+- Bloc Python original (per si calgués reaplicar): és a l'historial git (commit
+  previ a la retirada) i al cos d'aquest document més amunt.
 
-## T2 — No inventar contingut no demanat (ACTIVA, intacta)
-- Ubicació: prompt_builder.py, bloc "REGLA CRÍTICA — NO INVENTIS CONTINGUT NO DEMANAT"
-  (dins l'output_sections final) i "Omet les seccions NO activades".
-- Estat: INTACTA (no tocada en aquesta cascada — és salvaguarda transversal viva).
-- **Acció mineriaRAG**: avaluar si entra com a transversal global del canon
-  (proposta de nom: `no_contingut_no_demanat`) o si es queda com a regla de
-  plataforma ATNE (pot ser que sigui més runtime-ATNE que canon-pedagògic).
-- Decisió oberta: aquesta potser SÍ és legítimament d'ATNE (és sobre el format de
-  sortida del nostre pipeline 2-call), no del marc MALL. Confirmar amb mineriaRAG.
+## T2 — No inventar contingut no demanat ✅ REGLA DE PLATAFORMA ATNE (confirmada)
+- **TANCAT**. Decisió Miquel (coincideix amb hipòtesi ATNE): T2 governa el format
+  de sortida del pipeline 2-call (què va dins «## Text adaptat» vs «## Notes
+  d'auditoria»), NO el marc MALL → NO puja al canon, es queda a ATNE.
+- Ubicació: prompt_builder.py, bloc "REGLA CRÍTICA — NO INVENTIS CONTINGUT NO
+  DEMANAT". INTACTE. Comentari actualitzat: ja no és "en-trànsit", és regla de
+  plataforma ATNE confirmada (senyal mineriaRAG de53387).
 
-## Com es tanca aquest deute
-1. mineriaRAG decideix si T1/T2 són transversals de canon i, si ho són, les afegeix
-   a `transversals` dels rubrica.json afectats (amb el nom de camp que esculli).
-2. ATNE afegeix la lectura d'aquest transversal a `skills_loader` (anàleg a
-   `get_format_output`) i retira el bloc Python corresponent.
-3. Test anti-regressió: el prompt amb el transversal del canon ha de contenir la
-   mateixa regla que el bloc Python retirat.
+## Deute T1/T2 — SALDAT
+Tot tancat 2026-06-01. Vegeu docs/senyal_mineriarag_T1_T2_20260601.md.
