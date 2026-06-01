@@ -174,6 +174,8 @@ _MODEL_COST_EUR_PER_CALL: dict[str, float] = {
     "qwen/qwen3-235b-a22b:free":     0.0,      # Qwen 3 235B MoE — gratuït OpenRouter
     "qwen/qwen3-30b-a3b:free":       0.0,      # Qwen 3 30B MoE — gratuït OpenRouter
     "deepseek/deepseek-chat-v3-0324:free": 0.0,# DeepSeek V3 — gratuït OpenRouter
+    "xiaomi/mimo-v2.5-pro":          0.012,    # OpenRouter ~$0.435/$0.87 Mtok (~2k in + 1k out)
+    "xiaomi/mimo-v2.5":              0.004,    # variant no-Pro, més barata
 }
 
 
@@ -1117,6 +1119,8 @@ _ALLOWED_MODELS = [
     "qwen/qwen3-235b-a22b:free",
     "qwen/qwen3-30b-a3b:free",
     "deepseek/deepseek-chat-v3-0324:free",
+    "xiaomi/mimo-v2.5-pro",
+    "xiaomi/mimo-v2.5",
 ]
 
 
