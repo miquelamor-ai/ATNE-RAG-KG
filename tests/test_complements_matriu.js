@@ -35,6 +35,51 @@ function profile(cat) {
   return { cat: cat, chips: [] };
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// GUARD D'EQUIVALÈNCIA DERIVAT ↔ CANON (matís demanat per mineriaRAG, R0).
+//
+// complements-matriu.data.js és un DERIVAT de matriu_cobertura.json del submodule
+// (generat per scripts/build_matriu_data.js). Aquest test FALLA si algú bumpeja
+// el submodule sense regenerar el .data.js → detecta drift silenciós, que és
+// exactament el que la canonització R0 vol eliminar. El golden snapshot detecta
+// canvis de COMPORTAMENT; aquest detecta FRESCOR del derivat respecte al canon.
+// ─────────────────────────────────────────────────────────────────────────
+console.log('=== GUARD equivalència .data.js ↔ matriu_cobertura.json (canon submodule) ===');
+(function checkEmbeddedFreshness() {
+  let embedded, canon;
+  try {
+    embedded = require('../ui/atne/js/complements-matriu.data.js');
+    canon = require('../corpus/external/corpusFJE/.tooling/matriu_cobertura.json');
+  } catch (e) {
+    nFail++;
+    failures.push('No s\'ha pogut carregar .data.js o el canon del submodule: ' + e.message);
+    console.log('  ✗ càrrega fallida: ' + e.message);
+    return;
+  }
+  // Comparació canònica: mateixa serialització de claus ordenades (deep-equal robust).
+  function canonicalize(o) {
+    if (Array.isArray(o)) return o.map(canonicalize);
+    if (o && typeof o === 'object') {
+      return Object.keys(o).sort().reduce(function (acc, k) { acc[k] = canonicalize(o[k]); return acc; }, {});
+    }
+    return o;
+  }
+  const a = JSON.stringify(canonicalize(embedded));
+  const b = JSON.stringify(canonicalize(canon));
+  if (a === b) {
+    nPass++;
+    console.log('  ✓ .data.js coincideix amb el canon del submodule (version ' + canon.version + ')');
+  } else {
+    nFail++;
+    failures.push(
+      'DRIFT: complements-matriu.data.js NO coincideix amb matriu_cobertura.json del submodule.\n' +
+      '    → Regenera amb:  node scripts/build_matriu_data.js\n' +
+      '    (probablement s\'ha bumpejat el submodule sense regenerar el derivat).'
+    );
+    console.log('  ✗ DRIFT detectat — regenera amb: node scripts/build_matriu_data.js');
+  }
+})();
+
 console.log('=== Cas titella (1r primària · dislèxia · A1) — la raó del fix ===');
 eq(
   M.defaultComplementsForProfile(profile('disl'), 'A1'),
