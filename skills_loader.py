@@ -432,6 +432,127 @@ def get_format_output(rubrica: dict) -> dict:
     return (rubrica.get("transversals") or {}).get("format_output") or {}
 
 
+# ── Vista canon consolidada per al prompt_builder (A2 cascada · 2026-06-01) ──
+
+# Mapping UI complement key → nom de skill canònica. Centralitza el que abans
+# era implícit al prompt_builder. Les keys INLINE (pictogrames, illustracions)
+# tenen skill però el format_output no és una secció H2 (marcadors al cos).
+# Les keys sense canon (negretes, definicions_integrades, traduccio_l1) → None.
+COMP_TO_SKILL: dict[str, str | None] = {
+    "glossari": "generate-glossari",
+    "preguntes_comprensio": "generate-preguntes-comprensio",
+    "bastides": "generate-bastides-lectura",
+    "esquema_visual": "generate-esquema-visual",
+    "mapa_conceptual": "generate-mapa-conceptual",
+    "mapa_mental": "generate-mapa-mental",  # NOTA: només SKILL.md, sense rubrica.json (fallback)
+    "plantilles_genere": "generate-plantilles-genere",
+    "resum_graduat": "generate-resum-graduat",
+    "cartes_conversacionals": "generate-cartes-conversacionals",
+    "rubriques": "generate-rubriques",
+    "activitats_aprofundiment": "generate-activitats-aprofundiment",
+    "resum": "generate-resum-graduat",  # 'resum' UI legacy → mateix canon graduat
+    "pictogrames": "generate-pictogrames",   # inline
+    "illustracions": "generate-illustracions",  # inline
+    "tolc": "generate-tolc",
+    "negretes": None,
+    "definicions_integrades": None,
+    "traduccio_l1": None,
+}
+
+
+@dataclass
+class SkillCanon:
+    """Vista consolidada del rubrica.json d'una skill per a un MECR concret.
+
+    Tots els camps tenen fallback segur: si el rubrica.json no existeix o no
+    cobreix el camp, els literals queden buits/None i el codi crida ha
+    d'aplicar la seva directiva legacy. Així el refactor A2 NO trenca cap
+    skill sense rubrica.json (e.g. generate-mapa-mental).
+    """
+    skill_name: str
+    found: bool                  # True si s'ha llegit un rubrica.json vàlid
+    version: str = ""            # _meta.version del canon
+    h2: str = ""                 # primer h2_exact (ex: "## Glossari")
+    h3_list: list[str] = field(default_factory=list)  # h3_exact en ordre
+    must_contain_table: bool = False
+    _passos: list[dict] = field(default_factory=list)  # passos del nivell MECR
+
+    def countable(self, pas_id: str) -> dict | None:
+        """min/max (o el dict countable sencer) del pas donat al nivell actiu."""
+        return get_countable(self._passos, pas_id)
+
+    def descriptor(self, pas_id: str) -> str | None:
+        """Descriptor textual del pas donat al nivell actiu."""
+        return get_descriptor(self._passos, pas_id)
+
+    def descriptor_max(self, pas_id: str, unit: str | None = None,
+                       default: int | None = None) -> int | None:
+        """Extreu 'Màxim N [unit]' del descriptor d'un pas (None si no n'hi ha).
+
+        Alguns sostres del canon viuen al text del descriptor, no al countable
+        (ex: 'Màxim 8 preguntes' a pas_4_format_modalitat_acarament). Si es
+        dona `unit` (ex 'preguntes'), només casa amb 'Màxim N {unit}', evitant
+        confondre's amb altres 'Màxim N paraules' del mateix descriptor.
+        """
+        desc = self.descriptor(pas_id) or ""
+        if unit:
+            m = re.search(rf"[Mm]\xe0xim\s+(\d+)\s+{re.escape(unit)}", desc)
+        else:
+            m = re.search(r"[Mm]\xe0xim\s+(\d+)", desc)
+        return int(m.group(1)) if m else default
+
+    def range_text(self, pas_id: str, fallback: str = "") -> str:
+        """Countable d'un pas formatat com a text ('2-3 nodes' / '5 frases').
+
+        Retorna `fallback` si el pas no té countable al nivell actiu (e.g.
+        canon absent o nivell sense límit). Pensat per substituir els dicts
+        min/max hardcoded del prompt_builder per la lectura del canon.
+        """
+        c = self.countable(pas_id)
+        if not c:
+            return fallback
+        lo, hi = c.get("min"), c.get("max")
+        unit = c.get("unitat", "")
+        if lo is None and hi is None:
+            return fallback
+        if lo == hi:
+            num = str(lo)
+        elif lo is None:
+            num = f"fins a {hi}"
+        elif hi is None:
+            num = f"a partir de {lo}"
+        else:
+            num = f"{lo}-{hi}"
+        return f"{num} {unit}".strip()
+
+
+def get_skill_canon(skill_name: str, mecr: str | None,
+                    roots: list[Path] | None = None) -> SkillCanon:
+    """Carrega el rubrica.json d'una skill i en deriva la vista per a `mecr`.
+
+    Punt d'entrada únic del prompt_builder durant la cascada A2: substitueix
+    els headers H2/H3 i els min/max hardcoded per la lectura del canon. Mai
+    llança: si el canon no existeix, retorna `SkillCanon(found=False)` amb
+    literals buits perquè el codi crida apliqui el fallback legacy.
+    """
+    rub = load_rubrica(skill_name, roots=roots)
+    if not rub:
+        return SkillCanon(skill_name=skill_name, found=False)
+    fmt = get_format_output(rub)
+    h2_list = (fmt or {}).get("h2_exact") or []
+    h3_list = (fmt or {}).get("h3_exact") or []
+    passos = get_level_passos(rub, mecr)
+    return SkillCanon(
+        skill_name=skill_name,
+        found=True,
+        version=(rub.get("_meta") or {}).get("version", ""),
+        h2=h2_list[0] if h2_list else "",
+        h3_list=list(h3_list),
+        must_contain_table=bool((fmt or {}).get("must_contain_table")),
+        _passos=passos,
+    )
+
+
 # ── Debug helper ───────────────────────────────────────────────────────
 
 def debug_dump(skills_roots, profile: dict, params: dict, agent_role: str = "adapter"):

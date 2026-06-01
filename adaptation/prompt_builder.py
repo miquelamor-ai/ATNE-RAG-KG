@@ -39,6 +39,39 @@ def _str_to_bool(val) -> bool:
     return bool(val)
 
 
+def _sl_canon(skill_name: str, mecr: str | None):
+    """Accessor segur a la vista canon (rubrica.json) d'una skill (A2 cascada).
+
+    Centralitza l'import lazy de `skills_loader` i garanteix que MAI llança:
+    si el loader no és disponible o el rubrica.json no existeix, retorna un
+    `SkillCanon(found=False)` amb literals buits perquè el codi crida apliqui
+    el seu fallback legacy. Substitueix els headers H2/H3 i els min/max
+    hardcoded del prompt_builder per la lectura del canon mineriaRAG v1.0.x.
+    """
+    try:
+        import skills_loader as _sl
+        return _sl.get_skill_canon(skill_name, mecr)
+    except Exception:
+        # Fallback total: objecte buit amb la mateixa interfície.
+        class _Empty:
+            found = False
+            version = ""
+            h2 = ""
+            h3_list: list[str] = []
+            must_contain_table = False
+
+            def countable(self, _pas_id):
+                return None
+
+            def descriptor(self, _pas_id):
+                return None
+
+            def range_text(self, _pas_id, fallback=""):
+                return fallback
+
+        return _Empty()
+
+
 def build_persona_audience(profile: dict, context: dict, mecr: str) -> str:
     """
     Genera narrativa concreta de l'alumne (persona-audience pattern).
@@ -444,61 +477,20 @@ COMPLEMENTS A GENERAR (a més del text adaptat):
         _genere_block = ""
         if _genere_param:
             _genere_label = _genere_param.replace("_", " ").replace("-", " ").upper()
-            # Fix 2026-05-27 (Bug 3): reforç específic per a "notícia" — sense aquest
-            # reforç, el LLM ignorava l'estructura periodística canònica (titular + lead
-            # 5W + cos en piràmide invertida + cita) i generava prosa expositiva amb
-            # preguntes. Vegeu cas mireia C5_estructura_genere=1/5.
-            _genere_lower = _genere_param.lower()
-            _is_noticia = "notic" in _genere_lower or "notíc" in _genere_lower
-            _noticia_block = ""
-            if _is_noticia:
-                _noticia_block = """
-### 🗞️ FORMAT OBLIGATORI per a NOTÍCIA (piràmide invertida)
-El text adaptat HA DE SEGUIR aquesta estructura, NO és opcional:
-
-1. **TITULAR** (1a línia, format `# Titular`):
-   - Frase informativa amb subjecte + verb d'acció + complement.
-   - NO és el tema genèric ("La fotosíntesi"), sinó el FET noticiable
-     ("Els científics descobreixen com les plantes generen oxigen").
-   - Sense adjectius valoratius. Llargada segons MECR.
-
-2. **LEAD** (1r paràgraf, sense títol propi):
-   - Respon a les 5W en una sola frase o dues curtes:
-     QUI · QUÈ · QUAN · ON · PER QUÈ (cobertura segons MECR: A1=2W, A2=4W, B1+=5W).
-   - És el resum complet del fet més important. Si el lector només llegís el lead,
-     ja sabria l'essencial.
-
-3. **COS** (paràgrafs següents, piràmide invertida):
-   - Detalls per ordre DECREIXENT de rellevància (el més important PRIMER).
-   - Cada paràgraf afegeix un detall menys central que l'anterior.
-   - Pot incloure 1 cita directa atribuïda ("Segons [persona], '…'") a partir d'A2.
-
-4. **CONTEXT FINAL** (opcional, últim paràgraf):
-   - Antecedents o conseqüències. La part més prescindible.
-
-PROHIBIT:
-- Generar el text com a prosa expositiva tipus llibre de text ("La fotosíntesi és...").
-- Estructurar el cos amb preguntes ("**On passa aquest procés?**", "**Què necessita la planta?**").
-  Això és gènere DIVULGATIU/EXPOSITIU, NO notícia.
-- Ometre el titular o el lead 5W.
-"""
+            # A2 cascada · 2026-06-01 — «el JSON mana»: reforços de gènere RETIRATS.
+            # El canon (SKILL.md write-* + rubrica.json) injectat més amunt via
+            # render_skill_block ja descriu l'estructura canònica de cada gènere
+            # (5W de notícia, torns d'entrevista, forma del poema...). El "menú"
+            # de gèneres i el bloc 5W de notícia que hi havia aquí DUPLICAVEN el
+            # canon → arxivats literalment a docs/reforcos_generes_arxiu_20260601.md.
+            # Si reapareix el bug "LLM ignora la SKILL del gènere" → reaplicar des
+            # de l'arxiu. Aquí només queda un pointer mínim no-duplicatiu.
             _genere_block = f"""
 ## ⚠️ GÈNERE DISCURSIU OBLIGATORI: {_genere_label}
 El text adaptat HA DE SEGUIR l'estructura canònica del gènere "{_genere_param}",
-tal com es defineix a la SKILL ACTIVA de més amunt al system prompt.
-- Si el gènere és entrevista: format de torns Pregunta/Resposta entre entrevistador i entrevistat.
-- Si el gènere és opinió: tesi clara + arguments + conclusió.
-- Si el gènere és conte/fàbula/poema: narrativa amb personatges i estructura literària.
-- Si el gènere és instructiu/receptari/manual: materials + passos numerats + bloc final
-  `### Per acabar` (A1-A2) o `### Resultat esperat` (A2+) amb 1-2 frases que diuen
-  què s'ha obtingut. PROHIBIT deixar la frase de tancament com a paràgraf solt fora
-  d'estructura: ha d'anar dins un encapçalament propi.
-- Si el gènere és diàleg: dos parlants identificats amb torns clars.
-- Si el gènere és notícia: titular + lead 5W + cos en piràmide invertida + cita opcional.
-- Si el gènere és divulgatiu/expositiu: prosa estructurada amb idees jerarquitzades.
-{_noticia_block}
-PROHIBIT generar prosa expositiva genèrica si el gènere és un altre. La forma del
-gènere és tan important com el contingut adaptat.
+tal com la defineix la SKILL ACTIVA de més amunt al system prompt (NO la reinterpretis).
+La forma del gènere és tan important com el contingut adaptat: PROHIBIT generar prosa
+expositiva genèrica si el gènere demanat és un altre.
 """
 
         # Phase 2 retry 2026-05-31: provat sense aquesta directiva amb el nou
@@ -510,46 +502,21 @@ gènere és tan important com el contingut adaptat.
         _picto_block = ""
         if comp.get("pictogrames"):
             _mecr_pic = (mecr or "B1").upper().replace("Ç", "C")
-            # Cada banda: (rule, mode) — "inline" = marcadors davant els termes
-            # clau dins el text corrent; "glossari" = secció final amb la llista.
-            # NOTA: la canon SKILL diu "A2+: glossari peu, NO inline". A la pràctica
-            # gpt-4o ignora la regla "NO inline" i, si la imposem amb força,
-            # acaba ometent pictogrames del tot quan competeixen amb 5+ complements
-            # actius (cas ex_pri B1, 0/3 sistemàtic). Estratègia robusta: permet
-            # inline DAVANT del terme a TOTS els nivells; la gradació canònica
-            # actua sobre la QUANTITAT, no sobre presència/absència d'inline.
-            _PICTO_BANDS = {
-                "PRE-A1": (
-                    "1-2 marcadors per frase davant noms i verbs clau (8-10 max per text). "
-                    "POSICIÓ: SEMPRE abans de la paraula (`[PICTO: gat|gato] el gat dorm`, "
-                    "MAI després). Afegeix també una capçalera `### Vocabulari del text "
-                    "(mira primer!)` al començament amb la llista pictograma·paraula per "
-                    "anticipació visual (UNE 153101)."
-                ),
-                "A1": (
-                    "4-6 marcadors per text, 1 per paraula nova o concepte clau. "
-                    "POSICIÓ: INLINE DAVANT del terme (`[PICTO: mitja|calcetin] una mitja "
-                    "vella`, MAI després)."
-                ),
-                "A2": (
-                    "4-6 marcadors INLINE DAVANT dels termes tècnics o conceptes clau del text "
-                    "(`[PICTO: planta|planta] la planta verda`). Opcionalment, també pots "
-                    "afegir un `### Glossari visual` al final amb la llista pictograma·terme."
-                ),
-            }
-            _picto_rule = _PICTO_BANDS.get(
-                _mecr_pic,
-                (
-                    "4-5 marcadors INLINE DAVANT dels termes tècnics o conceptes clau del text "
-                    "(`[PICTO: clorofil·la|clorofila] la clorofil·la`). Només per a termes "
-                    "tècnics o conceptes clau, no per a vocabulari quotidià. Opcionalment, "
-                    "també pots afegir un `### Glossari visual` al final."
-                ),
+            # A2 cascada · 2026-06-01 — «el JSON mana»: el NOMBRE/gradació surt del
+            # descriptor del canon (generate-pictogrames · pas_3_nombre_per_text),
+            # com al Call 1. El dict `_PICTO_BANDS` hardcoded (que sobredimensionava
+            # B1+ a 4-5) s'ha arxivat a docs/reforcos_generes_arxiu_20260601.md.
+            # Es manté el FORMAT imperatiu del marcador (que empíricament cal per a
+            # gpt-4o, era 0/8 sense reforç) però el NOMBRE ja no és hardcoded.
+            _picto_band_canon = _sl_canon("generate-pictogrames", _mecr_pic)
+            _picto_rule = _picto_band_canon.descriptor("pas_3_nombre_per_text") or (
+                "4-5 marcadors INLINE DAVANT dels termes tècnics o conceptes clau, "
+                "no per a vocabulari quotidià."
             )
             _picto_block = f"""
 ## ⚠️ PICTOGRAMES ARASAAC — OBLIGATORI a {_mecr_pic}
 ACTIVAT — Insereix marcadors `[PICTO: terme]` reals (NO emojis Unicode 🌞🌊🌱).
-Gradació per a {_mecr_pic}: {_picto_rule}
+Gradació per a {_mecr_pic} (canon): {_picto_rule}
 
 Format OBLIGATORI del marcador: `[PICTO: terme_idioma_doc|terme_castellà]`
 - Esquerra del `|`: terme en l'idioma del document (català, castellà…).
@@ -726,7 +693,15 @@ ACTIVAT — Ja integrat al glossari (columna de traducció a {l1_display}). No c
                 "NO inline al text corrent. Màxim 5-6 pictogrames per document."
             ),
         }
-        _picto_instr = _picto_map.get(_mecr_c3)
+        # A2 · 2026-06-01 — «el JSON mana»: el NOMBRE i la gradació de
+        # pictogrames surten del descriptor del canon (generate-pictogrames ·
+        # pas_3_nombre_per_text), que és font única des dels M*.md. El canon
+        # redueix la densitat a nivells alts (B1: 2-4, B2: 1-3, C1+: 0-2) on
+        # ATNE abans sobredimensionava (4-5 fix). El `_picto_map` legacy queda
+        # com a FALLBACK només si el canon no té descriptor per al nivell.
+        _picto_canon = _sl_canon("generate-pictogrames", _mecr_c3)
+        _picto_canon_instr = _picto_canon.descriptor("pas_3_nombre_per_text")
+        _picto_instr = _picto_canon_instr or _picto_map.get(_mecr_c3)
         _picto_format = (
             "Format OBLIGATORI del marcador: `[PICTO: terme_idioma_doc|terme_castellà]`\n"
             "  - Usa SEMPRE el format amb barra vertical `|`.\n"
@@ -758,6 +733,12 @@ Màxim 4-5 pictogrames per document, només per a termes tècnics o conceptes cl
 """)
 
     if comp.get("illustracions"):
+        # A2 · 2026-06-01 — «el JSON mana»: la DENSITAT d'il·lustracions surt del
+        # descriptor del canon (generate-illustracions · pas_1_densitat), font
+        # única des dels M*.md. ATNE abans posava un fix "3-4" a tots els nivells;
+        # el canon gradua (pre-A1: 4-5 … C1+: 0-1). Fallback al fix si canon buit.
+        _illu_canon = _sl_canon("generate-illustracions", _mecr_c3)
+        _illu_densitat = _illu_canon.descriptor("pas_1_densitat") or "Màxim 3-4 marcadors per document. Menys és millor."
         output_sections.append(f"""
 **⚠️ INSTRUCCIÓ IL·LUSTRACIONS — NO generar com a secció ## separada. Inserir INLINE dins "## Text adaptat".**
 ACTIVAT — Insereix marcadors `[IMATGE: <concepte curt en {lang_label}>]` al text adaptat
@@ -767,7 +748,7 @@ REGLES ESTRICTES:
 - Format exacte: `[IMATGE: concepte]` amb claudàtors i la paraula IMATGE en majúscules.
 - **Idioma**: {lang_label}. 3-8 paraules. Concepte nuclear, no descripció d'escena.
 - **En línia pròpia**, abans del paràgraf/secció que introdueix el concepte.
-- **Màxim 3-4 marcadors per document**. Menys és millor.
+- **Densitat per a {_mecr_c3} (canon)**: {_illu_densitat}
 - **Un marcador per secció major com a màxim**.
 - Només conceptes **visualitzables i concrets** (llocs, objectes, escenes, processos observables).
 - **NO** conceptes abstractes purs ("la democràcia", "la justícia").
@@ -787,16 +768,31 @@ Exemples INCORRECTES:
 """)
 
     if comp.get("esquema_visual"):
-        # C.3 MALL: nombre de nodes per nivell
-        _esquema_nodes_map = {
-            "PRE-A1": "2-3 nodes. Seqüències temporals bàsiques (abans→després) o relacions imatge→paraula.",
-            "A1":     "3-4 nodes. Enumeració de qualitats o parts d'un objecte (descripció simple).",
-            "A2":     "4-6 nodes. Seqüència de passos d'instrucció o esdeveniments cronològics.",
-            "B1":     "6-8 nodes. Relacions causa-efecte o hipòtesi-evidència.",
+        # A2 · 2026-06-01: H2 + nombre de nodes derivats del rubrica.json del
+        # canon (generate-esquema-visual · pas_2_total_nodes.countable). El text
+        # pedagògic de cada banda (tipus de relació) NO és countable al canon →
+        # es manté com a directiva ATNE. Fallback complet als literals legacy.
+        _ev_canon = _sl_canon("generate-esquema-visual", _mecr_c3)
+        _ev_h2 = _ev_canon.h2 or "## Esquema visual"
+        # C.3 MALL: tipus de relació per nivell (orientació pedagògica ATNE)
+        _esquema_relacio_map = {
+            "PRE-A1": "Seqüències temporals bàsiques (abans→després) o relacions imatge→paraula.",
+            "A1":     "Enumeració de qualitats o parts d'un objecte (descripció simple).",
+            "A2":     "Seqüència de passos d'instrucció o esdeveniments cronològics.",
+            "B1":     "Relacions causa-efecte o hipòtesi-evidència.",
         }
-        _esquema_nodes = _esquema_nodes_map.get(_mecr_c3, "Nombre de nodes a criteri docent. Modelitza processos complexos.")
+        # Rang de nodes: canon primer, fallback als valors legacy per banda.
+        _esquema_nodes_fallback = {
+            "PRE-A1": "2-3 nodes", "A1": "3-4 nodes", "A2": "4-6 nodes", "B1": "6-8 nodes",
+        }
+        _ev_nodes = _ev_canon.range_text(
+            "pas_2_total_nodes",
+            fallback=_esquema_nodes_fallback.get(_mecr_c3, "nombre de nodes a criteri docent"),
+        )
+        _ev_relacio = _esquema_relacio_map.get(_mecr_c3, "Modelitza processos complexos.")
+        _esquema_nodes = f"{_ev_nodes}. {_ev_relacio}"
         output_sections.append(f"""
-## Esquema visual
+{_ev_h2}
 ACTIVAT — Genera un esquema seqüencial en format llista markdown amb sagnia. Per a {_mecr_c3}: {_esquema_nodes}
 
 Format: arrel + ramificacions amb `-` i sagnia de 2 espais. NO usar fletxes Unicode (→, ↓) ni ASCII-art (│ ├ └). El frontend ATNE detecta aquest format i el renderitza com a diagrama SVG (Mermaid flowchart LR). Si no es pot renderitzar, queda com a llista llegible.
@@ -816,16 +812,24 @@ Ha de ser senzill i comprensible. Bastida temporal: retira-la quan l'alumne pugu
 """)
 
     if comp.get("mapa_conceptual"):
+        # A2 · 2026-06-01: H2 + rang de branques derivats del rubrica.json del
+        # canon (generate-mapa-conceptual · pas_3_noms_de_categoria.countable).
+        # MODULACIÓ ATNE: a PRE-A1/A1 ATNE NO genera el mapa (bastida inapropiada
+        # per autonomia lectora), tot i que el canon hi té nodes — decisió
+        # pedagògica pròpia, paral·lela al sostre glossari. Fallback legacy total.
+        _mc_canon = _sl_canon("generate-mapa-conceptual", _mecr_c3)
+        _mc_h2 = _mc_canon.h2 or "## Mapa conceptual"
         # C.3 MALL: mapa conceptual inapropiat per a Emergent/Inicial
         if _mecr_c3 in ("PRE-A1", "A1"):
             output_sections.append(f"""
-## Mapa conceptual
+{_mc_h2}
 ⚠️ NIVELL {_mecr_c3} — BASTIDA INAPROPIADA: el mapa conceptual requereix autonomia lectora consolidada (mínim A2).
 A nivell {_mecr_c3}, substitueix el mapa per un esquema visual simple (2-4 nodes amb imatges).
 NO generis el mapa conceptual per a aquest nivell.
 """)
         else:
-            # Profunditat per nivell (MALL)
+            # Profunditat per nivell (MALL). El rang de branques ve del canon
+            # (pas_3_noms_de_categoria); la descripció qualitativa és ATNE.
             _mapa_depth_map = {
                 "A2": "2 nivells (concepte central → idees principals literals del text). Guiat.",
                 "B1": "3 nivells (concepte → categories → exemples/detalls inferits). Connectors lògics a les fletxes.",
@@ -834,9 +838,11 @@ NO generis el mapa conceptual per a aquest nivell.
                 "C2": "Mapa de CONTRAST entre fonts o posicions ideològiques (no només contingut). Multi-font.",
             }
             _mapa_depth = _mapa_depth_map.get(_mecr_c3, _mapa_depth_map["B1"])
+            _mc_branques = _mc_canon.range_text("pas_3_noms_de_categoria")
+            _mc_branques_line = f" Branques principals: {_mc_branques} (canon)." if _mc_branques else ""
             output_sections.append(f"""
-## Mapa conceptual
-ACTIVAT — Genera un mapa conceptual en format text. Per a {_mecr_c3}: {_mapa_depth}
+{_mc_h2}
+ACTIVAT — Genera un mapa conceptual en format text. Per a {_mecr_c3}: {_mapa_depth}{_mc_branques_line}
 Usa NOMÉS llistes amb guions i indentació amb 2 espais.
 
 **FORMAT OBLIGATORI (llista jeràrquica markdown, no caràcters de dibuix):**
@@ -892,18 +898,32 @@ REGLES CRÍTIQUES:
     if comp.get("preguntes_comprensio") and _skills_on:
         # SKILLs ON: la SKILL aporta context detallat. AQUÍ donem format
         # ACCIONABLE perquè el LLM no ometi la secció.
-        output_sections.append("""
-## Preguntes de comprensió
-ACTIVAT — Format OBLIGATORI:
+        # A2 · 2026-06-01: H2 + 3 H3 literals derivats del rubrica.json del canon
+        # (generate-preguntes-comprensio · format_output). Fallback als literals.
+        _mecr_pq = (params.get("mecr_sortida") or params.get("mecr") or "B1").upper().replace("Ç", "C")
+        _pq_canon = _sl_canon("generate-preguntes-comprensio", _mecr_pq)
+        _pq_h2 = _pq_canon.h2 or "## Preguntes de comprensió"
+        _pq_h3 = _pq_canon.h3_list or ["### Abans de llegir", "### Durant la lectura", "### Després de llegir"]
+        _pq_h3_abans = _pq_h3[0] if len(_pq_h3) > 0 else "### Abans de llegir"
+        _pq_h3_durant = _pq_h3[1] if len(_pq_h3) > 1 else "### Durant la lectura"
+        _pq_h3_despres = _pq_h3[2] if len(_pq_h3) > 2 else "### Després de llegir"
+        # Sostre de NOMBRE de preguntes: viu al DESCRIPTOR del canon
+        # (pas_4_format_modalitat_acarament: 'Màxim 6/8/10 preguntes'), NO al
+        # countable de plànols (que és frases-de-resposta, no preguntes).
+        # Correcció post-auditoria 01/06. Fallback 10 (sostre MALL «menys és més»).
+        _pq_max = _pq_canon.descriptor_max("pas_4_format_modalitat_acarament", unit="preguntes", default=10)
+        output_sections.append(f"""
+{_pq_h2}
+ACTIVAT — Format OBLIGATORI (màxim {_pq_max} preguntes en total, regla MALL «menys és més»):
 
-### Abans de llegir
+{_pq_h3_abans}
 - [1-2 preguntes: predicció + activar coneixements previs]
 
-### Durant la lectura
+{_pq_h3_durant}
 - [1-2 preguntes per a moments clau del text]
 
-### Després de llegir
-- [3-5 preguntes cobrint plànol literal + inferencial + crític, gradades al MECR]
+{_pq_h3_despres}
+- [la majoria de les preguntes aquí, cobrint plànol literal + inferencial + crític, gradades al MECR]
 
 Cada pregunta comença amb «- ». Vegeu SKILL generate-preguntes-comprensio per al detall pedagògic.
 """)
@@ -967,8 +987,26 @@ Regles: NO escriguis «Moment», «Nivell LITERAL», ni etiquetes [Literal · V/
 """)
 
     if comp.get("activitats_aprofundiment"):
-        output_sections.append(f"""
-## Activitats d'aprofundiment
+        # A2 · 2026-06-01 — «el JSON mana»: quantitat i profunditat de pensament
+        # surten del descriptor del canon (generate-activitats-aprofundiment),
+        # que GRADUA per MECR. ATNE abans posava un bloc fix amb "debat/crític"
+        # a TOTS els nivells, antipedagògic a pre-A1/A1 (el canon hi vol 1-2
+        # activitats manipulatives, sense abstracció). Fallback al bloc fix.
+        _act_canon = _sl_canon("generate-activitats-aprofundiment", _mecr_norm)
+        _act_h2 = _act_canon.h2 or "## Activitats d'aprofundiment"
+        _act_quant = _act_canon.descriptor("pas_1_quantitat_i_varietat")
+        _act_prof = _act_canon.descriptor("pas_2_profunditat_de_pensament")
+        if _act_quant:
+            _act_prof_line = f"\n- Profunditat del pensament: {_act_prof}" if _act_prof else ""
+            output_sections.append(f"""
+{_act_h2}
+ACTIVAT — Per a {mecr_complement} ({etapa_complement}): {_act_quant}{_act_prof_line}
+- Si el text ho permet: dimensió plurilingüe (com es diu X en altres llengües de l'aula?)
+""")
+        else:
+            # Fallback legacy (canon no disponible)
+            output_sections.append(f"""
+{_act_h2}
 ACTIVAT — Genera 2-3 activitats de repte cognitiu per a {etapa_complement}:
 - Connexions interdisciplinars amb altres matèries
 - Pensament crític (per què? i si…? què passaria si…?)
@@ -982,11 +1020,18 @@ ACTIVAT — Genera 2-3 activitats de repte cognitiu per a {etapa_complement}:
         # aporten el context pedagògic detallat. AQUÍ donem instrucció de
         # format ACCIONABLE perquè el LLM no ometi la secció (el context SKILL
         # és al mig del prompt; el format va al final).
-        output_sections.append("""
-## Bastides
+        # A2 · 2026-06-01: H2 + H3 lectura/resposta derivats del rubrica.json
+        # del canon (generate-bastides-lectura). Fallback als literals v1.0.1.
+        _bs1_canon = _sl_canon("generate-bastides-lectura", params.get("mecr_sortida") or params.get("mecr"))
+        _bs1_h2 = _bs1_canon.h2 or "## Bastides"
+        _bs1_h3 = _bs1_canon.h3_list or ["### Bastides de lectura", "### Bastides de resposta"]
+        _bs1_h3_lectura = _bs1_h3[0] if len(_bs1_h3) > 0 else "### Bastides de lectura"
+        _bs1_h3_resposta = _bs1_h3[1] if len(_bs1_h3) > 1 else "### Bastides de resposta"
+        output_sections.append(f"""
+{_bs1_h2}
 ACTIVAT — Format OBLIGATORI:
 
-### Bastides de lectura
+{_bs1_h3_lectura}
 - **Abans:** [1 pista per activar coneixement previ o predir]
 - **Durant:** [1 pista per a un moment clau del text]
 - **Després:** [1 pista per consolidar o verificar]
@@ -1000,7 +1045,7 @@ Les bastides son **estrategies de control metacognitiu**, NO un re-llistat dels 
 - Si el text es INSTRUCTIU, les bastides "Durant" han de ser **estrategies executives**
   (autoregulació de la tasca), no la llista de passos.
 
-### Bastides de resposta (només si preguntes_comprensio o activitats actives)
+{_bs1_h3_resposta} (només si preguntes_comprensio o activitats actives)
 **Connectors útils:** [3-5 connectors gradats al MECR]
 **Frases model:** [2-3 iniciadors per a respondre]
 
@@ -1320,11 +1365,12 @@ Has de generar TOTES les seccions ## següents (en aquest ordre), independentmen
 Si t'oblides cap secció, l'usuari rep una targeta buida. PROHIBIT ometre seccions activades. Si el contingut és curt, fes-lo curt però NO l'ometis.
 """)
 
-    # Reforç crític per a gèneres on la FORMA és contingut (poema, teatre,
-    # recepta…). Sense això, smoke tests 2026-04-20 mostraven que el LLM
-    # aplanava poemes a prosa quan MECR era baix, contradient la regla del
-    # gènere (parking lot #59). El reforç va al final perquè els LLMs
-    # respecten més les normes properes a la generació.
+    # A2 cascada · 2026-06-01 — «el JSON mana»: el detall per gènere-forma
+    # (versos del poema, torns de teatre, passos de recepta...) ja el descriu la
+    # SKILL write-* del canon. El reforç hardcoded extens (parking #59) s'ha
+    # arxivat a docs/reforcos_generes_arxiu_20260601.md. Es manté NOMÉS el
+    # principi transversal anti-aplanament (la forma guanya sobre el MECR), que
+    # no és duplicació de cap rubrica concret sinó una regla de conflicte global.
     _form_genres = {
         "poema", "poesia", "vers", "cançó", "canço", "song",
         "teatre", "guió teatral", "guio teatral", "monòleg", "monoleg", "diàleg", "dialeg",
@@ -1336,20 +1382,17 @@ Si t'oblides cap secció, l'usuari rep una targeta buida. PROHIBIT ometre seccio
     _is_form_genre = any(g in _genre_lower for g in _form_genres)
     if _is_form_genre:
         output_sections.append(f"""
-REGLA CRÍTICA — PRESERVA LA FORMA DEL GÈNERE «{genre}»:
-La forma estructural d'aquest gènere ÉS contingut, no només envoltori.
-Si hi ha conflicte entre la simplificació MECR i la preservació de la forma,
-GUANYA LA FORMA. Pots simplificar VOCABULARI però NO:
-- Convertir versos a prosa (poema, cançó): MAI uneixis dos versos amb una coma o un connector. Cada vers a la seva línia.
-- Eliminar acotacions o canvis de personatge (teatre, diàleg): preserva «PERSONATGE:» i les acotacions entre parèntesis o cursiva.
-- Reformular llistes numerades a prosa (recepta, instructiu, reglament): manté el «1. 2. 3.» i els passos discrets.
-- Treure separadors gràfics significatius (fitxa tècnica): respecta la presentació en taula o llista de camps.
-
-Si simplificar-ho et porta a destruir l'estructura, deixa el text en una versió
-mínimament adaptada però FORMALMENT íntegra. La integritat formal és més
-important que arribar al MECR exacte en aquests gèneres.
+REGLA TRANSVERSAL — La FORMA del gènere «{genre}» guanya sobre el nivell MECR:
+si hi ha conflicte entre simplificar al MECR i preservar l'estructura formal del
+gènere (versos, torns, passos numerats, camps), GUANYA LA FORMA. Pots simplificar
+VOCABULARI, però segueix l'estructura canònica que defineix la SKILL del gènere
+més amunt. Millor un text mínimament adaptat però FORMALMENT íntegre.
 """)
 
+    # TRANSVERSAL-EN-TRÀNSIT T2 (vegeu docs/reforcos_generes_arxiu_20260601.md):
+    # "no inventar contingut no demanat" és una regla transversal de format de
+    # sortida del pipeline 2-call d'ATNE. Es manté ACTIVA. Pendent decidir amb
+    # mineriaRAG si entra a `transversals` del canon o queda com a regla ATNE.
     output_sections.append("""
 Omet les seccions NO activades. No generis seccions buides.
 Títols: usa literalment «## Text adaptat», «## Glossari», «## Esquema visual», «## Mapa conceptual», «## Mapa mental», «## Preguntes de comprensió», «## Bastides», «## Activitats d'aprofundiment», «## Argumentació pedagògica», «## Notes d'auditoria». Sense prefixos numèrics, emojis ni qualificadors. Sub-apartats amb «###».
@@ -1732,25 +1775,37 @@ al `## Text adaptat` (sota la capçalera `{_h2_glossari}`). NO inventis termes q
     # Reforcem amb format taula explicit + escala FJE concreta.
     if "rubriques" in comp_actius:
         _mecr_r = (mecr or "B1").upper().replace("Ç", "C")
+        # A2 · 2026-06-01 — «el JSON mana»: el NOMBRE de criteris surt del canon
+        # (generate-rubriques · pas_2_amplitud_d_avaluacio.countable). El canon
+        # puja a 5-6 criteris a B2/C1+ on ATNE topava a 4-5/3-4. El FORMAT de
+        # taula (checklist / escala FJE NA-AE) és estructura ATNE i es manté.
+        _rub_canon = _sl_canon("generate-rubriques", _mecr_r)
+        _r_ncrit = _rub_canon.range_text("pas_2_amplitud_d_avaluacio")  # ex "5-6 criteris"
         _r_format = ""
         if _mecr_r in ("PRE-A1",):
+            _ncrit_txt = _r_ncrit or "2-3 criteris"
             _r_format = (
                 "**Format checklist binari** (pre-A1, NO escala FJE):\n"
                 "- [ ] He fet [accio observable 1]\n"
                 "- [ ] He fet [accio observable 2]\n"
                 "- [ ] He fet [accio observable 3]\n"
-                "2-3 items, primera persona, accions fisiques visibles."
+                f"{_ncrit_txt}, primera persona, accions fisiques visibles."
             )
         elif _mecr_r == "A1":
+            _ncrit_txt = _r_ncrit or "2-3 criteris"
             _r_format = (
                 "**Format taula 3 nivells** (A1, sense vocabulari FJE):\n"
                 "| Criteri | Encara no | Si | Si, i alguna cosa mes |\n"
                 "|---|---|---|---|\n"
                 "| He escrit [tasca 1] | | | |\n"
                 "| He usat [tasca 2] | | | |\n"
-                "2-3 criteris accionables, primera persona."
+                f"{_ncrit_txt} accionables, primera persona."
             )
         else:
+            # Nombre de criteris: canon (pas_2_amplitud) o fallback legacy.
+            _ncrit_txt = _r_ncrit or (
+                "4-5 criteris" if _mecr_r in ("B1", "B2") else "3-4 criteris"
+            )
             _r_format = (
                 "**Format taula escala FJE** (A2+):\n"
                 "| Criteri | NA (No Assolit) | AS (Assolit Suficient) | AN (Assolit Notable) | AE (Assolit Excel·lent) |\n"
@@ -1758,7 +1813,7 @@ al `## Text adaptat` (sota la capçalera `{_h2_glossari}`). NO inventis termes q
                 "| He [accio observable 1] | [descriptor NA] | [descriptor AS] | [descriptor AN] | [descriptor AE — salt qualitatiu] |\n"
                 "| He [accio observable 2] | ... | ... | ... | ... |\n"
                 "| He [accio observable 3] | ... | ... | ... | ... |\n"
-                f"{'4-5' if _mecr_r in ('B1','B2') else '3-4'} criteris × 4 nivells. "
+                f"{_ncrit_txt} × 4 nivells. "
                 "Primera persona SEMPRE ('He escrit...', no 'Has escrit'). "
                 "AE = salt qualitatiu (originalitat, transferencia), NO 'AN + esforç'."
             )
