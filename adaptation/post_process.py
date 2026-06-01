@@ -149,26 +149,42 @@ def clean_gemini_output(text: str) -> str:
     #    Gemini a vegades escriu "## Nivell 1:" dins de "## Preguntes"
     #    Lògica: el primer ## de cada secció principal es manté,
     #    els ## dins d'una secció es converteixen a ###
+    #
+    #    Cas especial (bug 2026-06-01): les subseccions de «## Bastides» són
+    #    «### Bastides de lectura» i «### Bastides de resposta» — REPETEIXEN la
+    #    paraula clau «bastides». La detecció per keyword les marcava com a
+    #    principals i les mantenia a «##», deixant «## Bastides» buida i una
+    #    «## Bastides de lectura» germana (consistent en gpt-4.1-mini I MiMo).
+    #    Regla general: un títol que comenci per la paraula clau d'una secció
+    #    principal però hi afegeixi un complement («Bastides de …», «Preguntes
+    #    de la lectura …») és una SUBSECCIÓ → «###». Distingim "principal exacta"
+    #    de "principal + cua".
+    _MAIN_KEYWORDS = [
+        "text adaptat", "glossari", "esquema", "mapa conceptual",
+        "preguntes", "bastides", "suport", "activitats", "mapa mental",
+        "argumentació", "argumentacio", "notes d'auditoria",
+        "notes d'audit", "pictogrames", "traducció", "negretes",
+        "definicions",
+    ]
     lines = text.split("\n")
-    in_section = False
+    seen_main = set()  # keywords de seccions principals ja obertes
     fixed_lines = []
     for line in lines:
         if line.startswith("## "):
             title_lower = line[3:].strip().lower()
-            # És una secció principal si el títol és un dels principals
-            is_main = any(kw in title_lower for kw in [
-                "text adaptat", "glossari", "esquema", "mapa conceptual",
-                "preguntes", "bastides", "suport", "activitats", "mapa mental",
-                "argumentació", "argumentacio", "notes d'auditoria",
-                "notes d'audit", "pictogrames", "traducció", "negretes",
-                "definicions",
-            ])
-            if is_main:
-                in_section = True
-                fixed_lines.append(line)
-            else:
-                # Sub-heading dins d'una secció → convertir a ###
+            matched_kw = next((kw for kw in _MAIN_KEYWORDS if kw in title_lower), None)
+            if matched_kw is None:
+                # Cap keyword principal → sub-heading lliure → ###
                 fixed_lines.append("###" + line[2:])
+                continue
+            # És la PRIMERA vegada que veiem aquesta secció principal? → es manté
+            # com a «##». Una segona aparició de la MATEIXA keyword (típicament
+            # amb cua: «Bastides de lectura» després de «Bastides») és subsecció.
+            if matched_kw in seen_main:
+                fixed_lines.append("###" + line[2:])
+            else:
+                seen_main.add(matched_kw)
+                fixed_lines.append(line)
         else:
             fixed_lines.append(line)
     text = "\n".join(fixed_lines)
