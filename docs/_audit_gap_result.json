@@ -1,0 +1,1359 @@
+{
+ "total": 121,
+ "gap_true": 69,
+ "gap_false": 52,
+ "safe_to_delete": [],
+ "contested": [
+  {
+   "id": "A-28",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:141 — pauta 1.2 'Evitar oracions impersonals amb cal, convé, s\\'ha de: és millor adreçar-se directament al lector'",
+   "refute_reason": "La pauta UNE al corpus M3 (línea 141: 'Evitar oracions impersonals amb \"cal\", \"convé\", \"s'ha de\"...') és una REFERÈNCIA ESTÀTICA dins la documentació pedagògica. A-28 al catàleg és PRESCRIPTIVA i GRADUADA per MECR (pre-A1→A2) — el pipeline l'activa dinàmicament segons nivell de sortida. La gradació per nivell MECR de A-28 NO es pot replicar lectura únicament el corpus: la pauta és idèntica en tots els nivells. Eliminar A-28 perdria la capacitat de diferenciar la restricció d'impersonals segons accessibilitat lingüística de l'alumne."
+  },
+  {
+   "id": "A-29",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:126 — pauta 1.2 'Evitar adverbis acabats en -ment'",
+   "refute_reason": "M3_lectura-facil-comunicacio-clara.md:126 cobreix NOMÉS la substitució 'adverbis -ment' per 'molt + adjectiu' ('clarament'→'molt clar'). A-29 demanda reformulació més ampla: pre-A1 exemples 'Posteriorment'→'després' (temporal, no \"molt+adj\"), A1 'lentament'→'a poc a poc' (preposicional). El canon no especifica aquestes alternatives de reformulació verbal/preposicional ni la gradació MECR (A2 permet \"normalment\"). La cobertura és parcial i insuficient per consumir A-29 en runtime."
+  },
+  {
+   "id": "A-30",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:128 — pauta 1.2 'Evitar paraules d\\'altres idiomes si no són d\\'ús comú'",
+   "refute_reason": "M3_lectura-facil-comunicacio-clara.md:128 diu \"Evitar paraules d'altres idiomes si no són d'ús comú en el context de l'usuari final\" com a PAUTA GENERAL de Lectura Fàcil. A-30 (instruction_catalog.py:443) és una INSTRUCCIÓ PERFIL-ESPECÍFICA activada NOMÉS per perfils [nouvingut, tdl] en runtime. Diferència crítica: M3 és documentació estàndard i general (no discrimina per perfil); A-30 és una directiva codificada que el pipeline ATNE executa condicionalment. El corpus M3 NO es carrega dinàmicament per generar instruccions per perfil: corpus_reader.py només extreu seccions 6-9 (MECR, càrrega cognitiva, exemples), no la secció 1.2. Per tant, eliminar A-30 deixaria sense cobertura operativa la restricció d'anglicismes/paraules estrangeres per a alumnat novingu t i TDL en runtime, malgrat que M3 la mencioni teòricament."
+  },
+  {
+   "id": "A-31",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:110 — pauta Ortotipografia 'No escriure paraules ni frases en majúscules'",
+   "refute_reason": "M3_lectura-facil-comunicacio-clara.md:110 proposa només la prohibició de majúscules (\"No escriure paraules ni frases en majúscules\"), però MANCA la prescripció de negreta como alternativa d'èmfasi. A-31 conté DOS components inseparables: (1) \"NO usis MAJÚSCULES sostingudes per emfasitzar (ni a títols ni a paraules)\" + (2) \"Usa **negreta** si cal èmfasi\". El canon M3 cobreix parcialment la part prohibitiva (sense matisos sobre \"ni a títols ni a paraules\") però NO especifica l'alternativa recomenda (negreta). Això és crític perquè l'adaptador LLM necessita no només saber QUÈ PROHIBIR sinó QUÈ FER EN LLOC. La negreta es menciona a M3:240 dins \"Pas 6 Dissenya\" pero no com resposta directa a majúscules ni dins Ortotipografia. A més, A-31 s'executa DIRECTAMENT al prompt (activation=\"SEMPRE\", suppress_if_dua=[\"Enriquiment\"]), mentre que M3 és un document de referència pedagògica, no una regla del pipeline."
+  },
+  {
+   "id": "A-32",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:112-115 — pautes Ortotipografia 'No usar punt i coma', 'Evitar punts suspensius'",
+   "refute_reason": "M3_lectura-facil-comunicacio-clara.md (línies 112-115) cobreix les PROHIBICIONS ('No usar punt i coma', 'Evitar punts suspensius', 'No usar cometes'), però FALTA la regla POSITIVA crítica de A-32: 'Si cita, introdueix amb L'autor diu:'. M3 és document canonical descriptiu (no instrucció activa del pipeline). A-32 és instrucció SEMPRE activada que el sistema LLM consumeix en runtime com a directiva explícita. La cobertura de M3 és incompleta (prohibicions sense pauta alternativa de cites) i no és dinàmica per nivell MECR. Mantenir A-32 és pedagògicament més segur que confiar en que l'LLM infereixi la pauta de cites des de M3."
+  },
+  {
+   "id": "A-33",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:139 — pauta 'Evitar la veu passiva i passiva reflexa'",
+   "refute_reason": "M3_lectura-facil-comunicacio-clara.md:139 cobreix la regla pedagògica bàsica (\"Evitar la veu passiva... sempre és preferible la veu activa\"), però: (1) no és executable al runtime del pipeline (és documentació canònica, no instrucció); (2) A-08 (NIVELL) ja cobreix passiva però es relaja a B1+; (3) A-33 (SEMPRE) va ser afegida el 2026-05-27 per UNE 153101 amb especialització en passiva reflexa. El commit 058c6a6 explícitament identifica A-33 com a \"regla UNE 153101 faltant\". Eliminar A-33 deixaria B1+ sense protecció contra passives reflexes quan UNE 153101 és categòrica. La cobertura canònica és pedagògica, no runtime-executable."
+  },
+  {
+   "id": "A-34",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:143 — pauta 'Evitar el·lipsis... el subjecte ha de repetir-se explícitament'",
+   "refute_reason": "A-34 és una regla operativa específica a \"DUA Accés\" que diu: \"una idea per frase, subjecte explícit sempre... REPETEIX el nom (no pronoms ambigus)\". El canon M3 línea 143 estableix: \"Evitar el·lipsis... Si el subjecte és 'l'alumne', s'ha de repetir 'l'alumne' cada vegada\". Tot que conceptualment related, el sistema ATNE carrega M3 NOMÉS dins els blocs compactats de la secció \"## 6. INSTRUCCIONS PER NIVELL MECR\" (corpus_reader.py línies 118-131), on els blocs pre-A1/A1/A2/B1/B2/C1 NO esmenten explícitament la regla d'elipsis ni la repetició de subjectes. La pauta pedagògica detallada de M3:143 (secció 1.2) queda FORA del prompt en runtime. A més, A-34 està qualificat com \"DUA Accés\" — una directiva per a alumnat amb dificultats cognitives severes, mentre que el canon M3 és més genèric. Mantenir A-34 assegura que l'LLM rebi la instrucció explícita durant la generació en DUA Accés, independentment del grau en què el corpus MECR compact la cubra."
+  },
+  {
+   "id": "A-35",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:113 + corpus/external/corpusFJE/skills/mediacio/generate-glossari/SKILL.md:68-70",
+   "refute_reason": "La cita proposta menciona M3_lectura-facil-comunicacio-clara.md:113 que diu NO usar parèntesi, i M3_instrument-generar-glossari.md:68-70 que parla de criteris del glossari. PERÒ aquestes sources NO expliquen HOW definir termes dins el cos del text com alternativa. A-35 especifica: \"Defineix la 1a aparició com a FRASE NOVA breu (no parèntesi), sense repetir el terme dins la definició\" + la distinció CALP/BICS amb prova de substitució. El corpus citat cobreix QUÈ evitar (parèntesi) però no CÓMO fer-ho (frase nova). M3_gradació_lingüística.md menciona \"definició inline\" per A2, però sense detall tècnic, i \"inline\" al corpus es refereix gairebé sempre a pictogrames, no a redacció de definicions textuals. La skill de generate-glossari descriu glossaris al final, no definicions dins el cos. A-35 afegeix matís pedagògic NO consumit explícitament per ATNE en runtime: quins termes (CALP, no BICS) definir inline, format (frase nova), i que la resta vagi al glossari. Mantenir A-35 és essencial perquè el pipeline generi textos adaptats correctament."
+  },
+  {
+   "id": "B-01",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:111-112 — pauta 'Punto i apart per separar idees' + 152 'Agrupar informació del mateix tema'",
+   "refute_reason": "M3_lectura-facil-comunicacio-clara.md línies 111-112 i 152 cobreixen principis generals (separar idees per paràgrafs, agrupar temes), però NO especifiquen la granularitat operativa de B-01 (3-5 frases per paràgraf). La cita diu \"Cada idea nova comença en un paràgraf nou\" i \"Agrupar informació del mateix tema en blocs\", pero mai quantifica \"3-5 frases\" ni dona criteri operatiu per determinar la longitud del paràgraf. B-01 és una directiva precisa consumida en runtime pel pipeline ATNE (instruction_catalog.py); perdre aquesta quantificació eliminaria el control granular que l'LLM necessita per respectar la barrera MECR."
+  },
+  {
+   "id": "B-02",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:151 — pauta 'Títols que anticipen el contingut' + Pas 1 estructura 'Identifica l\\'ordre lògic'",
+   "refute_reason": "M3 (línies 151-152) especifica \"Títols que anticipen el contingut\" + \"Agrupar informació en blocs\", però: (1) NO cobreix l'especificació \"Format pregunta\" que B-02 estableix explícitament; (2) M3 és pauta pedagògica de Lectura Fàcil, no instrucció operacional per a pipeline; (3) El format pregunta és tàctica específica d'ATNE que el canon no detalla; (4) La cobertura és passiva (recomanació) no prescriptiva (regla consumible en runtime). Perdre B-02 comportaria perdre la directiva concreta sobre estructurar títols COM A PREGUNTES."
+  },
+  {
+   "id": "B-03",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:151 — pauta 'Títols que anticipen el contingut' implica anticipació de contingut de paràgraf",
+   "refute_reason": "M3:151 diu ÚNICAMENT «Títols que anticipen el contingut» (nivell de secció). B-03 demanda «Frase tòpic al principi de cada paràgraf». Aquestes són dues coses diferents: els títols de secció (M3) NO cobreixen l'estratègia de topic sentence a nivell de paràgraf (B-03). B-03 mapeja a UNE §Org, CC Pas 1, Advance organizer Ausubel (matriu:94), però aquesta pauta pedagògica específica no es documenta explícitament al corpus M3 lectura-fàcil-comunicacio-clara. La cita citada és un salto de nivell de granularitat i no cobreix la intenció de B-03 dins del runtime del pipeline ATNE."
+  },
+  {
+   "id": "B-04",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:153 — pauta 'Usar llistes si hi ha més de tres elements'",
+   "refute_reason": "La corpus M3_lectura-facil-comunicacio-clara.md (línea 153 + heurística H6, línies 407-436) estableix la pauta UNE genèrica: \"Usar llistes si hi ha més de tres elements\" (pauta estàtica). Però B-04 a instruction_catalog.py implementa una **lògica MECR-dinàmica** que M3 no cobreix: pre-A1 demanda \"SEMPRE llista, màxim 3 ítems\"; A1 \"si 2+, màxim 4-5\"; B1 \"si 4+ O complexa\". Els blocs MECR de M3 (línies 493-572) no especifiquen comportament per llista per cap nivell. La pauta de M3 és una regla fixe de comunicació clara; B-04 és una instrucció paramètrica que varia per nivell lingüístic de l'alumne. Eliminar B-04 deixaria el pipeline sense capacitat de dynamitzar llistes segons MECR en runtime, cosa que és crucial per a accessibilitat real (pre-A1 necessita llistes \"sempre\", B1 pot tolerar prosa si no són 4+ elements)."
+  },
+  {
+   "id": "B-05",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md (linies 145-151): 'Ordre temporal clar. Titols que anticipen el contingut.' + skills/mediacio/generate-bastides-lectura/SKILL.md",
+   "refute_reason": "CRÍTICA FALLIDA DE COBERTURA: La cita afirma que B-05 (Estructura deductiva: general→particular) está cubierta a corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md línies 145-151, citando como suport \"Ordre temporal clar. Titols que anticipen el contingut.\"\n\nPERÒ LA VERIFICACIÓ LITERAL REVELA:\n1. Línies 145-151 del canon M3 **NO contenen la paraula \"deductiva\"** ni la frase \"general → particular\"\n2. Les línies 149-151 tracten NOMÉS: \"Ordre temporal clar\" (cronologia), \"Títols que anticipen contingut\" (titulació clara), \"Agrupar informació per temes\" (organització temàtica), \"Llistes per 3+ elements\" i \"Dirigir-se al lector\"\n3. La instrucció B-05 (estructura deductiva) és **estructuralment diferent** de \"ordre temporal clar\" (B-06): la deducció va de lo general a lo particular (metodologia argumentativa), mentre que la cronologia va de primer a últim (seqüència temporal). NO són equivalents\n4. La skill generate-bastides-lectura/SKILL.md NO contiene cap menció de \"estructura deductiva\" ni de \"general→particular\" en cap nivell MECR\n5. M1_vulnerabilitat-socioeducativa.md **mencionada B-05 de manera genèrica (línia 155)** però **sense definició operativa, sense exemples, sense criteris d'aplicació**\n\nABSÈNCIA CRÍTICA DE COBERTURA PEDAGÒGICA:\n- El canon NO explica QUÈ és \"estructura deductiva\" (definició)\n- El canon NO explica COM implementar-la (procediment)\n- El canon NO dona EXEMPLES de teXts deductius adaptats\n- La skill de bastides NO l'integra en cap moment lector (Abans/Durant/Després)\n- NO hi ha coneixement consumible en RUNTIME pel pipeline ATNE que implementi B-05\n\nCONCLUSIÓ: La cobertura és NOMINAL, no REAL. B-05 és una instrucció SOLITÀRIA, sense ancoratge pedagògic al canon ni implementació en les skills de mediació lectora."
+  },
+  {
+   "id": "B-06",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md (linies 149-150): 'Ordre temporal clar. Quan es descriuen processos o seqüencies, usar connectors temporals explícits.'",
+   "refute_reason": "B-06 al pipeline ATNE diu 'Ordre cronològic per a processos i seqüències' sense especificar connectors temporals explícits. M3 (corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md, línies 149-150) exigeix 'connectors temporals explícits: primer, després, a continuació, finalment' com a part integral de l'ordre temporal clar. H6 del M3 (línies 407-435) aclareix que llistes numerades (B-09) i connectors en prosa (B-06) són alternatives, no equivalents. Eliminar B-06 comportaria perdre la instrucció per a seqüències en prosa que no es presentin com a llistes numerades."
+  },
+  {
+   "id": "B-07",
+   "covered_by": "corpus/external/corpusFJE/skills/mediacio/generate-bastides-lectura/SKILL.md (linies 74-100): Predicció pel títol. Propòsit de lectura. Anticipació de contingut.",
+   "refute_reason": "B-07 és una instrucció de GENERACIÓ (inserir un resum anticipatiu com a paràgraf introductori del text adaptat). La skill generate-bastides-lectura (M3_instrument-generar-bastides-lectura.md linies 74-100) descriu bastides de MEDIACIÓ (guies per a l'alumne que estructura el procés lector). Els elements citats (predicció pel títol, propòsit de lectura) són directives pedagògiques que l'alumne EXECUTA, no contingut que ATNE GENERA al text. Addicionalment, el M3 document (línia 34) clarifica explícitament: 'No descriu la producció autònoma de l'alumne' — les bastides no generen contingut nou. B-07 és consumit a runtime quan cal injectar un paràgraf resumidor anticipatori; les bastides es consumen quan el docent activa bastides=true per a orientació. Són contextos i moments diferents. Mantenir B-07."
+  },
+  {
+   "id": "B-08",
+   "covered_by": "corpus/external/corpusFJE/skills/mediacio/generate-bastides-lectura/SKILL.md: Moment Després. Resum de les idees principals. + generate-resum-graduat/SKILL.md",
+   "refute_reason": "B-08 instrueix l'LLM que insereixi resums finals **dins el text adaptat** al tanca cada secció. Les skills citades (generate-bastides-lectura linia 59/109/133, generate-resum-graduat linia 74-120) generen **suports pedagògics separats** (marcs per al moment Després de la lectura, estructures per guiar producció de resum de l'alumne). Aquests complements són opcionals i externes; no substititueixen la capacitat de l'LLM d'estructurar el text amb resums internos. Si el docent no activa els complements, B-08 segueix obligatori per generar text adaptat coherent."
+  },
+  {
+   "id": "B-09",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md (linies 152-153): 'Usar llistes si hi ha més de tres elements.' + skills/mediacio/generate-esquema-visual/SKILL.md",
+   "refute_reason": "Línia 153 de M3_lectura-facil-comunicacio-clara.md diu \"Usar llistes si hi ha més de tres elements\", però B-09 exigeix \"Numera els passos i seqüències. Cada pas en línia separada.\" La diferència és crucial: (1) llistes genèriques vs. numeració explícita; (2) vinyetes vs. numeració (ordem semàntic); (3) no especifica format vertical obligatori. La skill generate-esquema-visual complementa estructuralment però NO consumeix B-09 en runtime —és una mediació visual opcional, no una implementació de numeració textual. B-09 activada per NIVELL (pre-A1→B1) es critica per accessibilitat cognitiva de seqüències causals en nivells baixos."
+  },
+  {
+   "id": "B-10",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md (linies 148-149): 'Cohesió i coherència. Transicions clares entre seccions.' + A-14 (connectors explícits)",
+   "refute_reason": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md (línies 149-150) menciona \"Cohesió i coherència\" i \"connectors temporals explícits: primer, després, a continuació, finalment\" —cobertura INTRA-FRASE—. B-10 és \"Transicions entre seccions: 'Ja hem vist X. Ara veurem Y.'\" —cobertura INTER-SECCIONAL—. El canon cobreix principis generals de cohesió, però NO l'operació específica de senyalització entre blocs. Document docs/solapaments-dua-instruccions.md (línia 76) classifica aquest solapament com SIMILAR (no IDÈNTIC), i mapa_variables_instruccions.md activa B-10 com REFORÇ per pragmàtica TDL/TEA. Suprimir B-10 trencaria aquesta especialització."
+  },
+  {
+   "id": "B-11",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md (linies 110-114): 'Punt i apart per separar idees. Cada idea nova comença en paràgraf nou.'",
+   "refute_reason": "M3 (línies 110-114) cobreix 'Punt i apart per separar idees. Cada idea nova comença en paràgraf nou' com a recomanació ortotipogràfica general de Lectura Fàcil. Però B-11 al pipeline (instruction_catalog.py) és una instrucció OPERATIVA i GRADUADA PER NIVELL: 'Salt de línia entre idees. Cada idea en paràgraf o línia independent' amb activació NIVELL mecr_levels: [pre-A1, A1, A2]. M3 és teòric; B-11 és una directiva executable que l'LLM rep en el prompt per generar salts de línia explícits. La cita de M3 no cobreix la instrumentació per a A1-A2 ni l'exigència de formateo visual. Perdre B-11 degradaria l'output per a alumnat amb nivells baixos."
+  },
+  {
+   "id": "B-14",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md (linies 152): Llistes. Comunicació Clara passos 5-6 (taules i recursos visuals).",
+   "refute_reason": "M3 menciona taules com a recurs visual genèric dins del Pas 5 de Comunicació Clara (línies 79, 236: 'Incorpora taules, llistes, gràfics i elements visuals quan milloren la comprensió'). Però la cobertura és PARCIAL: (1) M3 no especifica l'ús pedagògic particular 'per informació COMPARATIVA' que B-14 requereix; (2) M3 no dona format tècnic ('markdown: | Col1 | Col2 |') que B-14 prescriu; (3) M3 s'expressa com a principi general ('quan milloren la comprensió, no com a decoració'), mentre B-14 és una instrucció específica i graduada per nivell MECR que el prompt ATNE executa amb activació parametritzada dins de la macro ESTRUCTURA. La menció M3 no pot consumir-se pel runtime ATNE de forma que reemplaçi B-14. Perdre B-14 eliminaria la instrucció executable; mantenir-la protegeix aquesta directiva didàctica."
+  },
+  {
+   "id": "C-01",
+   "covered_by": "corpus/external/corpusFJE/M2_carrega-cognitiva-adaptacio-textos.md + M2_factors-promotors-aprenentatge.md (memòria de treball, densitat conceptual)",
+   "refute_reason": "M2_carrega-cognitiva-adaptacio-textos.md (línies 30-38) ofereix la teoria de Sweller + Miller sobre densitat conceptual (pre-A1/A1: 1-2 conceptes, A2: 2-3, B1: 3-4) però en format narratiu pedagògic per a docents, NO com a instrucció de prompts executada pel pipeline. C-01 és una instrucció de runtime amb xifres concretes graduades per MECR. M2_factors-promotors-aprenentatge.md tracta càrrega cognitiva com a factor general de ZDP, sense especificar limits operacionals per paràgraf ni xifres per nivell. Cap dels dos documents es consumeix per l'LLM en runtime; són materials referencials. La cobertura teòrica no és equivalent a la cobertura operacional. Mantenir C-01 per seguretat (dubte → mante)."
+  },
+  {
+   "id": "C-02",
+   "covered_by": "corpus/external/corpusFJE/skills/mediacio/generate-bastides-lectura/SKILL.md + M3_MALL-aprenentatge-llengues.md (reforç immediat, mediació cognitiva)",
+   "refute_reason": "C-02 defineix \"reforç immediat de cada concepte nou\" com afegir DINS del text \"exemple concret, connexió quotidiana, o suport visual\" (banc_exhaustiu_instruccions_adaptacio.md:559). Exemple: \"La clorofil·la (substància verda)... Mira el color de les fulles del teu entorn.\" // La skill bastides-lectura genera ESTRUCTURA DE LECTURA (3 moments: Abans/Durant/Després), NO afegeix reforço dins del text. Línies 30-47 especifiquen: \"La seva funció... és aportar el procediment (com llegir)\" i \"No descriu la producció autònoma\" sinó \"mediació cognitiva\" externa. // Són orthogonals: C-02 = dins TEXT + elaboració CLT; bastides = estructura FORA + mediació Vygotsky. // El pipeline ATNE no usa bastides per enriquir text; bastides és complement separat. // Perdre C-02 deixa buit operatiu: LLM no sabria afegir exemplos incrustats per a conceptes nous."
+  },
+  {
+   "id": "C-03",
+   "covered_by": "corpus/external/corpusFJE/M2_carrega-friccio-cognitiva.md + M3_lectura-facil-comunicacio-clara.md: Coherència, Mayer, cada element ha de tenir funció pedagògica clara.",
+   "refute_reason": "La cita a corpus/external/corpusFJE/M2_carrega-friccio-cognitiva.md + M3_lectura-facil-comunicacio-clara.md NO cobreix adequadament el contingut pedagogic de C-03 de forma que el pipeline ATNE el consumeixi en runtime. (1) M2_carrega-friccio-cognitiva.md NO menciona Mayer, coherencia ni redundancia decorativa — tracta de carrega cognitiva en context de IA, no de diseny textual. (2) M3_lectura-facil-comunicacio-clara.md menciona \"eliminació de redundancies\" al Pas 3 — Edita (linia 228: \"Cada paraula ha de guanyar-se el seu lloc al document. Les redundancies (...) han d'eliminar-se.\"), PERO: (a) NO menciona Mayer, (b) NO menciona explicitament el principi de coherencia de Mayer, (c) NO articula que \"cada element ha de tenir funcio pedagogica clara\" en el mateix context que l'eliminacio de redundancia decorativa. (3) C-03 esta definit al instruction_catalog.py linia 564 com: \"Eliminacio de redundancia decorativa (principi de coherencia, Mayer): cada element ha de tenir funcio pedagogica clara\" — s'activa SEMPRE al macrodirectiva QUALITAT. La cobertura al corpus es solament implícita i fragmentaria, mancant el marc teoric de Mayer que es essencial per a la implementacio correcta de la directriu. La proposta assumeix una equivalencia que no existeix."
+  },
+  {
+   "id": "C-04",
+   "covered_by": "corpus/external/corpusFJE/M2_carrega-cognitiva-adaptacio-textos.md (chunking, límit memòria de treball 3-5 ítems per bloc, Sweller)",
+   "refute_reason": "M2_carrega-cognitiva-adaptacio-textos.md documenta teoria de Sweller i Miller sobre memòria de treball (línies 20-26, 32) però NO cobreix la REGLA OPERATIVA de C-04: (1) No especifica 'blocs de 3-5 elements' — parla de 'densitat conceptual per paràgraf' (línies 34-38); (2) No menciona intensificació dinàmica per TDAH.baixa_memoria → '2-3 elements' (línies 112 matriu); (3) M2 és referència teòrica, no instrucció executable en runtime. C-04 és una directiva SEMPRE que el pipeline necessita per generar chunking automàtic. La supressió perdria la garantia de segmentació sistemàtica.\""
+  },
+  {
+   "id": "C-06",
+   "covered_by": "corpus/external/corpusFJE/skills/mediacio/generate-glossari/rubrica.json, M3_instrument-generar-glossari.md: 'Pot incloure una analogia simple (és com…) o un exemple concret del text.'",
+   "refute_reason": "C-06 al pipeline ATNE (matriu_tracabilitat.md línia 114): 'Analogies amb experiències quotidianes. NIVELL GRADUAT pre-A1→B1'. Definició: 'Analogia amb concepte abstracte per a cada pas, amb gradació MECR (pre-A1=objecte físic, A1=quotidiana, A2=familiar, B1=comparació)'. La cita canon proposa cobertura via rubrica.json (A2, linha 238): 'Pot incloure una analogia simple (és com…) o un exemple concret del text.' PERÒ: (1) el descriptor del glossari diu 'POT' (opcional), mentre C-06 prescriu obligatòriament analogies; (2) C-06 aplica al TEXT ADAPTAT en runtime (responsabilitat del generador de text), no al glossari aïllat; (3) el glossari és suport complementari, no la font de les analogies per al text principal. Perdre C-06 eliminaria la prescripció obligatòria d'analogies en el text adaptat, mantenint-la només com opció opcional al glossari."
+  },
+  {
+   "id": "C-08",
+   "covered_by": "corpus/external/corpusFJE/skills/mediacio/generate-glossari/M3_instrument-generar-glossari.md: 'els termes clau apareixen primer al glossari, després al text'",
+   "refute_reason": "C-08 especifica 'els termes clau apareixen primer al glossari, després al text' — una directiva de SEQÜENCIACIÓ pedagògica basada en CLT pre-training (Sweller). El M3_instrument-generar-glossari.md (línies 141-158, 260-288) genera ESTRUCTURA DE TAULA (ordre alfabètic, columnes per nivell, format markdown) però NO especifica l'ordre temporal de presentació ('glossari PRIMER que text') ni la seqüenciació dins del pipeline ATNE. M3 és referent de disseny, no directiva LLM-PROMPT executada en runtime. La instrucció C-08 és una DIRECTIVA DE SEQÜÈNCIA (quan/com presentar glossari vs text adaptat), mentre que M3 descriu un INSTRUMENT (com estructurar la taula de glossari). No són coextensives."
+  },
+  {
+   "id": "D-01",
+   "covered_by": "corpus/external/corpusFJE/skills/mediacio/generate-pictogrames/SKILL.md: '[PICTO: terme] per a ARASAAC'",
+   "refute_reason": "SKILL.md de generate-pictogrames (corpus/external/corpusFJE/skills/mediacio/generate-pictogrames/SKILL.md, linia 14) té agent_role: complements, cosa que **NO es carrega al call 1 (adapter)**. Això és confirmat a proposta_post_fase0_2026_05_31.md (linia 111): \"La SKILL actual no es carrega al call 1 perquè és complements-role. El slicing no té res a aplicar.\" El resultat d'eliminar la directiva Python 'pictogrames call 1' fou \"0/8 sans directiva\" fallada (fase 2, linia 85). El SKILL té estil **descriptiu** (no imperatiu), i el format exemplificat [PICTO: terme|terme_castella] (linia 52-53) no és una instrucció operativa executable pel pipeline ATNE en runtime. D-01 és SEMPRE necessària per a les instruccions de modalitat multimodal inline que D-01 menciona, especialment per a pre-A1/A1 amb TEA i CAA."
+  },
+  {
+   "id": "D-02",
+   "covered_by": "corpus/external/corpusFJE/skills/mediacio/generate-esquema-visual/SKILL.md: 'Llista markdown amb sagnia (compatible Mermaid SVG), NO fletxes Unicode ni ASCII-art'",
+   "refute_reason": "D-02 especifica: \"Esquema de procés com a llista markdown amb sagnia (compatible amb renderer Mermaid SVG del frontend); NO fletxes Unicode ni ASCII-art.\" (instruction_catalog.py:612). El SKILL.md corpus/external/corpusFJE/skills/mediacio/generate-esquema-visual/SKILL.md cobreix la PROHIBICIÓ de formato (línies 65-66: \"NO fletxes Unicode\" i \"NO ASCII-art\"), però l'esquema visual ATNE conté 6 seccions MECR diferenciades amb \"Tipus de relacions\" específiques per nivell (línies 68-154): pre-A1 \"seqüències temporals bàsiques\", A1 \"enumeració paral·lela\", A2 \"seqüència cronològica\", B1 \"causa-efecte\", B2 \"categorització jeràrquica\", C1+ \"estructures discursives complexes\". A runtime (prompt_builder.py:778-792), la distinció \"tipos_de_relacions\" es manté en ATNE legacy code, mostrant que el SKILL.md és consumit només parcialment (node counts del rubrica.json) però les directrius pedagògiques per relacions s'afegeblen manualment. Eliminar D-02 perdria l'alignement explicit entre la instrucció LLM i aquestes 6 subcategories MECR, que el SKILL.md espera però que al pipeline ATNE no es consumeix completament via SKILL JSON."
+  },
+  {
+   "id": "D-03",
+   "covered_by": "corpus/external/corpusFJE/skills/mediacio/generate-mapa-conceptual/SKILL.md: 'Mapa conceptual jeràrquic markdown, arbre amb branques etiquetades'",
+   "refute_reason": "La cita és parcial i crea confusió. La SKILL `corpus/external/corpusFJE/skills/mediacio/generate-mapa-conceptual/SKILL.md` sí cobreix la tipologia MALL completa (esquema visual pre-A1/A1, mapa conceptual A2+, mapa contrast C1), modulació per MECR, i distinció vs. mapa mental. PERÒ: (1) D-03 al catàleg es carrega SEMPRE que complement 'mapa_conceptual'=true (instruction_filter.py), independent de la skill. (2) La skill es carrega a `prompt_builder.py:820` via `_sl_canon(\"generate-mapa-conceptual\", _mecr_c3)` basant-se en complement_key, no en D-03. (3) Si D-03 es treu, la SKILL continua funcionant (linea 814: `if comp.get(\"mapa_conceptual\"):`), però perdríem TRAÇABILITAT explícita dins del catàleg ATNE que aquest complement és macrodirectiva MULTIMODAL. (4) La SKILL és corpus EXTERN canònic; D-03 és part de la LÓGICA INTERNA de ATNE. Perdre D-03 és perdre l'àncora del sistema (auditoria, estadístiques /api/stats-instruccions, filtratge per macro). Recomanació: MANTENIR D-03 com a referència de catàleg, no eliminar."
+  },
+  {
+   "id": "E-02",
+   "covered_by": "corpus/external/corpusFJE/skills/mediacio/generate-glossari/M3_instrument-generar-glossari.md: 'Principi rector CALP de Cummins: pre-A1=6 paraules · A1-A2=8-10 · B1=12 · B2=15 · C1=20'",
+   "refute_reason": "E-02 \"Gradua la definició tècnica segons MECR\" (instruction_catalog.py, lín. 645-655) és una instrucció INDEPENDENT que prescriu definicions integrades dins del text principal (entre parèntesis, primera aparició de termes tècnics). M3 generate-glossari (corpus/external/corpusFJE/skills/mediacio/generate-glossari/M3_instrument-generar-glossari.md, lín. 34) és una SKILL per al GLOSSARI SEPARADO (taula markdown al final). Son contextos pedagògics TOTALMENT DIFERENTS: (1) E-02 → definicions integrades al text (TEXT ADAPTAT), (2) M3 → glossari complement (taula separada). A més, les xifres discrepan: M3 prescriu pre-A1=6 paraules (lín. 34, 59), mentre E-02 prescriu pre-A1=3-4 paraules (lín. 650). El M3 NO cobreix el matís de E-02 (graduació per MECR de definicions integrades), sinó només el glossari. Perdre E-02 eliminaria la instrucció per a definicions integrades, obligant el LLM a confiar en E-01 i A-02 (que només demanen \"negreta\" i \"definició\"), sense la graduació pedagógica per nivell MECR que E-02 proporciona."
+  },
+  {
+   "id": "E-06",
+   "covered_by": "corpus/external/corpusFJE/skills/generes/write-conte/M3_genere-escriure-conte.md: 'Seqüència d'esdeveniments — Ordre i causalitat... cada acte impacta la successió'",
+   "refute_reason": "E-06 és una instrucció SEMPRE (universal, s'aplica a TOTS els texts de TOTS els gèneres). La citació cobreix NOMÉS la causalitat narrativa dins el M3 del conte (pas 3: \"Seqüència d'esdeveniments\") i la biografia (pas 1: \"relació causa-efecte\", B2+). Però aquests M3 es limiten als gèneres narratius i NO es consulten en runtime per a gèneres explicatius, informatius o divulgativos (notícies, divulgatiu, instructiu, manual, etc.). E-06 al pipeline és el mecanisme pedagògic que garanteix que qualsevol simplificació lingüística (del vocabulari, sintaxi) NO destrueix la cadena causal del contingut. Exemple: un text sobre fotosíntesi (gènere divulgatiu) simplificat sense E-06 podria dir \"La planta creix amb llum\" en lloc de \"La planta absorbeix llum, que activa la fotosíntesi per produir energia, perquè pugui créixer\" — perdent causalitat. Els M3 narratius no cobreixen aquest principi universal. Perdre E-06 acceptaria que gèneres no narratius es simplificaressin sense preservar cadena causal, violant rigor curricular (E-05 + E-06 són el duo de protecció de qualitat)."
+  },
+  {
+   "id": "E-07",
+   "covered_by": "corpus/external/corpusFJE/skills/mediacio/generate-glossari/M3_instrument-generar-glossari.md: 'Recursos pedagògics: pot incloure... exemple concret del text'",
+   "refute_reason": "E-07 ('Un exemple concret per concepte abstracte', NIVELL GRADUAT pre-A1→B1) és una INSTRUCCIÓ DEL PIPELINE ATNE que s'aplica al cos del TEXT ADAPTAT, mentre que generate-glossari (M3_instrument-generar-glossari.md) és una SKILL COMPLEMENTÀRIA que genera glossari DESPRÉS de l'adaptació. El M3 només menciona 'Recursos pedagògics: pot incloure analogia o exemple' a A2+ (OPCIONAL), però pre-A1 i A1 no ho garanteixen. La cobertura és parcial i condicionada per nivell. Eliminar E-07 deixaria sense instrucció l'adapter LLM de posar exemples concrets en el text adaptat per als nivells més crítics (pre-A1/A1). Font: corpus/external/corpusFJE/skills/mediacio/generate-glossari/M3_instrument-generar-glossari.md línies 150, 118 (SKILL.md) + docs/decisions/matriu_tracabilitat_instruccions.md línia 138 + instruction_catalog.py E-07 entry."
+  },
+  {
+   "id": "G-01",
+   "covered_by": "corpus/external/corpusFJE/skills/mediacio/generate-glossari/SKILL.md — 'Inclou una variant bilingüe per a alumnat nouvingut' + 'Afegeix el terme en L1 amb alfabet original'",
+   "refute_reason": "La skill 'generate-glossari' (SKILL.md línies 62-64 i 91-94) descriu CÓMO GENERAR glossaris bilingües amb L1 en alfabet original — és una rúbrica de QUALITAT per a glossaris ja generats. NO ordena l'ACTIVACIÓ automàtica al pipeline. En canvi, G-01 en instruction_catalog.py és l'ordre EXPLÍCITA al LLM: \"Glossari bilingüe complet: cada terme tècnic amb traducció a L1\". La skill depèn de `params.complements.glossari = true` (opcional), mentre G-01 s'activa automàticament quan PERFIL=nouvingut (obligatori). La cobertura és de FORMAT, no d'ACTIVACIÓ. El matís pedagògic és crític: G-01 prescriu inclusió sistemàtica per a TOTS els nouvinguts, la skill només valida la qualitat SI es genera."
+  },
+  {
+   "id": "G-07",
+   "covered_by": "M1_alumnat-nouvingut.md (sec. 4, barreres lingüístiques, inferència); M3_TILC-llengua-i-continguts.md (estructura CALP vs BICS)",
+   "refute_reason": "M1_alumnat-nouvingut.md secció 4 (Heurístiques) parla de context BICS/CALP però no conté instruccions operatives sobre marcar estructures discursives. M3_TILC-llengua-i-continguts.md secció \"Diferencia BICS i CALP\" (línies 125-128) diferencia competència conversacional d'acadèmica, però NO instrueix com marcar definicions vs exemples vs conclusions. El catàleg cobreix frase tòpic (B-03: \"Frase tòpic al principi de cada paràgraf\"), però NO el matís operatiu de G-07: \"Marca clarament què és una definició, què és un exemple, què és una conclusió.\" Aquest matís específic de marcar/etiquetar tipus discursiu és absent tant de M1 com M3. Documento solapaments-dua-instruccions.md (línea 163) anotació \"p\" (parcial) suggereix cobertura incompleta."
+  },
+  {
+   "id": "G-08",
+   "covered_by": "M3_lectura-facil-comunicacio-clara.md, secció 6 \"pre-A1 Emergent\" (linies 493-508): Lectura logogràfica compartida adult/infant; ritme oral, estructura narrativa rondalla, suport visual, destinatari adult que llegeix en veu alta",
+   "refute_reason": "G-08 és una instrucció ACTIVA del pipeline ATNE (instruction_catalog.py, línies 789-795) que es transmet a l'LLM via instruction_filter.get_instructions(). El M3_lectura-facil-comunicacio-clara.md (línies 493-508) és un document educatiu de REFERÈNCIA que descriu comportaments lectors per a pre-A1, però NO és codi ejecutable dins el prompt. El corpus_reader.py llegeix M3 només per extreure \"INSTRUCCIONS PER NIVELL MECR\" (línea 120), però G-08 no viu en aquesta secció — viu en instruction_catalog.py del pipeline. Si G-08 s'elimina, l'LLM NUNCA rebrà la directiva explícita \"Lectura compartida adult/infant - text apta per VEU ALTA amb ritme oral natural, narrativa rondalla, suport visual integrat, pauses clares (puntuació mínima)\". El M3 dóna context educatiu, però no reemplaça la función de G-08 com instrucció transmesa al LLM. Els \"hardcoded bastides\" al prompt_builder.py (línea 301) són complementaris, no substitutius. RISC: perdre la garantia que per a pre-A1 emergent/logogràfic el text sia deliberadament estructurat per a lectura compartida."
+  },
+  {
+   "id": "G-09",
+   "covered_by": "M3_lectura-facil-comunicacio-clara.md, secció 6 \"pre-A1 Emergent\" (linies 498-499): límit 3-5 paraules per frase per Emergent, vocabulari concret visual només",
+   "refute_reason": "M3_lectura-facil-comunicacio-clara.md secció 6 \"pre-A1 Emergent\" (línies 493-508) cobreix descriptivament el nivell MECR pre-A1 (frases 3-5 paraules, vocabulari quotidià bàsic) però NO conté els matissos operacionals crítics de G-09: (1) LÍMIT TOTAL de 40 paraules per text adaptat (M3 només especifica frases 3-5, no total text); (2) \"Vocabulari exclusivament concret i visual\" (M3 diu \"quotidià bàsic\" sense aquest qualificatiu); (3) **crucialmente**: \"No eliminis el nucli pedagògic de la sessió — comprimeix la forma però mantén l'objectiu d'aprenentatge\" (aquesta directiva OPERACIONAL per a l'LLM NO apareix a M3, que és merament descriptiu). El corpus M3 és contexte pedagògic per al docent; G-09 és instrucció PRESCRIPTIVA per al generador LLM en runtime. Són complementàries, no substitutes."
+  },
+  {
+   "id": "G-10",
+   "covered_by": "M3_TILC-llengua-i-continguts.md (paragrafs sobre TILC i CALP, línies 13-15, 59): 'NO reduir llargada sinó adaptar CALP/BICS'; 'bastides lingüístiques del TILC'; 'Cummins interdependència competència subjacent comune'",
+   "refute_reason": "M3_TILC-llengua-i-continguts.md (linies 13, 59-62, 97) menciona TILC, CALP/BICS, bastides i glossaris bilingües, però NO prescriu explícitament 'NO reduir llargada del text' ni distingueix entre perfils de transferència (TILC/MALL) vs. inicial (pre-A1). M1_alumnat-nouvingut.md (linies 328-332) confirma teòricament que 'l'alumne ja domina les HCL en L1, la bastida és per L2', però això és framework general, no instrucció operacional pel pipeline. G-10 és una prescripció OPERACIONAL específica que diferencia alumnat novingut en transferència (NO retalla) d'alumnat emergent (retalla permesa via A-27). La cobertura teòrica no garanteix que l'LLM/pipeline executed G-10 en runtime: sense la instrucció explícita, el sistema seguiria A-27 (retalla 60-70%) indiscriminadament, perdent contingut curricular per a lectors que JA saben llegir (L1)."
+  },
+  {
+   "id": "H-01",
+   "covered_by": "M1_alumnat-TEA.md (taula prioritats línies 279-284): 'H-01 (estructura predictible)' citat explícitament a la matriu barrera→instruccions",
+   "refute_reason": "M1_alumnat-TEA.md (línies 271 i 281) cita H-01 com a descriptiu al corpus, però corpus_reader.py (línea 107) busca secció \"## 6. INSTRUCCIONS D'ADAPTACIÓ TEXTUAL PER A L'LLM\" que NO existeix (M1 té \"## 6. INSTRUCCIONS D'ADAPTACIÓ TEXTUAL\" sense \"PER A L'LLM\"). La funció _extract_section() requereix prefix exacte, per la qual cosa el bloc de M1 NO es carrega al prompt en runtime. H-01 es consumeix operativament des de instruction_catalog.py (\"TEA: estructura predictible i fixa — sempre: títol → definició → exemple → activitat\"), que és el canon autoritat. M1_alumnat-TEA.md amplia el context pedagògic però no és la font operativa; és documentació didàctica, no duplicada amb la directiva de prompt H-01."
+  },
+  {
+   "id": "H-02",
+   "covered_by": "M1_alumnat-TEA.md (taula prioritats línies 281): 'H-02 (zero implicitura)' citat explícitament a la matriu barrera→instruccions",
+   "refute_reason": "M1_alumnat-TEA.md cita H-02 (zero implicitura) a la taula prioritats (línia 281) i ofereix l'exemple ABANS→DESPRÉS (línies 289-300) amb expressions figurades traduïdes. PERÒ: H-02 NO es desenvolupa com a heurística completa amb \"Quan aplica\", \"Fonament\" i \"Exemple de raonament\" com els altres H1-H8 (línies 201-242). La cobertura és conceptual (línies 265-275) però no pedagògica operativa. El pipeline ATNE consumeix instruccions heurístiques complertes, no cites tàcites de taula. La manca de desenvolupament complet de H-02 significa que la competència de \"zero implicitura\" no està scaffolded per a docents. MANTENIR H-02 com a instrucció independent del pipeline."
+  },
+  {
+   "id": "H-03",
+   "covered_by": "M1_alumnat-TEA.md (taula prioritats línies 282): 'H-03 (anticipació canvis)' citat explícitament a la matriu barrera→instruccions",
+   "refute_reason": "La taula de M1_alumnat-TEA.md (línea 282) cita \"H-03 (anticipació canvis)\" com a instrucció prioritat 2a, però és només una REFERÈNCIA al catàleg de `instruction_catalog.py`. La secció \"Especificació d'adaptació\" (línea 274) menciona genèricament \"Anticipació: avisar canvis de tema\" però NO defineix H-03 com a heurística LLM amb frases específiques. H-03 en `instruction_catalog.py` (línea 826-831) és una instrucció executable amb `activation: PERFIL, profiles: [tea]` i text concret: \"TEA: anticipació de canvis — avisa sempre: 'Ara canviem de tema.', 'A continuació veurem...'\" La proves dels tests (mpv/resultats/tea_tdl_B1_gemma_4_31b_it_CREAM.md línies 20, 32) mostren que H-03 genera anticipacions literals. M1_alumnat-TEA.md cobreix el concepte pedagògic, però NO implementa l'instrucció LLM que el pipeline ATNE necessita per funcionar. Eliminar H-03 de instruction_catalog.py deixaria el pipeline sense capacitat d'injectar anticipacions en els prompts, malgrat que la taula del document les referencii."
+  },
+  {
+   "id": "H-04",
+   "covered_by": "M1_TDAH.md (taula prioritats línies 218): 'H-04 (micro-blocs amb objectiu)' citat explícitament a la matriu barrera→instruccions",
+   "refute_reason": "M1_TDAH.md (línies 204-229) cita H-04 i proporciona exemple pedagògic ABANS→DESPRÉS que il·lustra micro-blocs amb objectiu ('Secció X de Y'). Però M1_TDAH.md NO defineix H-04 tècnicament — només la referencia. La definició executada pel pipeline ATNE resideix a instruction_catalog.py (línies 613-618), NO a M1_TDAH.md. El pipeline cridar instruction_filter.get_instructions() que treballa amb instruction_catalog.py, no amb M1_TDAH.md. Per tant, M1_TDAH.md cobreix el contextualització pedagògica (justificació, exemple), però NO la spec técnica. Eliminar H-04 perillaria l'adaptació TDAH, malgrat la cita aparent."
+  },
+  {
+   "id": "H-05",
+   "covered_by": "M1_TDAH.md (taula prioritats línies 220): 'H-05 (retroalimentació visual)' citat explícitament a la matriu barrera→instruccions",
+   "refute_reason": "**CRÍTICA TROUVADA DE DUPLICACIÓ PARCIAL, NO TOTAL:**\n\nM1_TDAH.md (línies 204-206) diferencia clarament:\n- **Prioritat 1a (ATENCIÓ):** B-13 = \"Indicadors de progrés: [Secció X de Y]\" \n- **Prioritat 3a (MOTIVACIÓ):** H-05 = \"retroalimentació visual de progrés — barres, percentatges, indicadors visuals\"\n\nEl CANON (M1_TDAH.md, línies 217-229) mostra ÚNICAMENT patró `[Secció X de Y]` en l'exemple ABANS→DESPRÉS. **NO hi ha barres, NO hi ha percentatges, NO hi ha \"indicadors visuals\" més allà de text amb format.**\n\nPROBLEMA: H-05 es defineix com \"barres, percentatges, indicadors visuals\" però en RUNTIME (instruction_catalog.py, línies 839-844) i en el canon (M1_TDAH.md) **NO es materialitza mai amb aquests elements gràfics reals**. Únicament apareix en prompts de sistema (tests/baseline_prompts/tdah_a2_noticia.adapter.txt, linia 106).\n\nMATÍS PEDAGÒGIC SUTIL PERÒ SIGNIFICATIU:\n- B-13 es consumeix com ESTRUCTURA genèrica: [Secció X de Y]\n- H-05 pretén afegir una dimensió MOTIVACIONAL (feedback immediat, celebració de progrés) diferent de la navegacional\n\n**CONCLUSIÓ:** H-05 no és purament duplicat — B-13 és una tàctica de navigation; H-05 seria una dimensió de motivació/celebració. PERÒ el canon NO documenta exemple real de H-05, i el pipeline NO genera \"barres, percentatges\" reals. Sense implementació demonstrable de H-05 més allà de text, és funcionalment equivalent a B-13. Perdre H-05 = perdre una INTENCIO pedagògica de motivació que podria ser important en TDAH (feedback immediat és crític per TDAH sever)."
+  },
+  {
+   "id": "H-06",
+   "covered_by": "M1_TDAH.md (taula prioritats línies 218): 'H-06 (variació dins text)' citat explícitament a la matriu barrera→instruccions",
+   "refute_reason": "M1_TDAH.md (línea 218) cita H-06 a la taula barrera→instruccions, però aquesta cita és DOCUMENTACIÓ INTERNA, no cobertura funcional. El pipeline ATNE no consumeix M1_TDAH.md per executar H-06 en runtime. La instrucció H-06 es treballa directament del instruction_catalog.py amb el seu text literal: \"TDAH: variació dins el text — alterna lectura, esquema, pregunta per mantenir l'atenció.\" M1_TDAH.md especifica que aquesta variació inclou \"alternar lectura, esquema, pregunta\" (línea 210), però aquest matís pedagògic MÉS DETALLAT no arriba a l'LLM en runtime perquè el pipeline no injecta el bloc M1_TDAH sinó només el text del catalog. H-06 és una instrucció genèrica que necessita estar com a directiva separada per a la PRECISIÓ de l'adaptació de TDAH. Eliminar-la comportaria perdre la referència específica a 'variació dins el text' i deixar que l'adaptació depengués només de H-04 (micro-blocs) i B-13 (indicadors de progrés), els quals no capturen la DINÀMICA de rotació activitat-esquema-pregunta."
+  },
+  {
+   "id": "H-07",
+   "covered_by": "M1_dislexia-dificultats-lectores.md (taula prioritats línies 281): 'H-07 (evitar compostos llargs, dividir/reformular)' citat explícitament a la matriu barrera→instruccions",
+   "refute_reason": "M1_dislexia.md (línea 281) cita H-07 dins la taula \"Mapa barrera → instruccions\" com a prioritat 1a (descodificació). PERÒ aquesta taula és només documentació informativa per als humans. El pipeline ATNE NO la consumeix en runtime. H-07 s'activa per codi duet: (1) instruction_catalog.py (línies 851-856) defineix H-07 amb profiles=[\"dislexia\"], i (2) instruction_filter.py (línies 403-417) l'activa quan dislexia.actiu==true. M1_dislexia.md NO participaciona en la lògica d'activació runtime; és només referència pedagògica. Si H-07 fos eliminada de instruction_catalog.py, M1_dislexia.md no la restauraria. La cobertura pedagògica és real però la cobertura tècnica depèn de codi duet, no de la connexió canon→instruccions. Mantenir H-07 és segur."
+  },
+  {
+   "id": "H-21",
+   "covered_by": "corpus/external/corpusFJE/M1_discapacitat-visual.md — Secció 'Barreres d'aprenentatge' i 'Manifestacions a l'escola' descriu la necessitat de descriure textualment per ceguesa, però el descriptor explicit de ceguesa no apareix amb format instruccional integrat al text del M1.",
+   "refute_reason": "M1_discapacitat-visual.md COBREIX PEDAGÒGICA però NO GENERATIVA. 1) «Verbalització sistemàtica» (§ Necessitats prioritàries, línea 6): «El docent ha de verbalitzar TOT el que escriu a la pissarra, projecta o assenyala» — és estratègia DOCENT. 2) Heurística H2 (línies 251-254): descriu COM un docent explicitaria un gràfic («al gràfic de barres... l'eix X mostra...»), però NO és directiva LLM. 3) «Alt-text descriptiu» (§ Instruccions d'adaptació, línea 292): aplica a imatges JA EXISTENTS («per a cada element visual mencionat»), NO a taules/gràfics que l'LLM ha de generar en runtime. H-21 és instrucció ACTIVA («quan l'LLM vegi una taula → descrigui textualment»). M1 contextualitza la barrera però no cobreix la regla de GENERACIÓ. Mantenir H-21."
+  },
+  {
+   "id": "H-22",
+   "covered_by": "corpus/external/corpusFJE/M1_dislexia-dificultats-lectores.md — Secció 'Barrera nuclear', línies 264-274: 'Descodificació: L'alumnat amb dislèxia té com a barrera principal...prefixos+arrel+sufixos generen fatiga lectora exponencial. ... Evita encadenar prefixos i sufixos'.",
+   "refute_reason": "La cita al M1_dislexia (línies 264-274, secció \"Barrera nuclear\") diu textualment \"Evita encadenar prefixos i sufixos\", però aquesta és METADA DE CORPUS (text de referència pedagògica), no una instrucció operacional consumida pel pipeline ATNE en runtime. H-22 és una INSTRUCCIÓ CONDICIONAL activa a instruction_catalog.py (línies 981-987) que s'injecta dinàmicament al prompt de l'LLM quan tipus_dislexia=fonologica. La corpus no reemplaça aquesta funcionalitat operacional: (1) la corpus documenta el principi però no és executada pel pipeline, (2) H-22 inclou l'especificació \"en una mateixa paraula\" i l'exemple operacional \"descontextualitzar → treure del context\" que el corpus no proporciona al llom d'execució. Mantenir H-22 és més segur que confiar que el corpus es consumeixi dinàmicament."
+  },
+  {
+   "id": "H-23",
+   "covered_by": "corpus/external/corpusFJE/M1_TDL-trastorn-llenguatge.md — Variables configurables: 'tdl_receptiu' (modalitat comprensiva severa). Secció 'Components' i 'Barreres': 'Comprensió receptiva molt afectada, entonació, discriminació, enteniment context'.",
+   "refute_reason": "M1_TDL-trastorn-llenguatge.md (línes 11-18) DECLARA la variable `modalitat: [comprensiu, expressiu, mixt]` però NO CONSUM a través de cap instrucció explícita de reforç per modalitat comprensiva. El canvas només ofereix una recomendació genèrica d'impacte ('simplificar text d'entrada') sense activar una directiva específica. H-23, en canvi, és una instrucció ACTIVADA per `subvar_conditions: {tdl_receptiu: True}` (instruction_filter.py:195-198), que apunta específicament a dificultats de COMPRENSIÓ (entrada), no només a simplicitat lèxica genèrica. H-16 (reducció densitat lèxica) NO és suficient per cobrir la 'simplificació lingüística reforçada en TOT el text' que demana H-23 — densitat lèxica és UN COMPONENT, no la totalitat de simplificació receptiva. El pipeline ATNE consumiria H-23 DE FORMA DISTINTA a H-16 en runtime si la modalitat és comprensiva."
+  },
+  {
+   "id": "H-24",
+   "covered_by": "corpus/external/corpusFJE/M1_TDL-trastorn-llenguatge.md — Variables configurables 'semantica=true': 'Vocabulari d'alta freqüència, definicions integrades al text'.",
+   "refute_reason": "H-24 (TDL semàntica: vocabulari mínim funcional) NO està suficientment cobert per M1_TDL-trastorn-llenguatge.md. (1) M1 especifica 'Vocabulari d'alta freqüència, definicions integrades' però NO el concepte de 'mínim funcional' que H-24 demana. 'Mínim funcional' és més restrictiu que 'alta freqüència'. (2) La matriu_tracabilitat_instruccions.md, línia 214, referencia H-24 a 'DSM-5, CLT' (NO a M1), mentre H-16 (genèrica TDL) sí referencia 'M1 corpus'. (3) H-24 requereix la sub-variable tdl.semantica=true, indicant que és una instrucció ESPECÍFICA per a semàntica severament afectada, diferent de H-16/H-17 que s'activen per a TDL en general. La cobertura teòrica del canon és insuficient per garantir que el runtime ATNE proporcionarà la mateixa restricció pedagògica de 'mínim funcional' que H-24 descriu. Mantenir H-24 és la decisió segura: evita perdre especificitat en casos clínics crítics."
+  },
+  {
+   "id": "H-25",
+   "covered_by": "corpus/external/corpusFJE/M1_TDL-trastorn-llenguatge.md — Variables 'morfosintaxi=true': 'Usar estructures SVO simples, evitar passives i subordinades'.",
+   "refute_reason": "El corpus M1_TDL-trastorn-llenguatge.md (lines 297-303) cita només H-16, H-17, H-13, H-26 al mapa barrera, però NO H-25. La variable `morfosintaxi=true` al corpus (line 25) té impacte: 'Usar estructures SVO simples, evitar passives i subordinades', però esta és genèrica i NO menciona:  1) SVO estricte, 2) ordre no canònic, 3) relatius (diferents de subordinades). H-25 s'activa pel catàleg (instruction_catalog.py, line 931: subvar_conditions: {tdl_morfosintaxi: True}), NO pel corpus_reader que extreu blocs genèrics de TDL. No hi ha cap referència a H-25 al canvas: grep H-25 corpus/M1_TDL retorna buit. La cobertura és parcial i no recuperable directament a runtime com afirma la proposta."
+  },
+  {
+   "id": "H-26",
+   "covered_by": "corpus/external/corpusFJE/M1_TDL-trastorn-llenguatge.md — Variables 'pragmatica=true': 'Evitar consignes amb llenguatge figurat o ambigu, explicitar el context comunicatiu'.",
+   "refute_reason": "M1_TDL-trastorn-llenguatge.md línies 33-39 cobreix parcialment: 'pragmatica=true' → 'Evitar consignes amb llenguatge figurat o ambigu, explicitar el context comunicatiu, estructurar rols en dinàmiques de grup'. PERÒ H-26 ('TDL amb pragmàtica afectada: fes explícita tota intenció comunicativa. No pressuposar que l'alumne infereix el propòsit del text') va més ELL: és una directiva EXECUTIVA sobre consignes/proposit, mentre el canon només cobreix 'evitar figurat'. La matisació 'no pressuposar inferència de propòsit' NO és explícita al canon, és implícita. El pipeline ATNE necessita H-26 com a instrucció independent per aplicar-la activament a cada consigna/enunciat (no només context general)."
+  },
+  {
+   "id": "H-27",
+   "covered_by": "corpus/external/corpusFJE/M1_discalculia.md — Secció 'Manifestacions per etapa' i 'Necessitats prioritàries': 'CPA sistemàtic, taules proporcionades', substitueix nombres abstractes per representacions concretes.",
+   "refute_reason": "M1_discalculia.md (corpus/external/corpusFJE/) documenta els PRINCIPIS teòrics: Secció \"Necessitats prioritàries\" (línies 124-131) descriu 'Instrucció basada en la comprensió (CPA)' i 'Externalització de la memòria de treball', però és documentació pedagògica de CONTEXT, no una instrucció operacional al pipeline. H-27 és l'única instrucció del catàleg que tradueix aquests principis a una ACCIÓ CONCRETA al text adaptat: 'substitueix nombres abstractes per representacions concretes o visuals' + 'afegeix analogia quotidiana tangible'. M1_discalculia.md no es consumeix en runtime pel LLM—serve com a recurs de coneixement. La skill només documenta les barreres i models (Triple Code, Butterworth, CPA estàtics) però no conté cap instrucció de transformació textual. Eliminar H-27 deixaria sense implementació la recomanació de M1 de proporcionar representacions concretes als alumnes."
+  },
+  {
+   "id": "H-28",
+   "covered_by": "corpus/external/corpusFJE/M1_discalculia.md — Secció 'Progressió CPA': 'no s'ha de forçar el salt a A fins que la comprensió estigui consolidada', desglossament pas a pas implicit en la progressió C→P→A.",
+   "refute_reason": "H-28 és una instrucció de RUNTIME de format textual: 'desglossa qualsevol seqüència numèrica o procediment pas a pas, sense saltar-ne cap' (instruction_catalog.py:947). M1_discalculia.md cobreix la teoría pedagógica CPA (línies 93-100: representacions Concretes, Pictòriques, Abstractes) però NO conté una regla explícita de FORMAT TEXTUAL ('cada pas en línia numerada'). La progressió CPA són representacions CONCEPTUALS, no directrius de generació textual. H-37 (Dispraxia) SÍ especifica el format: 'separa cada pas en línia independent i numerada' (instruction_catalog.py:1049), però no es consum per discalcúlia. El corpus pedagógic M1 no cobreix la instrucció de FORMAT que H-28 garanteix en runtime. Mantenir."
+  }
+ ],
+ "all_classified": [
+  {
+   "id": "A-01",
+   "activation": "SEMPRE",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció hardcoded al Python. M3_lectura-facil descriu el principi ('vocabulari freqüent') però no exporta una entrada A-01 reutilizable que el pipeline llegeixi. La regla viu sols al Python.",
+   "verdict": null
+  },
+  {
+   "id": "A-02",
+   "activation": "SEMPRE",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció hardcoded. Descriu com marcar termes CALP en negreta. M3 menciona 'CALP' però no exporta aquesta regla com entrada consumible per al pipeline RAG.",
+   "verdict": null
+  },
+  {
+   "id": "A-03",
+   "activation": "SEMPRE",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de coherència terminològica (no usar sinònims). Principi referit a M1_dislexia (H-08 ja cobreix). Però la regla A-03 en si es hardcoded al Python.",
+   "verdict": null
+  },
+  {
+   "id": "A-04",
+   "activation": "SEMPRE",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Referents pronominals explícits. M3_lectura-facil menciona elisió pero no exporta A-04 com entrada. Instrucció hardcoded al Python.",
+   "verdict": null
+  },
+  {
+   "id": "A-05",
+   "activation": "SEMPRE",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Eliminar idiomatismes. M3_lectura-facil i M1_alumnat-nouvingut mencionen el principi, però A-05 es hardcoded. No es consumeix de M*.md.",
+   "verdict": null
+  },
+  {
+   "id": "A-06",
+   "activation": "NIVELL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Eliminació de polisèmia, graduat per MECR. Mencionat en M1_alumnat-TEA (barrera d'inferència) i M1_alumnat-nouvingut, però A-06 viu als mecr_detail del Python.",
+   "verdict": null
+  },
+  {
+   "id": "A-07",
+   "activation": "NIVELL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "'Una idea per frase' — és el principi nuclear de M3_lectura-facil (menciona-ho explícitament: 'Una idea per frase redueix la càrrega de processament'). PERÒ la regla A-07 amb les seves gradacions MECR (pre-A1 → B2) es defineix sols al Python, no com entrada exportable.",
+   "verdict": null
+  },
+  {
+   "id": "A-08",
+   "activation": "NIVELL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Veu activa obligatòria. M3_lectura-facil dedica secció sencera: 'Evitar la veu passiva'. Però A-08 amb mecr_detail (pre-A1 'SEMPRE', A2 'preferent') es hardcoded al Python, no consumit de M3.",
+   "verdict": null
+  },
+  {
+   "id": "A-09",
+   "activation": "NIVELL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Subjecte explícit. M3 i M1_alumnat-nouvingut esmenteixen el principi ('repeteix el nom complet'), però A-09 amb les gradacions MECR viu al Python.",
+   "verdict": null
+  },
+  {
+   "id": "A-10",
+   "activation": "NIVELL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Ordre SVO canònic. M3_gradació_lingüística cita 'ordre sintàctic canònic (SVO)' però les regles d'A-10 per MECR ('pre-A1: SVO estricte') es hardcodegen al Python.",
+   "verdict": null
+  },
+  {
+   "id": "A-11",
+   "activation": "NIVELL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Puntuació simplificada. M3_lectura-facil dedica secció a 'Ortotipografia' (evita ; i ...). Però A-11 amb les gradacions MECR (pre-A1 'NOMÉS punts finals') es al Python.",
+   "verdict": null
+  },
+  {
+   "id": "A-12",
+   "activation": "NIVELL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Limita longitud de frase (pre-A1 3-5 paraules, A1 5-8, etc.). M3_lectura-facil cita 'màxim 15-20 paraules' com orientació genèrica. A-12 amb mecr_detail granular viu al Python.",
+   "verdict": null
+  },
+  {
+   "id": "A-13",
+   "activation": "NIVELL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Redueix subordinades. M3_gradació menciona 'ZERO subordinades' (pre-A1) i 'subordinades simples' (B1), però A-13 amb les gradacions de activació per MECR es defineix al Python, no com entrada consumible de M*.md.",
+   "verdict": null
+  },
+  {
+   "id": "A-14",
+   "activation": "SEMPRE",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció sobre connectors explícits entre frases. El M2_carrega-cognitiva ne parla en general (transicions entre activitats) però no defineix operativament quins connectors permetre per nivell (pre-A1: només 'i', 'després'; A1: 'i', 'però', 'perquè', etc.). La regla graduada A-14 és única al Python.",
+   "verdict": null
+  },
+  {
+   "id": "A-15",
+   "activation": "NIVELL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Scaffolding decreixent per termes especialitzats (Vygotsky). Mentre M2 menciona 'scaffolding' i 'bastida retirable', i D-06 tracta lectura en veu alta, NO especifica la progressió 1a aparició=definició completa → 2a=breu → 3a=sol. Aquesta regla és privativa del Python.",
+   "verdict": null
+  },
+  {
+   "id": "A-16",
+   "activation": "SEMPRE",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Desnominalització radical (noms abstractes → verbs). M2 parla de 'elements interactius' però no prescriu explícitament la transformació nominal → verbal. La regla A-16 és única al Python.",
+   "verdict": null
+  },
+  {
+   "id": "A-17",
+   "activation": "NIVELL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Evitar negacions múltiples, reformular en positiu. Cap M*.md del canon l'esmenta. Aquesta regla és única al Python hardcoded.",
+   "verdict": null
+  },
+  {
+   "id": "A-18",
+   "activation": "SEMPRE",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Format de dates (12 de març de 2026, no 12/03/26) i xifres amb context. Cap font canònica l'especifica. Regla privativa del Python.",
+   "verdict": null
+  },
+  {
+   "id": "A-19",
+   "activation": "SEMPRE",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Sigles i abreviatures: forma completa la primera vegada (ONU: Organització de les Nacions Unides). Cap M*.md ni SKILL ho prescriu explícitament. Regla única al Python.",
+   "verdict": null
+  },
+  {
+   "id": "A-20",
+   "activation": "NIVELL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Controlar densitat lèxica: reduir proporció de paraules de contingut per frase. M2_carrega-cognitiva parla genèricament de 'densitat conceptual' però NO quantifica 'densitat lèxica' per nivell. Aquesta regla és privativa del Python.",
+   "verdict": null
+  },
+  {
+   "id": "A-21",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Descompondre paraules compostes llargues (perfil: dislexia, nouvingut). Cap SKILL de mediació ho menciona. Regla única al Python hardcoded per a aquests perfils.",
+   "verdict": null
+  },
+  {
+   "id": "A-22",
+   "activation": "NIVELL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Concretar quantificadors abstractes ('molts' → 'més de 50'). M2 parla de 'contexte' i 'exemples' pero no prescriu aquesta transformació específica. Regla única al Python.",
+   "verdict": null
+  },
+  {
+   "id": "A-23",
+   "activation": "NIVELL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Evitar cultismes i llatinismes per a pre-A1/A1/A2. Cap M*.md la menciona. Regla privativa del Python hardcoded.",
+   "verdict": null
+  },
+  {
+   "id": "A-24",
+   "activation": "NIVELL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Present d'indicatiu preferent per a cada nivell (pre-A1: NOMÉS present; A1-A2: present + passat simple). M2 parla de 'temps de verb' genèricament però NO quantifica per nivell. Regla única al Python.",
+   "verdict": null
+  },
+  {
+   "id": "A-25",
+   "activation": "NIVELL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Formes verbals simples: evitar perífrasis (per nivell: pre-A1 zero perífrasis, A1 permet 'anar a+inf.', A2 permet perífrasis d'obligació). M2 no le menciona. Regla única al Python.",
+   "verdict": null
+  },
+  {
+   "id": "A-26",
+   "activation": "NIVELL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Evitar incisos parentètics llargs, moure definicions a frase independent (modulat per nivell). M2 menciona 'instruccions segmentades' genèricament però no prescriu la retirada d'incisos. Regla única al Python hardcoded.",
+   "verdict": null
+  },
+  {
+   "id": "A-27",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de fatiga cognitiva (TDAH, DI) basada en subvar_conditions (fatiga_o_sever). Text hardcoded al Python instruction_catalog.py:411-417, no referenced específicament a M3_lectura-facil.md (que cobreix UNE 153101 però no la lògica de retall per perfil).",
+   "verdict": null
+  },
+  {
+   "id": "A-28",
+   "activation": "NIVELL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:141 — pauta 1.2 'Evitar oracions impersonals amb cal, convé, s\\'ha de: és millor adreçar-se directament al lector'",
+   "rationale": "La pauta UNE 153101 a M3 cobreix explícitament la prohibició d'oracions impersonals i l'ús directe de la 2a persona. A-28 és equivalent a aquesta pauta.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "A-29",
+   "activation": "NIVELL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:126 — pauta 1.2 'Evitar adverbis acabats en -ment'",
+   "rationale": "M3 explícitament estableix la substitució d'adverbis -ment per formes simples ('clarament'→'molt clar'). A-29 és implementació directa.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "A-30",
+   "activation": "PERFIL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:128 — pauta 1.2 'Evitar paraules d\\'altres idiomes si no són d\\'ús comú'",
+   "rationale": "M3 cobreix la restricció de paraules estrangeres. A-30 applica aquesta pauta als perfils novingu ts/TDL.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "A-31",
+   "activation": "SEMPRE",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:110 — pauta Ortotipografia 'No escriure paraules ni frases en majúscules'",
+   "rationale": "M3 (UNE 153101) explícitament prohibeix majúscules sostingudes. A-31 és normatiu i totalment cobert.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "A-32",
+   "activation": "SEMPRE",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:112-115 — pautes Ortotipografia 'No usar punt i coma', 'Evitar punts suspensius'",
+   "rationale": "M3 (UNE 153101 pauta 1.2) cobreix tant la prohibició de ; i ... com l'ús de 'L\\'autor diu:' per a cites.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "A-33",
+   "activation": "SEMPRE",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:139 — pauta 'Evitar la veu passiva i passiva reflexa'",
+   "rationale": "M3 (UNE 153101 pauta 1.2) cobreix obligatorietat de veu activa i prohibició de passives reflexes. A-33 és equivalent directa.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "A-34",
+   "activation": "SEMPRE",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:143 — pauta 'Evitar el·lipsis... el subjecte ha de repetir-se explícitament'",
+   "rationale": "M3 (UNE 153101 pauta 1.2) estableix que el subjecte s'ha de repetir completament sense pronoms ambigus. A-34 és aplicació específica per a DUA Accés.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "A-35",
+   "activation": "SEMPRE",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:113 + corpus/external/corpusFJE/skills/mediacio/generate-glossari/SKILL.md:68-70",
+   "rationale": "M3 pauta Ortotipografia prohibeix parèntesis; SKILL generate-glossari descriu definicions de CALP al glossari, no al cos. A-35 implementa aquesta combinació amb frase nova en lloc de parèntesi.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "B-01",
+   "activation": "SEMPRE",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:111-112 — pauta 'Punto i apart per separar idees' + 152 'Agrupar informació del mateix tema'",
+   "rationale": "M3 (UNE 153101 pauta Organització) estableix paràgrafs curts amb una idea per paràgraf. B-01 és traducció directa a 3-5 frases.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "B-02",
+   "activation": "SEMPRE",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:151 — pauta 'Títols que anticipen el contingut' + Pas 1 estructura 'Identifica l\\'ordre lògic'",
+   "rationale": "M3 (UNE 153101 + 7 Passos Comunicació Clara) cobreix títols descriptius i blocs temàtics. B-02 és aplicació directa.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "B-03",
+   "activation": "SEMPRE",
+   "gap_at_M": false,
+   "confidence": "mitjana",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:151 — pauta 'Títols que anticipen el contingut' implica anticipació de contingut de paràgraf",
+   "rationale": "M3 cobreix títols que anticipen, però la 'frase tòpic' explícita com estratègia de comprensió és pauta pedagògica estàndard (MALL) no detallada al M3. Cobreix la intenció però potser no la forma.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "B-04",
+   "activation": "NIVELL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md:153 — pauta 'Usar llistes si hi ha més de tres elements'",
+   "rationale": "M3 (UNE 153101 pauta Organització) cobreix transformació d'enumeracions a llistes per millor estructura visual. B-04 és implementació de aquesta pauta per MECR.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "B-05",
+   "activation": "NIVELL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md (linies 145-151): 'Ordre temporal clar. Titols que anticipen el contingut.' + skills/mediacio/generate-bastides-lectura/SKILL.md",
+   "rationale": "L'estructura deductiva (general→particular) és doctrinal al M3 sobre Lectura Fàcil (UNE 153101) i s'implementa a les SKILLS de bastides.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "B-06",
+   "activation": "NIVELL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md (linies 149-150): 'Ordre temporal clar. Quan es descriuen processos o seqüencies, usar connectors temporals explícits.'",
+   "rationale": "L'ordre cronologic és explícit al M3 de Lectura Fàcil. Les SKILLS de bastides i esquemes també ho cobreixen.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "B-07",
+   "activation": "NIVELL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/skills/mediacio/generate-bastides-lectura/SKILL.md (linies 74-100): Predicció pel títol. Propòsit de lectura. Anticipació de contingut.",
+   "rationale": "Advance organizer és standard pedagògic cobert a MALL (M2/M3). Les bastides de lectura l'implementen explícitament.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "B-08",
+   "activation": "NIVELL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/skills/mediacio/generate-bastides-lectura/SKILL.md: Moment Després. Resum de les idees principals. + generate-resum-graduat/SKILL.md",
+   "rationale": "Resum final és mecànica estàndard de les bastides (lectura + producció). Ja cobert per SKILLS consumibles.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "B-09",
+   "activation": "NIVELL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md (linies 152-153): 'Usar llistes si hi ha més de tres elements.' + skills/mediacio/generate-esquema-visual/SKILL.md",
+   "rationale": "Numeració de passos és UNE 153101 estàndard (M3). Les SKILLS d'esquema visual i bastides ho implementen.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "B-10",
+   "activation": "SEMPRE",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md (linies 148-149): 'Cohesió i coherència. Transicions clares entre seccions.' + A-14 (connectors explícits)",
+   "rationale": "Transicions són part de coherència textual (A-14 + estructura B). Ja cobert al catàleg M3 sobre Lectura Fàcil.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "B-11",
+   "activation": "NIVELL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md (linies 110-114): 'Punt i apart per separar idees. Cada idea nova comença en paràgraf nou.'",
+   "rationale": "Salt de línia entre idees és bàsic a Lectura Fàcil (UNE 153101). M3 ja ho cobreix explícitament.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "B-13",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Indicadors de progrés [Secció X de Y] és instrucció PERFIL (TDAH). No apareix a M3 lectura-fàcil (genèric). Viu només al Python hardcoded.",
+   "verdict": null
+  },
+  {
+   "id": "B-14",
+   "activation": "NIVELL",
+   "gap_at_M": false,
+   "confidence": "mitjana",
+   "covered_by": "corpus/external/corpusFJE/M3_lectura-facil-comunicacio-clara.md (linies 152): Llistes. Comunicació Clara passos 5-6 (taules i recursos visuals).",
+   "rationale": "Taules per info comparativa és part de Comunicació Clara (paso 5). M3 ho menciona com recurs visual per accessibilitat.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "C-01",
+   "activation": "NIVELL",
+   "gap_at_M": false,
+   "confidence": "mitjana",
+   "covered_by": "corpus/external/corpusFJE/M2_carrega-cognitiva-adaptacio-textos.md + M2_factors-promotors-aprenentatge.md (memòria de treball, densitat conceptual)",
+   "rationale": "Limitar conceptes nous per paràgraf és aplicació directa de teoria cognitiva (Sweller, Mayer) documentada a M2 sobre carrega cognitiva.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "C-02",
+   "activation": "NIVELL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/skills/mediacio/generate-bastides-lectura/SKILL.md + M3_MALL-aprenentatge-llengues.md (reforç immediat, mediació cognitiva)",
+   "rationale": "Reforç immediat (exemple concret, visual, connexió quotidiana) és mecànica MALL estàndard. Les bastides l'implementen per tots els nivells MECR.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "C-03",
+   "activation": "SEMPRE",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M2_carrega-friccio-cognitiva.md + M3_lectura-facil-comunicacio-clara.md: Coherència, Mayer, cada element ha de tenir funció pedagògica clara.",
+   "rationale": "Eliminació de redundància decorativa és principi de coherència (Mayer) documentat a M2 sobre fricció cognitiva. UNE 153101 també ho exigeix.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "C-04",
+   "activation": "SEMPRE",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M2_carrega-cognitiva-adaptacio-textos.md (chunking, límit memòria de treball 3-5 ítems per bloc, Sweller)",
+   "rationale": "Chunking és teoria pedagògica estàndard sobre memòria de treball (Sweller, Mayer). M2 ho documenta com mecànica bàsica d'adaptació de textos.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "C-05",
+   "activation": "NIVELL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "La funcionalitat de glossari previ és cobert als M3, però la nomenclatura teòrica específica (Sweller, 'pre-training') no apareix al canon consumible — només està hardcoded al Python com a context conceptual.",
+   "verdict": null
+  },
+  {
+   "id": "C-06",
+   "activation": "NIVELL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/skills/mediacio/generate-glossari/rubrica.json, M3_instrument-generar-glossari.md: 'Pot incloure una analogia simple (és com…) o un exemple concret del text.'",
+   "rationale": "L'estratègia de 'Analogies amb experiències quotidianes' és explícitament descrita al rubrica.json i M3 de generate-glossari com a 'recursos pedagògics'. El descriptor coincideix literalment.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "C-08",
+   "activation": "NIVELL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/skills/mediacio/generate-glossari/M3_instrument-generar-glossari.md: 'els termes clau apareixen primer al glossari, després al text'",
+   "rationale": "La 'Anticipació de vocabulari' és cobert explícitament al M3 de generate-glossari com a principi de disseny: glossari abans, text després.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "D-01",
+   "activation": "COMPLEMENT",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/skills/mediacio/generate-pictogrames/SKILL.md: '[PICTO: terme] per a ARASAAC'",
+   "rationale": "Els pictogrames ARASAAC amb marcador [PICTO: terme|terme_castella] són descrits completament al SKILL.md de generate-pictogrames, incloent format i modalitats per perfil.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "D-02",
+   "activation": "COMPLEMENT",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/skills/mediacio/generate-esquema-visual/SKILL.md: 'Llista markdown amb sagnia (compatible Mermaid SVG), NO fletxes Unicode ni ASCII-art'",
+   "rationale": "L'esquema de procés en format text markdown amb sagnia és especificat exactament al SKILL.md de generate-esquema-visual, amb prohibicions explícites de fletxes Unicode.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "D-03",
+   "activation": "COMPLEMENT",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/skills/mediacio/generate-mapa-conceptual/SKILL.md: 'Mapa conceptual jeràrquic markdown, arbre amb branques etiquetades'",
+   "rationale": "El mapa conceptual jeràrquic és cobert al SKILL.md de generate-mapa-conceptual amb estructura, relacions etiquetades, i modulació per nivell MECR.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "D-06",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "La instrucció 'Prepara el text per a lectura en veu alta: ritme natural, pauses clares (punts)' NO apareix en cap SKILL.md operativa de mediació. Apareix de manera ocasional en context de testpeig metodològic (escriure assaig, carta) però no com a mediació sistema codificada.",
+   "verdict": null
+  },
+  {
+   "id": "D-06b",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "L'adaptació específica per a dislèxia moderada/severa (lectura veu alta, frases curtes, ritme natural, evita encavalcaments fonètics) NO és codificada en cap SKILL.md del canon consumible. És una instrucció de perfil pura hardcoded al Python.",
+   "verdict": null
+  },
+  {
+   "id": "E-01",
+   "activation": "SEMPRE",
+   "gap_at_M": true,
+   "confidence": "mitjana",
+   "covered_by": "",
+   "rationale": "El principi 'Nucli terminològic intocable — MAI substitueixis terme tècnic curricular per col·loquial' NO apareix explícitament al canon. Els M3 parlen de fidelitat al text i conservació de CALP, però no del veto específic sobre substitucions col·loquials de termes tècnics.",
+   "verdict": null
+  },
+  {
+   "id": "E-02",
+   "activation": "NIVELL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/skills/mediacio/generate-glossari/M3_instrument-generar-glossari.md: 'Principi rector CALP de Cummins: pre-A1=6 paraules · A1-A2=8-10 · B1=12 · B2=15 · C1=20'",
+   "rationale": "La gradació de definicions segons MECR és explícitament descrita al M3 de generate-glossari com a taula modulació per nivell amb llargada de paraules.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "E-05",
+   "activation": "SEMPRE",
+   "gap_at_M": true,
+   "confidence": "mitjana",
+   "covered_by": "",
+   "rationale": "L'instrucció específica 'Mantén l'exactitud científica: les simplificacions NO poden introduir errors conceptuals' NO apareix al canon consumible. Els M3 de gèneres mencionen 'coherència' i 'causalitat' però no la prohibició explícita d'errors conceptuals en simplificacions.",
+   "verdict": null
+  },
+  {
+   "id": "E-06",
+   "activation": "SEMPRE",
+   "gap_at_M": false,
+   "confidence": "mitjana",
+   "covered_by": "corpus/external/corpusFJE/skills/generes/write-conte/M3_genere-escriure-conte.md: 'Seqüència d'esdeveniments — Ordre i causalitat... cada acte impacta la successió'",
+   "rationale": "El principi 'Simplifica mantenint causalitat' és parcialment cobert al M3 de contes (causalitat narrativa) i biografia (causa-efecte entre fets). No és universal però apareix en context de gèneres discursius.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "E-07",
+   "activation": "NIVELL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/skills/mediacio/generate-glossari/M3_instrument-generar-glossari.md: 'Recursos pedagògics: pot incloure... exemple concret del text'",
+   "rationale": "L'instrucció 'Un exemple concret per cada concepte abstracte' és cobert al M3 de generate-glossari com a 'recursos pedagògics': 'analogia simple o exemple concret'.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "E-08",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de PERFIL activable per parametrització. No és descrita al canon de SKILLs consumides. Viu hardcoded al Python.",
+   "verdict": null
+  },
+  {
+   "id": "E-09",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de PERFIL sobre supòsits culturals. No apareix al canon. Requereix pujada a M*.md.",
+   "verdict": null
+  },
+  {
+   "id": "E-10",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de PERFIL sobre sensibilitat a temes traumàtics. No està descrita al canon consumible.",
+   "verdict": null
+  },
+  {
+   "id": "E-11",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de PERFIL sobre etimologia translingüe. No la trobo al canon de SKILLs ni M*.md.",
+   "verdict": null
+  },
+  {
+   "id": "E-12",
+   "activation": "NIVELL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de QUALITAT sobre contra-exemples. No descrita explícitament al canon consumible.",
+   "verdict": null
+  },
+  {
+   "id": "E-13",
+   "activation": "SEMPRE",
+   "gap_at_M": true,
+   "confidence": "mitjana",
+   "covered_by": "",
+   "rationale": "Fidelitat al contingut (principi MALL). Apareix referenced a adapt-document SKILL.md però E-13 és molt més específica i descriptiva. Valor afegit sobre canon.",
+   "verdict": null
+  },
+  {
+   "id": "F-06",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "mitjana",
+   "covered_by": "",
+   "rationale": "Preguntes intercalades dins del text com a PERFIL activable. La SKILL generate-preguntes-comprensio cobreix preguntes generalment, però F-06 especifica ubicació intercalada com a variant.",
+   "verdict": null
+  },
+  {
+   "id": "F-09",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "mitjana",
+   "covered_by": "",
+   "rationale": "Preguntes de pensament crític per PERFIL. Els plànols crítics estan a generate-preguntes-comprensio, però F-09 és una variant de PERFIL activable, no una SKILL genèrica.",
+   "verdict": null
+  },
+  {
+   "id": "F-10",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Connexions interdisciplinars com a instrucció de PERFIL. No cobert per cap SKILL de generació de complements.",
+   "verdict": null
+  },
+  {
+   "id": "G-01",
+   "activation": "PERFIL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/skills/mediacio/generate-glossari/SKILL.md — 'Inclou una variant bilingüe per a alumnat nouvingut' + 'Afegeix el terme en L1 amb alfabet original'",
+   "rationale": "Glossari bilingüe amb L1 i alfabet original. Completament cobert per SKILL generate-glossari, secció Variant bilingüe (línies 62-64, 91-94, etc.). DUPLICADA.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "G-02",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Traducció de consignes bàsiques a L1. No descrita explícitament al canon de SKILLs consumides.",
+   "verdict": null
+  },
+  {
+   "id": "G-03",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "mitjana",
+   "covered_by": "",
+   "rationale": "Transliteració fonètica OBLIGATÒRIA. Mentre que generate-glossari menciona 'alfabet original', G-03 és més específica: requereix transliteració de cada terme català. No plenament implementada al canon.",
+   "verdict": null
+  },
+  {
+   "id": "G-05",
+   "activation": "NIVELL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció sobre ajustar el to segons MECR. Recerca exhaustiva al canon no trobat cap referència explícita a aquest criteri específic per NIVELL (activació). Els M3 parlen de MECR però no de \"to\" com a variable independent per MECR.",
+   "verdict": null
+  },
+  {
+   "id": "G-06",
+   "activation": "NIVELL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció sobre ajustar el to segons MECR (duplicada de G-05). No trovada al canon. Les pautes MECR es troben en M3_lectura-facil-comunicacio-clara.md però NO mencionen \"ton\" o \"to\" com a variable configurable per nivell.",
+   "verdict": null
+  },
+  {
+   "id": "G-07",
+   "activation": "PERFIL",
+   "gap_at_M": false,
+   "confidence": "mitjana",
+   "covered_by": "M1_alumnat-nouvingut.md (sec. 4, barreres lingüístiques, inferència); M3_TILC-llengua-i-continguts.md (estructura CALP vs BICS)",
+   "rationale": "Nouvingut sense CALP: estructura explícita. M1_alumnat-nouvingut explica la distinció BICS/CALP i la necessitat d'estructura discursiva explícita. M3_TILC cobreix com marcar definicions vs exemples. No és grapada ID però el contingut sí.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "G-08",
+   "activation": "NIVELL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "M3_lectura-facil-comunicacio-clara.md, secció 6 \"pre-A1 Emergent\" (linies 493-508): Lectura logogràfica compartida adult/infant; ritme oral, estructura narrativa rondalla, suport visual, destinatari adult que llegeix en veu alta",
+   "rationale": "Lectura compartida adult/infant (Emergent/logogràfica). M3 descriu explícitament el comportament lector logogràfica, la narrativa tipo rondalla ('Hi havia una vegada…'), frases 3-5 paraules, ritme conversacional veu alta. Match directe amb l'instrucció G-08.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "G-09",
+   "activation": "NIVELL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "M3_lectura-facil-comunicacio-clara.md, secció 6 \"pre-A1 Emergent\" (linies 498-499): límit 3-5 paraules per frase per Emergent, vocabulari concret visual només",
+   "rationale": "Lectura compartida Emergent LÍMIT 40 paraules total. M3 especifica frases 3-5 paraules màxim, vocabulari quotidià bàsic, verbs present regularitats, NO formules ni nombres. La compressió al nucli pedagòtic mantenint objectiu està implícita en l'estratègia Emergent descrita.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "G-10",
+   "activation": "PERFIL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "M3_TILC-llengua-i-continguts.md (paragrafs sobre TILC i CALP, línies 13-15, 59): 'NO reduir llargada sinó adaptar CALP/BICS'; 'bastides lingüístiques del TILC'; 'Cummins interdependència competència subjacent comune'",
+   "rationale": "Nouvingut transferència L1→L2 (TILC/MALL): NO reduir llargada, afegir bastides. M3_TILC menciona explícitament que TILC aprofita la competència subjacent (Cummins interdependència), i que es treballa lèxica acadèmica i sintaxi, NO llargada. Bastides i glossaris són la solució descrita.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "H-01",
+   "activation": "PERFIL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "M1_alumnat-TEA.md (taula prioritats línies 279-284): 'H-01 (estructura predictible)' citat explícitament a la matriu barrera→instruccions",
+   "rationale": "TEA: estructura predictible fixa (títol→def→exemple→activitat). M1_TEA cita ID H-01 directament a la taula de prioritats per a inferència (barrera nuclear). El document descriu estrutura TEA explícitament als principis d'actuació.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "H-02",
+   "activation": "PERFIL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "M1_alumnat-TEA.md (taula prioritats línies 281): 'H-02 (zero implicitura)' citat explícitament a la matriu barrera→instruccions",
+   "rationale": "TEA: zero implicitura (literal explícit). M1_TEA cita ID H-02 directament a prioritat 1a. La barrera de inferència està documentada a les barreres lingüístiques (línies 63-70) del document.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "H-03",
+   "activation": "PERFIL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "M1_alumnat-TEA.md (taula prioritats línies 282): 'H-03 (anticipació canvis)' citat explícitament a la matriu barrera→instruccions",
+   "rationale": "TEA: anticipació de canvis ('Ara canviem...', 'A continuació veurem...'). M1_TEA cita ID H-03 directament a prioritat 2a (estructura). Necessitat de predictibilitat és pilar dels principis d'actuació.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "H-04",
+   "activation": "PERFIL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "M1_TDAH.md (taula prioritats línies 218): 'H-04 (micro-blocs amb objectiu)' citat explícitament a la matriu barrera→instruccions",
+   "rationale": "Micro-blocs 3-5 frases amb objectiu explícit ('En aquest bloc aprendràs...'). M1_TDAH cita ID H-04 a prioritat 1a (atenció). Chunking de 3-5 frases és tàctica core del TDAH.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "H-05",
+   "activation": "PERFIL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "M1_TDAH.md (taula prioritats línies 220): 'H-05 (retroalimentació visual)' citat explícitament a la matriu barrera→instruccions",
+   "rationale": "TDAH: retroalimentació visual (barres, percentatges, indicadors visuals). M1_TDAH cita ID H-05 a prioritat 3a (motivació, feedback immediat). Fatiga cognitiva i necessitat de feedback és documentada al perfil clínic.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "H-06",
+   "activation": "PERFIL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "M1_TDAH.md (taula prioritats línies 218): 'H-06 (variació dins text)' citat explícitament a la matriu barrera→instruccions",
+   "rationale": "TDAH: variació dins text (alterna lectura, esquema, pregunta per atenció). M1_TDAH cita ID H-06 a prioritat 1a. Estratègies de variació per mantenir atenció sustinguda explicitades al document.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "H-07",
+   "activation": "PERFIL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "M1_dislexia-dificultats-lectores.md (taula prioritats línies 281): 'H-07 (evitar compostos llargs, dividir/reformular)' citat explícitament a la matriu barrera→instruccions",
+   "rationale": "Dislèxia (Dehaene/Wolf): evita paraules compostes llargues, divideix o reformula. M1_dislèxia cita ID H-07 a prioritat 1a (descodificació). Barreres fonològiques i necessitat de vocabulari freqüent documentades explícitament.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "H-08",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de PERFIL (Dislèxia: paraules d'alta freqüència). Vé del Python hardcoded (instruction_catalog.py). No existe skill de mediació que la cobreixi; M1_dislexia-dificultats-lectores.md és conceptual, no consultat pel pipeline.",
+   "verdict": null
+  },
+  {
+   "id": "H-09",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de PERFIL (DI: un sol concepte nou per bloc). Hardcoded al Python. M1_discapacitat-intel·lectual.md és conceptual; cap skill de mediació la cobreix.",
+   "verdict": null
+  },
+  {
+   "id": "H-10",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de PERFIL (DI: concreció radical). Hardcoded al Python. No consultat des del canon consumible.",
+   "verdict": null
+  },
+  {
+   "id": "H-11",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de PERFIL (DI: repetició sistemàtica). Hardcoded al Python. M1 conceptual, no consumible pel pipeline.",
+   "verdict": null
+  },
+  {
+   "id": "H-12",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de PERFIL (Altes capacitats: profundització). Hardcoded al Python. M1_altes-capacitats.md és documentació, no instrument del pipeline.",
+   "verdict": null
+  },
+  {
+   "id": "H-14",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de PERFIL (Altes capacitats: PROHIBIT SIMPLIFICAR). Hardcoded al Python. No hi ha skill que la descrigui de forma consumible.",
+   "verdict": null
+  },
+  {
+   "id": "H-15",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de PERFIL (Doble excepcionalitat: equilibri). Hardcoded al Python. No hi ha instrument del corpus que la cobreixi.",
+   "verdict": null
+  },
+  {
+   "id": "H-16",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de PERFIL (TDL: densitat lèxica mínima). Hardcoded al Python. M1_TDL-trastorn-llenguatge.md és conceptual, no consultat.",
+   "verdict": null
+  },
+  {
+   "id": "H-17",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de PERFIL (TDL: modelatge context). Hardcoded al Python. No hi ha skill que la descrigui.",
+   "verdict": null
+  },
+  {
+   "id": "H-19",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de PERFIL (Disc. visual: estructura semàntica). Hardcoded al Python. M1_discapacitat-visual.md és documentació, no consumible.",
+   "verdict": null
+  },
+  {
+   "id": "H-20",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de PERFIL (Disc. auditiva: simplificació L2). Hardcoded al Python. M1_discapacitat-auditiva.md és conceptual; cap skill la cobreix.",
+   "verdict": null
+  },
+  {
+   "id": "H-21",
+   "activation": "PERFIL",
+   "gap_at_M": false,
+   "confidence": "mitjana",
+   "covered_by": "corpus/external/corpusFJE/M1_discapacitat-visual.md — Secció 'Barreres d'aprenentatge' i 'Manifestacions a l'escola' descriu la necessitat de descriure textualment per ceguesa, però el descriptor explicit de ceguesa no apareix amb format instruccional integrat al text del M1.",
+   "rationale": "L'M1 cobreix bien les barreres de la discapacitat visual i la necessitat d'alternatives textuals, però H-21 es una instrucció de PERFIL que requeix que el LLM generi descripcions textuals de taules/gràfics/esquemes — aquest és contingut dinàmic/generat, no estàtic al canon. L'M1 proporciona context però no la regla de generació.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "H-22",
+   "activation": "PERFIL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M1_dislexia-dificultats-lectores.md — Secció 'Barrera nuclear', línies 264-274: 'Descodificació: L'alumnat amb dislèxia té com a barrera principal...prefixos+arrel+sufixos generen fatiga lectora exponencial. ... Evita encadenar prefixos i sufixos'.",
+   "rationale": "H-22 està explícitament cobert al M1_dislexia amb la regla exacta: 'evita encadenar prefixos i sufixos'. El M1 descriu la barrera fonològica i els clústers consonàntics. L'instrucció és PERFIL però ja viu al M1.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "H-23",
+   "activation": "PERFIL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M1_TDL-trastorn-llenguatge.md — Variables configurables: 'tdl_receptiu' (modalitat comprensiva severa). Secció 'Components' i 'Barreres': 'Comprensió receptiva molt afectada, entonació, discriminació, enteniment context'.",
+   "rationale": "H-23 especifica TDL receptiu amb 'simplificació reforçada en TOT el text'. El M1_TDL ja cobreix aquesta variable i la necessitat de simplificació en modalitat comprensiva. És contingut recuperable del canon M1 existent.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "H-24",
+   "activation": "PERFIL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M1_TDL-trastorn-llenguatge.md — Variables configurables 'semantica=true': 'Vocabulari d'alta freqüència, definicions integrades al text'.",
+   "rationale": "H-24 (TDL semàntica: vocabulari mínim funcional) està cobert pel M1_TDL que specifica la variable 'semantica_afectada' i indica 'vocabulari d'alta freqüència' i 'bancs de paraules'. Regla preexistent al canon.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "H-25",
+   "activation": "PERFIL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M1_TDL-trastorn-llenguatge.md — Variables 'morfosintaxi=true': 'Usar estructures SVO simples, evitar passives i subordinades'.",
+   "rationale": "H-25 (TDL morfosintaxi: SVO estricte) és exactament la regla descrita al M1_TDL sota la variable 'morfosintaxi_afectada'. Recuperable directament del canvas consumit.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "H-26",
+   "activation": "PERFIL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M1_TDL-trastorn-llenguatge.md — Variables 'pragmatica=true': 'Evitar consignes amb llenguatge figurat o ambigu, explicitar el context comunicatiu'.",
+   "rationale": "H-26 (TDL pragmàtica: intenció comunicativa explícita) reprodueix la variable M1_TDL 'pragmatica_afectada' que especifica evitar el figurat i explicitar el context. Ja cobert al canon.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "H-27",
+   "activation": "PERFIL",
+   "gap_at_M": false,
+   "confidence": "alta",
+   "covered_by": "corpus/external/corpusFJE/M1_discalculia.md — Secció 'Manifestacions per etapa' i 'Necessitats prioritàries': 'CPA sistemàtic, taules proporcionades', substitueix nombres abstractes per representacions concretes.",
+   "rationale": "H-27 (Discalcúlia: nombres abstractes → representacions concretes) està cobert pel model CPA (Concret-Pictòric-Abstracte) descrit exhaustivament al M1_discalculia. Contingut preexistent.",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "H-28",
+   "activation": "PERFIL",
+   "gap_at_M": false,
+   "confidence": "mitjana",
+   "covered_by": "corpus/external/corpusFJE/M1_discalculia.md — Secció 'Progressió CPA': 'no s'ha de forçar el salt a A fins que la comprensió estigui consolidada', desglossament pas a pas implicit en la progressió C→P→A.",
+   "rationale": "H-28 (Discalcúlia: desglossament de seqüències numèriques pas a pas) està implícit al M1 dins el marc CPA però no com a instrucció de generació textual explícita. El M1 cobreix la teoria però no la regla de format ('cada pas en línia numerada').",
+   "verdict": "refuta_mante"
+  },
+  {
+   "id": "H-29",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "H-29 (Comprensió lectora desacoblada: explícit el propòsit de lectura) és una instrucció de PERFIL per a un trastorn 'comprensio_lectora' NO cobert al M1_TDL. El TDL és un trastorn del desenvolupament, mentre 'poor comprehender' és un perfil cognitiu distint (descodificació correcta pero construcció semàntica fallida). No hi ha M file dedicat a este perfil.",
+   "verdict": null
+  },
+  {
+   "id": "H-30",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "H-30 (Comprensió lectora desacoblada: desnominalitzacions) és una regla específica per al perfil 'comprensio_lectora' que no és cobert al canon M*. El M1_TDL no descriu cette modalitat. Cap M file cobre 'poor comprehender' o 'comprensió desacoblada'.",
+   "verdict": null
+  },
+  {
+   "id": "H-31",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "H-31 (Comprensió lectora desacoblada: causalitat i inferències explícites) és una regla per a 'comprensio_lectora' non cobert per cap M file. No hi ha un M1 dedicat a aquest perfil específic de comprensió desacoblada.",
+   "verdict": null
+  },
+  {
+   "id": "H-32",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "H-32 (Comprensió lectora desacoblada: mini-recapitulació per macroestructura) és una instrucció per a 'comprensio_lectora'. Cap M file específic cobreix aquest perfil neuropsicològic distint de TDL.",
+   "verdict": null
+  },
+  {
+   "id": "H-33",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "H-33 (Comprensió lectora desacoblada: substituir pronoms per noms complets) és una regla de 'comprensio_lectora' que requeriria un M file dedicat a aquest perfil cognitiu. Actualment no existeix M1_comprensio-lectora-desacoblada o similar al canon.",
+   "verdict": null
+  },
+  {
+   "id": "H-34",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de perfil 'comprensio_lectora' que demana micro-preguntes intercalades cada 2-3 paràgrafs per activar metacognició. No hi ha M*.md ni skill que descrigui aquest patró específic d'intercalació de preguntes verificació. Viu al Python hardcoded.",
+   "verdict": null
+  },
+  {
+   "id": "H-35",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de perfil 'tdc' (dispraxia) que demana formats de resposta amb mínima escriptura (V/F, opció múltiple, relacionar). M1_trastorn-coordinacio-dispraxia.md no descriu aquestes estratègies de format de resposta com a instruccions d'adaptació textual. Viu al Python.",
+   "verdict": null
+  },
+  {
+   "id": "H-36",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de perfil 'tdc' que demana estructura vertical lineal (no columnes paral·leles). M1_trastorn-coordinacio-dispraxia.md parla de barreres però no de l'adaptació de layout lineal. Viu al Python.",
+   "verdict": null
+  },
+  {
+   "id": "H-37",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de perfil 'tdc' que demana separació de cada pas en línia independent i numerada. M1_trastorn-coordinacio-dispraxia.md no especifica aquesta granularitat de separació de procediments. Viu al Python.",
+   "verdict": null
+  },
+  {
+   "id": "H-38",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de perfil 'tdc' que demana retalla de text si hi ha producció escrita extensa. M1_trastorn-coordinacio-dispraxia.md parla de barreres però no codifica aquesta regla de retalla específica. Viu al Python.",
+   "verdict": null
+  },
+  {
+   "id": "H-39",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de perfil 'discalculia' que demana definir lèxic quantitatiu en context quotidià. M1_discalculia.md parla de CPA però no codifica aquesta estratègia d'adaptació textual com a instrucció. Viu al Python.",
+   "verdict": null
+  },
+  {
+   "id": "H-40",
+   "activation": "PERFIL",
+   "gap_at_M": true,
+   "confidence": "alta",
+   "covered_by": "",
+   "rationale": "Instrucció de perfil 'discalculia' que demana descripcions verbals de gràfics/taules numèriques. M1_discalculia.md no especifica aquesta estratègia d'externalització textual de la informació visual. Viu al Python.",
+   "verdict": null
+  }
+ ]
+}
