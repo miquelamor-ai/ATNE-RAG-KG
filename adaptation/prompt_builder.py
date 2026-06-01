@@ -608,42 +608,69 @@ El text complet adaptat segons tots els paràmetres indicats.
             k for k, v in chars.items()
             if isinstance(v, dict) and v.get("actiu")
         ]
+
+        # A2 · 2026-06-01: deriva header literal + sostre per nivell del
+        # rubrica.json (canon mineriaRAG, v1.0.1). Fallback "## Glossari"+5-10
+        # si el JSON no es pot carregar.
+        _gl_mecr = (params.get("mecr_sortida") or params.get("mecr") or "B1").upper().replace("Ç", "C")
+        _gl_h2 = "## Glossari"
+        _gl_range = "5-10 termes (gradat per MECR)"
+        try:
+            import skills_loader as _sl_p1
+            _rub_p1 = _sl_p1.load_rubrica("generate-glossari")
+            if _rub_p1:
+                _fmt_p1 = _sl_p1.get_format_output(_rub_p1)
+                _h2_p1 = (_fmt_p1 or {}).get("h2_exact") or []
+                if _h2_p1:
+                    _gl_h2 = _h2_p1[0]
+                _passos_p1 = _sl_p1.get_level_passos(_rub_p1, _gl_mecr)
+                _count_p1 = _sl_p1.get_countable(_passos_p1, "pas_1_nombre")
+                if _count_p1:
+                    _min = _count_p1.get("min")
+                    _max = _count_p1.get("max")
+                    if _min and _max:
+                        _gl_range = f"{_min}-{_max} termes"
+                    elif _max:
+                        _gl_range = f"fins a {_max} termes"
+        except Exception:
+            pass
+
         if _skills_on:
             # SKILLs ON: la SKILL aporta context detallat. AQUÍ donem
             # format ACCIONABLE perquè el LLM no ometi la secció.
             if is_nouvingut and l1:
                 output_sections.append(f"""
-## Glossari
+{_gl_h2}
 ACTIVAT — Format OBLIGATORI: taula markdown 3 columnes:
 | Terme | Traducció ({l1_display}) | Explicació senzilla |
 
-Inclou 5-10 termes clau (gradat per MECR). Traducció REAL a {l1_display} en alfabet original.
+Inclou {_gl_range} (canon rubrica.json per a {_gl_mecr}). Traducció REAL a {l1_display} en alfabet original.
 Vegeu SKILL generate-glossari per al detall pedagògic.
 """)
             else:
                 output_sections.append(f"""
-## Glossari
+{_gl_h2}
 ACTIVAT — Format OBLIGATORI: taula markdown 2 columnes:
 | Terme | Explicació senzilla |
 
-Inclou 5-10 termes clau (gradat per MECR).
+Inclou {_gl_range} (canon rubrica.json per a {_gl_mecr}).
 Vegeu SKILL generate-glossari per al detall pedagògic.
 """)
         elif is_nouvingut and l1:
             output_sections.append(f"""
-## Glossari
+{_gl_h2}
 ACTIVAT — Genera una TAULA MARKDOWN amb 3 columnes:
 | Terme | Traducció ({l1_display}) | Explicació simple |
-Inclou tots els termes tècnics o difícils del text adaptat (mínim 8-12 termes).
+Inclou {_gl_range} (canon rubrica.json per a {_gl_mecr}).
 La columna de traducció ha de contenir la traducció REAL al/a la {l1_display} (en el seu alfabet original si escau: àrab, xinès, urdú, etc.).
 L'explicació ha de ser en {lang_label} molt senzill (nivell A1).
 """)
         else:
             output_sections.append(f"""
-## Glossari
+{_gl_h2}
 ACTIVAT — Genera una TAULA MARKDOWN amb 2 columnes:
 | Terme | Explicació simple |
-Inclou tots els termes tècnics o difícils del text adaptat (mínim 8-12 termes).
+Inclou {_gl_range} (canon rubrica.json per a {_gl_mecr}).
 L'explicació ha de ser en {lang_label} molt senzill.
 """)
 
@@ -1350,7 +1377,24 @@ def build_complements_prompt(profile: dict, context: dict, params: dict) -> str:
     (en aquest cas l'orquestrador no fa la 2a crida).
     """
     comp = params.get("complements", {})
-    comp_actius = {k for k, v in comp.items() if v}
+    # Ordre canon (determinista) — evita non-reproducibility en prompts (Troballa
+    # 5.bis pla A2): si comp_actius fos un set, l'ordre del CHECKLIST i de les
+    # directives específiques podia variar entre execucions i invalidava la
+    # cache de cost LLM + els diffs anti-regressió. L'ordre del CHECKLIST queda
+    # alineat amb _COMP_TITLES (sortida visual al Pas 3).
+    _CANON_ORDER = (
+        "glossari", "preguntes_comprensio", "bastides",
+        "esquema_visual", "mapa_conceptual", "mapa_mental",
+        "plantilles_genere", "resum_graduat", "cartes_conversacionals",
+        "rubriques", "activitats_aprofundiment", "resum",
+        "pictogrames", "illustracions",
+        "negretes", "definicions_integrades", "traduccio_l1",
+    )
+    comp_actius = [k for k in _CANON_ORDER if comp.get(k)]
+    # Per si arriba algun complement futur fora de l'ordre canon, l'afegim al final.
+    for k, v in comp.items():
+        if v and k not in _CANON_ORDER:
+            comp_actius.append(k)
     if not comp_actius:
         return ""
 
@@ -1427,6 +1471,7 @@ def build_complements_prompt(profile: dict, context: dict, params: dict) -> str:
         "traduccio_l1": None,
         "resum": "Resum",
     }
+    # comp_actius ja ve ordenat per _CANON_ORDER (vegeu inici de la funció).
     _seccions = [_COMP_TITLES[k] for k in comp_actius if _COMP_TITLES.get(k)]
     if not _seccions:
         return ""
@@ -1453,6 +1498,31 @@ PROHIBIT reproduir el text adaptat. PROHIBIT ometre seccions. Si el contingut é
         _produccio_activa = bool(
             comp.get("preguntes_comprensio") or comp.get("activitats_aprofundiment")
         )
+
+        # A2 · 2026-06-01: deriva headers literals del rubrica.json del canon
+        # mineriaRAG (h2_exact: '## Bastides'; h3_exact: '### Bastides de
+        # lectura' + '### Bastides de resposta'). Si el canon evoluciona, el
+        # prompt es sincronitza sol. Fallback als literals de la versió 1.0.1.
+        _bast_h2 = "## Bastides"
+        _bast_h3_lectura = "### Bastides de lectura"
+        _bast_h3_resposta = "### Bastides de resposta"
+        _bast_version = ""
+        try:
+            import skills_loader as _sl_bs
+            _rub_bs = _sl_bs.load_rubrica("generate-bastides-lectura")
+            if _rub_bs:
+                _bast_version = _rub_bs.get("_meta", {}).get("version", "")
+                _fmt_bs = _sl_bs.get_format_output(_rub_bs)
+                _h2_bs = (_fmt_bs or {}).get("h2_exact") or []
+                _h3_bs = (_fmt_bs or {}).get("h3_exact") or []
+                if _h2_bs:
+                    _bast_h2 = _h2_bs[0]
+                if len(_h3_bs) >= 1:
+                    _bast_h3_lectura = _h3_bs[0]
+                if len(_h3_bs) >= 2:
+                    _bast_h3_resposta = _h3_bs[1]
+        except Exception:
+            pass
         # Plantilla dels 3 moments per banda MECR (derivada de la SKILL canònica,
         # reformulada com a directiva). Cada entrada: (abans, durant, després).
         # CRÍTIC: ítems IMPERATIUS (verb d'acció, sense interrogants). Si es
@@ -1531,47 +1601,40 @@ PROHIBIT reproduir el text adaptat. PROHIBIT ometre seccions. Si el contingut é
         # (a pre-A1 la SKILL -produccio no genera res). Mirall de la condició de la SKILL.
         _resposta_block = ""
         if _produccio_activa and _band != "PRE-A1":
-            _resposta_block = """
-### Bastides de resposta
+            _resposta_block = f"""
+{_bast_h3_resposta}
 Genera també (perquè hi ha preguntes/activitats actives):
 - **Base d'orientació:** 3-4 passos del procés per construir la resposta del gènere treballat (GPS disciplinar, no «introducció/cos/conclusió» genèric).
 - **Connectors útils:** 3-5 connectors graduats al MECR.
 - **Frases per començar:** 2-3 iniciadors model (forats, NO la resposta sencera).
 """
 
+        _bast_version_cite = f" (canon rubrica.json {_bast_version})" if _bast_version else ""
         parts.append(f"""
 ## INSTRUCCIÓ ESPECÍFICA — Bastides (OBLIGATÒRIA)
-Reprodueix EXACTAMENT aquest esquema: és la secció `## Bastides` SENCERA, amb la
+Reprodueix EXACTAMENT aquest esquema: és la secció `{_bast_h2}` SENCERA{_bast_version_cite}, amb la
 capçalera literal i les 3 subseccions. Omple cada ítem a partir del text adaptat que
 reps. Són pistes d'ESTRATÈGIA LECTORA (com llegir, transferibles a qualsevol text del
 mateix gènere/nivell), adaptades a {_mecr_b} — no un re-llistat dels fets del text.
 
-## Bastides
+{_bast_h2}
 
-### Abans de llegir — prepara la lectura
-- {_ab}
-
-### Durant la lectura — estratègies de lector
-- {_du}
-
-### Després de llegir — consolida i revisa
-- {_de}
+{_bast_h3_lectura}
+- **Abans de llegir:** {_ab}
+- **Durant la lectura:** {_du}
+- **Després de llegir:** {_de}
 {_resposta_block}{_acces_line}{_tilc_line}
 
 {_disambig}
-PROHIBIT deixar `## Bastides` amb el cos buit o només amb la intro: omple SEMPRE els 3 moments amb 1-3 ítems cadascun.
+PROHIBIT deixar `{_bast_h2}` amb el cos buit o només amb la intro: omple SEMPRE els 3 moments amb 1-3 ítems cadascun.
 NO incloguis marcadors de pictogrames `[PICTO: …]` en aquesta secció.
 """)
 
-    # Fix 2026-05-31 (Cas titella — glossari ple de paraules quotidianes):
-    # Phase 2 retry 2026-05-31 (post canvis canon corpusFJE 981d9a0):
-    # Hem reforçat el M3 §5 amb exemples concrets de quotidians i llengua
-    # generalitzada multi-idioma. Tot i així el test test_glossari falla
-    # 0/3 sense la directiva: el model resol la tensió §Nombre vs §Selecció
-    # pertinent fent prevaler el sostre superior (5-8 termes A1). El canon
-    # encara necessita un sostre numèric estricte que sobrescrigui el §Nombre
-    # quan el text és majoritàriament quotidià. Pendent (mineriaRAG): afegir
-    # al §Nombre d'A1 una nota "max 2 si el text és majoritàriament quotidià".
+    # A2 · 2026-06-01: refactor — derivar regla d'exclusió quotidiana i header
+    # literal del rubrica.json del corpusFJE (mineriaRAG canon, v1.0.1). Si
+    # el rubrica no es pot llegir (fallback), restaurem la directiva legacy
+    # equivalent. Sostre numèric "MÀXIM 2 termes a A1+primària inicial" viu
+    # al case_override `a1_primaria_inicial_vocabulari_quotidia` (canon).
     if "glossari" in comp_actius:
         _mecr_gl = (mecr or "B1").upper().replace("Ç", "C")
         _is_low_gl = _mecr_gl in ("PRE-A1", "A1")
@@ -1581,38 +1644,72 @@ NO incloguis marcadors de pictogrames `[PICTO: …]` en aquesta secció.
             "pictograma inline (mediació visual), NO al glossari."
             if _has_pictos else ""
         )
-        _quotidia_block = (
-            f"""
+
+        try:
+            import skills_loader as _sl_gl
+            _rub_gl = _sl_gl.load_rubrica("generate-glossari")
+        except Exception:
+            _rub_gl = None
+
+        _h2_glossari = "## Glossari"
+        _seleccio_descriptor = ""  # canon level-specific, sense "Idem."
+        _seleccio_rule = ""        # canon transversal, fallback
+        if _rub_gl:
+            _fmt = _sl_gl.get_format_output(_rub_gl)
+            _h2_list = (_fmt or {}).get("h2_exact") or []
+            if _h2_list:
+                _h2_glossari = _h2_list[0]
+            _passos_gl = _sl_gl.get_level_passos(_rub_gl, _mecr_gl)
+            _seleccio_descriptor = _sl_gl.get_descriptor(_passos_gl, "pas_5_seleccio_pertinent") or ""
+            _seleccio_rule = (
+                ((_rub_gl.get("transversals") or {}).get("seleccio_pertinent") or {})
+                .get("rule", "")
+            )
+            # Si el descriptor diu només "Idem.", reemplacem per la regla
+            # transversal completa (a A1 ja és complet).
+            if _seleccio_descriptor.strip().lower().startswith("idem"):
+                _seleccio_descriptor = _seleccio_rule
+
+        if _is_low_gl and _seleccio_descriptor:
+            # Canon disponible: text pedagògic level-specific del rubrica.json +
+            # operativa Python (sostre 2 termes a A1+primària inicial + nota
+            # pictograma). NO injectem `case_overrides[].descripcio` raw —
+            # conté marques internes (Trigger:/Modulació:) destinades al parser.
+            _version_gl = _rub_gl.get('_meta', {}).get('version', '')
+            _quotidia_block = f"""
+🔴 FILTRE DE SELECCIÓ LÈXICA (canon rubrica.json {_version_gl} · pas_5_seleccio_pertinent per a {_mecr_gl}):
+{_seleccio_descriptor}
+
+⚠️ SOSTRE OPERATIU a {_mecr_gl} + etapa primària inicial (case_override `a1_primaria_inicial_vocabulari_quotidia`): **MÀXIM 2 termes** al glossari. Si en tens 4 candidats en ment, és senyal que n'estàs incloent de quotidians.{_picto_note}
+
+⚠️ DESEMPATE FIDELITAT-vs-QUOTIDIÀ (modulació ATNE per a MECR baix): la regla canon "fidelitat al text font" NO obliga a definir tots els termes centrals del text. Obliga que els que DEFINEIXIS hi siguin literalment. **Si un terme central és quotidià, OMET-LO del glossari** — el pictograma o el coneixement previ s'encarreguen del suport lèxic. A {_mecr_gl}, quotidià > fidelitat.
+
+INCLOU NOMÉS termes que siguin: (a) realment tècnics o de la disciplina, (b) inusuals per al nivell, o (c) específics del text fora del lèxic quotidià.
+"""
+        elif _is_low_gl:
+            # Fallback legacy quan no es pot carregar el rubrica.json (e.g.
+            # submodule no inicialitzat). Equivalent al text canon però hardcoded.
+            _quotidia_block = f"""
 🔴 FILTRE DE SELECCIÓ LÈXICA (regla canònica SKILL §5, prominent a {_mecr_gl}):
 SOSTRE ESTRICTE: a {_mecr_gl}, **MÀXIM 2 termes** al glossari. Si en tens 4
 candidats en ment, és senyal que n'estàs incloent de quotidians.
 
 EXCLOU del glossari tot el vocabulari QUOTIDIÀ que un alumne de {_mecr_gl}+etapa
-inicial JA coneix. Exemples que NO van al glossari:
-  • Objectes domèstics i materials comuns: **mitja, botó, agulla, fil, retolador,
-    llapis, paper, taula, casa, porta, plat, got…**
-  • Parts del cos: cap, mà, ulls, boca, peu…
-  • Verbs d'acció bàsics: posar, lligar, dibuixar, jugar, mirar, fer…
-  • Connectors, quantificadors i adjectius generals.{_picto_note}
+inicial JA coneix: objectes domèstics (mitja, botó, agulla, fil, retolador, llapis,
+paper, taula, casa, porta, plat, got…), parts del cos (cap, mà, ulls, boca, peu…),
+verbs d'acció bàsics (posar, lligar, dibuixar, jugar, mirar, fer…), connectors,
+quantificadors i adjectius generals.{_picto_note}
 
-⚠️ AMBIGÜITAT FIDELITAT-vs-QUOTIDIÀ: la regla SKILL "fidelitat al lèxic nuclear
-del text" NO obliga a definir tots els termes centrals del text. Obliga que els
-que DEFINEIXIS hi siguin literalment. **Si un terme central és quotidià, OMET-LO
-del glossari** — el pictograma o el coneixement previ s'encarreguen del suport
-lèxic. A {_mecr_gl}, quotidià > fidelitat.
-
-INCLOU NOMÉS termes que siguin: (a) realment tècnics o de la disciplina,
-(b) inusuals per al nivell, o (c) específics del text fora del lèxic quotidià.
 Si el text no en conté cap de realment nou, escriu sota la capçalera
-`## Glossari` la nota: **«Aquest text no necessita glossari nou per al teu nivell.»**
-i prou. Millor 0-2 termes ben triats que 4-6 termes redundants.
+`{_h2_glossari}` la nota: **«Aquest text no necessita glossari nou per al teu nivell.»** i prou.
 """
-            if _is_low_gl else ""
-        )
+        else:
+            _quotidia_block = ""
+
         parts.append(f"""
 ## INSTRUCCIÓ ESPECÍFICA — Glossari (OBLIGATÒRIA)
-Reforç de regles canòniques del SKILL generate-glossari que es perden quan hi
-ha molts complements actius simultàniament.
+Reforç de regles canòniques del SKILL generate-glossari (canon rubrica.json) que
+es perden quan hi ha molts complements actius simultàniament.
 {_quotidia_block}
 🔴 LLENGUA DE LES DEFINICIONS — CATALÀ ESTRICTE:
 Cada cel·la d'explicació ha de ser en català. CAP castellanisme com a definició
@@ -1622,7 +1719,7 @@ sense usar la paraula castellana («ninot petit de drap que es mou amb la mà»)
 o omet el terme.
 
 🔴 FIDELITAT AL TEXT: tots els termes del glossari han d'aparèixer LITERALMENT
-al `## Text adaptat`. NO inventis termes que no hi siguin.
+al `## Text adaptat` (sota la capçalera `{_h2_glossari}`). NO inventis termes que no hi siguin.
 """)
 
     # Fix 2026-05-27 (Bug 1 — esquema_visual buit en 2-call):

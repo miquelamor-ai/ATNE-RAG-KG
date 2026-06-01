@@ -1114,7 +1114,6 @@
       'rubriques autoavaluacio': 'rubriques',
       'rubriques': 'rubriques',
       'pictogrames': 'pictogrames',
-      'traduccio l1': 'traduccio_l1',
       'auditoria': 'auditoria',
       'notes dauditoria': 'auditoria',
       'argumentacio': 'argumentacio',
@@ -1153,9 +1152,13 @@
         else if (/argumentaci/.test(titleNorm)) key = 'argumentacio';
         else if (/auditoria/.test(titleNorm)) key = 'auditoria';
         else if (/pictogram/.test(titleNorm)) key = 'pictogrames';
-        else if (/traducci/.test(titleNorm)) key = 'traduccio_l1';
         else key = titleNorm.replace(/\s+/g, '_');
       }
+      // A2 (decisió Q3b 01/06): `traduccio_l1` és legacy — ja és columna del
+      // glossari, mai una secció pròpia. Si el LLM emet `## Traducció L1`,
+      // filtrem-ho silenciosament per no contaminar `result.complements` amb
+      // una clau orfa que cap chip ni cap vista del Pas 3 consumeix.
+      if (/^traducci/.test(key)) continue;
       if (key === '_main') result.main = body;
       else result.complements[key] = body;
     }

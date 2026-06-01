@@ -19,6 +19,7 @@ Slicing per nivell (2026-05-31):
 """
 from __future__ import annotations
 
+import json
 import os
 import re
 from dataclasses import dataclass, field
@@ -345,6 +346,90 @@ def render_skill_block(skills: list[Skill], mecr: str | None = None) -> str:
             # Fallback: body sencer (comportament pre-2026-05-31)
             parts.append(f"{header}\n{s.body}")
     return "\n\n".join(parts)
+
+
+# ── Rubrica.json loader (A2 · 2026-06-01) ──────────────────────────────
+
+_RUBRICA_CACHE: dict[str, dict] = {}
+
+
+def _normalize_mecr_for_rubrica(mecr: str | None) -> str | None:
+    """Normalitza un MECR runtime a la clau usada a rubrica.json.
+
+    L'esquema rubrica.json v1.0 usa: 'pre-A1', 'A1', 'A2', 'B1', 'B2', 'C1+'.
+    Coincideix amb _normalize_mecr() del slicing, però el separem perquè
+    aquest normalitzador pertany al consum del JSON i pot evolucionar
+    independentment si l'esquema canvia.
+    """
+    return _normalize_mecr(mecr)
+
+
+def load_rubrica(skill_name: str, roots: list[Path] | None = None) -> dict | None:
+    """Llegeix el rubrica.json d'una SKILL i el retorna com a dict.
+
+    Cerca a `roots` (default: `default_skills_roots()`) recursivament un
+    directori `**/{skill_name}/rubrica.json`. Cau silenciosament a None si
+    no existeix o el JSON és invàlid (deixant que el codi crida tingui un
+    fallback a la directiva Python actual durant el refactor A2).
+
+    Cache en memòria per nom de skill: els JSONs canvien només quan es
+    re-publica el corpusFJE (no per request).
+    """
+    if skill_name in _RUBRICA_CACHE:
+        return _RUBRICA_CACHE[skill_name]
+    if roots is None:
+        roots = default_skills_roots()
+    for root in roots:
+        if not root.exists():
+            continue
+        for candidate in root.rglob("rubrica.json"):
+            if candidate.parent.name == skill_name:
+                try:
+                    data = json.loads(candidate.read_text(encoding="utf-8"))
+                    _RUBRICA_CACHE[skill_name] = data
+                    return data
+                except Exception as e:
+                    print(f"[skills_loader] error parsing {candidate}: {e}")
+                    _RUBRICA_CACHE[skill_name] = None  # type: ignore[assignment]
+                    return None
+    _RUBRICA_CACHE[skill_name] = None  # type: ignore[assignment]
+    return None
+
+
+def get_level_passos(rubrica: dict, mecr: str | None) -> list[dict]:
+    """Retorna els passos del nivell MECR donat (o llista buida si no existeix)."""
+    if not rubrica or not mecr:
+        return []
+    nivell = _normalize_mecr_for_rubrica(mecr)
+    if not nivell:
+        return []
+    levels = rubrica.get("levels", {})
+    # rubrica.json fa servir 'pre-A1' literal a vegades i 'pre-A1' al levels
+    level_data = levels.get(nivell) or levels.get(mecr) or {}
+    return level_data.get("passos", []) or []
+
+
+def get_countable(passos: list[dict], pas_id: str) -> dict | None:
+    """Cerca el primer pas amb `pas_id` donat i retorna el seu `countable`."""
+    for p in passos:
+        if p.get("pas_id") == pas_id:
+            return p.get("countable")
+    return None
+
+
+def get_descriptor(passos: list[dict], pas_id: str) -> str | None:
+    """Retorna el descriptor textual d'un pas concret (None si no hi és)."""
+    for p in passos:
+        if p.get("pas_id") == pas_id:
+            return p.get("descriptor")
+    return None
+
+
+def get_format_output(rubrica: dict) -> dict:
+    """Retorna `transversals.format_output` (o dict buit)."""
+    if not rubrica:
+        return {}
+    return (rubrica.get("transversals") or {}).get("format_output") or {}
 
 
 # ── Debug helper ───────────────────────────────────────────────────────

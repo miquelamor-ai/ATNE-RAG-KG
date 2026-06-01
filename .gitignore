@@ -24,5 +24,6 @@ tests/golden/_report.md
 tests/golden/_phase_b_report.md
 tests/golden/outputs/
 tests/golden/judgments/
+tests/debug_adapt_*.txt
 .claude/
 260323_Millores*.md
