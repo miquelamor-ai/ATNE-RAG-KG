@@ -2,15 +2,19 @@
  * tests/test_complements_matriu.js — test Node determinista de la matriu
  * d'auto-suggestió de complements al Pas 2 (ui/atne/js/complements-matriu.js).
  *
- * Validem la modulació MECR/low afegida 2026-05-30 (cas titella):
- *   R1: pictogrames per a perfils visuals a nivell baix.
- *   R2: mapa_conceptual i mapa_mental fora a nivell baix.
- *   R3: glossari fora per dislèxia (sense nouvingut ni TDL) a nivell baix.
- *
- * Cap regressió de la matriu base per a perfils estàndards (B1+, AACC).
+ * Des de R0 (2026-06-01) la matriu és CANON: complements-matriu.js consumeix
+ * matriu_cobertura.json del submodule corpusFJE via complements-matriu.data.js
+ * (derivat incrustat, generat per scripts/build_matriu_data.js). Aquest test cobreix:
+ *   - GUARD anti-drift: .data.js ↔ matriu_cobertura.json del submodule (deep-equal).
+ *   - Lleis R1/R2/R3 + fallback R4/A5 (cas titella i companyia).
+ *   - GOLDEN SNAPSHOT: 711 combinacions byte-a-byte (contracte de no-regressió).
  *
  * Execució:
  *   node tests/test_complements_matriu.js
+ *
+ * ⚠️ DESPRÉS DE BUMPEJAR EL SUBMODULE corpusFJE, regenera el derivat i verifica:
+ *   node scripts/build_matriu_data.js && node tests/test_complements_matriu.js
+ * Si el test surt KO amb "DRIFT", és que falta el primer pas (regenerar el .data.js).
  */
 const M = require('../ui/atne/js/complements-matriu.js');
 
