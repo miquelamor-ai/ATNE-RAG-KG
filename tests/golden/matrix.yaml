@@ -79,24 +79,20 @@ complements:
 # Matriu d'esperança: per cada condició, quins complements s'han d'auto-activar
 # per defecte. Reproduïda EXACTAMENT de pas2.html:2814-2827. Si canvia allà,
 # canvia aquí (i el test ho detectarà).
+# defaults_per_condicio — ELIMINAT 2026-06-01 (R0 canonitzada).
 #
-# Llegenda: true = activar per defecte · false = no auto-activar (opt-in docent)
-defaults_per_condicio:
-  #     gloss  esq   bast  mapaC preg  aprof picto mapaM plant resum cartes rubr
-  tea:  [true, true, true, false, true, false, true, false, false, false, false, true ]
-  tdah: [true, true, true, false, true, false, false, false, false, false, false, false]
-  disl: [true, true, true, false, true, false, false, false, true,  false, false, false]
-  di:   [true, true, true, false, false, false, true, false, true,  true,  false, false]
-  tdl:  [true, true, true, false, true, false, false, false, true,  false, false, false]
-  ac:   [true, true, false, true, true, true, false, true,  false, false, false, true ]
-  aud:  [true, true, true, false, true, false, true, false, false, false, false, false]
-  vis:  [true, false, false, false, true, false, false, false, false, false, false, false]
-  tdc:  [true, false, false, false, true, false, false, false, false, false, false, false]
-  cat:  [true, true, true, false, true, false, true, false, true,  true,  false, false]
-  vuln: [true, true, true, false, true, false, false, false, false, false, false, false]
-  emo:  [true, true, true, false, true, false, false, false, false, false, false, false]
-  # Discalcúlia (afegida a §7 2026-05-27) — patró similar a TDL
-  discalculia: [true, true, true, false, true, false, false, false, true, false, false, false]
+# Aquesta taula era la matriu condició→complements ANTIGA (v1, ~5 compl/condició,
+# de pas2.html:2814). Quedava OBSOLETA i divergent del comportament viu, i el
+# harness (run_golden.py) NO la validava (era dades mortes). mineriaRAG ho va
+# detectar al senyal R0 i va recomanar retirar-la per no confondre lectors.
+#
+# FONT VIVA de la matriu (R0, 2026-06-01):
+#   - Canon: corpus/external/corpusFJE/M2_instruments-mediacio-pedagogica.md
+#            (§ Matriu de cobertura perfil × complement)
+#   - Derivat: corpus/external/corpusFJE/.tooling/matriu_cobertura.json
+#   - Consumidor ATNE: ui/atne/js/complements-matriu.js (+ .data.js incrustat)
+#   - Contracte de regressió: tests/golden/matriu_complements_snapshot.json (711)
+#     validat per tests/test_complements_matriu.js
 
 # Gèneres canònics disponibles (skills write-*).
 # Font: corpus/external/corpusFJE/skills/generes/

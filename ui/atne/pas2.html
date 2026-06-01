@@ -24,7 +24,10 @@
 <link rel="stylesheet" href="/ui/driver.css"/>
 <script src="/ui/driver.iife.js"></script>
 <script src="/ui/atne/js/profile-canonical.js"></script>
-<script src="/ui/atne/js/complements-matriu.js?v=20260530a"></script>
+<!-- R0 (2026-06-01): dades canon de la matriu (AUTO-GENERAT des de matriu_cobertura.json).
+     Ha de carregar-se ABANS de complements-matriu.js, que les consumeix síncronament. -->
+<script src="/ui/atne/js/complements-matriu.data.js?v=20260601"></script>
+<script src="/ui/atne/js/complements-matriu.js?v=20260601"></script>
 <script src="/ui/atne/js/llm.js?v=20260419j" defer></script>
 
 <style>
