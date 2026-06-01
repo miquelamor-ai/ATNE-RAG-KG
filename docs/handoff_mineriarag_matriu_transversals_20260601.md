@@ -186,3 +186,41 @@ hardcoded.
 contracte anti-regressió: el refactor R0 llegirà del JSON i haurà de reproduir
 aquest snapshot exacte. Cobreix les 13 condicions × 9 MECR × 5 cursos + fallbacks
 (NONE, NOUV_L1) + 4 parelles de condicions (R1/R2/R3/R4/A5 exercitades).
+
+---
+
+## §6. Deute paral·lel — transversals T1/T2 (mateixa decisió que R0)
+
+Aprofitant aquest canal: T1 i T2 estan en el MATEIX estat que R0 (bloquejats
+esperant decisió mineriaRAG). Detall complet a
+`docs/reforcos_generes_arxiu_20260601.md` §Regles transversals. Resum + cita
+literal del que ATNE té actiu i que caldria canonitzar (o confirmar com a ATNE):
+
+**T1 — "la forma del gènere guanya sobre el MECR"** (ACTIVA, reduïda al mínim).
+Ubicació: `prompt_builder.py` bloc `if _is_form_genre:`. Text literal actual:
+
+> REGLA TRANSVERSAL — La FORMA del gènere «{genre}» guanya sobre el nivell MECR:
+> si hi ha conflicte entre simplificar al MECR i preservar l'estructura formal del
+> gènere (versos, torns, passos numerats, camps), GUANYA LA FORMA. Pots simplificar
+> VOCABULARI, però segueix l'estructura canònica que defineix la SKILL del gènere.
+
+- Aplica a gèneres-forma: poema, poesia, vers, cançó, teatre/diàleg, recepta,
+  instructiu, manual, reglament, fitxa tècnica.
+- **Demanem**: ¿entra com a transversal del canon (proposta de nom
+  `forma_sobre_mecr`) als rubrica.json dels gèneres-forma? Si sí, ATNE el llegirà
+  via `skills_loader` (anàleg a `get_format_output`) i retirarà el bloc Python.
+
+**T2 — "no inventar contingut no demanat"** (ACTIVA, intacta). Salvaguarda del
+format de sortida del pipeline 2-call (no afegir preguntes/marcadors/meta-comentaris
+dins «## Text adaptat»). Text literal a `prompt_builder.py` (bloc "REGLA CRÍTICA
+— NO INVENTIS CONTINGUT NO DEMANAT").
+
+- **Demanem**: ¿és transversal de canon (`no_contingut_no_demanat`) o és
+  legítimament una regla de plataforma ATNE? La nostra hipòtesi: T2 és més
+  runtime-ATNE que canon-MALL (governa el nostre format 2-call, no el marc
+  pedagògic). Si mineriaRAG hi coincideix, T2 NO puja al canon i es queda a ATNE
+  documentada com a regla de plataforma (deixa de ser "en-trànsit").
+
+Quan tinguem la vostra decisió sobre T1/T2 (igual que sobre R0), ATNE tanca el
+deute: llegeix del canon el que pugi i retira el Python equivalent, amb test
+anti-regressió que el prompt resultant conté la mateixa regla.
