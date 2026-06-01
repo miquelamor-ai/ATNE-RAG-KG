@@ -131,6 +131,73 @@ cases.forEach(([input, expected]) => {
   else { nFail++; failures.push(`${label} got ${actual}`); console.log(`  ✗ ${label} got ${actual}`); }
 });
 
+// ─────────────────────────────────────────────────────────────────────────
+// GOLDEN SNAPSHOT — contracte anti-regressió per al refactor R0 (matriu canon).
+//
+// tests/golden/matriu_complements_snapshot.json captura la sortida actual de
+// defaultComplementsForProfile per a 711 combinacions (13 condicions × 9 MECR ×
+// 5 cursos + fallbacks NONE/NOUV_L1 + 4 parelles). Quan mineriaRAG publiqui
+// matriu_cobertura.json i fem R0 (consum del JSON canon), aquest bloc ha de
+// seguir verd SENSE tocar el snapshot: garanteix que el refactor reprodueix el
+// comportament byte-a-byte. Si el snapshot mai necessita actualització
+// intencionada, regenera'l amb el mateix algoritme i revisa el diff.
+// ─────────────────────────────────────────────────────────────────────────
+console.log('\n=== GOLDEN SNAPSHOT (711 combinacions · contracte R0) ===');
+(function checkSnapshot() {
+  let snap;
+  try {
+    snap = require('./golden/matriu_complements_snapshot.json');
+  } catch (e) {
+    console.log('  ⚠️  snapshot no trobat — saltant (genera amb el workflow R0)');
+    return;
+  }
+  const mecrs = ['pre-A1', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2', '', undefined];
+  const cursos = ['1r Primària', '2n Primària', '3r Primària', '3r ESO', ''];
+  const conds = Object.keys(M.MATRIU_CONDICIONS);
+  let mismatches = 0, checked = 0;
+  function cmp(key, actual) {
+    checked++;
+    const exp = JSON.stringify(snap[key]);
+    const act = JSON.stringify(actual);
+    if (exp !== act) {
+      mismatches++;
+      if (mismatches <= 10) {
+        console.log(`  ✗ ${key}\n    snapshot: ${exp}\n    actual:   ${act}`);
+      }
+    }
+  }
+  conds.forEach(function (c) {
+    mecrs.forEach(function (me) {
+      cursos.forEach(function (cu) {
+        cmp(c + '|' + (me === undefined ? 'undef' : me) + '|' + cu,
+            M.defaultComplementsForProfile({ cat: c, curs: cu }, me));
+      });
+    });
+  });
+  mecrs.forEach(function (me) {
+    cursos.forEach(function (cu) {
+      cmp('NONE|' + (me === undefined ? 'undef' : me) + '|' + cu,
+          M.defaultComplementsForProfile({ curs: cu }, me));
+      cmp('NOUV_L1|' + (me === undefined ? 'undef' : me) + '|' + cu,
+          M.defaultComplementsForProfile({ curs: cu, conditions: [{ key: 'nouvingut', l1: 'arab' }] }, me));
+    });
+  });
+  [['disl', 'cat'], ['disl', 'tdl'], ['tea', 'ac'], ['tdah', 'disl']].forEach(function (pair) {
+    mecrs.forEach(function (me) {
+      cmp(pair.join('+') + '|' + (me === undefined ? 'undef' : me) + '|',
+          M.defaultComplementsForProfile({ chips: pair.map(function (x) { return { cat: x }; }) }, me));
+    });
+  });
+  if (mismatches === 0) {
+    nPass++;
+    console.log(`  ✓ ${checked} combinacions coincideixen amb el snapshot`);
+  } else {
+    nFail++;
+    failures.push(`GOLDEN SNAPSHOT: ${mismatches}/${checked} desviacions del comportament canon R0`);
+    console.log(`  ✗ ${mismatches}/${checked} desviacions (només 10 primeres mostrades)`);
+  }
+})();
+
 console.log('\n' + '='.repeat(60));
 console.log(`RESULTAT: ${nPass} OK · ${nFail} KO`);
 console.log('='.repeat(60));
