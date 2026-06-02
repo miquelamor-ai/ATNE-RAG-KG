@@ -1126,7 +1126,19 @@
       .replace(/[^\w\s]/g, '')
       .replace(/\s+/g, ' ')
       .trim();
-    for (const part of parts) {
+    // Fix 2026-06-02: el primer segment (parts[0]) és el contingut ABANS del
+    // primer `##` — és a dir, el TEXT ADAPTAT, tant si el LLM ha posat
+    // `## Text adaptat` com a capçalera (llavors parts[0] és buit i el text va
+    // al segment amb títol 'text adaptat') com si NO l'ha posat i comença
+    // directament amb `### subtítols` o prosa. Sense aquest tractament, quan
+    // falta `## Text adaptat` el parser tractava parts[0] com una secció
+    // anònima i el `main` quedava buit → fallback `main = text` (TOT, amb
+    // argumentació/auditoria/mapa/rúbriques barrejades dins el text de l'alumne).
+    // Assignem parts[0] a main si té contingut real i encara no s'ha fixat.
+    const _first = (parts[0] || '').trim();
+    if (_first) result.main = _first;
+    for (let _pi = 1; _pi < parts.length; _pi++) {
+      const part = parts[_pi];
       if (!part.trim()) continue;
       const nlIdx = part.indexOf('\n');
       const title = nlIdx > -1 ? part.slice(0, nlIdx).trim() : part.trim();
