@@ -18,6 +18,7 @@ tres peces de configuració runtime (lazy import per evitar circularitat):
 - `_persist_adaptation_to_supabase`, `_log_session`, `post_process_catalan`
 """
 
+import os
 import re
 import threading
 import time
@@ -147,9 +148,23 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
     _has_complements = any(_comp_params.values())
     try:
         import skills_loader as _sl_check
-        _two_call = _sl_check.is_skills_enabled() and _has_complements
-    except Exception:
+        _skills_on_diag = _sl_check.is_skills_enabled()
+        _two_call = _skills_on_diag and _has_complements
+        # DIAG 2026-06-02: per què la Call 2 (complements) no s'executa a prod?
+        try:
+            _n_skills_diag = len(_sl_check.load_skills(_sl_check.default_skills_roots()))
+        except Exception as _e_sk:
+            _n_skills_diag = f"ERROR({type(_e_sk).__name__}: {_e_sk})"
+        print(
+            f"[diag_two_call] ATNE_USE_SKILLS_env={os.getenv('ATNE_USE_SKILLS')!r} "
+            f"is_skills_enabled={_skills_on_diag} skills_carregades={_n_skills_diag} "
+            f"has_complements={_has_complements} comp_keys={[k for k,v in _comp_params.items() if v]} "
+            f"=> _two_call={_two_call}",
+            flush=True,
+        )
+    except Exception as _e_two:
         _two_call = False
+        print(f"[diag_two_call] EXCEPCIÓ calculant _two_call: {type(_e_two).__name__}: {_e_two}", flush=True)
 
     # System prompt — sense RAG, les instruccions graduades són el motor
     cb({"type": "step", "step": "search", "msg": "Preparant instruccions d'adaptació..."})
