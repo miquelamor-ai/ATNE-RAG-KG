@@ -12,12 +12,13 @@ steps:
       - -c
       - |
         # Autentica el clone del submodule privat corpusFJE amb el PAT (Secret
-        # Manager). git reescriu github.com → x-access-token:TOKEN@github.com
-        # NOMÉS durant aquest step. Sense això: "could not read Username for
-        # https://github.com" (bug confirmat 2026-06-02).
-        git config --global url."https://x-access-token:$$GITHUB_TOKEN@github.com/".insteadOf "https://github.com/"
+        # Manager). Cal fer strip de qualsevol salt de línia del token (el secret
+        # es va crear amb un \n final) abans d'usar-lo, sino git config peta amb
+        # "invalid key (newline)". Injectem el token a la config insteadOf.
+        TOK=$$(printf '%s' "$$GITHUB_TOKEN" | tr -d '\n\r')
+        git config --global url."https://x-access-token:$${TOK}@github.com/".insteadOf "https://github.com/"
         git submodule update --init --recursive || echo "WARN: submodule update ha fallat. Skills NO estaran disponibles."
-        git config --global --unset url."https://x-access-token:$$GITHUB_TOKEN@github.com/".insteadOf || true
+        git config --global --remove-section url."https://x-access-token:$${TOK}@github.com/" 2>/dev/null || true
         N=$$(find corpus/external/corpusFJE/skills -name SKILL.md 2>/dev/null | wc -l)
         echo "=== SKILL.md trobats al build: $$N ==="
         if [ "$$N" -eq "0" ]; then echo "!!! ATENCIO: 0 SKILLs — el submodule no s'ha inicialitzat"; fi
