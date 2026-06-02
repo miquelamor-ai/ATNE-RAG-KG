@@ -581,6 +581,10 @@ Genera únicament:
 2. ## Argumentació pedagògica
 3. ## Notes d'auditoria
 
+DINS de "## Text adaptat", la PRIMERA línia ha de ser sempre un **títol** en format `# Títol`
+(un sol coixinet). Si el text original ja en té, conserva'l; si no, crea'n un de breu i
+descriptiu del contingut. Aquest títol identifica el document.
+
 El text adaptat ha de ser llegible directament per l'alumne, sense intromissions del sistema, i ha de respectar el FORMAT del gènere demanat.
 """)
         return "\n".join(parts)
