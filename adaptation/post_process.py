@@ -159,12 +159,21 @@ def clean_gemini_output(text: str) -> str:
     #    principal però hi afegeixi un complement («Bastides de …», «Preguntes
     #    de la lectura …») és una SUBSECCIÓ → «###». Distingim "principal exacta"
     #    de "principal + cua".
+    # Totes les seccions de complement canòniques (## de primer nivell). Ha
+    # d'estar SINCRONITZADA amb _section_aliases de l'orchestrator (font del
+    # mapping complement→secció). Bug 2026-06-02 (El Roure AACC): faltaven
+    # "rubriques", "cartes", "plantilla", "resum graduat", "tolc" →
+    # «## Rúbriques d'autoavaluació» es degradava a «###» → el parser del
+    # frontend l'englobava dins «## Mapa mental» → el diagrama Mermaid
+    # s'empassava la taula de rúbriques i sortia trencat.
     _MAIN_KEYWORDS = [
         "text adaptat", "glossari", "esquema", "mapa conceptual",
         "preguntes", "bastides", "suport", "activitats", "mapa mental",
         "argumentació", "argumentacio", "notes d'auditoria",
         "notes d'audit", "pictogrames", "traducció", "negretes",
-        "definicions",
+        "definicions", "rúbriques", "rubriques", "cartes conversacionals",
+        "cartes", "plantilla", "plantilles", "resum graduat", "tolc",
+        "transllenguatge", "il·lustracions", "illustracions",
     ]
     lines = text.split("\n")
     seen_main = set()  # keywords de seccions principals ja obertes
@@ -225,6 +234,15 @@ def clean_gemini_output(text: str) -> str:
         )
         if not _valid_parent:
             text = text[: m_abans.start()] + "## Preguntes de comprensió\n\n" + text[m_abans.start():]
+
+    # 5d. Eliminar regles horitzontals (`---`, `***`, `___`) que el model emet
+    #     com a separador entre seccions (2026-06-02). NO són mai contingut
+    #     legítim a la sortida ATNE i el render els mostra com a soroll (línies
+    #     `---` soltes al text, glossari, esquema; el PDF n'arrossega visualment).
+    #     Precaució: NO tocar els separadors de TAULA markdown (`|---|---|`), que
+    #     porten `|` — la regex exigeix que la línia sigui NOMÉS guions/asteriscs/
+    #     baixos (3+), sense cap `|`.
+    text = re.sub(r'^[ \t]*([-*_])\1{2,}[ \t]*$', '', text, flags=re.MULTILINE)
 
     # 6. Netejar línies buides excessives
     text = re.sub(r'\n{4,}', '\n\n\n', text)

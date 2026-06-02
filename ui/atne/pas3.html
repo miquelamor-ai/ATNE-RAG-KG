@@ -3960,6 +3960,34 @@
 
     if (docTitleEl) docTitleEl.value = title;
 
+    // Títol del document — jerarquia de font única (2026-06-02):
+    //   1r) títol manual del docent (Pas 2 / camp .doc-title)
+    //   2n) `# Títol` que el LLM genera a la 1a línia del text adaptat
+    //   3r) 'Sense títol'
+    // El LLM SEMPRE genera un `# Títol` (ho demana el prompt_builder) però fins
+    // ara s'ignorava → tots els docs sortien 'Sense títol'. Aquesta funció
+    // l'aprofita NOMÉS si el docent no n'ha posat cap de manual.
+    window.maybeApplyLlmTitle = function(mainText) {
+      try {
+        const el = document.querySelector('.doc-title');
+        if (!el) return;
+        const manual = (localStorage.getItem('atne.doc_title') || '').trim();
+        const current = (el.value || '').trim();
+        // Si ja hi ha un títol real del docent (no buit ni 'Sense títol'), respecta'l.
+        if (manual && manual.toLowerCase() !== 'sense títol') return;
+        if (current && current.toLowerCase() !== 'sense títol') return;
+        // Extreu el primer `# Títol` (un sol #) del text adaptat.
+        const m = (mainText || '').match(/^\s*#\s+(.+?)\s*$/m);
+        if (m && m[1]) {
+          const llmTitle = m[1].replace(/[#*`]/g, '').trim();
+          if (llmTitle) {
+            el.value = llmTitle;
+            localStorage.setItem('atne.doc_title', llmTitle);
+          }
+        }
+      } catch (e) { /* no-op: el títol no és crític */ }
+    };
+
     // Carrega els complements triats pel docent al Pas 2 ABANS del cache check
     // perquè els xips dinàmics (mapa conceptual, bastides, etc.) s'hagin de
     // crear tant si venim de cache com si s'acaba d'adaptar.
@@ -4210,6 +4238,10 @@
             localStorage.removeItem('atne.preserve_adapted');
           } else {
             const mainText = parsed.main || ev.adapted || '';
+            // Títol (2026-06-02): jerarquia docent > LLM > 'Sense títol'. Si el
+            // docent no ha posat títol manual, aprofitem el `# Títol` que el LLM
+            // genera a la 1a línia del text adaptat (abans s'ignorava → 'Sense títol').
+            maybeApplyLlmTitle(mainText);
             const looksLikeHtml = /<(p|h[1-6]|ul|ol|li|strong|em)[\s>]/i.test(mainText);
             adaptedEl.innerHTML = ATNE_sanitize(looksLikeHtml ? mainText : md2html(mainText));
             // Il·lustracions: si hi ha marcadors, processa'ls
@@ -4312,6 +4344,7 @@
     const adaptedEl = document.getElementById('adapted-text');
     if (adaptedEl) {
       const mainText = parsed.main || rawAdapted || '';
+      maybeApplyLlmTitle(mainText);
       const looksLikeHtml = /<(p|h[1-6]|ul|ol|li|strong|em)[\s>]/i.test(mainText);
       adaptedEl.innerHTML = ATNE_sanitize(looksLikeHtml ? mainText : md2html(mainText));
       if (mainText && /\[IMATGE:\s*[^\]]+\]/.test(mainText)) {
