@@ -474,6 +474,73 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
                 if _stripped_sections:
                     print(f"[post_filter] Seccions eliminades (no autoritzades): {_stripped_sections}", flush=True)
                     adapted = "".join(_new_parts)
+
+                # ── Retry de seccions absents (2026-06-02) ────────────────────
+                # Bug intermitent confirmat amb DevTools: la Call 2 de vegades
+                # OMET una secció de complement demanada (bastides, glossari…) —
+                # no-determinisme del model. El frontend (correctament) no mostra
+                # el que no rep. Solució general: detectar quins complements
+                # actius NO tenen la seva secció a `adapted` i re-demanar NOMÉS
+                # aquelles seccions en una crida focalitzada. Cobreix qualsevol
+                # complement via `_section_aliases` (font única del mapping).
+                # Skills inline (pictogrames/illustracions) NO generen secció ##
+                # pròpia → s'exclouen del retry.
+                _INLINE_NO_SECTION = {"pictogrames", "illustracions",
+                                      "negretes", "definicions_integrades", "traduccio_l1"}
+                _missing_sections = []
+                for _k, _v in _comp_params.items():
+                    if not _v or _k in _INLINE_NO_SECTION or _k not in _section_aliases:
+                        continue
+                    _pat = _re_filter.compile("|".join(_section_aliases[_k]), _re_filter.M)
+                    if not _pat.search(adapted):
+                        _missing_sections.append(_k)
+                if _missing_sections:
+                    print(f"[complements_retry] seccions absents, re-demanant: {_missing_sections}", flush=True)
+                    cb({"type": "step", "step": "complements_retry",
+                        "msg": f"Recuperant {len(_missing_sections)} complement(s) que falten..."})
+                    # Noms llegibles de les seccions per al prompt de retry
+                    _missing_titles = [
+                        _section_aliases[_k][0].replace(r"^## ", "## ").replace(r"\b", "")
+                        for _k in _missing_sections
+                    ]
+                    _retry_user = (
+                        f"TEXT ADAPTAT:\n{adapted}\n\n"
+                        "Genera NOMÉS aquestes seccions que falten, amb el mateix format "
+                        "i nivell demanats al system prompt. No repeteixis cap altra secció:\n"
+                        + "\n".join(f"- {_t}" for _t in _missing_titles)
+                    )
+                    try:
+                        _retry_raw = _call_llm(_comp_model, _comp_system, _retry_user)
+                        _retry_clean = clean_gemini_output(_retry_raw)
+                        _retry_clean = _post_process_llm_output(_retry_clean, lang=lang)
+                        if _comp_params.get("pictogrames") and "[PICTO" in _retry_clean:
+                            try:
+                                from adaptation.pictograms_arasaac import resolve_pictogram_markers
+                                _retry_clean = resolve_pictogram_markers(_retry_clean)
+                            except Exception:
+                                pass
+                        # Afegim NOMÉS les seccions que de debò faltaven (filtre per
+                        # evitar que el retry torni a colar seccions no demanades).
+                        _retry_allowed = []
+                        for _k in _missing_sections:
+                            _retry_allowed.extend(_section_aliases[_k])
+                        _retry_re = _re_filter.compile("|".join(_retry_allowed), _re_filter.M)
+                        _rseg = _re_filter.split(r"(?m)(^## [^\n]+)\n", _retry_clean)
+                        _kept = []
+                        _j = 1
+                        while _j < len(_rseg):
+                            _rt = _rseg[_j]
+                            _rb = _rseg[_j + 1] if _j + 1 < len(_rseg) else ""
+                            if _retry_re.match(_rt):
+                                _kept.append(_rt + "\n" + _rb)
+                            _j += 2
+                        if _kept:
+                            adapted = adapted.rstrip() + "\n\n" + "\n\n".join(_kept).strip()
+                            print(f"[complements_retry] recuperades {len(_kept)} secció(ns)", flush=True)
+                        else:
+                            print("[complements_retry] el retry tampoc no ha generat les seccions", flush=True)
+                    except Exception as _retry_err:
+                        print(f"[complements_retry] error (ignorat): {_retry_err}", flush=True)
             except Exception as _comp_err:
                 cb({"type": "step", "step": "warning",
                     "msg": f"Avís: complements fallits ({_comp_err}). Text adaptat conservat."})
