@@ -11,9 +11,9 @@ steps:
       - -c
       - |
         git submodule update --init --recursive || echo "WARN: submodule update ha fallat (auth?). Skills NO estaran disponibles."
-        N=$(find corpus/external/corpusFJE/skills -name SKILL.md 2>/dev/null | wc -l)
-        echo "=== SKILL.md trobats al build: $N ==="
-        if [ "$N" -eq "0" ]; then echo "!!! ATENCIO: 0 SKILLs — el submodule no s'ha inicialitzat (auth de Cloud Build a corpusFJE?)"; fi
+        N=$$(find corpus/external/corpusFJE/skills -name SKILL.md 2>/dev/null | wc -l)
+        echo "=== SKILL.md trobats al build: $$N ==="
+        if [ "$$N" -eq "0" ]; then echo "!!! ATENCIO: 0 SKILLs — el submodule no s'ha inicialitzat (auth de Cloud Build a corpusFJE?)"; fi
 
   # 1. Build la imatge Docker
   - name: 'gcr.io/cloud-builders/docker'
