@@ -1,4 +1,20 @@
 steps:
+  # 0. Inicialitza el submodule corpusFJE/skills (font única de les 41 SKILLs).
+  #    Sense això, COPY . . al Dockerfile copia el directori del submodule BUIT
+  #    → load_skills() retorna 0 → la Call 2 (complements) no genera bastides ni
+  #    glossari (bug confirmat 2026-06-02 via log [diag_two_call] skills_carregades=0).
+  #    corpusFJE és PRIVAT: el compte de servei de Cloud Build necessita accés de
+  #    lectura al repo miquelamor-ai/corpusFJE perquè aquest step funcioni.
+  - name: 'gcr.io/cloud-builders/git'
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        git submodule update --init --recursive || echo "WARN: submodule update ha fallat (auth?). Skills NO estaran disponibles."
+        N=$(find corpus/external/corpusFJE/skills -name SKILL.md 2>/dev/null | wc -l)
+        echo "=== SKILL.md trobats al build: $N ==="
+        if [ "$N" -eq "0" ]; then echo "!!! ATENCIO: 0 SKILLs — el submodule no s'ha inicialitzat (auth de Cloud Build a corpusFJE?)"; fi
+
   # 1. Build la imatge Docker
   - name: 'gcr.io/cloud-builders/docker'
     args:
