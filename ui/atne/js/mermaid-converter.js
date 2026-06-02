@@ -631,6 +631,18 @@
     s.innerHTML = '<svg viewBox="0 0 16 16" width="11" fill="currentColor"><path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 0 0-.354 0l-8.61 8.61a.25.25 0 0 0-.064.108l-.681 2.382 2.382-.68a.25.25 0 0 0 .108-.065l8.61-8.61a.25.25 0 0 0 0-.353z"/></svg> Editar font del diagrama';
     var ta = document.createElement('textarea');
     ta.className = 'mermaid-edit-textarea'; ta.value = mdRaw; ta.rows = 9; ta.spellcheck = false;
+    // Fix 2026-06-02: el textarea de 9 files (~110px) era massa baix per a
+    // mapes/esquemes complexos (contingut de 300px+) → calia scroll dins una
+    // caixa petita i "no es veia el text sencer". L'autoajustem al contingut,
+    // amb un mínim raonable i un sostre del 70% de la finestra (perquè no
+    // ocupi tota la pantalla i el botó "Refés" quedi sempre accessible).
+    function autosize() {
+      ta.style.height = 'auto';
+      var maxH = Math.round(window.innerHeight * 0.7);
+      var minH = 130;
+      ta.style.height = Math.min(Math.max(ta.scrollHeight + 4, minH), maxH) + 'px';
+    }
+    ta.addEventListener('input', autosize);
     var btn = document.createElement('button');
     btn.type = 'button'; btn.className = 'mermaid-rerender-btn'; btn.textContent = 'Refés el diagrama';
     btn.addEventListener('click', function () {
@@ -639,9 +651,9 @@
       renderMermaidBlock(cont, newMd, type);
     });
     d.appendChild(s); d.appendChild(ta); d.appendChild(btn);
-    // Quan s'obre el details, desplaça el textarea a la vista automàticament
+    // Quan s'obre el details, ajusta l'alçada al contingut i desplaça'l a la vista.
     d.addEventListener('toggle', function () {
-      if (d.open) setTimeout(function () { ta.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 60);
+      if (d.open) setTimeout(function () { autosize(); ta.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 60);
     });
     return d;
   }
