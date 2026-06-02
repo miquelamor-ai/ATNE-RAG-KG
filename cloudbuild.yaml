@@ -7,13 +7,20 @@ steps:
   #    lectura al repo miquelamor-ai/corpusFJE perquè aquest step funcioni.
   - name: 'gcr.io/cloud-builders/git'
     entrypoint: bash
+    secretEnv: ['GITHUB_TOKEN']
     args:
       - -c
       - |
-        git submodule update --init --recursive || echo "WARN: submodule update ha fallat (auth?). Skills NO estaran disponibles."
+        # Autentica el clone del submodule privat corpusFJE amb el PAT (Secret
+        # Manager). git reescriu github.com → x-access-token:TOKEN@github.com
+        # NOMÉS durant aquest step. Sense això: "could not read Username for
+        # https://github.com" (bug confirmat 2026-06-02).
+        git config --global url."https://x-access-token:$$GITHUB_TOKEN@github.com/".insteadOf "https://github.com/"
+        git submodule update --init --recursive || echo "WARN: submodule update ha fallat. Skills NO estaran disponibles."
+        git config --global --unset url."https://x-access-token:$$GITHUB_TOKEN@github.com/".insteadOf || true
         N=$$(find corpus/external/corpusFJE/skills -name SKILL.md 2>/dev/null | wc -l)
         echo "=== SKILL.md trobats al build: $$N ==="
-        if [ "$$N" -eq "0" ]; then echo "!!! ATENCIO: 0 SKILLs — el submodule no s'ha inicialitzat (auth de Cloud Build a corpusFJE?)"; fi
+        if [ "$$N" -eq "0" ]; then echo "!!! ATENCIO: 0 SKILLs — el submodule no s'ha inicialitzat"; fi
 
   # 1. Build la imatge Docker
   - name: 'gcr.io/cloud-builders/docker'
@@ -48,6 +55,11 @@ steps:
 
 images:
   - ${_AR_HOSTNAME}/${_AR_PROJECT_ID}/${_AR_REPOSITORY}/${_SERVICE_NAME}:$COMMIT_SHA
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/dreseraios-drive/secrets/github-corpusfje-token/versions/latest
+      env: 'GITHUB_TOKEN'
 
 options:
   logging: CLOUD_LOGGING_ONLY
