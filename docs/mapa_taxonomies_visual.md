@@ -147,7 +147,7 @@ flowchart TB
     CUMMINS --> ESTR
     CUMMINS --> CONT
 
-    MALL["☂️ MALL (FJE) · el paraigua que integra<br/>Cummins + DUA + Sweller + Vygotsky + Lectura Fàcil"]
+    MALL["☂️ MALL (FJE) · el paraigua que integra<br/>Cummins + DUA + Vygotsky/Bruner + Halliday + Bajtín/Adam + Solé"]
     LING --> MALL
     ESTR --> MALL
     CONT --> MALL
@@ -283,5 +283,5 @@ flowchart LR
 - **DUA + Sweller** són el fil transversal dels complements (com Cummins ho era de les transformacions).
 - Cada complement té un teòric pare clar, PERÒ atenció: **Novak (mapa conceptual) i Buzan (mapa mental) NO són citats pel MALL** — són atribucions externes nostres (la disciplina els reconeix, però el corpus FJE no els nomena).
 - **Preguntes de comprensió: el referent principal de la LECTURA és Isabel Solé** (3 moments), reforçada per Sanmartí (regulació). Correcció NotebookLM.
-- La regla mestra dels complements és **"menys és més"**: la matriu proposa 2-3 per condició, no tots. ✅ *NotebookLM: "sòlidament fonamentada (Sweller + Vygotsky)". Font MALL: "6-10 preguntes totals. Mai més."*
+- La regla mestra dels complements és **"menys és més"**: la matriu proposa 2-3 per condició, no tots. ✅ *Principi PROPI del MALL (font: "6-10 preguntes totals. Mai més."). Convergeix amb la càrrega cognitiva de Sweller, però el MALL no el cita — convergència externa, no fonament (canonitzat a M2_marc-teoric-mediacio.md).*
 - 🔴 **Teòrics que el MALL SÍ cita i caldria integrar:** Halliday (LSF), Camps/Zayas (seqüència didàctica), Bajtín (gèneres).

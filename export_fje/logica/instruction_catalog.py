@@ -401,7 +401,7 @@ CATALOG = {
         "subvar_conditions": {"baixa_memoria_treball": True},
     },
     "C-05": {
-        "text": "Glossari previ (pre-training, Sweller): comença amb '## Paraules clau' amb els termes essencials.",
+        "text": "Glossari previ (organitzador previ, principi MALL): comença amb '## Paraules clau' amb els termes essencials.",
         "activation": "NIVELL",
         "macro": "COGNITIU",
         "mecr_levels": ["pre-A1", "A1", "A2"],
