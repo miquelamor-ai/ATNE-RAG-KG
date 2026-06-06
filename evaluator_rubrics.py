@@ -44,6 +44,11 @@ REGLES:
 # ═══════════════════════════════════════════════════════════════════════════════
 # V2 — Rúbrica fonamentada amb ancoratges (Ronda 2)
 # ═══════════════════════════════════════════════════════════════════════════════
+# Rúbrica del jutge — marcs d'AVALUACIÓ triats per ATNE.
+# NO són necessàriament citats pel MALL: són els marcs que aquest
+# avaluador usa per puntuar adaptacions (Sweller = càrrega cognitiva, etc.).
+# Decisió mineriaRAG 2026-06-06: Sweller es queda aquí (marc propi de
+# l'avaluador, no fonament del MALL → no viola la regla de no-sobreatribució).
 
 V2_INDIVIDUAL_SYSTEM = """Ets un avaluador pedagògic expert i escèptic. Avalua la qualitat d'una adaptació de text educatiu usant una rúbrica fonamentada en 6 marcs teòrics (Halliday, Sweller, Mayer, CAST/UDL, Vygotsky, TSAR).
 

@@ -29,19 +29,20 @@ es presentava com a **fonament** (atribució indeguda al MALL):
 Confirmat: el motor d'adaptació (`adaptation/prompt_builder.py`) ja atribuïa correctament el
 "menys és més" al MALL (línies 712, 951, 955, 1001: "regla MALL «menys és més»"). NO calia tocar-lo.
 
-**🟡 DECISIÓ OBERTA PER A VOSALTRES — `evaluator_rubrics.py`:**
+**✅ DECISIÓ TANCADA (mineriaRAG, 2026-06-06) — `evaluator_rubrics.py`:**
 Sweller apareix a la rúbrica del JUTGE LLM (l'avaluador que puntua adaptacions), NO al
 "Per al docent" ni al motor d'adaptació:
 - Línia 48: "rúbrica fonamentada en 6 marcs teòrics (Halliday, **Sweller**, Mayer, CAST/UDL, Vygotsky, TSAR)"
 - Línia 97: criteri B3 "SUPORTS COGNITIUS I SCAFFOLDING (**Sweller** CLT, Vygotsky ZPD)"
 
-Aquí Sweller NO es presenta com a fonament del MALL, sinó com a marc propi de la rúbrica
-d'avaluació d'ATNE (un avaluador pot triar els seus marcs lliurement; Sweller és un autor
-real de càrrega cognitiva). Per això ho hem **deixat com està**, perquè queda fora de
-l'abast literal de la petició ("Per al docent"/motor d'adaptació).
-**Pregunta a mineriaRAG:** voleu que també hi marquem Sweller com a "convergència externa"
-a la rúbrica del jutge, o el deixem com a marc propi de l'avaluador? Miquel no ho té clar
-i prefereix que decidiu vosaltres, ja que la regla és vostra.
+**Decisió: Sweller ES QUEDA** com a marc propi de l'avaluador. Raonament de mineriaRAG:
+el jutge LLM no parla en nom del MALL — és una eina d'avaluació interna d'ATNE que pot
+triar lliurement els seus marcs. Sweller és l'autor real de la Cognitive Load Theory i és
+el marc més precís per al criteri B3. NO hi ha atribució falsa al MALL → no viola la regla
+(que era "no sobreatribuir al MALL"; aquí no s'hi atribueix res). Distinció clau:
+**fonament del MALL** (fidel al canon) ≠ **marc d'avaluació d'ATNE** (lliure).
+Acció feta: afegit comentari inequívoc a la capçalera de la rúbrica perquè ningú llegeixi
+els "6 marcs" com si fossin "els marcs del MALL". Sweller (línies 48 i 97) intacte.
 
 ### (3) Anidament de bastides — NO APLICA al codi ✅
 Revisat `adaptation/prompt_builder.py` i `instruction_catalog.py`. ATNE NO té les bastides
@@ -63,12 +64,13 @@ arxivat (`_bootstrap_fase0/`, no productiu) i als docs de la sessió anterior. *
 | Acció | Estat |
 |---|---|
 | (1) Submòdul actualitzat | ✅ (`2fe2ea3`, conté `a7b3df9`) |
-| (2) Sweller tret com a font | ✅ 4 punts corregits · 🟡 1 decisió oberta (avaluador) |
+| (2) Sweller tret com a font | ✅ 4 punts corregits · ✅ avaluador resolt (Sweller es queda + capçalera aclarida) |
 | (3) Anidament bastides | ✅ no aplica (no codificat al motor) |
 | (4) Gibbons → Bajtín/Adam | ✅ no aplica (absent del codi) |
+
+**🟢 CERCLE TANCAT per les dues bandes (2026-06-06).**
 
 ## Pendents ATNE (no urgents)
 - Derivar a JSON des de `M2_marc-teoric-mediacio.md` quan el "Per al docent" hagi de citar
   l'origen teòric de cada decisió (usant la columna "Estatus al MALL" per no sobreatribuir).
 - Regla recordada: ATNE consumeix el canon derivat, no escriu al corpus.
-- Una única decisió us torna la pilota: Sweller a la rúbrica del jutge (§2).
