@@ -1,5 +1,73 @@
 # Mapa visual de les taxonomies d'ATNE
 
+## Diagrama 0 — SÍNTESI: com s'integra tot i com adaptem (flux teòric complet)
+
+> El diagrama-resum. Mostra el procés sencer d'una adaptació ATNE de principi a fi,
+> amb els marcs teòrics que fonamenten cada decisió. La resta de diagrames (1-7) en
+> despleguen les peces. Renderitzat a `mapa_teoric_adaptacio.png`.
+
+```mermaid
+flowchart TB
+    TEXT["📄 TEXT ORIGINAL<br/>(currículum, nivell estàndard)"]
+    PERFIL["👤 PERFIL DE L'ALUMNE<br/>condició + MECR + L1 + fase lectora"]
+
+    TEXT --> MOTOR
+    PERFIL --> MOTOR
+    MOTOR{"⚙️ MOTOR D'ADAPTACIÓ ATNE<br/>regla mestra: adaptar el COM,<br/>MAI rebaixar el QUÈ"}
+
+    MOTOR --> VIA1
+    MOTOR --> VIA2
+
+    subgraph VIA1["✏️ VIA 1 · TRANSFORMAR EL TEXT (3 tipus)"]
+        direction TB
+        T1["Lingüístiques<br/><i>lèxic·sintaxi·cohesió·registre</i>"]
+        T2["Estructurals<br/><i>segmentar·titular·ordenar</i>"]
+        T3["Contingut curricular<br/><i>terminologia·rigor·exemples</i>"]
+    end
+
+    subgraph VIA2["🧰 VIA 2 · AFEGIR COMPLEMENTS (6 categories MALL)"]
+        direction TB
+        C1["Suports DUA · Bastides"]
+        C2["Autoregulació · Extensió"]
+        C3["(Ajuts i Crossa = humans,<br/>ATNE no els genera)"]
+    end
+
+    subgraph TEORIA["📚 MARCS TEÒRICS — ☂️ MALL FJE els integra (no és un marc més)"]
+        direction LR
+        CUM["Cummins<br/>BICS/CALP<br/><b>fil transversal</b>"]
+        VYG["Vygotsky/Bruner<br/>ZDP · scaffolding"]
+        HAL["Halliday · Bajtín/Adam<br/>text i gèneres"]
+        SOL["Solé · Sanmartí · Mercer<br/>lectura · regulació · diàleg"]
+        DUA["DUA (CAST)<br/>representació/implicació"]
+    end
+
+    TEORIA -.fonamenta.-> VIA1
+    TEORIA -.fonamenta.-> VIA2
+
+    VIA1 --> ORAL
+    VIA2 --> ORAL
+    ORAL["🗣️ EIX ORAL/ESCRIT (transversal)<br/>a pre-A1/A1: text = guió per a lectura mediada"]
+
+    ORAL --> SORTIDA
+    SORTIDA["📘 TEXT ADAPTAT + COMPLEMENTS<br/>regla: «menys és més» (principi MALL)"]
+
+    SORTIDA --> DOCENT
+    DOCENT["👩‍🏫 PER AL DOCENT (9 categories A–I)<br/>la factura: QUÈ s'ha transformat + QUÈ s'ha afegit + per què"]
+
+    style TEXT fill:#e8e8e8,stroke:#555
+    style PERFIL fill:#e8e8e8,stroke:#555
+    style MOTOR fill:#fff3cd,stroke:#b8860b,stroke-width:2px
+    style VIA1 fill:#eef6ff,stroke:#1565c0
+    style VIA2 fill:#eafaea,stroke:#2e7d32
+    style TEORIA fill:#faf0fb,stroke:#6a1b9a
+    style CUM fill:#ffe0b2,stroke:#e65100,stroke-width:2px
+    style ORAL fill:#e0f7fa,stroke:#00838f
+    style SORTIDA fill:#fff8e1,stroke:#b8860b
+    style DOCENT fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+```
+
+---
+
 ## Diagrama 1 — Les dues coses que fem quan adaptem
 
 ```mermaid
