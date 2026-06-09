@@ -945,6 +945,62 @@
   ::-webkit-scrollbar-thumb { background: var(--ink-200); border-radius: 99px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--ink-300); }
   ::-webkit-scrollbar-track { background: transparent; }
+
+  /* ═══ Flow-map · diagrama del flux d'adaptació (§05b) ═══════ */
+  .flow-map{ max-width:880px; margin:var(--sp-6) auto 0; display:flex; flex-direction:column; align-items:center; }
+  .flow-lbl{ display:flex; align-items:center; gap:10px; margin:0 0 12px; }
+  .flow-lbl .n{ width:22px; height:22px; border-radius:var(--r-pill); background:var(--primary); color:#fff;
+    font-family:var(--mono); font-size:11px; font-weight:600; display:grid; place-items:center; flex-shrink:0; }
+  .flow-lbl .t{ font-family:var(--mono); font-size:11px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-400); }
+  .flow-arr{ width:2px; height:26px; background:var(--ink-200); position:relative; margin:6px 0; }
+  .flow-arr::after{ content:''; position:absolute; bottom:-1px; left:50%; transform:translateX(-50%) rotate(45deg);
+    width:7px; height:7px; border-right:2px solid var(--ink-300); border-bottom:2px solid var(--ink-300); }
+  .fcard{ background:#fff; border:1px solid var(--ink-150); border-radius:var(--r-xl); box-shadow:var(--sh-sm);
+    padding:13px 18px; text-align:center; transition:box-shadow var(--trans-med), transform var(--trans-med); }
+  .fcard:hover{ box-shadow:var(--sh-md); transform:translateY(-1px); }
+  .fcard .ic{ font-size:18px; line-height:1; }
+  .fcard .t{ font-weight:700; color:var(--ink-800); font-size:13.5px; margin-top:3px; }
+  .fcard .d{ font-size:11.5px; color:var(--ink-500); margin-top:2px; line-height:1.45; font-style:italic; }
+  .flow-in{ display:flex; gap:18px; flex-wrap:wrap; justify-content:center; }
+  .flow-in .fcard{ min-width:230px; background:var(--ink-50); border-color:var(--ink-200); }
+  .flow-marcs{ width:100%; background:var(--primary-50); border:1px solid var(--primary-100); border-radius:var(--r-2xl); padding:18px 20px; }
+  .flow-marcs .cap{ font-family:var(--serif); font-weight:600; font-size:14px; color:var(--primary); text-align:center; margin-bottom:14px; }
+  .flow-marcs .cap small{ display:block; font-family:var(--ui); font-style:normal; font-weight:500; font-size:11px; color:var(--ink-500); margin-top:3px; letter-spacing:0; text-transform:none; }
+  .flow-marcs .row{ display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+  .flow-marcs .fcard{ flex:1; min-width:150px; }
+  .flow-marcs .fcard.hl{ border-color:var(--primary); border-width:1.5px; }
+  .flow-gen{ margin-top:14px; padding-top:12px; border-top:1px dashed var(--primary-100); text-align:center;
+    font-size:11px; color:var(--ink-600); line-height:1.6; }
+  .flow-gen b{ color:var(--primary); font-weight:600; }
+  .flow-motor{ background:linear-gradient(180deg,#fffdf5,var(--warn-50)); border:2px solid var(--warn); border-radius:var(--r-2xl);
+    box-shadow:var(--sh-md); padding:16px 28px; text-align:center; max-width:420px; }
+  .flow-motor .ic{ font-size:22px; }
+  .flow-motor .t{ font-family:var(--serif); font-weight:700; font-size:16px; color:#7a5a10; margin-top:2px; }
+  .flow-motor .d{ font-size:12px; color:#8a6a1a; margin-top:4px; }
+  .flow-motor .d b{ color:#6b4e0e; }
+  .flow-vies{ display:flex; gap:22px; width:100%; align-items:flex-start; flex-wrap:wrap; }
+  .flow-via{ flex:1; min-width:280px; border-radius:var(--r-2xl); padding:16px; }
+  .flow-via.v1{ background:var(--primary-50); border:1px solid var(--primary-100); }
+  .flow-via.v2{ background:var(--ok-50); border:1px solid var(--ok-100); }
+  .flow-via .vh{ display:flex; align-items:center; justify-content:center; gap:7px; font-weight:700; font-size:13px; margin-bottom:12px; }
+  .flow-via.v1 .vh{ color:var(--primary); }
+  .flow-via.v2 .vh{ color:var(--ok); }
+  .flow-via .sub{ background:#fff; border:1px solid var(--ink-150); border-radius:var(--r-lg); box-shadow:var(--sh-xs);
+    padding:9px 12px; margin-bottom:9px; text-align:center; }
+  .flow-via .sub:last-child{ margin-bottom:0; }
+  .flow-via .sub .t{ font-weight:600; font-size:12.5px; color:var(--ink-800); }
+  .flow-via .sub .d{ font-size:11px; color:var(--ink-500); font-style:italic; margin-top:1px; }
+  .flow-out{ background:linear-gradient(180deg,#fffdf5,var(--warn-50)); border:1px solid var(--warn-100); border-radius:var(--r-xl);
+    padding:13px 20px; text-align:center; max-width:520px; }
+  .flow-out .t{ font-weight:700; color:#7a5a10; font-size:13.5px; }
+  .flow-out .d{ font-size:11.5px; color:#8a6a1a; margin-top:2px; }
+  .flow-docent{ background:var(--ac-bg); border:1.5px solid var(--ac); border-radius:var(--r-xl);
+    padding:13px 20px; text-align:center; max-width:520px; }
+  .flow-docent .t{ font-weight:700; color:#4a2370; font-size:13.5px; }
+  .flow-docent .d{ font-size:11.5px; color:#6d3aa3; margin-top:2px; font-style:italic; }
+  .flow-oral{ display:inline-flex; align-items:center; gap:7px; margin:2px auto 0; padding:5px 14px;
+    background:#fff; border:1px dashed var(--primary-100); border-radius:var(--r-pill); font-size:11px; color:var(--ink-600); }
+  .flow-oral b{ color:var(--primary); font-weight:600; }
 </style>
 </head>
 <body>
@@ -997,7 +1053,7 @@
       </a>
       <a class="sidebar-link" href="#eines">
         <span class="sidebar-num">02</span>
-        Eines
+        Marcs
       </a>
       <a class="sidebar-link" href="#diversitat">
         <span class="sidebar-num">03</span>
@@ -1153,9 +1209,9 @@
 <section class="section" id="eines">
   <div class="section-header">
     <span class="section-badge">02</span>
-    <h2 class="section-title">Les eines</h2>
+    <h2 class="section-title">Els marcs</h2>
   </div>
-  <p class="section-intro">L'adaptació es recolza en quatre eines complementàries. Cadascuna té un rol diferent dins la mirada inclusiva.</p>
+  <p class="section-intro">L'adaptació es recolza en <strong>tres marcs operatius</strong> —DUA, MECR·MALL i Lectura Fàcil— més un <strong>marc explicatiu</strong> que els travessa: la càrrega cognitiva. Cadascun té un rol diferent dins la mirada inclusiva.</p>
 
   <div class="grid-4">
 
@@ -1229,7 +1285,7 @@
         <span class="material-symbols-outlined">architecture</span>
       </div>
       <h3 class="tool-title">CLT</h3>
-      <p class="tool-desc">Cognitive Load Theory (Sweller, 1988). Explica per què funcionen les tècniques: reduir extrínseca (soroll), gestionar intrínseca (dificultat), potenciar germana (aprenentatge).</p>
+      <p class="tool-desc"><strong>Marc convergent, no fonament del MALL.</strong> Cognitive Load Theory (Sweller, 1988): explica <em>per què</em> funcionen les tècniques i és el marc d'avaluació propi d'ATNE. Reduir extrínseca (soroll), gestionar intrínseca (dificultat), potenciar germana (aprenentatge).</p>
       <details class="tool-details">
         <summary>
           <span class="tool-details-label">Aprofundir: 3 càrregues</span>
@@ -1847,7 +1903,7 @@
     <span class="section-badge">05</span>
     <h2 class="section-title">Què és (i què no és) adaptar</h2>
   </div>
-  <p class="section-intro max-w-3xl">Abans d'entrar a eines i perfils, cal posar sobre la taula què entenem per adaptació. Les dues cares alhora: el que sí i el que no.</p>
+  <p class="section-intro max-w-3xl">Abans d'entrar a marcs i perfils, cal posar sobre la taula què entenem per adaptació. Les dues cares alhora: el que sí i el que no.</p>
 
   <div class="grid-2">
 
@@ -1983,9 +2039,78 @@
 
   <p class="si-card-text max-w-3xl" style="margin-top:var(--sp-4)"><strong>Una pista per al rigor:</strong> cada decisió té un origen teòric, però no tot s'atribueix al MALL. Hi ha <strong>fonament intern</strong> (autors que el MALL cita: Cummins, Vygotsky, Halliday, Bajtín/Adam, Solé, Sanmartí, Mercer…) i <strong>convergència externa</strong> (idees que hi conflueixen però que el MALL no cita: Sweller, Ausubel, Novak, Buzan). Convé no presentar les segones com si fossin del MALL.</p>
 
-  <figure style="margin:var(--sp-6) 0 0;text-align:center">
-    <img src="/ui/img/mapa_teoric_adaptacio.png" alt="Flux teòric complet d'una adaptació ATNE: del text original i el perfil de l'alumne, pel motor d'adaptació, a les dues vies (transformar el text / afegir complements) fonamentades en els marcs teòrics que integra el MALL, fins al text adaptat i el 'Per al docent'." style="max-width:100%;height:auto;border:1px solid var(--ink-200,#e5e7eb);border-radius:8px;background:#fff" loading="lazy">
-    <figcaption class="si-card-text" style="margin-top:var(--sp-2);font-style:italic;color:var(--ink-500)">El flux complet: com s'integra la teoria i com adaptem, de principi a fi.</figcaption>
+  <!-- Diagrama del flux d'adaptació · HTML natiu (substitueix el PNG Mermaid) -->
+  <figure style="margin:var(--sp-6) 0 0">
+    <div class="flow-map" role="img" aria-label="Flux d'una adaptació ATNE en 5 passos: 1) el punt de partida (text original i perfil de l'alumne), 2) els marcs que el MALL integra, 3) l'adaptador ATNE, 4) les dues vies en paral·lel (transformar el text i afegir complements), 5) la sortida (text adaptat i el «Per al docent»).">
+
+      <!-- 1 · Entrades -->
+      <div class="flow-lbl"><span class="n">1</span><span class="t">El punt de partida</span></div>
+      <div class="flow-in">
+        <div class="fcard"><div class="ic">📄</div><div class="t">Text original</div><div class="d">currículum · nivell estàndard</div></div>
+        <div class="fcard"><div class="ic">🧑‍🎓</div><div class="t">Perfil de l'alumne</div><div class="d">condició · MECR · L1 · fase lectora</div></div>
+      </div>
+
+      <div class="flow-arr"></div>
+
+      <!-- 2 · Els marcs -->
+      <div class="flow-lbl"><span class="n">2</span><span class="t">Els marcs · la lent</span></div>
+      <div class="flow-marcs">
+        <div class="cap">📚 El MALL FJE integra els marcs<small>la lent per on l'adaptador mira el text i l'alumne</small></div>
+        <div class="row">
+          <div class="fcard hl"><div class="t">MECR · MALL</div><div class="d">regula el nivell lingüístic</div></div>
+          <div class="fcard hl"><div class="t">Lectura Fàcil</div><div class="d">regles de claredat</div></div>
+          <div class="fcard hl"><div class="t">DUA · CAST</div><div class="d">accés · representació · implicació</div></div>
+        </div>
+        <div class="flow-gen">fonament teòric que el MALL integra: <b>Cummins</b> (BICS/CALP) · <b>Vygotsky/Bruner</b> (ZDP) · <b>Halliday · Bajtín/Adam</b> (text i gèneres) · <b>Solé · Sanmartí · Mercer</b> (lectura · regulació · diàleg)</div>
+      </div>
+
+      <div class="flow-arr"></div>
+
+      <!-- 3 · L'adaptador -->
+      <div class="flow-lbl"><span class="n">3</span><span class="t">L'adaptador</span></div>
+      <div class="flow-motor">
+        <div class="ic">⚙️</div>
+        <div class="t">L'adaptador ATNE</div>
+        <div class="d"><b>adaptar el COM</b> · mai rebaixar el QUÈ</div>
+      </div>
+
+      <div class="flow-arr"></div>
+
+      <!-- 4 · Dues vies -->
+      <div class="flow-lbl"><span class="n">4</span><span class="t">Dues coses alhora</span></div>
+      <div class="flow-vies">
+        <div class="flow-via v1">
+          <div class="vh">✏️ Transformar el text · 3 tipus</div>
+          <div class="sub"><div class="t">Lingüístiques</div><div class="d">lèxic · sintaxi · cohesió · registre</div></div>
+          <div class="sub"><div class="t">Estructurals</div><div class="d">segmentar · titular · ordenar</div></div>
+          <div class="sub"><div class="t">Contingut curricular</div><div class="d">terminologia · rigor · exemples</div></div>
+        </div>
+        <div class="flow-via v2">
+          <div class="vh">🧰 Afegir complements · 6 categories MALL</div>
+          <div class="sub"><div class="t">Suports DUA · Bastides</div></div>
+          <div class="sub"><div class="t">Autoregulació · Extensió</div></div>
+          <div class="sub"><div class="t">Ajuts i Crossa</div><div class="d">humans · ATNE no els genera</div></div>
+        </div>
+      </div>
+
+      <div class="flow-oral">🗣️ <span><b>Eix oral/escrit</b> transversal · a pre-A1/A1 el text és un guió per a la lectura mediada</span></div>
+
+      <div class="flow-arr"></div>
+
+      <!-- 5 · Sortida -->
+      <div class="flow-lbl"><span class="n">5</span><span class="t">La sortida</span></div>
+      <div class="flow-out">
+        <div class="t">📘 Text adaptat + complements</div>
+        <div class="d">regla «menys és més» · principi MALL</div>
+      </div>
+      <div class="flow-arr"></div>
+      <div class="flow-docent">
+        <div class="t">🧑‍🏫 Per al docent · 9 categories A–I</div>
+        <div class="d">la factura: què s'ha transformat + què s'ha afegit + per què</div>
+      </div>
+
+    </div>
+    <figcaption class="si-card-text" style="margin-top:var(--sp-5);font-style:italic;color:var(--ink-500);text-align:center">El flux complet: com s'integra la teoria i com adaptem, de principi a fi.</figcaption>
   </figure>
 
   <p class="si-card-text max-w-3xl" style="margin-top:var(--sp-4);font-style:italic;color:var(--ink-500)">Validat amb el corpus MALL (NotebookLM) i canonitzat al corpusFJE el 2026-06-06: <code>M2_marc-teoric-mediacio.md</code> (genealogia teòrica) i <code>M2_instruments-mediacio-pedagogica.md</code> (catàleg). Diagrames complets: <code>docs/mapa_taxonomies_visual.md</code>.</p>
