@@ -2485,14 +2485,14 @@
       <div style="width:40px;height:40px;border-radius:var(--r-md);background:var(--primary-50);display:grid;place-items:center;flex-shrink:0;font-size:20px">👤</div>
       <div>
         <div style="font-weight:var(--fw-semi);color:var(--ink-900);margin-bottom:4px">1 · Filtratge d'instruccions</div>
-        <div style="font-size:var(--fs-sm);color:var(--ink-600);line-height:1.55">A partir del perfil i el MECR, el sistema selecciona automàticament les instruccions rellevants del catàleg (unes 40 de 90+). Les instruccions de tipus SEMPRE s'activen sempre; les de PERFIL i NIVELL, condicionalment.</div>
+        <div style="font-size:var(--fs-sm);color:var(--ink-600);line-height:1.55">A partir del perfil i el MECR, el sistema selecciona automàticament les instruccions rellevants del catàleg (unes 50 de 122). Les instruccions de tipus SEMPRE s'activen sempre; les de PERFIL i NIVELL, condicionalment.</div>
       </div>
     </div>
     <div class="card card-p-sm" style="display:flex;gap:var(--sp-4);align-items:flex-start">
       <div style="width:40px;height:40px;border-radius:var(--r-md);background:var(--primary-50);display:grid;place-items:center;flex-shrink:0;font-size:20px">🤖</div>
       <div>
         <div style="font-weight:var(--fw-semi);color:var(--ink-900);margin-bottom:4px">2 · Generació (LLM)</div>
-        <div style="font-size:var(--fs-sm);color:var(--ink-600);line-height:1.55">L'LLM adapta el text seguint les instruccions seleccionades i el gènere discursiu triat. El model per defecte és Gemma 4 31B, amb rotació opcional a GPT-4o i GPT-4.1-mini. Típicament tarda 15–30 segons.</div>
+        <div style="font-size:var(--fs-sm);color:var(--ink-600);line-height:1.55">L'LLM adapta el text seguint les instruccions seleccionades i el gènere discursiu triat. Al mode Taller el model vigent és GPT-4o; la selecció és configurable des d'administració. Típicament tarda 15–30 segons.</div>
       </div>
     </div>
     <div class="card card-p-sm" style="display:flex;gap:var(--sp-4);align-items:flex-start">
@@ -2523,7 +2523,7 @@
         <li>El «Per al docent» (les 9 categories A–I)</li>
         <li>Controls de qualitat (verificació i neteja)</li>
       </ul>
-      <p style="margin:var(--sp-2) 0 0;font-size:var(--fs-xs);color:var(--ink-500);font-style:italic">Per a material final i preparació acurada. ~15-30 segons.</p>
+      <p style="margin:var(--sp-2) 0 0;font-size:var(--fs-xs);color:var(--ink-500);font-style:italic">Model GPT-4o. Per a material final i preparació acurada. ~15-30 segons.</p>
     </div>
     <div class="card card-p-sm" style="border-left:3px solid var(--warn)">
       <div style="font-weight:var(--fw-semi);color:var(--ink-900);margin-bottom:6px">⚡ Flash · el mode ràpid</div>
@@ -2532,7 +2532,7 @@
         <li>Uns quants complements bàsics (glossari, preguntes)</li>
         <li>Sense «Per al docent» ni controls de qualitat</li>
       </ul>
-      <p style="margin:var(--sp-2) 0 0;font-size:var(--fs-xs);color:var(--ink-500);font-style:italic">Per a esborranys i proves ràpides, no per a material final exigent.</p>
+      <p style="margin:var(--sp-2) 0 0;font-size:var(--fs-xs);color:var(--ink-500);font-style:italic">Model GPT-4.1-mini. Per a esborranys i proves ràpides, no per a material final exigent.</p>
     </div>
   </div>
 
@@ -2545,7 +2545,7 @@
     <span class="section-badge">10</span>
     <h2 class="section-title">El catàleg d'instruccions pedagògiques</h2>
   </div>
-  <p class="section-intro max-w-3xl">Més de 90 instruccions organitzades en 9 àrees temàtiques. Cada instrucció indica la transformació a fer, la graduació (mínima a màxima) i els perfils que l'activen. El catàleg s'ha construït a partir de marcs internacionals d'accessibilitat i aprenentatge.</p>
+  <p class="section-intro max-w-3xl">122 instruccions organitzades en 9 àrees temàtiques. Cada instrucció indica la transformació a fer, la graduació (mínima a màxima) i els perfils que l'activen. El catàleg s'ha construït a partir de marcs internacionals d'accessibilitat i aprenentatge.</p>
 
   <div class="grid-3">
 
@@ -2695,14 +2695,14 @@
 
   <div class="grid-2" style="margin-bottom:var(--sp-6)">
     <div class="card card-p-sm">
-      <div style="font-family:var(--mono);font-size:var(--fs-xs);font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--primary);margin-bottom:var(--sp-2)">Per defecte</div>
-      <div style="font-family:var(--serif);font-size:var(--fs-lg);font-weight:700;color:var(--ink-900);margin-bottom:var(--sp-2)">Gemma 4 31B</div>
-      <p style="font-size:var(--fs-sm);color:var(--ink-600);line-height:1.55;margin:0">Model open-source de Google. Excel·lent en català, cost zero en el pilot. Resultat d'una avaluació empírica amb 200+ casos i avaluació humana.</p>
+      <div style="font-family:var(--mono);font-size:var(--fs-xs);font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--primary);margin-bottom:var(--sp-2)">En ús · Taller</div>
+      <div style="font-family:var(--serif);font-size:var(--fs-lg);font-weight:700;color:var(--ink-900);margin-bottom:var(--sp-2)">GPT-4o</div>
+      <p style="font-size:var(--fs-sm);color:var(--ink-600);line-height:1.55;margin:0">Motor del mode Taller: adapta el text i genera els complements. Triat per la qualitat en català i el rigor curricular.</p>
     </div>
     <div class="card card-p-sm">
-      <div style="font-family:var(--mono);font-size:var(--fs-xs);font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-400);margin-bottom:var(--sp-2)">Rotació opcional</div>
-      <div style="font-family:var(--serif);font-size:var(--fs-lg);font-weight:700;color:var(--ink-900);margin-bottom:var(--sp-2)">GPT-4o · GPT-4.1-mini</div>
-      <p style="font-size:var(--fs-sm);color:var(--ink-600);line-height:1.55;margin:0">Preferits per a Primària (GPT-4o-mini guanya en textos simples). Disponibles amb clau API de la institució. Afegeixen cost marginal.</p>
+      <div style="font-family:var(--mono);font-size:var(--fs-xs);font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-400);margin-bottom:var(--sp-2)">Model lleuger</div>
+      <div style="font-family:var(--serif);font-size:var(--fs-lg);font-weight:700;color:var(--ink-900);margin-bottom:var(--sp-2)">GPT-4.1-mini</div>
+      <p style="font-size:var(--fs-sm);color:var(--ink-600);line-height:1.55;margin:0">Mode Flash, auditor i refinament: més ràpid i econòmic. Gemma 4 31B (open-source, avaluat amb 200+ casos al pilot) segueix disponible com a alternativa. Tot configurable des d'administració.</p>
     </div>
   </div>
 
