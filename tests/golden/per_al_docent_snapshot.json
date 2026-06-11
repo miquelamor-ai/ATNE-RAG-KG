@@ -1,0 +1,121 @@
+{
+  "_meta": {
+    "version": "ATNE-handoff-1.0",
+    "descripcio": "Dump determinista del coneixement «Per al docent» hardcoded a ATNE (prompt_builder.py). Per a canonització a mineriaRAG. ATNE el consumirà com a derivat quan existeixi. NO és canon.",
+    "origen": "adaptation/prompt_builder.py"
+  },
+  "taxonomia_9cat": {
+    "A": "Adaptació Lingüística",
+    "B": "Estructura i Organització",
+    "C": "Suport Cognitiu",
+    "D": "Multimodalitat",
+    "E": "Contingut Curricular",
+    "F": "Avaluació i Comprensió",
+    "G": "Personalització Lingüística",
+    "H": "Adaptacions per Perfil",
+    "I": "Meta-regles Transversals"
+  },
+  "complement_to_categoria": {
+    "glossari": [
+      "A"
+    ],
+    "pictogrames": [
+      "D"
+    ],
+    "illustracions": [
+      "D"
+    ],
+    "esquema_visual": [
+      "C",
+      "D"
+    ],
+    "mapa_conceptual": [
+      "C"
+    ],
+    "mapa_mental": [
+      "C"
+    ],
+    "bastides": [
+      "C"
+    ],
+    "preguntes_comprensio": [
+      "F"
+    ],
+    "activitats_aprofundiment": [
+      "F",
+      "E"
+    ],
+    "rubriques": [
+      "F"
+    ],
+    "resum_graduat": [
+      "C"
+    ],
+    "cartes_conversacionals": [
+      "F"
+    ],
+    "plantilles_genere": [
+      "B"
+    ]
+  },
+  "lleis_case_block": {
+    "sempre": [
+      "A",
+      "B",
+      "E"
+    ],
+    "H_si_perfil_actiu": true,
+    "I_si_multi_condicio": true,
+    "G_si_L1_declarada": true,
+    "metrica_A_paraules_per_mecr": {
+      "pre-A1": 5,
+      "A1": 8,
+      "A2": 12,
+      "B1": 18,
+      "B2": 25
+    }
+  },
+  "contracte_case_block_per_perfil": {
+    "nouvingut_A2_arab__glos_bast_picto": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "G",
+      "H"
+    ],
+    "tdah_dislexia_B1__glos_esq_preg": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "H",
+      "I"
+    ],
+    "aacc_B2__mapa_act_rub": [
+      "A",
+      "B",
+      "C",
+      "E",
+      "F",
+      "H"
+    ],
+    "tea_A2__esq_picto": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "H"
+    ],
+    "sense_perfil_B1__glossari": [
+      "A",
+      "B",
+      "E"
+    ]
+  },
+  "taxonomia_text_len": 5231
+}
