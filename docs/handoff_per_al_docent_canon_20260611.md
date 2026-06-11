@@ -1,5 +1,16 @@
 # HANDOFF a mineriaRAG — canonitzar la taxonomia «Per al docent» · 2026-06-11
 
+> ✅ **CICLE R0 TANCAT (2026-06-11).** mineriaRAG va canonitzar al M2 + generar
+> `.tooling/per_al_docent.json` (commit dc67a7b). ATNE: submòdul bumpejat a `cb9918a`,
+> `prompt_builder.py` ara CONSUMEIX la taxonomia/mapeig/lleis del canon (loader
+> `_load_per_al_docent_canon` + accessors), hardcoded reduït a FALLBACK defensiu, snapshot
+> validat (comportament idèntic, 0 canvis), 294 prompt_checks PASS. Resta la des-triplicació
+> de `pas3.html`/`saber-ne.html` (consum browser via `.data.js`), opcional. El text de sota
+> és el handoff original (per a referència històrica).
+
+---
+
+
 ## Per què aquest handoff
 
 **Principi (Opció 4, 01/06):** ATNE = CONSUMIDOR del canon, mai ORIGEN. Quan ATNE té

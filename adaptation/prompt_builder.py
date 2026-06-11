@@ -11,6 +11,9 @@ símbols públics per preservar el contracte amb `snapshot_contract`,
 generador_lliure i els tests.
 """
 
+import json as _json
+from pathlib import Path as _Path
+
 import corpus_reader
 import instruction_filter
 from adaptation.lang_config import get_lang_label
@@ -106,24 +109,23 @@ def _forma_sobre_mecr_canon(genre: str | None) -> str:
         return ""
 
 
-# ── "Per al docent" — taxonomia canònica de 9 categories A-I ────────────────
+# ── "Per al docent" — taxonomia 9 categories A-I (CONSUMIDA del canon) ──────
 #
-# FONT ÚNICA del bloc «## Argumentació pedagògica». Taxonomia A-I canònica
-# (origen: ui/saber-ne.html "Categories d'adaptació"; decisió Miquel 2026-05-27,
-# commits cec9b14+74bf20d; validada al mapa de taxonomies 2026-06-06). El
-# frontend (pas3.html dimMap) renderitza exactament aquestes 9 categories.
+# R0 (2026-06-11): la taxonomia + descripcions de les 9 categories + el mapeig
+# complement→categoria + les lleis vénen del CANON
+# `corpusFJE/.tooling/per_al_docent.json` (canonitzat per mineriaRAG, commit dc67a7b).
+# ATNE ja NO és l'origen d'aquest coneixement pedagògic: el LLEGEIX (com rubrica.json
+# i matriu_cobertura.json). Veure docs/handoff_per_al_docent_canon_20260611.md.
 #
-# ⚠️ PER QUÈ ÉS UNA CONSTANT COMPARTIDA: aquest bloc s'injecta en DOS camins de
-# `build_system_prompt` — la crida única (legacy) i `adapter_only=True` (Call 1
-# del pipeline 2-call, el que s'usa amb skills+complements). Mantenir-lo duplicat
-# va causar un drift històric: el camí 2-call va quedar amb una estructura antiga
-# de 5 punts mentre el frontend ja esperava les 9 categories (mateix patró que el
-# bug del `# Títol`). Centralitzar-lo aquí garanteix que els dos camins generin
-# SEMPRE la mateixa taxonomia. NO en facis una segona còpia: edita aquesta.
-#
-# Tema PEDAGÒGIC encara obert (no de codi): re-validació NotebookLM de la sortida
-# real post-A-I — veure project_per_al_docent_9categories_obert_20260602.
-_ARGUMENTACIO_9CAT_BLOCK = """## Argumentació pedagògica
+# Tres capes:
+#  · CANON (per_al_docent.json): noms, sub-àrees, descripcions, mapeig, lleis. MANA.
+#  · PRESENTACIÓ (ATNE — _ARG_HEADER/_ARG_FORMAT): com s'instrueix el LLM a escriure
+#    les cards (format ###, exemples). Regla de plataforma, NO canon (anàleg a T2).
+#  · FALLBACK (_ARG_*_FALLBACK): si el canon no és disponible (submòdul no inicialitzat),
+#    s'usa la versió hardcoded perquè el pipeline no caigui mai.
+
+# Capa PRESENTACIÓ (ATNE): intro de la secció.
+_ARG_HEADER = """## Argumentació pedagògica
 SEMPRE GENERAR — Justifica les decisions usant la taxonomia canonica FJE.
 Genera 1 card per a CADA categoria on hi hagi hagut intervencio (vegeu la llista de
 categories OBLIGATÒRIES per a aquest cas, més avall).
@@ -133,63 +135,10 @@ l'alumne (principis MALL/DUA, Cummins, Vygotsky/Solé), NO el QUÈ s'ha fet ("he
 Sempre que puguis, dona la xifra de control concreta (ex: límit de paraules/frase del nivell),
 no adjectius vagues ("frases curtes").
 
-Categories (usa nomes les que apliquen al cas concret):
+Categories (usa nomes les que apliquen al cas concret):"""
 
-**A. Adaptació Lingüística**
-- Sub-arees: A1 Lèxic · A2 Sintaxi · A3 Cohesio · A4 Registre
-- Que cobreix: triar vocabulari, construir frases, organitzar connectors, ajustar el to.
-- Format card: indica quina/es sub-area/es s'han activat (ex: "A1+A2") i justifica.
-
-**B. Estructura i Organització**
-- Sub-arees: B1 Segmentacio · B2 Jerarquia · B3 Ordre · B4 Senyalitzacio
-- Que cobreix: dividir el text, usar titols i llistes, ordre general↔particular.
-
-**C. Suport Cognitiu**
-- Sub-arees: C1 Carrega cognitiva · C2 Scaffolding · C3 Coneixements previs · C4 Metacognicio
-- Que cobreix: reduir la sobrecarrega, bastides, activar previs, autoavaluacio.
-- Matís: a A2+ l'alumne ja INICIA la lectura autonoma; les bastides eviten la frustracio
-  de la descodificacio (la suporten), NO la substitueixen.
-
-**D. Multimodalitat**
-- Sub-arees: D1 Suport visual · D2 Organitzadors grafics · D3 Redundancia canals
-- Que cobreix: pictogrames, esquemes, taules, diagrames que faciliten comprensio per multiples vies.
-
-**E. Contingut Curricular**
-- Sub-arees: E1 Terminologia · E2 Rigor conceptual · E3 Exemples · E4 Contextualitzacio
-- Que cobreix: que es manté del rigor i que s'adapta sense perdre la materia.
-- OBLIGATORI: nomena quina Habilitat Cognitivolingüística (HCL) es preserva o es treballa
-  (Descriure · Explicar · Justificar · Argumentar). Aixo garanteix que NO es rebaixa el «Què»
-  curricular (doble eix MALL). A Enriquiment, indica el repte de pensament d'ordre superior afegit.
-
-**F. Avaluació i Comprensió** (depèn de complements actius — SKILLs)
-- Sub-arees: F1 Preguntes · F2 Activitats · F3 Autoavaluacio
-- Que cobreix: preguntes graduades i activitats d'aprofundiment.
-- IMPORTANT: el contingut detallat ve de les SKILLs canoniques activades
-  (generate-preguntes-comprensio, generate-rubriques, etc.), no del catalog
-  d'instruccions. Genera la card NOMES si hi ha complements F-actius
-  (preguntes_comprensio, activitats_aprofundiment, rubriques, etc.).
-
-**G. Personalització Lingüística** (nomes per a nouvinguts/L2)
-- Sub-arees: G1 Suport L1 · G2 Adaptacio cultural
-- Que cobreix: glossaris bilingues, referents culturals propers, exemples de l'experiencia de l'alumne.
-- Matís: l'alfabet ORIGINAL de la L1 (arab, xines...) no nomes tradueix — enforteix la
-  IDENTITAT i la confianca de l'alumne (text d'identitat linguistica, LIT · Cummins).
-
-**H. Adaptacions per Perfil** (cor d'ATNE — instruccions especifiques per condicio)
-- Sub-arees: TEA · TDAH · Dislexia · DI · TDL · AACC · 2e · Disc.auditiva · Disc.visual · Discalculia · Vulnerabilitat · Dispraxia
-- Que cobreix: instruccions especifiques per a CADA condicio activa al perfil
-  (entre 5 i 12 per condicio). Aquesta es l'area MES extensa del prompt (>80 IDs).
-- FORMAT: indica nomes les condicions REALMENT actives al perfil
-  (ex: "H. TEA + TDAH" si el perfil te tots dos), no totes.
-
-**I. Meta-regles Transversals** (regles que combinen tot l'anterior)
-- Sub-arees: I1 Qualitat · I2 Integracio de perfils
-- Que cobreix: com es combinen instruccions de multiples condicions sense
-  contradiccions, regles de qualitat global (UNE, LF, MECR estricte).
-- Genera la card NOMES si hi ha perfil multi-condicio o conflicte declarat
-  entre regles.
-
-FORMAT OBLIGATORI per card (encapçalament H3 + body):
+# Capa PRESENTACIÓ (ATNE): format de card + exemples + tancament.
+_ARG_FORMAT = """FORMAT OBLIGATORI per card (encapçalament H3 + body):
 ```
 ### A. Adaptació Lingüística — [sub-àrees REALS, ex: A1·A2]
 [Justificacio en 1-2 frases amb terminologia pedagogica real, NO descriptiva.]
@@ -202,7 +151,7 @@ FORMAT OBLIGATORI per card (encapçalament H3 + body):
 ```
 ⚠️ Els codis darrere del «—» són les SUB-ÀREES de la categoria (A1 Lèxic, A2 Sintaxi,
 B1 Segmentació…), MAI els nivells MECR (A1, A2, B1…). Tria els codis REALS del cas;
-PROHIBIT copiar literalment «A1+A2» o «B1+B2» d'aquests exemples si no corresponen.
+PROHIBIT copiar literalment «A1·A2» o «B1·B2» d'aquests exemples si no corresponen.
 
 EXEMPLE CORRECTE:
 ### A. Adaptació Lingüística — A1·A2
@@ -218,16 +167,126 @@ EXEMPLE INCORRECTE:
 Omet les categories que no apliquen. NO inventis sub-arees no llistades.
 Cada card comença SEMPRE per `### [LLETRA]. [Nom] — [codis]`."""
 
+# Capa FALLBACK: descripcions hardcoded de les categories (s'usen NOMÉS si el canon
+# no carrega). Mentre el canon és disponible, MANA la descripció de per_al_docent.json.
+_ARG_CATEGORIES_FALLBACK = """**A. Adaptació Lingüística**
+- Sub-àrees: A1 Lèxic · A2 Sintaxi · A3 Cohesió · A4 Registre
+- Què cobreix: triar vocabulari, construir frases, organitzar connectors, ajustar el to.
 
-# ── R1 (re-validació NotebookLM 2026-06-11): sincronització complement → categoria ──
+**B. Estructura i Organització**
+- Sub-àrees: B1 Segmentació · B2 Jerarquia · B3 Ordre · B4 Senyalització
+- Què cobreix: dividir el text, usar titols i llistes, ordre general↔particular.
+
+**C. Suport Cognitiu**
+- Sub-àrees: C1 Càrrega cognitiva · C2 Scaffolding · C3 Coneixements previs · C4 Metacognició
+- Què cobreix: reduir la sobrecàrrega, bastides, activar previs, autoavaluació. A A2+ les bastides suporten la descodificació, no la substitueixen.
+
+**D. Multimodalitat**
+- Sub-àrees: D1 Suport visual · D2 Organitzadors gràfics · D3 Redundància de canals
+- Què cobreix: pictogrames, esquemes, taules, diagrames que faciliten comprensió per múltiples vies.
+
+**E. Contingut Curricular**
+- Sub-àrees: E1 Terminologia · E2 Rigor conceptual · E3 Exemples · E4 Contextualització
+- Què cobreix: què es manté del rigor i què s'adapta sense perdre matèria. Nomena sempre l'HCL que es preserva (descriure · explicar · justificar · argumentar): no es rebaixa el «Què» (doble eix MALL).
+
+**F. Avaluació i Comprensió**
+- Sub-àrees: F1 Preguntes · F2 Activitats · F3 Autoavaluació
+- Què cobreix: preguntes graduades i activitats d'aprofundiment. Només si hi ha complements d'aquesta família actius.
+
+**G. Personalització Lingüística**
+- Sub-àrees: G1 Suport L1 · G2 Adaptació cultural
+- Què cobreix: glossaris bilingües, referents culturals propers. L'alfabet original de la L1 enforteix la identitat i la confiança (LIT · Cummins), no només tradueix.
+
+**H. Adaptacions per Perfil**
+- Sub-àrees: per condició (TEA, TDAH, dislèxia, DI, TDL, AACC, 2e, disc. auditiva, disc. visual, discalcúlia, vulnerabilitat, dispràxia)
+- Què cobreix: instruccions específiques per a cada condició realment activa al perfil rebut, no per a totes.
+
+**I. Meta-regles Transversals**
+- Sub-àrees: I1 Qualitat global · I2 Integració de perfils
+- Què cobreix: com es combinen instruccions de múltiples condicions sense contradiccions. Només si multi-condició o conflicte declarat."""
+
+_ARGUMENTACIO_9CAT_FALLBACK = _ARG_HEADER + "\n\n" + _ARG_CATEGORIES_FALLBACK + "\n\n" + _ARG_FORMAT
+
+
+# ── Loader del canon «Per al docent» (cache + fallback segur) ───────────────
+_PAD_CANON = None
+_PAD_LOADED = False
+
+
+def _load_per_al_docent_canon():
+    """Llegeix `corpusFJE/.tooling/per_al_docent.json` (derivat canon mineriaRAG).
+    Cache en memòria. Retorna dict o None (→ s'usa el fallback hardcoded)."""
+    global _PAD_CANON, _PAD_LOADED
+    if _PAD_LOADED:
+        return _PAD_CANON
+    _PAD_LOADED = True
+    try:
+        p = (_Path(__file__).resolve().parents[1]
+             / "corpus" / "external" / "corpusFJE" / ".tooling" / "per_al_docent.json")
+        if p.exists():
+            _PAD_CANON = _json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        _PAD_CANON = None
+    return _PAD_CANON
+
+
+def _docent_cat_names() -> dict:
+    """{codi: nom} de les 9 categories — del canon, fallback al hardcoded."""
+    c = _load_per_al_docent_canon()
+    if c and isinstance(c.get("taxonomia_9cat"), dict):
+        return c["taxonomia_9cat"]
+    return _DOCENT_CAT_NAMES_FALLBACK
+
+
+def _comp_to_docent_cat() -> dict:
+    """Mapeig complement→categoria/es — del canon, fallback al hardcoded."""
+    c = _load_per_al_docent_canon()
+    if c and isinstance(c.get("complement_to_categoria"), dict):
+        return c["complement_to_categoria"]
+    return _COMP_TO_DOCENT_CAT_FALLBACK
+
+
+def _per_al_docent_lleis() -> dict:
+    """Lleis del case-block (sempre, H/I/G, mètrica per MECR) — del canon, fallback."""
+    c = _load_per_al_docent_canon()
+    if c and isinstance(c.get("lleis"), dict):
+        return c["lleis"]
+    return {
+        "sempre": ["A", "B", "E"],
+        "H_si_perfil_actiu": True,
+        "I_si_multi_condicio": True,
+        "G_si_L1_declarada": True,
+        "metrica_A_paraules_per_mecr": dict(MECR_MAX_WORDS),
+    }
+
+
+def _argumentacio_9cat_block() -> str:
+    """Bloc «## Argumentació pedagògica»: descripcions de les categories del CANON
+    (per_al_docent.json) embolcallades amb el scaffolding de presentació d'ATNE
+    (_ARG_HEADER + _ARG_FORMAT). Fallback al text hardcoded si el canon no carrega."""
+    c = _load_per_al_docent_canon()
+    cats = c.get("categories") if c else None
+    if not cats:
+        return _ARGUMENTACIO_9CAT_FALLBACK
+    parts = [_ARG_HEADER, ""]
+    for cat in cats:
+        codi = cat.get("codi", "?")
+        nom = cat.get("nom", "")
+        subs = " · ".join(cat.get("sub_arees", []))
+        desc = cat.get("descripcio", "")
+        parts.append(f"**{codi}. {nom}**\n- Sub-àrees: {subs}\n- Què cobreix: {desc}\n")
+    parts.append(_ARG_FORMAT)
+    return "\n".join(parts)
+
+
+# ── Sincronització complement → categoria (R1) — FALLBACK del canon ─────────
 #
-# El problema empíric: l'adapter generava 2-3 cards de les ~6-7 amb intervenció real
-# (ex: nouvingut amb glossari bilingüe SENSE categoria G). Solució: derivar de
-# params.complements + perfils actius QUINES categories són obligatòries per a aquest cas
-# i injectar-ho com a checklist imperatiu. Mapeig: mapa de taxonomies (Diagrama 4) +
-# recomanacions NLM. L'adapter coneix els complements actius encara que es generin a la
-# Call 2 → ha de JUSTIFICAR-LOS igualment.
-_COMP_TO_DOCENT_CAT = {
+# El problema empíric (NLM 2026-06-11): l'adapter generava 2-3 cards de les ~6-7 amb
+# intervenció real (ex: nouvingut amb glossari bilingüe SENSE categoria G). Solució:
+# derivar de params.complements + perfils actius QUINES categories són obligatòries i
+# injectar-ho com a checklist. El mapeig + les lleis viuen ARA al canon
+# (per_al_docent.json); aquests dicts són només FALLBACK si el canon no carrega.
+_COMP_TO_DOCENT_CAT_FALLBACK = {
     "glossari": ["A"],            # + G si L1/nouvingut (bilingüe), afegit dinàmicament
     "pictogrames": ["D"],
     "illustracions": ["D"],
@@ -242,7 +301,7 @@ _COMP_TO_DOCENT_CAT = {
     "cartes_conversacionals": ["F"],
     "plantilles_genere": ["B"],
 }
-_DOCENT_CAT_NAMES = {
+_DOCENT_CAT_NAMES_FALLBACK = {
     "A": "Adaptació Lingüística", "B": "Estructura i Organització",
     "C": "Suport Cognitiu", "D": "Multimodalitat", "E": "Contingut Curricular",
     "F": "Avaluació i Comprensió", "G": "Personalització Lingüística",
@@ -253,39 +312,43 @@ _DOCENT_CAT_NAMES = {
 def _argumentacio_case_block(profile: dict, params: dict) -> str:
     """Checklist dinàmic de categories «Per al docent» OBLIGATÒRIES per al cas concret.
 
-    Deriva de params.complements + perfils actius. Ataca la infra-generació detectada a
-    la re-validació NotebookLM (2026-06-11). Retorna un bloc per injectar al final de
-    `_ARGUMENTACIO_9CAT_BLOCK` (mateix per als 2 camins: adapter_only i crida única).
+    Deriva de params.complements + perfils actius, aplicant el mapeig i les LLEIS del
+    CANON (per_al_docent.json) — fallback al hardcoded si el canon no carrega. Ataca la
+    infra-generació detectada a la re-validació NotebookLM (2026-06-11).
     """
     comp = params.get("complements", {}) if isinstance(params, dict) else {}
     chars = profile.get("caracteristiques", {}) if isinstance(profile, dict) else {}
     active = [k for k, v in chars.items() if isinstance(v, dict) and v.get("actiu")]
     mecr = (params.get("mecr_sortida") or params.get("mecr") or "B1")
+    names = _docent_cat_names()
+    mapping = _comp_to_docent_cat()
+    lleis = _per_al_docent_lleis()
 
     reasons: dict[str, str] = {}
-    # A, B, E: les 3 transformacions del text — sempre hi ha hagut intervenció.
-    for c in ("A", "B", "E"):
+    # Categories SEMPRE obligatòries (lleis.sempre = les 3 transformacions A,B,E).
+    for c in lleis.get("sempre", ["A", "B", "E"]):
         reasons.setdefault(c, "transformació del text (sempre)")
-    # Complements actius → categories que justifiquen.
+    # Complements actius → categories que justifiquen (mapeig del canon).
     for k, v in comp.items():
         if not v:
             continue
-        for c in _COMP_TO_DOCENT_CAT.get(k, []):
+        for c in mapping.get(k, []):
             reasons.setdefault(c, f"complement «{k}» actiu")
     # H per cada perfil amb condició; I si multi-condició.
-    if active:
+    if active and lleis.get("H_si_perfil_actiu", True):
         reasons["H"] = "perfil amb condició: " + ", ".join(active)
-    if len(active) >= 2:
+    if len(active) >= 2 and lleis.get("I_si_multi_condicio", True):
         reasons["I"] = "perfil multi-condició (combinació de regles sense contradiccions)"
     # G si nouvingut amb L1 declarada (glossari bilingüe / TOLC).
     nouv = chars.get("nouvingut") or {}
     l1 = (nouv.get("l1") or nouv.get("L1")) if isinstance(nouv, dict) else ""
-    if l1:
+    if l1 and lleis.get("G_si_L1_declarada", True):
         reasons["G"] = f"suport L1 ({l1}) / Translanguaging-TOLC (Cummins)"
 
     order = ["A", "B", "C", "D", "E", "F", "G", "H", "I"]
-    lines = [f"- {c}. {_DOCENT_CAT_NAMES[c]} — {reasons[c]}" for c in order if c in reasons]
-    maxw = MECR_MAX_WORDS.get(mecr)
+    lines = [f"- {c}. {names.get(c, c)} — {reasons[c]}" for c in order if c in reasons]
+    metrica = lleis.get("metrica_A_paraules_per_mecr") or dict(MECR_MAX_WORDS)
+    maxw = metrica.get(mecr)
     metric = (f"\nMÈTRICA per a la categoria A (nivell {mecr}): frases de com a màxim "
               f"{maxw} paraules — dona la xifra a la justificació, no «frases curtes»."
               if maxw else "")
@@ -331,7 +394,7 @@ def build_argumentacio_prompt(profile: dict, context: dict, params: dict) -> str
         + (f" | Complements actius: {', '.join(comp_actius)}" if comp_actius else "")
         + "\n\n"
     )
-    return header + _ARGUMENTACIO_9CAT_BLOCK + "\n" + _argumentacio_case_block(profile, params)
+    return header + _argumentacio_9cat_block() + "\n" + _argumentacio_case_block(profile, params)
 
 
 def build_persona_audience(profile: dict, context: dict, mecr: str) -> str:
@@ -811,7 +874,7 @@ PROHIBIT deixar la sortida sense cap marcador `[PICTO:]` quan pictogrames és AC
         # (dins la crida gran l'adapter la infra-genera, validat NLM); es genera en una
         # crida dedicada (build_argumentacio_prompt) amb el text adaptat final.
         if include_argumentacio:
-            _arg_section = f"{_ARGUMENTACIO_9CAT_BLOCK}\n{_argumentacio_case_block(profile, params)}\n\n"
+            _arg_section = f"{_argumentacio_9cat_block()}\n{_argumentacio_case_block(profile, params)}\n\n"
             _checklist_items = (
                 '1. ## Text adaptat — amb l\'ESTRUCTURA del gènere "%s"\n'
                 "2. ## Argumentació pedagògica\n"
@@ -1522,11 +1585,11 @@ Exemple de format:
 """)
 
     # Sempre: argumentació pedagògica + auditoria
-    # Taxonomia A-I canonica (font única: _ARGUMENTACIO_9CAT_BLOCK, a dalt del
-    # mòdul). Decisio Miquel 2026-05-27. El mateix bloc s'injecta al camí
-    # adapter_only (Call 1 del 2-call) per evitar drift entre els dos camins.
+    # Taxonomia A-I del CANON (per_al_docent.json via _argumentacio_9cat_block()).
+    # El mateix bloc s'injecta al camí adapter_only (Call 1 del 2-call) per evitar
+    # drift entre els dos camins.
     output_sections.append(f"""
-{_ARGUMENTACIO_9CAT_BLOCK}
+{_argumentacio_9cat_block()}
 {_argumentacio_case_block(profile, params)}
 
 ## Notes d'auditoria

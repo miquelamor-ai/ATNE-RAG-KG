@@ -32,12 +32,12 @@ except Exception:
     pass
 
 from adaptation.prompt_builder import (
-    _ARGUMENTACIO_9CAT_BLOCK,
-    _COMP_TO_DOCENT_CAT,
-    _DOCENT_CAT_NAMES,
     _argumentacio_case_block,
+    _comp_to_docent_cat,
+    _docent_cat_names,
+    _load_per_al_docent_canon,
+    _per_al_docent_lleis,
 )
-from adaptation.post_process import MECR_MAX_WORDS
 
 SNAPSHOT_PATH = Path(__file__).parent / "per_al_docent_snapshot.json"
 
@@ -68,27 +68,30 @@ def _mandatory_cats(profile: dict, params: dict) -> list[str]:
 
 
 def build_snapshot() -> dict:
+    """Captura el comportament EFECTIU (valors que ATNE consumeix del canon, amb fallback).
+    Si el canon canvia (mineriaRAG actualitza per_al_docent.json), aquest snapshot detecta
+    el drift → cal revisar i regenerar conscientment."""
+    lleis = _per_al_docent_lleis()
     return {
         "_meta": {
-            "version": "ATNE-handoff-1.0",
-            "descripcio": "Dump determinista del coneixement «Per al docent» hardcoded a ATNE "
-                          "(prompt_builder.py). Per a canonització a mineriaRAG. ATNE el consumirà "
-                          "com a derivat quan existeixi. NO és canon.",
-            "origen": "adaptation/prompt_builder.py",
+            "version": "ATNE-canon-consum-1.0",
+            "descripcio": "Contracte de comportament «Per al docent». ATNE CONSUMEIX la "
+                          "taxonomia/mapeig/lleis del canon corpusFJE/.tooling/per_al_docent.json "
+                          "(fallback hardcoded). Aquest snapshot congela el comportament esperat.",
+            "canon_present": _load_per_al_docent_canon() is not None,
         },
-        "taxonomia_9cat": dict(_DOCENT_CAT_NAMES),
-        "complement_to_categoria": {k: list(v) for k, v in _COMP_TO_DOCENT_CAT.items()},
+        "taxonomia_9cat": dict(_docent_cat_names()),
+        "complement_to_categoria": {k: list(v) for k, v in _comp_to_docent_cat().items()},
         "lleis_case_block": {
-            "sempre": ["A", "B", "E"],
-            "H_si_perfil_actiu": True,
-            "I_si_multi_condicio": True,
-            "G_si_L1_declarada": True,
-            "metrica_A_paraules_per_mecr": dict(MECR_MAX_WORDS),
+            "sempre": list(lleis.get("sempre", [])),
+            "H_si_perfil_actiu": lleis.get("H_si_perfil_actiu"),
+            "I_si_multi_condicio": lleis.get("I_si_multi_condicio"),
+            "G_si_L1_declarada": lleis.get("G_si_L1_declarada"),
+            "metrica_A_paraules_per_mecr": dict(lleis.get("metrica_A_paraules_per_mecr", {})),
         },
         "contracte_case_block_per_perfil": {
             nom: _mandatory_cats(prof, par) for nom, (prof, par) in _GOLDEN_PROFILES.items()
         },
-        "taxonomia_text_len": len(_ARGUMENTACIO_9CAT_BLOCK),
     }
 
 

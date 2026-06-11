@@ -1,8 +1,8 @@
 {
   "_meta": {
-    "version": "ATNE-handoff-1.0",
-    "descripcio": "Dump determinista del coneixement «Per al docent» hardcoded a ATNE (prompt_builder.py). Per a canonització a mineriaRAG. ATNE el consumirà com a derivat quan existeixi. NO és canon.",
-    "origen": "adaptation/prompt_builder.py"
+    "version": "ATNE-canon-consum-1.0",
+    "descripcio": "Contracte de comportament «Per al docent». ATNE CONSUMEIX la taxonomia/mapeig/lleis del canon corpusFJE/.tooling/per_al_docent.json (fallback hardcoded). Aquest snapshot congela el comportament esperat.",
+    "canon_present": true
   },
   "taxonomia_9cat": {
     "A": "Adaptació Lingüística",
@@ -116,6 +116,5 @@
       "B",
       "E"
     ]
-  },
-  "taxonomia_text_len": 5231
+  }
 }
