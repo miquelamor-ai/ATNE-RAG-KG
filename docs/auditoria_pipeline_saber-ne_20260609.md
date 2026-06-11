@@ -27,7 +27,7 @@ Una adaptació ATNE té **tres taxonomies** que s'han de reflectir al pipeline:
 
 ### ✅ Arquitectura 2-call — CORRECTE
 - Trigger a [orchestrator.py:147-167](../adaptation/orchestrator.py#L147): `_two_call = is_skills_enabled() AND any(complements)`. Coincideix amb el contracte.
-- Call 1 = adapter (`_model_for("adapt")` → gpt-4o), Call 2 = complements (`_model_for("complements")` → gpt-4.1-mini). ✅
+- Call 1 = adapter (`_model_for("adapt")`), Call 2 = complements (`_model_for("complements")`). Models VIGENTS a `system_config`: adapter **gpt-4o** + complements **gpt-4o** (config híbrida actual; veure §3-bis #7). ✅
 - Complements INLINE (pictogrames, il·lustracions, activitats) van a Call 1; complements SECCIÓ (glossari, bastides…) a Call 2. Documentat i coherent.
 - Fallbacks (Call 1 buida → no Call 2; Call 2 falla → text preservat + warning SSE; retry de seccions absents). ✅
 
@@ -106,27 +106,44 @@ xat): dir explícitament que Flash = mode ràpid amb subconjunt del contracte.
 Verificat al codi 2026-06-11. saber-ne+ té text desactualitzat en aquests punts:
 
 ### #7 Models — DISCREPÀNCIA REAL (cal actualitzar saber-ne+)
-`server._MODEL_CONFIG` (defaults runtime):
+⚠️ Cal mirar els **valors VIGENTS a `system_config` (Supabase)**, NO els defaults del
+codi: `_MODEL_CONFIG` només té els defaults fins que `_load_system_config()` els
+sobreescriu a l'startup. Verificat per consulta directa a Supabase 2026-06-11
+(config híbrida, `set_by: _set_hybrid_gpt4o.py`):
 
-| Tasca | Model real |
-|---|---|
-| adapt (Taller adapter, Call 1) | **gpt-4o** |
-| complements (Taller Call 2) | **gpt-4.1-mini** |
-| adapt_flash (Flash) | **gpt-4o** (1 crida) |
-| auditor | gpt-4.1-mini |
-| refine / generate | gpt-4o |
+| Tasca | **VIGENT (system_config)** | Default codi |
+|---|---|---|
+| adapt (Taller adapter, Call 1) | **gpt-4o** | gpt-4o |
+| complements (Taller Call 2) | **gpt-4o** | gpt-4.1-mini |
+| adapt_flash (Flash, 1 crida) | **gpt-4.1-mini** | gpt-4o |
+| auditor | gpt-4.1-mini | gpt-4.1-mini |
+| refine | gpt-4.1-mini | gpt-4o |
+| generate | gpt-4.1-mini | gpt-4o |
+
+→ **Resum per a saber-ne+**: Taller = adapter **GPT-4o** + complements **GPT-4o**;
+Flash = **GPT-4.1-mini**; tasques auxiliars (auditor/refine/generate) = GPT-4.1-mini.
+Configurable des d'admin (`/api/admin/model_config`).
 
 - saber-ne+ §09 (≈línia 2495) diu *"El model per defecte és **Gemma 4 31B**, amb rotació
   opcional a GPT-4o i GPT-4.1-mini"* → **FALS** al runtime. Gemma NO és per defecte des de
-  2026-04-12; decisió GPT-4o/GPT-4.1-mini el 27/05.
+  2026-04-12; decisió GPT-4o/GPT-4.1-mini el 27/05; híbrid actual des de ~02/06.
 - saber-ne+ §11 (≈línia 2674) destaca "Gemma 4 31B" com a card principal → desactualitzat.
+- saber-ne+ §11 cita un **"GPT-4o-mini"** que NO és vigent enlloc (`system_config` no el té;
+  el model petit vigent és **gpt-4.1-mini**) → corregir o eliminar.
 
 ### #6 Nombre d'instruccions — DESACTUALITZAT
 `len(instruction_catalog.CATALOG)` = **122** (SEMPRE 24 · NIVELL 37 · PERFIL 58 · COMPLEMENT 3),
-en 10 macrodirectives.
-- saber-ne+ §10 (≈línia 2523) diu *"Més de 90 instruccions"* i §09 (≈línia 2488) *"unes 40
-  de 90+"* → el **40 actives típiques** és plausible (denominador APLICABLE per perfil), però
-  el **total "90+" hauria de ser ~122**.
+en 10 macrodirectives. (El "~147" d'un grep brut és artefacte: hi ha una 2a còpia a
+`export_fje/logica/instruction_catalog.py` + camps comptats dos cops. El canònic és **122**,
+confirmat per `tests/diag_cobertura.py`.)
+
+**Instruccions que ARRIBEN al prompt per perfil** (`diag_cobertura.py`, 6 perfils canònics):
+25 (AACC/Enriquiment) · 52 (TDAH) · 53 (DI) · 58 (Dislèxia) · 60 (TEA) · 64 (Nouvingut) →
+**mitjana ~52, rang 25–64** segons perfil + MECR + DUA.
+
+- saber-ne+ §10 (≈línia 2523) diu *"Més de 90 instruccions"* → corregir a **122**.
+- saber-ne+ §09 (≈línia 2488) diu *"unes 40 de 90+"* → millor **"unes 50 de 122"**
+  (el subconjunt que s'envia, no el total). El "40" és una mica baix però del mateix ordre.
 
 ### §09 pipeline 1-call ↔ 2-call — A COMPLETAR (desbloquejat per Opció A)
 saber-ne+ §09 descriu el pipeline com una sola crida (3 passos). Ara que Flash=A:
