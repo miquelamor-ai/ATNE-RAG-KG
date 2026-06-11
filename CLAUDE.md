@@ -11,7 +11,8 @@ Explicacions clares i practiques.
 ## Stack tecnic
 - **Backend**: Python 3.12 + FastAPI + uvicorn
 - **Frontend**: HTML + JavaScript pur + CSS (ZERO frameworks)
-- **LLM**: Gemma 4 31B + rotacio GPT-4o / GPT-4.1-mini / Gemma 3 27B (decidit 2026-04-16)
+- **LLM** (vigent via `system_config` Supabase, NO els defaults del codi): **Taller = GPT-4o** (adapter + complements) · **Flash + auditor/refine/generate = GPT-4.1-mini**. Config híbrida `_set_hybrid_gpt4o.py`; gestionable des d'admin (`/api/admin/model_config`). Confirmat 2026-06-11.
+  - Alternatives disponibles al codi: Gemma 4 31B (model inicial del pilot, open-source) i Gemma 3 27B.
   - Gemini 2.5-flash disponible al codi pero no es el model per defecte des de 2026-04-12
 - **Auth**: Supabase Auth + Google OAuth restringit a `@fje.edu` (desplegat 2026-04-20)
 - **Dades**: Supabase (PostgreSQL)
