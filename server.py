@@ -4731,6 +4731,15 @@ def _parse_flash_response(raw: str) -> dict:
 async def adapt_flash(payload: dict = Body(...)):
     """Mode Flash: adapta amb el prompt MVP (senzill) i SSE.
 
+    ⚠️ MODE «LITE» INTENCIONAL (decisió Miquel, Opció A, 2026-06-11) ⚠️
+    Flash NO és el pipeline complet del Taller i NO ha d'honorar tot el contracte
+    de saber-ne+. Per disseny: 1 sola crida (no 2-call), SENSE skills/canon,
+    SENSE Verify/Retry ni quality pipeline català, SENSE secció «Per al docent»
+    (9 cat A-I), i només 3 complements (glossari, preguntes, resum). El contracte
+    didàctic complet viu al Taller (`/api/adapt` → run_adaptation). NO afegeixis
+    aquí skills, 2-call ni Per-al-docent «per coherència»: això trencaria la raó de
+    ser de Flash (rapidesa). Veure docs/auditoria_pipeline_saber-ne_20260609.md.
+
     Payload:
       text (str):         text original
       curs (str):         primaria_12 | primaria_34 | primaria_56 | eso_12 | eso_34 | batxillerat

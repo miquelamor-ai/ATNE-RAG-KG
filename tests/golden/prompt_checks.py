@@ -245,6 +245,58 @@ def _c_no_contradiction(case, prompt):
                       f"Sense contradicció (a02={has_a02}, a30={has_a30})")
 
 
+# ─── Check "Per al docent" — taxonomia 9 categories A-I ────────────────────
+
+# Les 9 categories canòniques A-I (font: ui/saber-ne.html "Categories d'adaptació",
+# decisió Miquel 2026-05-27, commits cec9b14+74bf20d). El frontend (pas3.html dimMap)
+# les renderitza. El prompt 2-call (adapter_only) ha de GENERAR-les: si genera
+# l'estructura antiga de 5 punts, el docent rep argumentació genèrica i el dimMap
+# cau als fallbacks legacy. Aquest check captura aquell desync.
+_PER_AL_DOCENT_9CAT = [
+    "Adaptació Lingüística",
+    "Estructura i Organització",
+    "Suport Cognitiu",
+    "Multimodalitat",
+    "Contingut Curricular",
+    "Avaluació i Comprensió",
+    "Personalització Lingüística",
+    "Adaptacions per Perfil",
+    "Meta-regles Transversals",
+]
+
+
+@check("PER_AL_DOCENT_9_categories", severity="ERROR")
+def _c_per_al_docent_9cat(case, prompt):
+    """La secció 'Per al docent' (## Argumentació pedagògica) ha d'usar la
+    taxonomia canònica de 9 categories A-I, NO l'estructura antiga de 5 punts.
+
+    El prompt es construeix amb adapter_only=True (camí 2-call real). El bug
+    històric: aquest camí va quedar desincronitzat i generava els 5 punts
+    genèrics ('adaptació lingüística, atenció a la diversitat, suport
+    multimodal, gradació cognitiva, rigor curricular'), mai les 9 categories.
+    """
+    low = prompt.lower()
+    present = [c for c in _PER_AL_DOCENT_9CAT if c.lower() in low]
+    # Signatura inequívoca de l'estructura ANTIGA de 5 punts.
+    has_legacy_5 = (
+        "atenció a la diversitat, suport multimodal, gradació cognitiva" in low
+    )
+    if len(present) < 9:
+        absent = [c for c in _PER_AL_DOCENT_9CAT if c.lower() not in low]
+        extra = " (encara hi ha l'estructura antiga de 5 punts)" if has_legacy_5 else ""
+        return CheckResult(
+            "PER_AL_DOCENT_9_categories", False,
+            f"Falten {len(absent)}/9 categories canòniques: {absent}{extra}",
+        )
+    if has_legacy_5:
+        return CheckResult(
+            "PER_AL_DOCENT_9_categories", False,
+            "Les 9 categories hi són però també queda l'estructura antiga de 5 punts (duplicació)",
+        )
+    return CheckResult("PER_AL_DOCENT_9_categories", True,
+                       "Taxonomia 9 cat A-I present, sense estructura antiga")
+
+
 # ─── Checks per perfil ────────────────────────────────────────────────────
 
 @check("PERFIL_TILC_si_nouvingut", severity="WARN")

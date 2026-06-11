@@ -106,6 +106,104 @@ def _forma_sobre_mecr_canon(genre: str | None) -> str:
         return ""
 
 
+# ── "Per al docent" — taxonomia canònica de 9 categories A-I ────────────────
+#
+# FONT ÚNICA del bloc «## Argumentació pedagògica». Taxonomia A-I canònica
+# (origen: ui/saber-ne.html "Categories d'adaptació"; decisió Miquel 2026-05-27,
+# commits cec9b14+74bf20d; validada al mapa de taxonomies 2026-06-06). El
+# frontend (pas3.html dimMap) renderitza exactament aquestes 9 categories.
+#
+# ⚠️ PER QUÈ ÉS UNA CONSTANT COMPARTIDA: aquest bloc s'injecta en DOS camins de
+# `build_system_prompt` — la crida única (legacy) i `adapter_only=True` (Call 1
+# del pipeline 2-call, el que s'usa amb skills+complements). Mantenir-lo duplicat
+# va causar un drift històric: el camí 2-call va quedar amb una estructura antiga
+# de 5 punts mentre el frontend ja esperava les 9 categories (mateix patró que el
+# bug del `# Títol`). Centralitzar-lo aquí garanteix que els dos camins generin
+# SEMPRE la mateixa taxonomia. NO en facis una segona còpia: edita aquesta.
+#
+# Tema PEDAGÒGIC encara obert (no de codi): re-validació NotebookLM de la sortida
+# real post-A-I — veure project_per_al_docent_9categories_obert_20260602.
+_ARGUMENTACIO_9CAT_BLOCK = """## Argumentació pedagògica
+SEMPRE GENERAR — Justifica les decisions usant la taxonomia canonica FJE.
+Genera 1 card per a CADA categoria on hi hagi hagut intervencio (omet les que no apliquen).
+Per a cada card: identifica les sub-areas concretes (codi+nom) i justifica amb terminologia
+pedagogica (MALL/DUA/UNE), NO descriptivament ("hem fet X").
+
+Categories (usa nomes les que apliquen al cas concret):
+
+**A. Adaptació Lingüística**
+- Sub-arees: A1 Lèxic · A2 Sintaxi · A3 Cohesio · A4 Registre
+- Que cobreix: triar vocabulari, construir frases, organitzar connectors, ajustar el to.
+- Format card: indica quina/es sub-area/es s'han activat (ex: "A1+A2") i justifica.
+
+**B. Estructura i Organització**
+- Sub-arees: B1 Segmentacio · B2 Jerarquia · B3 Ordre · B4 Senyalitzacio
+- Que cobreix: dividir el text, usar titols i llistes, ordre general↔particular.
+
+**C. Suport Cognitiu**
+- Sub-arees: C1 Carrega cognitiva · C2 Scaffolding · C3 Coneixements previs · C4 Metacognicio
+- Que cobreix: reduir la sobrecarrega, bastides, activar previs, autoavaluacio.
+
+**D. Multimodalitat**
+- Sub-arees: D1 Suport visual · D2 Organitzadors grafics · D3 Redundancia canals
+- Que cobreix: pictogrames, esquemes, taules, diagrames que faciliten comprensio per multiples vies.
+
+**E. Contingut Curricular**
+- Sub-arees: E1 Terminologia · E2 Rigor conceptual · E3 Exemples · E4 Contextualitzacio
+- Que cobreix: que es manté del rigor i que s'adapta sense perdre la materia.
+
+**F. Avaluació i Comprensió** (depèn de complements actius — SKILLs)
+- Sub-arees: F1 Preguntes · F2 Activitats · F3 Autoavaluacio
+- Que cobreix: preguntes graduades i activitats d'aprofundiment.
+- IMPORTANT: el contingut detallat ve de les SKILLs canoniques activades
+  (generate-preguntes-comprensio, generate-rubriques, etc.), no del catalog
+  d'instruccions. Genera la card NOMES si hi ha complements F-actius
+  (preguntes_comprensio, activitats_aprofundiment, rubriques, etc.).
+
+**G. Personalització Lingüística** (nomes per a nouvinguts/L2)
+- Sub-arees: G1 Suport L1 · G2 Adaptacio cultural
+- Que cobreix: glossaris bilingues, referents culturals propers, exemples de l'experiencia de l'alumne.
+
+**H. Adaptacions per Perfil** (cor d'ATNE — instruccions especifiques per condicio)
+- Sub-arees: TEA · TDAH · Dislexia · DI · TDL · AACC · 2e · Disc.auditiva · Disc.visual · Discalculia · Vulnerabilitat · Dispraxia
+- Que cobreix: instruccions especifiques per a CADA condicio activa al perfil
+  (entre 5 i 12 per condicio). Aquesta es l'area MES extensa del prompt (>80 IDs).
+- FORMAT: indica nomes les condicions REALMENT actives al perfil
+  (ex: "H. TEA + TDAH" si el perfil te tots dos), no totes.
+
+**I. Meta-regles Transversals** (regles que combinen tot l'anterior)
+- Sub-arees: I1 Qualitat · I2 Integracio de perfils
+- Que cobreix: com es combinen instruccions de multiples condicions sense
+  contradiccions, regles de qualitat global (UNE, LF, MECR estricte).
+- Genera la card NOMES si hi ha perfil multi-condicio o conflicte declarat
+  entre regles.
+
+FORMAT OBLIGATORI per card (encapçalament H3 + body):
+```
+### A. Adaptació Lingüística — A1+A2
+[Justificacio en 1-2 frases amb terminologia pedagogica real, NO descriptiva.]
+
+### B. Estructura i Organització — B1+B2
+[Justificacio...]
+
+### H. Adaptacions per Perfil — TDAH + Dislexia
+[Justificacio especifica per a CADA condicio activa al perfil rebut.]
+```
+
+EXEMPLE CORRECTE:
+### A. Adaptació Lingüística — A1+A2
+S'ha reduit el lèxic a vocabulari frequent (BICS) per evitar carrega lexica
+abans de la descodificacio. Sintaxi a SVO amb verbs en present d'indicatiu
+per facilitar el processament a pre-A1 sense subordinacio.
+
+EXEMPLE INCORRECTE:
+**Adaptació lingüística**: Hem fet frases curtes i senzilles.
+(Massa generic, sense codis, sense fonamentacio.)
+
+Omet les categories que no apliquen. NO inventis sub-arees no llistades.
+Cada card comença SEMPRE per `### [LLETRA]. [Nom] — [codis]`."""
+
+
 def build_persona_audience(profile: dict, context: dict, mecr: str) -> str:
     """
     Genera narrativa concreta de l'alumne (persona-audience pattern).
@@ -565,9 +663,12 @@ PROHIBIT generar una secció `## Pictogrames` separada: els marcadors viuen DINS
 PROHIBIT deixar la sortida sense cap marcador `[PICTO:]` quan pictogrames és ACTIVAT.
 """
 
+        # «Per al docent» — taxonomia canònica de 9 categories A-I (font única:
+        # _ARGUMENTACIO_9CAT_BLOCK). Abans aquí hi havia una estructura antiga de
+        # 5 punts que desincronitzava el camí 2-call del frontend (dimMap A-I) i
+        # de la crida única. Sincronitzat 2026-06-09.
         parts.append(f"""
-## Argumentació pedagògica
-SEMPRE GENERAR — Explica les decisions pedagògiques (adaptació lingüística, atenció a la diversitat, suport multimodal, gradació cognitiva, rigor curricular). Breu, 3-5 punts.
+{_ARGUMENTACIO_9CAT_BLOCK}
 
 ## Notes d'auditoria
 SEMPRE GENERAR — Taula comparativa dels canvis principals:
@@ -1269,89 +1370,11 @@ Exemple de format:
 """)
 
     # Sempre: argumentació pedagògica + auditoria
-    # Taxonomia A-G canonica (font: ui/saber-ne.html §"Categories d'adaptacio").
-    # Decisio Miquel 2026-05-27: substituir 5 categories generiques per
-    # aquesta taxonomia rica que connecta amb el coneixement docent FJE.
-    output_sections.append("""
-## Argumentació pedagògica
-SEMPRE GENERAR — Justifica les decisions usant la taxonomia canonica FJE.
-Genera 1 card per a CADA categoria on hi hagi hagut intervencio (omet les que no apliquen).
-Per a cada card: identifica les sub-areas concretes (codi+nom) i justifica amb terminologia
-pedagogica (MALL/DUA/UNE), NO descriptivament ("hem fet X").
-
-Categories (usa nomes les que apliquen al cas concret):
-
-**A. Adaptació Lingüística**
-- Sub-arees: A1 Lèxic · A2 Sintaxi · A3 Cohesio · A4 Registre
-- Que cobreix: triar vocabulari, construir frases, organitzar connectors, ajustar el to.
-- Format card: indica quina/es sub-area/es s'han activat (ex: "A1+A2") i justifica.
-
-**B. Estructura i Organització**
-- Sub-arees: B1 Segmentacio · B2 Jerarquia · B3 Ordre · B4 Senyalitzacio
-- Que cobreix: dividir el text, usar titols i llistes, ordre general↔particular.
-
-**C. Suport Cognitiu**
-- Sub-arees: C1 Carrega cognitiva · C2 Scaffolding · C3 Coneixements previs · C4 Metacognicio
-- Que cobreix: reduir la sobrecarrega, bastides, activar previs, autoavaluacio.
-
-**D. Multimodalitat**
-- Sub-arees: D1 Suport visual · D2 Organitzadors grafics · D3 Redundancia canals
-- Que cobreix: pictogrames, esquemes, taules, diagrames que faciliten comprensio per multiples vies.
-
-**E. Contingut Curricular**
-- Sub-arees: E1 Terminologia · E2 Rigor conceptual · E3 Exemples · E4 Contextualitzacio
-- Que cobreix: que es manté del rigor i que s'adapta sense perdre la materia.
-
-**F. Avaluació i Comprensió** (depèn de complements actius — SKILLs)
-- Sub-arees: F1 Preguntes · F2 Activitats · F3 Autoavaluacio
-- Que cobreix: preguntes graduades i activitats d'aprofundiment.
-- IMPORTANT: el contingut detallat ve de les SKILLs canoniques activades
-  (generate-preguntes-comprensio, generate-rubriques, etc.), no del catalog
-  d'instruccions. Genera la card NOMES si hi ha complements F-actius
-  (preguntes_comprensio, activitats_aprofundiment, rubriques, etc.).
-
-**G. Personalització Lingüística** (nomes per a nouvinguts/L2)
-- Sub-arees: G1 Suport L1 · G2 Adaptacio cultural
-- Que cobreix: glossaris bilingues, referents culturals propers, exemples de l'experiencia de l'alumne.
-
-**H. Adaptacions per Perfil** (cor d'ATNE — instruccions especifiques per condicio)
-- Sub-arees: TEA · TDAH · Dislexia · DI · TDL · AACC · 2e · Disc.auditiva · Disc.visual · Discalculia · Vulnerabilitat · Dispraxia
-- Que cobreix: instruccions especifiques per a CADA condicio activa al perfil
-  (entre 5 i 12 per condicio). Aquesta es l'area MES extensa del prompt (>80 IDs).
-- FORMAT: indica nomes les condicions REALMENT actives al perfil
-  (ex: "H. TEA + TDAH" si el perfil te tots dos), no totes.
-
-**I. Meta-regles Transversals** (regles que combinen tot l'anterior)
-- Sub-arees: I1 Qualitat · I2 Integracio de perfils
-- Que cobreix: com es combinen instruccions de multiples condicions sense
-  contradiccions, regles de qualitat global (UNE, LF, MECR estricte).
-- Genera la card NOMES si hi ha perfil multi-condicio o conflicte declarat
-  entre regles.
-
-FORMAT OBLIGATORI per card (encapçalament H3 + body):
-```
-### A. Adaptació Lingüística — A1+A2
-[Justificacio en 1-2 frases amb terminologia pedagogica real, NO descriptiva.]
-
-### B. Estructura i Organització — B1+B2
-[Justificacio...]
-
-### H. Adaptacions per Perfil — TDAH + Dislexia
-[Justificacio especifica per a CADA condicio activa al perfil rebut.]
-```
-
-EXEMPLE CORRECTE:
-### A. Adaptació Lingüística — A1+A2
-S'ha reduit el lèxic a vocabulari frequent (BICS) per evitar carrega lexica
-abans de la descodificacio. Sintaxi a SVO amb verbs en present d'indicatiu
-per facilitar el processament a pre-A1 sense subordinacio.
-
-EXEMPLE INCORRECTE:
-**Adaptació lingüística**: Hem fet frases curtes i senzilles.
-(Massa generic, sense codis, sense fonamentacio.)
-
-Omet les categories que no apliquen. NO inventis sub-arees no llistades.
-Cada card comença SEMPRE per `### [LLETRA]. [Nom] — [codis]`.
+    # Taxonomia A-I canonica (font única: _ARGUMENTACIO_9CAT_BLOCK, a dalt del
+    # mòdul). Decisio Miquel 2026-05-27. El mateix bloc s'injecta al camí
+    # adapter_only (Call 1 del 2-call) per evitar drift entre els dos camins.
+    output_sections.append(f"""
+{_ARGUMENTACIO_9CAT_BLOCK}
 
 ## Notes d'auditoria
 SEMPRE GENERAR — Taula comparativa breu dels canvis principals:
