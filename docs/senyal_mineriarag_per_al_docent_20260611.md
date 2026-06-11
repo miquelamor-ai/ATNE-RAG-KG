@@ -48,7 +48,7 @@ dels 9 noms apareix al `corpusFJE`** → ATNE n'és, de facto, l'ORIGEN. Això t
   perfils golden): `tests/golden/per_al_docent_snapshot.json`
 - **Guard anti-regressió**: `tests/golden/per_al_docent_snapshot.py`
 
-> Commit d'entrega ATNE: **{{COMMIT_HASH}}**
+> Commit d'entrega ATNE: **cab69f4** (branca `main`)
 
 ## Detall que us estalvia feina (les lleis NO són a cap taula)
 
