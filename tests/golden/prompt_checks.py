@@ -297,6 +297,42 @@ def _c_per_al_docent_9cat(case, prompt):
                        "Taxonomia 9 cat A-I present, sense estructura antiga")
 
 
+@check("PER_AL_DOCENT_dedicated_mandatory", severity="ERROR")
+def _c_per_al_docent_dedicated(case, prompt):
+    """La crida DEDICADA «Per al docent» (build_argumentacio_prompt, producció 2-call) ha de
+    contenir les 9 cat + el checklist de categories OBLIGATÒRIES del cas. Concretament: si el
+    perfil és nouvingut amb L1, la categoria G ha de ser a la llista obligatòria (era el bug
+    empíric: G mai apareixia). Validat NotebookLM 2026-06-11.
+    """
+    try:
+        from adaptation.prompt_builder import build_argumentacio_prompt
+        arg_prompt = build_argumentacio_prompt(
+            profile=case["profile"],
+            context={"etapa": case["params"].get("etapa", "ESO"), "materia": "ciències naturals"},
+            params=case["params"],
+        )
+    except Exception as e:
+        return CheckResult("PER_AL_DOCENT_dedicated_mandatory", False,
+                           f"Excepció construint build_argumentacio_prompt: {e}")
+    low = arg_prompt.lower()
+    if "categories obligatòries per a aquest cas" not in low:
+        return CheckResult("PER_AL_DOCENT_dedicated_mandatory", False,
+                           "Falta el checklist de categories obligatòries del cas")
+    n9 = sum(1 for c in _PER_AL_DOCENT_9CAT if c.lower() in low)
+    if n9 < 9:
+        return CheckResult("PER_AL_DOCENT_dedicated_mandatory", False,
+                           f"Falten categories canòniques al prompt dedicat ({n9}/9)")
+    # Si nouvingut amb L1 → G obligatòria a la llista del cas.
+    chars = case["profile"].get("caracteristiques", {})
+    nouv = chars.get("nouvingut", {})
+    has_l1 = isinstance(nouv, dict) and (nouv.get("l1") or nouv.get("L1"))
+    if has_l1 and "g. personalització lingüística" not in low:
+        return CheckResult("PER_AL_DOCENT_dedicated_mandatory", False,
+                           "Nouvingut amb L1 però la categoria G no és obligatòria al cas")
+    return CheckResult("PER_AL_DOCENT_dedicated_mandatory", True,
+                       "Crida dedicada amb 9 cat + checklist obligatori correcte")
+
+
 # ─── Checks per perfil ────────────────────────────────────────────────────
 
 @check("PERFIL_TILC_si_nouvingut", severity="WARN")

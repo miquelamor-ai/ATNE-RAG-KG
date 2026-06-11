@@ -31,7 +31,11 @@ from adaptation.post_process import (
     post_process_adaptation,
 )
 from adaptation.pricing import estimate_cost_eur
-from adaptation.prompt_builder import build_system_prompt, build_complements_prompt
+from adaptation.prompt_builder import (
+    build_system_prompt,
+    build_complements_prompt,
+    build_argumentacio_prompt,
+)
 
 
 # ── Buffer d'inspecció d'adaptacions (només memòria) ───────────────────────
@@ -168,8 +172,12 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
 
     # System prompt — sense RAG, les instruccions graduades són el motor
     cb({"type": "step", "step": "search", "msg": "Preparant instruccions d'adaptació..."})
+    # include_argumentacio=False quan 2-call: «Per al docent» es genera en una crida
+    # DEDICADA al final (l'adapter la infra-genera dins la crida gran — validat NLM 2026-06-11).
+    # En crida única (no _two_call) es manté inline.
     system_prompt = build_system_prompt(profile, context, params, rag_context="",
-                                        adapter_only=_two_call)
+                                        adapter_only=_two_call,
+                                        include_argumentacio=not _two_call)
     _filtered = instruction_filter.get_instructions(profile, params, context=context)
     _instruction_ids = [
         instr["id"]
@@ -560,6 +568,46 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
                 cb({"type": "step", "step": "warning",
                     "msg": f"Avís: complements fallits ({_comp_err}). Text adaptat conservat."})
                 print(f"[complements_call] error: {_comp_err}", flush=True)
+
+    # 6d. Crida DEDICADA «Per al docent» (argumentació pedagògica, 9 cat A-I).
+    # Per què separada: dins la Call 1 (adapter), gpt-4o prioritza el text adaptat i
+    # infra-genera l'argumentació (2 cards de ~7). Una crida focalitzada amb el TEXT
+    # ADAPTAT FINAL (text + complements) com a context produeix les 7-9 cards COHERENTS
+    # amb el que realment s'ha generat i amb el perfil. Validat empíricament + NotebookLM
+    # 2026-06-11. Només en 2-call (en crida única l'argumentació ja va inline).
+    if _two_call and adapted.strip():
+        try:
+            _arg_system = build_argumentacio_prompt(profile, context, params)
+            _arg_model = server._model_for("complements")  # tasca focalitzada (config híbrid: gpt-4o)
+            cb({"type": "step", "step": "argumentacio",
+                "msg": "Generant «Per al docent» (argumentació pedagògica)..."})
+            _arg_user = (
+                f"TEXT ADAPTAT FINAL (amb els complements ja generats):\n{adapted}\n\n"
+                "Genera NOMÉS la secció «## Argumentació pedagògica» amb una card per a cada "
+                "categoria obligatòria del cas. No reprodueixis el text ni cap complement."
+            )
+            _arg_raw = _call_llm(_arg_model, _arg_system, _arg_user)
+            _arg_clean = clean_gemini_output(_arg_raw)
+            _arg_clean = _post_process_llm_output(_arg_clean, lang=lang).strip()
+            if _arg_clean:
+                import re as _re_arg
+                # Normalitza la sortida del model (defensiu):
+                # 1) Treu TOTS els headings «## Argumentació pedagògica» que el model
+                #    hagi posat (sovint l'eco-genera duplicat) → en prependrem un de net.
+                #    Nota: «pedagògica» porta ò (U+00F2), no o/ó → cal [oòó] a les dues paraules.
+                _body = _re_arg.sub(r"(?im)^#{1,3}\s*Argumentaci[oòó]\s+pedag[oòó]gica\s*$",
+                                    "", _arg_clean).strip()
+                # 2) Cards amb «## X.» en lloc de «### X.» trenquen el rendering del
+                #    frontend (les interpretaria com a seccions top-level) → força ###.
+                _body = _re_arg.sub(r"(?m)^##\s+([A-I]\.\s)", r"### \1", _body)
+                _arg_final = "## Argumentació pedagògica\n\n" + _body
+                adapted = adapted.rstrip() + "\n\n" + _arg_final
+                _n_cards = len(_re_arg.findall(r"(?m)^###\s*[A-I]\.", _arg_final))
+                print(f"[argumentacio_call] generat {len(_arg_final)} chars, {_n_cards} cards", flush=True)
+        except Exception as _arg_err:
+            cb({"type": "step", "step": "warning",
+                "msg": f"Avís: argumentació «Per al docent» fallida ({_arg_err}). Text conservat."})
+            print(f"[argumentacio_call] error (ignorat): {_arg_err}", flush=True)
 
     # 7. Pipeline de qualitat català (LanguageTool + llegibilitat + LLM Auditor)
     quality_enabled = params.get("quality_check", True)

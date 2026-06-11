@@ -125,9 +125,13 @@ def _forma_sobre_mecr_canon(genre: str | None) -> str:
 # real post-A-I — veure project_per_al_docent_9categories_obert_20260602.
 _ARGUMENTACIO_9CAT_BLOCK = """## Argumentació pedagògica
 SEMPRE GENERAR — Justifica les decisions usant la taxonomia canonica FJE.
-Genera 1 card per a CADA categoria on hi hagi hagut intervencio (omet les que no apliquen).
-Per a cada card: identifica les sub-areas concretes (codi+nom) i justifica amb terminologia
-pedagogica (MALL/DUA/UNE), NO descriptivament ("hem fet X").
+Genera 1 card per a CADA categoria on hi hagi hagut intervencio (vegeu la llista de
+categories OBLIGATÒRIES per a aquest cas, més avall).
+Per a cada card: identifica les sub-arees concretes (codi+nom) i justifica el PER QUÈ
+pedagogic — com el canvi afavoreix la comprensio, l'aprenentatge o l'autoregulacio de
+l'alumne (principis MALL/DUA, Cummins, Vygotsky/Solé), NO el QUÈ s'ha fet ("hem fet X").
+Sempre que puguis, dona la xifra de control concreta (ex: límit de paraules/frase del nivell),
+no adjectius vagues ("frases curtes").
 
 Categories (usa nomes les que apliquen al cas concret):
 
@@ -143,6 +147,8 @@ Categories (usa nomes les que apliquen al cas concret):
 **C. Suport Cognitiu**
 - Sub-arees: C1 Carrega cognitiva · C2 Scaffolding · C3 Coneixements previs · C4 Metacognicio
 - Que cobreix: reduir la sobrecarrega, bastides, activar previs, autoavaluacio.
+- Matís: a A2+ l'alumne ja INICIA la lectura autonoma; les bastides eviten la frustracio
+  de la descodificacio (la suporten), NO la substitueixen.
 
 **D. Multimodalitat**
 - Sub-arees: D1 Suport visual · D2 Organitzadors grafics · D3 Redundancia canals
@@ -151,6 +157,9 @@ Categories (usa nomes les que apliquen al cas concret):
 **E. Contingut Curricular**
 - Sub-arees: E1 Terminologia · E2 Rigor conceptual · E3 Exemples · E4 Contextualitzacio
 - Que cobreix: que es manté del rigor i que s'adapta sense perdre la materia.
+- OBLIGATORI: nomena quina Habilitat Cognitivolingüística (HCL) es preserva o es treballa
+  (Descriure · Explicar · Justificar · Argumentar). Aixo garanteix que NO es rebaixa el «Què»
+  curricular (doble eix MALL). A Enriquiment, indica el repte de pensament d'ordre superior afegit.
 
 **F. Avaluació i Comprensió** (depèn de complements actius — SKILLs)
 - Sub-arees: F1 Preguntes · F2 Activitats · F3 Autoavaluacio
@@ -163,6 +172,8 @@ Categories (usa nomes les que apliquen al cas concret):
 **G. Personalització Lingüística** (nomes per a nouvinguts/L2)
 - Sub-arees: G1 Suport L1 · G2 Adaptacio cultural
 - Que cobreix: glossaris bilingues, referents culturals propers, exemples de l'experiencia de l'alumne.
+- Matís: l'alfabet ORIGINAL de la L1 (arab, xines...) no nomes tradueix — enforteix la
+  IDENTITAT i la confianca de l'alumne (text d'identitat linguistica, LIT · Cummins).
 
 **H. Adaptacions per Perfil** (cor d'ATNE — instruccions especifiques per condicio)
 - Sub-arees: TEA · TDAH · Dislexia · DI · TDL · AACC · 2e · Disc.auditiva · Disc.visual · Discalculia · Vulnerabilitat · Dispraxia
@@ -180,28 +191,147 @@ Categories (usa nomes les que apliquen al cas concret):
 
 FORMAT OBLIGATORI per card (encapçalament H3 + body):
 ```
-### A. Adaptació Lingüística — A1+A2
+### A. Adaptació Lingüística — [sub-àrees REALS, ex: A1·A2]
 [Justificacio en 1-2 frases amb terminologia pedagogica real, NO descriptiva.]
 
-### B. Estructura i Organització — B1+B2
+### B. Estructura i Organització — [sub-àrees REALS, ex: B1·B2]
 [Justificacio...]
 
-### H. Adaptacions per Perfil — TDAH + Dislexia
+### H. Adaptacions per Perfil — [condicions REALS del perfil rebut]
 [Justificacio especifica per a CADA condicio activa al perfil rebut.]
 ```
+⚠️ Els codis darrere del «—» són les SUB-ÀREES de la categoria (A1 Lèxic, A2 Sintaxi,
+B1 Segmentació…), MAI els nivells MECR (A1, A2, B1…). Tria els codis REALS del cas;
+PROHIBIT copiar literalment «A1+A2» o «B1+B2» d'aquests exemples si no corresponen.
 
 EXEMPLE CORRECTE:
-### A. Adaptació Lingüística — A1+A2
-S'ha reduit el lèxic a vocabulari frequent (BICS) per evitar carrega lexica
-abans de la descodificacio. Sintaxi a SVO amb verbs en present d'indicatiu
-per facilitar el processament a pre-A1 sense subordinacio.
+### A. Adaptació Lingüística — A1·A2
+S'ha reduit el lèxic a vocabulari frequent (BICS) i s'han limitat les frases a 8
+paraules (control de llengua del nivell A1) per rebaixar la carrega cognitiva abans
+de la descodificacio. Sintaxi a SVO en present d'indicatiu per facilitar el
+processament sense subordinacio.
 
 EXEMPLE INCORRECTE:
 **Adaptació lingüística**: Hem fet frases curtes i senzilles.
-(Massa generic, sense codis, sense fonamentacio.)
+(Massa generic, sense codis de sub-area, sense xifra de control, sense fonamentacio del per què.)
 
 Omet les categories que no apliquen. NO inventis sub-arees no llistades.
 Cada card comença SEMPRE per `### [LLETRA]. [Nom] — [codis]`."""
+
+
+# ── R1 (re-validació NotebookLM 2026-06-11): sincronització complement → categoria ──
+#
+# El problema empíric: l'adapter generava 2-3 cards de les ~6-7 amb intervenció real
+# (ex: nouvingut amb glossari bilingüe SENSE categoria G). Solució: derivar de
+# params.complements + perfils actius QUINES categories són obligatòries per a aquest cas
+# i injectar-ho com a checklist imperatiu. Mapeig: mapa de taxonomies (Diagrama 4) +
+# recomanacions NLM. L'adapter coneix els complements actius encara que es generin a la
+# Call 2 → ha de JUSTIFICAR-LOS igualment.
+_COMP_TO_DOCENT_CAT = {
+    "glossari": ["A"],            # + G si L1/nouvingut (bilingüe), afegit dinàmicament
+    "pictogrames": ["D"],
+    "illustracions": ["D"],
+    "esquema_visual": ["C", "D"],
+    "mapa_conceptual": ["C"],
+    "mapa_mental": ["C"],
+    "bastides": ["C"],
+    "preguntes_comprensio": ["F"],
+    "activitats_aprofundiment": ["F", "E"],
+    "rubriques": ["F"],
+    "resum_graduat": ["C"],
+    "cartes_conversacionals": ["F"],
+    "plantilles_genere": ["B"],
+}
+_DOCENT_CAT_NAMES = {
+    "A": "Adaptació Lingüística", "B": "Estructura i Organització",
+    "C": "Suport Cognitiu", "D": "Multimodalitat", "E": "Contingut Curricular",
+    "F": "Avaluació i Comprensió", "G": "Personalització Lingüística",
+    "H": "Adaptacions per Perfil", "I": "Meta-regles Transversals",
+}
+
+
+def _argumentacio_case_block(profile: dict, params: dict) -> str:
+    """Checklist dinàmic de categories «Per al docent» OBLIGATÒRIES per al cas concret.
+
+    Deriva de params.complements + perfils actius. Ataca la infra-generació detectada a
+    la re-validació NotebookLM (2026-06-11). Retorna un bloc per injectar al final de
+    `_ARGUMENTACIO_9CAT_BLOCK` (mateix per als 2 camins: adapter_only i crida única).
+    """
+    comp = params.get("complements", {}) if isinstance(params, dict) else {}
+    chars = profile.get("caracteristiques", {}) if isinstance(profile, dict) else {}
+    active = [k for k, v in chars.items() if isinstance(v, dict) and v.get("actiu")]
+    mecr = (params.get("mecr_sortida") or params.get("mecr") or "B1")
+
+    reasons: dict[str, str] = {}
+    # A, B, E: les 3 transformacions del text — sempre hi ha hagut intervenció.
+    for c in ("A", "B", "E"):
+        reasons.setdefault(c, "transformació del text (sempre)")
+    # Complements actius → categories que justifiquen.
+    for k, v in comp.items():
+        if not v:
+            continue
+        for c in _COMP_TO_DOCENT_CAT.get(k, []):
+            reasons.setdefault(c, f"complement «{k}» actiu")
+    # H per cada perfil amb condició; I si multi-condició.
+    if active:
+        reasons["H"] = "perfil amb condició: " + ", ".join(active)
+    if len(active) >= 2:
+        reasons["I"] = "perfil multi-condició (combinació de regles sense contradiccions)"
+    # G si nouvingut amb L1 declarada (glossari bilingüe / TOLC).
+    nouv = chars.get("nouvingut") or {}
+    l1 = (nouv.get("l1") or nouv.get("L1")) if isinstance(nouv, dict) else ""
+    if l1:
+        reasons["G"] = f"suport L1 ({l1}) / Translanguaging-TOLC (Cummins)"
+
+    order = ["A", "B", "C", "D", "E", "F", "G", "H", "I"]
+    lines = [f"- {c}. {_DOCENT_CAT_NAMES[c]} — {reasons[c]}" for c in order if c in reasons]
+    maxw = MECR_MAX_WORDS.get(mecr)
+    metric = (f"\nMÈTRICA per a la categoria A (nivell {mecr}): frases de com a màxim "
+              f"{maxw} paraules — dona la xifra a la justificació, no «frases curtes»."
+              if maxw else "")
+    return (
+        "\nCATEGORIES OBLIGATÒRIES PER A AQUEST CAS (no n'ometis CAP; pots afegir-ne més "
+        "si hi ha hagut intervencions addicionals):\n"
+        + "\n".join(lines)
+        + metric
+    )
+
+
+def build_argumentacio_prompt(profile: dict, context: dict, params: dict) -> str:
+    """System prompt de la crida DEDICADA «Per al docent» (2026-06-11).
+
+    Genera NOMÉS la secció «## Argumentació pedagògica» (9 cat A-I), de forma focalitzada.
+    El user message (a l'orchestrator) porta el TEXT ADAPTAT FINAL com a context, perquè la
+    justificació sigui COHERENT amb el que el LLM ha retornat realment (no genèrica). El
+    checklist de categories (derivat del perfil + complements) garanteix que cobreix el que
+    les indicacions de perfil fan arribar. Reutilitza la MATEIXA font única que els 2 camins
+    de build_system_prompt (_ARGUMENTACIO_9CAT_BLOCK + _argumentacio_case_block) → zero drift.
+    """
+    lang = params.get("lang", "ca")
+    lang_label = get_lang_label(lang)
+    mecr = params.get("mecr_sortida") or params.get("mecr") or "B1"
+    dua = params.get("dua", "Core")
+    chars = profile.get("caracteristiques", {}) if isinstance(profile, dict) else {}
+    active = [k for k, v in chars.items() if isinstance(v, dict) and v.get("actiu")]
+    _nouv = chars.get("nouvingut", {}) if isinstance(chars.get("nouvingut"), dict) else {}
+    l1 = _nouv.get("L1", "") or _nouv.get("l1", "")
+    comp = params.get("complements", {}) if isinstance(params, dict) else {}
+    comp_actius = [k for k, v in comp.items() if v]
+
+    header = (
+        f"Ets un avaluador pedagògic expert en el model MALL (FJE) i el DUA. La teva única "
+        f"tasca és redactar la secció «## Argumentació pedagògica» (la part «Per al docent») "
+        f"d'una adaptació de text que JA s'ha fet. Escriu en {lang_label}.\n\n"
+        f"Reps el TEXT ADAPTAT FINAL (amb els seus complements ja generats). Justifica les "
+        f"decisions pedagògiques que s'hi observen, de manera COHERENT amb el que realment "
+        f"conté el text i amb el perfil de l'alumne. NO reprodueixis ni modifiquis el text "
+        f"adaptat; NO generis cap altra secció ni cap complement.\n\n"
+        f"PERFIL: {', '.join(active) if active else 'genèric'} | MECR: {mecr} | DUA: {dua}"
+        + (f" | L1: {l1}" if l1 else "")
+        + (f" | Complements actius: {', '.join(comp_actius)}" if comp_actius else "")
+        + "\n\n"
+    )
+    return header + _ARGUMENTACIO_9CAT_BLOCK + "\n" + _argumentacio_case_block(profile, params)
 
 
 def build_persona_audience(profile: dict, context: dict, mecr: str) -> str:
@@ -451,8 +581,14 @@ def build_persona_audience(profile: dict, context: dict, mecr: str) -> str:
 
 
 def build_system_prompt(profile: dict, context: dict, params: dict, rag_context: str = "",
-                        adapter_only: bool = False) -> str:
-    """Munta el system prompt en 4 capes — instruccions graduades del catàleg de 98."""
+                        adapter_only: bool = False, include_argumentacio: bool = True) -> str:
+    """Munta el system prompt en 4 capes — instruccions graduades del catàleg de 98.
+
+    `include_argumentacio`: si False (només té efecte amb `adapter_only=True`), l'adapter
+    de la Call 1 NO genera la secció «## Argumentació pedagògica». Es genera en una crida
+    DEDICADA i focalitzada (build_argumentacio_prompt) amb el text adaptat FINAL com a
+    context — perquè dins la crida gran l'adapter la infra-genera (validat NLM 2026-06-11).
+    """
     parts = []
     mecr = params.get("mecr_sortida", "B2")
     dua = params.get("dua", "Core")
@@ -568,7 +704,13 @@ def build_system_prompt(profile: dict, context: dict, params: dict, rag_context:
     # Complements activats
     comp = params.get("complements", {})
     comp_actius = [k.replace("_", " ").title() for k, v in comp.items() if v]
-    parts.append(f"""
+    # Només en crida única: en 2-call (adapter_only) els complements SECCIÓ es generen a
+    # la Call 2 (build_complements_prompt). Llistar-los aquí contradeia la checklist de
+    # l'adapter («genera únicament text+notes») i feia que la Call 1 generés un glossari
+    # inline DUPLICAT del de la Call 2 (bug de coherència, fix 2026-06-11). Els complements
+    # INLINE (pictogrames) ja tenen el seu bloc dedicat dins la branca adapter_only.
+    if not adapter_only:
+        parts.append(f"""
 COMPLEMENTS A GENERAR (a més del text adaptat):
 {chr(10).join('- ' + c for c in comp_actius) if comp_actius else '- Cap complement addicional'}
 """)
@@ -664,13 +806,25 @@ PROHIBIT deixar la sortida sense cap marcador `[PICTO:]` quan pictogrames és AC
 """
 
         # «Per al docent» — taxonomia canònica de 9 categories A-I (font única:
-        # _ARGUMENTACIO_9CAT_BLOCK). Abans aquí hi havia una estructura antiga de
-        # 5 punts que desincronitzava el camí 2-call del frontend (dimMap A-I) i
-        # de la crida única. Sincronitzat 2026-06-09.
+        # _ARGUMENTACIO_9CAT_BLOCK). Sincronitzat 2026-06-09.
+        # 2026-06-11: amb include_argumentacio=False, l'argumentació NO es genera aquí
+        # (dins la crida gran l'adapter la infra-genera, validat NLM); es genera en una
+        # crida dedicada (build_argumentacio_prompt) amb el text adaptat final.
+        if include_argumentacio:
+            _arg_section = f"{_ARGUMENTACIO_9CAT_BLOCK}\n{_argumentacio_case_block(profile, params)}\n\n"
+            _checklist_items = (
+                '1. ## Text adaptat — amb l\'ESTRUCTURA del gènere "%s"\n'
+                "2. ## Argumentació pedagògica\n"
+                "3. ## Notes d'auditoria"
+            ) % (_genere_param or 'demanat')
+        else:
+            _arg_section = ""
+            _checklist_items = (
+                '1. ## Text adaptat — amb l\'ESTRUCTURA del gènere "%s"\n'
+                "2. ## Notes d'auditoria"
+            ) % (_genere_param or 'demanat')
         parts.append(f"""
-{_ARGUMENTACIO_9CAT_BLOCK}
-
-## Notes d'auditoria
+{_arg_section}## Notes d'auditoria
 SEMPRE GENERAR — Taula comparativa dels canvis principals:
 | Aspecte | Original | Adaptat | Motiu |
 Màxim 5-6 files.
@@ -678,9 +832,7 @@ Màxim 5-6 files.
 {_picto_block}
 ## CHECKLIST DE GENERACIÓ — OBLIGATORI
 Genera únicament:
-1. ## Text adaptat — amb l'ESTRUCTURA del gènere "{_genere_param or 'demanat'}"
-2. ## Argumentació pedagògica
-3. ## Notes d'auditoria
+{_checklist_items}
 
 DINS de "## Text adaptat", la PRIMERA línia ha de ser sempre un **títol** en format `# Títol`
 (un sol coixinet). Si el text original ja en té, conserva'l; si no, crea'n un de breu i
@@ -1375,6 +1527,7 @@ Exemple de format:
     # adapter_only (Call 1 del 2-call) per evitar drift entre els dos camins.
     output_sections.append(f"""
 {_ARGUMENTACIO_9CAT_BLOCK}
+{_argumentacio_case_block(profile, params)}
 
 ## Notes d'auditoria
 SEMPRE GENERAR — Taula comparativa breu dels canvis principals:
