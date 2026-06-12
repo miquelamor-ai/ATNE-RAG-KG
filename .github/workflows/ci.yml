@@ -33,12 +33,19 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
 
       - name: Dependències mínimes (sense LLM real)
         run: |
           pip install --quiet fastapi uvicorn python-dotenv requests \
             python-multipart python-docx python-pptx fpdf2 pypdf PyJWT \
             PyYAML PyMuPDF google-genai openai pyflakes
+
+      - name: Guard del renderitzador de diagrames (parseTree/treeToGraph)
+        run: node tests/test_diagrames_parse.js
+        # No necessita el submodule (llegeix ui/atne/js/mermaid-converter.js del repo).
 
       - name: Sintaxi (py_compile del backend)
         run: |

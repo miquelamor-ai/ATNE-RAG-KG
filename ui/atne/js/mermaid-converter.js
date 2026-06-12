@@ -716,4 +716,8 @@
     },
   };
 
+  // Exposició per a tests deterministes (parseTree/treeToGraph són funcions PURES,
+  // no toquen el DOM). Innocu en producció. Veure tests/test_diagrames_parse.js.
+  window.ATNE_DIAGRAM_TEST = { parseTree: parseTree, treeToGraph: treeToGraph };
+
 })();
