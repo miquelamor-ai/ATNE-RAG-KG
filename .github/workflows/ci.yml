@@ -1,0 +1,92 @@
+# .github/workflows/ci.yml
+# ════════════════════════════════════════════════════════════════════════
+# ATNE — CI mínim determinista (Fase 3 "gate" de spec/synthetic-monitoring.md
+# en versió 0). ZERO claus d'API: tot és determinista (sintaxi, lint, smoke del
+# resolver, guards del prompt, matriu de complements, drift frontend↔canon).
+# Les fases amb LLM (smoke diari, judge setmanal) seran un workflow a part amb secrets.
+#
+# ⚠️ SUBMODULE PRIVAT: corpusFJE és privat → el GITHUB_TOKEN per defecte NO el pot
+#    clonar. Cal un PAT al secret `CORPUSFJE_PAT` (Settings → Secrets → Actions) amb
+#    accés de lectura a miquelamor-ai/corpusFJE. El job `core` NO el necessita (corre
+#    sempre); el job `canon-guards` sí. Originalment basat en la proposta de l'auditoria
+#    12/06, corregit: el drift guard és Python (no el .js inexistent) + s'afegeixen
+#    prompt_checks i el snapshot guard.
+#
+# Quan portin uns dies en verd: Settings → Branches → marcar com a "required" per a main.
+# ════════════════════════════════════════════════════════════════════════
+name: CI determinista
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # ── Checks que NO necessiten el submodule (corren SEMPRE, sense secrets) ──
+  # Inclou el smoke del resolver: el guard que hauria caçat el bug B1 (2e).
+  core:
+    name: Core (sintaxi + lint + smoke resolver)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4   # sense submodule a propòsit
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Dependències mínimes (sense LLM real)
+        run: |
+          pip install --quiet fastapi uvicorn python-dotenv requests \
+            python-multipart python-docx python-pptx fpdf2 pypdf PyJWT \
+            PyYAML PyMuPDF google-genai openai pyflakes
+
+      - name: Sintaxi (py_compile del backend)
+        run: |
+          python -m py_compile server.py adaptation/*.py routes/*.py \
+            skills_loader.py corpus_reader.py instruction_catalog.py \
+            instruction_filter.py eval_db.py
+
+      - name: Lint (pyflakes — fallem només per errors REALS, no cosmètics)
+        run: |
+          # Bloquegem per "undefined name" (bugs de debò). Els "imported but unused"
+          # i "f-string is missing placeholders" són soroll conegut (neteja a part).
+          python -m pyflakes server.py adaptation/*.py routes/*.py > /tmp/pf.txt || true
+          if grep "undefined name" /tmp/pf.txt; then
+            echo "::error::pyflakes ha trobat noms no definits (bug real)"; exit 1
+          fi
+
+      - name: Smoke pedagògic — resolver canònic MECR+DUA (inclou cas 2e)
+        run: python -m adaptation.params_resolver
+        # El mòdul surt amb codi d'error si algun cas falla (TOTS OK requerit).
+
+  # ── Guards que necessiten el canon (submodule corpusFJE privat → PAT) ──
+  canon-guards:
+    name: Guards del canon (prompt + complements + drift)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.CORPUSFJE_PAT }}   # PAT amb accés a corpusFJE privat
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Dependències
+        run: pip install --quiet python-dotenv PyYAML
+
+      - name: Guard del prompt (294 checks de contracte)
+        run: python tests/golden/prompt_checks.py
+
+      - name: Guard «Per al docent» — snapshot de comportament (canon)
+        run: python tests/golden/per_al_docent_snapshot.py
+
+      - name: Guard de drift «Per al docent» frontend ↔ canon
+        run: python tests/golden/per_al_docent_frontend_drift.py
+
+      - name: Matriu de complements (711 combinacions golden + lleis R1-R4)
+        run: node tests/test_complements_matriu.js
