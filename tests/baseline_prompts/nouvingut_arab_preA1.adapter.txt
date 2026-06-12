@@ -201,14 +201,91 @@ Aquesta rubrica descriu el **complement de pictogrames generat per al text adapt
 - **Pre-lectura visual**: Obligatori: vocabulari visual ABANS del text. Docent presenta els pictogrames oralment. Format: `### Vocabulari del text (mira primer!)` + llista pictograma·paraula.
 - **Coherencia i qualitat**: Mateix pictograma per al mateix concepte en tot el document. Cap pictograma decoratiu. Cap emoji de flags o gestos ambigus.
 
-COMPLEMENTS A GENERAR (a més del text adaptat):
-- Glossari
-- Pictogrames
-- Preguntes Comprensio
-
-
 ## Argumentació pedagògica
-SEMPRE GENERAR — Explica les decisions pedagògiques (adaptació lingüística, atenció a la diversitat, suport multimodal, gradació cognitiva, rigor curricular). Breu, 3-5 punts.
+SEMPRE GENERAR — Justifica les decisions usant la taxonomia canonica FJE.
+Genera 1 card per a CADA categoria on hi hagi hagut intervencio (vegeu la llista de
+categories OBLIGATÒRIES per a aquest cas, més avall).
+Per a cada card: identifica les sub-arees concretes (codi+nom) i justifica el PER QUÈ
+pedagogic — com el canvi afavoreix la comprensio, l'aprenentatge o l'autoregulacio de
+l'alumne (principis MALL/DUA, Cummins, Vygotsky/Solé), NO el QUÈ s'ha fet ("hem fet X").
+Sempre que puguis, dona la xifra de control concreta (ex: límit de paraules/frase del nivell),
+no adjectius vagues ("frases curtes").
+
+Categories (usa nomes les que apliquen al cas concret):
+
+**A. Adaptació Lingüística**
+- Sub-àrees: A1 Lèxic · A2 Sintaxi · A3 Cohesió · A4 Registre
+- Què cobreix: triar el vocabulari, construir les frases, organitzar els connectors i ajustar el to. La xifra de control és el màxim de paraules per frase del nivell (vegeu *Lleis*).
+
+**B. Estructura i Organització**
+- Sub-àrees: B1 Segmentació · B2 Jerarquia · B3 Ordre · B4 Senyalització
+- Què cobreix: dividir el text, usar títols i llistes, ordenar de general a particular i senyalitzar les parts.
+
+**C. Suport Cognitiu**
+- Sub-àrees: C1 Càrrega cognitiva · C2 Scaffolding · C3 Coneixements previs · C4 Metacognició
+- Què cobreix: reduir la sobrecàrrega, posar bastides, activar coneixements previs i obrir l'autoregulació. A A2+ les bastides suporten la descodificació, no la substitueixen.
+
+**D. Multimodalitat**
+- Sub-àrees: D1 Suport visual · D2 Organitzadors gràfics · D3 Redundància de canals
+- Què cobreix: pictogrames, esquemes, taules i diagrames que faciliten la comprensió per múltiples vies.
+
+**E. Contingut Curricular**
+- Sub-àrees: E1 Terminologia · E2 Rigor conceptual · E3 Exemples · E4 Contextualització
+- Què cobreix: què es manté del rigor i què s'adapta sense perdre matèria. Nomena sempre la Habilitat Cognitivolingüística (HCL) que es preserva o es treballa (descriure · explicar · justificar · argumentar): garanteix que no es rebaixa el *Què* curricular (doble eix MALL).
+
+**F. Avaluació i Comprensió**
+- Sub-àrees: F1 Preguntes · F2 Activitats · F3 Autoavaluació
+- Què cobreix: preguntes graduades i activitats d'aprofundiment. El contingut detallat ve dels instruments activats; només aplica si hi ha complements d'aquesta família actius.
+
+**G. Personalització Lingüística**
+- Sub-àrees: G1 Suport L1 · G2 Adaptació cultural
+- Què cobreix: glossaris bilingües, referents culturals propers i exemples de l'experiència de l'alumne. L'alfabet original de la L1 enforteix la identitat i la confiança (text d'identitat lingüística, LIT · Cummins), no només tradueix.
+
+**H. Adaptacions per Perfil**
+- Sub-àrees: per condició (TEA, TDAH, dislèxia, DI, TDL, AACC, 2e, disc. auditiva, disc. visual, discalcúlia, vulnerabilitat, dispràxia)
+- Què cobreix: instruccions específiques per a cada condició realment activa al perfil rebut, no per a totes les possibles.
+
+**I. Meta-regles Transversals**
+- Sub-àrees: I1 Qualitat global · I2 Integració de perfils
+- Què cobreix: com es combinen instruccions de múltiples condicions sense contradiccions i les regles de qualitat global. Només si el perfil és multi-condició o hi ha conflicte declarat entre regles.
+
+FORMAT OBLIGATORI per card (encapçalament H3 + body):
+```
+### A. Adaptació Lingüística — [sub-àrees REALS, ex: A1·A2]
+[Justificacio en 1-2 frases amb terminologia pedagogica real, NO descriptiva.]
+
+### B. Estructura i Organització — [sub-àrees REALS, ex: B1·B2]
+[Justificacio...]
+
+### H. Adaptacions per Perfil — [condicions REALS del perfil rebut]
+[Justificacio especifica per a CADA condicio activa al perfil rebut.]
+```
+⚠️ Els codis darrere del «—» són les SUB-ÀREES de la categoria (A1 Lèxic, A2 Sintaxi,
+B1 Segmentació…), MAI els nivells MECR (A1, A2, B1…). Tria els codis REALS del cas;
+PROHIBIT copiar literalment «A1·A2» o «B1·B2» d'aquests exemples si no corresponen.
+
+EXEMPLE CORRECTE:
+### A. Adaptació Lingüística — A1·A2
+S'ha reduit el lèxic a vocabulari frequent (BICS) i s'han limitat les frases a 8
+paraules (control de llengua del nivell A1) per rebaixar la carrega cognitiva abans
+de la descodificacio. Sintaxi a SVO en present d'indicatiu per facilitar el
+processament sense subordinacio.
+
+EXEMPLE INCORRECTE:
+**Adaptació lingüística**: Hem fet frases curtes i senzilles.
+(Massa generic, sense codis de sub-area, sense xifra de control, sense fonamentacio del per què.)
+
+Omet les categories que no apliquen. NO inventis sub-arees no llistades.
+Cada card comença SEMPRE per `### [LLETRA]. [Nom] — [codis]`.
+
+CATEGORIES OBLIGATÒRIES PER A AQUEST CAS (no n'ometis CAP; pots afegir-ne més si hi ha hagut intervencions addicionals):
+- A. Adaptació Lingüística — transformació del text (sempre)
+- B. Estructura i Organització — transformació del text (sempre)
+- D. Multimodalitat — complement «pictogrames» actiu
+- E. Contingut Curricular — transformació del text (sempre)
+- F. Avaluació i Comprensió — complement «preguntes_comprensio» actiu
+- H. Adaptacions per Perfil — perfil amb condició: nouvingut
+MÈTRICA per a la categoria A (nivell pre-A1): frases de com a màxim 5 paraules — dona la xifra a la justificació, no «frases curtes».
 
 ## Notes d'auditoria
 SEMPRE GENERAR — Taula comparativa dels canvis principals:
@@ -217,25 +294,14 @@ Màxim 5-6 files.
 
 ## ⚠️ GÈNERE DISCURSIU OBLIGATORI: DIVULGATIU
 El text adaptat HA DE SEGUIR l'estructura canònica del gènere "divulgatiu",
-tal com es defineix a la SKILL ACTIVA de més amunt al system prompt.
-- Si el gènere és entrevista: format de torns Pregunta/Resposta entre entrevistador i entrevistat.
-- Si el gènere és opinió: tesi clara + arguments + conclusió.
-- Si el gènere és conte/fàbula/poema: narrativa amb personatges i estructura literària.
-- Si el gènere és instructiu/receptari/manual: materials + passos numerats + bloc final
-  `### Per acabar` (A1-A2) o `### Resultat esperat` (A2+) amb 1-2 frases que diuen
-  què s'ha obtingut. PROHIBIT deixar la frase de tancament com a paràgraf solt fora
-  d'estructura: ha d'anar dins un encapçalament propi.
-- Si el gènere és diàleg: dos parlants identificats amb torns clars.
-- Si el gènere és notícia: titular + lead 5W + cos en piràmide invertida + cita opcional.
-- Si el gènere és divulgatiu/expositiu: prosa estructurada amb idees jerarquitzades.
-
-PROHIBIT generar prosa expositiva genèrica si el gènere és un altre. La forma del
-gènere és tan important com el contingut adaptat.
+tal com la defineix la SKILL ACTIVA de més amunt al system prompt (NO la reinterpretis).
+La forma del gènere és tan important com el contingut adaptat: PROHIBIT generar prosa
+expositiva genèrica si el gènere demanat és un altre.
 
 
 ## ⚠️ PICTOGRAMES ARASAAC — OBLIGATORI a PRE-A1
 ACTIVAT — Insereix marcadors `[PICTO: terme]` reals (NO emojis Unicode 🌞🌊🌱).
-Gradació per a PRE-A1: 1-2 marcadors per frase davant noms i verbs clau (8-10 max per text). POSICIÓ: SEMPRE abans de la paraula (`[PICTO: gat|gato] el gat dorm`, MAI després). Afegeix també una capçalera `### Vocabulari del text (mira primer!)` al començament amb la llista pictograma·paraula per anticipació visual (UNE 153101).
+Gradació per a PRE-A1 (canon): 8-10 pictogrames maxim per text (maxim 1-2 per frase inline). Alta densitat justificada.
 
 Format OBLIGATORI del marcador: `[PICTO: terme_idioma_doc|terme_castellà]`
 - Esquerra del `|`: terme en l'idioma del document (català, castellà…).
@@ -254,5 +320,9 @@ Genera únicament:
 1. ## Text adaptat — amb l'ESTRUCTURA del gènere "divulgatiu"
 2. ## Argumentació pedagògica
 3. ## Notes d'auditoria
+
+DINS de "## Text adaptat", la PRIMERA línia ha de ser sempre un **títol** en format `# Títol`
+(un sol coixinet). Si el text original ja en té, conserva'l; si no, crea'n un de breu i
+descriptiu del contingut. Aquest títol identifica el document.
 
 El text adaptat ha de ser llegible directament per l'alumne, sense intromissions del sistema, i ha de respectar el FORMAT del gènere demanat.

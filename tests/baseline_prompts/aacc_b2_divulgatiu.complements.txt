@@ -229,7 +229,7 @@ basada en el text adaptat), NO una rubrica per al docent.
 | He [accio observable 1] | [descriptor NA] | [descriptor AS] | [descriptor AN] | [descriptor AE — salt qualitatiu] |
 | He [accio observable 2] | ... | ... | ... | ... |
 | He [accio observable 3] | ... | ... | ... | ... |
-4-5 criteris × 4 nivells. Primera persona SEMPRE ('He escrit...', no 'Has escrit'). AE = salt qualitatiu (originalitat, transferencia), NO 'AN + esforç'.
+5-6 criteris × 4 nivells. Primera persona SEMPRE ('He escrit...', no 'Has escrit'). AE = salt qualitatiu (originalitat, transferencia), NO 'AN + esforç'.
 
 PROHIBIT generar la capçalera "## Rubriques d'autoavaluacio" amb el cos buit.
 PROHIBIT usar segona ("Has fet") o tercera persona ("L'alumne ha fet").
