@@ -245,8 +245,13 @@
   };
 
   function buildConceptMap(md) {
-    var g = treeToGraph(parseTree(md));
+    // Enllaços creuats (graf Novak): separem el bloc del final; l'arbre es
+    // parseja net i les arestes transversals es dibuixen a sobre.
+    var _cx = (window.ATNE_EDIT_CORE && window.ATNE_EDIT_CORE.splitCross)
+      ? window.ATNE_EDIT_CORE.splitCross(md) : { tree: md, cross: [] };
+    var g = treeToGraph(parseTree(_cx.tree));
     if (!g.nodes.length) return null;
+    var crossLinks = _cx.cross || [];
 
     var byId = {}, childMap = {};
     g.nodes.forEach(function (n) {
@@ -265,36 +270,59 @@
     var l1Ids  = childMap[rootId] || [];
     var colW   = CM.NW + CM.HG;  // 164
 
-    // Alçada de la columna d'un L1 (prop o concepte directe)
-    function colH(nid) {
-      var n = byId[nid], subs = childMap[nid] || [];
-      if (n.type === 'prop') {
-        if (!subs.length) return n.ph;
-        var conH = subs.reduce(function (s, sid) { return s + CM.LG + byId[sid].nh; }, -CM.LG);
-        return n.ph + CM.VG2 + conH;
+    // Layout RECURSIU amb FORK HORITZONTAL (fix prototip 2026-06-12):
+    // suporta profunditat arbitrària (v0.3) i amplada arbitrària (v0.5).
+    // Regles de col·locació (preserven l'estètica original):
+    //  - prop -> conceptes: PILA VERTICAL (com sempre)
+    //  - concepte/arrel -> 1 fill: cadena vertical
+    //  - concepte/arrel -> 2+ fills: FORK HORITZONTAL, proposicions germanes
+    //    EN PARAL·LEL amb el pare centrat a sobre (mapa Novak de debò)
+    function nodeH(nid) { var n = byId[nid]; return n.type === 'prop' ? n.ph : n.nh; }
+    function subW(nid) {
+      var n = byId[nid], kids = childMap[nid] || [];
+      if (!kids.length) return CM.NW;
+      var ws = kids.map(subW);
+      if (n.type !== 'prop' && kids.length >= 2) {
+        return ws.reduce(function (a, b) { return a + b; }, 0) + CM.HG * (kids.length - 1);
       }
-      return n.nh;
+      return Math.max(CM.NW, Math.max.apply(null, ws));
     }
-
-    function placeColumn(nid, cx, startY) {
-      var n = byId[nid];
-      if (n.type === 'prop') {
-        n.x = cx; n.y = startY + n.ph / 2;
-        var cy = startY + n.ph + CM.VG2;
-        (childMap[nid] || []).forEach(function (sid) {
-          var cn = byId[sid]; cn.x = cx; cn.y = cy + cn.nh / 2; cy += cn.nh + CM.LG;
+    function subH(nid) {
+      var n = byId[nid], h = nodeH(nid), kids = childMap[nid] || [];
+      if (!kids.length) return h;
+      if (n.type !== 'prop' && kids.length >= 2) {
+        return h + CM.VG2 + Math.max.apply(null, kids.map(subH));
+      }
+      var kH = kids.reduce(function (s, sid) { return s + CM.LG + subH(sid); }, -CM.LG);
+      return h + CM.VG2 + kH;
+    }
+    function colH(nid) { return subH(nid); }
+    function placeColumn(nid, cx, topY) {
+      var n = byId[nid], h = nodeH(nid), kids = childMap[nid] || [];
+      n.x = cx; n.y = topY + h / 2;
+      if (!kids.length) return;
+      if (n.type !== 'prop' && kids.length >= 2) {
+        var x = cx - subW(nid) / 2;
+        kids.forEach(function (sid) {
+          var w = subW(sid);
+          placeColumn(sid, x + w / 2, topY + h + CM.VG2);
+          x += w + CM.HG;
         });
       } else {
-        n.x = cx; n.y = startY + n.nh / 2;
-        var cy = startY + n.nh + CM.VG2;
-        (childMap[nid] || []).forEach(function (sid) {
-          var cn = byId[sid]; cn.x = cx; cn.y = cy + cn.nh / 2; cy += cn.nh + CM.LG;
-        });
+        var cy = topY + h + CM.VG2;
+        kids.forEach(function (sid) { placeColumn(sid, cx, cy); cy += subH(sid) + CM.LG; });
       }
     }
 
     var startY = CM.RH / 2 + CM.VG1;
-    l1Ids.forEach(function (nid, i) { placeColumn(nid, i * colW + colW / 2, startY); });
+    // Amplada variable per columna (HG/2 de marge a cada banda): amb mapes
+    // sense forks, els centres queden EXACTAMENT on eren (82, 246, ...).
+    var offX = 0;
+    l1Ids.forEach(function (nid) {
+      var w = subW(nid);
+      placeColumn(nid, offX + CM.HG / 2 + w / 2, startY);
+      offX += CM.HG + w;
+    });
     byId[rootId].y = 0;
     if (l1Ids.length) {
       var xs1 = l1Ids.map(function (id) { return byId[id].x; });
@@ -309,7 +337,30 @@
     var y0  = Math.min.apply(null, ys) - CM.RH / 2 - CM.M;
     var x1  = Math.max.apply(null, xs) + CM.NW / 2 + CM.M;
     var y1  = Math.max.apply(null, ys) + Math.max.apply(null, allH) / 2 + CM.M;
+    var y1b = y1;
+    // Eixamplar el viewBox per encabir les corbes d'enllaços creuats (surten
+    // per la dreta). Sense això, l'etiqueta de la relació quedava tallada (v0.8).
+    if (crossLinks.length) {
+      var byLx = {};
+      g.nodes.forEach(function (n) { if (byLx[n.label] === undefined) byLx[n.label] = n; });
+      var laneR = {}, laneC = {};
+      crossLinks.forEach(function (cl) {
+        var sn = byLx[cl.from], tn = byLx[cl.to];
+        if (!sn || !tn || sn.x === undefined || tn.x === undefined) return;
+        if (Math.abs(tn.y - sn.y) < 6) {
+          var rk = Math.round(sn.y); var ln = laneR[rk] = (laneR[rk] || 0) + 1;
+          var hh = (sn.type === 'prop' ? sn.ph : sn.nh) / 2;
+          y1b = Math.max(y1b, Math.max(sn.y, tn.y) + hh + 30 + ln * 26 + 14);  // arc inferior
+        } else {
+          var ck = 'col' + Math.round(Math.max(sn.x, tn.x)); var lc = laneC[ck] = (laneC[ck] || 0) + 1;
+          var ctrlX = Math.max(sn.x, tn.x) + CM.NW / 2 + 46 + lc * 22 + Math.abs(sn.y - tn.y) * 0.12;
+          var lblPad = (cl.link ? cl.link.length * 6.2 + 12 : 0) / 2;
+          x1 = Math.max(x1, ctrlX + lblPad + CM.M);
+        }
+      });
+    }
 
+    y1 = Math.max(y1, y1b);
     var uid = 'cm' + (Math.random() * 1e9 | 0);
     var svg = el('svg', { viewBox: [x0, y0, x1 - x0, y1 - y0].join(' '), xmlns: NS,
       'font-family': pageFont() });
@@ -322,6 +373,10 @@
       [el('path', { d: 'M0,1 L7,4 L0,7 L2,4 Z', fill: '#818cf8' })]));
     svg.appendChild(defs);
 
+    // Mapa de pares (per al routing d'arestes amb bypass)
+    var parentOf = {};
+    g.edges.forEach(function (e) { parentOf[e.t] = e.s; });
+
     var gE = el('g');
     g.edges.forEach(function (e) {
       var sn = byId[e.s], tn = byId[e.t]; if (!sn || !tn) return;
@@ -330,7 +385,28 @@
       var ty2 = tn.type === 'prop' ? tn.y - tn.ph / 2 - 3 : tn.y - tn.nh / 2 - 3;
       var sx2 = sn.x, tx2 = tn.x, d;
       if (Math.abs(sx2 - tx2) < 3) {
-        d = 'M ' + sx2 + ' ' + sy2 + ' L ' + tx2 + ' ' + ty2;
+        // Routing amb bypass (fix 2026-06-12): si entre origen i destí (mateixa
+        // columna) hi ha algun node que NO és germà del destí, una línia recta
+        // travessaria un subarbre aliè i llegiria com una cadena FALSA
+        // (p.ex. concepte -> 2a proposició saltant el subarbre de la 1a).
+        // Les pluges normals (prop -> conceptes apilats, tots germans) queden
+        // rectes com sempre: geometria intacta per als mapes existents.
+        var needsBypass = g.nodes.some(function (m) {
+          if (m.id === e.s || m.id === e.t || m.x === undefined) return false;
+          if (Math.abs(m.x - sx2) >= 3) return false;
+          var top = m.y - (m.nh || m.ph || 0) / 2, bot = m.y + (m.nh || m.ph || 0) / 2;
+          if (bot <= sy2 || top >= ty2) return false;       // fora del tram
+          return parentOf[m.id] !== parentOf[e.t];          // no és germà del destí
+        });
+        if (needsBypass) {
+          var off = sx2 + CM.NW / 2 + 20;
+          var k = (ty2 - sy2);
+          d = 'M ' + sx2 + ' ' + sy2 +
+              ' C ' + off + ' ' + (sy2 + k * 0.22) + ' ' + off + ' ' + (sy2 + k * 0.78) +
+              ' ' + tx2 + ' ' + ty2;
+        } else {
+          d = 'M ' + sx2 + ' ' + sy2 + ' L ' + tx2 + ' ' + ty2;
+        }
       } else {
         var cp = sy2 + (ty2 - sy2) * 0.6;
         d = 'M ' + sx2 + ' ' + sy2 + ' C ' + sx2 + ' ' + cp + ' ' + tx2 + ' ' + cp + ' ' + tx2 + ' ' + ty2;
@@ -339,6 +415,73 @@
         fill: 'none', 'marker-end': 'url(#' + uid + '-arr)' }));
     });
     svg.appendChild(gE);
+
+    // ── Enllaços creuats: es CALCULEN aquí però es dibuixen DESPRÉS dels nodes
+    //    (fix v0.8: abans es pintaven sota gN i els rectangles dels conceptes
+    //    + ombres tapaven la corba i, sobretot, l'etiqueta de la relació). ──
+    var gX = null;
+    if (crossLinks.length) {
+      var byLabel = {};
+      g.nodes.forEach(function (n) { if (byLabel[n.label] === undefined) byLabel[n.label] = n; });
+      var mk = el('marker', { id: uid + '-xarr', viewBox: '0 0 8 8', refX: 7, refY: 4,
+        markerWidth: 6, markerHeight: 6, orient: 'auto' },
+        [el('path', { d: 'M0,1 L7,4 L0,7 L2,4 Z', fill: '#ea580c' })]);
+      defs.appendChild(mk);
+      gX = el('g');
+      // Alçada de mitja caixa per tipus (per sortir/entrar pel caire correcte)
+      function halfH(n) { return (n.type === 'prop' ? n.ph : n.nh) / 2; }
+      // Comptador de carrils per evitar que enllaços paral·lels se superposin.
+      var laneByRow = {};   // clau de fila -> nombre d'enllaços ja dibuixats
+      crossLinks.forEach(function (cl, ci) {
+        var sn = byLabel[cl.from], tn = byLabel[cl.to];
+        if (!sn || !tn || sn.x === undefined || tn.x === undefined) return;
+        var dx = tn.x - sn.x, dy = tn.y - sn.y;
+        var sameRow = Math.abs(dy) < 6;
+        var d, lx, ly;
+
+        if (sameRow) {
+          // Horitzontal: arquegem PER SOTA de la franja de nodes (esquiva-ho tot).
+          // Carril incremental segons quants enllaços ja hi ha en aquesta fila.
+          var rowKey = Math.round(sn.y);
+          var lane = laneByRow[rowKey] = (laneByRow[rowKey] || 0) + 1;
+          var x1 = sn.x, x2 = tn.x;
+          var y1 = sn.y + halfH(sn), y2 = tn.y + halfH(tn);   // surten per BAIX
+          var span = Math.abs(x2 - x1);
+          var drop = 30 + lane * 26;   // l'arc més llarg baixa més                           // cada carril, més avall
+          var midX = (x1 + x2) / 2, dipY = Math.max(y1, y2) + drop;
+          d = 'M ' + x1 + ' ' + y1 +
+              ' C ' + x1 + ' ' + dipY + ' ' + x2 + ' ' + dipY + ' ' + x2 + ' ' + y2;
+          lx = (x1 + x2) / 2; ly = dipY - 1;
+        } else {
+          // Diferent fila: corba lateral per la dreta (com abans), amb carril per X.
+          var laneK = 'col' + Math.round(Math.max(sn.x, tn.x));
+          var laneN = laneByRow[laneK] = (laneByRow[laneK] || 0) + 1;
+          var sx = sn.x + halfH(sn) * 0 + (sn.type === 'prop' ? 0 : CM.NW / 2);
+          var tx = tn.x + (tn.type === 'prop' ? 0 : CM.NW / 2);
+          var sy = sn.y, ty = tn.y, my = (sy + ty) / 2;
+          var bow = 46 + laneN * 22 + Math.abs(ty - sy) * 0.12;
+          var ctrlX = Math.max(sx, tx) + bow;
+          d = 'M ' + sx + ' ' + sy + ' Q ' + ctrlX + ' ' + my + ' ' + tx + ' ' + ty;
+          lx = ctrlX * 0.52 + ((sx + tx) / 2) * 0.48; ly = my;
+        }
+
+        gX.appendChild(el('path', { d: d, stroke: '#ea580c', 'stroke-width': 1.8,
+          'stroke-dasharray': '5 4', fill: 'none', 'marker-end': 'url(#' + uid + '-xarr)' }));
+        if (cl.link) {
+          var w = cl.link.length * 6.2 + 12;
+          // Grup clicable: data-cross-idx identifica l'enllaç per a editar/eliminar
+          var lg = el('g', { 'data-cross-idx': ci, style: 'cursor:pointer' });
+          var tt = document.createElementNS(NS, 'title');
+          tt.textContent = 'Clica per editar o eliminar la connexió';
+          lg.appendChild(tt);
+          lg.appendChild(el('rect', { x: lx - w / 2, y: ly - 9, width: w, height: 18, rx: 5,
+            fill: '#fff7ed', stroke: '#fb923c', 'stroke-width': 1 }));
+          lg.appendChild(txt(cl.link, { x: lx, y: ly + 4, 'text-anchor': 'middle',
+            'font-size': 10.5, 'font-style': 'italic', fill: '#c2410c', 'font-weight': '600' }));
+          gX.appendChild(lg);
+        }
+      });
+    }
 
     var gN = el('g');
     g.nodes.forEach(function (n) {
@@ -375,6 +518,7 @@
       gN.appendChild(grp);
     });
     svg.appendChild(gN);
+    if (gX) svg.appendChild(gX);   // arestes creuades + etiquetes SEMPRE a sobre
     return svg;
   }
 
