@@ -1167,7 +1167,7 @@ Ha de ser senzill i comprensible. Bastida temporal: retira-la quan l'alumne pugu
 
     if comp.get("mapa_conceptual"):
         # A2 · 2026-06-01: H2 + rang de branques derivats del rubrica.json del
-        # canon (generate-mapa-conceptual · pas_3_noms_de_categoria.countable).
+        # canon (generate-mapa-conceptual · pas_3_relacio_de_branca.countable).
         # MODULACIÓ ATNE: a PRE-A1/A1 ATNE NO genera el mapa (bastida inapropiada
         # per autonomia lectora), tot i que el canon hi té nodes — decisió
         # pedagògica pròpia, paral·lela al sostre glossari. Fallback legacy total.
@@ -1183,17 +1183,68 @@ NO generis el mapa conceptual per a aquest nivell.
 """)
         else:
             # Profunditat per nivell (MALL). El rang de branques ve del canon
-            # (pas_3_noms_de_categoria); la descripció qualitativa és ATNE.
+            # (pas_3_relacio_de_branca); la descripció qualitativa és ATNE.
             _mapa_depth_map = {
                 "A2": "2 nivells (concepte central → idees principals literals del text). Guiat.",
-                "B1": "3 nivells (concepte → categories → exemples/detalls inferits). Connectors lògics a les fletxes.",
+                "B1": "3 nivells (concepte → branques amb verb d'enllaç → exemples/detalls inferits).",
                 "B2": "4+ nivells. Jerarquització complexa abstracta (CALP). Superestructura del gènere.",
                 "C1": "Mapa de CONTRAST entre fonts o posicions ideològiques (no només contingut). Multi-font.",
                 "C2": "Mapa de CONTRAST entre fonts o posicions ideològiques (no només contingut). Multi-font.",
             }
             _mapa_depth = _mapa_depth_map.get(_mecr_c3, _mapa_depth_map["B1"])
-            _mc_branques = _mc_canon.range_text("pas_3_noms_de_categoria")
+            _mc_branques = _mc_canon.range_text("pas_3_relacio_de_branca")
             _mc_branques_line = f" Branques principals: {_mc_branques} (canon)." if _mc_branques else ""
+            # Format de branca graduat pel MECR (canon v4.1.0 generate-mapa-conceptual,
+            # §«Esquelet de sortida»): A2 = noms de categoria (bastida classificatòria,
+            # l'objectiu és agrupar); B1+ = verbs d'enllaç (proposició Novak llegible);
+            # C1 = connector de tensió (contrast). El renderitzador ATNE pinta tota
+            # branca en negreta com a node-proposició, contingui categoria o verb (cap
+            # canvi de codi: la gradació és purament pedagògica i ve del canon).
+            if _mecr_c3 == "A2":
+                _mc_branca_regla = (
+                    "BRANQUES EN NEGRETA amb NOM DE CATEGORIA RELACIONAL (Causes, "
+                    "Conseqüències, Tipus de, Processos, Parts de...). Bastida "
+                    "classificatòria: a A2 l'objectiu cognitiu és aprendre a AGRUPAR. "
+                    "Mai etiquetes genèriques (Informació, Coses, Dades)."
+                )
+                _mc_branca_exemple = (
+                    "- **Escalfament global**\n"
+                    "  - **Causes**\n"
+                    "    - gasos d'efecte hivernacle\n"
+                    "    - crema de combustibles\n"
+                    "  - **Conseqüències**\n"
+                    "    - desglaç dels pols\n"
+                    "    - pujada del nivell del mar"
+                )
+            elif _mecr_c3 in ("C1", "C2"):
+                _mc_branca_regla = (
+                    "BRANQUES EN NEGRETA amb VERB o CONNECTOR DE TENSIÓ (en canvi, "
+                    "contrasta amb, mentre que): mapa de contrast entre posicions o "
+                    "fonts. Mai etiquetes genèriques (Informació, Coses, Dades)."
+                )
+                _mc_branca_exemple = (
+                    "- **Models energètics**\n"
+                    "  - **es basen en**\n"
+                    "    - combustibles fòssils\n"
+                    "  - **en canvi**\n"
+                    "    - energies renovables"
+                )
+            else:  # B1, B2
+                _mc_branca_regla = (
+                    "BRANQUES EN NEGRETA amb VERB o FRASE D'ENLLAÇ (és provocat per, "
+                    "provoca, necessita, es divideix en): formen una proposició Novak "
+                    "llegible (concepte + enllaç + concepte: «L'escalfament PROVOCA "
+                    "el desglaç»). Mai etiquetes genèriques (Informació, Coses, Dades)."
+                )
+                _mc_branca_exemple = (
+                    "- **Escalfament global**\n"
+                    "  - **és provocat per**\n"
+                    "    - gasos d'efecte hivernacle\n"
+                    "    - crema de combustibles\n"
+                    "  - **provoca**\n"
+                    "    - desglaç dels pols\n"
+                    "    - pujada del nivell del mar"
+                )
             output_sections.append(f"""
 {_mc_h2}
 ACTIVAT — Genera un mapa conceptual en format text. Per a {_mecr_c3}: {_mapa_depth}{_mc_branques_line}
@@ -1202,21 +1253,16 @@ Usa NOMÉS llistes amb guions i indentació amb 2 espais.
 **FORMAT OBLIGATORI (llista jeràrquica markdown, no caràcters de dibuix):**
 
 ```
-- **CONCEPTE CENTRAL**
-  - **Causes**
-    - Element a
-    - Element b
-  - **Conseqüències**
-    - Element c
+{_mc_branca_exemple}
 ```
 
-REGLES CRÍTIQUES (alineades amb el canon generate-mapa-conceptual):
+REGLES CRÍTIQUES (alineades amb el canon generate-mapa-conceptual v4.1.0):
 - ESTRUCTURA: el concepte central és l'ÚNICA arrel de la llista, en negreta `- **...**`
-  (MAI un títol `###`). Totes les branques pengen del central per sagnia.
-- BRANQUES EN NEGRETA amb NOM DE CATEGORIA RELACIONAL (Causes, Conseqüències, Tipus de,
-  Processos, Parts de...), mai etiquetes genèriques (Informació, Coses, Dades). El
-  renderitzador ATNE les pinta com a nodes-proposició (Novak). Els sub-elements pengen
-  de la branca SENSE negreta.
+  (MAI un títol `###`, que el renderitzador filtra i perd el central). Totes les
+  branques pengen del central per sagnia (mai a columna 0).
+- {_mc_branca_regla} El renderitzador ATNE les pinta com a nodes-proposició (Novak).
+  Els sub-elements pengen de la branca SENSE negreta (una negreta no-arrel crearia
+  una branca falsa).
 - NO usis caràcters de dibuix d'arbre (│ ├ └ ─ ╔ ║) ni encapçalaments `###`: trenquen el
   render del mapa o corrompen lletres ('Causes' → 'Cau—ses').
 - NOMÉS guions `-` i indentació amb 2 espais per nivell.

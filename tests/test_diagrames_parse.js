@@ -3,10 +3,15 @@
  *
  * Blinda les funcions PURES parseTree + treeToGraph de ui/atne/js/mermaid-converter.js
  * (exposades via window.ATNE_DIAGRAM_TEST). Verifica que:
- *   - el format Novak amb paraules d'enllaç (mini-brief Fable) → nodes-proposició,
- *   - el format de PRODUCCIÓ del canon (branques en negreta amb noms de categoria) → idem,
+ *   - l'esquelet canònic B1+ (verbs d'enllaç, proposició Novak) → nodes-proposició,
+ *   - l'esquelet canònic A2 (branques en negreta amb noms de categoria) → idem,
  *   - una llista SENSE negretes no-arrel → 0 proposicions (compatibilitat enrere),
  *   - les capçaleres `###` es filtren (cap node corrupte).
+ *
+ * Fixtures = esquelets LITERALS del canon generate-mapa-conceptual v4.1.0 (corpusFJE
+ * d4b97c8, §«Format de sortida → Esquelet de sortida»). El renderitzador pinta tota
+ * branca en negreta com a node-proposició, contingui categoria (A2) o verb (B1+):
+ * els dos formats donen el MATEIX recompte estructural sense cap canvi de codi.
  *
  * Origen: Canvi 2 del mini-brief de l'auditoria 12/06. Cap dependència; corre a node net.
  * ÚS: node tests/test_diagrames_parse.js   (exit != 0 si alguna comprovació falla)
@@ -43,36 +48,37 @@ function counts(md) {
   return c;
 }
 
-// 1) Format Novak amb PARAULES D'ENLLAÇ (exemple del mini-brief de Fable)
-const novak = [
+// 1) A2 — branques = NOMS DE CATEGORIA (esquelet canònic «Mapa conceptual A2»)
+const mapaA2 = [
   '## Mapa conceptual',
-  '- **FOTOSÍNTESI**',
-  '  - **es produeix a**',
-  '    - Els cloroplasts',
-  '  - **necessita**',
-  '    - Llum del sol',
-  '    - Aigua',
-  '  - **produeix**',
-  '    - Glucosa',
-  '    - Oxigen',
-].join('\n');
-let t = counts(novak);
-check('Novak (verbs): 1 root + 3 prop + 5 concept',
-      t.root === 1 && t.prop === 3 && t.concept === 5, JSON.stringify(t));
-
-// 2) Format de PRODUCCIÓ del canon (branques en negreta amb NOMS DE CATEGORIA)
-const canon = [
-  '## Mapa conceptual',
-  '- **REVOLUCIÓ INDUSTRIAL**',
+  '',
+  '- **Escalfament global**',
   '  - **Causes**',
-  '    - Màquina de vapor',
+  '    - gasos d\'efecte hivernacle',
+  '    - crema de combustibles',
   '  - **Conseqüències**',
-  '    - Fàbriques',
-  '    - Ciutats',
+  '    - desglaç dels pols',
+  '    - pujada del nivell del mar',
 ].join('\n');
-t = counts(canon);
-check('Canon (categories): 1 root + 2 prop + 3 concept',
-      t.root === 1 && t.prop === 2 && t.concept === 3, JSON.stringify(t));
+let t = counts(mapaA2);
+check('A2 (categories): 1 root + 2 prop + 4 concept',
+      t.root === 1 && t.prop === 2 && t.concept === 4, JSON.stringify(t));
+
+// 2) B1+ — branques = VERBS D'ENLLAÇ (esquelet canònic «Mapa conceptual B1+», Novak)
+const mapaB1 = [
+  '## Mapa conceptual',
+  '',
+  '- **Escalfament global**',
+  '  - **és provocat per**',
+  '    - gasos d\'efecte hivernacle',
+  '    - crema de combustibles',
+  '  - **provoca**',
+  '    - desglaç dels pols',
+  '    - pujada del nivell del mar',
+].join('\n');
+t = counts(mapaB1);
+check('B1+ (verbs Novak): 1 root + 2 prop + 4 concept',
+      t.root === 1 && t.prop === 2 && t.concept === 4, JSON.stringify(t));
 
 // 3) Compatibilitat enrere: llista SENSE negretes no-arrel → 0 proposicions
 const flat = [

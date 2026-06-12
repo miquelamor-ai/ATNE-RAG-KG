@@ -230,6 +230,73 @@ def _c_glossari_l1(case, prompt):
                       f"Glossari OK (has_l1={has_l1})")
 
 
+# ─── Check mapa conceptual — graduació de branca per MECR (canon v4.1.0) ───
+
+# El fallback de crida única del mapa (prompt_builder, `if comp.get("mapa_conceptual")`)
+# gradua el FORMAT de branca pel MECR, alineat amb el canon generate-mapa-conceptual
+# v4.1.0 (§«Esquelet de sortida»): A2 = noms de categoria (Causes, Conseqüències —
+# bastida classificatòria); B1+ = verbs d'enllaç (és provocat per, provoca — proposició
+# Novak llegible). El renderitzador pinta tots dos com a node-proposició sense canvi de
+# codi. Cap cas de cases.yaml demana mapa_conceptual, així que el check construeix els
+# seus propis prompts A2/B1 (memoïtzats → 2 builds en total per a tota la passada).
+_MAPA_PROMPT_CACHE: dict[str, str] = {}
+
+
+def _mapa_prompt_for(mecr: str) -> str:
+    if mecr not in _MAPA_PROMPT_CACHE:
+        import os
+        from adaptation.prompt_builder import build_system_prompt
+        # El "fallback de crida única" és el bloc Python pur (skills OFF): en aquest
+        # camí la secció del mapa NO ve del canon SKILL sinó del fallback graduat de
+        # prompt_builder. adapter_only=False perquè en 2-call la secció va a Call 2.
+        # Desactivem ATNE_USE_SKILLS només per a aquest build (i el restaurem) per no
+        # barrejar-hi el body del canon, que descriu la graduació sencera (A2 i B1+).
+        _prev = os.environ.get("ATNE_USE_SKILLS")
+        os.environ["ATNE_USE_SKILLS"] = "false"
+        try:
+            _MAPA_PROMPT_CACHE[mecr] = build_system_prompt(
+                profile={"caracteristiques": {}},
+                context={"etapa": "ESO", "materia": "ciències naturals"},
+                params={"mecr_sortida": mecr, "dua": "Core",
+                        "complements": {"mapa_conceptual": True}},
+                rag_context="", adapter_only=False,
+            )
+        finally:
+            if _prev is None:
+                os.environ.pop("ATNE_USE_SKILLS", None)
+            else:
+                os.environ["ATNE_USE_SKILLS"] = _prev
+    return _MAPA_PROMPT_CACHE[mecr]
+
+
+@check("MAPA_branca_graduada_MECR", severity="ERROR")
+def _c_mapa_graduacio(case, prompt):
+    """El fallback del mapa conceptual ha de graduar la branca pel MECR (canon v4.1.0):
+    A2 = noms de categoria; B1+ = verbs d'enllaç (proposició Novak). Independent del
+    `case` (build propi A2/B1 memoïtzat)."""
+    a2 = _mapa_prompt_for("A2").lower()
+    b1 = _mapa_prompt_for("B1").lower()
+    problems = []
+    # A2 → categories (no verbs d'enllaç)
+    if "nom de categoria" not in a2 or "causes" not in a2:
+        problems.append("A2 sense format de categoria")
+    if "verb o frase d'enllaç" in a2:
+        problems.append("A2 instrueix verbs (hauria de ser categories)")
+    # B1 → verbs d'enllaç (proposició Novak) + esquelet canònic
+    if "verb o frase d'enllaç" not in b1 or "proposició novak" not in b1:
+        problems.append("B1 sense format de verb d'enllaç (Novak)")
+    if "és provocat per" not in b1:
+        problems.append("B1 sense exemple d'esquelet verbal canònic")
+    # Estructura compartida: central = única arrel en negreta (mai ###)
+    for lvl, p in (("A2", a2), ("B1", b1)):
+        if "única arrel" not in p:
+            problems.append(f"{lvl} sense regla d'arrel única en negreta")
+    if problems:
+        return CheckResult("MAPA_branca_graduada_MECR", False, "; ".join(problems))
+    return CheckResult("MAPA_branca_graduada_MECR", True,
+                       "A2=categories · B1+=verbs Novak · arrel única en negreta")
+
+
 # ─── Checks de contradicció / coherència ──────────────────────────────────
 
 @check("NO_A02_A30_simultaneous", severity="ERROR")
