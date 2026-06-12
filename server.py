@@ -3436,16 +3436,9 @@ def _languagetool_correct(text: str, lang: str = "ca") -> tuple[str, int, list[d
 
 # Taula etapa+curs → MECR aproximat per al target de llegibilitat
 # Usada quan el client no envia target_mecr explícit.
-def _mecr_from_etapa_curs(etapa: str, curs: str = "") -> str:
-    _MAP = {
-        "infantil":    {"P3": "pre-A1", "P4": "pre-A1", "P5": "pre-A1"},
-        "primaria":    {"1r": "A1", "2n": "A1", "3r": "A1", "4t": "A2", "5e": "A2", "6e": "B1"},
-        "ESO":         {"1r": "B1", "2n": "B1", "3r": "B2", "4t": "B2"},
-        "batxillerat": {"1r": "B2", "2n": "C1"},
-        "FP":          {"1r_CFGB": "A2", "2n_CFGB": "A2", "1r_CGM": "B1", "2n_CGM": "B1", "1r_CGS": "B2", "2n_CGS": "B2"},
-    }
-    _FALLBACK = {"infantil": "pre-A1", "primaria": "A1", "ESO": "B1", "batxillerat": "B2", "FP": "B1"}
-    return _MAP.get(etapa, {}).get(curs) or _FALLBACK.get(etapa, "B1")
+# B6 (auditoria 12/06): _mecr_from_etapa_curs() ELIMINAT — codi mort sense callers que
+# duplicava (i contradeia: claus de curs divergents, "primària" amb accent → fallback B1)
+# el resolver canònic adaptation/params_resolver.py. La derivació MECR viu allà (font única).
 
 
 # ═══ Filtre de caràcters exòtics (CJK, ciríl·lic, àrab, etc.) ══════════════
@@ -4476,7 +4469,9 @@ async def adapt_stream(request: Request, payload: dict = Body(...)):
                 try:
                     t.result()
                 except Exception as task_err:
-                    yield f"data: {json.dumps({'type': 'error', 'error': str(task_err)}, ensure_ascii=False)}\n\n"
+                    # B7 (auditoria 12/06): no filtrar el detall intern de l'excepció al
+                    # client. _safe_error sanititza (logueja el cru, retorna missatge segur).
+                    yield f"data: {json.dumps({'type': 'error', 'error': _safe_error(task_err)}, ensure_ascii=False)}\n\n"
 
             # 'done' global quan tots els nivells han acabat
             yield f"data: {json.dumps({'type': 'done', 'total_levels': total}, ensure_ascii=False)}\n\n"
