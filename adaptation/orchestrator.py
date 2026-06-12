@@ -479,8 +479,6 @@ def run_adaptation(text: str, profile: dict, context: dict, params: dict,
                     if _v and _k in _section_aliases:
                         _allowed_patterns.extend(_section_aliases[_k])
                 _allowed_re = _re_filter.compile("|".join(_allowed_patterns), _re_filter.M)
-                # Tots els títols ## que apareixen al adapted
-                _all_titles_re = _re_filter.compile(r"^## [^\n]+", _re_filter.M)
                 _stripped_sections = []
                 _segments = _re_filter.split(r"(?m)(^## [^\n]+)\n", adapted)
                 # _segments: [prefix, title1, body1, title2, body2, ...]

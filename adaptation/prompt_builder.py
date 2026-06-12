@@ -1280,6 +1280,8 @@ ACTIVAT — Format OBLIGATORI (màxim {_pq_max} preguntes en total, regla MALL �
 - [la majoria de les preguntes aquí, cobrint plànol literal + inferencial + crític, gradades al MECR]
 
 Cada pregunta comença amb «- ». Vegeu SKILL generate-preguntes-comprensio per al detall pedagògic.
+Adequació a l'etapa (tipologia cognitiva de les preguntes):
+{adequacio_linia}
 """)
     elif comp.get("preguntes_comprensio"):
         # SKILLs OFF: bloc hardcoded legacy (backup funcional)
@@ -1338,6 +1340,8 @@ FORMAT DE SORTIDA (exacte, és el que veu l'alumnat):
 [3-5 preguntes cobrint els 3 plànols amb el pes per a {mecr_complement}; 1 Think Aloud integrat]
 
 Regles: NO escriguis «Moment», «Nivell LITERAL», ni etiquetes [Literal · V/F]. Cada pregunta comença amb «- ». Integra els formats visuals dins la pregunta («- Omple els buits: El ___ serveix per ___.»).
+Adequació a l'etapa (tipologia cognitiva de les preguntes):
+{adequacio_linia}
 """)
 
     if comp.get("activitats_aprofundiment"):
@@ -1789,7 +1793,6 @@ def build_complements_prompt(profile: dict, context: dict, params: dict) -> str:
         return ""
 
     _lines = [f"{i+1}. ## {s}" for i, s in enumerate(_seccions)]
-    n = len(_seccions)
     parts.append(f"""
 CHECKLIST DE GENERACIÓ — OBLIGATORI
 Genera TOTES les seccions ## següents basant-te en el text adaptat que reps:

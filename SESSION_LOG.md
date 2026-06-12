@@ -2,6 +2,34 @@
 
 ---
 
+## Sessió 2026-06-12 — Auditoria creuada + bugs pedagògics + R0 «Per al docent»
+
+### Fet (branca `fix/bugs-pedagogics-auditoria-20260612`, sense merge encara)
+- **B1 🔴 (viu en producció): 2e rebia text MÉS difícil.** El resolver depenia d'un flag
+  que cap UI establia → AACC+dislèxia donava B2/Enriquiment. Fix: autodetecció `_is_2e`
+  (AACC + constitutiva). Veure `docs/adr/ADR-001-2e-doble-excepcionalitat.md`.
+- B2 (adequació preguntes per etapa), B3 (guard bool resolver), B4 (avís malformats),
+  B6 (codi mort: `_mecr_from_etapa_curs`, `_all_titles_re`, `n`), B7 (`_safe_error` SSE).
+- **R0 «Per al docent» tancat**: ATNE consumeix `corpusFJE/.tooling/per_al_docent.json`
+  (era hardcoded; cicle R0 com la matriu). Submodule bumpejat a cb9918a.
+- CI determinista mínim a `.github/workflows/ci.yml`.
+
+### ⚠️ A FER DESPRÉS DEL MERGE + DEPLOY
+- **Prova real AACC+dislèxia** a producció + mirar la traça: confirmar que el fix B1 viu
+  a prod (no només als tests). La traça NO ha de dir «AACC sense 2e»; el MECR es manté al
+  del curs.
+- **Avís pilot:** si algun docent havia generat adaptacions per a alumnes 2e, les noves
+  sortiran DIFERENTS (millors). Que no el sorprengui.
+
+### 📋 Backlog
+- **30 WARN de `prompt_checks`** (294 PASS, 0 ERROR — no bloquegen): un dia de calma,
+  mirar què avisen (artefacte finestra 3K a GENERE_specific_format + hints GLOSSARI_L1).
+- **21 imports morts a server.py** (cosmètic, pyflakes `imported but unused`).
+- **Ratificació DOP** de la definició 2e (ADR-001) — no bloquejant.
+- Des-triplicació frontend «Per al docent» via `.data.js` (opcional; ara guard de drift).
+
+---
+
 ## Sessió 2026-03-27 (tarda) — Historial de textos anteriors
 
 ### Problema resolt

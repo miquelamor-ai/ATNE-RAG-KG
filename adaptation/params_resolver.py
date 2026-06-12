@@ -97,6 +97,37 @@ def _str_to_bool(v):
     return bool(v)
 
 
+# Característiques CONTEXTUALS (situacionals): NO activen 2e per si soles.
+# Decisió pedagògica 2026-06-12 (Miquel + auditoria): la doble excepcionalitat (2e)
+# és AACC + una altra EXCEPCIONALITAT (condició CONSTITUTIVA: discapacitat o trastorn),
+# NO AACC + un mal moment vital. Coherent amb la taxonomia ATNE constitutiva/contextual.
+#
+# Distinció clau (correcció Fable 12/06):
+#  · `vulnerabilitat` / `vulnerabilitat_emocional` = SITUACIONALS (socioeconòmica; dol,
+#    crisi puntual) → CONTEXTUALS → AACC + aixó NO és 2e (s'aplica el +1; la vulnerabilitat
+#    ja resta pel seu compte). El resolver actual usa la grafia `vulnerabilitat`;
+#    `vulnerabilitat_emocional` s'hi inclou per forward-compat de la taxonomia documentada.
+#  · `trastorn_emocional` = trastorn DIAGNOSTICAT → CONSTITUTIVA → NO és aquí → AACC +
+#    trastorn_emocional SÍ és 2e. (Verificat als smoke tests.)
+# Pendent: validació formal del DOP; mentrestant mana la taxonomia documentada.
+_CONTEXTUALS = {"nouvingut", "vulnerabilitat", "vulnerabilitat_emocional"}
+
+
+def _is_2e(chars: dict, actives: set) -> bool:
+    """Autodetecta doble excepcionalitat (2e): AACC + una altra CONSTITUTIVA activa.
+
+    El flag explícit `doble_excepcionalitat` (si arriba) també es respecta, però el
+    backend NO depèn que cap client el posi (fix bug B1, auditoria 12/06 — cap fitxer
+    de ui/atne/ l'establia → els 2e rebien text MÉS difícil)."""
+    if "altes_capacitats" not in actives:
+        return False
+    ac = chars.get("altes_capacitats", {})
+    if isinstance(ac, dict) and _str_to_bool(ac.get("doble_excepcionalitat")):
+        return True
+    # 2e = AACC + alguna altra condició CONSTITUTIVA activa (no contextual).
+    return bool(actives - {"altes_capacitats"} - _CONTEXTUALS)
+
+
 def resolve_params(caracteristiques: dict, etapa: str = "", curs: str = "",
                    override_mecr: str = None) -> dict:
     """
@@ -150,6 +181,17 @@ def resolve_params(caracteristiques: dict, etapa: str = "", curs: str = "",
 
     # ── 2) Condicions actives ──
     actives = {k for k, v in chars.items() if isinstance(v, dict) and v.get("actiu")}
+
+    # B4 (auditoria 12/06): avisar de característiques amb FORMAT inesperat (no-dict, o
+    # dict sense clau 'actiu') que abans s'ignoraven en silenci absolut. NO avisem de les
+    # legítimament inactives (actiu:false) — el frontend les envia totes per defecte.
+    _malformades = [k for k, v in chars.items()
+                    if not isinstance(v, dict) or "actiu" not in v]
+    if _malformades:
+        trace.append(
+            "AVÍS: característiques amb format inesperat (no-dict o sense 'actiu'), "
+            f"ignorades: {sorted(_malformades)}"
+        )
 
     # Llista de candidats que poden modificar el MECR. Sempre comencem amb base.
     candidats = [mecr_base]
@@ -225,8 +267,9 @@ def resolve_params(caracteristiques: dict, etapa: str = "", curs: str = "",
     trace.append(f"més restrictiu de {candidats} -> {mecr}")
 
     # ── 8) AACC sense 2e: +1 nivell sobre el resultat ──
-    ac = chars.get("altes_capacitats", {})
-    if "altes_capacitats" in actives and not _str_to_bool(ac.get("doble_excepcionalitat")):
+    # 2e autodetectat (AACC + constitutiva) NO rep el +1: manté el repte cognitiu al
+    # nivell del curs i deixa que el DUA aporti la via d'accés (fix B1).
+    if "altes_capacitats" in actives and not _is_2e(chars, actives):
         idx = MECR_ORDER.index(mecr)
         prev = mecr
         mecr = MECR_ORDER[min(len(MECR_ORDER) - 1, idx + 1)]
@@ -299,17 +342,20 @@ def _resolve_dua(chars: dict, mecr_sortida: str) -> str:
     """Calcula el DUA: Acces / Core / Enriquiment."""
     actives = {k for k, v in chars.items() if isinstance(v, dict) and v.get("actiu")}
 
-    di_grau = chars.get("di", {}).get("grau", "")
-    tea_nivell = chars.get("tea", {}).get("nivell_suport", 0)
+    # B3 (auditoria 12/06): guard contra valors no-dict (ex: {"di": True}) que feien
+    # petar el resolver amb AttributeError (500 evitable a /api/derive-params).
+    def _sub(key):
+        v = chars.get(key, {})
+        return v if isinstance(v, dict) else {}
+
+    di_grau = _sub("di").get("grau", "")
+    tea_nivell = _sub("tea").get("nivell_suport", 0)
     try:
         tea_nivell = int(tea_nivell)
     except (TypeError, ValueError):
         tea_nivell = 0
-    tdl_grau = chars.get("tdl", {}).get("grau", "")
-    nv_alfabet = chars.get("nouvingut", {}).get("alfabet_llati", True)
-    ac_doble = _str_to_bool(
-        chars.get("altes_capacitats", {}).get("doble_excepcionalitat", False)
-    )
+    tdl_grau = _sub("tdl").get("grau", "")
+    nv_alfabet = _sub("nouvingut").get("alfabet_llati", True)
 
     if (
         (di_grau == "sever" and "di" in actives)
@@ -319,7 +365,9 @@ def _resolve_dua(chars: dict, mecr_sortida: str) -> str:
     ):
         return "Acces"
 
-    if "altes_capacitats" in actives and not ac_doble:
+    # 2e (AACC + constitutiva) → NO Enriquiment pur: cau a Core/Acces perquè el suport
+    # de la condició constitutiva arribi. Autodetectat, no depèn del flag (fix B1).
+    if "altes_capacitats" in actives and not _is_2e(chars, actives):
         return "Enriquiment"
 
     return "Core"
@@ -408,15 +456,68 @@ if __name__ == "__main__":
         expected_mecr="A1",  # min(A1 base, A2 DI) = A1
     )
 
-    # 2e: AACC + dislèxia -> no s'aplica el +1 d'AACC
+    # 2e: AACC + dislèxia amb flag explícit -> no s'aplica el +1 d'AACC
     all_ok &= _check(
-        "2e (AACC + dislèxia)",
+        "2e (AACC + dislèxia) amb flag explícit",
         resolve_params(
             {"altes_capacitats": {"actiu": True, "doble_excepcionalitat": True},
              "dislexia": {"actiu": True}},
             etapa="ESO", curs="2n ESO",
         ),
         expected_mecr="B1",  # base sense +1 perquè 2e
+    )
+
+    # B1 (auditoria 12/06): 2e AUTODETECTAT sense flag — abans donava B2/Enriquiment (bug
+    # viu: l'alumne 2e rebia text MÉS difícil perquè cap client posava el flag).
+    all_ok &= _check(
+        "2e AUTODETECTAT (AACC + dislèxia SENSE flag) 2n ESO",
+        resolve_params(
+            {"altes_capacitats": {"actiu": True},
+             "dislexia": {"actiu": True, "grau": "moderat"}},
+            etapa="ESO", curs="2n ESO",
+        ),
+        expected_mecr="B1", expected_dua="Core",
+    )
+    # Contraprova anti-regressió: AACC SOLA manté el +1 (no és 2e).
+    all_ok &= _check(
+        "AACC SOLA manté +1 (no 2e) 2n ESO",
+        resolve_params(
+            {"altes_capacitats": {"actiu": True}},
+            etapa="ESO", curs="2n ESO",
+        ),
+        expected_mecr="B2", expected_dua="Enriquiment",
+    )
+    # Contraprova: AACC + nouvingut (CONTEXTUAL) NO és 2e -> manté el +1.
+    all_ok &= _check(
+        "AACC + nouvingut (contextual, NO 2e) manté +1",
+        resolve_params(
+            {"altes_capacitats": {"actiu": True},
+             "nouvingut": {"actiu": True, "alfabet_llati": True}},
+            etapa="ESO", curs="2n ESO",
+        ),
+        expected_mecr="B2",
+    )
+
+    # Distinció taxonòmica (correcció Fable 12/06) — FIXAR PER SEMPRE:
+    # AACC + vulnerabilitat SITUACIONAL -> NO és 2e (s'aplica +1; DUA Enriquiment).
+    all_ok &= _check(
+        "AACC + vulnerabilitat (situacional/contextual) NO és 2e",
+        resolve_params(
+            {"altes_capacitats": {"actiu": True},
+             "vulnerabilitat": {"actiu": True}},
+            etapa="ESO", curs="2n ESO",
+        ),
+        expected_mecr="B1", expected_dua="Enriquiment",  # AACC no-2e -> Enriquiment
+    )
+    # AACC + trastorn_emocional (DIAGNOSTICAT, constitutiva) -> SÍ és 2e (sense +1, no Enriq.).
+    all_ok &= _check(
+        "AACC + trastorn_emocional (diagnosticat) SÍ és 2e",
+        resolve_params(
+            {"altes_capacitats": {"actiu": True},
+             "trastorn_emocional": {"actiu": True}},
+            etapa="ESO", curs="2n ESO",
+        ),
+        expected_mecr="B1", expected_dua="Core",
     )
 
     # Override sagrat
