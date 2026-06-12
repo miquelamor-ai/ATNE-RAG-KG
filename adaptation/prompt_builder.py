@@ -1203,19 +1203,23 @@ Usa NOMÉS llistes amb guions i indentació amb 2 espais.
 
 ```
 - **CONCEPTE CENTRAL**
-  - Branca 1:
+  - **Causes**
     - Element a
     - Element b
-  - Branca 2:
+  - **Conseqüències**
     - Element c
 ```
 
-REGLES CRÍTIQUES:
-- NO usis caràcters de dibuix d'arbre (│ ├ └ ─ ╔ ║). Causen corrupció
-  en alguns models, que substitueixen lletres al mig de paraules
-  ('Causes' → 'Cau—ses').
+REGLES CRÍTIQUES (alineades amb el canon generate-mapa-conceptual):
+- ESTRUCTURA: el concepte central és l'ÚNICA arrel de la llista, en negreta `- **...**`
+  (MAI un títol `###`). Totes les branques pengen del central per sagnia.
+- BRANQUES EN NEGRETA amb NOM DE CATEGORIA RELACIONAL (Causes, Conseqüències, Tipus de,
+  Processos, Parts de...), mai etiquetes genèriques (Informació, Coses, Dades). El
+  renderitzador ATNE les pinta com a nodes-proposició (Novak). Els sub-elements pengen
+  de la branca SENSE negreta.
+- NO usis caràcters de dibuix d'arbre (│ ├ └ ─ ╔ ║) ni encapçalaments `###`: trenquen el
+  render del mapa o corrompen lletres ('Causes' → 'Cau—ses').
 - NOMÉS guions `-` i indentació amb 2 espais per nivell.
-- Negreta opcional al concepte central amb `**...**`.
 - Bastida temporal: retira-la quan l'alumne pugui organitzar les idees sense suport.
 """)
 
