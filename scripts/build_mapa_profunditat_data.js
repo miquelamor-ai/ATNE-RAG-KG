@@ -10,9 +10,9 @@
  * N'extraiem el primer enter seguit de "nivell". Si el descriptor no parla de
  * nivells (pre-A1 = llista plana; C1+ = mapa de contrast en columnes) → null.
  *
- * El consumidor (diagram-editor-ui.js) aplica la política de l'eina docent:
- * A2/B1 limitats, B2+ lliure (null o ≥4 → sense límit). Aquest fitxer NOMÉS
- * exposa els números del canon; la lògica viu al consumidor (com la matriu).
+ * El consumidor (diagram-editor-ui.js) aplica el límit TAL QUAL del canon
+ * (A2=2, B1=3, B2=4); només tracta `null` com a "sense límit" (nivells no
+ * comptables: pre-A1 esquema pla, C1+ contrast). Cap regla pedagògica al codi.
  *
  * Sortida DETERMINISTA (provinença des del _meta del canon, sense data del
  * sistema) perquè el guard de drift sigui estable.
@@ -64,7 +64,7 @@ if (require.main === module) {
       font_version: meta.font_version || null,
       rubrica_version: meta.version || null,
       extret_de: 'levels[*].passos.pas_5_estructura_markdown.descriptor (regex `N nivell`)',
-      nota: 'Numeros del canon. La politica B2+ lliure (>=4 o null) viu al consumidor.',
+      nota: 'Limit tal qual del canon. El consumidor nomes tracta null com a sense limit (pre-A1/C1+).',
     },
     levels: extractDepths(rubrica),
   };

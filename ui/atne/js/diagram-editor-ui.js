@@ -31,10 +31,11 @@
 
   // ── Profunditat per MECR (B4): consumida del canon, NO hardcoded ──
   // window.ATNE_MAPA_PROFUNDITAT.levels = { "A2":2, "B1":3, "B2":4, "C1+":null, ... }
-  // (nivells de sangria del rubrica.json, pas_5). Política de l'EINA DOCENT: els
-  // nivells baixos es limiten (protegeixen la càrrega cognitiva); B2+ queda lliure.
-  // El número (2, 3) ve del canon; el llindar "≥4 → lliure" és el propi valor de
-  // B2 al canon → expressa "B2+ lliure" sense inventar cap xifra.
+  // (nivells de sangria del rubrica.json, pas_5). EL CANON MANA: el límit és el
+  // número del canon tal qual (A2=2, B1=3, B2=4). L'única lògica del consumidor és
+  // tractar `null` com a "sense límit" — i null vol dir que el canon NO declara
+  // nivells comptables (pre-A1 = esquema pla; C1+ = mapa de contrast en columnes).
+  // Cap regla pedagògica al codi: si algun dia es vol B2 lliure, es canvia al canon.
   function normMecr(m) {
     m = (m || '').trim();
     if (/^C[12]/i.test(m)) return 'C1+';
@@ -44,8 +45,8 @@
     var data = window.ATNE_MAPA_PROFUNDITAT;
     if (!data || !data.levels) return Infinity;        // dades canon absents → sense límit
     var n = data.levels[normMecr(state.mecr)];
-    if (n == null || n >= 4) return Infinity;          // C1+/B2+ → lliure
-    return n;                                          // A2=2, B1=3 (del canon)
+    if (n == null) return Infinity;                    // sense nivells comptables al canon
+    return n;                                          // el canon mana: A2=2, B1=3, B2=4
   }
   // Nivell de sangria (indentOf/2) de la línia lineIdx del markdown vigent.
   function levelOf(lineIdx) {

@@ -19,7 +19,7 @@
     "font_version": "4.1.1-canonic",
     "rubrica_version": "1.0.1",
     "extret_de": "levels[*].passos.pas_5_estructura_markdown.descriptor (regex `N nivell`)",
-    "nota": "Numeros del canon. La politica B2+ lliure (>=4 o null) viu al consumidor."
+    "nota": "Limit tal qual del canon. El consumidor nomes tracta null com a sense limit (pre-A1/C1+)."
   },
   "levels": {
     "pre-A1": null,
