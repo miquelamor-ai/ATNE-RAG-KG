@@ -70,6 +70,11 @@ jobs:
   canon-guards:
     name: Guards del canon (prompt + complements + drift)
     runs-on: ubuntu-latest
+    # Replica producció: les SKILLs s'injecten al prompt (com el runtime via
+    # system_config). Sense aquest flag, prompt_checks corre amb skills OFF i els
+    # checks ESQUEMA (la secció només s'injecta a la 2a crida amb skills) fallen.
+    env:
+      ATNE_USE_SKILLS: "true"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -86,7 +91,7 @@ jobs:
       - name: Dependències
         run: pip install --quiet python-dotenv PyYAML
 
-      - name: Guard del prompt (294 checks de contracte)
+      - name: Guard del prompt (321 checks de contracte, skills ON)
         run: python tests/golden/prompt_checks.py
 
       - name: Guard «Per al docent» — snapshot de comportament (canon)
