@@ -47,6 +47,11 @@ jobs:
         run: node tests/test_diagrames_parse.js
         # No necessita el submodule (llegeix ui/atne/js/mermaid-converter.js del repo).
 
+      - name: Guard del layout de diagrames (fork A2 + profunditat A1 + snapshot)
+        run: node tests/test_diagram_layout.js
+        # Bloc B: renderitza amb DOM stub i comprova que cap node profund es descarta,
+        # que les proposicions germanes forquen i que la geometria és estable.
+
       - name: Sintaxi (py_compile del backend)
         run: |
           python -m py_compile server.py adaptation/*.py routes/*.py \
