@@ -35,7 +35,7 @@ jobs:
           python-version: "3.12"
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
 
       - name: Dependències mínimes (sense LLM real)
         run: |
@@ -86,7 +86,7 @@ jobs:
           python-version: "3.12"
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
 
       - name: Dependències
         run: pip install --quiet python-dotenv PyYAML
