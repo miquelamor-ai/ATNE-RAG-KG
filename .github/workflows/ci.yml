@@ -102,3 +102,8 @@ jobs:
 
       - name: Matriu de complements (711 combinacions golden + lleis R1-R4)
         run: node tests/test_complements_matriu.js
+
+      - name: Drift profunditat MECR de l'editor de diagrames (.data.js ↔ canon)
+        run: node tests/test_mapa_profunditat_drift.js
+        # Bloc B4: el derivat diagram-mecr-depth.data.js ha de seguir el canon
+        # rubrica.json de generate-mapa-conceptual (regenera amb build_mapa_profunditat_data.js).
