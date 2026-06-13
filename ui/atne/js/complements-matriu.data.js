@@ -14,7 +14,7 @@
   "version": "1.0",
   "_meta": {
     "source": "M2_instruments-mediacio-pedagogica.md#matriu-de-cobertura-perfil--complement",
-    "generat_at": "2026-06-01",
+    "generat_at": "2026-06-12",
     "build_tag": "build_matriu_cobertura.py@v1.0-2026-06-01",
     "validacio_pedagogica": "NotebookLM MALL FJE 2026-05-27 (Opció D)"
   },
