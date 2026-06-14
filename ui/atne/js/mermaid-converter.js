@@ -346,35 +346,74 @@
     // és compartit pel pre-pass (viewBox) i el draw-pass perquè siguin coherents.
     function crossHalfW(n) { return n.type === 'prop' ? 34 : CM.NW / 2; }
     function crossHalfH(n) { return (n.type === 'prop' ? n.ph : n.nh) / 2; }
-    function crossRoute(sn, tn, lane) {
-      // Canal lliure (decisió Miquel 14/06): la corba surt pel COSTAT del node cap
-      // al passadís entre columnes (sempre buit), baixa/puja fins a un BUS per sota
-      // O sobre de TOTES les columnes que connecta (el costat amb menys recorregut),
-      // i torna al destí. Així NO travessa MAI cap concepte. Corba suau (2 cúbics).
+    // Mitja amplada d'empremta d'un node (per a la cerca de bandes netes).
+    function crossFW(n) { return n.type === 'root' ? CM.RW / 2 : (n.type === 'prop' ? (n.label.length * CM.PFS * 0.6 + 10) / 2 : CM.NW / 2); }
+    var mapTop = Infinity, mapBot = -Infinity;
+    g.nodes.forEach(function (m) {
+      if (m.x === undefined) return;
+      mapTop = Math.min(mapTop, m.y - crossHalfH(m));
+      mapBot = Math.max(mapBot, m.y + crossHalfH(m));
+    });
+    if (mapBot === -Infinity) { mapBot = 0; mapTop = 0; }
+    function crossRoute(sn, tn, lane, labelW) {
+      // Enrutament al BUS NET MÉS PROPER (decisió Miquel 14/06): la corba surt pel
+      // COSTAT del node cap al passadís (sempre buit) i va a la BANDA HORITZONTAL
+      // LLIURE més propera — la de SOBRE o la de SOTA immediata dels conceptes que
+      // connecta, la que quedi més a prop — on l'etiqueta (proposició) seu sense
+      // trepitjar res. Si el mapa és molt dens, cau al bus exterior. Corba suau.
       var sxC = sn.x, syC = sn.y, txC = tn.x, tyC = tn.y;
       var dirS = (txC >= sxC) ? 1 : -1, dirT = (sxC > txC) ? 1 : -1;
       var gutS = sxC + dirS * (crossHalfW(sn) + CM.HG / 2);
       var gutT = txC + dirT * (crossHalfW(tn) + CM.HG / 2);
       var edgeSx = sxC + dirS * crossHalfW(sn), edgeTx = txC + dirT * crossHalfW(tn);
-      var loC = Math.min(sxC, txC), hiC = Math.max(sxC, txC);
-      var maxBottom = -Infinity, minTop = Infinity;
-      g.nodes.forEach(function (m) {
-        if (m.x === undefined || m.x < loC - 1 || m.x > hiC + 1) return;
-        maxBottom = Math.max(maxBottom, m.y + crossHalfH(m));
-        minTop = Math.min(minTop, m.y - crossHalfH(m));
-      });
-      if (maxBottom === -Infinity) { maxBottom = Math.max(syC, tyC); minTop = Math.min(syC, tyC); }
-      var busBelow = maxBottom + 14 + lane * 16;
-      var busAbove = minTop - 14 - lane * 16;
-      var below = (busBelow - Math.max(syC, tyC)) <= (Math.min(syC, tyC) - busAbove);
-      var busY = below ? busBelow : busAbove;
       var gutMid = (gutS + gutT) / 2;
-      var d = 'M ' + edgeSx + ' ' + syC +
-              ' C ' + gutS + ' ' + syC + ' ' + gutS + ' ' + busY + ' ' + gutMid + ' ' + busY +
-              ' C ' + gutT + ' ' + busY + ' ' + gutT + ' ' + tyC + ' ' + edgeTx + ' ' + tyC;
+      var halfStrip = Math.max(Math.abs(gutT - gutS) / 2, (labelW || 0) / 2) + 6;
+      // Una banda a alçada y és lliure si cap node intercepta l'strip [gutMid±halfStrip]
+      // a aquella y (amb marge per a l'alçada de l'etiqueta).
+      function clearBand(y) {
+        var lo = gutMid - halfStrip, hi = gutMid + halfStrip;
+        for (var i = 0; i < g.nodes.length; i++) {
+          var m = g.nodes[i]; if (m.x === undefined) continue;
+          var fw = crossFW(m);
+          if (hi < m.x - fw || lo > m.x + fw) continue;
+          if (y > m.y - crossHalfH(m) - 11 && y < m.y + crossHalfH(m) + 11) return false;
+        }
+        return true;
+      }
+      function pathFor(by) {
+        return 'M ' + edgeSx + ' ' + syC +
+               ' C ' + gutS + ' ' + syC + ' ' + gutS + ' ' + by + ' ' + gutMid + ' ' + by +
+               ' C ' + gutT + ' ' + by + ' ' + gutT + ' ' + tyC + ' ' + edgeTx + ' ' + tyC;
+      }
+      // Verifica que TOTA la corba (no només la banda) queda fora dels conceptes.
+      // S'exclouen origen i destí (la corba hi toca pels extrems, és correcte).
+      function curveClear(by) {
+        var P = [[edgeSx, syC], [gutS, syC], [gutS, by], [gutMid, by], [gutT, by], [gutT, tyC], [edgeTx, tyC]];
+        function cub(a, b, c, e, t) { var u = 1 - t; return [u * u * u * a[0] + 3 * u * u * t * b[0] + 3 * u * t * t * c[0] + t * t * t * e[0], u * u * u * a[1] + 3 * u * u * t * b[1] + 3 * u * t * t * c[1] + t * t * t * e[1]]; }
+        for (var seg = 0; seg < 2; seg++) {
+          var a = P[seg * 3], b = P[seg * 3 + 1], c = P[seg * 3 + 2], e = P[seg * 3 + 3];
+          for (var t = 0; t <= 1.0001; t += 0.04) {
+            var pt = cub(a, b, c, e, t);
+            for (var i = 0; i < g.nodes.length; i++) {
+              var m = g.nodes[i]; if (m.x === undefined || m === sn || m === tn) continue;
+              var fw = crossFW(m), fh = crossHalfH(m);
+              if (pt[0] > m.x - fw - 2 && pt[0] < m.x + fw + 2 && pt[1] > m.y - fh - 2 && pt[1] < m.y + fh + 2) return false;
+            }
+          }
+        }
+        return true;
+      }
+      var base = (syC + tyC) / 2;
+      // Fallback exterior (costat més proper) si no es troba cap banda interior neta.
+      var busY = (base <= (mapTop + mapBot) / 2) ? (mapTop - 22 - lane * 22) : (mapBot + 22 + lane * 22);
+      for (var off = 0; off <= 900; off += 7) {
+        if (clearBand(base + off) && curveClear(base + off)) { busY = base + off; break; }
+        if (off > 0 && clearBand(base - off) && curveClear(base - off)) { busY = base - off; break; }
+      }
+      var d = pathFor(busY);
       return { d: d, lx: gutMid, ly: busY,
                minX: Math.min(edgeSx, gutS, gutT, edgeTx), maxX: Math.max(edgeSx, gutS, gutT, edgeTx),
-               minY: below ? Math.min(syC, tyC) : busY, maxY: below ? busY : Math.max(syC, tyC) };
+               minY: Math.min(syC, tyC, busY), maxY: Math.max(syC, tyC, busY) };
     }
     // crossRender: calculat UN COP aquí (corba + col·locació d'etiqueta) i reusat
     // al draw-pass, perquè el viewBox pugui encabir la posició FINAL de l'etiqueta.
@@ -397,7 +436,7 @@
       crossLinks.forEach(function (cl, ci) {
         var sn = byLx[cl.from], tn = byLx[cl.to];
         if (!sn || !tn || sn.x === undefined || tn.x === undefined) return;
-        var r = crossRoute(sn, tn, ci);
+        var r = crossRoute(sn, tn, ci, cl.link ? cl.link.length * 6.2 + 12 : 0);
         x0 = Math.min(x0, r.minX - CM.M); x1 = Math.max(x1, r.maxX + CM.M);
         y0 = Math.min(y0, r.minY - 10); y1b = Math.max(y1b, r.maxY + 10);
         var lbl = null;
