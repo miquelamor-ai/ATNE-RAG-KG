@@ -57,6 +57,35 @@
     "B1": 12,
     "B2": 15,
     "C1+": 15
+  },
+  "esquema": {
+    "_meta": {
+      "source": "skills/mediacio/generate-esquema-visual/rubrica.json",
+      "font_canonic": "skills/mediacio/generate-esquema-visual/M3_instrument-generar-esquema-visual.md",
+      "font_version": "1.0.0-canonic",
+      "rubrica_version": "1.0.1",
+      "extret_de": {
+        "levels": "pas_2_profunditat_de_l.descriptor (regex `N nivell` / `N-M nivells`)",
+        "densitat_max": "pas_2_total_nodes.countable.max"
+      },
+      "nota": "Esquema: nomes profunditat + densitat (no branques/subelements). null = sense limit."
+    },
+    "levels": {
+      "pre-A1": 1,
+      "A1": 2,
+      "A2": 2,
+      "B1": 3,
+      "B2": 3,
+      "C1+": 4
+    },
+    "densitat_max": {
+      "pre-A1": 3,
+      "A1": 4,
+      "A2": 6,
+      "B1": 8,
+      "B2": 12,
+      "C1+": 15
+    }
   }
 };
   if (typeof module !== 'undefined' && module.exports) {

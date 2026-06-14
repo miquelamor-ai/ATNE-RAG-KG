@@ -18,9 +18,11 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const SRC = path.join(ROOT, 'corpus', 'external', 'corpusFJE', 'skills',
   'mediacio', 'generate-mapa-conceptual', 'rubrica.json');
+const SRC_ESQUEMA = path.join(ROOT, 'corpus', 'external', 'corpusFJE', 'skills',
+  'mediacio', 'generate-esquema-visual', 'rubrica.json');
 const DATA = path.join(ROOT, 'ui', 'atne', 'js', 'diagram-mecr-depth.data.js');
 
-const { extractAll } = require('../scripts/build_mapa_profunditat_data.js');
+const { extractAll, extractEsquema } = require('../scripts/build_mapa_profunditat_data.js');
 
 let fails = 0;
 function check(name, cond, detail) {
@@ -50,6 +52,34 @@ check('gradació profunditat A2 < B1', fresh.levels.A2 < fresh.levels.B1,
 check('gradació branques A2 ≤ B1 ≤ B2',
   fresh.branques_max.A2 <= fresh.branques_max.B1 && fresh.branques_max.B1 <= fresh.branques_max.B2,
   JSON.stringify(fresh.branques_max));
+
+// ── ESQUEMA VISUAL: mateix guard sobre la clau `esquema` del derivat ──
+// (canon propi, estructura de passos diferent: profunditat + densitat). Si el
+// submodule es bumpeja i canvia un límit sense regenerar, aquest test ho atrapa.
+if (!fs.existsSync(SRC_ESQUEMA)) {
+  console.error('ERROR: canon esquema absent (' + path.relative(ROOT, SRC_ESQUEMA) + ') — cal el submodule corpusFJE.');
+  process.exit(2);
+}
+const rubricaE = JSON.parse(fs.readFileSync(SRC_ESQUEMA, 'utf8'));
+const freshE = extractEsquema(rubricaE);
+check('derivat conté la clau «esquema»', !!committed.esquema,
+  'committed.esquema = ' + JSON.stringify(committed.esquema));
+if (committed.esquema) {
+  ['levels', 'densitat_max'].forEach((mapName) => {
+    const a = JSON.stringify(committed.esquema[mapName]);
+    const b = JSON.stringify(freshE[mapName]);
+    check('cap drift esquema «' + mapName + '» .data.js ↔ canon', a === b,
+      '\n      committed: ' + a + '\n      canon:     ' + b +
+      '\n      → regenera amb: node scripts/build_mapa_profunditat_data.js');
+  });
+}
+// Sanity pedagògic esquema: profunditat i densitat creixen amb el MECR.
+check('esquema gradació profunditat A2 ≤ B1 ≤ C1+',
+  freshE.levels.A2 <= freshE.levels.B1 && freshE.levels.B1 <= freshE.levels['C1+'],
+  JSON.stringify(freshE.levels));
+check('esquema gradació densitat A2 < B1 < B2',
+  freshE.densitat_max.A2 < freshE.densitat_max.B1 && freshE.densitat_max.B1 < freshE.densitat_max.B2,
+  JSON.stringify(freshE.densitat_max));
 
 console.log(fails === 0 ? '\nTOTS OK' : `\n${fails} FALLADES`);
 process.exit(fails === 0 ? 0 : 1);

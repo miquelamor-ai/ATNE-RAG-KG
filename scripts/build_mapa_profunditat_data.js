@@ -33,6 +33,11 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const SRC = path.join(ROOT, 'corpus', 'external', 'corpusFJE', 'skills',
   'mediacio', 'generate-mapa-conceptual', 'rubrica.json');
+// Esquema visual: canon PROPI amb estructura de passos DIFERENT del mapa
+// conceptual (profunditat a pas_2_profunditat_de_l, densitat a pas_2_total_nodes;
+// no té relacio_de_branca/detalls_de_les). Derivat sota la clau `esquema`.
+const SRC_ESQUEMA = path.join(ROOT, 'corpus', 'external', 'corpusFJE', 'skills',
+  'mediacio', 'generate-esquema-visual', 'rubrica.json');
 const OUT = path.join(ROOT, 'ui', 'atne', 'js', 'diagram-mecr-depth.data.js');
 
 // ── Helpers ──
@@ -112,7 +117,44 @@ function extractAll(rubrica) {
   };
 }
 
-module.exports = { extractDepths, extractBranques, extractSubelements, extractDensitat, extractAll };
+// ── Extractors PURS del canon ESQUEMA VISUAL (estructura de passos diferent) ──
+// L'esquema NO té relacio_de_branca/detalls_de_les: l'amplada queda implícita en
+// el total de nodes. Dos senyals graduats per MECR:
+//   · levels       (profunditat): pas_2_profunditat_de_l, descriptor en prosa
+//                  ("1 nivell", "2-3 nivells"…) → màxim del rang.
+//   · densitat_max (nodes totals): pas_2_total_nodes.countable.max.
+
+// Profunditat de l'arbre (pas_2_profunditat_de_l, prosa "N nivell(s)" / "N-M nivells").
+function extractEsquemaDepths(rubrica) {
+  return mapLevels(rubrica, (passos) => {
+    const pas = findPas(passos, 'profunditat_de_l');
+    if (!pas || typeof pas.descriptor !== 'string') return null;
+    const range = pas.descriptor.match(/(\d+)\s*[-–]\s*(\d+)\s*nivell/i);
+    if (range) return parseInt(range[2], 10);           // rang "N-M" → màxim
+    const single = pas.descriptor.match(/(\d+)\s*nivell/i);
+    if (single) return parseInt(single[1], 10);
+    return null;
+  });
+}
+
+// Densitat — nombre total de nodes (pas_2_total_nodes.countable.max).
+function extractEsquemaDensitat(rubrica) {
+  return mapLevels(rubrica, (passos) => {
+    const pas = findPas(passos, 'total_nodes');
+    if (pas && pas.countable && typeof pas.countable.max === 'number') return pas.countable.max;
+    return null;
+  });
+}
+
+function extractEsquema(rubrica) {
+  return {
+    levels: extractEsquemaDepths(rubrica),
+    densitat_max: extractEsquemaDensitat(rubrica),
+  };
+}
+
+module.exports = { extractDepths, extractBranques, extractSubelements, extractDensitat, extractAll,
+  extractEsquemaDepths, extractEsquemaDensitat, extractEsquema };
 
 // Quan s'executa directament: regenera el fitxer derivat.
 if (require.main === module) {
@@ -133,6 +175,29 @@ if (require.main === module) {
       nota: 'Limits tal qual del canon. El consumidor nomes tracta null com a sense limit.',
     },
   }, extractAll(rubrica));
+
+  // ── Esquema visual: derivat del seu canon propi, sota la clau `esquema` ──
+  // (mapa_mental NO té rubrica.json → cap clau; el consumidor el tracta sense
+  //  límit fins que mineriaRAG el canonitzi. Veure docs/handoff_mineriaRAG_*.)
+  if (fs.existsSync(SRC_ESQUEMA)) {
+    const rubE = JSON.parse(fs.readFileSync(SRC_ESQUEMA, 'utf8'));
+    const metaE = rubE._meta || {};
+    out.esquema = Object.assign({
+      _meta: {
+        source: 'skills/mediacio/generate-esquema-visual/rubrica.json',
+        font_canonic: metaE.font_canonic || null,
+        font_version: metaE.font_version || null,
+        rubrica_version: metaE.version || null,
+        extret_de: {
+          levels: 'pas_2_profunditat_de_l.descriptor (regex `N nivell` / `N-M nivells`)',
+          densitat_max: 'pas_2_total_nodes.countable.max',
+        },
+        nota: 'Esquema: nomes profunditat + densitat (no branques/subelements). null = sense limit.',
+      },
+    }, extractEsquema(rubE));
+  } else {
+    console.warn('  ⚠ canon esquema absent (' + path.relative(ROOT, SRC_ESQUEMA) + ') — clau `esquema` omesa.');
+  }
 
   const banner =
 `/**
@@ -164,8 +229,14 @@ if (require.main === module) {
 
   fs.writeFileSync(OUT, banner + body + footer + '\n', 'utf8');
   console.log('✓ generat', path.relative(ROOT, OUT));
+  console.log('  [mapa conceptual]');
   console.log('  levels:        ', JSON.stringify(out.levels));
   console.log('  branques_max:  ', JSON.stringify(out.branques_max));
   console.log('  subelements_max:', JSON.stringify(out.subelements_max));
   console.log('  densitat_max:  ', JSON.stringify(out.densitat_max));
+  if (out.esquema) {
+    console.log('  [esquema visual]');
+    console.log('  levels:        ', JSON.stringify(out.esquema.levels));
+    console.log('  densitat_max:  ', JSON.stringify(out.esquema.densitat_max));
+  }
 }
