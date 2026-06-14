@@ -224,83 +224,55 @@ const ambCross = [
 })();
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 5) + 6) Traçat d'enllaços creuats: la línia NO entra DINS de cap caixa de
-//    concepte (router ortogonal per passadís + bus). Requisit explícit de Miquel
-//    (14/06): "les línies mai per sobre o sota dels conceptes".
+// 5) + 6) Enllaços creuats estil CmapTools (decisió 14/06): corba SUAU DIRECTA
+//    entre els dos conceptes (M..Q..), ancorada als seus caires, amb la paraula
+//    d'enllaç en una CAIXA OPACA al mig. (S'accepta solapament ocasional, que la
+//    caixa opaca tapa — per això NO es comprova el no-creuament aquí.)
 // ─────────────────────────────────────────────────────────────────────────────
-function nodeRects(cont) {
-  return nodeGroups(cont).map(function (g) {
-    var r = descendants(g).find(function (e) { return e.tagName === 'rect'; });
-    return r ? { x: +r.attrs.x, y: +r.attrs.y, w: +r.attrs.width, h: +r.attrs.height } : null;
-  }).filter(Boolean);
-}
-// Mostreja la corba de l'enllaç creuat (2 trams cúbics: M + C + C) en molts punts.
-function cubicAt(p0, p1, p2, p3, t) {
-  var u = 1 - t;
-  return {
-    x: u * u * u * p0.x + 3 * u * u * t * p1.x + 3 * u * t * t * p2.x + t * t * t * p3.x,
-    y: u * u * u * p0.y + 3 * u * u * t * p1.y + 3 * u * t * t * p2.y + t * t * t * p3.y,
-  };
-}
-function crossSamples(cont) {
-  var p = descendants(cont).find(function (e) {
+function crossPath(cont) {
+  return descendants(cont).find(function (e) {
     return e.tagName === 'path' && /5 4/.test(e.attrs['stroke-dasharray'] || '');
   });
-  if (!p) return [];
-  var nums = (p.attrs.d || '').match(/-?[\d.]+/g) || [];
-  var pts = [];
-  for (var i = 0; i + 1 < nums.length; i += 2) pts.push({ x: +nums[i], y: +nums[i + 1] });
-  // pts = [P0, c1,c2,P1, c3,c4,P2]  → dos cúbics: (P0,c1,c2,P1) i (P1,c3,c4,P2)
-  var s = [];
-  function sample(a, b, c, d) { for (var t = 0; t <= 1.0001; t += 0.04) s.push(cubicAt(a, b, c, d, t)); }
-  if (pts.length >= 4) sample(pts[0], pts[1], pts[2], pts[3]);
-  if (pts.length >= 7) sample(pts[3], pts[4], pts[5], pts[6]);
-  return s;
 }
-function pointInRect(p, r, inset) {
-  return p.x > r.x + inset && p.x < r.x + r.w - inset && p.y > r.y + inset && p.y < r.y + r.h - inset;
+function pathPoints(p) {
+  var nums = ((p && p.attrs.d) || '').match(/-?[\d.]+/g) || [];
+  var pts = []; for (var i = 0; i + 1 < nums.length; i += 2) pts.push({ x: +nums[i], y: +nums[i + 1] });
+  return pts;   // quadràtica M P0 Q ctrl P2 → [P0, ctrl, P2]
 }
-function crossHitsNode(cont) {
-  var rects = nodeRects(cont), s = crossSamples(cont);
-  for (var i = 0; i < s.length; i++)
-    for (var j = 0; j < rects.length; j++)
-      if (pointInRect(s[i], rects[j], 2)) return true;
-  return false;
-}
-// La caixa de l'etiqueta de la relació (rect dins el grup data-cross-idx).
-function labelRect(cont) {
+function labelBox(cont) {
   var cg = crossGroups(cont)[0]; if (!cg) return null;
   var r = descendants(cg).find(function (e) { return e.tagName === 'rect'; });
-  return r ? { x: +r.attrs.x, y: +r.attrs.y, w: +r.attrs.width, h: +r.attrs.height } : null;
+  return r ? { x: +r.attrs.x, y: +r.attrs.y, w: +r.attrs.width, h: +r.attrs.height, fill: r.attrs.fill } : null;
 }
-function rectsOverlap(a, b, inset) {
-  return a.x < b.x + b.w - inset && a.x + a.w > b.x + inset &&
-         a.y < b.y + b.h - inset && a.y + a.h > b.y + inset;
+function nodeCenters(cont) {
+  var m = {}; nodeGroups(cont).forEach(function (g) { m[g.attrs['data-lbl']] = center(g); }); return m;
 }
-function labelHitsNode(cont) {
-  var lr = labelRect(cont); if (!lr) return false;
-  return nodeRects(cont).some(function (n) { return rectsOverlap(lr, n, 2); });
-}
-// (5) Mateixa fila, amb germans apilats a sota dins l'abast. Etiqueta llarga
-//     (com "cau des dels") per estressar el solapament de l'etiqueta.
+// (5) Enllaç horitzontal entre conceptes de columnes diferents.
 (function () {
   var cont = render([
-    '- **R**', '  - **a**', '    - X1', '    - X2', '  - **b**', '    - Y1', '    - Y2',
-    '', '- Enllaços creuats:', '  - X1 -> Y1 : cau des dels núvols',
+    '- **R**', '  - **a**', '    - X1', '  - **b**', '    - Y1',
+    '', '- Enllaços creuats:', '  - X1 -> Y1 : cau des dels',
   ].join('\n'));
-  check('enllaç creuat (mateixa fila): línia NI etiqueta trepitgen cap concepte',
-    !crossHitsNode(cont) && !labelHitsNode(cont),
-    'línia=' + crossHitsNode(cont) + ' etiqueta=' + labelHitsNode(cont));
+  var p = crossPath(cont), pts = pathPoints(p), lb = labelBox(cont), c = nodeCenters(cont);
+  var oneCurve = !!p && pts.length === 3;                       // M P0 Q ctrl P2
+  var opaque = !!(lb && lb.fill && lb.fill !== 'none' && lb.fill !== 'transparent');
+  var loX = Math.min(c.X1.cx, c.Y1.cx), hiX = Math.max(c.X1.cx, c.Y1.cx);
+  var labelMidX = lb ? lb.x + lb.w / 2 : NaN;
+  var between = labelMidX >= loX - 30 && labelMidX <= hiX + 30;
+  check('enllaç creuat horitzontal: 1 corba + etiqueta opaca entre els conceptes',
+    oneCurve && opaque && between,
+    'corba=' + oneCurve + ' opaca=' + (lb && lb.fill) + ' entre=' + between);
 })();
-// (6) Files diferents (columnes de profunditat desigual) — el cas que ho trencava.
+// (6) Enllaç entre dos conceptes apilats a la MATEIXA columna (ancoratge vertical).
 (function () {
   var cont = render([
-    '- **R**', '  - **a**', '    - X1', '    - X2', '    - X3', '  - **b**', '    - Y1',
-    '', '- Enllaços creuats:', '  - X3 -> Y1 : prové de',
+    '- **R**', '  - **a**', '    - X1', '    - X2',
+    '', '- Enllaços creuats:', '  - X1 -> X2 : es transforma en',
   ].join('\n'));
-  check('enllaç creuat (files diferents): línia NI etiqueta trepitgen cap concepte',
-    !crossHitsNode(cont) && !labelHitsNode(cont),
-    'línia=' + crossHitsNode(cont) + ' etiqueta=' + labelHitsNode(cont));
+  var p = crossPath(cont), pts = pathPoints(p), lb = labelBox(cont);
+  check('enllaç creuat vertical (mateixa columna): es dibuixa correctament',
+    !!p && pts.length === 3 && !!lb,
+    'path=' + !!p + ' pts=' + pts.length + ' label=' + !!lb);
 })();
 
 console.log(fails === 0 ? '\nTOTS OK' : `\n${fails} FALLADES`);

@@ -347,38 +347,27 @@
     function crossHalfW(n) { return n.type === 'prop' ? 34 : CM.NW / 2; }
     function crossHalfH(n) { return (n.type === 'prop' ? n.ph : n.nh) / 2; }
     function crossRoute(sn, tn, lane) {
-      var sxC = sn.x, syC = sn.y, txC = tn.x, tyC = tn.y;
-      var dirS = (txC >= sxC) ? 1 : -1, dirT = (sxC > txC) ? 1 : -1;
-      var gutS = sxC + dirS * (crossHalfW(sn) + CM.HG / 2);   // passadís costat origen
-      var gutT = txC + dirT * (crossHalfW(tn) + CM.HG / 2);   // passadís costat destí
-      // Columnes adjacents → gutS==gutT (passadís compartit, bus de longitud 0): correcte.
-      // Mateixa columna → dirS/dirT donen costats oposats i el bus passa per sota.
-      var edgeSx = sxC + dirS * crossHalfW(sn), edgeTx = txC + dirT * crossHalfW(tn);
-      // El bus (i l'ETIQUETA, que és ampla) ha d'anar per sota O per sobre de TOTES
-      // les columnes que el tram connecta [sxC..txC] — mai al nivell d'una fila, que
-      // hi faria trepitjar els germans apilats. Triem el costat amb menys recorregut.
-      var loC = Math.min(sxC, txC), hiC = Math.max(sxC, txC);
-      var maxBottom = -Infinity, minTop = Infinity;
-      g.nodes.forEach(function (m) {
-        if (m.x === undefined || m.x < loC - 1 || m.x > hiC + 1) return;
-        maxBottom = Math.max(maxBottom, m.y + crossHalfH(m));
-        minTop = Math.min(minTop, m.y - crossHalfH(m));
-      });
-      if (maxBottom === -Infinity) { maxBottom = Math.max(syC, tyC); minTop = Math.min(syC, tyC); }
-      var busBelow = maxBottom + 16 + lane * 18;
-      var busAbove = minTop - 16 - lane * 18;
-      var below = (busBelow - Math.max(syC, tyC)) <= (Math.min(syC, tyC) - busAbove);
-      var busY = below ? busBelow : busAbove;
-      var gutMid = (gutS + gutT) / 2;
-      // Corba SUAU (estil CmapTools) que segueix el canal lliure: surt pel costat,
-      // baixa/puja pel passadís fins al bus i torna, en comptes d'angles rectes.
-      // Dos trams cúbics units al punt baix/alt (on va l'etiqueta opaca).
-      var d = 'M ' + edgeSx + ' ' + syC +
-              ' C ' + gutS + ' ' + syC + ' ' + gutS + ' ' + busY + ' ' + gutMid + ' ' + busY +
-              ' C ' + gutT + ' ' + busY + ' ' + gutT + ' ' + tyC + ' ' + edgeTx + ' ' + tyC;
-      return { d: d, lx: gutMid, ly: busY, busY: busY, below: below,
-               minX: Math.min(edgeSx, gutS, gutT, edgeTx),
-               maxX: Math.max(edgeSx, gutS, gutT, edgeTx) };
+      // Estil CmapTools (decisió Miquel 14/06): corba SUAU DIRECTA entre els dos
+      // conceptes, ancorada al caire que es miren, amb una lleugera panxa. La
+      // paraula d'enllaç va en una CAIXA OPACA al mig (tapa el que hi hagi a sota).
+      var dx = tn.x - sn.x, dy = tn.y - sn.y;
+      var horiz = Math.abs(dx) >= Math.abs(dy);
+      var sSign = horiz ? (dx >= 0 ? 1 : -1) : (dy >= 0 ? 1 : -1);
+      var p0 = horiz ? { x: sn.x + sSign * crossHalfW(sn), y: sn.y }
+                     : { x: sn.x, y: sn.y + sSign * crossHalfH(sn) };
+      var p2 = horiz ? { x: tn.x - sSign * crossHalfW(tn), y: tn.y }
+                     : { x: tn.x, y: tn.y - sSign * crossHalfH(tn) };
+      var mx = (p0.x + p2.x) / 2, my = (p0.y + p2.y) / 2;
+      var bow = 16 + lane * 13;                       // panxa creixent per carril
+      var cx = horiz ? mx : mx + bow;                 // horitzontal → panxa avall
+      var cy = horiz ? my + bow : my;                 // vertical → panxa a la dreta
+      var d = 'M ' + p0.x + ' ' + p0.y + ' Q ' + cx + ' ' + cy + ' ' + p2.x + ' ' + p2.y;
+      var lx = 0.25 * p0.x + 0.5 * cx + 0.25 * p2.x;  // punt mig de la quadràtica
+      var ly = 0.25 * p0.y + 0.5 * cy + 0.25 * p2.y;
+      var xs = [p0.x, p2.x, cx, lx], ys = [p0.y, p2.y, cy, ly];
+      return { d: d, lx: lx, ly: ly,
+               minX: Math.min.apply(null, xs), maxX: Math.max.apply(null, xs),
+               minY: Math.min.apply(null, ys), maxY: Math.max.apply(null, ys) };
     }
     if (crossLinks.length) {
       var byLx = {};
@@ -388,10 +377,10 @@
         if (!sn || !tn || sn.x === undefined || tn.x === undefined) return;
         var r = crossRoute(sn, tn, ci);
         var lblHalf = (cl.link ? cl.link.length * 6.2 + 12 : 0) / 2;
-        if (r.below) y1b = Math.max(y1b, r.busY + 16);   // bus avall → eixampla per baix
-        else y0 = Math.min(y0, r.busY - 16);             // bus amunt → eixampla per dalt
         x0 = Math.min(x0, r.minX - CM.M, r.lx - lblHalf - 4);
         x1 = Math.max(x1, r.maxX + CM.M, r.lx + lblHalf + 4);
+        y0 = Math.min(y0, r.minY - 12);
+        y1b = Math.max(y1b, r.maxY + 14);
       });
     }
 
