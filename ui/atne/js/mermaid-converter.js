@@ -365,14 +365,18 @@
         minTop = Math.min(minTop, m.y - crossHalfH(m));
       });
       if (maxBottom === -Infinity) { maxBottom = Math.max(syC, tyC); minTop = Math.min(syC, tyC); }
-      var busBelow = maxBottom + 14 + lane * 16;
-      var busAbove = minTop - 14 - lane * 16;
+      var busBelow = maxBottom + 16 + lane * 18;
+      var busAbove = minTop - 16 - lane * 18;
       var below = (busBelow - Math.max(syC, tyC)) <= (Math.min(syC, tyC) - busAbove);
       var busY = below ? busBelow : busAbove;
-      var d = 'M ' + edgeSx + ' ' + syC + ' L ' + gutS + ' ' + syC +
-              ' L ' + gutS + ' ' + busY + ' L ' + gutT + ' ' + busY +
-              ' L ' + gutT + ' ' + tyC + ' L ' + edgeTx + ' ' + tyC;
-      return { d: d, lx: (gutS + gutT) / 2, ly: busY, busY: busY, below: below,
+      var gutMid = (gutS + gutT) / 2;
+      // Corba SUAU (estil CmapTools) que segueix el canal lliure: surt pel costat,
+      // baixa/puja pel passadís fins al bus i torna, en comptes d'angles rectes.
+      // Dos trams cúbics units al punt baix/alt (on va l'etiqueta opaca).
+      var d = 'M ' + edgeSx + ' ' + syC +
+              ' C ' + gutS + ' ' + syC + ' ' + gutS + ' ' + busY + ' ' + gutMid + ' ' + busY +
+              ' C ' + gutT + ' ' + busY + ' ' + gutT + ' ' + tyC + ' ' + edgeTx + ' ' + tyC;
+      return { d: d, lx: gutMid, ly: busY, busY: busY, below: below,
                minX: Math.min(edgeSx, gutS, gutT, edgeTx),
                maxX: Math.max(edgeSx, gutS, gutT, edgeTx) };
     }

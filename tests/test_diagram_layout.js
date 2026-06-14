@@ -234,7 +234,15 @@ function nodeRects(cont) {
     return r ? { x: +r.attrs.x, y: +r.attrs.y, w: +r.attrs.width, h: +r.attrs.height } : null;
   }).filter(Boolean);
 }
-function crossPoints(cont) {
+// Mostreja la corba de l'enllaç creuat (2 trams cúbics: M + C + C) en molts punts.
+function cubicAt(p0, p1, p2, p3, t) {
+  var u = 1 - t;
+  return {
+    x: u * u * u * p0.x + 3 * u * u * t * p1.x + 3 * u * t * t * p2.x + t * t * t * p3.x,
+    y: u * u * u * p0.y + 3 * u * u * t * p1.y + 3 * u * t * t * p2.y + t * t * t * p3.y,
+  };
+}
+function crossSamples(cont) {
   var p = descendants(cont).find(function (e) {
     return e.tagName === 'path' && /5 4/.test(e.attrs['stroke-dasharray'] || '');
   });
@@ -242,28 +250,21 @@ function crossPoints(cont) {
   var nums = (p.attrs.d || '').match(/-?[\d.]+/g) || [];
   var pts = [];
   for (var i = 0; i + 1 < nums.length; i += 2) pts.push({ x: +nums[i], y: +nums[i + 1] });
-  return pts;
+  // pts = [P0, c1,c2,P1, c3,c4,P2]  → dos cúbics: (P0,c1,c2,P1) i (P1,c3,c4,P2)
+  var s = [];
+  function sample(a, b, c, d) { for (var t = 0; t <= 1.0001; t += 0.04) s.push(cubicAt(a, b, c, d, t)); }
+  if (pts.length >= 4) sample(pts[0], pts[1], pts[2], pts[3]);
+  if (pts.length >= 7) sample(pts[3], pts[4], pts[5], pts[6]);
+  return s;
 }
-// Intersecció segment ortogonal ↔ rectangle (amb un inset per permetre que els
-// extrems toquin el caire del node origen/destí sense comptar com a travessia).
-function segHitsRect(p1, p2, r, inset) {
-  var rx0 = r.x + inset, ry0 = r.y + inset, rx1 = r.x + r.w - inset, ry1 = r.y + r.h - inset;
-  if (rx1 <= rx0 || ry1 <= ry0) return false;
-  if (Math.abs(p1.y - p2.y) < 0.01) {                 // horitzontal
-    if (p1.y <= ry0 || p1.y >= ry1) return false;
-    return Math.min(p1.x, p2.x) < rx1 && Math.max(p1.x, p2.x) > rx0;
-  }
-  if (Math.abs(p1.x - p2.x) < 0.01) {                 // vertical
-    if (p1.x <= rx0 || p1.x >= rx1) return false;
-    return Math.min(p1.y, p2.y) < ry1 && Math.max(p1.y, p2.y) > ry0;
-  }
-  return false;
+function pointInRect(p, r, inset) {
+  return p.x > r.x + inset && p.x < r.x + r.w - inset && p.y > r.y + inset && p.y < r.y + r.h - inset;
 }
 function crossHitsNode(cont) {
-  var rects = nodeRects(cont), pts = crossPoints(cont);
-  for (var i = 0; i + 1 < pts.length; i++)
+  var rects = nodeRects(cont), s = crossSamples(cont);
+  for (var i = 0; i < s.length; i++)
     for (var j = 0; j < rects.length; j++)
-      if (segHitsRect(pts[i], pts[i + 1], rects[j], 2)) return true;
+      if (pointInRect(s[i], rects[j], 2)) return true;
   return false;
 }
 // La caixa de l'etiqueta de la relació (rect dins el grup data-cross-idx).
