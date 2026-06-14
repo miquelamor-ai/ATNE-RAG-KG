@@ -1,11 +1,11 @@
 /**
- * tests/test_mapa_profunditat_drift.js — guard de drift del derivat de profunditat
- * per MECR (bloc B4 de l'editor de diagrames).
+ * tests/test_mapa_profunditat_drift.js — guard de drift del derivat de modulació
+ * per MECR de l'editor de diagrames (bloc B4): profunditat + amplada + densitat.
  *
  * Verifica que ui/atne/js/diagram-mecr-depth.data.js segueix sent el derivat FIDEL
  * del canon rubrica.json (generate-mapa-conceptual). Si algú bumpeja el submodule
- * corpusFJE i canvia la profunditat per nivell SENSE regenerar el .data.js, aquest
- * test falla amb DRIFT i recorda el flux de regeneració.
+ * corpusFJE i canvia un límit SENSE regenerar el .data.js, aquest test falla amb
+ * DRIFT i recorda el flux de regeneració.
  *
  * Necessita el submodule corpusFJE (canon) → corre al job `canon-guards` del CI.
  * Cap dependència; corre a node net.
@@ -20,7 +20,7 @@ const SRC = path.join(ROOT, 'corpus', 'external', 'corpusFJE', 'skills',
   'mediacio', 'generate-mapa-conceptual', 'rubrica.json');
 const DATA = path.join(ROOT, 'ui', 'atne', 'js', 'diagram-mecr-depth.data.js');
 
-const { extractDepths } = require('../scripts/build_mapa_profunditat_data.js');
+const { extractAll } = require('../scripts/build_mapa_profunditat_data.js');
 
 let fails = 0;
 function check(name, cond, detail) {
@@ -34,20 +34,22 @@ if (!fs.existsSync(SRC)) {
 }
 const rubrica = JSON.parse(fs.readFileSync(SRC, 'utf8'));
 const committed = require(DATA);   // el .data.js fa module.exports = ATNE_MAPA_PROFUNDITAT
-const fresh = extractDepths(rubrica);
+const fresh = extractAll(rubrica);
 
-check('el .data.js exposa levels', committed && committed.levels && typeof committed.levels === 'object',
-  JSON.stringify(committed && committed.levels));
+['levels', 'branques_max', 'subelements_max', 'densitat_max'].forEach((mapName) => {
+  const a = JSON.stringify(committed[mapName]);
+  const b = JSON.stringify(fresh[mapName]);
+  check('cap drift «' + mapName + '» .data.js ↔ canon', a === b,
+    '\n      committed: ' + a + '\n      canon:     ' + b +
+    '\n      → regenera amb: node scripts/build_mapa_profunditat_data.js');
+});
 
-const a = JSON.stringify(committed.levels);
-const b = JSON.stringify(fresh);
-check('cap drift profunditat .data.js ↔ canon rubrica.json', a === b,
-  '\n      committed: ' + a + '\n      canon:     ' + b +
-  '\n      → regenera amb: node scripts/build_mapa_profunditat_data.js');
-
-// Sanity pedagògic: el canon ha de graduar A2 < B1 (la profunditat creix amb el MECR).
-check('gradació A2 < B1 al canon', fresh['A2'] != null && fresh['B1'] != null && fresh['A2'] < fresh['B1'],
-  'A2=' + fresh['A2'] + ' B1=' + fresh['B1']);
+// Sanity pedagògic: la gradació creix amb el MECR (profunditat i amplada).
+check('gradació profunditat A2 < B1', fresh.levels.A2 < fresh.levels.B1,
+  'A2=' + fresh.levels.A2 + ' B1=' + fresh.levels.B1);
+check('gradació branques A2 ≤ B1 ≤ B2',
+  fresh.branques_max.A2 <= fresh.branques_max.B1 && fresh.branques_max.B1 <= fresh.branques_max.B2,
+  JSON.stringify(fresh.branques_max));
 
 console.log(fails === 0 ? '\nTOTS OK' : `\n${fails} FALLADES`);
 process.exit(fails === 0 ? 0 : 1);
