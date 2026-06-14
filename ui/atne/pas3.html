@@ -32,11 +32,12 @@
 <!-- Mermaid converter: càrrega lazy de Mermaid.js per a mapes conceptuals i esquemes visuals.
      El script no carrega Mermaid.js fins que no hi ha un complement d'aquest tipus actiu. -->
 <script src="/ui/atne/js/mermaid-converter.js?v=20260602a" defer></script>
-<!-- Profunditat per MECR del canon (bloc B4): derivat de rubrica.json, NO editar a mà. -->
-<script src="/ui/atne/js/diagram-mecr-depth.data.js?v=20260613a" defer></script>
-<!-- Capa d'UI de l'editor Novak (+/×/↝, desfés/refés, toolbar de font).
-     Carrega DESPRÉS del renderitzador (usa window.ATNE_MERMAID). -->
-<script src="/ui/atne/js/diagram-editor-ui.js?v=20260613a" defer></script>
+<!-- Profunditat per MECR del canon (bloc B4): derivat de rubrica.json (mapa conceptual
+     + esquema visual), NO editar a mà. -->
+<script src="/ui/atne/js/diagram-mecr-depth.data.js?v=20260614a" defer></script>
+<!-- Capa d'UI de l'editor de diagrames (3 tipus: Novak complet + branca/germà/× per a
+     mapa mental i esquema). Carrega DESPRÉS del renderitzador (usa window.ATNE_MERMAID). -->
+<script src="/ui/atne/js/diagram-editor-ui.js?v=20260614a" defer></script>
 <!-- DOMPurify: sanititza HTML que ve del LLM o de Supabase abans d'innerHTML. -->
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
 <script>
@@ -2121,19 +2122,20 @@
         // Renderitza si encara no hi ha un diagrama vàlid (wrapper absent).
         // L'únic render és aquí (contenidor visible), mai en hidden.
         if (cont.querySelector('.mermaid-wrapper')) {
-          // Ja renderitzat: nomes (re)enganxa l'editor Novak si es el mapa conceptual.
-          if (v === 'mapa-conc' && window.ATNE_DIAGRAM_EDITOR) {
+          // Ja renderitzat: re-enganxa l'editor (mapa conceptual, mapa mental o esquema).
+          if (window.ATNE_DIAGRAM_EDITOR) {
             let mecr = ''; try { mecr = localStorage.getItem('atne.active_level_mecr') || ''; } catch (_) {}
-            window.ATNE_DIAGRAM_EDITOR.attach(cont, { mecr });
+            window.ATNE_DIAGRAM_EDITOR.attach(cont, { mecr, type: target.type });
           }
           return;
         }
         window.ATNE_MERMAID.renderMermaidBlock(cont, cont.dataset.md, target.type);
-        // Bloc B: enganxa el subsistema d'edicio Novak nomes al mapa conceptual.
-        // El MECR ve del perfil/nivell actiu (mateixa font que el glossari).
-        if (v === 'mapa-conc' && window.ATNE_DIAGRAM_EDITOR) {
+        // Bloc B: enganxa el subsistema d'edicio. El joc de botons s'adapta al tipus
+        // (Novak complet al mapa conceptual; + branca / + germa / x al mapa mental i
+        // l'esquema). El MECR ve del perfil/nivell actiu (mateixa font que el glossari).
+        if (window.ATNE_DIAGRAM_EDITOR) {
           let mecr = ''; try { mecr = localStorage.getItem('atne.active_level_mecr') || ''; } catch (_) {}
-          window.ATNE_DIAGRAM_EDITOR.attach(cont, { mecr });
+          window.ATNE_DIAGRAM_EDITOR.attach(cont, { mecr, type: target.type });
         }
       });
     }
