@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ATNE · Prova manual de l'editor de diagrames (Novak · mapa mental · esquema)</title>
+<!--
+  Banc de proves AÏLLAT per a la verificació visual de l'editor de diagrames
+  (mapa conceptual Novak + mapa mental + esquema visual).
+  NO és producció: carrega els mateixos scripts de producció però amb un mapa
+  llavor i un selector de MECR, sense auth ni LLM. Serveix-lo des de l'arrel del
+  repo perquè els camins absoluts /ui/atne/js/... resolguin:
+
+      python -m http.server 8000      (des de l'arrel del repo)
+      http://localhost:8000/tests/diagram_editor_manual_test.html
+-->
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; background: #faf8ff; color: #1e1b4b; }
+  header { background: #312e81; color: #fff; padding: 14px 22px; }
+  header h1 { margin: 0 0 2px; font-size: 18px; }
+  header p { margin: 0; font-size: 13px; opacity: .85; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 18px 22px 60px; }
+  .controls { display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+    background: #fff; border: 1px solid #ede9fe; border-radius: 10px; padding: 12px 16px; margin-bottom: 18px; }
+  .controls label { font-size: 13px; font-weight: 600; }
+  select { font-size: 14px; padding: 5px 8px; border: 1.5px solid #ddd6fe; border-radius: 7px; }
+  .mecr-note { font-size: 12.5px; color: #6d28d9; }
+  #diagram { background: #fff; border: 1px solid #ede9fe; border-radius: 12px; padding: 10px; min-height: 360px; }
+  .guide { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 10px; padding: 12px 16px; margin-bottom: 18px; font-size: 13.5px; line-height: 1.6; }
+  .guide b { color: #c2410c; }
+  code { background: #f5f3ff; padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Editor de diagrames — prova manual (Novak · mapa mental · esquema)</h1>
+  <p>Banc aïllat · no és producció · mateixos scripts, sense auth ni LLM</p>
+</header>
+<div class="wrap">
+
+  <div class="guide">
+    <b>Què provar (segons el TIPUS triat a dalt):</b>
+    1) <b>Mapa conceptual</b> (Novak): popup amb <code>+ proposició</code> / <code>+ concepte</code> / <code>+ germà</code> / <code>×</code> / <code>↝ connectar</code>. Els enllaços creuats (taronja) es creen amb ↝ i s'editen clicant-los.
+    2) <b>Mapa mental</b> i <b>Esquema</b>: popup REDUÏT — només <code>+ branca</code> / <code>+ germà</code> / <code>×</code>. <b>No</b> hi ha proposicions ni ↝ connectar.
+    3) <b>Desfés/Refés</b> amb els botons o <code>Ctrl+Z</code> / <code>Ctrl+Y</code>.
+    4) Canvia el <b>MECR</b>: el botó d'afegir es <b>desactiva</b> en arribar al límit del canon del tipus
+       (esquema: profunditat pre-A1=1 … C1+=4; mapa mental: profunditat + <b>branques primàries</b> per nivell; vegeu la nota del canon a la dreta).
+    5) Obre <i>«Editar font del diagrama»</i>: la toolbar (sagnat/negreta/cursiva) i el diagrama s'actualitza en sortir del camp o amb «Refés».
+  </div>
+
+  <div class="controls">
+    <label for="type-sel">Tipus de diagrama:</label>
+    <select id="type-sel">
+      <option value="mapa_conceptual">Mapa conceptual (Novak)</option>
+      <option value="mapa_mental">Mapa mental (Buzan)</option>
+      <option value="esquema_visual" selected>Esquema visual</option>
+    </select>
+    <label for="mecr-sel">MECR de l'alumne:</label>
+    <select id="mecr-sel">
+      <option value="pre-A1">pre-A1</option>
+      <option value="A1">A1</option>
+      <option value="A2">A2</option>
+      <option value="B1" selected>B1</option>
+      <option value="B2">B2</option>
+      <option value="C1+">C1+</option>
+    </select>
+    <span class="mecr-note" id="mecr-note"></span>
+  </div>
+
+  <div id="diagram"></div>
+</div>
+
+<!-- Scripts de PRODUCCIÓ, en el mateix ordre que pas3.html (?v per saltar la cau) -->
+<script src="/ui/atne/js/diagram-editor-core.js?v=20260614l"></script>
+<script src="/ui/atne/js/mermaid-converter.js?v=20260614l"></script>
+<script src="/ui/atne/js/diagram-mecr-depth.data.js?v=20260614l"></script>
+<script src="/ui/atne/js/diagram-editor-ui.js?v=20260614l"></script>
+<script>
+  // Llavors per tipus — mateix format markdown que ATNE en producció.
+  var SEEDS = {
+    // Mapa conceptual (Novak): verbs d'enllaç en negreta + un enllaç creuat.
+    mapa_conceptual: [
+      '## Mapa conceptual', '',
+      '- **Cicle de l’aigua**',
+      '  - **s’evapora per**',
+      '    - la calor del sol',
+      '    - la temperatura',
+      '  - **es condensa en**',
+      '    - núvols',
+      '    - boira',
+      '  - **precipita com**',
+      '    - pluja',
+      '    - neu',
+      '', '- Enllaços creuats:',
+      '  - pluja -> núvols : cau des dels',
+    ].join('\n'),
+    // Mapa mental (Buzan): arbre radial pur, sense negreta de proposicions.
+    mapa_mental: [
+      '## Mapa mental', '',
+      '- **FOTOSÍNTESI**',
+      '  - Què és?',
+      '    - Transformació de llum en aliment',
+      '    - Només les plantes ho fan?',
+      '  - Quins ingredients?',
+      '    - Aigua, diòxid de carboni i llum',
+      '    - Connexió amb Química',
+      '  - On passa?',
+      '    - A les fulles',
+      '  - Quin resultat dona?',
+      '    - Sucres i oxigen',
+    ].join('\n'),
+    // Esquema visual: jerarquia LR. Arrel = PRODUCTE (no "Materials"), H1 del canon.
+    esquema_visual: [
+      '## Esquema visual', '',
+      '- **Titella de mitjó**',
+      '  - Materials',
+      '    - mitjó',
+      '    - botons',
+      '  - Passos',
+      '    - enganxar els ulls',
+      '    - cosir la boca',
+      '  - Resultat',
+      '    - titella acabada',
+    ].join('\n'),
+  };
+
+  var cont = document.getElementById('diagram');
+  var sel = document.getElementById('mecr-sel');
+  var typeSel = document.getElementById('type-sel');
+  var note = document.getElementById('mecr-note');
+
+  function currentMecr() { return sel.value; }
+  function currentType() { return typeSel.value; }
+
+  function boot() {
+    try { localStorage.setItem('atne.active_level_mecr', currentMecr()); } catch (e) {}
+    var type = currentType();
+    cont.dataset.md = SEEDS[type];
+    cont.innerHTML = '';
+    // Mateix flux que pas3.html: render + attach amb el tipus.
+    window.ATNE_MERMAID.renderMermaidBlock(cont, cont.dataset.md, type);
+    window.ATNE_DIAGRAM_EDITOR.attach(cont, { mecr: currentMecr(), type: type });
+    updateNote();
+  }
+  // Selecciona la font de límits del canon segons el tipus (igual que capsObj a l'UI).
+  function capsFor(type) {
+    var D = window.ATNE_MAPA_PROFUNDITAT || {};
+    if (type === 'esquema_visual') return D.esquema || null;
+    if (type === 'mapa_mental') return D.mapa_mental || null;
+    return D;                                        // mapa_conceptual (arrel)
+  }
+  function updateNote() {
+    var type = currentType(), m = currentMecr();
+    var src = capsFor(type);
+    if (!src) {
+      note.textContent = (type === 'mapa_mental')
+        ? 'Mapa mental: canon absent al derivat (regenera diagram-mecr-depth.data.js) → sense límit.'
+        : 'Sense canon per a aquest tipus.';
+      return;
+    }
+    function g(map) { var v = (src[map] || {})[m]; return v == null ? 'lliure' : v; }
+    if (type === 'esquema_visual') {
+      note.textContent = 'Canon esquema ' + m + ': profunditat ' + g('levels') +
+        ' nivells · densitat ≤ ' + g('densitat_max') + ' nodes';
+    } else if (type === 'mapa_mental') {
+      note.textContent = 'Canon mapa mental ' + m + ': profunditat ' + g('levels') +
+        ' nivells · màx ' + g('branques_max') + ' branques primàries · densitat ≤ ' +
+        g('densitat_max') + ' nodes';
+    } else {
+      note.textContent = 'Canon ' + m + ': profunditat ' + g('levels') + ' nivells · màx ' +
+        g('branques_max') + ' branques · ' + g('subelements_max') + ' sub-elements/branca · densitat ≤ ' +
+        g('densitat_max') + ' nodes · enllaços ≤ ' + g('cross_max');
+    }
+  }
+  // Canviar MECR: re-attach (actualitza el límit en viu, sense perdre el diagrama).
+  sel.addEventListener('change', function () {
+    try { localStorage.setItem('atne.active_level_mecr', currentMecr()); } catch (e) {}
+    window.ATNE_DIAGRAM_EDITOR.attach(cont, { mecr: currentMecr(), type: currentType() });
+    updateNote();
+  });
+  // Canviar TIPUS: re-boot (canvia la llavor i el renderitzador).
+  typeSel.addEventListener('change', boot);
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+</script>
+</body>
+</html>

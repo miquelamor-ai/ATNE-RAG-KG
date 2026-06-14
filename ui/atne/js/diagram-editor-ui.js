@@ -1,13 +1,18 @@
-/* ═══ ATNE · diagram-editor-ui.js — Subsistema d'edició Novak (bloc B3+B4) ═══
+/* ═══ ATNE · diagram-editor-ui.js — Subsistema d'edició de diagrames (bloc B3+B4) ═══
  *
  * Capa d'UI sobre el renderitzador (mermaid-converter.js) i el nucli pur
- * (diagram-editor-core.js). Permet, sobre el mapa conceptual renderitzat:
- *   · afegir conceptes/proposicions amb botons + contextuals al popup de node,
- *   · eliminar branques amb ×,
- *   · crear enllaços creuats Novak amb ↝ (mode connexió de dos clics),
- *   · editar/eliminar enllaços creuats clicant-los,
- *   · desfés/refés (Ctrl+Z / Ctrl+Y) i una barra de control injectada,
- *   · una mini-toolbar sobre l'editor de font (sagnat / negreta / cursiva).
+ * (diagram-editor-core.js). Serveix els TRES tipus de diagrama d'ATNE, segons el
+ * `type` passat a attach() (mapa_conceptual | mapa_mental | esquema_visual):
+ *
+ *   · MAPA CONCEPTUAL (Novak) — joc complet: afegir conceptes/proposicions, ×,
+ *     enllaços creuats amb ↝ (mode connexió de dos clics) i edició d'aquests.
+ *   · MAPA MENTAL i ESQUEMA VISUAL — arbres jeràrquics PURS: joc reduït de
+ *     + branca (fill) / + germà / ×. SENSE proposicions ni enllaços creuats.
+ *
+ * Comú a tots: edició de label pel popup del renderitzador, desfés/refés
+ * (Ctrl+Z / Ctrl+Y), barra de control injectada i mini-toolbar sobre l'editor
+ * de font (sagnat / negreta / cursiva). La modulació per MECR (profunditat,
+ * amplada, densitat) ve del canon de cada tipus (veure capsObj).
  *
  * Tota mutació passa per la FONT ÚNICA (el markdown a `cont.dataset.md`); el
  * render es recalcula després. Adaptat del prototip validat (v0.2), SENSE el
@@ -49,10 +54,23 @@
     if (/^C[12]/i.test(m)) return 'C1+';
     return m;
   }
-  function depthCap() {
+  // Font de límits SEGONS EL TIPUS de diagrama (cada tipus té el seu canon):
+  //   · mapa_conceptual → arrel de ATNE_MAPA_PROFUNDITAT (levels/branques/subel/densitat).
+  //   · esquema_visual  → ATNE_MAPA_PROFUNDITAT.esquema (només levels + densitat;
+  //                       el canon de l'esquema no té branques/subelements).
+  //   · mapa_mental     → ATNE_MAPA_PROFUNDITAT.mapa_mental (levels + branques + densitat;
+  //                       canonitzat per mineriaRAG, font ≥ 1.1.0). null si encara absent.
+  function capsObj() {
     var data = window.ATNE_MAPA_PROFUNDITAT;
-    if (!data || !data.levels) return Infinity;        // dades canon absents → sense límit
-    var n = data.levels[normMecr(state.mecr)];
+    if (!data) return null;
+    if (state.type === 'esquema_visual') return data.esquema || null;
+    if (state.type === 'mapa_mental') return data.mapa_mental || null;
+    return data;                                       // mapa_conceptual (arrel)
+  }
+  function depthCap() {
+    var c = capsObj();
+    if (!c || !c.levels) return Infinity;              // sense canon per al tipus → sense límit
+    var n = c.levels[normMecr(state.mecr)];
     if (n == null) return Infinity;                    // sense nivells comptables al canon
     return n;                                          // el canon mana: A2=2, B1=3, B2=4
   }
@@ -74,14 +92,16 @@
   // ── Modulació d'AMPLADA i DENSITAT per MECR (B4) — també del canon ──
   // branques_max (pas_3), subelements_max (pas_4), densitat_max (H6). null → lliure.
   function capFromMap(mapName) {
-    var data = window.ATNE_MAPA_PROFUNDITAT;
-    if (!data || !data[mapName]) return Infinity;
-    var n = data[mapName][normMecr(state.mecr)];
+    var c = capsObj();
+    if (!c || !c[mapName]) return Infinity;            // clau absent per al tipus → sense límit
+    var n = c[mapName][normMecr(state.mecr)];
     return (n == null) ? Infinity : n;
   }
   function branchMax() { return capFromMap('branques_max'); }
   function subelMax() { return capFromMap('subelements_max'); }
   function densitatMax() { return capFromMap('densitat_max'); }
+  // Enllaços creuats recomanats (Novak): pas_6_nombre_recomanat del canon, per MECR.
+  function crossMax() { return capFromMap('cross_max'); }
 
   function mdLines() { return md().split('\n'); }
   function isItemLn(l) { return /^\s*-\s+/.test(l); }
@@ -131,6 +151,17 @@
   }
   function subelReason(parentPropLi) {
     return subelFull(parentPropLi) ? ('màx ' + subelMax() + ' sub-elements') : null;
+  }
+  // Mapa mental: el canon `branques_max` limita les branques PRIMÀRIES (filles
+  // directes de l'arrel). Només gateja a aquest nivell; les sub-idees es regulen
+  // per profunditat + densitat. parentLineIdx = node sota el qual penjaria el nou.
+  function primaryBranchReason(parentLineIdx) {
+    if (state.type !== 'mapa_mental') return null;     // esquema no té branques_max
+    if (parentLineIdx == null || parentLineIdx < 0) return null;
+    if (C.classify(md(), parentLineIdx) !== 'root') return null;
+    var max = branchMax();
+    if (max === Infinity) return null;
+    return (childrenOfKind(parentLineIdx, 'concept') >= max) ? ('màx ' + max + ' branques') : null;
   }
 
   // ── Estat de la font única ──
@@ -207,12 +238,12 @@
     var capTxt = (cap === Infinity) ? 'profunditat lliure' : ('fins a ' + cap + ' nivells');
     var dmax = densitatMax();
     var nx = crossCount();
-    // Enllaços creuats: el principi Novak (i CmapTools) en demana POCS. Llindar tou
-    // (≤ CROSS_REC); avís, no bloqueig. NOTA: aquesta xifra hauria de venir del canon
-    // (handoff a mineriaRAG, pendent) — de moment és un valor de plataforma documentat.
-    var CROSS_REC = 3;
+    // Enllaços creuats: el principi Novak (i CmapTools) en demana POCS. El sostre
+    // recomanat ve del CANON (pas_6_nombre_recomanat, per MECR): avís, no bloqueig.
+    // null/sense canon → Infinity → mai avisa.
+    var crossRec = crossMax();
     var dOver = (dmax !== Infinity && n > dmax);
-    var xOver = nx > CROSS_REC;
+    var xOver = (crossRec !== Infinity && nx > crossRec);
     var crossTxt = nx ? (' · ' + nx + ' connexi' + (nx === 1 ? 'ó' : 'ons') + (xOver ? ' (massa?)' : '')) : '';
     ui.badge.textContent = n + ' nodes' + (dOver ? ' (≤ ' + dmax + ')' : '') +
       ' · ' + normMecr(state.mecr) + ' · ' + capTxt + crossTxt;
@@ -239,7 +270,9 @@
     ui.undoBtn = mkCtrl('↶ Desfés', 'Desfés (Ctrl+Z)', undo);
     ui.redoBtn = mkCtrl('↷ Refés', 'Refés (Ctrl+Y)', redo);
     var hint = document.createElement('span');
-    hint.textContent = 'Clica un node per editar-lo, afegir-hi o connectar-lo';
+    hint.textContent = (state.type === 'mapa_conceptual')
+      ? 'Clica un node per editar-lo, afegir-hi o connectar-lo'
+      : 'Clica un node per editar-lo o afegir-hi branques';
     hint.style.cssText = 'font-size:11.5px;color:#7c3aed';
     ui.badge = document.createElement('span');
     ui.badge.className = 'atne-ed-badge';
@@ -317,6 +350,43 @@
     var bar = document.createElement('div');
     bar.style.cssText = 'display:flex;gap:5px;margin-left:6px;padding-left:8px;' +
       'border-left:1px solid #e9d5ff;flex-wrap:wrap;align-items:center';
+
+    // ── Mapa mental / esquema visual: arbre jeràrquic PUR. Sense proposicions ni
+    //    enllaços creuats — només + branca (fill) / + germà / ×. La profunditat es
+    //    gateja des del canon del tipus (esquema sí; mapa mental sense límit fins
+    //    que mineriaRAG el canonitzi). La densitat és avís tou al badge.
+    if (state.type !== 'mapa_conceptual') {
+      // + branca (fill): gate de profunditat (tots) + amplada de branques primàries
+      //   (mapa mental, només si el pare és l'arrel).
+      bar.appendChild(gatedBtn('+ branca', 'Afegir una branca filla',
+        depthReason(li) || primaryBranchReason(li),
+        function () {
+          var r = C.addChild(md(), li, 'Nova branca');
+          closePopup(); state.lastLine = null;
+          setMd(r.md, { openLine: r.newLineIdx });
+        }));
+      if (kind !== 'root') {
+        // Germà: mateix nivell (no afegeix profunditat). A l'arrel no s'ofereix
+        // (un segon node a sangria 0 trencaria l'arbre d'arrel única). Gate
+        // d'amplada si el germà seria una branca primària (pare = arrel).
+        bar.appendChild(gatedBtn('+ germà', 'Afegir una branca germana',
+          primaryBranchReason(parentOf(li)),
+          function () {
+          var r = C.addSibling(md(), li, 'Nova branca');
+          closePopup(); state.lastLine = null;
+          setMd(r.md, { openLine: r.newLineIdx });
+        }));
+        bar.appendChild(mkBtn('×', 'Eliminar', 'del', function () {
+          var nd = C.descendantCount(md(), li);
+          if (nd > 0 && !confirm('Aquest node té ' + nd + ' descendent(s). Eliminar tota la branca?')) return;
+          var r = C.deleteSubtree(md(), li);
+          closePopup(); state.lastLine = null;
+          setMd(r.md);
+        }));
+      }
+      pop.appendChild(bar);
+      return;
+    }
 
     if (kind === 'root') {
       // Nova branca sota l'arrel: gate per profunditat (nova prop) + amplada (branques de l'arrel).
@@ -399,6 +469,7 @@
   }
   // Captura el clic de destí en mode connexió (fase de captura, abans del popup)
   document.addEventListener('click', function (e) {
+    if (state.type !== 'mapa_conceptual') return;   // enllaços creuats = només Novak
     if (!state.connecting || !state.cont) return;
     var t = e.target;
     while (t && t.nodeType === 1 && !(t.hasAttribute && t.hasAttribute('data-nid'))) t = t.parentElement;
@@ -416,6 +487,7 @@
 
   // ── Clic sobre etiqueta d'enllaç creuat -> editar paraula o eliminar ──
   document.addEventListener('click', function (e) {
+    if (state.type !== 'mapa_conceptual') return;   // enllaços creuats = només Novak
     if (state.connecting || !state.cont) return;
     var t = e.target;
     while (t && t.nodeType === 1 && !(t.hasAttribute && t.hasAttribute('data-cross-idx'))) t = t.parentElement;
@@ -567,6 +639,9 @@
     if (!cont) return;
     opts = opts || {};
     if (opts.mecr) state.mecr = opts.mecr;
+    // El tipus de diagrama (mapa_conceptual | mapa_mental | esquema_visual) governa
+    // el joc de botons, els listeners de connexió i la font de límits del canon.
+    if (opts.type) state.type = opts.type;
     if (state.attached && state.cont === cont) { decorate(); updateBadge(); return; }
     // Normalitza la font al md filtrat → els data-line del render quadren amb els
     // índexs de línia de les mutacions del nucli (sense re-renderitzar).

@@ -33,6 +33,16 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const SRC = path.join(ROOT, 'corpus', 'external', 'corpusFJE', 'skills',
   'mediacio', 'generate-mapa-conceptual', 'rubrica.json');
+// Esquema visual: canon PROPI amb estructura de passos DIFERENT del mapa
+// conceptual (profunditat a pas_2_profunditat_de_l, densitat a pas_2_total_nodes;
+// no té relacio_de_branca/detalls_de_les). Derivat sota la clau `esquema`.
+const SRC_ESQUEMA = path.join(ROOT, 'corpus', 'external', 'corpusFJE', 'skills',
+  'mediacio', 'generate-esquema-visual', 'rubrica.json');
+// Mapa mental: canon propi (canonitzat per mineriaRAG, font ≥ 1.1.0). Estructura
+// pròpia: profunditat a pas_3_nivells_d_expansio, branques a pas_2_nombre_de_branques,
+// densitat (nodes totals) a la heurística H5. Derivat sota la clau `mapa_mental`.
+const SRC_MAPA_MENTAL = path.join(ROOT, 'corpus', 'external', 'corpusFJE', 'skills',
+  'mediacio', 'generate-mapa-mental', 'rubrica.json');
 const OUT = path.join(ROOT, 'ui', 'atne', 'js', 'diagram-mecr-depth.data.js');
 
 // ── Helpers ──
@@ -83,14 +93,16 @@ function extractSubelements(rubrica) {
   });
 }
 
-// Densitat — nodes totals per MECR (heurística docent H6, prosa amb "≤").
-function extractDensitat(rubrica) {
+// Densitat — nodes totals per MECR, des d'una heurística docent en prosa amb "≤".
+// Per defecte H6 (mapa conceptual); el mapa mental usa H5 (mateix patró "MECR ≤ N").
+function extractDensitat(rubrica, hid) {
+  hid = hid || 'H6';
   const out = emptyLevels(rubrica);
-  const h6 = (rubrica.heuristiques_docent || []).find((h) => h.id === 'H6');
-  if (!h6 || typeof h6.descripcio !== 'string') return out;
+  const h = (rubrica.heuristiques_docent || []).find((x) => x.id === hid);
+  if (!h || typeof h.descripcio !== 'string') return out;
   const re = /([A-Za-z0-9+]+(?:-[A-Za-z0-9+]+)*)\s*≤\s*(\d+)/g;
   let m;
-  while ((m = re.exec(h6.descripcio))) {
+  while ((m = re.exec(h.descripcio))) {
     const n = parseInt(m[2], 10);
     expandLevelToken(m[1]).forEach((key) => { if (key in out) out[key] = n; });
   }
@@ -103,16 +115,97 @@ function expandLevelToken(tok) {
   return tok.split('-').map((p) => { p = p.trim(); return /^C[12]\+?$/i.test(p) ? 'C1+' : p; });
 }
 
+// Enllaços creuats — nombre recomanat per MECR (pas_6_nombre_recomanat.countable.max).
+// Pas ADDITIU al canon del mapa conceptual (pas_id 1-5 intactes). Avís, no bloqueig.
+function extractCrossMax(rubrica) {
+  return mapLevels(rubrica, (passos) => {
+    const pas = findPas(passos, 'nombre_recomanat');
+    if (pas && pas.countable && typeof pas.countable.max === 'number') return pas.countable.max;
+    return null;
+  });
+}
+
 function extractAll(rubrica) {
   return {
     levels: extractDepths(rubrica),
     branques_max: extractBranques(rubrica),
     subelements_max: extractSubelements(rubrica),
     densitat_max: extractDensitat(rubrica),
+    cross_max: extractCrossMax(rubrica),
   };
 }
 
-module.exports = { extractDepths, extractBranques, extractSubelements, extractDensitat, extractAll };
+// ── Extractors PURS del canon ESQUEMA VISUAL (estructura de passos diferent) ──
+// L'esquema NO té relacio_de_branca/detalls_de_les: l'amplada queda implícita en
+// el total de nodes. Dos senyals graduats per MECR:
+//   · levels       (profunditat): pas_2_profunditat_de_l, descriptor en prosa
+//                  ("1 nivell", "2-3 nivells"…) → màxim del rang.
+//   · densitat_max (nodes totals): pas_2_total_nodes.countable.max.
+
+// Profunditat de l'arbre (pas_2_profunditat_de_l, prosa "N nivell(s)" / "N-M nivells").
+function extractEsquemaDepths(rubrica) {
+  return mapLevels(rubrica, (passos) => {
+    const pas = findPas(passos, 'profunditat_de_l');
+    if (!pas || typeof pas.descriptor !== 'string') return null;
+    const range = pas.descriptor.match(/(\d+)\s*[-–]\s*(\d+)\s*nivell/i);
+    if (range) return parseInt(range[2], 10);           // rang "N-M" → màxim
+    const single = pas.descriptor.match(/(\d+)\s*nivell/i);
+    if (single) return parseInt(single[1], 10);
+    return null;
+  });
+}
+
+// Densitat — nombre total de nodes (pas_2_total_nodes.countable.max).
+function extractEsquemaDensitat(rubrica) {
+  return mapLevels(rubrica, (passos) => {
+    const pas = findPas(passos, 'total_nodes');
+    if (pas && pas.countable && typeof pas.countable.max === 'number') return pas.countable.max;
+    return null;
+  });
+}
+
+function extractEsquema(rubrica) {
+  return {
+    levels: extractEsquemaDepths(rubrica),
+    densitat_max: extractEsquemaDensitat(rubrica),
+  };
+}
+
+// ── Extractors PURS del canon MAPA MENTAL (Buzan; estructura de passos pròpia) ──
+// Tres senyals graduats per MECR:
+//   · levels       (profunditat): pas_3_nivells_d_expansio, prosa "N nivell(s)".
+//   · branques_max (amplada):     pas_2_nombre_de_branques.countable.max.
+//   · densitat_max (nodes totals): heurística H5 (mateix patró "MECR ≤ N" que H6).
+// (No té subelements_max comptable, com l'esquema.)
+function extractMmDepths(rubrica) {
+  return mapLevels(rubrica, (passos) => {
+    const pas = findPas(passos, 'nivells_d_expansio');
+    if (!pas || typeof pas.descriptor !== 'string') return null;
+    const range = pas.descriptor.match(/(\d+)\s*[-–]\s*(\d+)\s*nivell/i);
+    if (range) return parseInt(range[2], 10);           // rang "N-M" → màxim
+    const single = pas.descriptor.match(/(\d+)\s*nivell/i);
+    if (single) return parseInt(single[1], 10);
+    return null;
+  });
+}
+function extractMmBranques(rubrica) {
+  return mapLevels(rubrica, (passos) => {
+    const pas = findPas(passos, 'nombre_de_branques');
+    if (pas && pas.countable && typeof pas.countable.max === 'number') return pas.countable.max;
+    return null;
+  });
+}
+function extractMapaMental(rubrica) {
+  return {
+    levels: extractMmDepths(rubrica),
+    branques_max: extractMmBranques(rubrica),
+    densitat_max: extractDensitat(rubrica, 'H5'),
+  };
+}
+
+module.exports = { extractDepths, extractBranques, extractSubelements, extractDensitat, extractCrossMax,
+  extractAll, extractEsquemaDepths, extractEsquemaDensitat, extractEsquema,
+  extractMmDepths, extractMmBranques, extractMapaMental };
 
 // Quan s'executa directament: regenera el fitxer derivat.
 if (require.main === module) {
@@ -129,10 +222,56 @@ if (require.main === module) {
         branques_max: 'pas_3_relacio_de_branca.countable.max',
         subelements_max: 'pas_4_detalls_de_les.descriptor (regex `N-M sub-element` / "Cap")',
         densitat_max: 'heuristiques_docent H6.descripcio (regex `MECR ≤ N`)',
+        cross_max: 'pas_6_nombre_recomanat.countable.max (enllacos creuats; avis no bloqueig)',
       },
       nota: 'Limits tal qual del canon. El consumidor nomes tracta null com a sense limit.',
     },
   }, extractAll(rubrica));
+
+  // ── Esquema visual: derivat del seu canon propi, sota la clau `esquema` ──
+  // (mapa_mental NO té rubrica.json → cap clau; el consumidor el tracta sense
+  //  límit fins que mineriaRAG el canonitzi. Veure docs/handoff_mineriaRAG_*.)
+  if (fs.existsSync(SRC_ESQUEMA)) {
+    const rubE = JSON.parse(fs.readFileSync(SRC_ESQUEMA, 'utf8'));
+    const metaE = rubE._meta || {};
+    out.esquema = Object.assign({
+      _meta: {
+        source: 'skills/mediacio/generate-esquema-visual/rubrica.json',
+        font_canonic: metaE.font_canonic || null,
+        font_version: metaE.font_version || null,
+        rubrica_version: metaE.version || null,
+        extret_de: {
+          levels: 'pas_2_profunditat_de_l.descriptor (regex `N nivell` / `N-M nivells`)',
+          densitat_max: 'pas_2_total_nodes.countable.max',
+        },
+        nota: 'Esquema: nomes profunditat + densitat (no branques/subelements). null = sense limit.',
+      },
+    }, extractEsquema(rubE));
+  } else {
+    console.warn('  ⚠ canon esquema absent (' + path.relative(ROOT, SRC_ESQUEMA) + ') — clau `esquema` omesa.');
+  }
+
+  // ── Mapa mental: derivat del seu canon propi, sota la clau `mapa_mental` ──
+  if (fs.existsSync(SRC_MAPA_MENTAL)) {
+    const rubM = JSON.parse(fs.readFileSync(SRC_MAPA_MENTAL, 'utf8'));
+    const metaM = rubM._meta || {};
+    out.mapa_mental = Object.assign({
+      _meta: {
+        source: 'skills/mediacio/generate-mapa-mental/rubrica.json',
+        font_canonic: metaM.font_canonic || null,
+        font_version: metaM.font_version || null,
+        rubrica_version: metaM.version || null,
+        extret_de: {
+          levels: 'pas_3_nivells_d_expansio.descriptor (regex `N nivell` / `N-M nivells`)',
+          branques_max: 'pas_2_nombre_de_branques.countable.max',
+          densitat_max: 'heuristiques_docent H5.descripcio (regex `MECR ≤ N`)',
+        },
+        nota: 'Mapa mental: profunditat + branques + densitat (no subelements). null = sense limit.',
+      },
+    }, extractMapaMental(rubM));
+  } else {
+    console.warn('  ⚠ canon mapa mental absent (' + path.relative(ROOT, SRC_MAPA_MENTAL) + ') — clau `mapa_mental` omesa.');
+  }
 
   const banner =
 `/**
@@ -164,8 +303,21 @@ if (require.main === module) {
 
   fs.writeFileSync(OUT, banner + body + footer + '\n', 'utf8');
   console.log('✓ generat', path.relative(ROOT, OUT));
+  console.log('  [mapa conceptual]');
   console.log('  levels:        ', JSON.stringify(out.levels));
   console.log('  branques_max:  ', JSON.stringify(out.branques_max));
   console.log('  subelements_max:', JSON.stringify(out.subelements_max));
   console.log('  densitat_max:  ', JSON.stringify(out.densitat_max));
+  console.log('  cross_max:     ', JSON.stringify(out.cross_max));
+  if (out.esquema) {
+    console.log('  [esquema visual]');
+    console.log('  levels:        ', JSON.stringify(out.esquema.levels));
+    console.log('  densitat_max:  ', JSON.stringify(out.esquema.densitat_max));
+  }
+  if (out.mapa_mental) {
+    console.log('  [mapa mental]');
+    console.log('  levels:        ', JSON.stringify(out.mapa_mental.levels));
+    console.log('  branques_max:  ', JSON.stringify(out.mapa_mental.branques_max));
+    console.log('  densitat_max:  ', JSON.stringify(out.mapa_mental.densitat_max));
+  }
 }
