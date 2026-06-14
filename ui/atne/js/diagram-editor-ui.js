@@ -71,6 +71,68 @@
     return (levelOf(lineIdx) + 1) > cap;
   }
 
+  // ── Modulació d'AMPLADA i DENSITAT per MECR (B4) — també del canon ──
+  // branques_max (pas_3), subelements_max (pas_4), densitat_max (H6). null → lliure.
+  function capFromMap(mapName) {
+    var data = window.ATNE_MAPA_PROFUNDITAT;
+    if (!data || !data[mapName]) return Infinity;
+    var n = data[mapName][normMecr(state.mecr)];
+    return (n == null) ? Infinity : n;
+  }
+  function branchMax() { return capFromMap('branques_max'); }
+  function subelMax() { return capFromMap('subelements_max'); }
+  function densitatMax() { return capFromMap('densitat_max'); }
+
+  function mdLines() { return md().split('\n'); }
+  function isItemLn(l) { return /^\s*-\s+/.test(l); }
+  // Índex de la línia pare (primera anterior amb menys sagnia). -1 = arrel.
+  function parentOf(lineIdx) {
+    var ls = mdLines(), lvl = C.indentOf(ls[lineIdx] || '');
+    for (var p = lineIdx - 1; p >= 0; p--) {
+      if (isItemLn(ls[p]) && C.indentOf(ls[p]) < lvl) return p;
+    }
+    return -1;
+  }
+  // Compta els fills DIRECTES (sagnia pare+2) del tipus indicat (prop|concept).
+  function childrenOfKind(parentLineIdx, kind) {
+    var ls = mdLines();
+    var pIndent = parentLineIdx < 0 ? -2 : C.indentOf(ls[parentLineIdx] || '');
+    var end = parentLineIdx < 0 ? ls.length - 1 : C.subtreeEnd(md(), parentLineIdx);
+    var target = pIndent + 2, count = 0;
+    for (var i = parentLineIdx + 1; i <= end; i++) {
+      if (!isItemLn(ls[i]) || C.indentOf(ls[i]) !== target) continue;
+      if (C.classify(md(), i) === kind) count++;
+    }
+    return count;
+  }
+  // Bloqueig per AMPLADA: afegir una branca (prop) sota parentLineIdx o un
+  // sub-element (concept) sota una proposició, si ja s'ha arribat al màxim del canon.
+  function branchFull(parentLineIdx) {
+    var max = branchMax();
+    return max !== Infinity && childrenOfKind(parentLineIdx, 'prop') >= max;
+  }
+  function subelFull(parentPropLineIdx) {
+    var max = subelMax();
+    return max !== Infinity && childrenOfKind(parentPropLineIdx, 'concept') >= max;
+  }
+  // Nombre de nodes de l'ARBRE (exclou el bloc d'enllaços creuats) per a la densitat.
+  function treeNodeCount() {
+    var s = C.splitCross(md());
+    return s.tree.split('\n').filter(isItemLn).length;
+  }
+  // Motius de bloqueig (string per al tooltip) o null si l'operació és permesa.
+  function depthReason(anchorLi) {
+    if (anchorLi == null || !deepBlocked(anchorLi)) return null;
+    var cap = depthCap();
+    return 'profunditat màx ' + (cap === Infinity ? '∞' : cap) + ' nivells';
+  }
+  function branchReason(parentLi) {
+    return branchFull(parentLi) ? ('màx ' + branchMax() + ' branques') : null;
+  }
+  function subelReason(parentPropLi) {
+    return subelFull(parentPropLi) ? ('màx ' + subelMax() + ' sub-elements') : null;
+  }
+
   // ── Estat de la font única ──
   function md() { return (state.cont && state.cont.dataset.md) || ''; }
 
@@ -139,10 +201,15 @@
   }
   function updateBadge() {
     if (!ui.badge) return;
-    var n = C.nodeCount(md());
+    var n = treeNodeCount();
     var cap = depthCap();
     var capTxt = (cap === Infinity) ? 'profunditat lliure' : ('fins a ' + cap + ' nivells');
-    ui.badge.textContent = n + ' nodes · ' + normMecr(state.mecr) + ' · ' + capTxt;
+    var dmax = densitatMax();
+    var over = (dmax !== Infinity && n > dmax);
+    ui.badge.textContent = n + ' nodes' + (over ? ' (recomanat ≤ ' + dmax + ')' : '') +
+      ' · ' + normMecr(state.mecr) + ' · ' + capTxt;
+    ui.badge.style.color = over ? '#dc2626' : '#6d28d9';
+    ui.badge.style.fontWeight = over ? '700' : '600';
   }
 
   // Injecta la barra de control + la mini-toolbar de font dins del wrapper del
@@ -215,13 +282,12 @@
     b.addEventListener('click', function (ev) { ev.stopPropagation(); fn(); });
     return b;
   }
-  // Botó "+ proposició" gatejat per profunditat (B4): si supera el límit del
-  // canon es mostra inactiu amb explicació, en lloc d'amagar-lo.
-  function mkPropBtn(label, title, li, fn) {
-    if (deepBlocked(li)) {
-      var cap = depthCap();
-      var b = mkBtn(label, 'Límit de profunditat per a ' + normMecr(state.mecr) +
-        ' (' + (cap === Infinity ? '∞' : cap) + ' nivells del canon). Puja el MECR per aprofundir més.', '', function () {});
+  // Botó gatejat per la modulació del canon (B4): si una operació supera un límit
+  // (profunditat o amplada) es mostra inactiu amb l'explicació, en lloc d'amagar-lo.
+  function gatedBtn(label, title, reason, fn) {
+    if (reason) {
+      var b = mkBtn(label, 'Límit del canon per a ' + normMecr(state.mecr) + ': ' + reason +
+        '. Puja el MECR o canvia el límit al canon.', '', function () {});
       b.disabled = true; b.style.opacity = '.4'; b.style.cursor = 'not-allowed';
       return b;
     }
@@ -244,27 +310,40 @@
       'border-left:1px solid #e9d5ff;flex-wrap:wrap;align-items:center';
 
     if (kind === 'root') {
-      bar.appendChild(mkPropBtn('+ proposició', 'Nova branca: paraula d’enllaç + concepte', li,
+      // Nova branca sota l'arrel: gate per profunditat (nova prop) + amplada (branques de l'arrel).
+      bar.appendChild(gatedBtn('+ proposició', 'Nova branca: paraula d’enllaç + concepte',
+        depthReason(li) || branchReason(li),
         function () { addPropAndConcept(li); }));
     } else if (kind === 'prop') {
-      bar.appendChild(mkBtn('+ concepte', 'Afegir un concepte sota aquesta proposició', '', function () {
-        var r = C.addChild(md(), li, 'Nou concepte');
-        closePopup(); state.lastLine = null;
-        setMd(r.md, { openLine: r.newLineIdx });
-      }));
-      bar.appendChild(mkBtn('+ proposició', 'Proposició germana', '', function () {
-        var r = C.addSibling(md(), li, 'enllaç');
-        closePopup(); state.lastLine = null;
-        setMd(r.md, { openLine: r.newLineIdx });
-      }));
+      // Sub-element sota la proposició: gate per amplada (sub-elements d'aquesta prop).
+      bar.appendChild(gatedBtn('+ concepte', 'Afegir un concepte sota aquesta proposició',
+        subelReason(li),
+        function () {
+          var r = C.addChild(md(), li, 'Nou concepte');
+          closePopup(); state.lastLine = null;
+          setMd(r.md, { openLine: r.newLineIdx });
+        }));
+      // Proposició germana: mateix nivell (sense gate de profunditat) → amplada del pare.
+      bar.appendChild(gatedBtn('+ proposició', 'Proposició germana',
+        branchReason(parentOf(li)),
+        function () {
+          var r = C.addSibling(md(), li, 'enllaç');
+          closePopup(); state.lastLine = null;
+          setMd(r.md, { openLine: r.newLineIdx });
+        }));
     } else if (kind === 'concept') {
-      bar.appendChild(mkBtn('+ germà', 'Concepte germà', '', function () {
-        var r = C.addSibling(md(), li, 'Nou concepte');
-        closePopup(); state.lastLine = null;
-        setMd(r.md, { openLine: r.newLineIdx });
-      }));
-      // La cadena Novak continua en profunditat: concepte -> enllaç -> concepte
-      bar.appendChild(mkPropBtn('+ proposició', 'Aprofundir: paraula d’enllaç + concepte sota aquest', li,
+      // Concepte germà: mateix nivell → amplada del pare (sub-elements de la prop pare).
+      bar.appendChild(gatedBtn('+ germà', 'Concepte germà',
+        subelReason(parentOf(li)),
+        function () {
+          var r = C.addSibling(md(), li, 'Nou concepte');
+          closePopup(); state.lastLine = null;
+          setMd(r.md, { openLine: r.newLineIdx });
+        }));
+      // La cadena Novak continua en profunditat: concepte -> enllaç -> concepte.
+      // Gate per profunditat (nova prop) + amplada (relacions d'aquest concepte).
+      bar.appendChild(gatedBtn('+ proposició', 'Aprofundir: paraula d’enllaç + concepte sota aquest',
+        depthReason(li) || branchReason(li),
         function () { addPropAndConcept(li); }));
     }
     if (kind !== 'root') {
