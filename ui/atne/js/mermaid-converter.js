@@ -240,7 +240,7 @@
     NW: 120, NH: 36, NR: 8,    // concepte
     PH: 22,                     // proposició (alçada base)
     HG: 44,                     // gap horitzontal → colW = 164
-    VG1: 44, VG2: 28, LG: 10,
+    VG1: 44, VG2: 28, LG: 20,   // LG = gap vertical entre germans (10→20: més aire, feedback 13/06)
     M: 32, PFS: 11,
   };
 
@@ -338,25 +338,126 @@
     var x1  = Math.max.apply(null, xs) + CM.NW / 2 + CM.M;
     var y1  = Math.max.apply(null, ys) + Math.max.apply(null, allH) / 2 + CM.M;
     var y1b = y1;
-    // Eixamplar el viewBox per encabir les corbes d'enllaços creuats (surten
-    // per la dreta). Sense això, l'etiqueta de la relació quedava tallada (v0.8).
+    // ── Enrutament dels enllaços creuats (graf Novak) — BUS ORTOGONAL ──
+    // La corba surt pel COSTAT del node cap al passadís entre columnes (sempre
+    // buit), baixa fins a un BUS horitzontal per sota dels nodes que el tram
+    // sobrevola, i puja cap al destí. Així la línia NO travessa MAI cap caixa de
+    // concepte, ni en files iguals ni diferents (fix feedback 14/06). El router
+    // és compartit pel pre-pass (viewBox) i el draw-pass perquè siguin coherents.
+    function crossHalfW(n) { return n.type === 'prop' ? 34 : CM.NW / 2; }
+    function crossHalfH(n) { return (n.type === 'prop' ? n.ph : n.nh) / 2; }
+    // Mitja amplada d'empremta d'un node (per a la cerca de bandes netes).
+    function crossFW(n) { return n.type === 'root' ? CM.RW / 2 : (n.type === 'prop' ? (n.label.length * CM.PFS * 0.6 + 10) / 2 : CM.NW / 2); }
+    var mapTop = Infinity, mapBot = -Infinity;
+    g.nodes.forEach(function (m) {
+      if (m.x === undefined) return;
+      mapTop = Math.min(mapTop, m.y - crossHalfH(m));
+      mapBot = Math.max(mapBot, m.y + crossHalfH(m));
+    });
+    if (mapBot === -Infinity) { mapBot = 0; mapTop = 0; }
+    function crossRoute(sn, tn, lane, labelW) {
+      // Enrutament al BUS NET MÉS PROPER (decisió Miquel 14/06): la corba surt pel
+      // COSTAT del node cap al passadís (sempre buit) i va a la BANDA HORITZONTAL
+      // LLIURE més propera — la de SOBRE o la de SOTA immediata dels conceptes que
+      // connecta, la que quedi més a prop — on l'etiqueta (proposició) seu sense
+      // trepitjar res. Si el mapa és molt dens, cau al bus exterior. Corba suau.
+      var sxC = sn.x, syC = sn.y, txC = tn.x, tyC = tn.y;
+      var dirS = (txC >= sxC) ? 1 : -1, dirT = (sxC > txC) ? 1 : -1;
+      var gutS = sxC + dirS * (crossHalfW(sn) + CM.HG / 2);
+      var gutT = txC + dirT * (crossHalfW(tn) + CM.HG / 2);
+      var edgeSx = sxC + dirS * crossHalfW(sn), edgeTx = txC + dirT * crossHalfW(tn);
+      var gutMid = (gutS + gutT) / 2;
+      var halfStrip = Math.max(Math.abs(gutT - gutS) / 2, (labelW || 0) / 2) + 6;
+      // Una banda a alçada y és lliure si cap node intercepta l'strip [gutMid±halfStrip]
+      // a aquella y (amb marge per a l'alçada de l'etiqueta).
+      function clearBand(y) {
+        var lo = gutMid - halfStrip, hi = gutMid + halfStrip;
+        for (var i = 0; i < g.nodes.length; i++) {
+          var m = g.nodes[i]; if (m.x === undefined) continue;
+          var fw = crossFW(m);
+          if (hi < m.x - fw || lo > m.x + fw) continue;
+          if (y > m.y - crossHalfH(m) - 11 && y < m.y + crossHalfH(m) + 11) return false;
+        }
+        return true;
+      }
+      function pathFor(by) {
+        return 'M ' + edgeSx + ' ' + syC +
+               ' C ' + gutS + ' ' + syC + ' ' + gutS + ' ' + by + ' ' + gutMid + ' ' + by +
+               ' C ' + gutT + ' ' + by + ' ' + gutT + ' ' + tyC + ' ' + edgeTx + ' ' + tyC;
+      }
+      // Verifica que TOTA la corba (no només la banda) queda fora dels conceptes.
+      // S'exclouen origen i destí (la corba hi toca pels extrems, és correcte).
+      function curveClear(by) {
+        var P = [[edgeSx, syC], [gutS, syC], [gutS, by], [gutMid, by], [gutT, by], [gutT, tyC], [edgeTx, tyC]];
+        function cub(a, b, c, e, t) { var u = 1 - t; return [u * u * u * a[0] + 3 * u * u * t * b[0] + 3 * u * t * t * c[0] + t * t * t * e[0], u * u * u * a[1] + 3 * u * u * t * b[1] + 3 * u * t * t * c[1] + t * t * t * e[1]]; }
+        for (var seg = 0; seg < 2; seg++) {
+          var a = P[seg * 3], b = P[seg * 3 + 1], c = P[seg * 3 + 2], e = P[seg * 3 + 3];
+          for (var t = 0; t <= 1.0001; t += 0.04) {
+            var pt = cub(a, b, c, e, t);
+            for (var i = 0; i < g.nodes.length; i++) {
+              var m = g.nodes[i]; if (m.x === undefined || m === sn || m === tn) continue;
+              var fw = crossFW(m), fh = crossHalfH(m);
+              if (pt[0] > m.x - fw - 2 && pt[0] < m.x + fw + 2 && pt[1] > m.y - fh - 2 && pt[1] < m.y + fh + 2) return false;
+            }
+          }
+        }
+        return true;
+      }
+      var base = (syC + tyC) / 2;
+      // Fallback exterior (costat més proper) si no es troba cap banda interior neta.
+      var busY = (base <= (mapTop + mapBot) / 2) ? (mapTop - 22 - lane * 22) : (mapBot + 22 + lane * 22);
+      for (var off = 0; off <= 900; off += 7) {
+        if (clearBand(base + off) && curveClear(base + off)) { busY = base + off; break; }
+        if (off > 0 && clearBand(base - off) && curveClear(base - off)) { busY = base - off; break; }
+      }
+      var d = pathFor(busY);
+      return { d: d, lx: gutMid, ly: busY,
+               minX: Math.min(edgeSx, gutS, gutT, edgeTx), maxX: Math.max(edgeSx, gutS, gutT, edgeTx),
+               minY: Math.min(syC, tyC, busY), maxY: Math.max(syC, tyC, busY) };
+    }
+    // crossRender: calculat UN COP aquí (corba + col·locació d'etiqueta) i reusat
+    // al draw-pass, perquè el viewBox pugui encabir la posició FINAL de l'etiqueta.
+    var crossRender = [];
     if (crossLinks.length) {
       var byLx = {};
       g.nodes.forEach(function (n) { if (byLx[n.label] === undefined) byLx[n.label] = n; });
-      var laneR = {}, laneC = {};
-      crossLinks.forEach(function (cl) {
+      // Empremtes dels nodes = obstacles per a la col·locació d'etiquetes.
+      var footprint = function (n) {
+        if (n.type === 'root') return { x: n.x - CM.RW / 2, y: n.y - CM.RH / 2, w: CM.RW, h: CM.RH };
+        if (n.type === 'prop') { var pw = n.label.length * CM.PFS * 0.6 + 10; return { x: n.x - pw / 2, y: n.y - n.ph / 2, w: pw, h: n.ph }; }
+        return { x: n.x - CM.NW / 2, y: n.y - n.nh / 2, w: CM.NW, h: n.nh };
+      };
+      var ov = function (a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; };
+      var obstacles = g.nodes.filter(function (n) { return n.x !== undefined; }).map(footprint);
+      // Cerca voraç: provem el punt mig i, si xoca, ens allunyem en cercles fins
+      // trobar un buit (ni sobre un concepte ni sobre una altra etiqueta ja posada).
+      var STEPS = [0, 16, 26, 36, 48, 62, 78, 96, 116, 138];
+      var DIRS = [[0, 1], [0, -1], [1, 0.5], [-1, 0.5], [1, -0.5], [-1, -0.5], [0.6, 1], [-0.6, 1]];
+      crossLinks.forEach(function (cl, ci) {
         var sn = byLx[cl.from], tn = byLx[cl.to];
         if (!sn || !tn || sn.x === undefined || tn.x === undefined) return;
-        if (Math.abs(tn.y - sn.y) < 6) {
-          var rk = Math.round(sn.y); var ln = laneR[rk] = (laneR[rk] || 0) + 1;
-          var hh = (sn.type === 'prop' ? sn.ph : sn.nh) / 2;
-          y1b = Math.max(y1b, Math.max(sn.y, tn.y) + hh + 30 + ln * 26 + 14);  // arc inferior
-        } else {
-          var ck = 'col' + Math.round(Math.max(sn.x, tn.x)); var lc = laneC[ck] = (laneC[ck] || 0) + 1;
-          var ctrlX = Math.max(sn.x, tn.x) + CM.NW / 2 + 46 + lc * 22 + Math.abs(sn.y - tn.y) * 0.12;
-          var lblPad = (cl.link ? cl.link.length * 6.2 + 12 : 0) / 2;
-          x1 = Math.max(x1, ctrlX + lblPad + CM.M);
+        var r = crossRoute(sn, tn, ci, cl.link ? cl.link.length * 6.2 + 12 : 0);
+        x0 = Math.min(x0, r.minX - CM.M); x1 = Math.max(x1, r.maxX + CM.M);
+        y0 = Math.min(y0, r.minY - 10); y1b = Math.max(y1b, r.maxY + 10);
+        var lbl = null;
+        if (cl.link) {
+          var w = cl.link.length * 6.2 + 12, h = 18, bx = r.lx, by = r.ly, placed = false;
+          for (var si = 0; si < STEPS.length && !placed; si++) {
+            var cands = si === 0 ? [[0, 0]] : DIRS;
+            for (var di = 0; di < cands.length; di++) {
+              var cxC = r.lx + cands[di][0] * STEPS[si], cyC = r.ly + cands[di][1] * STEPS[si];
+              var box = { x: cxC - w / 2, y: cyC - h / 2, w: w, h: h };
+              var clash = false;
+              for (var oi = 0; oi < obstacles.length; oi++) { if (ov(box, obstacles[oi])) { clash = true; break; } }
+              if (!clash) { bx = cxC; by = cyC; placed = true; break; }
+            }
+          }
+          obstacles.push({ x: bx - w / 2, y: by - h / 2, w: w, h: h });
+          x0 = Math.min(x0, bx - w / 2 - 4); x1 = Math.max(x1, bx + w / 2 + 4);
+          y0 = Math.min(y0, by - h / 2 - 4); y1b = Math.max(y1b, by + h / 2 + 4);
+          lbl = { x: bx, y: by, w: w, mx: r.lx, my: r.ly };
         }
+        crossRender.push({ d: r.d, ci: ci, link: cl.link, label: lbl });
       });
     }
 
@@ -369,8 +470,8 @@
     defs.appendChild(el('filter', { id: uid + '-sh', x: '-20%', y: '-20%', width: '140%', height: '140%' }, [
       el('feDropShadow', { dx: 0, dy: 1, stdDeviation: 2.5, 'flood-opacity': 0.11 })]));
     defs.appendChild(el('marker', { id: uid + '-arr', viewBox: '0 0 8 8', refX: 7, refY: 4,
-      markerWidth: 5, markerHeight: 5, orient: 'auto' },
-      [el('path', { d: 'M0,1 L7,4 L0,7 L2,4 Z', fill: '#818cf8' })]));
+      markerWidth: 8, markerHeight: 8, orient: 'auto' },
+      [el('path', { d: 'M0,1 L7,4 L0,7 L2,4 Z', fill: '#6366f1' })]));
     svg.appendChild(defs);
 
     // Mapa de pares (per al routing d'arestes amb bypass)
@@ -420,63 +521,33 @@
     //    (fix v0.8: abans es pintaven sota gN i els rectangles dels conceptes
     //    + ombres tapaven la corba i, sobretot, l'etiqueta de la relació). ──
     var gX = null;
-    if (crossLinks.length) {
-      var byLabel = {};
-      g.nodes.forEach(function (n) { if (byLabel[n.label] === undefined) byLabel[n.label] = n; });
+    if (crossRender.length) {
       var mk = el('marker', { id: uid + '-xarr', viewBox: '0 0 8 8', refX: 7, refY: 4,
-        markerWidth: 6, markerHeight: 6, orient: 'auto' },
+        markerWidth: 8, markerHeight: 8, orient: 'auto' },
         [el('path', { d: 'M0,1 L7,4 L0,7 L2,4 Z', fill: '#ea580c' })]);
       defs.appendChild(mk);
       gX = el('g');
-      // Alçada de mitja caixa per tipus (per sortir/entrar pel caire correcte)
-      function halfH(n) { return (n.type === 'prop' ? n.ph : n.nh) / 2; }
-      // Comptador de carrils per evitar que enllaços paral·lels se superposin.
-      var laneByRow = {};   // clau de fila -> nombre d'enllaços ja dibuixats
-      crossLinks.forEach(function (cl, ci) {
-        var sn = byLabel[cl.from], tn = byLabel[cl.to];
-        if (!sn || !tn || sn.x === undefined || tn.x === undefined) return;
-        var dx = tn.x - sn.x, dy = tn.y - sn.y;
-        var sameRow = Math.abs(dy) < 6;
-        var d, lx, ly;
-
-        if (sameRow) {
-          // Horitzontal: arquegem PER SOTA de la franja de nodes (esquiva-ho tot).
-          // Carril incremental segons quants enllaços ja hi ha en aquesta fila.
-          var rowKey = Math.round(sn.y);
-          var lane = laneByRow[rowKey] = (laneByRow[rowKey] || 0) + 1;
-          var x1 = sn.x, x2 = tn.x;
-          var y1 = sn.y + halfH(sn), y2 = tn.y + halfH(tn);   // surten per BAIX
-          var span = Math.abs(x2 - x1);
-          var drop = 30 + lane * 26;   // l'arc més llarg baixa més                           // cada carril, més avall
-          var midX = (x1 + x2) / 2, dipY = Math.max(y1, y2) + drop;
-          d = 'M ' + x1 + ' ' + y1 +
-              ' C ' + x1 + ' ' + dipY + ' ' + x2 + ' ' + dipY + ' ' + x2 + ' ' + y2;
-          lx = (x1 + x2) / 2; ly = dipY - 1;
-        } else {
-          // Diferent fila: corba lateral per la dreta (com abans), amb carril per X.
-          var laneK = 'col' + Math.round(Math.max(sn.x, tn.x));
-          var laneN = laneByRow[laneK] = (laneByRow[laneK] || 0) + 1;
-          var sx = sn.x + halfH(sn) * 0 + (sn.type === 'prop' ? 0 : CM.NW / 2);
-          var tx = tn.x + (tn.type === 'prop' ? 0 : CM.NW / 2);
-          var sy = sn.y, ty = tn.y, my = (sy + ty) / 2;
-          var bow = 46 + laneN * 22 + Math.abs(ty - sy) * 0.12;
-          var ctrlX = Math.max(sx, tx) + bow;
-          d = 'M ' + sx + ' ' + sy + ' Q ' + ctrlX + ' ' + my + ' ' + tx + ' ' + ty;
-          lx = ctrlX * 0.52 + ((sx + tx) / 2) * 0.48; ly = my;
-        }
-
-        gX.appendChild(el('path', { d: d, stroke: '#ea580c', 'stroke-width': 1.8,
-          'stroke-dasharray': '5 4', fill: 'none', 'marker-end': 'url(#' + uid + '-xarr)' }));
-        if (cl.link) {
-          var w = cl.link.length * 6.2 + 12;
+      crossRender.forEach(function (it) {
+        // Traç fi i discret (decisió Miquel 14/06): l'enllaç creuat és una anotació
+        // secundària, no ha de dominar el mapa.
+        gX.appendChild(el('path', { d: it.d, stroke: '#fb923c', 'stroke-width': 1.2,
+          'stroke-dasharray': '4 3', fill: 'none', 'marker-end': 'url(#' + uid + '-xarr)' }));
+        if (it.label) {
+          var L = it.label, w = L.w;
           // Grup clicable: data-cross-idx identifica l'enllaç per a editar/eliminar
-          var lg = el('g', { 'data-cross-idx': ci, style: 'cursor:pointer' });
+          var lg = el('g', { 'data-cross-idx': it.ci, style: 'cursor:pointer' });
           var tt = document.createElementNS(NS, 'title');
           tt.textContent = 'Clica per editar o eliminar la connexió';
           lg.appendChild(tt);
-          lg.appendChild(el('rect', { x: lx - w / 2, y: ly - 9, width: w, height: 18, rx: 5,
+          // Si l'etiqueta s'ha desplaçat al buit més proper, una línia fina la lliga
+          // amb el seu enllaç (estratègia de col·locació intel·ligent, decisió 14/06).
+          if (Math.abs(L.x - L.mx) > 2 || Math.abs(L.y - L.my) > 2) {
+            lg.appendChild(el('line', { x1: L.mx, y1: L.my, x2: L.x, y2: L.y,
+              stroke: '#fb923c', 'stroke-width': 1, 'stroke-dasharray': '2 2' }));
+          }
+          lg.appendChild(el('rect', { x: L.x - w / 2, y: L.y - 9, width: w, height: 18, rx: 5,
             fill: '#fff7ed', stroke: '#fb923c', 'stroke-width': 1 }));
-          lg.appendChild(txt(cl.link, { x: lx, y: ly + 4, 'text-anchor': 'middle',
+          lg.appendChild(txt(it.link, { x: L.x, y: L.y + 4, 'text-anchor': 'middle',
             'font-size': 10.5, 'font-style': 'italic', fill: '#c2410c', 'font-weight': '600' }));
           gX.appendChild(lg);
         }
