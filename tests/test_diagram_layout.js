@@ -188,7 +188,8 @@ const mapaA2 = [
   var snap = Object.keys(byLine).sort(function (a, b) { return +a - +b; })
     .map(function (k) { var c = byLine[k]; return k + ':' + Math.round(c.cx) + ',' + Math.round(c.cy); })
     .join('|');
-  const EXPECTED = '0:164,0|1:82,75|2:82,132|3:82,178|4:246,75|5:246,132|6:246,178';
+  // Snapshot amb LG=20 (gap vertical entre germans, ampliat el 13/06 per donar aire).
+  const EXPECTED = '0:164,0|1:82,75|2:82,132|3:82,188|4:246,75|5:246,132|6:246,188';
   check('A2 snapshot: geometria estable (anti-regressió)', snap === EXPECTED,
     '\n      actual:   ' + snap + '\n      esperat:  ' + EXPECTED);
 })();
@@ -220,6 +221,44 @@ const ambCross = [
     nodeGroups(cont).length === 5, 'grups=' + nodeGroups(cont).length);
   check('render: l\'enllaç creuat té etiqueta clicable (data-cross-idx)',
     crossGroups(cont).length === 1, 'cross-grups=' + crossGroups(cont).length);
+})();
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 5) Traçat d'enllaç creuat: passa SEMPRE per FORA dels nodes (per sota de tota
+//    la columna), no els travessa (fix feedback 13/06).
+// ─────────────────────────────────────────────────────────────────────────────
+const crossSpan = [
+  '- **R**',
+  '  - **a**',
+  '    - X1',          // primera fila de conceptes
+  '    - X2',          // germà apilat a sota de X1
+  '  - **b**',
+  '    - Y1',
+  '    - Y2',
+  '',
+  '- Enllaços creuats:',
+  '  - X1 -> Y1 : rel',   // mateixa fila, abast que cobreix X2/Y2 a sota
+].join('\n');
+(function () {
+  var cont = render(crossSpan);
+  // Y màxima del path de l'enllaç creuat (taronja, discontinu '5 4').
+  var paths = descendants(cont).filter(function (e) {
+    return e.tagName === 'path' && /5 4/.test(e.attrs['stroke-dasharray'] || '');
+  });
+  var pathMaxY = -Infinity;
+  paths.forEach(function (p) {
+    var nums = (p.attrs.d || '').match(/-?[\d.]+/g) || [];
+    for (var i = 1; i < nums.length; i += 2) pathMaxY = Math.max(pathMaxY, +nums[i]);
+  });
+  // Bottom del node més baix (rect y + height).
+  var maxBottom = -Infinity;
+  nodeGroups(cont).forEach(function (g) {
+    var rect = descendants(g).find(function (e) { return e.tagName === 'rect'; });
+    if (rect) maxBottom = Math.max(maxBottom, +rect.attrs.y + (+rect.attrs.height));
+  });
+  check('enllaç creuat: passa per sota de tots els nodes de l\'abast (no els travessa)',
+    paths.length === 1 && pathMaxY > maxBottom,
+    'pathMaxY=' + pathMaxY + ' maxBottom=' + maxBottom + ' paths=' + paths.length);
 })();
 
 console.log(fails === 0 ? '\nTOTS OK' : `\n${fails} FALLADES`);

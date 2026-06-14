@@ -240,7 +240,7 @@
     NW: 120, NH: 36, NR: 8,    // concepte
     PH: 22,                     // proposició (alçada base)
     HG: 44,                     // gap horitzontal → colW = 164
-    VG1: 44, VG2: 28, LG: 10,
+    VG1: 44, VG2: 28, LG: 20,   // LG = gap vertical entre germans (10→20: més aire, feedback 13/06)
     M: 32, PFS: 11,
   };
 
@@ -343,14 +343,22 @@
     if (crossLinks.length) {
       var byLx = {};
       g.nodes.forEach(function (n) { if (byLx[n.label] === undefined) byLx[n.label] = n; });
+      var halfOf = function (n) { return (n.type === 'prop' ? n.ph : n.nh) / 2; };
       var laneR = {}, laneC = {};
       crossLinks.forEach(function (cl) {
         var sn = byLx[cl.from], tn = byLx[cl.to];
         if (!sn || !tn || sn.x === undefined || tn.x === undefined) return;
         if (Math.abs(tn.y - sn.y) < 6) {
+          // Mateix càlcul que el draw-pass: dipa sota de TOTS els nodes de l'abast.
           var rk = Math.round(sn.y); var ln = laneR[rk] = (laneR[rk] || 0) + 1;
-          var hh = (sn.type === 'prop' ? sn.ph : sn.nh) / 2;
-          y1b = Math.max(y1b, Math.max(sn.y, tn.y) + hh + 30 + ln * 26 + 14);  // arc inferior
+          var loX = Math.min(sn.x, tn.x), hiX = Math.max(sn.x, tn.x);
+          var floorY = Math.max(sn.y + halfOf(sn), tn.y + halfOf(tn));
+          g.nodes.forEach(function (m) {
+            if (m.x === undefined || m.x < loX - 1 || m.x > hiX + 1) return;
+            var mb = m.y + halfOf(m);
+            if (mb > floorY) floorY = mb;
+          });
+          y1b = Math.max(y1b, floorY + 24 + ln * 22 + 14);  // arc inferior + etiqueta
         } else {
           var ck = 'col' + Math.round(Math.max(sn.x, tn.x)); var lc = laneC[ck] = (laneC[ck] || 0) + 1;
           var ctrlX = Math.max(sn.x, tn.x) + CM.NW / 2 + 46 + lc * 22 + Math.abs(sn.y - tn.y) * 0.12;
@@ -440,15 +448,21 @@
         var d, lx, ly;
 
         if (sameRow) {
-          // Horitzontal: arquegem PER SOTA de la franja de nodes (esquiva-ho tot).
-          // Carril incremental segons quants enllaços ja hi ha en aquesta fila.
+          // Horitzontal: arquegem PER SOTA de TOTS els nodes de l'abast horitzontal
+          // (no només l'origen) perquè la corba no travessi mai cap concepte germà
+          // apilat a sota (fix feedback 13/06). Carril incremental per fila.
           var rowKey = Math.round(sn.y);
           var lane = laneByRow[rowKey] = (laneByRow[rowKey] || 0) + 1;
           var x1 = sn.x, x2 = tn.x;
           var y1 = sn.y + halfH(sn), y2 = tn.y + halfH(tn);   // surten per BAIX
-          var span = Math.abs(x2 - x1);
-          var drop = 30 + lane * 26;   // l'arc més llarg baixa més                           // cada carril, més avall
-          var midX = (x1 + x2) / 2, dipY = Math.max(y1, y2) + drop;
+          var loX = Math.min(x1, x2), hiX = Math.max(x1, x2);
+          var floorY = Math.max(y1, y2);
+          g.nodes.forEach(function (m) {
+            if (m.x === undefined || m.x < loX - 1 || m.x > hiX + 1) return;
+            var mb = m.y + halfH(m);
+            if (mb > floorY) floorY = mb;
+          });
+          var dipY = floorY + 24 + lane * 22;   // sota de tot + carril
           d = 'M ' + x1 + ' ' + y1 +
               ' C ' + x1 + ' ' + dipY + ' ' + x2 + ' ' + dipY + ' ' + x2 + ' ' + y2;
           lx = (x1 + x2) / 2; ly = dipY - 1;
