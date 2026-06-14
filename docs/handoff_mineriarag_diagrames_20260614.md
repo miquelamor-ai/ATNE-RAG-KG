@@ -2,6 +2,18 @@
 
 **Data:** 14 juny 2026 · **De:** ATNE (editor de diagrames bloc B) · **Per a:** mineriaRAG (canon corpusFJE)
 
+> **✅ RESOLT (14/06).** mineriaRAG ha canonitzat les 2 peticions i ATNE les
+> consumeix (submodule corpusFJE bumpat a `b64be13`):
+> - **Petició 1** — `generate-mapa-mental/rubrica.json` existeix (font 1.1.0-canonic):
+>   profunditat `pas_3_nivells_d_expansio`, branques `pas_2_nombre_de_branques`,
+>   densitat heurística `H5`. ATNE deriva la clau `mapa_mental` i en gateja
+>   profunditat + branques primàries.
+> - **Petició 2** — `cross_max` des de `pas_6_nombre_recomanat` del mapa conceptual
+>   (font 4.2.0-canonic): {pre-A1..C1+} = 0,0,0,1,2,3. ATNE substitueix el
+>   `CROSS_REC=3` hardcoded per la lectura del canon (avís, no bloqueig).
+>
+> El text de sota és la petició original (històric).
+
 ## Context
 
 ATNE ha afegit **edició interactiva** als diagrames (mapa conceptual Novak), **graduada per MECR consumint el canon** (`rubrica.json` de cada skill, via build-script → derivat `.data.js` → consum al frontend, amb drift-guard). Ara s'estén l'edició a **mapa mental** i **esquema visual**. Calen 2 coses al canon perquè ATNE les pugui consumir (ATNE = consumidor, mai origen).
