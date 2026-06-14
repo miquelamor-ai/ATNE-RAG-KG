@@ -338,33 +338,49 @@
     var x1  = Math.max.apply(null, xs) + CM.NW / 2 + CM.M;
     var y1  = Math.max.apply(null, ys) + Math.max.apply(null, allH) / 2 + CM.M;
     var y1b = y1;
-    // Eixamplar el viewBox per encabir les corbes d'enllaços creuats (surten
-    // per la dreta). Sense això, l'etiqueta de la relació quedava tallada (v0.8).
+    // ── Enrutament dels enllaços creuats (graf Novak) — BUS ORTOGONAL ──
+    // La corba surt pel COSTAT del node cap al passadís entre columnes (sempre
+    // buit), baixa fins a un BUS horitzontal per sota dels nodes que el tram
+    // sobrevola, i puja cap al destí. Així la línia NO travessa MAI cap caixa de
+    // concepte, ni en files iguals ni diferents (fix feedback 14/06). El router
+    // és compartit pel pre-pass (viewBox) i el draw-pass perquè siguin coherents.
+    function crossHalfW(n) { return n.type === 'prop' ? 34 : CM.NW / 2; }
+    function crossHalfH(n) { return (n.type === 'prop' ? n.ph : n.nh) / 2; }
+    function crossRoute(sn, tn, lane) {
+      var sxC = sn.x, syC = sn.y, txC = tn.x, tyC = tn.y;
+      var dirS = (txC >= sxC) ? 1 : -1, dirT = (sxC > txC) ? 1 : -1;
+      var gutS = sxC + dirS * (crossHalfW(sn) + CM.HG / 2);   // passadís costat origen
+      var gutT = txC + dirT * (crossHalfW(tn) + CM.HG / 2);   // passadís costat destí
+      // Columnes adjacents → gutS==gutT (passadís compartit, bus de longitud 0): correcte.
+      // Mateixa columna → dirS/dirT donen costats oposats i el bus passa per sota.
+      var edgeSx = sxC + dirS * crossHalfW(sn), edgeTx = txC + dirT * crossHalfW(tn);
+      // Bus per sota dels nodes que el tram horitzontal sobrevola [gutS..gutT].
+      var loX = Math.min(gutS, gutT), hiX = Math.max(gutS, gutT);
+      var floorY = Math.max(syC + crossHalfH(sn), tyC + crossHalfH(tn));
+      g.nodes.forEach(function (m) {
+        if (m.x === undefined || m.x < loX - 1 || m.x > hiX + 1) return;
+        var mb = m.y + crossHalfH(m);
+        if (mb > floorY) floorY = mb;
+      });
+      var busY = floorY + 22 + lane * 16;
+      var d = 'M ' + edgeSx + ' ' + syC + ' L ' + gutS + ' ' + syC +
+              ' L ' + gutS + ' ' + busY + ' L ' + gutT + ' ' + busY +
+              ' L ' + gutT + ' ' + tyC + ' L ' + edgeTx + ' ' + tyC;
+      return { d: d, lx: (gutS + gutT) / 2, ly: busY, busY: busY,
+               minX: Math.min(edgeSx, gutS, gutT, edgeTx),
+               maxX: Math.max(edgeSx, gutS, gutT, edgeTx) };
+    }
     if (crossLinks.length) {
       var byLx = {};
       g.nodes.forEach(function (n) { if (byLx[n.label] === undefined) byLx[n.label] = n; });
-      var halfOf = function (n) { return (n.type === 'prop' ? n.ph : n.nh) / 2; };
-      var laneR = {}, laneC = {};
-      crossLinks.forEach(function (cl) {
+      crossLinks.forEach(function (cl, ci) {
         var sn = byLx[cl.from], tn = byLx[cl.to];
         if (!sn || !tn || sn.x === undefined || tn.x === undefined) return;
-        if (Math.abs(tn.y - sn.y) < 6) {
-          // Mateix càlcul que el draw-pass: dipa sota de TOTS els nodes de l'abast.
-          var rk = Math.round(sn.y); var ln = laneR[rk] = (laneR[rk] || 0) + 1;
-          var loX = Math.min(sn.x, tn.x), hiX = Math.max(sn.x, tn.x);
-          var floorY = Math.max(sn.y + halfOf(sn), tn.y + halfOf(tn));
-          g.nodes.forEach(function (m) {
-            if (m.x === undefined || m.x < loX - 1 || m.x > hiX + 1) return;
-            var mb = m.y + halfOf(m);
-            if (mb > floorY) floorY = mb;
-          });
-          y1b = Math.max(y1b, floorY + 24 + ln * 22 + 14);  // arc inferior + etiqueta
-        } else {
-          var ck = 'col' + Math.round(Math.max(sn.x, tn.x)); var lc = laneC[ck] = (laneC[ck] || 0) + 1;
-          var ctrlX = Math.max(sn.x, tn.x) + CM.NW / 2 + 46 + lc * 22 + Math.abs(sn.y - tn.y) * 0.12;
-          var lblPad = (cl.link ? cl.link.length * 6.2 + 12 : 0) / 2;
-          x1 = Math.max(x1, ctrlX + lblPad + CM.M);
-        }
+        var r = crossRoute(sn, tn, ci);
+        var lblHalf = (cl.link ? cl.link.length * 6.2 + 12 : 0) / 2;
+        y1b = Math.max(y1b, r.busY + 16);
+        x0 = Math.min(x0, r.minX - CM.M, r.lx - lblHalf - 4);
+        x1 = Math.max(x1, r.maxX + CM.M, r.lx + lblHalf + 4);
       });
     }
 
@@ -436,48 +452,14 @@
         [el('path', { d: 'M0,1 L7,4 L0,7 L2,4 Z', fill: '#ea580c' })]);
       defs.appendChild(mk);
       gX = el('g');
-      // Alçada de mitja caixa per tipus (per sortir/entrar pel caire correcte)
-      function halfH(n) { return (n.type === 'prop' ? n.ph : n.nh) / 2; }
-      // Comptador de carrils per evitar que enllaços paral·lels se superposin.
-      var laneByRow = {};   // clau de fila -> nombre d'enllaços ja dibuixats
       crossLinks.forEach(function (cl, ci) {
         var sn = byLabel[cl.from], tn = byLabel[cl.to];
         if (!sn || !tn || sn.x === undefined || tn.x === undefined) return;
-        var dx = tn.x - sn.x, dy = tn.y - sn.y;
-        var sameRow = Math.abs(dy) < 6;
-        var d, lx, ly;
-
-        if (sameRow) {
-          // Horitzontal: arquegem PER SOTA de TOTS els nodes de l'abast horitzontal
-          // (no només l'origen) perquè la corba no travessi mai cap concepte germà
-          // apilat a sota (fix feedback 13/06). Carril incremental per fila.
-          var rowKey = Math.round(sn.y);
-          var lane = laneByRow[rowKey] = (laneByRow[rowKey] || 0) + 1;
-          var x1 = sn.x, x2 = tn.x;
-          var y1 = sn.y + halfH(sn), y2 = tn.y + halfH(tn);   // surten per BAIX
-          var loX = Math.min(x1, x2), hiX = Math.max(x1, x2);
-          var floorY = Math.max(y1, y2);
-          g.nodes.forEach(function (m) {
-            if (m.x === undefined || m.x < loX - 1 || m.x > hiX + 1) return;
-            var mb = m.y + halfH(m);
-            if (mb > floorY) floorY = mb;
-          });
-          var dipY = floorY + 24 + lane * 22;   // sota de tot + carril
-          d = 'M ' + x1 + ' ' + y1 +
-              ' C ' + x1 + ' ' + dipY + ' ' + x2 + ' ' + dipY + ' ' + x2 + ' ' + y2;
-          lx = (x1 + x2) / 2; ly = dipY - 1;
-        } else {
-          // Diferent fila: corba lateral per la dreta (com abans), amb carril per X.
-          var laneK = 'col' + Math.round(Math.max(sn.x, tn.x));
-          var laneN = laneByRow[laneK] = (laneByRow[laneK] || 0) + 1;
-          var sx = sn.x + halfH(sn) * 0 + (sn.type === 'prop' ? 0 : CM.NW / 2);
-          var tx = tn.x + (tn.type === 'prop' ? 0 : CM.NW / 2);
-          var sy = sn.y, ty = tn.y, my = (sy + ty) / 2;
-          var bow = 46 + laneN * 22 + Math.abs(ty - sy) * 0.12;
-          var ctrlX = Math.max(sx, tx) + bow;
-          d = 'M ' + sx + ' ' + sy + ' Q ' + ctrlX + ' ' + my + ' ' + tx + ' ' + ty;
-          lx = ctrlX * 0.52 + ((sx + tx) / 2) * 0.48; ly = my;
-        }
+        // Router ortogonal compartit amb el pre-pass: surt pel costat cap al
+        // passadís, baixa al bus per sota dels nodes de l'abast i puja al destí
+        // (mai travessa cap concepte). El carril = índex de l'enllaç.
+        var route = crossRoute(sn, tn, ci);
+        var d = route.d, lx = route.lx, ly = route.ly;
 
         gX.appendChild(el('path', { d: d, stroke: '#ea580c', 'stroke-width': 1.8,
           'stroke-dasharray': '5 4', fill: 'none', 'marker-end': 'url(#' + uid + '-xarr)' }));

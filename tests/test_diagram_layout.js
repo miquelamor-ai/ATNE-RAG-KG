@@ -224,41 +224,63 @@ const ambCross = [
 })();
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 5) Traçat d'enllaç creuat: passa SEMPRE per FORA dels nodes (per sota de tota
-//    la columna), no els travessa (fix feedback 13/06).
+// 5) + 6) Traçat d'enllaços creuats: la línia NO entra DINS de cap caixa de
+//    concepte (router ortogonal per passadís + bus). Requisit explícit de Miquel
+//    (14/06): "les línies mai per sobre o sota dels conceptes".
 // ─────────────────────────────────────────────────────────────────────────────
-const crossSpan = [
-  '- **R**',
-  '  - **a**',
-  '    - X1',          // primera fila de conceptes
-  '    - X2',          // germà apilat a sota de X1
-  '  - **b**',
-  '    - Y1',
-  '    - Y2',
-  '',
-  '- Enllaços creuats:',
-  '  - X1 -> Y1 : rel',   // mateixa fila, abast que cobreix X2/Y2 a sota
-].join('\n');
-(function () {
-  var cont = render(crossSpan);
-  // Y màxima del path de l'enllaç creuat (taronja, discontinu '5 4').
-  var paths = descendants(cont).filter(function (e) {
+function nodeRects(cont) {
+  return nodeGroups(cont).map(function (g) {
+    var r = descendants(g).find(function (e) { return e.tagName === 'rect'; });
+    return r ? { x: +r.attrs.x, y: +r.attrs.y, w: +r.attrs.width, h: +r.attrs.height } : null;
+  }).filter(Boolean);
+}
+function crossPoints(cont) {
+  var p = descendants(cont).find(function (e) {
     return e.tagName === 'path' && /5 4/.test(e.attrs['stroke-dasharray'] || '');
   });
-  var pathMaxY = -Infinity;
-  paths.forEach(function (p) {
-    var nums = (p.attrs.d || '').match(/-?[\d.]+/g) || [];
-    for (var i = 1; i < nums.length; i += 2) pathMaxY = Math.max(pathMaxY, +nums[i]);
-  });
-  // Bottom del node més baix (rect y + height).
-  var maxBottom = -Infinity;
-  nodeGroups(cont).forEach(function (g) {
-    var rect = descendants(g).find(function (e) { return e.tagName === 'rect'; });
-    if (rect) maxBottom = Math.max(maxBottom, +rect.attrs.y + (+rect.attrs.height));
-  });
-  check('enllaç creuat: passa per sota de tots els nodes de l\'abast (no els travessa)',
-    paths.length === 1 && pathMaxY > maxBottom,
-    'pathMaxY=' + pathMaxY + ' maxBottom=' + maxBottom + ' paths=' + paths.length);
+  if (!p) return [];
+  var nums = (p.attrs.d || '').match(/-?[\d.]+/g) || [];
+  var pts = [];
+  for (var i = 0; i + 1 < nums.length; i += 2) pts.push({ x: +nums[i], y: +nums[i + 1] });
+  return pts;
+}
+// Intersecció segment ortogonal ↔ rectangle (amb un inset per permetre que els
+// extrems toquin el caire del node origen/destí sense comptar com a travessia).
+function segHitsRect(p1, p2, r, inset) {
+  var rx0 = r.x + inset, ry0 = r.y + inset, rx1 = r.x + r.w - inset, ry1 = r.y + r.h - inset;
+  if (rx1 <= rx0 || ry1 <= ry0) return false;
+  if (Math.abs(p1.y - p2.y) < 0.01) {                 // horitzontal
+    if (p1.y <= ry0 || p1.y >= ry1) return false;
+    return Math.min(p1.x, p2.x) < rx1 && Math.max(p1.x, p2.x) > rx0;
+  }
+  if (Math.abs(p1.x - p2.x) < 0.01) {                 // vertical
+    if (p1.x <= rx0 || p1.x >= rx1) return false;
+    return Math.min(p1.y, p2.y) < ry1 && Math.max(p1.y, p2.y) > ry0;
+  }
+  return false;
+}
+function crossHitsNode(cont) {
+  var rects = nodeRects(cont), pts = crossPoints(cont);
+  for (var i = 0; i + 1 < pts.length; i++)
+    for (var j = 0; j < rects.length; j++)
+      if (segHitsRect(pts[i], pts[i + 1], rects[j], 2)) return true;
+  return false;
+}
+// (5) Mateixa fila, amb germans apilats a sota dins l'abast.
+(function () {
+  var cont = render([
+    '- **R**', '  - **a**', '    - X1', '    - X2', '  - **b**', '    - Y1', '    - Y2',
+    '', '- Enllaços creuats:', '  - X1 -> Y1 : rel',
+  ].join('\n'));
+  check('enllaç creuat (mateixa fila): no travessa cap caixa de concepte', !crossHitsNode(cont));
+})();
+// (6) Files diferents (columnes de profunditat desigual) — el cas que ho trencava.
+(function () {
+  var cont = render([
+    '- **R**', '  - **a**', '    - X1', '    - X2', '    - X3', '  - **b**', '    - Y1',
+    '', '- Enllaços creuats:', '  - X3 -> Y1 : rel',
+  ].join('\n'));
+  check('enllaç creuat (files diferents): no travessa cap caixa de concepte', !crossHitsNode(cont));
 })();
 
 console.log(fails === 0 ? '\nTOTS OK' : `\n${fails} FALLADES`);
