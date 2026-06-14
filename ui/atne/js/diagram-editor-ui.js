@@ -199,17 +199,26 @@
       b.style.cursor = empty ? 'default' : 'pointer';
     });
   }
+  function crossCount() { return (C.splitCross(md()).cross || []).length; }
   function updateBadge() {
     if (!ui.badge) return;
     var n = treeNodeCount();
     var cap = depthCap();
     var capTxt = (cap === Infinity) ? 'profunditat lliure' : ('fins a ' + cap + ' nivells');
     var dmax = densitatMax();
-    var over = (dmax !== Infinity && n > dmax);
-    ui.badge.textContent = n + ' nodes' + (over ? ' (recomanat ≤ ' + dmax + ')' : '') +
-      ' · ' + normMecr(state.mecr) + ' · ' + capTxt;
-    ui.badge.style.color = over ? '#dc2626' : '#6d28d9';
-    ui.badge.style.fontWeight = over ? '700' : '600';
+    var nx = crossCount();
+    // Enllaços creuats: el principi Novak (i CmapTools) en demana POCS. Llindar tou
+    // (≤ CROSS_REC); avís, no bloqueig. NOTA: aquesta xifra hauria de venir del canon
+    // (handoff a mineriaRAG, pendent) — de moment és un valor de plataforma documentat.
+    var CROSS_REC = 3;
+    var dOver = (dmax !== Infinity && n > dmax);
+    var xOver = nx > CROSS_REC;
+    var crossTxt = nx ? (' · ' + nx + ' connexi' + (nx === 1 ? 'ó' : 'ons') + (xOver ? ' (massa?)' : '')) : '';
+    ui.badge.textContent = n + ' nodes' + (dOver ? ' (≤ ' + dmax + ')' : '') +
+      ' · ' + normMecr(state.mecr) + ' · ' + capTxt + crossTxt;
+    var warn = dOver || xOver;
+    ui.badge.style.color = warn ? '#dc2626' : '#6d28d9';
+    ui.badge.style.fontWeight = warn ? '700' : '600';
   }
 
   // Injecta la barra de control + la mini-toolbar de font dins del wrapper del

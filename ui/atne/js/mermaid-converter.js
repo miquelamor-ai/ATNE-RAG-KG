@@ -369,18 +369,49 @@
                minX: Math.min.apply(null, xs), maxX: Math.max.apply(null, xs),
                minY: Math.min.apply(null, ys), maxY: Math.max.apply(null, ys) };
     }
+    // crossRender: calculat UN COP aquí (corba + col·locació d'etiqueta) i reusat
+    // al draw-pass, perquè el viewBox pugui encabir la posició FINAL de l'etiqueta.
+    var crossRender = [];
     if (crossLinks.length) {
       var byLx = {};
       g.nodes.forEach(function (n) { if (byLx[n.label] === undefined) byLx[n.label] = n; });
+      // Empremtes dels nodes = obstacles per a la col·locació d'etiquetes.
+      var footprint = function (n) {
+        if (n.type === 'root') return { x: n.x - CM.RW / 2, y: n.y - CM.RH / 2, w: CM.RW, h: CM.RH };
+        if (n.type === 'prop') { var pw = n.label.length * CM.PFS * 0.6 + 10; return { x: n.x - pw / 2, y: n.y - n.ph / 2, w: pw, h: n.ph }; }
+        return { x: n.x - CM.NW / 2, y: n.y - n.nh / 2, w: CM.NW, h: n.nh };
+      };
+      var ov = function (a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; };
+      var obstacles = g.nodes.filter(function (n) { return n.x !== undefined; }).map(footprint);
+      // Cerca voraç: provem el punt mig i, si xoca, ens allunyem en cercles fins
+      // trobar un buit (ni sobre un concepte ni sobre una altra etiqueta ja posada).
+      var STEPS = [0, 16, 26, 36, 48, 62, 78, 96, 116, 138];
+      var DIRS = [[0, 1], [0, -1], [1, 0.5], [-1, 0.5], [1, -0.5], [-1, -0.5], [0.6, 1], [-0.6, 1]];
       crossLinks.forEach(function (cl, ci) {
         var sn = byLx[cl.from], tn = byLx[cl.to];
         if (!sn || !tn || sn.x === undefined || tn.x === undefined) return;
         var r = crossRoute(sn, tn, ci);
-        var lblHalf = (cl.link ? cl.link.length * 6.2 + 12 : 0) / 2;
-        x0 = Math.min(x0, r.minX - CM.M, r.lx - lblHalf - 4);
-        x1 = Math.max(x1, r.maxX + CM.M, r.lx + lblHalf + 4);
-        y0 = Math.min(y0, r.minY - 12);
-        y1b = Math.max(y1b, r.maxY + 14);
+        x0 = Math.min(x0, r.minX - CM.M); x1 = Math.max(x1, r.maxX + CM.M);
+        y0 = Math.min(y0, r.minY - 10); y1b = Math.max(y1b, r.maxY + 10);
+        var lbl = null;
+        if (cl.link) {
+          var w = cl.link.length * 6.2 + 12, h = 18, bx = r.lx, by = r.ly, placed = false;
+          for (var si = 0; si < STEPS.length && !placed; si++) {
+            var cands = si === 0 ? [[0, 0]] : DIRS;
+            for (var di = 0; di < cands.length; di++) {
+              var cxC = r.lx + cands[di][0] * STEPS[si], cyC = r.ly + cands[di][1] * STEPS[si];
+              var box = { x: cxC - w / 2, y: cyC - h / 2, w: w, h: h };
+              var clash = false;
+              for (var oi = 0; oi < obstacles.length; oi++) { if (ov(box, obstacles[oi])) { clash = true; break; } }
+              if (!clash) { bx = cxC; by = cyC; placed = true; break; }
+            }
+          }
+          obstacles.push({ x: bx - w / 2, y: by - h / 2, w: w, h: h });
+          x0 = Math.min(x0, bx - w / 2 - 4); x1 = Math.max(x1, bx + w / 2 + 4);
+          y0 = Math.min(y0, by - h / 2 - 4); y1b = Math.max(y1b, by + h / 2 + 4);
+          lbl = { x: bx, y: by, w: w, mx: r.lx, my: r.ly };
+        }
+        crossRender.push({ d: r.d, ci: ci, link: cl.link, label: lbl });
       });
     }
 
@@ -444,35 +475,31 @@
     //    (fix v0.8: abans es pintaven sota gN i els rectangles dels conceptes
     //    + ombres tapaven la corba i, sobretot, l'etiqueta de la relació). ──
     var gX = null;
-    if (crossLinks.length) {
-      var byLabel = {};
-      g.nodes.forEach(function (n) { if (byLabel[n.label] === undefined) byLabel[n.label] = n; });
+    if (crossRender.length) {
       var mk = el('marker', { id: uid + '-xarr', viewBox: '0 0 8 8', refX: 7, refY: 4,
         markerWidth: 6, markerHeight: 6, orient: 'auto' },
         [el('path', { d: 'M0,1 L7,4 L0,7 L2,4 Z', fill: '#ea580c' })]);
       defs.appendChild(mk);
       gX = el('g');
-      crossLinks.forEach(function (cl, ci) {
-        var sn = byLabel[cl.from], tn = byLabel[cl.to];
-        if (!sn || !tn || sn.x === undefined || tn.x === undefined) return;
-        // Router ortogonal compartit amb el pre-pass: surt pel costat cap al
-        // passadís, baixa al bus per sota dels nodes de l'abast i puja al destí
-        // (mai travessa cap concepte). El carril = índex de l'enllaç.
-        var route = crossRoute(sn, tn, ci);
-        var d = route.d, lx = route.lx, ly = route.ly;
-
-        gX.appendChild(el('path', { d: d, stroke: '#ea580c', 'stroke-width': 1.8,
+      crossRender.forEach(function (it) {
+        gX.appendChild(el('path', { d: it.d, stroke: '#ea580c', 'stroke-width': 1.8,
           'stroke-dasharray': '5 4', fill: 'none', 'marker-end': 'url(#' + uid + '-xarr)' }));
-        if (cl.link) {
-          var w = cl.link.length * 6.2 + 12;
+        if (it.label) {
+          var L = it.label, w = L.w;
           // Grup clicable: data-cross-idx identifica l'enllaç per a editar/eliminar
-          var lg = el('g', { 'data-cross-idx': ci, style: 'cursor:pointer' });
+          var lg = el('g', { 'data-cross-idx': it.ci, style: 'cursor:pointer' });
           var tt = document.createElementNS(NS, 'title');
           tt.textContent = 'Clica per editar o eliminar la connexió';
           lg.appendChild(tt);
-          lg.appendChild(el('rect', { x: lx - w / 2, y: ly - 9, width: w, height: 18, rx: 5,
+          // Si l'etiqueta s'ha desplaçat al buit més proper, una línia fina la lliga
+          // amb el seu enllaç (estratègia de col·locació intel·ligent, decisió 14/06).
+          if (Math.abs(L.x - L.mx) > 2 || Math.abs(L.y - L.my) > 2) {
+            lg.appendChild(el('line', { x1: L.mx, y1: L.my, x2: L.x, y2: L.y,
+              stroke: '#fb923c', 'stroke-width': 1, 'stroke-dasharray': '2 2' }));
+          }
+          lg.appendChild(el('rect', { x: L.x - w / 2, y: L.y - 9, width: w, height: 18, rx: 5,
             fill: '#fff7ed', stroke: '#fb923c', 'stroke-width': 1 }));
-          lg.appendChild(txt(cl.link, { x: lx, y: ly + 4, 'text-anchor': 'middle',
+          lg.appendChild(txt(it.link, { x: L.x, y: L.y + 4, 'text-anchor': 'middle',
             'font-size': 10.5, 'font-style': 'italic', fill: '#c2410c', 'font-weight': '600' }));
           gX.appendChild(lg);
         }

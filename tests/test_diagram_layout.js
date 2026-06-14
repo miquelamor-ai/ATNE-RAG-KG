@@ -275,5 +275,25 @@ function nodeCenters(cont) {
     'path=' + !!p + ' pts=' + pts.length + ' label=' + !!lb);
 })();
 
+// (7) Col·locació intel·ligent: si el punt mig de l'enllaç cau sobre un concepte,
+//     l'etiqueta s'ha de DESPLAÇAR al buit (no quedar damunt del concepte).
+(function () {
+  var cont = render([
+    '- **R**', '  - **a**', '    - X1', '  - **b**', '    - Y1', '  - **c**', '    - Z1',
+    '', '- Enllaços creuats:', '  - X1 -> Z1 : passa per',   // punt mig ≈ sobre Y1
+  ].join('\n'));
+  var lb = labelBox(cont);
+  function nrects(c) {
+    return nodeGroups(c).map(function (g) {
+      var r = descendants(g).find(function (e) { return e.tagName === 'rect'; });
+      return r ? { x: +r.attrs.x, y: +r.attrs.y, w: +r.attrs.width, h: +r.attrs.height } : null;
+    }).filter(Boolean);
+  }
+  function ov(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
+  var hits = !!lb && nrects(cont).some(function (n) { return ov(lb, n); });
+  check('col·locació intel·ligent: l\'etiqueta es mou del concepte al buit',
+    !!lb && !hits, 'label=' + !!lb + ' solapa_concepte=' + hits);
+})();
+
 console.log(fails === 0 ? '\nTOTS OK' : `\n${fails} FALLADES`);
 process.exit(fails === 0 ? 0 : 1);
