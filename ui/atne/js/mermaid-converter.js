@@ -470,8 +470,8 @@
     defs.appendChild(el('filter', { id: uid + '-sh', x: '-20%', y: '-20%', width: '140%', height: '140%' }, [
       el('feDropShadow', { dx: 0, dy: 1, stdDeviation: 2.5, 'flood-opacity': 0.11 })]));
     defs.appendChild(el('marker', { id: uid + '-arr', viewBox: '0 0 8 8', refX: 7, refY: 4,
-      markerWidth: 5, markerHeight: 5, orient: 'auto' },
-      [el('path', { d: 'M0,1 L7,4 L0,7 L2,4 Z', fill: '#818cf8' })]));
+      markerWidth: 8, markerHeight: 8, orient: 'auto' },
+      [el('path', { d: 'M0,1 L7,4 L0,7 L2,4 Z', fill: '#6366f1' })]));
     svg.appendChild(defs);
 
     // Mapa de pares (per al routing d'arestes amb bypass)
@@ -523,8 +523,8 @@
     var gX = null;
     if (crossRender.length) {
       var mk = el('marker', { id: uid + '-xarr', viewBox: '0 0 8 8', refX: 7, refY: 4,
-        markerWidth: 5, markerHeight: 5, orient: 'auto' },
-        [el('path', { d: 'M0,1.5 L7,4 L0,6.5 L2,4 Z', fill: '#fb923c' })]);
+        markerWidth: 8, markerHeight: 8, orient: 'auto' },
+        [el('path', { d: 'M0,1 L7,4 L0,7 L2,4 Z', fill: '#ea580c' })]);
       defs.appendChild(mk);
       gX = el('g');
       crossRender.forEach(function (it) {
