@@ -16,6 +16,14 @@
  *
  * Carrega DESPRÉS de mermaid-converter.js (usa window.ATNE_MERMAID) i, si hi és,
  * consumeix window.ATNE_MAPA_PROFUNDITAT (límit de profunditat per MECR, canon).
+ *
+ * BACKLOG CONEGUT (decidit amb Miquel 13/06 — diferit, no bloquejant):
+ *   1. renameInCross NO s'enganxa: si es reanomena un node pel popup d'edició del
+ *      renderitzador, els enllaços creuats que el referencien queden trencats
+ *      (el label vell ja no existeix). El nucli té renameInCross() a punt.
+ *   2. Les edicions de LABEL pel popup del renderitzador NO entren al desfés (el
+ *      renderitzador re-renderitza pel seu compte). Les operacions estructurals
+ *      (+/×/↝) i l'editor de font SÍ que hi entren.
  */
 (function () {
   'use strict';
@@ -391,6 +399,10 @@
     if (!ta || ta.dataset.atneEnhanced) return;
     ta.dataset.atneEnhanced = '1';
     ta.value = md();   // assegura que reflecteix la font vigent
+    // Una mica més ample i alt de sortida (es demanava al feedback 13/06).
+    ta.style.width = '100%';
+    ta.style.minHeight = '170px';
+    ta.style.minWidth = '440px';
 
     var details = ta.closest('details') || wrap;
     var tb = document.createElement('div');
@@ -418,9 +430,10 @@
     if (btn) {
       var clone = btn.cloneNode(true);
       btn.parentNode.replaceChild(clone, btn);
+      clone.addEventListener('mousedown', function (e) { e.preventDefault(); });   // no robis el focus
       clone.addEventListener('click', function () {
         var v = filterMd(ta.value);
-        if (v) setMd(v);
+        if (v && v !== md()) setMd(v);
       });
     }
   }
@@ -429,6 +442,9 @@
     b.type = 'button'; b.textContent = label; b.title = title;
     b.style.cssText = 'border:1px solid #ddd6fe;background:#fff;color:#6d28d9;border-radius:6px;' +
       'padding:3px 8px;font-size:11.5px;cursor:pointer;font-family:system-ui,sans-serif';
+    // CLAU: preventDefault al mousedown perquè el botó NO robi el focus al textarea.
+    // Sense això, el textarea fa blur → commit → re-render → "surts de l'editor".
+    b.addEventListener('mousedown', function (e) { e.preventDefault(); });
     b.addEventListener('click', function (e) { e.preventDefault(); fn(); });
     return b;
   }
