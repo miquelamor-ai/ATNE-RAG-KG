@@ -20,9 +20,11 @@ const SRC = path.join(ROOT, 'corpus', 'external', 'corpusFJE', 'skills',
   'mediacio', 'generate-mapa-conceptual', 'rubrica.json');
 const SRC_ESQUEMA = path.join(ROOT, 'corpus', 'external', 'corpusFJE', 'skills',
   'mediacio', 'generate-esquema-visual', 'rubrica.json');
+const SRC_MAPA_MENTAL = path.join(ROOT, 'corpus', 'external', 'corpusFJE', 'skills',
+  'mediacio', 'generate-mapa-mental', 'rubrica.json');
 const DATA = path.join(ROOT, 'ui', 'atne', 'js', 'diagram-mecr-depth.data.js');
 
-const { extractAll, extractEsquema } = require('../scripts/build_mapa_profunditat_data.js');
+const { extractAll, extractEsquema, extractMapaMental } = require('../scripts/build_mapa_profunditat_data.js');
 
 let fails = 0;
 function check(name, cond, detail) {
@@ -38,7 +40,7 @@ const rubrica = JSON.parse(fs.readFileSync(SRC, 'utf8'));
 const committed = require(DATA);   // el .data.js fa module.exports = ATNE_MAPA_PROFUNDITAT
 const fresh = extractAll(rubrica);
 
-['levels', 'branques_max', 'subelements_max', 'densitat_max'].forEach((mapName) => {
+['levels', 'branques_max', 'subelements_max', 'densitat_max', 'cross_max'].forEach((mapName) => {
   const a = JSON.stringify(committed[mapName]);
   const b = JSON.stringify(fresh[mapName]);
   check('cap drift «' + mapName + '» .data.js ↔ canon', a === b,
@@ -80,6 +82,33 @@ check('esquema gradació profunditat A2 ≤ B1 ≤ C1+',
 check('esquema gradació densitat A2 < B1 < B2',
   freshE.densitat_max.A2 < freshE.densitat_max.B1 && freshE.densitat_max.B1 < freshE.densitat_max.B2,
   JSON.stringify(freshE.densitat_max));
+
+// ── MAPA MENTAL: guard sobre la clau `mapa_mental` (canon propi: profunditat +
+// branques + densitat; sense subelements, com l'esquema) ──
+if (!fs.existsSync(SRC_MAPA_MENTAL)) {
+  console.error('ERROR: canon mapa mental absent (' + path.relative(ROOT, SRC_MAPA_MENTAL) + ') — cal el submodule corpusFJE.');
+  process.exit(2);
+}
+const rubricaM = JSON.parse(fs.readFileSync(SRC_MAPA_MENTAL, 'utf8'));
+const freshM = extractMapaMental(rubricaM);
+check('derivat conté la clau «mapa_mental»', !!committed.mapa_mental,
+  'committed.mapa_mental = ' + JSON.stringify(committed.mapa_mental));
+if (committed.mapa_mental) {
+  ['levels', 'branques_max', 'densitat_max'].forEach((mapName) => {
+    const a = JSON.stringify(committed.mapa_mental[mapName]);
+    const b = JSON.stringify(freshM[mapName]);
+    check('cap drift mapa_mental «' + mapName + '» .data.js ↔ canon', a === b,
+      '\n      committed: ' + a + '\n      canon:     ' + b +
+      '\n      → regenera amb: node scripts/build_mapa_profunditat_data.js');
+  });
+}
+// Sanity pedagògic mapa mental: branques i densitat creixen amb el MECR.
+check('mapa_mental gradació branques A2 ≤ B1 ≤ B2',
+  freshM.branques_max.A2 <= freshM.branques_max.B1 && freshM.branques_max.B1 <= freshM.branques_max.B2,
+  JSON.stringify(freshM.branques_max));
+check('mapa_mental gradació densitat A2 < B1 < B2',
+  freshM.densitat_max.A2 < freshM.densitat_max.B1 && freshM.densitat_max.B1 < freshM.densitat_max.B2,
+  JSON.stringify(freshM.densitat_max));
 
 console.log(fails === 0 ? '\nTOTS OK' : `\n${fails} FALLADES`);
 process.exit(fails === 0 ? 0 : 1);

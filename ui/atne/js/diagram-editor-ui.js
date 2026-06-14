@@ -58,8 +58,8 @@
   //   · mapa_conceptual → arrel de ATNE_MAPA_PROFUNDITAT (levels/branques/subel/densitat).
   //   · esquema_visual  → ATNE_MAPA_PROFUNDITAT.esquema (només levels + densitat;
   //                       el canon de l'esquema no té branques/subelements).
-  //   · mapa_mental     → sense canon (rubrica.json inexistent) → null = sense límit,
-  //                       fins que mineriaRAG el canonitzi (handoff pendent).
+  //   · mapa_mental     → ATNE_MAPA_PROFUNDITAT.mapa_mental (levels + branques + densitat;
+  //                       canonitzat per mineriaRAG, font ≥ 1.1.0). null si encara absent.
   function capsObj() {
     var data = window.ATNE_MAPA_PROFUNDITAT;
     if (!data) return null;
@@ -100,6 +100,8 @@
   function branchMax() { return capFromMap('branques_max'); }
   function subelMax() { return capFromMap('subelements_max'); }
   function densitatMax() { return capFromMap('densitat_max'); }
+  // Enllaços creuats recomanats (Novak): pas_6_nombre_recomanat del canon, per MECR.
+  function crossMax() { return capFromMap('cross_max'); }
 
   function mdLines() { return md().split('\n'); }
   function isItemLn(l) { return /^\s*-\s+/.test(l); }
@@ -149,6 +151,17 @@
   }
   function subelReason(parentPropLi) {
     return subelFull(parentPropLi) ? ('màx ' + subelMax() + ' sub-elements') : null;
+  }
+  // Mapa mental: el canon `branques_max` limita les branques PRIMÀRIES (filles
+  // directes de l'arrel). Només gateja a aquest nivell; les sub-idees es regulen
+  // per profunditat + densitat. parentLineIdx = node sota el qual penjaria el nou.
+  function primaryBranchReason(parentLineIdx) {
+    if (state.type !== 'mapa_mental') return null;     // esquema no té branques_max
+    if (parentLineIdx == null || parentLineIdx < 0) return null;
+    if (C.classify(md(), parentLineIdx) !== 'root') return null;
+    var max = branchMax();
+    if (max === Infinity) return null;
+    return (childrenOfKind(parentLineIdx, 'concept') >= max) ? ('màx ' + max + ' branques') : null;
   }
 
   // ── Estat de la font única ──
@@ -225,12 +238,12 @@
     var capTxt = (cap === Infinity) ? 'profunditat lliure' : ('fins a ' + cap + ' nivells');
     var dmax = densitatMax();
     var nx = crossCount();
-    // Enllaços creuats: el principi Novak (i CmapTools) en demana POCS. Llindar tou
-    // (≤ CROSS_REC); avís, no bloqueig. NOTA: aquesta xifra hauria de venir del canon
-    // (handoff a mineriaRAG, pendent) — de moment és un valor de plataforma documentat.
-    var CROSS_REC = 3;
+    // Enllaços creuats: el principi Novak (i CmapTools) en demana POCS. El sostre
+    // recomanat ve del CANON (pas_6_nombre_recomanat, per MECR): avís, no bloqueig.
+    // null/sense canon → Infinity → mai avisa.
+    var crossRec = crossMax();
     var dOver = (dmax !== Infinity && n > dmax);
-    var xOver = nx > CROSS_REC;
+    var xOver = (crossRec !== Infinity && nx > crossRec);
     var crossTxt = nx ? (' · ' + nx + ' connexi' + (nx === 1 ? 'ó' : 'ons') + (xOver ? ' (massa?)' : '')) : '';
     ui.badge.textContent = n + ' nodes' + (dOver ? ' (≤ ' + dmax + ')' : '') +
       ' · ' + normMecr(state.mecr) + ' · ' + capTxt + crossTxt;
@@ -343,8 +356,10 @@
     //    gateja des del canon del tipus (esquema sí; mapa mental sense límit fins
     //    que mineriaRAG el canonitzi). La densitat és avís tou al badge.
     if (state.type !== 'mapa_conceptual') {
+      // + branca (fill): gate de profunditat (tots) + amplada de branques primàries
+      //   (mapa mental, només si el pare és l'arrel).
       bar.appendChild(gatedBtn('+ branca', 'Afegir una branca filla',
-        depthReason(li),
+        depthReason(li) || primaryBranchReason(li),
         function () {
           var r = C.addChild(md(), li, 'Nova branca');
           closePopup(); state.lastLine = null;
@@ -352,8 +367,11 @@
         }));
       if (kind !== 'root') {
         // Germà: mateix nivell (no afegeix profunditat). A l'arrel no s'ofereix
-        // (un segon node a sangria 0 trencaria l'arbre d'arrel única).
-        bar.appendChild(mkBtn('+ germà', 'Afegir una branca germana', '', function () {
+        // (un segon node a sangria 0 trencaria l'arbre d'arrel única). Gate
+        // d'amplada si el germà seria una branca primària (pare = arrel).
+        bar.appendChild(gatedBtn('+ germà', 'Afegir una branca germana',
+          primaryBranchReason(parentOf(li)),
+          function () {
           var r = C.addSibling(md(), li, 'Nova branca');
           closePopup(); state.lastLine = null;
           setMd(r.md, { openLine: r.newLineIdx });

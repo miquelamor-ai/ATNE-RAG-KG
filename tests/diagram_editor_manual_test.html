@@ -43,8 +43,8 @@
     1) <b>Mapa conceptual</b> (Novak): popup amb <code>+ proposició</code> / <code>+ concepte</code> / <code>+ germà</code> / <code>×</code> / <code>↝ connectar</code>. Els enllaços creuats (taronja) es creen amb ↝ i s'editen clicant-los.
     2) <b>Mapa mental</b> i <b>Esquema</b>: popup REDUÏT — només <code>+ branca</code> / <code>+ germà</code> / <code>×</code>. <b>No</b> hi ha proposicions ni ↝ connectar.
     3) <b>Desfés/Refés</b> amb els botons o <code>Ctrl+Z</code> / <code>Ctrl+Y</code>.
-    4) Canvia el <b>MECR</b>: el botó d'afegir en profunditat es <b>desactiva</b> en arribar al límit del canon del tipus
-       (esquema: pre-A1=1 nivell … C1+=4; mapa mental: <i>sense límit</i> fins que mineriaRAG el canonitzi).
+    4) Canvia el <b>MECR</b>: el botó d'afegir es <b>desactiva</b> en arribar al límit del canon del tipus
+       (esquema: profunditat pre-A1=1 … C1+=4; mapa mental: profunditat + <b>branques primàries</b> per nivell; vegeu la nota del canon a la dreta).
     5) Obre <i>«Editar font del diagrama»</i>: la toolbar (sagnat/negreta/cursiva) i el diagrama s'actualitza en sortir del camp o amb «Refés».
   </div>
 
@@ -71,10 +71,10 @@
 </div>
 
 <!-- Scripts de PRODUCCIÓ, en el mateix ordre que pas3.html (?v per saltar la cau) -->
-<script src="/ui/atne/js/diagram-editor-core.js?v=20260614k"></script>
-<script src="/ui/atne/js/mermaid-converter.js?v=20260614k"></script>
-<script src="/ui/atne/js/diagram-mecr-depth.data.js?v=20260614k"></script>
-<script src="/ui/atne/js/diagram-editor-ui.js?v=20260614k"></script>
+<script src="/ui/atne/js/diagram-editor-core.js?v=20260614l"></script>
+<script src="/ui/atne/js/mermaid-converter.js?v=20260614l"></script>
+<script src="/ui/atne/js/diagram-mecr-depth.data.js?v=20260614l"></script>
+<script src="/ui/atne/js/diagram-editor-ui.js?v=20260614l"></script>
 <script>
   // Llavors per tipus — mateix format markdown que ATNE en producció.
   var SEEDS = {
@@ -146,24 +146,30 @@
   function capsFor(type) {
     var D = window.ATNE_MAPA_PROFUNDITAT || {};
     if (type === 'esquema_visual') return D.esquema || null;
-    if (type === 'mapa_mental') return null;       // sense canon (handoff mineriaRAG)
+    if (type === 'mapa_mental') return D.mapa_mental || null;
     return D;                                        // mapa_conceptual (arrel)
   }
   function updateNote() {
     var type = currentType(), m = currentMecr();
     var src = capsFor(type);
     if (!src) {
-      note.textContent = 'Mapa mental: sense canon MECR encara (rubrica.json pendent a mineriaRAG) → edició sense límit de profunditat.';
+      note.textContent = (type === 'mapa_mental')
+        ? 'Mapa mental: canon absent al derivat (regenera diagram-mecr-depth.data.js) → sense límit.'
+        : 'Sense canon per a aquest tipus.';
       return;
     }
     function g(map) { var v = (src[map] || {})[m]; return v == null ? 'lliure' : v; }
     if (type === 'esquema_visual') {
       note.textContent = 'Canon esquema ' + m + ': profunditat ' + g('levels') +
         ' nivells · densitat ≤ ' + g('densitat_max') + ' nodes';
+    } else if (type === 'mapa_mental') {
+      note.textContent = 'Canon mapa mental ' + m + ': profunditat ' + g('levels') +
+        ' nivells · màx ' + g('branques_max') + ' branques primàries · densitat ≤ ' +
+        g('densitat_max') + ' nodes';
     } else {
       note.textContent = 'Canon ' + m + ': profunditat ' + g('levels') + ' nivells · màx ' +
         g('branques_max') + ' branques · ' + g('subelements_max') + ' sub-elements/branca · densitat ≤ ' +
-        g('densitat_max') + ' nodes';
+        g('densitat_max') + ' nodes · enllaços ≤ ' + g('cross_max');
     }
   }
   // Canviar MECR: re-attach (actualitza el límit en viu, sense perdre el diagrama).
