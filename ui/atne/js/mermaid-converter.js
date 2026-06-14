@@ -347,27 +347,34 @@
     function crossHalfW(n) { return n.type === 'prop' ? 34 : CM.NW / 2; }
     function crossHalfH(n) { return (n.type === 'prop' ? n.ph : n.nh) / 2; }
     function crossRoute(sn, tn, lane) {
-      // Estil CmapTools (decisió Miquel 14/06): corba SUAU DIRECTA entre els dos
-      // conceptes, ancorada al caire que es miren, amb una lleugera panxa. La
-      // paraula d'enllaç va en una CAIXA OPACA al mig (tapa el que hi hagi a sota).
-      var dx = tn.x - sn.x, dy = tn.y - sn.y;
-      var horiz = Math.abs(dx) >= Math.abs(dy);
-      var sSign = horiz ? (dx >= 0 ? 1 : -1) : (dy >= 0 ? 1 : -1);
-      var p0 = horiz ? { x: sn.x + sSign * crossHalfW(sn), y: sn.y }
-                     : { x: sn.x, y: sn.y + sSign * crossHalfH(sn) };
-      var p2 = horiz ? { x: tn.x - sSign * crossHalfW(tn), y: tn.y }
-                     : { x: tn.x, y: tn.y - sSign * crossHalfH(tn) };
-      var mx = (p0.x + p2.x) / 2, my = (p0.y + p2.y) / 2;
-      var bow = 16 + lane * 13;                       // panxa creixent per carril
-      var cx = horiz ? mx : mx + bow;                 // horitzontal → panxa avall
-      var cy = horiz ? my + bow : my;                 // vertical → panxa a la dreta
-      var d = 'M ' + p0.x + ' ' + p0.y + ' Q ' + cx + ' ' + cy + ' ' + p2.x + ' ' + p2.y;
-      var lx = 0.25 * p0.x + 0.5 * cx + 0.25 * p2.x;  // punt mig de la quadràtica
-      var ly = 0.25 * p0.y + 0.5 * cy + 0.25 * p2.y;
-      var xs = [p0.x, p2.x, cx, lx], ys = [p0.y, p2.y, cy, ly];
-      return { d: d, lx: lx, ly: ly,
-               minX: Math.min.apply(null, xs), maxX: Math.max.apply(null, xs),
-               minY: Math.min.apply(null, ys), maxY: Math.max.apply(null, ys) };
+      // Canal lliure (decisió Miquel 14/06): la corba surt pel COSTAT del node cap
+      // al passadís entre columnes (sempre buit), baixa/puja fins a un BUS per sota
+      // O sobre de TOTES les columnes que connecta (el costat amb menys recorregut),
+      // i torna al destí. Així NO travessa MAI cap concepte. Corba suau (2 cúbics).
+      var sxC = sn.x, syC = sn.y, txC = tn.x, tyC = tn.y;
+      var dirS = (txC >= sxC) ? 1 : -1, dirT = (sxC > txC) ? 1 : -1;
+      var gutS = sxC + dirS * (crossHalfW(sn) + CM.HG / 2);
+      var gutT = txC + dirT * (crossHalfW(tn) + CM.HG / 2);
+      var edgeSx = sxC + dirS * crossHalfW(sn), edgeTx = txC + dirT * crossHalfW(tn);
+      var loC = Math.min(sxC, txC), hiC = Math.max(sxC, txC);
+      var maxBottom = -Infinity, minTop = Infinity;
+      g.nodes.forEach(function (m) {
+        if (m.x === undefined || m.x < loC - 1 || m.x > hiC + 1) return;
+        maxBottom = Math.max(maxBottom, m.y + crossHalfH(m));
+        minTop = Math.min(minTop, m.y - crossHalfH(m));
+      });
+      if (maxBottom === -Infinity) { maxBottom = Math.max(syC, tyC); minTop = Math.min(syC, tyC); }
+      var busBelow = maxBottom + 14 + lane * 16;
+      var busAbove = minTop - 14 - lane * 16;
+      var below = (busBelow - Math.max(syC, tyC)) <= (Math.min(syC, tyC) - busAbove);
+      var busY = below ? busBelow : busAbove;
+      var gutMid = (gutS + gutT) / 2;
+      var d = 'M ' + edgeSx + ' ' + syC +
+              ' C ' + gutS + ' ' + syC + ' ' + gutS + ' ' + busY + ' ' + gutMid + ' ' + busY +
+              ' C ' + gutT + ' ' + busY + ' ' + gutT + ' ' + tyC + ' ' + edgeTx + ' ' + tyC;
+      return { d: d, lx: gutMid, ly: busY,
+               minX: Math.min(edgeSx, gutS, gutT, edgeTx), maxX: Math.max(edgeSx, gutS, gutT, edgeTx),
+               minY: below ? Math.min(syC, tyC) : busY, maxY: below ? busY : Math.max(syC, tyC) };
     }
     // crossRender: calculat UN COP aquí (corba + col·locació d'etiqueta) i reusat
     // al draw-pass, perquè el viewBox pugui encabir la posició FINAL de l'etiqueta.
@@ -477,13 +484,15 @@
     var gX = null;
     if (crossRender.length) {
       var mk = el('marker', { id: uid + '-xarr', viewBox: '0 0 8 8', refX: 7, refY: 4,
-        markerWidth: 6, markerHeight: 6, orient: 'auto' },
-        [el('path', { d: 'M0,1 L7,4 L0,7 L2,4 Z', fill: '#ea580c' })]);
+        markerWidth: 5, markerHeight: 5, orient: 'auto' },
+        [el('path', { d: 'M0,1.5 L7,4 L0,6.5 L2,4 Z', fill: '#fb923c' })]);
       defs.appendChild(mk);
       gX = el('g');
       crossRender.forEach(function (it) {
-        gX.appendChild(el('path', { d: it.d, stroke: '#ea580c', 'stroke-width': 1.8,
-          'stroke-dasharray': '5 4', fill: 'none', 'marker-end': 'url(#' + uid + '-xarr)' }));
+        // Traç fi i discret (decisió Miquel 14/06): l'enllaç creuat és una anotació
+        // secundària, no ha de dominar el mapa.
+        gX.appendChild(el('path', { d: it.d, stroke: '#fb923c', 'stroke-width': 1.2,
+          'stroke-dasharray': '4 3', fill: 'none', 'marker-end': 'url(#' + uid + '-xarr)' }));
         if (it.label) {
           var L = it.label, w = L.w;
           // Grup clicable: data-cross-idx identifica l'enllaç per a editar/eliminar
