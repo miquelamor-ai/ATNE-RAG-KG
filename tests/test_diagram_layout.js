@@ -266,21 +266,40 @@ function crossHitsNode(cont) {
       if (segHitsRect(pts[i], pts[i + 1], rects[j], 2)) return true;
   return false;
 }
-// (5) Mateixa fila, amb germans apilats a sota dins l'abast.
+// La caixa de l'etiqueta de la relació (rect dins el grup data-cross-idx).
+function labelRect(cont) {
+  var cg = crossGroups(cont)[0]; if (!cg) return null;
+  var r = descendants(cg).find(function (e) { return e.tagName === 'rect'; });
+  return r ? { x: +r.attrs.x, y: +r.attrs.y, w: +r.attrs.width, h: +r.attrs.height } : null;
+}
+function rectsOverlap(a, b, inset) {
+  return a.x < b.x + b.w - inset && a.x + a.w > b.x + inset &&
+         a.y < b.y + b.h - inset && a.y + a.h > b.y + inset;
+}
+function labelHitsNode(cont) {
+  var lr = labelRect(cont); if (!lr) return false;
+  return nodeRects(cont).some(function (n) { return rectsOverlap(lr, n, 2); });
+}
+// (5) Mateixa fila, amb germans apilats a sota dins l'abast. Etiqueta llarga
+//     (com "cau des dels") per estressar el solapament de l'etiqueta.
 (function () {
   var cont = render([
     '- **R**', '  - **a**', '    - X1', '    - X2', '  - **b**', '    - Y1', '    - Y2',
-    '', '- Enllaços creuats:', '  - X1 -> Y1 : rel',
+    '', '- Enllaços creuats:', '  - X1 -> Y1 : cau des dels núvols',
   ].join('\n'));
-  check('enllaç creuat (mateixa fila): no travessa cap caixa de concepte', !crossHitsNode(cont));
+  check('enllaç creuat (mateixa fila): línia NI etiqueta trepitgen cap concepte',
+    !crossHitsNode(cont) && !labelHitsNode(cont),
+    'línia=' + crossHitsNode(cont) + ' etiqueta=' + labelHitsNode(cont));
 })();
 // (6) Files diferents (columnes de profunditat desigual) — el cas que ho trencava.
 (function () {
   var cont = render([
     '- **R**', '  - **a**', '    - X1', '    - X2', '    - X3', '  - **b**', '    - Y1',
-    '', '- Enllaços creuats:', '  - X3 -> Y1 : rel',
+    '', '- Enllaços creuats:', '  - X3 -> Y1 : prové de',
   ].join('\n'));
-  check('enllaç creuat (files diferents): no travessa cap caixa de concepte', !crossHitsNode(cont));
+  check('enllaç creuat (files diferents): línia NI etiqueta trepitgen cap concepte',
+    !crossHitsNode(cont) && !labelHitsNode(cont),
+    'línia=' + crossHitsNode(cont) + ' etiqueta=' + labelHitsNode(cont));
 })();
 
 console.log(fails === 0 ? '\nTOTS OK' : `\n${fails} FALLADES`);

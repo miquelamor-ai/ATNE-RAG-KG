@@ -354,19 +354,25 @@
       // Columnes adjacents → gutS==gutT (passadís compartit, bus de longitud 0): correcte.
       // Mateixa columna → dirS/dirT donen costats oposats i el bus passa per sota.
       var edgeSx = sxC + dirS * crossHalfW(sn), edgeTx = txC + dirT * crossHalfW(tn);
-      // Bus per sota dels nodes que el tram horitzontal sobrevola [gutS..gutT].
-      var loX = Math.min(gutS, gutT), hiX = Math.max(gutS, gutT);
-      var floorY = Math.max(syC + crossHalfH(sn), tyC + crossHalfH(tn));
+      // El bus (i l'ETIQUETA, que és ampla) ha d'anar per sota O per sobre de TOTES
+      // les columnes que el tram connecta [sxC..txC] — mai al nivell d'una fila, que
+      // hi faria trepitjar els germans apilats. Triem el costat amb menys recorregut.
+      var loC = Math.min(sxC, txC), hiC = Math.max(sxC, txC);
+      var maxBottom = -Infinity, minTop = Infinity;
       g.nodes.forEach(function (m) {
-        if (m.x === undefined || m.x < loX - 1 || m.x > hiX + 1) return;
-        var mb = m.y + crossHalfH(m);
-        if (mb > floorY) floorY = mb;
+        if (m.x === undefined || m.x < loC - 1 || m.x > hiC + 1) return;
+        maxBottom = Math.max(maxBottom, m.y + crossHalfH(m));
+        minTop = Math.min(minTop, m.y - crossHalfH(m));
       });
-      var busY = floorY + 22 + lane * 16;
+      if (maxBottom === -Infinity) { maxBottom = Math.max(syC, tyC); minTop = Math.min(syC, tyC); }
+      var busBelow = maxBottom + 14 + lane * 16;
+      var busAbove = minTop - 14 - lane * 16;
+      var below = (busBelow - Math.max(syC, tyC)) <= (Math.min(syC, tyC) - busAbove);
+      var busY = below ? busBelow : busAbove;
       var d = 'M ' + edgeSx + ' ' + syC + ' L ' + gutS + ' ' + syC +
               ' L ' + gutS + ' ' + busY + ' L ' + gutT + ' ' + busY +
               ' L ' + gutT + ' ' + tyC + ' L ' + edgeTx + ' ' + tyC;
-      return { d: d, lx: (gutS + gutT) / 2, ly: busY, busY: busY,
+      return { d: d, lx: (gutS + gutT) / 2, ly: busY, busY: busY, below: below,
                minX: Math.min(edgeSx, gutS, gutT, edgeTx),
                maxX: Math.max(edgeSx, gutS, gutT, edgeTx) };
     }
@@ -378,7 +384,8 @@
         if (!sn || !tn || sn.x === undefined || tn.x === undefined) return;
         var r = crossRoute(sn, tn, ci);
         var lblHalf = (cl.link ? cl.link.length * 6.2 + 12 : 0) / 2;
-        y1b = Math.max(y1b, r.busY + 16);
+        if (r.below) y1b = Math.max(y1b, r.busY + 16);   // bus avall → eixampla per baix
+        else y0 = Math.min(y0, r.busY - 16);             // bus amunt → eixampla per dalt
         x0 = Math.min(x0, r.minX - CM.M, r.lx - lblHalf - 4);
         x1 = Math.max(x1, r.maxX + CM.M, r.lx + lblHalf + 4);
       });
