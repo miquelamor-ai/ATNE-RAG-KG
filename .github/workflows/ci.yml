@@ -52,6 +52,11 @@ jobs:
         # Bloc B: renderitza amb DOM stub i comprova que cap node profund es descarta,
         # que les proposicions germanes forquen i que la geometria és estable.
 
+      - name: Guard del layout del mapa mental (wrap de fulles + no-solapament)
+        run: node tests/test_mindmap_layout.js
+        # Les fulles llargues s'ajusten (multi-línia) i les germanes de la mateixa
+        # columna no es trepitgen (alçada real per nombre de línies → espai vertical).
+
       - name: Sintaxi (py_compile del backend)
         run: |
           python -m py_compile server.py adaptation/*.py routes/*.py \

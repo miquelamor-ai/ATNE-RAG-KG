@@ -599,7 +599,8 @@
 
   var MM = {
     RW: 128, RH: 42, RR: 12, L1H: 32, LNH: 24,
-    XS: 180, VG: 18, M: 44, W0: 9, W1: 4, W2: 2,
+    XS: 200, VG: 18, M: 44, W0: 9, W1: 4, W2: 2,
+    LW1: 150, LW2: 148, WMAX: 168,   // amplades màx de wrap (L1 / fulla) i cap de caixa
     PALETTE: ['#4f46e5','#0891b2','#059669','#d97706',
               '#7c3aed','#be185d','#0f766e','#b45309'],
   };
@@ -617,29 +618,55 @@
     var tree = parseTree(md);
     if (!tree) return null;
 
-    function sh(node, d) {
-      var base = (d <= 1 ? MM.L1H : MM.LNH) + MM.VG;
+    // ── Pas 1: MESURA cada node (text amb wrap + dimensions reals) per profunditat.
+    // CLAU: les FULLES (depth>=2) també s'ajusten (wrap). Abans sortien en una sola
+    // línia llarga → es trepitjaven horitzontalment i no es llegien. L'alçada real
+    // (segons el nombre de línies) alimenta sh() perquè reservi prou espai vertical.
+    function maxLineW(lines, fs) {
+      return lines.reduce(function (m, l) { return Math.max(m, tw(l, fs)); }, 0);
+    }
+    function measure(node, depth) {
+      node.depth = depth;
+      if (depth === 0) {
+        node._lines = wrap(node.label, MM.RW - 16, 12);
+        node._w = MM.RW; node._h = Math.max(MM.RH, node._lines.length * 16 + 10);
+      } else if (depth === 1) {
+        node._lines = wrap(node.label, MM.LW1, 13);
+        node._w = Math.min(Math.max(64, maxLineW(node._lines, 13)) + 20, MM.WMAX);
+        node._h = Math.max(MM.L1H, node._lines.length * Math.ceil(13 * 1.4) + 8);
+      } else {
+        node._lines = wrap(node.label, MM.LW2, 11);
+        node._w = Math.min(Math.max(56, maxLineW(node._lines, 11)) + 10, MM.WMAX);
+        node._h = Math.max(MM.LNH, node._lines.length * Math.ceil(11 * 1.45) + 6);
+      }
+      (node.children || []).forEach(function (c) { measure(c, depth + 1); });
+    }
+    measure(tree, 0);
+
+    // ── Pas 2: alçada del subarbre, usant l'alçada REAL de cada node (no fixa) ──
+    function sh(node) {
+      var base = node._h + MM.VG;
       if (!node.children || !node.children.length) return base;
-      return Math.max(base, node.children.reduce(function (s, c) { return s + sh(c, d + 1); }, 0));
+      return Math.max(base, node.children.reduce(function (s, c) { return s + sh(c); }, 0));
     }
 
-    tree.x = 0; tree.y = 0; tree.depth = 0;
+    tree.x = 0; tree.y = 0;
     var kids   = tree.children || [];
     var nRight = Math.ceil(kids.length / 2);
 
-    function placeGroup(group, dir, depth) {
+    function placeGroup(group, dir) {
       if (!group.children || !group.children.length) return;
       var bx = group.x + dir * MM.XS;
-      var totH = group.children.reduce(function (s, c) { return s + sh(c, depth); }, 0) - MM.VG;
+      var totH = group.children.reduce(function (s, c) { return s + sh(c); }, 0) - MM.VG;
       var cy = group.y - totH / 2;
       group.children.forEach(function (child) {
-        var csh = sh(child, depth);
-        child.x = bx; child.y = cy + csh / 2 - MM.VG / 2; child.depth = depth;
-        placeGroup(child, dir, depth + 1); cy += csh;
+        var csh = sh(child);
+        child.x = bx; child.y = cy + csh / 2 - MM.VG / 2;
+        placeGroup(child, dir); cy += csh;
       });
     }
-    placeGroup({ x: 0, y: 0, children: kids.slice(0, nRight) },  1, 1);
-    placeGroup({ x: 0, y: 0, children: kids.slice(nRight) },    -1, 1);
+    placeGroup({ x: 0, y: 0, children: kids.slice(0, nRight) },  1);
+    placeGroup({ x: 0, y: 0, children: kids.slice(nRight) },    -1);
 
     kids.forEach(function (k, i) { k.color = MM.PALETTE[i % MM.PALETTE.length]; });
     function propagate(n) { (n.children || []).forEach(function (c) { c.color = c.color || n.color; propagate(c); }); }
@@ -647,9 +674,11 @@
 
     function allNodes(n) { return [n].concat((n.children || []).reduce(function (a, c) { return a.concat(allNodes(c)); }, [])); }
     var all = allNodes(tree);
-    var xs = all.map(function (n) { return n.x; }), ys = all.map(function (n) { return n.y; });
-    var x0 = Math.min.apply(null, xs) - 160 - MM.M, y0 = Math.min.apply(null, ys) - MM.L1H - MM.M;
-    var x1 = Math.max.apply(null, xs) + 160 + MM.M, y1 = Math.max.apply(null, ys) + MM.L1H + MM.M;
+    // ViewBox a partir de les CAIXES reals (x±w/2, y±h/2), no de marges fixos.
+    var x0 = Math.min.apply(null, all.map(function (n) { return n.x - n._w / 2; })) - MM.M;
+    var x1 = Math.max.apply(null, all.map(function (n) { return n.x + n._w / 2; })) + MM.M;
+    var y0 = Math.min.apply(null, all.map(function (n) { return n.y - n._h / 2; })) - MM.M;
+    var y1 = Math.max.apply(null, all.map(function (n) { return n.y + n._h / 2; })) + MM.M;
 
     var uid = 'mm' + (Math.random() * 1e9 | 0);
     var svg = el('svg', { viewBox: [x0, y0, x1 - x0, y1 - y0].join(' '), xmlns: NS,
@@ -672,33 +701,25 @@
 
       if (node.depth === 0) {
         grp.setAttribute('filter', 'url(#' + uid + '-sh)');
-        // Arrel: text amb wrapping perquè fonts amples (monospace) no desborden
-        var rootLines = wrap(node.label, MM.RW - 16, 12);
-        var rootRH = Math.max(MM.RH, rootLines.length * 16 + 10);
-        grp.appendChild(el('rect', { x: node.x - MM.RW / 2, y: node.y - rootRH / 2,
-          width: MM.RW, height: rootRH, rx: MM.RR, fill: 'url(#' + uid + '-rg)' }));
-        grp.appendChild(mtext(rootLines, node.x, node.y, 12,
+        grp.appendChild(el('rect', { x: node.x - node._w / 2, y: node.y - node._h / 2,
+          width: node._w, height: node._h, rx: MM.RR, fill: 'url(#' + uid + '-rg)' }));
+        grp.appendChild(mtext(node._lines, node.x, node.y, 12,
           { fill: '#fff', 'font-weight': '700', 'letter-spacing': '0.3px' }));
-      } else {
+      } else if (node.depth === 1) {
         var color = node.color || '#64748b';
-        var fs = node.depth === 1 ? 13 : 11;
-        var nh = node.depth === 1 ? MM.L1H : MM.LNH;
-        // Cap l'amplada de L1 a 160 px per evitar que etiquetes llargues trenquin el layout
-        var ntw = Math.min(Math.max(60, tw(node.label, fs)) + 18, 160);
-        if (node.depth === 1) {
-          var l1Lines = wrap(node.label, ntw - 20, fs);
-          var l1h = Math.max(nh, l1Lines.length * Math.ceil(fs * 1.4) + 8);
-          grp.appendChild(el('rect', { x: node.x - ntw / 2, y: node.y - l1h / 2, width: ntw, height: l1h,
-            rx: l1h / 2, fill: color + '18', stroke: color, 'stroke-width': 2 }));
-          grp.appendChild(mtext(l1Lines, node.x, node.y, fs,
-            { fill: color, 'font-weight': '600', 'text-anchor': 'middle', 'dominant-baseline': 'central' }));
-        } else {
-          var lw2 = tw(node.label, fs) + 4;
-          grp.appendChild(el('line', { x1: node.x - lw2 / 2, y1: node.y + nh / 2 - 2,
-            x2: node.x + lw2 / 2, y2: node.y + nh / 2 - 2, stroke: color, 'stroke-width': 1.5, 'stroke-opacity': 0.6 }));
-          grp.appendChild(txt(node.label, { x: node.x, y: node.y, 'font-size': fs,
-            'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#334155' }));
-        }
+        grp.appendChild(el('rect', { x: node.x - node._w / 2, y: node.y - node._h / 2,
+          width: node._w, height: node._h, rx: node._h / 2,
+          fill: color + '18', stroke: color, 'stroke-width': 2 }));
+        grp.appendChild(mtext(node._lines, node.x, node.y, 13,
+          { fill: color, 'font-weight': '600' }));
+      } else {
+        // Fulla: text AJUSTAT (multi-línia) + subratllat sota el bloc (la cinta hi
+        // arriba pel costat). Amplada del subratllat = amplada de la caixa de text.
+        var color2 = node.color || '#64748b';
+        grp.appendChild(el('line', { x1: node.x - node._w / 2, y1: node.y + node._h / 2 - 1,
+          x2: node.x + node._w / 2, y2: node.y + node._h / 2 - 1,
+          stroke: color2, 'stroke-width': 1.5, 'stroke-opacity': 0.6 }));
+        grp.appendChild(mtext(node._lines, node.x, node.y - 1, 11, { fill: '#334155' }));
       }
       gN.appendChild(grp);
 
@@ -706,12 +727,10 @@
         child.parent = node;
         var color = child.color || '#94a3b8';
         var dirX  = child.x > node.x ? 1 : -1;
-        var pw = node.depth === 0 ? MM.RW :
-                 Math.min(Math.max(60, tw(node.label, node.depth === 1 ? 13 : 11)) + 18, 160);
-        var cw2 = child.depth >= 2 ? Math.max(60, tw(child.label, 11)) + 18 :
-                  Math.min(Math.max(60, tw(child.label, 13)) + 18, 160);
-        var sx = node.x + dirX * pw / 2, sy = node.y;
-        var tx = child.x - dirX * cw2 / 2, ty = child.y;
+        var sx = node.x + dirX * node._w / 2, sy = node.y;
+        // A les fulles la cinta arriba al subratllat (vora inferior); a L1, al centre.
+        var tx = child.x - dirX * child._w / 2;
+        var ty = child.depth >= 2 ? child.y + child._h / 2 - 1 : child.y;
         var w1 = node.depth === 0 ? MM.W0 : child.depth === 1 ? MM.W1 : MM.W2;
         var w2 = child.depth === 1 ? MM.W1 : MM.W2;
         gR.appendChild(ribbon(sx, sy, tx, ty, w1, w2, color));
