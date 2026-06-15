@@ -386,9 +386,30 @@
         }
         return true;
       }
-      // ── 1) CORBA DIRECTA (CmapTools): S suau horitzontal entre origen i destí ──
+      // ── 1) CORBA DIRECTA entre origen i destí (sense detour a cap bus) ──
       var ddx = edgeTx - edgeSx, cp1x = edgeSx + ddx * 0.5, cp2x = edgeTx - ddx * 0.5;
-      if (clearChain([[edgeSx, syC], [cp1x, syC], [cp2x, tyC], [edgeTx, tyC]])) {
+      var directOk = clearChain([[edgeSx, syC], [cp1x, syC], [cp2x, tyC], [edgeTx, tyC]]);
+      if (directOk && Math.abs(syC - tyC) < 24) {
+        // 1a) MATEIX NIVELL (branques del costat): arc CÒNCAU cap a una banda lliure,
+        //     amb la proposició a l'ÀPEX (sobre la línia, SENSE cap línia secundària).
+        var y0 = (syC + tyC) / 2, midX = (edgeSx + edgeTx) / 2;
+        var ax1 = edgeSx + ddx * 0.25, ax2 = edgeTx - ddx * 0.25, lw = Math.max(labelW || 0, 22), BOW = 32;
+        var arc = function (dir) {
+          var apexY = y0 + dir * BOW, h = dir * BOW * 1.34;
+          if (!clearChain([[edgeSx, syC], [ax1, y0 + h], [ax2, y0 + h], [edgeTx, tyC]])) return null;
+          for (var i = 0; i < g.nodes.length; i++) {   // l'àpex (etiqueta) lliure de nodes
+            var m = g.nodes[i]; if (m.x === undefined) continue;
+            if (Math.abs(midX - m.x) < crossFW(m) + lw / 2 && Math.abs(apexY - m.y) < crossHalfH(m) + 11) return null;
+          }
+          return { d: 'M ' + edgeSx + ' ' + syC + ' C ' + ax1 + ' ' + (y0 + h) + ' ' + ax2 + ' ' + (y0 + h) + ' ' + edgeTx + ' ' + tyC, apexY: apexY };
+        };
+        var a = arc(-1) || arc(1);   // prova amunt; si no, avall
+        if (a) return { d: a.d, lx: midX, ly: a.apexY,
+                        minX: Math.min(edgeSx, edgeTx), maxX: Math.max(edgeSx, edgeTx),
+                        minY: Math.min(syC, tyC, a.apexY), maxY: Math.max(syC, tyC, a.apexY) };
+      }
+      if (directOk) {
+        // 1b) NIVELLS DIFERENTS (diagonal): S suau; la proposició al mig, la línia hi passa.
         var dd = 'M ' + edgeSx + ' ' + syC + ' C ' + cp1x + ' ' + syC + ' ' + cp2x + ' ' + tyC + ' ' + edgeTx + ' ' + tyC;
         return { d: dd, lx: (edgeSx + edgeTx) / 2, ly: (syC + tyC) / 2,
                  minX: Math.min(edgeSx, edgeTx), maxX: Math.max(edgeSx, edgeTx),
