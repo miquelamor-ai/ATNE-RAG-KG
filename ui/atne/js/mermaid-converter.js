@@ -413,7 +413,20 @@
                         minX: Math.min(edgeSx, edgeTx), maxX: Math.max(edgeSx, edgeTx),
                         minY: Math.min(syC, tyC, a.apexY), maxY: Math.max(syC, tyC, a.apexY) };
       }
-      // NIVELLS DIFERENTS (diagonal) o sense lloc per a l'arc → BUS net més proper (avall).
+      if (directOk) {
+        // 1b) NIVELLS DIFERENTS (diagonal): CORBA SUAU directa entre els dos conceptes
+        //     (no un bus llunyà avall). L'etiqueta s'ancorarà en un punt LLIURE al llarg
+        //     de la pròpia corba (crossRender, via curvePts) → cap leader, no cau avall.
+        var dd = 'M ' + edgeSx + ' ' + syC + ' C ' + cp1x + ' ' + syC + ' ' + cp2x + ' ' + tyC + ' ' + edgeTx + ' ' + tyC;
+        var cubAt = function (t) { var u = 1 - t;
+          return { x: u*u*u*edgeSx + 3*u*u*t*cp1x + 3*u*t*t*cp2x + t*t*t*edgeTx,
+                   y: u*u*u*syC + 3*u*u*t*syC + 3*u*t*t*tyC + t*t*t*tyC }; };
+        var ts = [0.5, 0.42, 0.58, 0.34, 0.66, 0.27, 0.73, 0.2, 0.8, 0.14, 0.86], curvePts = ts.map(cubAt);
+        return { d: dd, lx: (edgeSx + edgeTx) / 2, ly: (syC + tyC) / 2, curvePts: curvePts,
+                 minX: Math.min(edgeSx, edgeTx), maxX: Math.max(edgeSx, edgeTx),
+                 minY: Math.min(syC, tyC), maxY: Math.max(syC, tyC) };
+      }
+      // Direct BLOQUEJADA (hi ha un node pel mig) → BUS net més proper.
       // ── 2) FALLBACK: BUS NET MÉS PROPER (passadís lateral + banda horitzontal lliure) ──
       // Una banda a alçada y és lliure si cap node intercepta l'strip [gutMid±halfStrip].
       function clearBand(y) {
@@ -486,21 +499,32 @@
         y0 = Math.min(y0, r.minY - 10); y1b = Math.max(y1b, r.maxY + 10);
         var lbl = null;
         if (cl.link) {
-          var w = cl.link.length * 6.2 + 12, h = 18, bx = r.lx, by = r.ly, placed = false;
+          var w = cl.link.length * 6.2 + 12, h = 18, bx = r.lx, by = r.ly, placed = false, onCurve = false;
+          var fits = function (cxC, cyC) {
+            var box = { x: cxC - w / 2, y: cyC - h / 2, w: w, h: h };
+            for (var oi = 0; oi < obstacles.length; oi++) { var o = obstacles[oi]; if (o.node === sn || o.node === tn) continue; if (ov(box, o)) return false; }
+            return true;
+          };
+          // Corba directa: prova punts AL LLARG de la pròpia corba (etiqueta sobre la
+          // línia, sense leader). El primer lliure guanya.
+          if (r.curvePts) {
+            for (var pi = 0; pi < r.curvePts.length && !placed; pi++) {
+              if (fits(r.curvePts[pi].x, r.curvePts[pi].y)) { bx = r.curvePts[pi].x; by = r.curvePts[pi].y; placed = true; onCurve = true; }
+            }
+          }
+          // Si no (bus, o cap punt de corba lliure): cerca voraç al voltant de l'àncora.
           for (var si = 0; si < STEPS.length && !placed; si++) {
             var cands = si === 0 ? [[0, 0]] : DIRS;
             for (var di = 0; di < cands.length; di++) {
               var cxC = r.lx + cands[di][0] * STEPS[si], cyC = r.ly + cands[di][1] * STEPS[si];
-              var box = { x: cxC - w / 2, y: cyC - h / 2, w: w, h: h };
-              var clash = false;
-              for (var oi = 0; oi < obstacles.length; oi++) { var o = obstacles[oi]; if (o.node === sn || o.node === tn) continue; if (ov(box, o)) { clash = true; break; } }
-              if (!clash) { bx = cxC; by = cyC; placed = true; break; }
+              if (fits(cxC, cyC)) { bx = cxC; by = cyC; placed = true; break; }
             }
           }
           obstacles.push({ x: bx - w / 2, y: by - h / 2, w: w, h: h, node: null });
           x0 = Math.min(x0, bx - w / 2 - 4); x1 = Math.max(x1, bx + w / 2 + 4);
           y0 = Math.min(y0, by - h / 2 - 4); y1b = Math.max(y1b, by + h / 2 + 4);
-          lbl = { x: bx, y: by, w: w, mx: r.lx, my: r.ly };
+          // Si l'etiqueta seu SOBRE la corba, no cal leader (mx/my = la pròpia posició).
+          lbl = { x: bx, y: by, w: w, mx: onCurve ? bx : r.lx, my: onCurve ? by : r.ly };
         }
         crossRender.push({ d: r.d, ci: ci, link: cl.link, label: lbl });
       });
