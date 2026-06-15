@@ -406,12 +406,26 @@
       var base = (syC + tyC) / 2;
       // Fallback exterior (costat més proper) si no es troba cap banda interior neta.
       var busY = (base <= (mapTop + mapBot) / 2) ? (mapTop - 22 - lane * 22) : (mapBot + 22 + lane * 22);
+      // BUS NET MÉS PROPER, SENSE biaix avall (decisió Miquel 15/06): a cada distància
+      // provem amunt I avall; si totes dues són netes, triem la de MENYS recorregut
+      // vertical (detour mínim) → s'evita "baixar dos busos i tornar a pujar".
       for (var off = 0; off <= 900; off += 7) {
-        if (clearBand(base + off) && curveClear(base + off)) { busY = base + off; break; }
-        if (off > 0 && clearBand(base - off) && curveClear(base - off)) { busY = base - off; break; }
+        var dOk = clearBand(base + off) && curveClear(base + off);
+        var uOk = off > 0 && clearBand(base - off) && curveClear(base - off);
+        if (dOk || uOk) {
+          if (dOk && uOk) {
+            var costD = Math.abs(base + off - syC) + Math.abs(base + off - tyC);
+            var costU = Math.abs(base - off - syC) + Math.abs(base - off - tyC);
+            busY = (costU < costD) ? (base - off) : (base + off);
+          } else { busY = dOk ? (base + off) : (base - off); }
+          break;
+        }
       }
+      // Etiqueta ancorada AL BUS, prop del concepte d'ORIGEN (no al mig del tram): es
+      // llegeix "origen → relació → destí" i no flota lluny dels conceptes que lliga.
+      var lblx = gutS + (gutT - gutS) * 0.32;
       var d = pathFor(busY);
-      return { d: d, lx: gutMid, ly: busY,
+      return { d: d, lx: lblx, ly: busY,
                minX: Math.min(edgeSx, gutS, gutT, edgeTx), maxX: Math.max(edgeSx, gutS, gutT, edgeTx),
                minY: Math.min(syC, tyC, busY), maxY: Math.max(syC, tyC, busY) };
     }
