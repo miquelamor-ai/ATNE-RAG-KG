@@ -320,5 +320,23 @@ function labelHitsNode(cont) {
     !!lb && !hits, 'label=' + !!lb + ' solapa_concepte=' + hits);
 })();
 
+// (8) Estils DIFERENTS per enllaç creuat (decisió Miquel 15/06): si n'hi ha 2 o 3,
+//     cada un ha de tenir un traç/color propi (paleta cíclica per índex), per no
+//     confondre'ls. Doble codi (color + discontinuïtat). L'1r conserva l'estil històric.
+(function () {
+  var cont = render([
+    '- **R**', '  - **a**', '    - X1', '  - **b**', '    - Y1', '  - **c**', '    - Z1',
+    '', '- Enllaços creuats:',
+    '  - X1 -> Y1 : rel1', '  - Y1 -> Z1 : rel2', '  - X1 -> Z1 : rel3',
+  ].join('\n'));
+  var curves = descendants(cont).filter(function (e) {
+    return e.tagName === 'path' && /xarr/.test(e.attrs['marker-end'] || '');
+  });
+  var dashes = curves.map(function (p) { return p.attrs['stroke-dasharray']; });
+  check('3 enllaços creuats → 3 corbes dibuixades', curves.length === 3, 'corbes=' + curves.length);
+  check('cada enllaç creuat amb traç DIFERENT (no es confonen)', new Set(dashes).size === 3,
+    'dashes=' + JSON.stringify(dashes));
+})();
+
 console.log(fails === 0 ? '\nTOTS OK' : `\n${fails} FALLADES`);
 process.exit(fails === 0 ? 0 : 1);

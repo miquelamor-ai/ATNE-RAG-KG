@@ -522,16 +522,32 @@
     //    + ombres tapaven la corba i, sobretot, l'etiqueta de la relació). ──
     var gX = null;
     if (crossRender.length) {
-      var mk = el('marker', { id: uid + '-xarr', viewBox: '0 0 8 8', refX: 7, refY: 4,
-        markerWidth: 8, markerHeight: 8, orient: 'auto' },
-        [el('path', { d: 'M0,1 L7,4 L0,7 L2,4 Z', fill: '#ea580c' })]);
-      defs.appendChild(mk);
+      // Paleta d'estils per als enllaços creuats: cada enllaç (per índex it.ci) en
+      // rep un de propi, perquè quan n'hi ha més d'un es distingeixin (i cada nou que
+      // l'usuari crea es diferenciï dels anteriors). Doble codi DUA: color + tipus de
+      // discontinuïtat alhora (qui no distingeix colors ho capta pel traç, i a l'inrevés).
+      // L'etiqueta hereta el color del seu enllaç per poder aparellar-los.
+      // Índex 0 = l'estil històric (taronja · "4 3"), per no trencar res que ja anava bé.
+      var CROSS_STYLES = [
+        { line: '#fb923c', arrow: '#ea580c', dash: '4 3',     bg: '#fff7ed', txt: '#c2410c' }, // taronja · guions
+        { line: '#06b6d4', arrow: '#0891b2', dash: '1 5',     bg: '#ecfeff', txt: '#0e7490' }, // cian · punts
+        { line: '#a78bfa', arrow: '#7c3aed', dash: '10 5',    bg: '#f5f3ff', txt: '#6d28d9' }, // lila · guions llargs
+        { line: '#34d399', arrow: '#059669', dash: '7 3 2 3', bg: '#ecfdf5', txt: '#047857' }, // verd · guió-punt
+        { line: '#f472b6', arrow: '#db2777', dash: '2 3',     bg: '#fdf2f8', txt: '#be185d' }, // rosa · punts fins
+      ];
+      // Un marker de fletxa per estil (amb el seu color).
+      CROSS_STYLES.forEach(function (st, k) {
+        defs.appendChild(el('marker', { id: uid + '-xarr' + k, viewBox: '0 0 8 8', refX: 7, refY: 4,
+          markerWidth: 8, markerHeight: 8, orient: 'auto' },
+          [el('path', { d: 'M0,1 L7,4 L0,7 L2,4 Z', fill: st.arrow })]));
+      });
       gX = el('g');
       crossRender.forEach(function (it) {
+        var st = CROSS_STYLES[it.ci % CROSS_STYLES.length];
         // Traç fi i discret (decisió Miquel 14/06): l'enllaç creuat és una anotació
         // secundària, no ha de dominar el mapa.
-        gX.appendChild(el('path', { d: it.d, stroke: '#fb923c', 'stroke-width': 1.2,
-          'stroke-dasharray': '4 3', fill: 'none', 'marker-end': 'url(#' + uid + '-xarr)' }));
+        gX.appendChild(el('path', { d: it.d, stroke: st.line, 'stroke-width': 1.2,
+          'stroke-dasharray': st.dash, fill: 'none', 'marker-end': 'url(#' + uid + '-xarr' + (it.ci % CROSS_STYLES.length) + ')' }));
         if (it.label) {
           var L = it.label, w = L.w;
           // Grup clicable: data-cross-idx identifica l'enllaç per a editar/eliminar
@@ -543,12 +559,12 @@
           // amb el seu enllaç (estratègia de col·locació intel·ligent, decisió 14/06).
           if (Math.abs(L.x - L.mx) > 2 || Math.abs(L.y - L.my) > 2) {
             lg.appendChild(el('line', { x1: L.mx, y1: L.my, x2: L.x, y2: L.y,
-              stroke: '#fb923c', 'stroke-width': 1, 'stroke-dasharray': '2 2' }));
+              stroke: st.line, 'stroke-width': 1, 'stroke-dasharray': '2 2' }));
           }
           lg.appendChild(el('rect', { x: L.x - w / 2, y: L.y - 9, width: w, height: 18, rx: 5,
-            fill: '#fff7ed', stroke: '#fb923c', 'stroke-width': 1 }));
+            fill: st.bg, stroke: st.line, 'stroke-width': 1 }));
           lg.appendChild(txt(it.link, { x: L.x, y: L.y + 4, 'text-anchor': 'middle',
-            'font-size': 10.5, 'font-style': 'italic', fill: '#c2410c', 'font-weight': '600' }));
+            'font-size': 10.5, 'font-style': 'italic', fill: st.txt, 'font-weight': '600' }));
           gX.appendChild(lg);
         }
       });
