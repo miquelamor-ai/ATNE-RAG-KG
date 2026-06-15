@@ -528,12 +528,15 @@
       // discontinuïtat alhora (qui no distingeix colors ho capta pel traç, i a l'inrevés).
       // L'etiqueta hereta el color del seu enllaç per poder aparellar-los.
       // Índex 0 = l'estil històric (taronja · "4 3"), per no trencar res que ja anava bé.
+      // NB: s'eviten blau/lila/indigo a propòsit — són els colors per defecte dels
+      // conceptes i de les connexions d'arbre, i un creuat blavós es confondria amb
+      // un enllaç jeràrquic. Doble codi DUA: color + tipus de discontinuïtat.
       var CROSS_STYLES = [
         { line: '#fb923c', arrow: '#ea580c', dash: '4 3',     bg: '#fff7ed', txt: '#c2410c' }, // taronja · guions
-        { line: '#06b6d4', arrow: '#0891b2', dash: '1 5',     bg: '#ecfeff', txt: '#0e7490' }, // cian · punts
-        { line: '#a78bfa', arrow: '#7c3aed', dash: '10 5',    bg: '#f5f3ff', txt: '#6d28d9' }, // lila · guions llargs
-        { line: '#34d399', arrow: '#059669', dash: '7 3 2 3', bg: '#ecfdf5', txt: '#047857' }, // verd · guió-punt
-        { line: '#f472b6', arrow: '#db2777', dash: '2 3',     bg: '#fdf2f8', txt: '#be185d' }, // rosa · punts fins
+        { line: '#10b981', arrow: '#059669', dash: '1 5',     bg: '#ecfdf5', txt: '#047857' }, // verd · punts
+        { line: '#ec4899', arrow: '#be185d', dash: '10 5',    bg: '#fdf2f8', txt: '#be185d' }, // rosa · guions llargs
+        { line: '#f87171', arrow: '#dc2626', dash: '7 3 2 3', bg: '#fef2f2', txt: '#b91c1c' }, // vermell · guió-punt
+        { line: '#eab308', arrow: '#a16207', dash: '2 3',     bg: '#fefce8', txt: '#854d0e' }, // ambre · punts fins
       ];
       // Un marker de fletxa per estil (amb el seu color).
       CROSS_STYLES.forEach(function (st, k) {
