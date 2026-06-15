@@ -165,14 +165,18 @@
   }
 
   // ── Estat de la font única ──
-  function md() { return (state.cont && state.cont.dataset.md) || ''; }
+  // FONT OPERATIVA de l'editor: SEMPRE filtrada (sense capçalera ## / ``` / >).
+  // El renderitzador calcula els `data-line` sobre el md FILTRAT; per tant les
+  // mutacions del nucli (per índex de línia) HAN d'operar també sobre el md
+  // filtrat, o quedarien desplaçades. Fix 15/06: a pas3, `dataset.md` pot arribar
+  // (o tornar a quedar) amb la capçalera `## Mapa conceptual` (+ línia en blanc),
+  // que desplaçava cada +/×/germana 2 línies → branca equivocada. ↝ no es veia
+  // afectat perquè opera per etiqueta. Filtrant aquí, els índexs sempre quadren
+  // amb el `data-line`, passi el que passi amb `dataset.md`.
+  function md() { return filterMd((state.cont && state.cont.dataset.md) || ''); }
 
   // Mateix filtre que el renderitzador (renderMermaidBlock): treu capçaleres
-  // ## / blocs ``` / cites >. Normalitzem dataset.md a aquesta forma a attach()
-  // perquè els data-line del SVG (calculats sobre el md filtrat) quadrin amb els
-  // índexs de línia que fan servir les mutacions del nucli. El renderitzador ja
-  // desa la forma filtrada després de qualsevol edició de label, així que és
-  // coherent amb el seu comportament.
+  // ## / blocs ``` / cites >.
   function filterMd(raw) {
     return (raw || '').split('\n').filter(function (l) {
       return !l.match(/^##\s+/) && !l.match(/^```/) && !l.match(/^>/);
@@ -655,5 +659,6 @@
     decorate(); updateBadge();
   }
 
-  window.ATNE_DIAGRAM_EDITOR = { attach: attach };
+  // _filterMd exposat per a tests deterministes (veure tests/test_editor_md_alignment.js).
+  window.ATNE_DIAGRAM_EDITOR = { attach: attach, _filterMd: filterMd };
 })();

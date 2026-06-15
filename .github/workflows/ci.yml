@@ -49,6 +49,9 @@ jobs:
 
       - name: Guard del layout de diagrames (fork A2 + profunditat A1 + snapshot)
         run: node tests/test_diagram_layout.js
+
+      - name: Guard d'alineació md↔data-line de l'editor (regressió capçalera 15/06)
+        run: node tests/test_editor_md_alignment.js
         # Bloc B: renderitza amb DOM stub i comprova que cap node profund es descarta,
         # que les proposicions germanes forquen i que la geometria és estable.
 
