@@ -355,7 +355,11 @@
       mapBot = Math.max(mapBot, m.y + crossHalfH(m));
     });
     if (mapBot === -Infinity) { mapBot = 0; mapTop = 0; }
-    function crossRoute(sn, tn, lane, labelW) {
+    function crossRoute(sn, tn, lane, labelW, usedBuses) {
+      usedBuses = usedBuses || [];
+      // Una banda y ja queda "ocupada" si un altre enllaç hi té el bus/etiqueta a prop
+      // (evita que dos enllaços s'apilin al mateix carril → etiquetes amb leader).
+      var farUsed = function (y) { for (var i = 0; i < usedBuses.length; i++) { if (Math.abs(y - usedBuses[i]) < 22) return false; } return true; };
       // Enrutament dels enllaços creuats. PRIORITAT (decisió Miquel 15/06): una corba
       // DIRECTA entre els dos conceptes (estil CmapTools) — curta i sense detour —
       // sempre que NO trepitgi cap altre node. Si la directa xocaria (conceptes amb
@@ -396,6 +400,7 @@
         var ax1 = edgeSx + ddx * 0.25, ax2 = edgeTx - ddx * 0.25, lw = Math.max(labelW || 0, 22), BOW = 32;
         var arc = function (dir) {
           var apexY = y0 + dir * BOW, h = dir * BOW * 1.34;
+          if (!farUsed(apexY)) return null;
           if (!clearChain([[edgeSx, syC], [ax1, y0 + h], [ax2, y0 + h], [edgeTx, tyC]])) return null;
           for (var i = 0; i < g.nodes.length; i++) {   // l'àpex (etiqueta) lliure de nodes
             var m = g.nodes[i]; if (m.x === undefined) continue;
@@ -408,7 +413,20 @@
                         minX: Math.min(edgeSx, edgeTx), maxX: Math.max(edgeSx, edgeTx),
                         minY: Math.min(syC, tyC, a.apexY), maxY: Math.max(syC, tyC, a.apexY) };
       }
-      // NIVELLS DIFERENTS (diagonal) o sense lloc per a l'arc → BUS net més proper (avall).
+      if (directOk) {
+        // 1b) NIVELLS DIFERENTS (diagonal): CORBA SUAU directa entre els dos conceptes
+        //     (no un bus llunyà avall). L'etiqueta s'ancorarà en un punt LLIURE al llarg
+        //     de la pròpia corba (crossRender, via curvePts) → cap leader, no cau avall.
+        var dd = 'M ' + edgeSx + ' ' + syC + ' C ' + cp1x + ' ' + syC + ' ' + cp2x + ' ' + tyC + ' ' + edgeTx + ' ' + tyC;
+        var cubAt = function (t) { var u = 1 - t;
+          return { x: u*u*u*edgeSx + 3*u*u*t*cp1x + 3*u*t*t*cp2x + t*t*t*edgeTx,
+                   y: u*u*u*syC + 3*u*u*t*syC + 3*u*t*t*tyC + t*t*t*tyC }; };
+        var ts = [0.5, 0.42, 0.58, 0.34, 0.66, 0.27, 0.73, 0.2, 0.8, 0.14, 0.86], curvePts = ts.map(cubAt);
+        return { d: dd, lx: (edgeSx + edgeTx) / 2, ly: (syC + tyC) / 2, curvePts: curvePts,
+                 minX: Math.min(edgeSx, edgeTx), maxX: Math.max(edgeSx, edgeTx),
+                 minY: Math.min(syC, tyC), maxY: Math.max(syC, tyC) };
+      }
+      // Direct BLOQUEJADA (hi ha un node pel mig) → BUS net més proper.
       // ── 2) FALLBACK: BUS NET MÉS PROPER (passadís lateral + banda horitzontal lliure) ──
       // Una banda a alçada y és lliure si cap node intercepta l'strip [gutMid±halfStrip].
       function clearBand(y) {
@@ -433,8 +451,8 @@
       // BUS NET MÉS PROPER, SENSE biaix avall: a cada distància provem amunt I avall i,
       // si totes dues són netes, triem la de MENYS recorregut vertical (detour mínim).
       for (var off = 0; off <= 900; off += 7) {
-        var dOk = clearBand(base + off) && busClear(base + off);
-        var uOk = off > 0 && clearBand(base - off) && busClear(base - off);
+        var dOk = clearBand(base + off) && busClear(base + off) && farUsed(base + off);
+        var uOk = off > 0 && clearBand(base - off) && busClear(base - off) && farUsed(base - off);
         if (dOk || uOk) {
           if (dOk && uOk) {
             var costD = Math.abs(base + off - syC) + Math.abs(base + off - tyC);
@@ -471,29 +489,42 @@
       // trobar un buit (ni sobre un concepte ni sobre una altra etiqueta ja posada).
       var STEPS = [0, 16, 26, 36, 48, 62, 78, 96, 116, 138];
       var DIRS = [[0, 1], [0, -1], [1, 0.5], [-1, 0.5], [1, -0.5], [-1, -0.5], [0.6, 1], [-0.6, 1]];
+      var usedBuses = [];   // carrils (y) ja ocupats per altres enllaços → no s'hi apilen
       crossLinks.forEach(function (cl, ci) {
         var sn = byLx[cl.from], tn = byLx[cl.to];
         if (!sn || !tn || sn.x === undefined || tn.x === undefined) return;
-        var r = crossRoute(sn, tn, ci, cl.link ? cl.link.length * 6.2 + 12 : 0);
+        var r = crossRoute(sn, tn, ci, cl.link ? cl.link.length * 6.2 + 12 : 0, usedBuses);
+        usedBuses.push(r.ly);
         x0 = Math.min(x0, r.minX - CM.M); x1 = Math.max(x1, r.maxX + CM.M);
         y0 = Math.min(y0, r.minY - 10); y1b = Math.max(y1b, r.maxY + 10);
         var lbl = null;
         if (cl.link) {
-          var w = cl.link.length * 6.2 + 12, h = 18, bx = r.lx, by = r.ly, placed = false;
+          var w = cl.link.length * 6.2 + 12, h = 18, bx = r.lx, by = r.ly, placed = false, onCurve = false;
+          var fits = function (cxC, cyC) {
+            var box = { x: cxC - w / 2, y: cyC - h / 2, w: w, h: h };
+            for (var oi = 0; oi < obstacles.length; oi++) { var o = obstacles[oi]; if (o.node === sn || o.node === tn) continue; if (ov(box, o)) return false; }
+            return true;
+          };
+          // Corba directa: prova punts AL LLARG de la pròpia corba (etiqueta sobre la
+          // línia, sense leader). El primer lliure guanya.
+          if (r.curvePts) {
+            for (var pi = 0; pi < r.curvePts.length && !placed; pi++) {
+              if (fits(r.curvePts[pi].x, r.curvePts[pi].y)) { bx = r.curvePts[pi].x; by = r.curvePts[pi].y; placed = true; onCurve = true; }
+            }
+          }
+          // Si no (bus, o cap punt de corba lliure): cerca voraç al voltant de l'àncora.
           for (var si = 0; si < STEPS.length && !placed; si++) {
             var cands = si === 0 ? [[0, 0]] : DIRS;
             for (var di = 0; di < cands.length; di++) {
               var cxC = r.lx + cands[di][0] * STEPS[si], cyC = r.ly + cands[di][1] * STEPS[si];
-              var box = { x: cxC - w / 2, y: cyC - h / 2, w: w, h: h };
-              var clash = false;
-              for (var oi = 0; oi < obstacles.length; oi++) { var o = obstacles[oi]; if (o.node === sn || o.node === tn) continue; if (ov(box, o)) { clash = true; break; } }
-              if (!clash) { bx = cxC; by = cyC; placed = true; break; }
+              if (fits(cxC, cyC)) { bx = cxC; by = cyC; placed = true; break; }
             }
           }
           obstacles.push({ x: bx - w / 2, y: by - h / 2, w: w, h: h, node: null });
           x0 = Math.min(x0, bx - w / 2 - 4); x1 = Math.max(x1, bx + w / 2 + 4);
           y0 = Math.min(y0, by - h / 2 - 4); y1b = Math.max(y1b, by + h / 2 + 4);
-          lbl = { x: bx, y: by, w: w, mx: r.lx, my: r.ly };
+          // Si l'etiqueta seu SOBRE la corba, no cal leader (mx/my = la pròpia posició).
+          lbl = { x: bx, y: by, w: w, mx: onCurve ? bx : r.lx, my: onCurve ? by : r.ly };
         }
         crossRender.push({ d: r.d, ci: ci, link: cl.link, label: lbl });
       });
