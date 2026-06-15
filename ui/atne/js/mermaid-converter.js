@@ -414,7 +414,7 @@
       function clearBand(y) {
         var lo = gutMid - halfStrip, hi = gutMid + halfStrip;
         for (var i = 0; i < g.nodes.length; i++) {
-          var m = g.nodes[i]; if (m.x === undefined) continue;
+          var m = g.nodes[i]; if (m.x === undefined || m === sn || m === tn) continue;  // origen/destí no bloquegen
           var fw = crossFW(m);
           if (hi < m.x - fw || lo > m.x + fw) continue;
           if (y > m.y - crossHalfH(m) - 11 && y < m.y + crossHalfH(m) + 11) return false;
@@ -464,7 +464,9 @@
         return { x: n.x - CM.NW / 2, y: n.y - n.nh / 2, w: CM.NW, h: n.nh };
       };
       var ov = function (a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; };
-      var obstacles = g.nodes.filter(function (n) { return n.x !== undefined; }).map(footprint);
+      // Cada obstacle recorda el seu node: l'etiqueta d'un enllaç POT seure tocant el
+      // seu propi origen/destí (hi va entre mig), però no cap altre concepte ni etiqueta.
+      var obstacles = g.nodes.filter(function (n) { return n.x !== undefined; }).map(function (n) { var f = footprint(n); f.node = n; return f; });
       // Cerca voraç: provem el punt mig i, si xoca, ens allunyem en cercles fins
       // trobar un buit (ni sobre un concepte ni sobre una altra etiqueta ja posada).
       var STEPS = [0, 16, 26, 36, 48, 62, 78, 96, 116, 138];
@@ -484,11 +486,11 @@
               var cxC = r.lx + cands[di][0] * STEPS[si], cyC = r.ly + cands[di][1] * STEPS[si];
               var box = { x: cxC - w / 2, y: cyC - h / 2, w: w, h: h };
               var clash = false;
-              for (var oi = 0; oi < obstacles.length; oi++) { if (ov(box, obstacles[oi])) { clash = true; break; } }
+              for (var oi = 0; oi < obstacles.length; oi++) { var o = obstacles[oi]; if (o.node === sn || o.node === tn) continue; if (ov(box, o)) { clash = true; break; } }
               if (!clash) { bx = cxC; by = cyC; placed = true; break; }
             }
           }
-          obstacles.push({ x: bx - w / 2, y: by - h / 2, w: w, h: h });
+          obstacles.push({ x: bx - w / 2, y: by - h / 2, w: w, h: h, node: null });
           x0 = Math.min(x0, bx - w / 2 - 4); x1 = Math.max(x1, bx + w / 2 + 4);
           y0 = Math.min(y0, by - h / 2 - 4); y1b = Math.max(y1b, by + h / 2 + 4);
           lbl = { x: bx, y: by, w: w, mx: r.lx, my: r.ly };
