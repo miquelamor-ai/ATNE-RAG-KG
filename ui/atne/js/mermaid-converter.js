@@ -356,11 +356,11 @@
     });
     if (mapBot === -Infinity) { mapBot = 0; mapTop = 0; }
     function crossRoute(sn, tn, lane, labelW) {
-      // Enrutament al BUS NET MÉS PROPER (decisió Miquel 14/06): la corba surt pel
-      // COSTAT del node cap al passadís (sempre buit) i va a la BANDA HORITZONTAL
-      // LLIURE més propera — la de SOBRE o la de SOTA immediata dels conceptes que
-      // connecta, la que quedi més a prop — on l'etiqueta (proposició) seu sense
-      // trepitjar res. Si el mapa és molt dens, cau al bus exterior. Corba suau.
+      // Enrutament dels enllaços creuats. PRIORITAT (decisió Miquel 15/06): una corba
+      // DIRECTA entre els dos conceptes (estil CmapTools) — curta i sense detour —
+      // sempre que NO trepitgi cap altre node. Si la directa xocaria (conceptes amb
+      // nodes pel mig), es cau al BUS NET MÉS PROPER (passadís lateral + banda lliure),
+      // que garanteix que la línia no travessa cap caixa. Corbes suaus.
       var sxC = sn.x, syC = sn.y, txC = tn.x, tyC = tn.y;
       var dirS = (txC >= sxC) ? 1 : -1, dirT = (sxC > txC) ? 1 : -1;
       var gutS = sxC + dirS * (crossHalfW(sn) + CM.HG / 2);
@@ -368,8 +368,34 @@
       var edgeSx = sxC + dirS * crossHalfW(sn), edgeTx = txC + dirT * crossHalfW(tn);
       var gutMid = (gutS + gutT) / 2;
       var halfStrip = Math.max(Math.abs(gutT - gutS) / 2, (labelW || 0) / 2) + 6;
-      // Una banda a alçada y és lliure si cap node intercepta l'strip [gutMid±halfStrip]
-      // a aquella y (amb marge per a l'alçada de l'etiqueta).
+      // Mostreja una cadena de cúbics (P = [[x,y]...] de 4/7/... punts) i comprova que
+      // cap punt cau dins d'un node. Exclou origen i destí (la corba hi toca pels extrems).
+      function clearChain(P) {
+        function cub(a, b, c, e, t) { var u = 1 - t; return [u*u*u*a[0] + 3*u*u*t*b[0] + 3*u*t*t*c[0] + t*t*t*e[0], u*u*u*a[1] + 3*u*u*t*b[1] + 3*u*t*t*c[1] + t*t*t*e[1]]; }
+        var segs = (P.length - 1) / 3;
+        for (var seg = 0; seg < segs; seg++) {
+          var a = P[seg*3], b = P[seg*3+1], c = P[seg*3+2], e = P[seg*3+3];
+          for (var t = 0; t <= 1.0001; t += 0.04) {
+            var pt = cub(a, b, c, e, t);
+            for (var i = 0; i < g.nodes.length; i++) {
+              var m = g.nodes[i]; if (m.x === undefined || m === sn || m === tn) continue;
+              var fw = crossFW(m), fh = crossHalfH(m);
+              if (pt[0] > m.x - fw - 2 && pt[0] < m.x + fw + 2 && pt[1] > m.y - fh - 2 && pt[1] < m.y + fh + 2) return false;
+            }
+          }
+        }
+        return true;
+      }
+      // ── 1) CORBA DIRECTA (CmapTools): S suau horitzontal entre origen i destí ──
+      var ddx = edgeTx - edgeSx, cp1x = edgeSx + ddx * 0.5, cp2x = edgeTx - ddx * 0.5;
+      if (clearChain([[edgeSx, syC], [cp1x, syC], [cp2x, tyC], [edgeTx, tyC]])) {
+        var dd = 'M ' + edgeSx + ' ' + syC + ' C ' + cp1x + ' ' + syC + ' ' + cp2x + ' ' + tyC + ' ' + edgeTx + ' ' + tyC;
+        return { d: dd, lx: (edgeSx + edgeTx) / 2, ly: (syC + tyC) / 2,
+                 minX: Math.min(edgeSx, edgeTx), maxX: Math.max(edgeSx, edgeTx),
+                 minY: Math.min(syC, tyC), maxY: Math.max(syC, tyC) };
+      }
+      // ── 2) FALLBACK: BUS NET MÉS PROPER (passadís lateral + banda horitzontal lliure) ──
+      // Una banda a alçada y és lliure si cap node intercepta l'strip [gutMid±halfStrip].
       function clearBand(y) {
         var lo = gutMid - halfStrip, hi = gutMid + halfStrip;
         for (var i = 0; i < g.nodes.length; i++) {
@@ -385,33 +411,15 @@
                ' C ' + gutS + ' ' + syC + ' ' + gutS + ' ' + by + ' ' + gutMid + ' ' + by +
                ' C ' + gutT + ' ' + by + ' ' + gutT + ' ' + tyC + ' ' + edgeTx + ' ' + tyC;
       }
-      // Verifica que TOTA la corba (no només la banda) queda fora dels conceptes.
-      // S'exclouen origen i destí (la corba hi toca pels extrems, és correcte).
-      function curveClear(by) {
-        var P = [[edgeSx, syC], [gutS, syC], [gutS, by], [gutMid, by], [gutT, by], [gutT, tyC], [edgeTx, tyC]];
-        function cub(a, b, c, e, t) { var u = 1 - t; return [u * u * u * a[0] + 3 * u * u * t * b[0] + 3 * u * t * t * c[0] + t * t * t * e[0], u * u * u * a[1] + 3 * u * u * t * b[1] + 3 * u * t * t * c[1] + t * t * t * e[1]]; }
-        for (var seg = 0; seg < 2; seg++) {
-          var a = P[seg * 3], b = P[seg * 3 + 1], c = P[seg * 3 + 2], e = P[seg * 3 + 3];
-          for (var t = 0; t <= 1.0001; t += 0.04) {
-            var pt = cub(a, b, c, e, t);
-            for (var i = 0; i < g.nodes.length; i++) {
-              var m = g.nodes[i]; if (m.x === undefined || m === sn || m === tn) continue;
-              var fw = crossFW(m), fh = crossHalfH(m);
-              if (pt[0] > m.x - fw - 2 && pt[0] < m.x + fw + 2 && pt[1] > m.y - fh - 2 && pt[1] < m.y + fh + 2) return false;
-            }
-          }
-        }
-        return true;
-      }
+      function busClear(by) { return clearChain([[edgeSx, syC], [gutS, syC], [gutS, by], [gutMid, by], [gutT, by], [gutT, tyC], [edgeTx, tyC]]); }
       var base = (syC + tyC) / 2;
       // Fallback exterior (costat més proper) si no es troba cap banda interior neta.
       var busY = (base <= (mapTop + mapBot) / 2) ? (mapTop - 22 - lane * 22) : (mapBot + 22 + lane * 22);
-      // BUS NET MÉS PROPER, SENSE biaix avall (decisió Miquel 15/06): a cada distància
-      // provem amunt I avall; si totes dues són netes, triem la de MENYS recorregut
-      // vertical (detour mínim) → s'evita "baixar dos busos i tornar a pujar".
+      // BUS NET MÉS PROPER, SENSE biaix avall: a cada distància provem amunt I avall i,
+      // si totes dues són netes, triem la de MENYS recorregut vertical (detour mínim).
       for (var off = 0; off <= 900; off += 7) {
-        var dOk = clearBand(base + off) && curveClear(base + off);
-        var uOk = off > 0 && clearBand(base - off) && curveClear(base - off);
+        var dOk = clearBand(base + off) && busClear(base + off);
+        var uOk = off > 0 && clearBand(base - off) && busClear(base - off);
         if (dOk || uOk) {
           if (dOk && uOk) {
             var costD = Math.abs(base + off - syC) + Math.abs(base + off - tyC);
@@ -421,8 +429,7 @@
           break;
         }
       }
-      // Etiqueta ancorada AL BUS, prop del concepte d'ORIGEN (no al mig del tram): es
-      // llegeix "origen → relació → destí" i no flota lluny dels conceptes que lliga.
+      // Etiqueta ancorada AL BUS, prop del concepte d'ORIGEN (no al mig del tram).
       var lblx = gutS + (gutT - gutS) * 0.32;
       var d = pathFor(busY);
       return { d: d, lx: lblx, ly: busY,
