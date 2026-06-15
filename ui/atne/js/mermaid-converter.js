@@ -408,13 +408,7 @@
                         minX: Math.min(edgeSx, edgeTx), maxX: Math.max(edgeSx, edgeTx),
                         minY: Math.min(syC, tyC, a.apexY), maxY: Math.max(syC, tyC, a.apexY) };
       }
-      if (directOk) {
-        // 1b) NIVELLS DIFERENTS (diagonal): S suau; la proposició al mig, la línia hi passa.
-        var dd = 'M ' + edgeSx + ' ' + syC + ' C ' + cp1x + ' ' + syC + ' ' + cp2x + ' ' + tyC + ' ' + edgeTx + ' ' + tyC;
-        return { d: dd, lx: (edgeSx + edgeTx) / 2, ly: (syC + tyC) / 2,
-                 minX: Math.min(edgeSx, edgeTx), maxX: Math.max(edgeSx, edgeTx),
-                 minY: Math.min(syC, tyC), maxY: Math.max(syC, tyC) };
-      }
+      // NIVELLS DIFERENTS (diagonal) o sense lloc per a l'arc → BUS net més proper (avall).
       // ── 2) FALLBACK: BUS NET MÉS PROPER (passadís lateral + banda horitzontal lliure) ──
       // Una banda a alçada y és lliure si cap node intercepta l'strip [gutMid±halfStrip].
       function clearBand(y) {
