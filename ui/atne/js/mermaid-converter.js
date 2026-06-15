@@ -355,7 +355,11 @@
       mapBot = Math.max(mapBot, m.y + crossHalfH(m));
     });
     if (mapBot === -Infinity) { mapBot = 0; mapTop = 0; }
-    function crossRoute(sn, tn, lane, labelW) {
+    function crossRoute(sn, tn, lane, labelW, usedBuses) {
+      usedBuses = usedBuses || [];
+      // Una banda y ja queda "ocupada" si un altre enllaç hi té el bus/etiqueta a prop
+      // (evita que dos enllaços s'apilin al mateix carril → etiquetes amb leader).
+      var farUsed = function (y) { for (var i = 0; i < usedBuses.length; i++) { if (Math.abs(y - usedBuses[i]) < 22) return false; } return true; };
       // Enrutament dels enllaços creuats. PRIORITAT (decisió Miquel 15/06): una corba
       // DIRECTA entre els dos conceptes (estil CmapTools) — curta i sense detour —
       // sempre que NO trepitgi cap altre node. Si la directa xocaria (conceptes amb
@@ -396,6 +400,7 @@
         var ax1 = edgeSx + ddx * 0.25, ax2 = edgeTx - ddx * 0.25, lw = Math.max(labelW || 0, 22), BOW = 32;
         var arc = function (dir) {
           var apexY = y0 + dir * BOW, h = dir * BOW * 1.34;
+          if (!farUsed(apexY)) return null;
           if (!clearChain([[edgeSx, syC], [ax1, y0 + h], [ax2, y0 + h], [edgeTx, tyC]])) return null;
           for (var i = 0; i < g.nodes.length; i++) {   // l'àpex (etiqueta) lliure de nodes
             var m = g.nodes[i]; if (m.x === undefined) continue;
@@ -433,8 +438,8 @@
       // BUS NET MÉS PROPER, SENSE biaix avall: a cada distància provem amunt I avall i,
       // si totes dues són netes, triem la de MENYS recorregut vertical (detour mínim).
       for (var off = 0; off <= 900; off += 7) {
-        var dOk = clearBand(base + off) && busClear(base + off);
-        var uOk = off > 0 && clearBand(base - off) && busClear(base - off);
+        var dOk = clearBand(base + off) && busClear(base + off) && farUsed(base + off);
+        var uOk = off > 0 && clearBand(base - off) && busClear(base - off) && farUsed(base - off);
         if (dOk || uOk) {
           if (dOk && uOk) {
             var costD = Math.abs(base + off - syC) + Math.abs(base + off - tyC);
@@ -471,10 +476,12 @@
       // trobar un buit (ni sobre un concepte ni sobre una altra etiqueta ja posada).
       var STEPS = [0, 16, 26, 36, 48, 62, 78, 96, 116, 138];
       var DIRS = [[0, 1], [0, -1], [1, 0.5], [-1, 0.5], [1, -0.5], [-1, -0.5], [0.6, 1], [-0.6, 1]];
+      var usedBuses = [];   // carrils (y) ja ocupats per altres enllaços → no s'hi apilen
       crossLinks.forEach(function (cl, ci) {
         var sn = byLx[cl.from], tn = byLx[cl.to];
         if (!sn || !tn || sn.x === undefined || tn.x === undefined) return;
-        var r = crossRoute(sn, tn, ci, cl.link ? cl.link.length * 6.2 + 12 : 0);
+        var r = crossRoute(sn, tn, ci, cl.link ? cl.link.length * 6.2 + 12 : 0, usedBuses);
+        usedBuses.push(r.ly);
         x0 = Math.min(x0, r.minX - CM.M); x1 = Math.max(x1, r.maxX + CM.M);
         y0 = Math.min(y0, r.minY - 10); y1b = Math.max(y1b, r.maxY + 10);
         var lbl = null;

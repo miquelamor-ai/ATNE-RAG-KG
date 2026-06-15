@@ -346,5 +346,28 @@ function labelHitsNode(cont, endpoints) {
     'dashes=' + JSON.stringify(dashes));
 })();
 
+// (9) Molts enllaços creuats NO s'apilen al mateix carril (decisió Miquel 15/06):
+//     cas real "Cicle de l'aigua" amb 5 enllaços (dues diagonals que es creuen).
+//     Cada un al seu carril → CAP leader (línia secundària que despenja l'etiqueta).
+(function () {
+  var cont = render([
+    '- **Cicle**',
+    '  - **A**', '    - la calor del sol', '    - la temperatura',
+    '  - **B**', '    - núvols', '    - boira',
+    '  - **C**', '    - pluja', '    - neu',
+    '', '- Enllaços creuats:',
+    '  - pluja -> núvols : cau des dels',
+    '  - la calor del sol -> boira : escalfa i crea',
+    '  - neu -> la temperatura : depèn de la',
+    '  - núvols -> neu : i despres',
+    '  - pluja -> boira : i abans',
+  ].join('\n'));
+  var leaders = crossGroups(cont).reduce(function (s, g) {
+    return s + descendants(g).filter(function (e) { return e.tagName === 'line'; }).length;
+  }, 0);
+  check('5 enllaços creuats: cap leader (cada un al seu carril, no s\'apilen)', leaders === 0,
+    'leaders=' + leaders);
+})();
+
 console.log(fails === 0 ? '\nTOTS OK' : `\n${fails} FALLADES`);
 process.exit(fails === 0 ? 0 : 1);
