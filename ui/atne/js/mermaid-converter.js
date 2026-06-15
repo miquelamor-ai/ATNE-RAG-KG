@@ -356,11 +356,11 @@
     });
     if (mapBot === -Infinity) { mapBot = 0; mapTop = 0; }
     function crossRoute(sn, tn, lane, labelW) {
-      // Enrutament al BUS NET MÉS PROPER (decisió Miquel 14/06): la corba surt pel
-      // COSTAT del node cap al passadís (sempre buit) i va a la BANDA HORITZONTAL
-      // LLIURE més propera — la de SOBRE o la de SOTA immediata dels conceptes que
-      // connecta, la que quedi més a prop — on l'etiqueta (proposició) seu sense
-      // trepitjar res. Si el mapa és molt dens, cau al bus exterior. Corba suau.
+      // Enrutament dels enllaços creuats. PRIORITAT (decisió Miquel 15/06): una corba
+      // DIRECTA entre els dos conceptes (estil CmapTools) — curta i sense detour —
+      // sempre que NO trepitgi cap altre node. Si la directa xocaria (conceptes amb
+      // nodes pel mig), es cau al BUS NET MÉS PROPER (passadís lateral + banda lliure),
+      // que garanteix que la línia no travessa cap caixa. Corbes suaus.
       var sxC = sn.x, syC = sn.y, txC = tn.x, tyC = tn.y;
       var dirS = (txC >= sxC) ? 1 : -1, dirT = (sxC > txC) ? 1 : -1;
       var gutS = sxC + dirS * (crossHalfW(sn) + CM.HG / 2);
@@ -368,30 +368,13 @@
       var edgeSx = sxC + dirS * crossHalfW(sn), edgeTx = txC + dirT * crossHalfW(tn);
       var gutMid = (gutS + gutT) / 2;
       var halfStrip = Math.max(Math.abs(gutT - gutS) / 2, (labelW || 0) / 2) + 6;
-      // Una banda a alçada y és lliure si cap node intercepta l'strip [gutMid±halfStrip]
-      // a aquella y (amb marge per a l'alçada de l'etiqueta).
-      function clearBand(y) {
-        var lo = gutMid - halfStrip, hi = gutMid + halfStrip;
-        for (var i = 0; i < g.nodes.length; i++) {
-          var m = g.nodes[i]; if (m.x === undefined) continue;
-          var fw = crossFW(m);
-          if (hi < m.x - fw || lo > m.x + fw) continue;
-          if (y > m.y - crossHalfH(m) - 11 && y < m.y + crossHalfH(m) + 11) return false;
-        }
-        return true;
-      }
-      function pathFor(by) {
-        return 'M ' + edgeSx + ' ' + syC +
-               ' C ' + gutS + ' ' + syC + ' ' + gutS + ' ' + by + ' ' + gutMid + ' ' + by +
-               ' C ' + gutT + ' ' + by + ' ' + gutT + ' ' + tyC + ' ' + edgeTx + ' ' + tyC;
-      }
-      // Verifica que TOTA la corba (no només la banda) queda fora dels conceptes.
-      // S'exclouen origen i destí (la corba hi toca pels extrems, és correcte).
-      function curveClear(by) {
-        var P = [[edgeSx, syC], [gutS, syC], [gutS, by], [gutMid, by], [gutT, by], [gutT, tyC], [edgeTx, tyC]];
-        function cub(a, b, c, e, t) { var u = 1 - t; return [u * u * u * a[0] + 3 * u * u * t * b[0] + 3 * u * t * t * c[0] + t * t * t * e[0], u * u * u * a[1] + 3 * u * u * t * b[1] + 3 * u * t * t * c[1] + t * t * t * e[1]]; }
-        for (var seg = 0; seg < 2; seg++) {
-          var a = P[seg * 3], b = P[seg * 3 + 1], c = P[seg * 3 + 2], e = P[seg * 3 + 3];
+      // Mostreja una cadena de cúbics (P = [[x,y]...] de 4/7/... punts) i comprova que
+      // cap punt cau dins d'un node. Exclou origen i destí (la corba hi toca pels extrems).
+      function clearChain(P) {
+        function cub(a, b, c, e, t) { var u = 1 - t; return [u*u*u*a[0] + 3*u*u*t*b[0] + 3*u*t*t*c[0] + t*t*t*e[0], u*u*u*a[1] + 3*u*u*t*b[1] + 3*u*t*t*c[1] + t*t*t*e[1]]; }
+        var segs = (P.length - 1) / 3;
+        for (var seg = 0; seg < segs; seg++) {
+          var a = P[seg*3], b = P[seg*3+1], c = P[seg*3+2], e = P[seg*3+3];
           for (var t = 0; t <= 1.0001; t += 0.04) {
             var pt = cub(a, b, c, e, t);
             for (var i = 0; i < g.nodes.length; i++) {
@@ -403,15 +386,68 @@
         }
         return true;
       }
+      // ── 1) CORBA DIRECTA entre origen i destí (sense detour a cap bus) ──
+      var ddx = edgeTx - edgeSx, cp1x = edgeSx + ddx * 0.5, cp2x = edgeTx - ddx * 0.5;
+      var directOk = clearChain([[edgeSx, syC], [cp1x, syC], [cp2x, tyC], [edgeTx, tyC]]);
+      if (directOk && Math.abs(syC - tyC) < 24) {
+        // 1a) MATEIX NIVELL (branques del costat): arc CÒNCAU cap a una banda lliure,
+        //     amb la proposició a l'ÀPEX (sobre la línia, SENSE cap línia secundària).
+        var y0 = (syC + tyC) / 2, midX = (edgeSx + edgeTx) / 2;
+        var ax1 = edgeSx + ddx * 0.25, ax2 = edgeTx - ddx * 0.25, lw = Math.max(labelW || 0, 22), BOW = 32;
+        var arc = function (dir) {
+          var apexY = y0 + dir * BOW, h = dir * BOW * 1.34;
+          if (!clearChain([[edgeSx, syC], [ax1, y0 + h], [ax2, y0 + h], [edgeTx, tyC]])) return null;
+          for (var i = 0; i < g.nodes.length; i++) {   // l'àpex (etiqueta) lliure de nodes
+            var m = g.nodes[i]; if (m.x === undefined) continue;
+            if (Math.abs(midX - m.x) < crossFW(m) + lw / 2 && Math.abs(apexY - m.y) < crossHalfH(m) + 11) return null;
+          }
+          return { d: 'M ' + edgeSx + ' ' + syC + ' C ' + ax1 + ' ' + (y0 + h) + ' ' + ax2 + ' ' + (y0 + h) + ' ' + edgeTx + ' ' + tyC, apexY: apexY };
+        };
+        var a = arc(-1) || arc(1);   // prova amunt; si no, avall
+        if (a) return { d: a.d, lx: midX, ly: a.apexY,
+                        minX: Math.min(edgeSx, edgeTx), maxX: Math.max(edgeSx, edgeTx),
+                        minY: Math.min(syC, tyC, a.apexY), maxY: Math.max(syC, tyC, a.apexY) };
+      }
+      // NIVELLS DIFERENTS (diagonal) o sense lloc per a l'arc → BUS net més proper (avall).
+      // ── 2) FALLBACK: BUS NET MÉS PROPER (passadís lateral + banda horitzontal lliure) ──
+      // Una banda a alçada y és lliure si cap node intercepta l'strip [gutMid±halfStrip].
+      function clearBand(y) {
+        var lo = gutMid - halfStrip, hi = gutMid + halfStrip;
+        for (var i = 0; i < g.nodes.length; i++) {
+          var m = g.nodes[i]; if (m.x === undefined || m === sn || m === tn) continue;  // origen/destí no bloquegen
+          var fw = crossFW(m);
+          if (hi < m.x - fw || lo > m.x + fw) continue;
+          if (y > m.y - crossHalfH(m) - 11 && y < m.y + crossHalfH(m) + 11) return false;
+        }
+        return true;
+      }
+      function pathFor(by) {
+        return 'M ' + edgeSx + ' ' + syC +
+               ' C ' + gutS + ' ' + syC + ' ' + gutS + ' ' + by + ' ' + gutMid + ' ' + by +
+               ' C ' + gutT + ' ' + by + ' ' + gutT + ' ' + tyC + ' ' + edgeTx + ' ' + tyC;
+      }
+      function busClear(by) { return clearChain([[edgeSx, syC], [gutS, syC], [gutS, by], [gutMid, by], [gutT, by], [gutT, tyC], [edgeTx, tyC]]); }
       var base = (syC + tyC) / 2;
       // Fallback exterior (costat més proper) si no es troba cap banda interior neta.
       var busY = (base <= (mapTop + mapBot) / 2) ? (mapTop - 22 - lane * 22) : (mapBot + 22 + lane * 22);
+      // BUS NET MÉS PROPER, SENSE biaix avall: a cada distància provem amunt I avall i,
+      // si totes dues són netes, triem la de MENYS recorregut vertical (detour mínim).
       for (var off = 0; off <= 900; off += 7) {
-        if (clearBand(base + off) && curveClear(base + off)) { busY = base + off; break; }
-        if (off > 0 && clearBand(base - off) && curveClear(base - off)) { busY = base - off; break; }
+        var dOk = clearBand(base + off) && busClear(base + off);
+        var uOk = off > 0 && clearBand(base - off) && busClear(base - off);
+        if (dOk || uOk) {
+          if (dOk && uOk) {
+            var costD = Math.abs(base + off - syC) + Math.abs(base + off - tyC);
+            var costU = Math.abs(base - off - syC) + Math.abs(base - off - tyC);
+            busY = (costU < costD) ? (base - off) : (base + off);
+          } else { busY = dOk ? (base + off) : (base - off); }
+          break;
+        }
       }
+      // Etiqueta ancorada AL BUS, prop del concepte d'ORIGEN (no al mig del tram).
+      var lblx = gutS + (gutT - gutS) * 0.32;
       var d = pathFor(busY);
-      return { d: d, lx: gutMid, ly: busY,
+      return { d: d, lx: lblx, ly: busY,
                minX: Math.min(edgeSx, gutS, gutT, edgeTx), maxX: Math.max(edgeSx, gutS, gutT, edgeTx),
                minY: Math.min(syC, tyC, busY), maxY: Math.max(syC, tyC, busY) };
     }
@@ -428,7 +464,9 @@
         return { x: n.x - CM.NW / 2, y: n.y - n.nh / 2, w: CM.NW, h: n.nh };
       };
       var ov = function (a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; };
-      var obstacles = g.nodes.filter(function (n) { return n.x !== undefined; }).map(footprint);
+      // Cada obstacle recorda el seu node: l'etiqueta d'un enllaç POT seure tocant el
+      // seu propi origen/destí (hi va entre mig), però no cap altre concepte ni etiqueta.
+      var obstacles = g.nodes.filter(function (n) { return n.x !== undefined; }).map(function (n) { var f = footprint(n); f.node = n; return f; });
       // Cerca voraç: provem el punt mig i, si xoca, ens allunyem en cercles fins
       // trobar un buit (ni sobre un concepte ni sobre una altra etiqueta ja posada).
       var STEPS = [0, 16, 26, 36, 48, 62, 78, 96, 116, 138];
@@ -448,11 +486,11 @@
               var cxC = r.lx + cands[di][0] * STEPS[si], cyC = r.ly + cands[di][1] * STEPS[si];
               var box = { x: cxC - w / 2, y: cyC - h / 2, w: w, h: h };
               var clash = false;
-              for (var oi = 0; oi < obstacles.length; oi++) { if (ov(box, obstacles[oi])) { clash = true; break; } }
+              for (var oi = 0; oi < obstacles.length; oi++) { var o = obstacles[oi]; if (o.node === sn || o.node === tn) continue; if (ov(box, o)) { clash = true; break; } }
               if (!clash) { bx = cxC; by = cyC; placed = true; break; }
             }
           }
-          obstacles.push({ x: bx - w / 2, y: by - h / 2, w: w, h: h });
+          obstacles.push({ x: bx - w / 2, y: by - h / 2, w: w, h: h, node: null });
           x0 = Math.min(x0, bx - w / 2 - 4); x1 = Math.max(x1, bx + w / 2 + 4);
           y0 = Math.min(y0, by - h / 2 - 4); y1b = Math.max(y1b, by + h / 2 + 4);
           lbl = { x: bx, y: by, w: w, mx: r.lx, my: r.ly };
@@ -522,16 +560,35 @@
     //    + ombres tapaven la corba i, sobretot, l'etiqueta de la relació). ──
     var gX = null;
     if (crossRender.length) {
-      var mk = el('marker', { id: uid + '-xarr', viewBox: '0 0 8 8', refX: 7, refY: 4,
-        markerWidth: 8, markerHeight: 8, orient: 'auto' },
-        [el('path', { d: 'M0,1 L7,4 L0,7 L2,4 Z', fill: '#ea580c' })]);
-      defs.appendChild(mk);
+      // Paleta d'estils per als enllaços creuats: cada enllaç (per índex it.ci) en
+      // rep un de propi, perquè quan n'hi ha més d'un es distingeixin (i cada nou que
+      // l'usuari crea es diferenciï dels anteriors). Doble codi DUA: color + tipus de
+      // discontinuïtat alhora (qui no distingeix colors ho capta pel traç, i a l'inrevés).
+      // L'etiqueta hereta el color del seu enllaç per poder aparellar-los.
+      // Índex 0 = l'estil històric (taronja · "4 3"), per no trencar res que ja anava bé.
+      // NB: s'eviten blau/lila/indigo a propòsit — són els colors per defecte dels
+      // conceptes i de les connexions d'arbre, i un creuat blavós es confondria amb
+      // un enllaç jeràrquic. Doble codi DUA: color + tipus de discontinuïtat.
+      var CROSS_STYLES = [
+        { line: '#fb923c', arrow: '#ea580c', dash: '4 3',     bg: '#fff7ed', txt: '#c2410c' }, // taronja · guions
+        { line: '#10b981', arrow: '#059669', dash: '1 5',     bg: '#ecfdf5', txt: '#047857' }, // verd · punts
+        { line: '#ec4899', arrow: '#be185d', dash: '10 5',    bg: '#fdf2f8', txt: '#be185d' }, // rosa · guions llargs
+        { line: '#f87171', arrow: '#dc2626', dash: '7 3 2 3', bg: '#fef2f2', txt: '#b91c1c' }, // vermell · guió-punt
+        { line: '#eab308', arrow: '#a16207', dash: '2 3',     bg: '#fefce8', txt: '#854d0e' }, // ambre · punts fins
+      ];
+      // Un marker de fletxa per estil (amb el seu color).
+      CROSS_STYLES.forEach(function (st, k) {
+        defs.appendChild(el('marker', { id: uid + '-xarr' + k, viewBox: '0 0 8 8', refX: 7, refY: 4,
+          markerWidth: 8, markerHeight: 8, orient: 'auto' },
+          [el('path', { d: 'M0,1 L7,4 L0,7 L2,4 Z', fill: st.arrow })]));
+      });
       gX = el('g');
       crossRender.forEach(function (it) {
+        var st = CROSS_STYLES[it.ci % CROSS_STYLES.length];
         // Traç fi i discret (decisió Miquel 14/06): l'enllaç creuat és una anotació
         // secundària, no ha de dominar el mapa.
-        gX.appendChild(el('path', { d: it.d, stroke: '#fb923c', 'stroke-width': 1.2,
-          'stroke-dasharray': '4 3', fill: 'none', 'marker-end': 'url(#' + uid + '-xarr)' }));
+        gX.appendChild(el('path', { d: it.d, stroke: st.line, 'stroke-width': 1.2,
+          'stroke-dasharray': st.dash, fill: 'none', 'marker-end': 'url(#' + uid + '-xarr' + (it.ci % CROSS_STYLES.length) + ')' }));
         if (it.label) {
           var L = it.label, w = L.w;
           // Grup clicable: data-cross-idx identifica l'enllaç per a editar/eliminar
@@ -543,12 +600,12 @@
           // amb el seu enllaç (estratègia de col·locació intel·ligent, decisió 14/06).
           if (Math.abs(L.x - L.mx) > 2 || Math.abs(L.y - L.my) > 2) {
             lg.appendChild(el('line', { x1: L.mx, y1: L.my, x2: L.x, y2: L.y,
-              stroke: '#fb923c', 'stroke-width': 1, 'stroke-dasharray': '2 2' }));
+              stroke: st.line, 'stroke-width': 1, 'stroke-dasharray': '2 2' }));
           }
           lg.appendChild(el('rect', { x: L.x - w / 2, y: L.y - 9, width: w, height: 18, rx: 5,
-            fill: '#fff7ed', stroke: '#fb923c', 'stroke-width': 1 }));
+            fill: st.bg, stroke: st.line, 'stroke-width': 1 }));
           lg.appendChild(txt(it.link, { x: L.x, y: L.y + 4, 'text-anchor': 'middle',
-            'font-size': 10.5, 'font-style': 'italic', fill: '#c2410c', 'font-weight': '600' }));
+            'font-size': 10.5, 'font-style': 'italic', fill: st.txt, 'font-weight': '600' }));
           gX.appendChild(lg);
         }
       });

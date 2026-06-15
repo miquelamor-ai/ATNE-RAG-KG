@@ -275,9 +275,17 @@ function rectsOverlap(a, b, inset) {
   return a.x < b.x + b.w - inset && a.x + a.w > b.x + inset &&
          a.y < b.y + b.h - inset && a.y + a.h > b.y + inset;
 }
-function labelHitsNode(cont) {
+// L'etiqueta d'un enllaç pot SEURE entre els seus dos conceptes (origen/destí) i
+// tocar-los; el que NO pot és trepitjar un concepte ALIÈ. `endpoints` = labels de
+// l'origen i el destí d'aquest enllaç, que s'exclouen de la comprovació.
+function labelHitsNode(cont, endpoints) {
   var lr = labelBox(cont); if (!lr) return false;
-  return nodeRects(cont).some(function (n) { return rectsOverlap(lr, n, 2); });
+  endpoints = endpoints || [];
+  return nodeGroups(cont).filter(function (g) { return endpoints.indexOf(g.attrs['data-lbl']) < 0; })
+    .map(function (g) { var r = descendants(g).find(function (e) { return e.tagName === 'rect'; });
+      return r ? { x: +r.attrs.x, y: +r.attrs.y, w: +r.attrs.width, h: +r.attrs.height } : null; })
+    .filter(Boolean)
+    .some(function (n) { return rectsOverlap(lr, n, 2); });
 }
 // (5) Enllaç horitzontal amb germans apilats dins l'abast (etiqueta llarga).
 (function () {
@@ -285,9 +293,9 @@ function labelHitsNode(cont) {
     '- **R**', '  - **a**', '    - X1', '    - X2', '  - **b**', '    - Y1', '    - Y2',
     '', '- Enllaços creuats:', '  - X1 -> Y1 : cau des dels núvols',
   ].join('\n'));
-  check('enllaç creuat (mateixa fila): corba NI etiqueta trepitgen cap concepte',
-    !crossHitsNode(cont) && !labelHitsNode(cont),
-    'corba=' + crossHitsNode(cont) + ' etiqueta=' + labelHitsNode(cont));
+  check('enllaç creuat (mateixa fila): corba NI etiqueta trepitgen cap concepte aliè',
+    !crossHitsNode(cont) && !labelHitsNode(cont, ['X1', 'Y1']),
+    'corba=' + crossHitsNode(cont) + ' etiqueta=' + labelHitsNode(cont, ['X1', 'Y1']));
 })();
 // (6) Enllaç entre files diferents (columnes de profunditat desigual).
 (function () {
@@ -295,9 +303,9 @@ function labelHitsNode(cont) {
     '- **R**', '  - **a**', '    - X1', '    - X2', '    - X3', '  - **b**', '    - Y1',
     '', '- Enllaços creuats:', '  - X3 -> Y1 : prové de',
   ].join('\n'));
-  check('enllaç creuat (files diferents): corba NI etiqueta trepitgen cap concepte',
-    !crossHitsNode(cont) && !labelHitsNode(cont),
-    'corba=' + crossHitsNode(cont) + ' etiqueta=' + labelHitsNode(cont));
+  check('enllaç creuat (files diferents): corba NI etiqueta trepitgen cap concepte aliè',
+    !crossHitsNode(cont) && !labelHitsNode(cont, ['X3', 'Y1']),
+    'corba=' + crossHitsNode(cont) + ' etiqueta=' + labelHitsNode(cont, ['X3', 'Y1']));
 })();
 
 // (7) Col·locació intel·ligent: si el punt mig de l'enllaç cau sobre un concepte,
@@ -318,6 +326,24 @@ function labelHitsNode(cont) {
   var hits = !!lb && nrects(cont).some(function (n) { return ov(lb, n); });
   check('col·locació intel·ligent: l\'etiqueta es mou del concepte al buit',
     !!lb && !hits, 'label=' + !!lb + ' solapa_concepte=' + hits);
+})();
+
+// (8) Estils DIFERENTS per enllaç creuat (decisió Miquel 15/06): si n'hi ha 2 o 3,
+//     cada un ha de tenir un traç/color propi (paleta cíclica per índex), per no
+//     confondre'ls. Doble codi (color + discontinuïtat). L'1r conserva l'estil històric.
+(function () {
+  var cont = render([
+    '- **R**', '  - **a**', '    - X1', '  - **b**', '    - Y1', '  - **c**', '    - Z1',
+    '', '- Enllaços creuats:',
+    '  - X1 -> Y1 : rel1', '  - Y1 -> Z1 : rel2', '  - X1 -> Z1 : rel3',
+  ].join('\n'));
+  var curves = descendants(cont).filter(function (e) {
+    return e.tagName === 'path' && /xarr/.test(e.attrs['marker-end'] || '');
+  });
+  var dashes = curves.map(function (p) { return p.attrs['stroke-dasharray']; });
+  check('3 enllaços creuats → 3 corbes dibuixades', curves.length === 3, 'corbes=' + curves.length);
+  check('cada enllaç creuat amb traç DIFERENT (no es confonen)', new Set(dashes).size === 3,
+    'dashes=' + JSON.stringify(dashes));
 })();
 
 console.log(fails === 0 ? '\nTOTS OK' : `\n${fails} FALLADES`);
