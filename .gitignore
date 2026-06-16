@@ -27,3 +27,11 @@ tests/golden/judgments/
 tests/debug_adapt_*.txt
 .claude/
 260323_Millores*.md
+
+# Sortida temporal d'avaluacio (scratch — NO versionat).
+# L'evidencia real esta a tests/results/experiment_combinat_* (origin, commit 544a625).
+tests/golden/_multimodel/
+tests/golden/_multimodel_v2/
+tests/golden/_nlm_sources/
+tests/results/experiment_models_20260612_*.json
+tests/results/experiment_models_20260612_*.md

@@ -1,0 +1,111 @@
+--- a/adaptation/params_resolver.py
++++ b/adaptation/params_resolver.py
+@@ -97,6 +97,26 @@
+     return bool(v)
+ 
+ 
++# Característiques CONTEXTUALS (situacionals): NO activen 2e per si soles.
++# Decisió pedagògica 2026-06-12 (Miquel + recomanació auditoria): la doble
++# excepcionalitat és AACC + qualsevol altra caracteristica CONSTITUTIVA activa.
++_CONTEXTUALS = {"nouvingut", "vulnerabilitat", "vulnerabilitat_emocional"}
++
++
++def _is_2e(chars: dict, actives: set) -> bool:
++    """Autodetecta doble excepcionalitat (2e): AACC + una altra CONSTITUTIVA activa.
++
++    El flag explicit doble_excepcionalitat (si arriba) tambe es respecta, pero
++    el backend NO depen que cap client el posi (fix bug B1, auditoria 12/06)."""
++    if "altes_capacitats" not in actives:
++        return False
++    ac = chars.get("altes_capacitats", {})
++    if isinstance(ac, dict) and _str_to_bool(ac.get("doble_excepcionalitat")):
++        return True
++    altres_constitutives = actives - {"altes_capacitats"} - _CONTEXTUALS
++    return bool(altres_constitutives)
++
++
+ def resolve_params(caracteristiques: dict, etapa: str = "", curs: str = "",
+                    override_mecr: str = None) -> dict:
+     """
+@@ -151,6 +171,12 @@
+     # ── 2) Condicions actives ──
+     actives = {k for k, v in chars.items() if isinstance(v, dict) and v.get("actiu")}
+ 
++    # B4 (auditoria 12/06): avisar de característiques presents però NO actives
++    # (format antic o malformat). Abans s'ignoraven en silenci absolut.
++    _ignorades = [k for k in chars if k not in actives]
++    if _ignorades:
++        trace.append(f"AVÍS: característiques presents però ignorades (sense actiu=true o format no-dict): {sorted(_ignorades)}")
++
+     # Llista de candidats que poden modificar el MECR. Sempre comencem amb base.
+     candidats = [mecr_base]
+ 
+@@ -226,11 +252,11 @@
+ 
+     # ── 8) AACC sense 2e: +1 nivell sobre el resultat ──
+     ac = chars.get("altes_capacitats", {})
+-    if "altes_capacitats" in actives and not _str_to_bool(ac.get("doble_excepcionalitat")):
++    if "altes_capacitats" in actives and not _is_2e(chars, actives):
+         idx = MECR_ORDER.index(mecr)
+         prev = mecr
+         mecr = MECR_ORDER[min(len(MECR_ORDER) - 1, idx + 1)]
+-        trace.append(f"AACC sense 2e -> +1 ({prev} -> {mecr})")
++        trace.append(f"AACC sense 2e (autodetectat) -> +1 ({prev} -> {mecr})")
+ 
+     # ── 8.5) CLAMP INFANTIL: regla rectora MALL ──
+     # A etapa infantil, tota lectura és Emergent (compartida amb adult).
+@@ -299,16 +325,20 @@
+     """Calcula el DUA: Acces / Core / Enriquiment."""
+     actives = {k for k, v in chars.items() if isinstance(v, dict) and v.get("actiu")}
+ 
+-    di_grau = chars.get("di", {}).get("grau", "")
+-    tea_nivell = chars.get("tea", {}).get("nivell_suport", 0)
++    def _sub(key):
++        v = chars.get(key, {})
++        return v if isinstance(v, dict) else {}
++
++    di_grau = _sub("di").get("grau", "")
++    tea_nivell = _sub("tea").get("nivell_suport", 0)
+     try:
+         tea_nivell = int(tea_nivell)
+     except (TypeError, ValueError):
+         tea_nivell = 0
+-    tdl_grau = chars.get("tdl", {}).get("grau", "")
+-    nv_alfabet = chars.get("nouvingut", {}).get("alfabet_llati", True)
++    tdl_grau = _sub("tdl").get("grau", "")
++    nv_alfabet = _sub("nouvingut").get("alfabet_llati", True)
+     ac_doble = _str_to_bool(
+-        chars.get("altes_capacitats", {}).get("doble_excepcionalitat", False)
++        _sub("altes_capacitats").get("doble_excepcionalitat", False)
+     )
+ 
+     if (
+@@ -319,7 +349,7 @@
+     ):
+         return "Acces"
+ 
+-    if "altes_capacitats" in actives and not ac_doble:
++    if "altes_capacitats" in actives and not _is_2e(chars, actives):
+         return "Enriquiment"
+ 
+     return "Core"
+--- a/adaptation/prompt_builder.py
++++ b/adaptation/prompt_builder.py
+@@ -1280,6 +1280,8 @@
+ - [la majoria de les preguntes aquí, cobrint plànol literal + inferencial + crític, gradades al MECR]
+ 
+ Cada pregunta comença amb «- ». Vegeu SKILL generate-preguntes-comprensio per al detall pedagògic.
++Adequació a l'etapa:
++{adequacio_linia}
+ """)
+     elif comp.get("preguntes_comprensio"):
+         # SKILLs OFF: bloc hardcoded legacy (backup funcional)
+@@ -1338,6 +1340,8 @@
+ [3-5 preguntes cobrint els 3 plànols amb el pes per a {mecr_complement}; 1 Think Aloud integrat]
+ 
+ Regles: NO escriguis «Moment», «Nivell LITERAL», ni etiquetes [Literal · V/F]. Cada pregunta comença amb «- ». Integra els formats visuals dins la pregunta («- Omple els buits: El ___ serveix per ___.»).
++Adequació a l'etapa:
++{adequacio_linia}
+ """)
+ 
+     if comp.get("activitats_aprofundiment"):
