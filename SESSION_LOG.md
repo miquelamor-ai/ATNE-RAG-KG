@@ -1,138 +1,160 @@
-# ATNE-RAG-KG — Resum de sessió (2026-03-27, actualitzat)
+# ATNE — SESSION LOG i ESTAT DEL PROJECTE
+> **Instrucció d'ús:** executa `bash log.sh` per actualitzar la secció d'estat.
+> La part objectiva (branques, commits) s'omple automàticament.
+> La part de coordinació (xats actius, decisions) l'actualitzes tu a mà sota.
 
 ---
 
-## Sessió 2026-06-12 — Auditoria creuada + bugs pedagògics + R0 «Per al docent»
+## 🗂️ ESTAT ACTUAL — 2026-06-16 07:16
 
-### ✅ DEPLOY 2026-06-12 12:15
-- Merge a main: `f1d0f28`. Cloud Build `a6f02221` **SUCCESS** → Cloud Run revisió
-  `atne-00623-vt6` (servint des de 12:15). URL: `https://atne-1050342211642.europe-west1.run.app`.
-- **Verificat (codi desplegat f1d0f28):** AACC+dislèxia 2n ESO → **B1/Core**; traça SENSE
-  «AACC sense 2e». Bug B1 mort a prod. (Traça calenta via UI/auth pendent — endpoint auth-gated.)
+### Repositori
+- **Branca activa:** `main`
+- **Working tree:** ⚠️ 2 fitxers modificats · 11 untracked
+- **main vs origin:** ✅ sincronitzats (`a0b7695`)
 
-### Fet (branca `fix/bugs-pedagogics-auditoria-20260612`, mergejada a main `f1d0f28`)
-- **B1 🔴 (viu en producció): 2e rebia text MÉS difícil.** El resolver depenia d'un flag
-  que cap UI establia → AACC+dislèxia donava B2/Enriquiment. Fix: autodetecció `_is_2e`
-  (AACC + constitutiva). Veure `docs/adr/ADR-001-2e-doble-excepcionalitat.md`.
-- B2 (adequació preguntes per etapa), B3 (guard bool resolver), B4 (avís malformats),
-  B6 (codi mort: `_mecr_from_etapa_curs`, `_all_titles_re`, `n`), B7 (`_safe_error` SSE).
-- **R0 «Per al docent» tancat**: ATNE consumeix `corpusFJE/.tooling/per_al_docent.json`
-  (era hardcoded; cicle R0 com la matriu). Submodule bumpejat a cb9918a.
-- CI determinista mínim a `.github/workflows/ci.yml`.
+**Últims commits a main:**
+-` `a0b7695 Merge fix/editor-md-header-offset: +/x/germana a la branca correcta (fix capçalera índexs)
+-` `ccf045a fix(diagrames): +/x/germana operaven a la branca equivocada (capçalera ## desplaçava els índexs)
+-` `5602fd7 Merge pull request #7 from miquelamor-ai/fix/mapa-mental-render
 
-### ⚠️ Seguiment post-deploy
-- **Avís pilot:** si algun docent havia generat adaptacions per a alumnes 2e abans del fix,
-  les noves sortiran DIFERENTS (millors). Que no el sorprengui.
-- (Opcional) traça calenta de `/api/derive-params` amb sessió @fje.edu per confirmar a la UI.
+**Branques obertes (ahead de main):**
+- `chore/eines-govern` — 3 ahead · 2 behind
+- `docs/diagrames-referencia` — 1 ahead · 2 behind
+- `docs/handoff-stem-curriculum` — 1 ahead · 0 behind
+- `feat/tests-avaluacio` — 1 ahead · 2 behind
+- `spec/mvp-migracio-php` — 1 ahead · 762 behind
+
+### 🔴 Espera decisió meva
+<!-- Actualitza manualment: push/merge/decisions pendents -->
+- **Ronda de merges de branques de documentació** (`chore/eines-govern`, `docs/diagrames-referencia`, `feat/tests-avaluacio`, `docs/handoff-stem-curriculum`) → PR + CI verd, una per una.
+- **Firmar ADR-003** → pendent resposta DPO FJE (B1 base jurídica + B2 k-anonimat).
+- **mineriaRAG ha de respondre el handoff STEM+currículum** abans que ATNE pugui implementar.
+
+### 🟡 En marxa (xats actius)
+<!-- Actualitza manualment: qui treballa què i a quina branca -->
+- (cap xat actiu — sessió de neteja i merges en curs)
 
 ### 📋 Backlog
-- **30 WARN de `prompt_checks`** (294 PASS, 0 ERROR — no bloquegen): un dia de calma,
-  mirar què avisen (artefacte finestra 3K a GENERE_specific_format + hints GLOSSARI_L1).
-- **21 imports morts a server.py** (cosmètic, pyflakes `imported but unused`).
-- **Ratificació DOP** de la definició 2e (ADR-001) — no bloquejant.
-- Des-triplicació frontend «Per al docent» via `.data.js` (opcional; ara guard de drift).
+- RAG/KG desactivat des del 9/04 — decidir reactivar o retirar
+- Neteja branques velles a origin (~15 punters antics)
+- Bucle de millora (ADR-003) — bloquejat fins al DPO FJE
+- Tercer jutge Claude per al framework d'avaluació
+- SVG diagrames a l'export PDF/DOCX
+- Multi-agent (Adaptador→Auditor→Corrector→Traductor)
+- Memòria triàdica (StudentMemory/ClassMemory/SubjectProfile)
+- Decisió motor institucional FJE
+- Gemma 4 com a motor sobirà
 
 ---
 
-## Sessió 2026-03-27 (tarda) — Historial de textos anteriors
-
-### Problema resolt
-- Servidor antic (PID 42656, iniciat el 24-03) continuava corrent amb codi obsolet
-- Calia matar-lo manualment (PowerShell `Stop-Process`) per carregar el codi nou
-
-### Canvis implementats
-
-#### 5. Historial de textos anteriors (GET /api/history + UI)
-- **Nou endpoint** `GET /api/history` → llista les 30 últimes adaptacions de Supabase
-- **Panell desplegable** al pas 2 (sota el textarea):
-  - Badge amb nom del perfil + data + previsualització 200 caràcters
-  - "Carrega text" → omple textarea (manté perfil actual)
-  - "Carrega text + perfil" → restaura text + característiques + context (etapa, curs, etc.) i va al pas 1
-  - Notificació blava 6s en restaurar perfil complet
-- **Cache invalidada** automàticament en desar nova adaptació
-- Pre-càrrega silenciosa en obrir l'app
-
-#### 6. Fixes SSE/Gemini (inclosos al mateix commit)
-- `timeout=180_000` al client Gemini (generacions llargues)
-- `max_output_tokens=16384` (era 8000)
-- `thinking_config=ThinkingConfig(thinking_budget=0)` per evitar tokens thinking
-- Keepalive SSE (`: keepalive\n\n`) cada 0.5s per evitar QUIC_NETWORK_IDLE_TIMEOUT
-- Dedup event `done` (flag `_doneHandled`)
-- Avís si Gemini trunca per MAX_TOKENS
-
-### Push
-- `miquelamor-ai/ATNE-RAG-KG` (origin) ✓
-- `FundacioJesuitesEducacio/ATNE` (fje) ✓ — remote afegit i push confirmat
-
-### Remote FJE
-El repo `FundacioJesuitesEducacio/ATNE` (branca main) és el mateix codi que ATNE-RAG-KG.
-Ara té dos remots configurats: `origin` (personal) i `fje` (institucional).
+---
 
 ---
 
-# ATNE-RAG-KG — Resum de sessió (2026-03-27)
+---
 
-## Repo
-- **Local**: `C:\Users\miquel.amor\Documents\GitHub\ATNE\`
-- **Remote origin**: `https://github.com/miquelamor-ai/ATNE-RAG-KG.git`
-- **Branca**: `main`
-- **Deploy**: Cloud Run `atne-00011-rqn` → `https://atne-1050342211642.europe-west1.run.app`
-- **Projecte GCP**: `dreseraios-drive`
+---
 
-## Stack
-Python 3.12 + FastAPI + Gemini 2.5-flash + Supabase (RAG-KG) + Cloud Run
+## ⚙️ INFRAESTRUCTURA (referència fixa)
+- **Repos:** `origin` = `miquelamor-ai/ATNE-RAG-KG` · `fje` = `FundacioJesuitesEducacio/ATNE`
+- **Deploy:** Cloud Run `europe-west1` → `https://atne-1050342211642.europe-west1.run.app`
+- **Working tree local:** `C:\Users\miquel.amor\Documents\GitHub\ATNE\` ⚠️ compartit entre xats
+- **CI:** `.github/workflows/ci.yml` · Node 24 · secret `CORPUSFJE_PAT` · 8/8 jobs
+- **Regla de governança:** cap push/merge sense ordre de Miquel · verificar amb `bash log.sh`
 
-## Canvis fets (2026-03-25 → 2026-03-27)
+---
 
-### 1. Reorganització de repos (2026-03-25)
-- Repo `miquelamor-ai/ATNE` traspassat a `FundacioJesuitesEducacio/ATNE`
-- Nou repo personal `miquelamor-ai/ATNE-RAG-KG` per la versió Python
-- Creada carpeta local ATNE-FJE per la versió institucional PHP
+## 📋 HISTORIAL DE SESSIONS
 
-### 2. Cursos i àmbits dinàmics per etapa (2026-03-25)
-- FP: 1r/2n CGM, 1r/2n CGS + 25 famílies professionals
-- Cada etapa amb cursos propis
+### Sessió 2026-06-15 — Disseny STEM + currículum (handoff a mineriaRAG)
 
-### 3. Doble excepcionalitat — 2e (2026-03-25)
-- Detecció automàtica: quan AC + qualsevol altra → alerta groga al pas 1
-- Bloc informatiu al pas 3 Proposta amb combinació específica
-- Eliminada sub-variable manual `doble_excepcionalitat` (redundant)
-- CSS: `.alert-2e`, `.proposal-2e` (colors ambre/groc)
-- Briefing per mineriaRAG: `briefing_2e_mineriaRAG.md`
+- **Handoff a mineriaRAG redactat** (`docs/handoff_mineriarag_stem_curriculum_20260615.md`).
+- **Decisions:**
+  - STEM = secció **invariant disciplinari** dins les SKILLs de gènere (NO subsistema nou), graduada per MECR, format taula **ADAPTABLE | INVARIANT** auditable, fonamentada en el principi del 2e (eix lingüístic ⊥ eix disciplinari, ADR-001).
+  - Currículum en **2 fases**: F1 = selector cascada determinista + injecció mecànica del text del saber (canon ja complet); F2 = pont pedagògic saber→text (diferit).
+- **Risc detectat:** divergència entre `schema_lomloe.json` i el JSON real de mates (`sabers_basics`/`cursos.<curs>` vs `sabers_items` pla) — mineriaRAG ha de confirmar la **forma canònica** abans que ATNE construeixi el parser.
 
-### 4. Ampliació variables configurables (2026-03-27)
-Sincronització amb briefing mineriaRAG `briefing_variables_ATNE_2026-03-27.md`:
-- **TDAH**: 4 subvars noves (presentació DSM-5, grau, memòria treball, fatiga)
-- **Dislèxia**: 4 subvars noves (tipus ruta, grau, tipografia adaptada, columnes estretes)
-- **TDL**: 8 subvars noves (modalitat, 5 components, grau, bilingüe)
-- **TDC/Dispraxia**: nova característica + 4 subvars (grau, motricitat fina/grossa, accés teclat)
-- **Disc. visual**: grau ampliat 2→3 (baixa_visio_moderada, baixa_visio_greu, ceguesa)
-- **Disc. auditiva**: `mixta` → `bimodal`
-- Total: 13 característiques, 40 variables configurables
+### Sessió 2026-06-13/15 — Release + Editor de diagrames + Decisió de models
 
-## Qüestions pendents
+#### ✅ A main, CI verd
+- **Mapa conceptual Novak graduat per MECR** (`ac7729e`): proposicions verbals B1+, categories nominals A2, fallback graduat al `prompt_builder`, canon v4.1.1
+- **CI determinista instal·lat** (`c82d4a3`): `.github/workflows/ci.yml`, secret `CORPUSFJE_PAT` configurat, Node 24, 8/8 jobs verds
+- **Bugs pedagògics B1-B7** (`a123b28`): bug 2e (resolver autodetecta doble excepcionalitat), B2-B7 (seguretat SSE, guards, codi mort)
+- **Bloc A editor diagrames** (`041c791`): correccions renderitzador A1-A4 (layout recursiu, fork horitzontal, routing, z-order creuats)
+- **Node 24** (`e08fe44`): PR #1, deprecació GitHub 16/06 coberta
+- **J2 cross-judge + ADR-002 firmat** (`544a625`): jutge gemini-2.5-flash homogeni 21/21, artefacte self-judging corregit, decisió: empat dins variància → mana compliance
+- **Bloc B editor Novak** (PR #2): subsistema d'edició interactiu (+/×/↝/Ctrl+Z), modulació profunditat per MECR
+- **Mapa mental + Esquema visual** (PRs #4-#7): dos nous tipus de diagrama, routing creuats millorat
+- **Fix header offset** (`a0b7695`): +/×/germana operaven a la branca equivocada (capçalera ## desplaçava índexs +2)
 
-### Per fer
-- [ ] Renombrar carpeta local `ATNE` → `ATNE-RAG-KG` (cal tancar VSCode primer)
-- [ ] Actualitzar corpus mineriaRAG amb briefing 2e
-- [ ] Actualitzar corpus mineriaRAG amb noves variables (briefing a mineriaRAG/output/)
-- [ ] Implementar CSS tipografia dislèxia (subvar `tipografia_adaptada`)
-- [ ] Implementar CSS columnes estretes (subvar `columnes_estretes`)
-- [ ] Pujar fitxer PDF/DOCX al pas 2
+#### Decisions clau
+- **ADR-002**: gemini-2.5-flash per al prototip (free tier + compliance UE, NO per qualitat — empatat amb gpt-4o dins variància del jutge)
+- **ADR-003 (ESBORRANY)**: bucle de millora via few-shot (`get_fewshot_example()`), gate compliance multicapa, `observacions` exclòs de l'exemplar per defecte. Pendent DPO.
+- **RAG/KG desactivat** des del 9/04 — troballa de l'auditoria del bucle: codi mort, zero crides reals
 
-### Notes
-- Sensibilitat temàtica (trauma) a vulnerabilitat i trastorns emocionals: camp manual, no al corpus
-- La detecció 2e funciona amb qualsevol combinació AC + altra (inclou noves: TDC, TDL, etc.)
+#### Eines de govern creades
+- `log.sh` (aquest script) — actualitza l'estat del SESSION_LOG automàticament
+- `estat.sh` — taulell ràpid de branques i commits
+- `docs/ESTAT_DEL_DIA_plantilla.md` — plantilla de taulell manual
+
+---
+
+### Sessió 2026-06-12 — Auditoria creuada + bugs pedagògics + R0 «Per al docent»
+
+#### ✅ DEPLOY 2026-06-12 12:15
+- Merge a main: `f1d0f28`. Cloud Build `a6f02221` **SUCCESS** → Cloud Run revisió `atne-00623-vt6`
+- **Verificat:** AACC+dislèxia 2n ESO → **B1/Core**; traça SENSE «AACC sense 2e». Bug B1 mort a prod.
+
+#### Fet (branca `fix/bugs-pedagogics-auditoria-20260612`, mergejada a main `f1d0f28`)
+- **B1 🔴 (viu en producció): 2e rebia text MÉS difícil.** El resolver depenia d'un flag que cap UI establia → AACC+dislèxia donava B2/Enriquiment. Fix: autodetecció `_is_2e`. Veure `docs/adr/ADR-001-2e-doble-excepcionalitat.md`.
+- B2-B7: adequació preguntes per etapa, guards bool resolver, codi mort, `_safe_error` SSE
+- **R0 «Per al docent» tancat**: ATNE consumeix `corpusFJE/.tooling/per_al_docent.json` (era hardcoded)
+- CI determinista mínim afegit
+
+---
+
+### Sessió 2026-03-27 (tarda) — Historial de textos anteriors
+
+- Nou endpoint `GET /api/history` + panell desplegable al pas 2
+- Fixes SSE/Gemini: timeout, max_output_tokens, keepalive
+- Doble excepcionalitat (2e): detecció automàtica + alerta UI
+- Ampliació variables: 13 característiques, 40 variables configurables (TDAH, dislèxia, TDL, TDC/dispraxia, disc. visual, disc. auditiva)
+
+---
+
+### Sessions 2026-03-23/26 — Base del sistema
+
+- App completa: backend FastAPI, frontend vanilla HTML/JS/CSS, export PDF/DOCX/TXT, Cloud Run
+- Historial d'adaptacions amb feedback docent (Supabase)
+- Spec MVP migració PHP/OpenAI + corpus 7 MDs
+- Creuament variables, càrrega cognitiva, camps perfil nous
+
+---
 
 ## Estructura de carpetes
 
 ```
 Documents/GitHub/
-├── ATNE/              ← AQUEST PROJECTE (Python + RAG-KG) — renombrar a ATNE-RAG-KG
+├── ATNE/              ← AQUEST PROJECTE (Python + RAG-KG)
 │   origin: miquelamor-ai/ATNE-RAG-KG.git
-│   Deploy: Cloud Run (atne) — https://atne-1050342211642.europe-west1.run.app
+│   Deploy: Cloud Run → https://atne-1050342211642.europe-west1.run.app
 │
-└── ATNE-FJE/          ← Versió institucional (PHP + OpenAI)
-    origin: FundacioJesuitesEducacio/ATNE.git (branca spec/mvp-migracio-php)
-    Deploy: Cloud Run (atne-fje) — https://atne-fje-1050342211642.europe-west1.run.app
+└── mineriaRAG/        ← Gestió corpus i canon
+    origin: miquelamor-ai/mineriaRAG
 ```
+
+---
+
+## 📖 GUIA DE MÈTODE (secció estable — el `log.sh` NO la regenera)
+> Migrada de l'antic `ESTAT_DEL_DIA.md` (unificat 2026-06-16). El `log.sh`
+> només toca la capçalera 🗂️ de dalt; tot el que va sota el bloc d'historial
+> és estable.
+
+### Com l'uso (3 moments)
+1. **Obro un xat nou** → primera línia: "Vinc de [tasca], branca [X]; aquí vull [Z]". Enganxo context del taulell.
+2. **Canvio de tasca o tanco un xat** → actualitzo les seccions 🔴🟡 (30 segons).
+3. **Torno a un xat després d'estona** → llegeixo el taulell abans de res. En 10 segons sé on soc.
+
+### Quan val la pena un worktree
+Si DOS xats han de tocar CODI alhora en branques diferents → `git worktree add ../ATNE-[tasca] [branca]`.
+Un directori per tasca = cap xat mou el terra a un altre.
