@@ -5,34 +5,30 @@
 
 ---
 
-## 🗂️ ESTAT ACTUAL — 2026-06-16 07:16
+## 🗂️ ESTAT ACTUAL — 2026-06-16 08:39
 
 ### Repositori
 - **Branca activa:** `main`
-- **Working tree:** ⚠️ 2 fitxers modificats · 11 untracked
-- **main vs origin:** ✅ sincronitzats (`a0b7695`)
+- **Working tree:** ⚠️ 0 fitxers modificats · 1 untracked
+- **main vs origin:** ✅ sincronitzats (`2ffeb54`)
 
 **Últims commits a main:**
--` `a0b7695 Merge fix/editor-md-header-offset: +/x/germana a la branca correcta (fix capçalera índexs)
--` `ccf045a fix(diagrames): +/x/germana operaven a la branca equivocada (capçalera ## desplaçava els índexs)
--` `5602fd7 Merge pull request #7 from miquelamor-ai/fix/mapa-mental-render
+-` `2ffeb54 Merge pull request #11 from miquelamor-ai/feat/tests-avaluacio-v2
+-` `8bdad3e feat(tests): harnesses d'avaluació (titella e2e + multimodel eval/test)
+-` `d9bc21f Merge pull request #10 from miquelamor-ai/docs/handoff-stem-curriculum-v2
 
 **Branques obertes (ahead de main):**
-- `chore/eines-govern` — 3 ahead · 2 behind
-- `docs/diagrames-referencia` — 1 ahead · 2 behind
-- `docs/handoff-stem-curriculum` — 1 ahead · 0 behind
-- `feat/tests-avaluacio` — 1 ahead · 2 behind
-- `spec/mvp-migracio-php` — 1 ahead · 762 behind
+- `spec/mvp-migracio-php` — 1 ahead · 771 behind
 
 ### 🔴 Espera decisió meva
 <!-- Actualitza manualment: push/merge/decisions pendents -->
-- **Ronda de merges de branques de documentació** (`chore/eines-govern`, `docs/diagrames-referencia`, `feat/tests-avaluacio`, `docs/handoff-stem-curriculum`) → PR + CI verd, una per una.
-- **Firmar ADR-003** → pendent resposta DPO FJE (B1 base jurídica + B2 k-anonimat).
-- **mineriaRAG ha de respondre el handoff STEM+currículum** abans que ATNE pugui implementar.
+- **mineriaRAG ha de respondre el handoff STEM+currículum** (`docs/handoff_mineriarag_stem_curriculum_20260615.md`, a main) abans que ATNE pugui implementar.
+- **Firmar ADR-003** → pendent resposta DPO FJE (B1 base jurídica + B2 k-anonimat). ADR-003 segueix untracked (no versionat fins firma).
+- *(ronda de merges de documentació TANCADA — PRs #8-#11 a main, branques esborrades)*
 
 ### 🟡 En marxa (xats actius)
 <!-- Actualitza manualment: qui treballa què i a quina branca -->
-- (cap xat actiu — sessió de neteja i merges en curs)
+- (cap xat actiu)
 
 ### 📋 Backlog
 - RAG/KG desactivat des del 9/04 — decidir reactivar o retirar
@@ -44,6 +40,8 @@
 - Memòria triàdica (StudentMemory/ClassMemory/SubjectProfile)
 - Decisió motor institucional FJE
 - Gemma 4 com a motor sobirà
+
+---
 
 ---
 
