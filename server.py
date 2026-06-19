@@ -5633,10 +5633,11 @@ async def api_prompt_preview(request: Request):
     # 4. Capes separades per visualització
     identity = corpus_reader.get_identity()
     dua_block = corpus_reader.get_dua_block(params.get("dua", "Core")) or ""
+    # genre_block: deprecat des de la migració a skills (2026-05-17). El gènere
+    # discursiu s'injecta ara com a SKILL write-* via skills_loader, no via
+    # corpus_reader.get_genre_block() (que ja retorna "" sempre). Es manté la
+    # clau "capes.genere" buida pel contracte de /api/prompt-preview (ui/pipeline.html).
     genre_block = ""
-    genre = params.get("genere_discursiu", "")
-    if genre:
-        genre_block = corpus_reader.get_genre_block(genre) or ""
     fewshot = corpus_reader.get_fewshot_example(mecr) or ""
 
     return {
