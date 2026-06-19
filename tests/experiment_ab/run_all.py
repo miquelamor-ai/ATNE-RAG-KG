@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Xat 9 — Orquestrador: llança generació + avaluació + anàlisi en seqüència.
+Peça 4 — Orquestrador: generació (skills OFF/ON) + avaluació (Sonnet 4.6) + anàlisi.
 Ús: python tests/experiment_ab/run_all.py [--skip-gen] [--skip-eval] [--only-stats]
 """
 import subprocess, sys, os
@@ -27,11 +27,11 @@ args = sys.argv[1:]
 
 if "--only-stats" not in args:
     if "--skip-gen" not in args:
-        run("experiment_ab.py", "Pas 1/3: Generació de 180 parells A/B")
+        run("experiment_ab.py", "Pas 1/3: Generació 5 casos × (skills OFF/ON) amb Gemini Lite")
     if "--skip-eval" not in args:
-        run("eval_experiment.py", "Pas 2/3: Avaluació dual (GPT-4o + Claude Sonnet)")
+        run("eval_experiment.py", "Pas 2/3: Avaluació amb Claude Sonnet 4.6 (jutge únic)")
 
-run("stats_experiment.py", "Pas 3/3: Anàlisi estadística + informe")
+run("stats_experiment.py", "Pas 3/3: Anàlisi descriptiva + informe")
 
 print(f"\n{'='*60}")
 print("🏁 TOT COMPLETAT")

@@ -1,204 +1,185 @@
 #!/usr/bin/env python3
 """
-Xat 9 — Anàlisi estadística de l'experiment A/B
-- Wilcoxon parells aparellats (p<0.05 amb correcció Bonferroni)
-- Effect size Cohen's d
-- Correlació inter-jutge (GPT-4o vs Claude Sonnet)
-- Kappa Cohen per concordança
-- Visualitzacions
+Peça 4 — Anàlisi de l'experiment A/B skills OFF vs ON.
+
+n=5 casos: NO es fa test de significació (Wilcoxon no té potència amb n=5).
+Es produeix una taula DESCRIPTIVA per cas (Δ ON−OFF per criteri + mitjana ponderada)
+i una taula global de mitjanes per criteri. Verdict orientatiu segons el llindar
+del README (Δ>0.5 → skills valen la pena), explícitament marcat com a senyal
+qualitatiu, no prova estadística.
+
+Jutge únic: Claude Sonnet 4.6.
 """
 
-import json, sys
-import numpy as np
+import json, sys, io
 from pathlib import Path
-from scipy import stats
-from collections import defaultdict
+
+if sys.platform == "win32":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
 EXP_DIR = Path(__file__).resolve().parent
 EVAL_PATH = EXP_DIR / "resultats_avaluacio.json"
 REPORT_PATH = EXP_DIR / "informe_resultats.md"
 
-
-def load_data():
-    data = json.loads(EVAL_PATH.read_text(encoding="utf-8"))
-    return data["avaluacions"]
-
-
-def extract_scores(evals: list, jutge: str) -> dict:
-    """Extreu puntuacions per condició i criteri."""
-    criteris = ["adequacio_linguistica", "fidelitat_curricular", "adequacio_perfil",
-                "llegibilitat_estructura", "complements"]
-    scores = {"A": defaultdict(list), "B": defaultdict(list)}
-
-    for ev in evals:
-        for condicio in ["A", "B"]:
-            judge_data = ev["evaluations"].get(condicio, {}).get(jutge, {})
-            if "error" in judge_data:
-                continue
-            for c in criteris:
-                if c in judge_data and "puntuacio" in judge_data[c]:
-                    scores[condicio][c].append(judge_data[c]["puntuacio"])
-
-    return scores
+CRITERIS = [
+    ("adequacio_linguistica", "Adequació lingüística MECR", 0.25),
+    ("fidelitat_curricular",  "Fidelitat curricular",       0.20),
+    ("adequacio_perfil",      "Adequació al perfil",        0.25),
+    ("llegibilitat_estructura", "Llegibilitat/estructura",  0.15),
+    ("complements",           "Complements",                0.15),
+]
 
 
-def cohens_d(a, b):
-    """Effect size Cohen's d per a mostres aparellades."""
-    diff = np.array(a) - np.array(b)
-    return np.mean(diff) / np.std(diff, ddof=1) if np.std(diff, ddof=1) > 0 else 0
+def score(judge_data: dict, crit_id: str):
+    """Retorna la puntuació (1-5) d'un criteri, o None si falta/error."""
+    if not isinstance(judge_data, dict) or "error" in judge_data:
+        return None
+    c = judge_data.get(crit_id)
+    if isinstance(c, dict) and isinstance(c.get("puntuacio"), (int, float)):
+        return float(c["puntuacio"])
+    return None
 
 
-def interpret_d(d):
-    d = abs(d)
-    if d < 0.2:
-        return "negligible"
-    elif d < 0.5:
-        return "petit"
-    elif d < 0.8:
-        return "mitjà"
-    else:
-        return "gran"
+def weighted_mean(judge_data: dict):
+    """Mitjana ponderada dels 5 criteris; None si falta algun."""
+    total, w_sum = 0.0, 0.0
+    for cid, _nom, pes in CRITERIS:
+        s = score(judge_data, cid)
+        if s is None:
+            return None
+        total += s * pes
+        w_sum += pes
+    return round(total / w_sum, 2) if w_sum else None
 
 
-def interpret_decision(mean_diff, d):
-    """Decisió segons llindars de l'experiment."""
-    if abs(mean_diff) > 0.5 and abs(d) >= 0.3:
-        return "PROMPT COMPLET VAL LA PENA" if mean_diff > 0 else "PROMPT MÍNIM SUFICIENT"
-    elif abs(mean_diff) < 0.3:
-        return "DIFERÈNCIA NEGLIGIBLE — prompt mínim suficient"
-    else:
-        return "ZONA GRISA — cal més dades"
+def fmt(v):
+    return f"{v:.1f}" if isinstance(v, (int, float)) else "—"
 
 
-def kappa_cohen_simple(scores_j1, scores_j2):
-    """Kappa Cohen simplificat per a escales ordinals (linealitzat)."""
-    if len(scores_j1) != len(scores_j2) or len(scores_j1) == 0:
-        return 0
-    # Convertir a acord/desacord amb tolerància ±1
-    agree = sum(1 for a, b in zip(scores_j1, scores_j2) if abs(a - b) <= 1)
-    n = len(scores_j1)
-    po = agree / n
-    pe = 0.5  # probabilitat d'acord per atzar (simplificat)
-    if pe >= 1:
-        return 1
-    return (po - pe) / (1 - pe)
+def fmt_delta(on, off):
+    if isinstance(on, (int, float)) and isinstance(off, (int, float)):
+        d = on - off
+        return f"{d:+.1f}"
+    return "—"
 
 
 def analyze():
-    evals = load_data()
-    print(f"Avaluacions carregades: {len(evals)}")
+    data = json.loads(EVAL_PATH.read_text(encoding="utf-8"))
+    evals = data["avaluacions"]
+    jutge = data.get("jutge", "Claude Sonnet 4.6")
 
-    criteris = ["adequacio_linguistica", "fidelitat_curricular", "adequacio_perfil",
-                "llegibilitat_estructura", "complements"]
-    pesos = [0.25, 0.20, 0.25, 0.15, 0.15]
+    L = []
+    L.append("# Informe Peça 4 — Experiment A/B: skills OFF vs ON\n")
+    L.append(f"**Jutge**: {jutge}  ·  **Casos avaluats**: {len(evals)}\n")
+    L.append("> n=5 → senyal QUALITATIU, no prova estadística. "
+             "Δ = ON − OFF. Llindar orientatiu: Δ>0.5 = les skills aporten valor.\n")
 
-    report_lines = []
-    report_lines.append("# Informe Xat 9 — Experiment A/B: Prompt mínim vs complet\n")
-    report_lines.append(f"**Data**: {EXP_DIR / 'resultats_avaluacio.json'}\n")
-    report_lines.append(f"**Parells avaluats**: {len(evals)}\n")
+    # Acumuladors globals per criteri
+    glob = {cid: {"OFF": [], "ON": []} for cid, _n, _p in CRITERIS}
+    glob_wmean = {"OFF": [], "ON": []}
 
-    for jutge in ["gpt4o", "claude_sonnet"]:
-        jutge_nom = "GPT-4o" if jutge == "gpt4o" else "Claude Sonnet"
-        report_lines.append(f"\n## Resultats — Jutge: {jutge_nom}\n")
+    for ev in evals:
+        case_id = ev["case_id"]
+        genere = ev.get("genere", "")
+        mecr = ev.get("mecr", "")
+        perfil = ev.get("perfil_id", "")
+        skills = ", ".join(ev.get("skills_actives_ON", [])) or "(cap)"
+        off = ev["evaluations"].get("OFF", {})
+        on = ev["evaluations"].get("ON", {})
 
-        scores = extract_scores(evals, jutge)
+        L.append(f"\n## {case_id} — {genere} / {mecr} / {perfil}\n")
+        L.append("| Criteri | OFF | ON | Δ (ON−OFF) |")
+        L.append("|---|:---:|:---:|:---:|")
+        for cid, nom, _pes in CRITERIS:
+            s_off = score(off, cid)
+            s_on = score(on, cid)
+            if s_off is not None:
+                glob[cid]["OFF"].append(s_off)
+            if s_on is not None:
+                glob[cid]["ON"].append(s_on)
+            L.append(f"| {nom} | {fmt(s_off)} | {fmt(s_on)} | {fmt_delta(s_on, s_off)} |")
 
-        report_lines.append("| Criteri | Mitjana A | Mitjana B | Diff (B-A) | Wilcoxon p | Cohen's d | Interpretació |")
-        report_lines.append("|---|---|---|---|---|---|---|")
+        wm_off = weighted_mean(off)
+        wm_on = weighted_mean(on)
+        if wm_off is not None:
+            glob_wmean["OFF"].append(wm_off)
+        if wm_on is not None:
+            glob_wmean["ON"].append(wm_on)
+        L.append(f"| **Mitjana ponderada** | **{fmt(wm_off)}** | **{fmt(wm_on)}** | **{fmt_delta(wm_on, wm_off)}** |")
+        L.append(f"\nSkills actives ON: {skills}")
 
-        all_weighted_a = []
-        all_weighted_b = []
+        # Justificacions del jutge (per a la revisió pedagògica)
+        for cond, jd in [("OFF", off), ("ON", on)]:
+            just = []
+            for cid, nom, _p in CRITERIS:
+                c = jd.get(cid) if isinstance(jd, dict) else None
+                if isinstance(c, dict) and c.get("justificacio"):
+                    just.append(f"  - *{nom}*: {c['justificacio']}")
+            if just:
+                L.append(f"\nJustificació jutge ({cond}):")
+                L.extend(just)
 
-        for i, c in enumerate(criteris):
-            sa = scores["A"][c]
-            sb = scores["B"][c]
-            n = min(len(sa), len(sb))
+    # Taula global
+    L.append("\n## Resum global per criteri (mitjana dels casos)\n")
+    L.append("| Criteri | OFF mitjà | ON mitjà | Δ mitjà |")
+    L.append("|---|:---:|:---:|:---:|")
 
-            if n < 5:
-                report_lines.append(f"| {c} | — | — | — | n<5 | — | — |")
-                continue
+    def avg(xs):
+        return round(sum(xs) / len(xs), 2) if xs else None
 
-            sa, sb = sa[:n], sb[:n]
-            mean_a = np.mean(sa)
-            mean_b = np.mean(sb)
-            diff = mean_b - mean_a
+    for cid, nom, _pes in CRITERIS:
+        a_off = avg(glob[cid]["OFF"])
+        a_on = avg(glob[cid]["ON"])
+        L.append(f"| {nom} | {fmt(a_off)} | {fmt(a_on)} | {fmt_delta(a_on, a_off)} |")
 
-            # Wilcoxon
-            try:
-                stat_w, p_val = stats.wilcoxon(sb, sa, alternative='two-sided')
-            except Exception:
-                p_val = 1.0
+    g_off = avg(glob_wmean["OFF"])
+    g_on = avg(glob_wmean["ON"])
+    L.append(f"| **Mitjana ponderada global** | **{fmt(g_off)}** | **{fmt(g_on)}** | **{fmt_delta(g_on, g_off)}** |")
 
-            # Bonferroni
-            p_bonferroni = min(p_val * len(criteris), 1.0)
+    # Verdict orientatiu
+    L.append("\n## Verdict orientatiu\n")
+    if isinstance(g_on, (int, float)) and isinstance(g_off, (int, float)):
+        delta = g_on - g_off
+        if delta > 0.5:
+            verdict = "🟢 Les skills aporten valor clar (Δ>0.5)."
+        elif delta < 0.3:
+            verdict = "🔴 Diferència negligible (Δ<0.3) — skills sense impacte mesurable."
+        else:
+            verdict = "🟡 Zona grisa (0.3≤Δ≤0.5) — senyal feble, calen més casos."
+        L.append(f"Δ ponderada global = **{delta:+.2f}** → {verdict}")
+    else:
+        L.append("Dades insuficients per a un verdict global.")
+    L.append("\n> Recordatori: n=5. Aquest verdict és orientatiu i requereix la revisió "
+             "pedagògica humana dels textos a `resultats_generacio.json`.")
 
-            # Cohen's d
-            d = cohens_d(sb, sa)
+    # ── Limitacions i abast (caveat metodològic obligatori) ──
+    L.append("\n## Limitacions i abast\n")
+    L.append(
+        "Aquest experiment mesura **combinacions concretes** de gènere + perfil + MECR + "
+        "complement, una per cas, NO l'efecte d'un perfil en general:\n")
+    L.append(
+        "- **No extrapolable a un perfil sencer.** El cas 2 mesura «conte + pictogrames per a "
+        "TEA a pre-A1», NO «les skills milloren per a TEA en general». El corpus FJE és explícit "
+        "que TEA, TDAH, altes capacitats i dislèxia són **independents del nivell MECR** (un mateix "
+        "perfil pot tenir qualsevol nivell de llengua), de manera que el MECR de cada cas és una "
+        "decisió de disseny de l'experiment, no una propietat del perfil.")
+    L.append(
+        "- **n=5, un cas per combinació.** Cap criteri té rèpliques; les diferències són un "
+        "senyal il·lustratiu, no una estimació estadística. Variació de temperatura (0.4) i de "
+        "mostratge del generador no estan controlades per repetició.")
+    L.append(
+        "- **El judici és d'un sol jutge** (Claude Sonnet 4.6). Sense segon jutge no es pot estimar "
+        "la concordança inter-jutge ni descartar biaix sistemàtic del jutge.")
+    L.append(
+        "- **Abast de la conclusió.** Un Δ favorable a ON indica que, *per a aquestes 5 combinacions "
+        "concretes i amb aquest generador (gemini-2.5-flash-lite)*, activar les skills millora la "
+        "qualitat segons la rúbrica. Generalitzar a altres gèneres, perfils, nivells o models "
+        "requeriria ampliar el disseny (més casos per combinació, més jutges, més models).")
 
-            sig = "**" if p_bonferroni < 0.05 else ""
-            report_lines.append(
-                f"| {c} | {mean_a:.2f} | {mean_b:.2f} | {diff:+.2f} | "
-                f"{p_bonferroni:.4f}{sig} | {d:+.2f} ({interpret_d(d)}) | "
-                f"{interpret_decision(diff, d)} |"
-            )
-
-            # Acumular per puntuació global ponderada
-            for j in range(n):
-                if len(all_weighted_a) <= j:
-                    all_weighted_a.append(0)
-                    all_weighted_b.append(0)
-                all_weighted_a[j] += sa[j] * pesos[i]
-                all_weighted_b[j] += sb[j] * pesos[i]
-
-        # Puntuació global
-        if len(all_weighted_a) >= 5:
-            ga = np.array(all_weighted_a)
-            gb = np.array(all_weighted_b)
-            global_diff = np.mean(gb) - np.mean(ga)
-            try:
-                _, gp = stats.wilcoxon(gb, ga)
-            except Exception:
-                gp = 1.0
-            gd = cohens_d(gb, ga)
-            report_lines.append(f"\n**Puntuació global ponderada**: A={np.mean(ga):.2f}, B={np.mean(gb):.2f}, "
-                              f"Diff={global_diff:+.2f}, p={gp:.4f}, d={gd:+.2f}")
-            report_lines.append(f"\n**Decisió**: {interpret_decision(global_diff, gd)}\n")
-
-    # Concordança inter-jutge
-    report_lines.append("\n## Concordança inter-jutge (GPT-4o vs Claude Sonnet)\n")
-    scores_gpt = extract_scores(evals, "gpt4o")
-    scores_claude = extract_scores(evals, "claude_sonnet")
-
-    for c in criteris:
-        for condicio in ["A", "B"]:
-            sg = scores_gpt[condicio][c]
-            sc = scores_claude[condicio][c]
-            n = min(len(sg), len(sc))
-            if n >= 5:
-                kappa = kappa_cohen_simple(sg[:n], sc[:n])
-                corr = np.corrcoef(sg[:n], sc[:n])[0, 1] if n >= 3 else 0
-                report_lines.append(f"- **{c}** ({condicio}): Kappa={kappa:.2f}, r={corr:.2f}, n={n}")
-
-    # Anàlisi per etapa
-    report_lines.append("\n## Diferències per etapa\n")
-    for etapa in ["primaria", "ESO", "batxillerat"]:
-        evals_etapa = [e for e in evals if e.get("etapa") == etapa]
-        if len(evals_etapa) < 3:
-            continue
-        scores_e = extract_scores(evals_etapa, "gpt4o")
-        for c in criteris:
-            sa = scores_e["A"][c]
-            sb = scores_e["B"][c]
-            n = min(len(sa), len(sb))
-            if n >= 3:
-                diff = np.mean(sb[:n]) - np.mean(sa[:n])
-                report_lines.append(f"- {etapa} / {c}: diff={diff:+.2f} (n={n})")
-
-    # Escriure informe
-    report = "\n".join(report_lines)
+    report = "\n".join(L)
     REPORT_PATH.write_text(report, encoding="utf-8")
-    print(f"\nInforme generat: {REPORT_PATH}")
-    print("\n" + report)
+    print(f"Informe generat: {REPORT_PATH}\n")
+    print(report)
 
 
 if __name__ == "__main__":
