@@ -1,67 +1,167 @@
-# Informe Xat 9 — Experiment A/B: Prompt mínim vs complet
+# Informe Peça 4 — Experiment A/B: skills OFF vs ON
 
-**Data**: C:\Users\miquel.amor\Documents\GitHub\ATNE\tests\experiment_ab\resultats_avaluacio.json
+**Jutge**: anthropic/claude-sonnet-4.6  ·  **Casos avaluats**: 5
 
-**Parells avaluats**: 180
-
-
-## Resultats — Jutge: GPT-4o
-
-| Criteri | Mitjana A | Mitjana B | Diff (B-A) | Wilcoxon p | Cohen's d | Interpretació |
-|---|---|---|---|---|---|---|
-| adequacio_linguistica | 4.11 | 4.06 | -0.05 | 0.3535 | -0.15 (negligible) | DIFERÈNCIA NEGLIGIBLE — prompt mínim suficient |
-| fidelitat_curricular | 4.22 | 4.40 | +0.18 | 0.0018** | +0.32 (petit) | DIFERÈNCIA NEGLIGIBLE — prompt mínim suficient |
-| adequacio_perfil | 3.63 | 4.35 | +0.72 | 0.0000** | +0.80 (mitjà) | PROMPT COMPLET VAL LA PENA |
-| llegibilitat_estructura | 4.34 | 4.45 | +0.12 | 0.0793 | +0.21 (petit) | DIFERÈNCIA NEGLIGIBLE — prompt mínim suficient |
-| complements | 2.54 | 4.51 | +1.97 | 0.0000** | +2.06 (gran) | PROMPT COMPLET VAL LA PENA |
-
-**Puntuació global ponderada**: A=3.81, B=4.33, Diff=+0.52, p=0.0000, d=+1.16
-
-**Decisió**: PROMPT COMPLET VAL LA PENA
+> n=5 → senyal QUALITATIU, no prova estadística. Δ = ON − OFF. Llindar orientatiu: Δ>0.5 = les skills aporten valor.
 
 
-## Resultats — Jutge: Claude Sonnet
+## c1_nouvingut — noticia / A2 / nouvingut
 
-| Criteri | Mitjana A | Mitjana B | Diff (B-A) | Wilcoxon p | Cohen's d | Interpretació |
-|---|---|---|---|---|---|---|
-| adequacio_linguistica | 3.57 | 3.62 | +0.04 | 1.0000 | +0.06 (negligible) | DIFERÈNCIA NEGLIGIBLE — prompt mínim suficient |
-| fidelitat_curricular | 3.74 | 4.28 | +0.53 | 0.0001** | +0.81 (gran) | PROMPT COMPLET VAL LA PENA |
-| adequacio_perfil | 2.57 | 3.21 | +0.64 | 0.0254** | +0.42 (petit) | PROMPT COMPLET VAL LA PENA |
-| llegibilitat_estructura | 3.98 | 3.89 | -0.09 | 1.0000 | -0.12 (negligible) | DIFERÈNCIA NEGLIGIBLE — prompt mínim suficient |
-| complements | 1.66 | 4.09 | +2.43 | 0.0000** | +2.55 (gran) | PROMPT COMPLET VAL LA PENA |
+| Criteri | OFF | ON | Δ (ON−OFF) |
+|---|:---:|:---:|:---:|
+| Adequació lingüística MECR | 3.0 | 4.0 | +1.0 |
+| Fidelitat curricular | 3.0 | 4.0 | +1.0 |
+| Adequació al perfil | 2.0 | 3.0 | +1.0 |
+| Llegibilitat/estructura | 3.0 | 3.0 | +0.0 |
+| Complements | 1.0 | 3.0 | +2.0 |
+| **Mitjana ponderada** | **2.5** | **3.5** | **+1.0** |
 
-**Puntuació global ponderada**: A=3.13, B=3.76, Diff=+0.63, p=0.0000, d=+0.96
+Skills actives ON: write-noticia, generate-glossari
 
-**Decisió**: PROMPT COMPLET VAL LA PENA
+Justificació jutge (OFF):
+  - *Adequació lingüística MECR*: Les frases del cos de la notícia són majoritàriament curtes i dins del rang A2 (8-12 paraules), amb veu activa i subjecte explícit. Però hi ha fragments problemàtics: 'El plàstic que s'usa només un cop' és una frase nominal sense verb principal (fragment), i 'O per coses que es puguin fer compost' és un altre fragment. La construcció 'coses que es puguin tornar a usar / fer compost' evita els termes tècnics però introdueix perífrasis amb subjuntiu ('es puguin') que superen el nivell A2. El vocabulari és majoritàriament adequat, però 'emergència climàtica' i 'entitats ecologistes' es mantenen sense definir.
+  - *Fidelitat curricular*: El contingut principal es preserva: aprovació de la llei, data d'entrada en vigor, obligació de substituir plàstics, dada de 1,2 kg/setmana, objectiu de reducció a la meitat en cinc anys, posicions de comerciants i ecologistes. Però 'alternatives reutilitzables o compostables' es substitueix per 'coses que es puguin tornar a usar o fer compost', perdent el terme tècnic 'compostable' sense definir-lo correctament (fer compost ≠ compostable és una simplificació que rossa l'error conceptual). El terme 'normativa' desapareix sense substitut. La nota G1 anuncia un glossari bilingüe que no apareix al text adaptat.
+  - *Adequació al perfil*: El text menciona explícitament el perfil nouvingut A2 a les seccions G1 i H, i aplica simplificació lingüística i segmentació. Però els suports concrets per a nouvingut amb L1 àrab i alfabet no llatí no estan implementats al text real: el glossari bilingüe amb transliteració anunciat a G1 no existeix al document; no hi ha cap paraula en àrab ni transliteració fonètica; no hi ha pistes visuals per a lector d'alfabet no llatí. L'adaptació és genèrica (frases curtes, vocabulari senzill) però no específica per al perfil declarat.
+  - *Llegibilitat/estructura*: Hi ha un títol descriptiu i quatre paràgrafs temàtics identificables amb 3-5 frases cadascun, cosa positiva. Però falta resum anticipatiu inicial, falta frase tòpic explícita a cada paràgraf, no hi ha connectors de transició entre seccions ('Ara veurem...'), i no hi ha resum final. Els fragments sense verb ('El plàstic que s'usa només un cop', 'O per coses que es puguin fer compost') trenquen la cohesió. L'estructura és acceptable però incompleta per al nivell d'excel·lència esperat.
+  - *Complements*: El text adaptat no conté cap complement real integrat: no hi ha glossari bilingüe (anunciat però absent), no hi ha transliteració a l'àrab, no hi ha definicions en negreta dins el text, no hi ha analogies culturalment diverses, no hi ha esquema visual, no hi ha preguntes de comprensió intercalades. Les seccions A, B, E, G, H i la taula d'auditoria són metadocumentació dirigida al docent, no suports per a l'alumne. Per al perfil nouvingut L1 àrab, l'absència total de glossari bilingüe és una mancança crítica.
 
+Justificació jutge (ON):
+  - *Adequació lingüística MECR*: La majoria de frases es mantenen dins el rang A2 (8-12 paraules). Exemples: 'Cada persona a Catalunya genera 1,2 quilograms de residus plàstics cada setmana' (13 paraules, lleugerament per sobre) i 'Les alternatives es poden tornar a utilitzar' (7 paraules, dins rang). Predomina la veu activa i el subjecte explícit. El vocabulari és d'alta freqüència. Es penalitza perquè algunes frases queden per sota del rang A2 (massa fragmentades: 'Obligarà els supermercats i les botigues', 'Hauran de canviar les bosses de plàstic') i 'emergència climàtica' es manté sense adaptació lingüística al cos del text.
+  - *Fidelitat curricular*: Es preserven les dades numèriques clau (1,2 kg, 5 anys), la font (Departament de Territori), les dues posicions (comerciants i ecologistes) i la causalitat principal. El terme 'plàstic d'un sol ús' desapareix del cos del text (es manté al glossari), cosa que és una pèrdua terminològica menor. 'Compostables' s'explica implícitament ('es poden fer compost') però sense el terme tècnic al text. No s'introdueixen errors conceptuals. Es penalitza la pèrdua del terme 'reutilitzables' com a paraula explícita al cos.
+  - *Adequació al perfil*: S'implementa un glossari bilingüe català-àrab amb transliteració fonètica, que és el suport principal per a nouvingut amb L1 àrab i alfabet no llatí. Tanmateix, falten pistes de connexió L1 integrades dins el text (no només al glossari extern), no hi ha cap indicació explícita de l'alfabet àrab al cos del text per anclar la lectura, i el glossari apareix al final (post-lectura) en lloc de com a pre-training. La simplificació sintàctica és adequada per al nivell A2 però no hi ha suports visuals ni estructures predictibles explícites que ajudin l'alumne nouvingut a orientar-se en el text.
+  - *Llegibilitat/estructura*: Hi ha un títol principal i quatre paràgrafs temàtics identificables amb una idea per paràgraf. L'ordre és lògic (llei > aplicació > dades > opinions). Manca un resum anticipatiu inicial, no hi ha subtítols per a cada paràgraf (que ajudarien molt a un A2 nouvingut), les transicions entre paràgrafs són inexistents (no hi ha connectors del tipus 'Ara veurem...' o 'A més...'), i no hi ha frase recapitulativa final. L'estructura és funcional però bàsica.
+  - *Complements*: El glossari bilingüe amb transliteració és un complement valuós i ben elaborat (10 termes, traducció àrab, explicació en català senzill). Tanmateix, es col·loca al final del document (no com a pre-training abans del text), no hi ha analogies culturalment diverses ni exemples quotidians integrats al cos del text, no hi ha esquema visual del procés (llei → comerços → canvi → objectiu), i no s'aplica scaffolding decreixent (primera aparició amb definició completa, segona breu). La taula d'auditoria és útil pedagògicament però no és un suport per a l'alumne.
 
-## Concordança inter-jutge (GPT-4o vs Claude Sonnet)
+## c2_tea_pictogrames — conte / pre-A1 / tea
 
-- **adequacio_linguistica** (A): Kappa=0.70, r=-0.77, n=47
-- **adequacio_linguistica** (B): Kappa=0.79, r=-0.05, n=47
-- **fidelitat_curricular** (A): Kappa=1.00, r=0.62, n=47
-- **fidelitat_curricular** (B): Kappa=1.00, r=0.17, n=47
-- **adequacio_perfil** (A): Kappa=0.57, r=0.50, n=47
-- **adequacio_perfil** (B): Kappa=0.36, r=0.53, n=47
-- **llegibilitat_estructura** (A): Kappa=0.91, r=0.19, n=47
-- **llegibilitat_estructura** (B): Kappa=0.87, r=0.16, n=47
-- **complements** (A): Kappa=0.74, r=0.38, n=47
-- **complements** (B): Kappa=0.87, r=0.31, n=47
+| Criteri | OFF | ON | Δ (ON−OFF) |
+|---|:---:|:---:|:---:|
+| Adequació lingüística MECR | 5.0 | 5.0 | +0.0 |
+| Fidelitat curricular | 3.0 | 3.0 | +0.0 |
+| Adequació al perfil | 4.0 | 4.0 | +0.0 |
+| Llegibilitat/estructura | 3.0 | 4.0 | +1.0 |
+| Complements | 3.0 | 3.0 | +0.0 |
+| **Mitjana ponderada** | **3.8** | **3.9** | **+0.1** |
 
-## Diferències per etapa
+Skills actives ON: write-conte, generate-pictogrames
 
-- primaria / adequacio_linguistica: diff=-0.03 (n=60)
-- primaria / fidelitat_curricular: diff=+0.13 (n=60)
-- primaria / adequacio_perfil: diff=+0.72 (n=60)
-- primaria / llegibilitat_estructura: diff=+0.22 (n=60)
-- primaria / complements: diff=+1.95 (n=60)
-- ESO / adequacio_linguistica: diff=-0.08 (n=59)
-- ESO / fidelitat_curricular: diff=+0.14 (n=59)
-- ESO / adequacio_perfil: diff=+0.71 (n=59)
-- ESO / llegibilitat_estructura: diff=+0.07 (n=59)
-- ESO / complements: diff=+1.92 (n=59)
-- batxillerat / adequacio_linguistica: diff=+0.00 (n=19)
-- batxillerat / fidelitat_curricular: diff=+0.47 (n=19)
-- batxillerat / adequacio_perfil: diff=+0.74 (n=19)
-- batxillerat / llegibilitat_estructura: diff=-0.11 (n=19)
-- batxillerat / complements: diff=+2.21 (n=19)
+Justificació jutge (OFF):
+  - *Adequació lingüística MECR*: Les frases es mantenen sistemàticament dins el rang pre-A1 (3-5 paraules): 'La guineu viu al bosc', 'La guineu té gana', 'No troba menjar'. Sintaxi SVO pura, present d'indicatiu, zero subordinades, subjecte explícit i repetit en cada frase. Vocabulari d'alta freqüència sense excepcions. L'única frase llarga detectable és 'L'arbre està darrere d'una roca gran' (7 paraules), desviació mínima i justificada per la informació espacial necessària.
+  - *Fidelitat curricular*: El nucli narratiu (gana → ajuda → menjar → gratitud → amistat) es preserva. Però es perden elements importants: la causalitat explícita ('perquè arribava l'hivern' queda implícita), el concepte de 'generositat' dels ocells es redueix a 'bons' (pèrdua de matís), i la promesa de protecció del niu perd el caràcter de compromís recíproc explícit. 'Agraïda' desapareix com a terme i es substitueix per 'diu gràcies', acceptable però empobridor. Cap error conceptual introduït, però la cadena causal queda debilitada.
+  - *Adequació al perfil*: Els suports TEA estan ben implementats: estructura predictible i fixa, una idea per frase, llenguatge literal i concret, pictogrames ARASAAC amb terme en català i castellà per a tots els conceptes clau. S'eviten implicatures i metàfores. Manca, però, un element de suport emocional/social explícit (habitual en adaptacions TEA per treballar la comprensió d'estats mentals dels personatges), i no hi ha cap indicador visual de progrés narratiu (ex: numeració de seqüències o icona de 'pas 1/7') que ajudaria l'alumne TEA a anticipar l'estructura global del conte.
+  - *Llegibilitat/estructura*: El text està segmentat en blocs temàtics curts amb una lògica seqüencial clara i cronològica. Cada bloc correspon a un moment narratiu. Manca, però, un resum anticipatiu inicial ('Avui llegirem sobre...'), no hi ha títols de secció per a cada bloc (només el títol global), i no hi ha frase de tancament recapitulatiu explícit. Les transicions entre blocs són inexistents: la seqüència es percep per contigüitat, no per connectors o frases de transició adaptades al nivell.
+  - *Complements*: Els pictogrames ARASAAC amb doble etiqueta (català|castellà) són un complement ben integrat i coherent amb el perfil. Cobreixen els conceptes clau de manera sistemàtica. Manca, però, un glossari previ (pre-training) que presenti el vocabulari abans de la lectura, no hi ha preguntes de comprensió intercalades ni al final, i no s'ofereix cap esquema visual de la seqüència narrativa (storyboard simplificat) que seria especialment valuós per a TEA. Els complements presents són funcionals però insuficients per assolir la puntuació màxima.
+
+Justificació jutge (ON):
+  - *Adequació lingüística MECR*: Les frases es mantenen sistemàticament dins el rang pre-A1 (3-5 paraules): 'Hi vivia una guineu petita' (5), 'La guineu tenia molta gana' (5), 'Arribava l'hivern' (2), 'Van veure un arbre' (4). Vocabulari bàsic i freqüent al llarg de tot el text. Sintaxi SVO sense subordinades. Subjecte explícit en gairebé totes les frases. Cap desviació significativa del rang establert per al nivell pre-A1.
+  - *Fidelitat curricular*: Es preserven els elements narratius principals (gana, ajuda, fruits, niu, amistat). Però es perden matisos rellevants: 'generosos' desapareix sense substitut clar ('bons' és vague), la motivació dels ocells per volar al sud (l'hivern com a causa) queda desconnectada causalment ('Els ocells volaven al sud. Arribava l'hivern' no explicita la relació), i 'agraïda' s'elimina. La promesa de protegir el niu es manté però sense el context de reciprocitat explícita ('es van ajudar els uns als altres' queda reduït a 'Es van ajudar sempre', que és acceptable). Cap error conceptual greu, però la cadena causal original queda debilitada.
+  - *Adequació al perfil*: Els pictogrames inline amb traducció castellana (L1 probable) estan ben implementats i cobreixen els conceptes clau, cosa molt adequada per a TEA i pre-A1. L'estructura és predictible i repetitiva (frase + picto), favorable per a TEA. El sentit literal es respecta. Manca, però, un vocabulari anticipatori previ a la lectura (pre-training explícit) i no hi ha cap indicador visual de progrés narratiu (p. ex. numeració de blocs o icona de seqüència) que reforci la predictibilitat per a TEA. La densitat de pictogrames és alta i consistent, però alguns conceptes abstractes com 'bons' o 'ajudar' podrien beneficiar-se d'un suport addicional.
+  - *Llegibilitat/estructura*: El text està ben segmentat en 5 blocs temàtics curts (3-5 frases cadascun) que segueixen l'ordre cronològic del conte. Hi ha un títol clar. Les frases tòpic inicien cada bloc de manera coherent. Manca un resum anticipatiu inicial ('En aquest conte veurem...') i un resum final recapitulatiu, així com connectors explícits entre blocs ('Ara veurem...'). Les transicions entre paràgrafs són implícites, no marcades.
+  - *Complements*: Els pictogrames inline amb etiqueta bilingüe (català|castellà) són el complement principal i estan ben integrats al text. Però no hi ha glossari previ (pre-training) que presenti el vocabulari abans de la lectura, no hi ha analogies ni preguntes intercalades, i no s'aplica scaffolding decreixent (totes les ocurrències d'un mateix mot reben el mateix suport pictogràfic, sense reducció progressiva). Els complements presents són funcionals però limitats en varietat i profunditat per al perfil TEA pre-A1.
+
+## c3_tdah — instructiu / B1 / tdah
+
+| Criteri | OFF | ON | Δ (ON−OFF) |
+|---|:---:|:---:|:---:|
+| Adequació lingüística MECR | 4.0 | 3.0 | -1.0 |
+| Fidelitat curricular | 3.0 | 3.0 | +0.0 |
+| Adequació al perfil | 3.0 | 2.0 | -1.0 |
+| Llegibilitat/estructura | 4.0 | 3.0 | -1.0 |
+| Complements | 3.0 | 1.0 | -2.0 |
+| **Mitjana ponderada** | **3.4** | **2.5** | **-0.9** |
+
+Skills actives ON: write-instructiu
+
+Justificació jutge (OFF):
+  - *Adequació lingüística MECR*: El vocabulari és freqüent i adequat al B1. Les frases són majoritàriament curtes i en veu activa amb ordre SVO clar ('Agafa un dels cables de coure. Connecta una punta al pol positiu'). Hi ha algunes frases lleugerament llargues però dins del rang B1 (12-18 paraules). Desviació puntual al pas 3: 'utilitza un tercer cable (o si el segon cable és prou llarg, el seu altre extrem)' introdueix una subordinada condicional i una ambigüitat que complica la comprensió i contradiu el text original (que especifica dos cables, no tres). Subjecte explícit present de forma consistent.
+  - *Fidelitat curricular*: El contingut principal es preserva i els termes clau (circuit elèctric, pila, interruptor, corrent elèctric, pol positiu/negatiu, born) es mantenen. Tanmateix, el pas 3 introdueix un error conceptual rellevant: el text original especifica dos cables de coure, però l'adaptat menciona 'un tercer cable', contravenint el material llistat i el procediment original. Això és una imprecisió que rossa l'error conceptual i pot confondre l'alumne durant la pràctica real.
+  - *Adequació al perfil*: S'implementen alguns suports per a TDAH: blocs curts, llistes numerades, títols de secció i dues preguntes de comprensió al final. Però falten elements clau per a un bon ajust: no hi ha indicadors de progrés visuals (p.ex. 'Pas 1 de 3'), no hi ha variació en el format per mantenir l'atenció (cap element visual, diagrama o icona suggerida), les preguntes de comprensió estan al final en lloc d'intercalades entre seccions, i no hi ha cap estratègia explícita de gestió de la memòria de treball (p.ex. recordatoris del que s'ha fet). L'estructura és predictible però no prou dinàmica per a TDAH.
+  - *Llegibilitat/estructura*: L'estructura és clara: títol principal, seccions amb títols descriptius, llista de materials, passos numerats, solució de problemes i glossari. Els paràgrafs són curts. Hi ha una frase anticipatòria al principi ('Aquest text t'explicarà els passos...'). Manca un resum final recapitulatiu i les transicions explícites entre seccions ('Ja hem vist els materials. Ara veurem els passos') que elevarien la puntuació. Els títols de secció són descriptius però no en format pregunta, que seria òptim per a TDAH.
+  - *Complements*: Hi ha un glossari al final amb 9 termes definits, incloent termes tècnics rellevants. Les definicions són clares però homogènies en extensió (no hi ha scaffolding decreixent: 1a aparició=definició completa, 2a=breu, 3a=sol). El glossari és al final i no integrat al text (sense asteriscs ni remissions inline). No hi ha analogies quotidianes, cap esquema visual del circuit, ni pre-training de vocabulari. Les preguntes de comprensió són bàsiques (només 2) i no intercalades. Complements presents però poc integrats i insuficients per al perfil TDAH.
+
+Justificació jutge (ON):
+  - *Adequació lingüística MECR*: Les frases dels passos són curtes i directes (8-12 paraules), adequades per a B1. La veu activa i l'ordre SVO predominen. Però el pas 5 introdueix una subordinada condicional entre parèntesis ('o utilitza un dels anteriors si és prou llarg') que trenca el ritme i afegeix ambigüitat innecessària. A més, l'argumentació pedagògica inclosa al text adaptat usa frases llargues i vocabulari meta que no correspon al nivell de l'alumne. Si es considera part del document lliurat, penalitza l'ajust global.
+  - *Fidelitat curricular*: Els termes clau (circuit elèctric, pila, cable de coure, portabombetes, interruptor, pol positiu, pol negatiu) es mantenen. Però el concepte de 'corrent elèctric' desapareix del text instructiu principal: l'original explica explícitament que 'el corrent elèctric circularà pel circuit', mentre que l'adaptat només diu 'la bombeta s'encendrà', eliminant la cadena causal fonamental. A més, el pas 5 introdueix un tercer cable no present a l'original, cosa que és un error conceptual per addició.
+  - *Adequació al perfil*: S'apliquen alguns suports bàsics per a TDAH: llistes numerades, passos curts, secció de resolució de problemes. Però falten elements clau per a aquest perfil: no hi ha indicadors de progrés visuals (p. ex. 'Pas 1 de 6'), no hi ha variació en el format per mantenir l'atenció, no hi ha microtasques amb confirmació ('Comprova: el cable toca el pol positiu?'), ni cap element de gamificació o reforç positiu intercalat. L'adaptació és genèrica per a qualsevol alumne, no específicament dissenyada per a TDAH.
+  - *Llegibilitat/estructura*: L'estructura en tres seccions amb títols descriptius és clara i funcional. Els passos numerats faciliten el seguiment seqüencial. Però falta un resum anticipatiu inicial ('En aquesta activitat faràs X en Y passos'), no hi ha transicions explícites entre seccions, i no hi ha resum final recapitulatiu. La frase tòpic de cada secció és el títol mateix, sense ampliació introductòria.
+  - *Complements*: El text no inclou cap complement real integrat: no hi ha glossari (ni previ ni al final), no hi ha definicions dels termes tècnics en context (p. ex. 'born: punt de connexió metàl·lic'), no hi ha analogies quotidianes, no hi ha esquema visual del circuit, ni scaffolding decreixent. L'argumentació pedagògica i les notes d'auditoria no són complements per a l'alumne sinó metadocumentació per al docent, i no computen com a suports didàctics integrats al text.
+
+## c4_altes_capacitats — opinio / B2 / altes_capacitats
+
+| Criteri | OFF | ON | Δ (ON−OFF) |
+|---|:---:|:---:|:---:|
+| Adequació lingüística MECR | 3.0 | 3.0 | +0.0 |
+| Fidelitat curricular | 4.0 | 4.0 | +0.0 |
+| Adequació al perfil | 3.0 | 3.0 | +0.0 |
+| Llegibilitat/estructura | 3.0 | 3.0 | +0.0 |
+| Complements | 2.0 | 2.0 | +0.0 |
+| **Mitjana ponderada** | **3.0** | **3.0** | **+0.0** |
+
+Skills actives ON: write-opinio
+
+Justificació jutge (OFF):
+  - *Adequació lingüística MECR*: El text s'ajusta raonablement al nivell B2: frases d'entre 15-25 paraules, vocabulari acadèmic adequat ('erosionant', 'interpel·la', 'propietat intel·lectual'), connectors discursius presents ('no obstant això', 'finalment'). Tanmateix, hi ha desviacions puntuals: el darrer paràgraf fragmenta excessivament les idees en frases molt curtes i paral·leles ('Hem de reflexionar...', 'També cal analitzar...', 'Finalment, ens interpel·la...') que resulten poc naturals per a un B2 i trenquen el flux argumentatiu esperat en aquest nivell. La definició entre parèntesis '(IA generativa)' és útil però l'adaptació no aprofita prou la riquesa sintàctica que un B2 pot i ha de processar.
+  - *Fidelitat curricular*: Es preserven els termes nuclears: 'intel·ligència artificial generativa', 'autoria', 'creativitat', 'propietat intel·lectual', 'originalitat'. La cadena causal (IA entrena amb obres humanes → dilema d'autoria → debat filosòfic) es manté intacta. Les dues posicions (defensors/crítics) i les analogies originals (pinzell, càmera) es conserven. Es perd, però, el matís precís de 'milions d'obres humanes preexistents' (substituït per 'grans quantitats'), que és rellevant per entendre l'escala del problema. Cap error conceptual introduït.
+  - *Adequació al perfil*: El text manté la complexitat conceptual i filosòfica adequada per a altes capacitats i batxillerat B2, i incorpora preguntes retòriques que estimulen la reflexió. Tanmateix, per a un alumne d'altes capacitats el text adaptat no ofereix elements d'enriquiment real: no hi ha connexions interdisciplinàries (filosofia, dret, estètica), no es proposen preguntes de pensament crític intercalades, no hi ha aprofundiment en els conceptes (p.ex. distinció entre 'autoria' i 'creativitat', referència a debats filosòfics existents com Barthes o Searle), ni activitats d'extensió. L'adaptació evita la simplificació però no activa el repte intel·lectual específic que el perfil AC requereix.
+  - *Llegibilitat/estructura*: Hi ha un títol descriptiu, paràgrafs curts amb una idea central cadascun i connectors explícits entre perspectives. L'estructura és identificable i coherent. Manca, però, una frase tòpic clara al principi de cada paràgraf que anticipi el contingut, no hi ha resum anticipatiu inicial ni recapitulatiu final, i les transicions entre seccions són mínimes ('no obstant això' és l'únic connector de contrast explícit entre blocs). El darrer paràgraf, tot i voler ser la conclusió filosòfica, queda fragmentat i perd força com a tancament argumentatiu.
+  - *Complements*: L'únic complement integrat al text és la definició entre parèntesis '(IA generativa)' a la primera aparició del terme. No hi ha glossari previ ni integrat, no hi ha preguntes de pensament crític intercalades, no hi ha connexions amb altres disciplines o lectures d'ampliació, no hi ha analogies addicionals ni esquemes conceptuals. Per a un perfil d'altes capacitats, s'esperarien com a mínim preguntes de reflexió profunda, connexions amb debats filosòfics o jurídics existents, i algun element de scaffolding orientat al repte intel·lectual. L'argumentació pedagògica annexa és extensa però no forma part del text adaptat en si.
+
+Justificació jutge (ON):
+  - *Adequació lingüística MECR*: El text s'ajusta raonablement al nivell B2: frases curtes i clares, vocabulari acadèmic adequat ('transcendeix', 'interpel·la', 'fonamentals'). Tanmateix, per a un B2 de batxillerat el text resulta lleugerament simplificat en alguns punts ('programa informàtic' en lloc de 'sistema d'IA') i no aprofita prou la complexitat sintàctica que un B2 pot gestionar. L'argumentació pedagògica menciona erròniament 'A1·A2' com a nivell d'adaptació lingüística, cosa que contradiu el perfil B2 i genera confusió sobre l'objectiu real.
+  - *Fidelitat curricular*: Els conceptes clau es preserven: autoria, creativitat, propietat intel·lectual, originalitat, la dicotomia defensors/crítics i les analogies del pinzell i la càmera. El terme 'intel·ligència artificial generativa' apareix en negreta amb definició breu. La cadena causal (apropiació sense compensació → erosió del valor creatiu) es manté. Es perd lleugerament la formulació original 'dilema ètic de primer ordre' i 'milions d'obres humanes preexistents', que aportaven precisió conceptual rellevant per a un alumne de batxillerat.
+  - *Adequació al perfil*: S'incorporen preguntes obertes al final que estimulen el pensament crític, adequades per a altes capacitats. L'argumentació pedagògica menciona connexions interdisciplinàries (tecnologia, ètica, filosofia). Però els suports específics per a AC són insuficients: no hi ha profundització real en debats filosòfics (Searle, Kant sobre autoria, dret d'autor), no s'ofereixen connexions amb altres camps del coneixement de forma explícita al text, ni extensions per a l'alumne que vulgui aprofundir. Les preguntes finals són genèriques i no representen un repte cognitiu elevat per a un alumne d'altes capacitats de batxillerat.
+  - *Llegibilitat/estructura*: El text presenta paràgrafs curts i identificables, amb un ordre lògic (introducció → posicions → reflexió filosòfica → preguntes obertes). Hi ha un títol principal. Però manca resum anticipatiu inicial, no hi ha títols de secció interns que guiïn la lectura, les transicions entre paràgrafs són febles ('No obstant això' és l'únic connector explícit destacable) i no hi ha frase tòpic clara a cada bloc ni recapitulació final estructurada.
+  - *Complements*: L'únic complement real integrat al text és la definició breu de 'IA generativa' entre parèntesis i les preguntes obertes al final. No hi ha glossari previ ni integrat, no hi ha analogies addicionals més enllà de les del text original, no hi ha esquemes, no hi ha scaffolding graduat ni recursos d'aprofundiment (lectures, debats, connexions bibliogràfiques) que serien esperables per a un perfil d'altes capacitats a batxillerat. Els complements de l'argumentació pedagògica descriuen intencions però no es materialitzen en el text adaptat.
+
+## c5_dislexia_glossari — descripcio / A2 / dislexia
+
+| Criteri | OFF | ON | Δ (ON−OFF) |
+|---|:---:|:---:|:---:|
+| Adequació lingüística MECR | 4.0 | 4.0 | +0.0 |
+| Fidelitat curricular | 3.0 | 4.0 | +1.0 |
+| Adequació al perfil | 2.0 | 3.0 | +1.0 |
+| Llegibilitat/estructura | 3.0 | 4.0 | +1.0 |
+| Complements | 1.0 | 2.0 | +1.0 |
+| **Mitjana ponderada** | **2.7** | **3.5** | **+0.8** |
+
+Skills actives ON: write-descripcio, generate-glossari
+
+Justificació jutge (OFF):
+  - *Adequació lingüística MECR*: La majoria de frases es mantenen dins el rang A2 (8-12 paraules) o per sota. Predomina l'estructura SVO, veu activa i subjecte explícit. El vocabulari és freqüent i accessible ('fort', 'gran', 'cavar'). Es penalitza lleugerament perquè moltes frases cauen en rang A1 (3-6 paraules: 'L'os bru és un animal gran', 'Té un cos fort'), cosa que fragmenta en excés per a un objectiu A2 de sortida. A més, 'letargia' i 'funcions vitals' es mantenen sense definició explícita, cosa que suposa un salt lèxic no resolt.
+  - *Fidelitat curricular*: Es preserven els termes clau 'mamífers', 'omnívor' i 'letargia', i la cadena causal hivern→letargia→estalvi d'energia→primavera es manté. Però hi ha errors i omissions: 'Posa petits animals' és un error conceptual greu (hauria de ser 'menja petits animals'). 'Urpes corbades' es manté però 'enfilar-se als arbres' es redueix a 'enfila als arbres' sense el pronom reflexiu correcte. 'Robust' i 'imponent' desapareixen sense substitut. 'Letargia' i 'funcions vitals' no es defineixen, perdent rigor curricular. El terme 'fruites' substitueix 'fruits', canvi semànticament acceptable però imprecís en context botànic.
+  - *Adequació al perfil*: El perfil demana adaptació per a dislèxia fonològica amb glossari. L'adaptació redueix la longitud de frase i simplifica la sintaxi, cosa útil per a la descodificació, però no implementa cap suport específic per a dislèxia fonològica: no hi ha glossari visual ni definicions integrades dels termes difícils ('letargia', 'omnívor', 'funcions vitals'), no hi ha ressaltat en negreta dels termes clau, no hi ha suports de segmentació sil·làbica ni cap altra estratègia fonològica explícita. L'argumentació pedagògica menciona el perfil però el text adaptat no ho materialitza amb eines concretes.
+  - *Llegibilitat/estructura*: El text té paràgrafs curts i identificables, cadascun centrat en una idea (cos, potes, alimentació, letargia), cosa positiva. Hi ha un títol general. Però manca resum anticipatiu inicial, no hi ha subtítols per secció (l'argumentació els menciona però el text final no els inclou), les transicions entre paràgrafs són inexistents ('Ja hem vist X. Ara veurem Y'), i no hi ha frase recapitulativa final. L'estructura és funcional però bàsica.
+  - *Complements*: El text adaptat final no inclou cap complement ni suport addicional: no hi ha glossari (ni previ ni al final), no hi ha definicions entre parèntesis dels termes tècnics mantinguts ('letargia', 'omnívor', 'funcions vitals'), no hi ha analogies, no hi ha esquema, no hi ha preguntes intercalades ni scaffolding de cap tipus. L'argumentació pedagògica i la taula d'auditoria aporten metainformació per al docent, però no constitueixen suports per a l'alumne dins el text.
+
+Justificació jutge (ON):
+  - *Adequació lingüística MECR*: Les frases són majoritàriament curtes (3-8 paraules), amb subjecte explícit i veu activa predominant, cosa que s'ajusta bé al rang A2 (8-12 paraules). Tanmateix, el perfil indica nivell de sortida A2 però el text s'ha adaptat més aviat a A1 (moltes frases de 3-5 paraules), cosa que podria ser excessivament simplificada per a un A2 real. No hi ha subordinades complexes. El vocabulari és freqüent i accessible. La desviació principal és que la majoria de frases queden per sota del rang A2 (8-12), situant-se en el rang A1 (5-8), però l'ajust és coherent i funcional per al perfil de dislèxia.
+  - *Fidelitat curricular*: Es preserven els conceptes clau: mamífer, omnívor, letargia, característiques físiques (pèl espès, urpes corbades), alimentació i comportament hivernal. El terme 'letargia' es manté en negreta amb explicació funcional. Es perd el matís 'funcions vitals' que apareix al text original però es recupera parcialment ('les seves funcions vitals van més lentes'). Es perd 'excavar' (substituït per 'cavar', acceptable) i 'enfilar-se' (substituït per 's'enfila', correcte). La cadena causal fred→letargia→estalvi d'energia→primavera es manté intacta. Cap error conceptual introduït.
+  - *Adequació al perfil*: S'implementen alguns suports rellevants per a la dislèxia fonològica: frases curtes, repetició de termes clau en lloc de sinònims, evitació de paraules fonològicament complexes, i segmentació visual clara. Tanmateix, el perfil inclou 'descripció amb glossari' i el text no incorpora cap glossari explícit (ni al final ni integrat). El terme 'letargia' s'explica breument però no hi ha un glossari formal. Tampoc hi ha suports tipogràfics específics per a dislèxia (com interlineat, font recomanada o ressaltat de morfemes). L'adaptació és funcional però incompleta respecte al perfil declarat.
+  - *Llegibilitat/estructura*: El text presenta paràgrafs curts (3-5 frases cadascun), un títol principal clar i una llista per a l'alimentació que millora l'accés visual. Cada paràgraf tracta una idea central. Manca un resum anticipatiu inicial ('En aquest text aprendràs...') i un resum final recapitulatiu. Les transicions entre seccions són implícites (no hi ha connectors explícits del tipus 'Ja hem vist X. Ara veurem Y'). L'ordre és lògic i predictible. L'estructura és bona però no excel·lent per absència d'elements anticipatoris i recapitulatius.
+  - *Complements*: L'únic complement real és la definició breu de 'letargia' integrada al text i la llista d'aliments. El perfil declara explícitament 'descripció amb glossari' però no hi ha cap glossari formal. No hi ha analogies quotidianes, esquemes visuals, preguntes intercalades ni scaffolding decreixent. No hi ha pre-training de vocabulari. Els complements presents són mínims i insuficients per al perfil declarat, especialment considerant que el glossari era un element explícitament requerit.
+
+## Resum global per criteri (mitjana dels casos)
+
+| Criteri | OFF mitjà | ON mitjà | Δ mitjà |
+|---|:---:|:---:|:---:|
+| Adequació lingüística MECR | 3.8 | 3.8 | +0.0 |
+| Fidelitat curricular | 3.2 | 3.6 | +0.4 |
+| Adequació al perfil | 2.8 | 3.0 | +0.2 |
+| Llegibilitat/estructura | 3.2 | 3.4 | +0.2 |
+| Complements | 2.0 | 2.2 | +0.2 |
+| **Mitjana ponderada global** | **3.1** | **3.3** | **+0.2** |
+
+## Verdict orientatiu
+
+Δ ponderada global = **+0.19** → 🔴 Diferència negligible (Δ<0.3) — skills sense impacte mesurable.
+
+> Recordatori: n=5. Aquest verdict és orientatiu i requereix la revisió pedagògica humana dels textos a `resultats_generacio.json`.
+
+## Limitacions i abast
+
+Aquest experiment mesura **combinacions concretes** de gènere + perfil + MECR + complement, una per cas, NO l'efecte d'un perfil en general:
+
+- **No extrapolable a un perfil sencer.** El cas 2 mesura «conte + pictogrames per a TEA a pre-A1», NO «les skills milloren per a TEA en general». El corpus FJE és explícit que TEA, TDAH, altes capacitats i dislèxia són **independents del nivell MECR** (un mateix perfil pot tenir qualsevol nivell de llengua), de manera que el MECR de cada cas és una decisió de disseny de l'experiment, no una propietat del perfil.
+- **n=5, un cas per combinació.** Cap criteri té rèpliques; les diferències són un senyal il·lustratiu, no una estimació estadística. Variació de temperatura (0.4) i de mostratge del generador no estan controlades per repetició.
+- **El judici és d'un sol jutge** (Claude Sonnet 4.6). Sense segon jutge no es pot estimar la concordança inter-jutge ni descartar biaix sistemàtic del jutge.
+- **Abast de la conclusió.** Un Δ favorable a ON indica que, *per a aquestes 5 combinacions concretes i amb aquest generador (gemini-2.5-flash-lite)*, activar les skills millora la qualitat segons la rúbrica. Generalitzar a altres gèneres, perfils, nivells o models requeriria ampliar el disseny (més casos per combinació, més jutges, més models).

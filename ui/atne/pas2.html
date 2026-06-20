@@ -1605,6 +1605,7 @@
   if (isNew) {
     localStorage.removeItem('atne.doc_draft');
     localStorage.removeItem('atne.doc_title');
+    localStorage.removeItem('atne.genere_discursiu');  // Gap 2: evita gènere heretat en nova adaptació
     history.replaceState(null, '', location.pathname);
   } else {
     const savedDraft = localStorage.getItem('atne.doc_draft');
@@ -1629,7 +1630,7 @@
       notice.querySelector('.rn-new').addEventListener('click', () => {
         ['atne.doc_draft','atne.doc_title','atne.doc_original',
          'atne.adapted_cache_key','atne.adapted_raw_ck','atne.adapted_raw',
-         'atne.adapted_text','atne.draft_id'].forEach(k => localStorage.removeItem(k));
+         'atne.adapted_text','atne.draft_id','atne.genere_discursiu'].forEach(k => localStorage.removeItem(k));
         location.href = '/ui/atne/pas1.html';
       });
       notice.querySelector('.rn-close').addEventListener('click', () => notice.remove());
@@ -2884,6 +2885,7 @@
     // Persistència local: buida les claus relacionades
     localStorage.removeItem('atne.doc_draft');
     localStorage.removeItem('atne.doc_title');
+    localStorage.removeItem('atne.genere_discursiu');  // Gap 2: evita gènere heretat en buidar
     localStorage.removeItem('atne.draft_id');
     localStorage.removeItem('atne.draft_saved_at');
     // Desvincula biblioteca perquè el proper "Desar" al pas3 creï una

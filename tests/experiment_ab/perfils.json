@@ -1,98 +1,92 @@
 [
   {
-    "id": "nouvingut_arabic",
-    "nom": "Nouvingut genèric (àrab)",
-    "descripcio_curta": "Alumne nouvingut, L1 àrab, alfabet no llatí, MECR A1",
+    "id": "c1_nouvingut",
+    "nom": "Cas 1 — Nouvingut (notícia/A2)",
+    "descripcio_curta": "Alumne nouvingut, L1 àrab, alfabet no llatí, MECR A2. Notícia.",
+    "text_id": "t1_noticia",
     "perfil": "nouvingut",
     "etapa": "ESO",
-    "curs": "1r ESO",
-    "mecr": "A1",
+    "curs": "2n ESO",
+    "mecr": "A2",
+    "genere": "noticia",
     "sub_variables": {
       "L1": "àrab",
       "alfabet_llati": false,
       "calp": "inicial",
-      "temps_acollida": "6 mesos"
+      "temps_acollida": "8 mesos"
     },
+    "complements": {"glossari": true, "pictogrames": false, "esquema_visual": false},
     "complexitat": "simple",
-    "prompt_minim": "Adapta aquest text per a un alumne nouvingut de 1r d'ESO, parlant natiu d'àrab, amb un nivell de català A1."
+    "prompt_minim": "Adapta aquesta notícia per a un alumne nouvingut de 2n d'ESO, parlant natiu d'àrab, amb un nivell de català A2."
   },
   {
-    "id": "tdah_lleu",
-    "nom": "TDAH lleu",
-    "descripcio_curta": "Alumne amb TDAH lleu, primària cicle superior",
-    "perfil": "tdah",
+    "id": "c2_tea_pictogrames",
+    "nom": "Cas 2 — TEA + pictogrames (conte/pre-A1)",
+    "descripcio_curta": "Alumne amb TEA, primària, MECR pre-A1. Conte amb suport de pictogrames.",
+    "text_id": "t2_conte",
+    "perfil": "tea",
     "etapa": "primaria",
-    "curs": "5è primària",
-    "mecr": "B1",
+    "curs": "3r primària",
+    "mecr": "pre-A1",
+    "genere": "conte",
     "sub_variables": {
-      "grau": "lleu",
-      "baixa_memoria_treball": false
+      "grau": "moderat",
+      "suport_visual": true
     },
+    "complements": {"glossari": false, "pictogrames": true, "esquema_visual": false},
     "complexitat": "simple",
-    "prompt_minim": "Adapta aquest text per a un alumne de 5è de primària amb TDAH lleu, nivell lingüístic B1."
+    "prompt_minim": "Adapta aquest conte per a un alumne amb TEA de 3r de primària, nivell pre-A1. Necessita frases molt curtes i suport visual amb pictogrames."
   },
   {
-    "id": "altes_capacitats",
-    "nom": "Altes capacitats",
-    "descripcio_curta": "Alumne amb altes capacitats, batxillerat",
+    "id": "c3_tdah",
+    "nom": "Cas 3 — TDAH (instructiu/B1)",
+    "descripcio_curta": "Alumne amb TDAH, ESO, MECR B1. Text instructiu.",
+    "text_id": "t3_instructiu",
+    "perfil": "tdah",
+    "etapa": "ESO",
+    "curs": "2n ESO",
+    "mecr": "B1",
+    "genere": "instructiu",
+    "sub_variables": {
+      "grau": "moderat",
+      "baixa_memoria_treball": true
+    },
+    "complements": {"glossari": false, "pictogrames": false, "esquema_visual": false},
+    "complexitat": "simple",
+    "prompt_minim": "Adapta aquest text instructiu per a un alumne de 2n d'ESO amb TDAH moderat, nivell B1. Necessita passos clars, blocs curts i instruccions ben separades."
+  },
+  {
+    "id": "c4_altes_capacitats",
+    "nom": "Cas 4 — Altes capacitats (opinió/B2)",
+    "descripcio_curta": "Alumne amb altes capacitats, batxillerat, MECR B2. Text d'opinió.",
+    "text_id": "t4_opinio",
     "perfil": "altes_capacitats",
     "etapa": "batxillerat",
     "curs": "1r batxillerat",
-    "mecr": "C1",
-    "sub_variables": {},
-    "complexitat": "simple",
-    "prompt_minim": "Adapta aquest text per a un alumne d'altes capacitats de 1r de batxillerat, nivell C1. Enriqueix el contingut amb profundització i pensament crític."
-  },
-  {
-    "id": "tdl_pragmatica",
-    "nom": "TDL amb afectació pragmàtica",
-    "descripcio_curta": "Alumne amb TDL receptiu-pragmàtic, ESO",
-    "perfil": "tdl",
-    "etapa": "ESO",
-    "curs": "2n ESO",
-    "mecr": "A2",
-    "sub_variables": {
-      "grau": "moderat",
-      "modalitat": "receptiu",
-      "pragmatica": true,
-      "morfosintaxi": true,
-      "semantica": false
-    },
-    "complexitat": "complex",
-    "prompt_minim": "Adapta aquest text per a un alumne de 2n d'ESO amb Trastorn del Desenvolupament del Llenguatge (TDL) de tipus receptiu i pragmàtic, nivell A2."
-  },
-  {
-    "id": "doble_excepcionalitat",
-    "nom": "2e: Altes capacitats + dislèxia",
-    "descripcio_curta": "Alumne 2e amb AC i dislèxia fonològica, ESO",
-    "perfil": "2e",
-    "etapa": "ESO",
-    "curs": "3r ESO",
     "mecr": "B2",
-    "sub_variables": {
-      "perfil_ac": true,
-      "perfil_dislexia": true,
-      "tipus_dislexia": "fonologica",
-      "grau_dislexia": "moderat"
-    },
-    "complexitat": "complex",
-    "prompt_minim": "Adapta aquest text per a un alumne de 3r d'ESO amb doble excepcionalitat: altes capacitats intel·lectuals i dislèxia fonològica moderada, nivell B2."
+    "genere": "opinio",
+    "dua": "Enriquiment",
+    "sub_variables": {},
+    "complements": {"glossari": false, "pictogrames": false, "esquema_visual": false},
+    "complexitat": "simple",
+    "prompt_minim": "Adapta aquest text d'opinió per a un alumne d'altes capacitats de 1r de batxillerat, nivell B2. Enriqueix amb profunditat argumentativa i pensament crític."
   },
   {
-    "id": "tdah_di_lleu",
-    "nom": "TDAH moderat + DI lleu",
-    "descripcio_curta": "Alumne amb TDAH moderat i discapacitat intel·lectual lleu, primària",
-    "perfil": "tdah",
-    "etapa": "primaria",
-    "curs": "6è primària",
+    "id": "c5_dislexia_glossari",
+    "nom": "Cas 5 — Dislèxia + glossari (descripció/A2)",
+    "descripcio_curta": "Alumne amb dislèxia fonològica, ESO, MECR A2. Descripció amb glossari.",
+    "text_id": "t5_descripcio",
+    "perfil": "dislexia",
+    "etapa": "ESO",
+    "curs": "1r ESO",
     "mecr": "A2",
+    "genere": "descripcio",
     "sub_variables": {
-      "grau_tdah": "moderat",
-      "perfil_di": true,
-      "grau_di": "lleu",
-      "baixa_memoria_treball": true
+      "tipus_dislexia": "fonologica",
+      "grau": "moderat"
     },
-    "complexitat": "complex",
-    "prompt_minim": "Adapta aquest text per a un alumne de 6è de primària amb TDAH moderat i discapacitat intel·lectual lleu, nivell A2. Necessita suport visual, blocs molt curts i vocabulari molt senzill."
+    "complements": {"glossari": true, "pictogrames": false, "esquema_visual": false},
+    "complexitat": "simple",
+    "prompt_minim": "Adapta aquesta descripció per a un alumne de 1r d'ESO amb dislèxia fonològica moderada, nivell A2. Inclou un glossari dels termes clau."
   }
 ]
