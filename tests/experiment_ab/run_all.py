@@ -3,12 +3,21 @@
 Peça 4 — Orquestrador: generació (skills OFF/ON) + avaluació (Sonnet 4.6) + anàlisi.
 Ús: python tests/experiment_ab/run_all.py [--skip-gen] [--skip-eval] [--only-stats]
 """
-import subprocess, sys, os
+import subprocess, sys, os, io
 from pathlib import Path
+
+# Fix Windows console encoding (consola cp1252 no pot imprimir ▶/✅/❌).
+if sys.platform == "win32":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 EXP_DIR = Path(__file__).resolve().parent
 os.chdir(ROOT)
+
+# Garanteix UTF-8 també als subprocessos (els fills ja blinden stdout, però el
+# print() del subprocés hereta l'encoding de l'entorn si no es força).
+os.environ["PYTHONIOENCODING"] = "utf-8"
 
 def run(script_name, desc):
     print(f"\n{'='*60}")

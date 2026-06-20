@@ -29,6 +29,11 @@ import requests
 JUDGE_MODEL = "anthropic/claude-sonnet-4.6"   # Sonnet 4.6 — diferent del generador
 JUDGE_TEMPERATURE = 0.1                        # quasi determinístic per avaluació
 
+
+class JudgeAuthError(Exception):
+    """Error d'autenticació del jutge (HTTP 401/403). Avorta tot el pas: si la clau
+    no és vàlida, totes les crides fallaran i no té sentit generar un informe buit."""
+
 # ── Paths ──
 EXP_DIR = Path(__file__).resolve().parent
 RESULTATS_PATH = EXP_DIR / "resultats_generacio.json"
@@ -120,6 +125,9 @@ def call_judge(prompt: str) -> dict:
         },
         timeout=120,
     )
+    if r.status_code in (401, 403):
+        # Error d'autenticació: no té sentit continuar (totes les crides fallaran).
+        raise JudgeAuthError(f"OpenRouter HTTP {r.status_code}: {r.text[:200]}")
     if r.status_code != 200:
         raise RuntimeError(f"OpenRouter HTTP {r.status_code}: {r.text[:200]}")
     raw = r.json()["choices"][0]["message"]["content"]
@@ -149,6 +157,8 @@ def evaluate_case(case: dict, rubrica: dict, perfils_map: dict) -> dict:
         try:
             evaluations[cond] = call_judge(eval_prompt)
             time.sleep(0.5)
+        except JudgeAuthError:
+            raise  # error d'auth: NO l'engolim, ha d'avortar tot el pas (no informe buit silenciós)
         except Exception as e:
             evaluations[cond] = {"error": str(e)}
 
@@ -179,19 +189,36 @@ def main():
     casos = resultats["casos"]
     print(f"Casos a avaluar: {len(casos)}")
 
+    evals, done_ids = [], set()
     if EVAL_OUTPUT_PATH.exists():
-        existing = json.loads(EVAL_OUTPUT_PATH.read_text(encoding="utf-8"))
-        evals = existing.get("avaluacions", [])
-        done_ids = {e["case_id"] for e in evals}
-        print(f"Recuperades {len(evals)} avaluacions existents.")
-    else:
-        evals, done_ids = [], set()
+        try:
+            existing = json.loads(EVAL_OUTPUT_PATH.read_text(encoding="utf-8"))
+            # Només recupera avaluacions d'AQUEST experiment (amb 'case_id'); ignora
+            # formats antics incompatibles (p.ex. xat9 amb 'pair_id').
+            evals = [e for e in existing.get("avaluacions", []) if "case_id" in e]
+            done_ids = {e["case_id"] for e in evals}
+            if evals:
+                print(f"Recuperades {len(evals)} avaluacions existents.")
+            else:
+                print("Fitxer d'avaluació previ incompatible o buit — es regenera.")
+        except Exception as e:
+            print(f"No s'ha pogut llegir l'avaluació prèvia ({e}) — es regenera.")
 
     for i, case in enumerate(casos, 1):
         if case["case_id"] in done_ids:
             continue
         print(f"[{i}/{len(casos)}] {case['case_id']}...", end=" ", flush=True)
-        result = evaluate_case(case, rubrica, perfils_map)
+        try:
+            result = evaluate_case(case, rubrica, perfils_map)
+        except JudgeAuthError as e:
+            print("✗")
+            print("\n" + "=" * 60, file=sys.stderr)
+            print("ERROR D'AUTENTICACIÓ DEL JUTGE — s'avorta l'avaluació.", file=sys.stderr)
+            print(f"  {e}", file=sys.stderr)
+            print("  La OPENROUTER_API_KEY del .env no és vàlida (401/403).", file=sys.stderr)
+            print("  Cap informe generat: arregla la clau i torna a executar.", file=sys.stderr)
+            print("=" * 60, file=sys.stderr)
+            sys.exit(2)
         if result is None:
             print("SKIP (error en generació)")
             continue
@@ -204,6 +231,20 @@ def main():
     print(f"Fitxer: {EVAL_OUTPUT_PATH}")
 
 
+def _atomic_write(path: Path, text: str, retries: int = 5):
+    """Escriptura atòmica amb reintents (evita PermissionError per locks transitoris Windows)."""
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    for attempt in range(retries):
+        try:
+            tmp.write_text(text, encoding="utf-8")
+            os.replace(tmp, path)
+            return
+        except PermissionError:
+            if attempt == retries - 1:
+                raise
+            time.sleep(0.5 * (attempt + 1))
+
+
 def _save(evals):
     output = {
         "experiment": "peca4_avaluacio_skills_off_vs_on",
@@ -212,7 +253,7 @@ def _save(evals):
         "total_avaluacions": len(evals),
         "avaluacions": evals,
     }
-    EVAL_OUTPUT_PATH.write_text(json.dumps(output, ensure_ascii=False, indent=2), encoding="utf-8")
+    _atomic_write(EVAL_OUTPUT_PATH, json.dumps(output, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

@@ -11,7 +11,7 @@ qualitatiu, no prova estadística.
 Jutge únic: Claude Sonnet 4.6.
 """
 
-import json, sys, io
+import json, sys, io, os, time
 from pathlib import Path
 
 if sys.platform == "win32":
@@ -177,7 +177,17 @@ def analyze():
         "requeriria ampliar el disseny (més casos per combinació, més jutges, més models).")
 
     report = "\n".join(L)
-    REPORT_PATH.write_text(report, encoding="utf-8")
+    # Escriptura atòmica amb reintents (evita PermissionError per locks transitoris Windows).
+    tmp = REPORT_PATH.with_suffix(REPORT_PATH.suffix + ".tmp")
+    for attempt in range(5):
+        try:
+            tmp.write_text(report, encoding="utf-8")
+            os.replace(tmp, REPORT_PATH)
+            break
+        except PermissionError:
+            if attempt == 4:
+                raise
+            time.sleep(0.5 * (attempt + 1))
     print(f"Informe generat: {REPORT_PATH}\n")
     print(report)
 

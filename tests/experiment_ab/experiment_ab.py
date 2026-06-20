@@ -273,6 +273,21 @@ def main():
     print(f"Fitxer: {OUTPUT_PATH}")
 
 
+def _atomic_write(path: Path, text: str, retries: int = 5):
+    """Escriptura atòmica amb reintents (evita PermissionError per locks transitoris
+    de Windows: antivirus/indexador). Escriu a un .tmp i fa os.replace (atòmic)."""
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    for attempt in range(retries):
+        try:
+            tmp.write_text(text, encoding="utf-8")
+            os.replace(tmp, path)
+            return
+        except PermissionError:
+            if attempt == retries - 1:
+                raise
+            time.sleep(0.5 * (attempt + 1))
+
+
 def _save(resultats):
     output = {
         "experiment": "peca4_ab_skills_off_vs_on",
@@ -283,7 +298,7 @@ def _save(resultats):
         "total_casos": len(resultats),
         "casos": resultats,
     }
-    OUTPUT_PATH.write_text(json.dumps(output, ensure_ascii=False, indent=2), encoding="utf-8")
+    _atomic_write(OUTPUT_PATH, json.dumps(output, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
