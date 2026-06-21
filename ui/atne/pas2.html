@@ -2399,6 +2399,13 @@
         // Persistim el gènere per al Pas 3 (adaptació genere-aware).
         // El backend el fa servir via corpus_reader.get_genre_block(genere).
         if (genere) localStorage.setItem('atne.genere_discursiu', genere);
+        // Sincronitza el selector del Pas 2 amb el gènere generat (el text ve del
+        // generador via streaming, no passa per detectGenre): pre-emplena #genere-sel.
+        if (genere && genereSel) {
+          genereSel.value = genere;
+          _persistGenere(genere, 'generador', null);  // procedència explícita (RIA)
+          _setGenereBadge('', null);                   // tria del docent: cap badge "detectat?"
+        }
         updateWC();
       }
     } catch (err) {
