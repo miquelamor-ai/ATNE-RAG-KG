@@ -602,6 +602,21 @@
   }
   .doc-materia-inp::placeholder { font-weight: 400; color: var(--ink-400); }
 
+  /* Selector de gènere (Peça C — detecció de gènere) */
+  .doc-genere-sel {
+    border: none; outline: none; background: transparent;
+    font-family: inherit; font-size: 12.5px; font-weight: 600;
+    color: var(--ink-900); cursor: pointer; max-width: 180px;
+  }
+  .doc-genere-sel:invalid, .doc-genere-sel option[value=""] { color: var(--ink-400); font-weight: 400; }
+  .genere-badge {
+    margin: 6px 0 0; font-size: 11.5px; display: flex; align-items: center; gap: 5px;
+    color: var(--ink-600); transition: opacity .2s;
+  }
+  .genere-badge.is-detected { color: var(--accent-700, #1d6fb8); }
+  .genere-badge.is-fallback { color: var(--ink-500); }
+  .genere-badge.is-loading { color: var(--ink-400); font-style: italic; }
+
   /* ─── Frail dret (floating rail) ─────────────────────── */
   .frail {
     position: fixed;
@@ -1095,8 +1110,11 @@
             </div>
             <div class="opts">
               <span class="opt opt-materia" data-help="p2-materia"><span class="opt-k">Matèria</span><input type="text" class="doc-materia-inp" placeholder="Ex. Història"></span>
+              <span class="opt opt-genere" data-help="p2-genere"><span class="opt-k">Gènere</span><select class="doc-genere-sel" id="genere-sel"><option value="">Selecciona un gènere…</option></select></span>
               <span class="opt" data-help="p2-complements"><span class="opt-k">Complements</span><span class="opt-v">Cap</span></span>
             </div>
+            <!-- Badge de detecció de gènere (Peça C, Gap 1). Estat gestionat per JS. -->
+            <p id="genere-badge" class="genere-badge" hidden></p>
           </div>
 
           <!-- Mode: Pujar fitxer -->
@@ -1606,6 +1624,7 @@
     localStorage.removeItem('atne.doc_draft');
     localStorage.removeItem('atne.doc_title');
     localStorage.removeItem('atne.genere_discursiu');  // Gap 2: evita gènere heretat en nova adaptació
+    localStorage.removeItem('atne.genere_meta');
     history.replaceState(null, '', location.pathname);
   } else {
     const savedDraft = localStorage.getItem('atne.doc_draft');
@@ -1630,7 +1649,7 @@
       notice.querySelector('.rn-new').addEventListener('click', () => {
         ['atne.doc_draft','atne.doc_title','atne.doc_original',
          'atne.adapted_cache_key','atne.adapted_raw_ck','atne.adapted_raw',
-         'atne.adapted_text','atne.draft_id','atne.genere_discursiu'].forEach(k => localStorage.removeItem(k));
+         'atne.adapted_text','atne.draft_id','atne.genere_discursiu','atne.genere_meta'].forEach(k => localStorage.removeItem(k));
         location.href = '/ui/atne/pas1.html';
       });
       notice.querySelector('.rn-close').addEventListener('click', () => notice.remove());
@@ -1717,10 +1736,112 @@
     clearTimeout(p2Hist.timer);
     p2Hist.timer = setTimeout(p2Snapshot, 600);
   }
+  // ─── Detecció de gènere (Peça C, Gap 1) ──────────────────────────────
+  // El gènere és propietat del text (Pas 2). La cascada del backend proposa
+  // (heurística→LLM→fallback); el docent confirma o corregeix. Persistim a
+  // atne.genere_discursiu (clau existent) + atne.genere_meta (procedència RIA).
+  const genereSel = document.getElementById('genere-sel');
+  const genereBadge = document.getElementById('genere-badge');
+  let _genereDetectSeq = 0;      // token incremental anti-stale
+  let _genereDetectTimer = null;
+
+  function _setGenereBadge(html, cls) {
+    if (!genereBadge) return;
+    if (!html) { genereBadge.hidden = true; genereBadge.textContent = ''; return; }
+    genereBadge.hidden = false;
+    genereBadge.className = 'genere-badge' + (cls ? ' ' + cls : '');
+    genereBadge.textContent = html;
+  }
+
+  function _persistGenere(genre, origen, confianca) {
+    if (genre) localStorage.setItem('atne.genere_discursiu', genre);
+    else localStorage.removeItem('atne.genere_discursiu');
+    localStorage.setItem('atne.genere_meta', JSON.stringify({
+      genere: genre || '', origen: origen, confianca: (confianca ?? null),
+      detectat_at: new Date().toISOString(),
+    }));
+  }
+
+  // Pobla el <select> des de /api/genres (públic, agrupat per família). Mai hardcoded.
+  async function loadGenresCatalog() {
+    if (!genereSel) return;
+    try {
+      const r = await fetch('/api/genres');
+      const d = await r.json();
+      const fams = d.families || [];
+      // Manté l'opció buida inicial; afegeix optgroups.
+      for (const fam of fams) {
+        const og = document.createElement('optgroup');
+        og.label = fam.macro_tipologia;
+        for (const g of (fam.generes || [])) {
+          const op = document.createElement('option');
+          op.value = g.genre_key; op.textContent = g.label_ca || g.genre_key;
+          og.appendChild(op);
+        }
+        genereSel.appendChild(og);
+      }
+      // Si ja hi havia un gènere persistit (sessió en curs), preselecciona'l.
+      const prev = localStorage.getItem('atne.genere_discursiu');
+      if (prev) genereSel.value = prev;
+    } catch (e) {
+      // Catàleg no carregat: el selector queda amb l'opció buida (mai trencat).
+    }
+  }
+
+  // Crida el classificador en segon pla. immediate=true per a paste/upload.
+  async function detectGenre(text) {
+    if (!genereSel) return;
+    const txt = (text || '').trim();
+    if (txt.split(/\s+/).filter(Boolean).length < 40) {
+      // Massa curt: no cridem; deixem que el docent triï.
+      _setGenereBadge('🔎 Tria el gènere del teu text.', 'is-fallback');
+      return;
+    }
+    const seq = ++_genereDetectSeq;
+    _setGenereBadge('⏳ Detectant gènere…', 'is-loading');
+    try {
+      const r = await fetch('/api/detect-genre', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: txt, lang: 'ca' }),
+      });
+      const d = await r.json();
+      if (seq !== _genereDetectSeq) return;  // anti-stale: ha arribat una detecció més nova
+      if (d && d.ok && d.origen && d.origen !== 'fallback' && d.genere) {
+        genereSel.value = d.genere;
+        _persistGenere(d.genere, d.origen, d.confianca);
+        _setGenereBadge('✨ ATNE ha detectat el gènere · és correcte?', 'is-detected');
+      } else {
+        // Decisió C.7: quan la màquina no sap, NO proposa. Selector buit + missatge.
+        genereSel.value = '';
+        _persistGenere('', 'fallback', null);
+        _setGenereBadge('🔎 No hem pogut detectar-lo. Tria el gènere del teu text.', 'is-fallback');
+      }
+    } catch (e) {
+      if (seq !== _genereDetectSeq) return;
+      _setGenereBadge('🔎 Tria el gènere del teu text.', 'is-fallback');
+    }
+  }
+
+  function detectGenreDebounced(text) {
+    clearTimeout(_genereDetectTimer);
+    _genereDetectTimer = setTimeout(() => detectGenre(text), 800);
+  }
+
+  // El docent edita el selector → la seva decisió mana, badge desapareix.
+  genereSel?.addEventListener('change', () => {
+    _genereDetectSeq++;  // cancel·la qualsevol detecció en vol
+    _persistGenere(genereSel.value, 'docent', null);
+    _setGenereBadge('', null);
+  });
+
+  loadGenresCatalog();
+
   ta.addEventListener('input', () => {
     updateWC();
     localStorage.setItem('atne.doc_draft', ta.value);
     debouncedSnapshot();
+    detectGenreDebounced(ta.value);   // detecció en segon pla (debounce 800ms)
   });
   docTitleEl?.addEventListener('input', () => {
     localStorage.setItem('atne.doc_title', docTitleEl.value);
@@ -1965,6 +2086,8 @@
     updateWC();
     // Auto-save: si Pujar/Generar/Recuperar aboquen text, el persistim també
     if (text != null) localStorage.setItem('atne.doc_draft', text);
+    // Detecció de gènere immediata (paste/upload/demo no han d'esperar el debounce).
+    if (typeof detectGenre === 'function' && text) detectGenre(text);
     if (title) localStorage.setItem('atne.doc_title', title);
     else localStorage.removeItem('atne.doc_title');
     // Desvincula qualsevol draft_id previ: aquest text ve de fora i no té
@@ -2886,6 +3009,7 @@
     localStorage.removeItem('atne.doc_draft');
     localStorage.removeItem('atne.doc_title');
     localStorage.removeItem('atne.genere_discursiu');  // Gap 2: evita gènere heretat en buidar
+    localStorage.removeItem('atne.genere_meta');
     localStorage.removeItem('atne.draft_id');
     localStorage.removeItem('atne.draft_saved_at');
     // Desvincula biblioteca perquè el proper "Desar" al pas3 creï una
