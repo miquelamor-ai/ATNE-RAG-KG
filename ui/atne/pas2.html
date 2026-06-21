@@ -2492,6 +2492,16 @@
         if (it?.original_text) {
           const title = it.original_text.split('\n')[0].slice(0, 60) || it.profile_name || 'Sense títol';
           loadTextIntoEditor(it.original_text, title);
+          // Gènere conegut de l'historial: assigna'l directament, no re-detectis.
+          // Si l'item no en porta (adaptacions velles / text propi pre-Gap1), deixem
+          // que detectGenre (ja disparat per loadTextIntoEditor) actuï com a fallback.
+          const gh = it.params_json?.genere_discursiu;
+          if (gh && genereSel) {
+            _genereDetectSeq++;  // cancel·la la detecció async que loadTextIntoEditor ha disparat (anti-race)
+            genereSel.value = gh;
+            _persistGenere(gh, 'historial', null);
+            _setGenereBadge('', null);
+          }
         }
       });
     });
