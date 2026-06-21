@@ -487,6 +487,7 @@ ATNE_PUBLIC_API_PATHS = {
     "/api/health",
     "/api/runtime-config",
     "/api/auth/exchange",   # intercanvi token LaNet → cookie httpOnly (sense auth prèvia)
+    "/api/genres",          # catàleg de gèneres derivat (no sensible; consum públic Pas 2)
 }
 
 def _atne_is_public_path(path: str) -> bool:
@@ -697,6 +698,17 @@ async def _atne_startup():
     de boot perquè no torni a passar en silenci.
     """
     _load_system_config()
+
+    # Catàleg de gèneres derivat del corpusFJE (Peça A, Gap 1). Es construeix un
+    # cop al boot i es cacheja; només canvia amb bump del submòdul + redeploy.
+    # Tolerant: si falla, el mòdul retorna el catàleg degradat (mai bloqueja el boot).
+    try:
+        from adaptation import genres_catalog
+        _cat = genres_catalog.build_catalog()
+        print(f"[ATNE] catàleg de gèneres: {_cat['total']} gèneres "
+              f"(degraded={_cat['degraded']}, version={_cat['version']})")
+    except Exception as _e:
+        print(f"[ATNE] ERROR construint catàleg de gèneres (no bloqueja): {_e}")
 
     # ── Asserts de seguretat de la service-role key ──────────────────────
     # La service-role bypassa RLS — un leak al frontend permetria modificar
@@ -5669,6 +5681,31 @@ async def api_stats_instruccions():
     el nombre d'instruccions. No hardcodejar en prosa — consultar aquí.
     """
     return instruction_catalog.get_catalog_stats()
+
+
+# ── API Catàleg de gèneres (derivat del corpusFJE — Peça A, Gap 1) ──────────
+
+@app.get("/api/genres")
+async def api_genres(format: str = "", keys_only: int = 0, refresh: int = 0):
+    """Catàleg de gèneres discursius derivat de les skills write-* del corpusFJE.
+
+    Pública (com /api/stats-instruccions): el catàleg no és sensible i el Pas 2
+    l'ha de consumir sense fricció.
+
+    Variants:
+      - GET /api/genres              → agrupat per macro_tipologia (per al <select>)
+      - GET /api/genres?format=flat  → llista plana (per al classificador, Peça B)
+      - GET /api/genres?keys_only=1  → només els genre_key (validació)
+      - ?refresh=1                   → força reconstruir el catàleg (admin)
+    """
+    from adaptation import genres_catalog
+    if keys_only:
+        fmt = "keys"
+    elif format == "flat":
+        fmt = "flat"
+    else:
+        fmt = "grouped"
+    return genres_catalog.get_catalog(fmt=fmt, refresh=bool(refresh))
 
 
 # ── API Avaluació (dashboard) ──────────────────────────────────────────────
