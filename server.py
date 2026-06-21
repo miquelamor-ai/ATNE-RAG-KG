@@ -5708,6 +5708,35 @@ async def api_genres(format: str = "", keys_only: int = 0, refresh: int = 0):
     return genres_catalog.get_catalog(fmt=fmt, refresh=bool(refresh))
 
 
+# ── API Detecció de gènere (classificador preflight — Peça B, Gap 1) ────────
+
+@app.post("/api/detect-genre")
+async def api_detect_genre(payload: dict = Body(...)):
+    """Detecta el gènere discursiu d'un text via cascada heurística → LLM → fallback.
+
+    NO és públic (rep text del docent): sota el mur d'auth normal. S'invoca des del
+    Pas 2 quan el docent enganxa/puja text. Mai falla cap a l'usuari: qualsevol error
+    cau al fallback "divulgatiu".
+
+    Payload: {"text": "<text>", "lang": "ca"}
+    Retorna: {ok, genere, label_ca, confianca, origen, motiu}
+    """
+    from adaptation import genre_detector
+    text = (payload.get("text") or "").strip()
+    lang = (payload.get("lang") or "ca").strip()
+    if not text:
+        return JSONResponse({"ok": False, "error": "camp 'text' buit"}, status_code=400)
+    try:
+        return genre_detector.detect_genre(text, lang=lang)
+    except Exception as e:
+        # Defensa última: mai propagar error al frontend.
+        return {
+            "ok": True, "genere": "divulgatiu", "label_ca": "",
+            "confianca": None, "origen": "fallback",
+            "motiu": f"error intern ({type(e).__name__})",
+        }
+
+
 # ── API Avaluació (dashboard) ──────────────────────────────────────────────
 
 @app.get("/eval", response_class=HTMLResponse)
