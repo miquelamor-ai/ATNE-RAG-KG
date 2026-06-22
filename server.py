@@ -5705,7 +5705,13 @@ async def api_genres(format: str = "", keys_only: int = 0, refresh: int = 0):
         fmt = "flat"
     else:
         fmt = "grouped"
-    return genres_catalog.get_catalog(fmt=fmt, refresh=bool(refresh))
+    # charset=utf-8 explícit (higiene defensiva): els bytes ja són UTF-8 vàlids, però
+    # declarar-ho evita falsos positius de mojibake amb eines/clients que descodifiquen
+    # segons la capçalera (no com fetch().json(), que sempre assumeix UTF-8).
+    return JSONResponse(
+        genres_catalog.get_catalog(fmt=fmt, refresh=bool(refresh)),
+        media_type="application/json; charset=utf-8",
+    )
 
 
 # ── API Detecció de gènere (classificador preflight — Peça B, Gap 1) ────────
