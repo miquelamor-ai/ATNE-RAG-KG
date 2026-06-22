@@ -1155,39 +1155,10 @@
                 <textarea class="ta" placeholder="Ex. Text sobre la Revolució Industrial per a 3r d'ESO…" style="min-height:60px"></textarea>
               </div>
               <div class="gen-grid">
-                <div><div class="mp-l">Gènere</div><select class="sel">
-                  <optgroup label="Expositiu">
-                    <option value="manual" selected>Manual / capítol</option>
-                    <option value="divulgatiu">Article divulgatiu</option>
-                    <option value="informe">Informe / memòria</option>
-                    <option value="enciclopedic">Definició enciclopèdica</option>
-                    <option value="descripcio">Descripció</option>
-                    <option value="resum">Resum / síntesi</option>
-                  </optgroup>
-                  <optgroup label="Narratiu">
-                    <option value="conte">Conte / relat</option>
-                    <option value="fabula">Fàbula / llegenda</option>
-                    <option value="poema">Poema / vers</option>
-                    <option value="biografia">Biografia</option>
-                    <option value="noticia">Notícia de premsa</option>
-                    <option value="cronica">Crònica</option>
-                    <option value="diari">Diari / blog</option>
-                  </optgroup>
-                  <optgroup label="Argumentatiu">
-                    <option value="opinio">Article d'opinió</option>
-                    <option value="ressenya">Ressenya / crítica</option>
-                    <option value="assaig">Assaig</option>
-                    <option value="carta">Carta / correu</option>
-                  </optgroup>
-                  <optgroup label="Instructiu">
-                    <option value="instructiu">Procediment / protocol</option>
-                    <option value="receptari">Receptari</option>
-                    <option value="reglament">Reglament / normes</option>
-                  </optgroup>
-                  <optgroup label="Dialogat">
-                    <option value="entrevista">Entrevista</option>
-                    <option value="dialeg">Diàleg / guió teatral</option>
-                  </optgroup>
+                <div><div class="mp-l">Gènere</div><select class="sel" id="gen-genere">
+                  <!-- Poblat dinàmicament des de /api/genres (loadGenresCatalog),
+                       igual que el selector del mode Adaptar. Cap gènere hardcoded:
+                       els gèneres nous del corpus hi entren automàticament. -->
                 </select></div>
                 <div><div class="mp-l">To</div><select class="sel" id="gen-to">
                   <option value="neutre" selected>Neutre</option>
@@ -1762,29 +1733,49 @@
     }));
   }
 
-  // Pobla el <select> des de /api/genres (públic, agrupat per família). Mai hardcoded.
+  // Omple un <select> amb les famílies de /api/genres (optgroups per macro_tipologia).
+  function _fillGenreSelect(sel, fams) {
+    if (!sel) return;
+    for (const fam of fams) {
+      const og = document.createElement('optgroup');
+      og.label = fam.macro_tipologia;
+      for (const g of (fam.generes || [])) {
+        const op = document.createElement('option');
+        op.value = g.genre_key; op.textContent = g.label_ca || g.genre_key;
+        og.appendChild(op);
+      }
+      sel.appendChild(og);
+    }
+  }
+
+  // Pobla els selectors de gènere des de /api/genres (públic). Mai hardcoded:
+  // els gèneres nous del corpus hi entren automàticament. Dos consumidors:
+  //  - #genere-sel  (mode Adaptar): manté l'opció buida + preselecciona el persistit.
+  //  - #gen-genere  (mode Generar): default al primer gènere expositiu (abans "manual").
   async function loadGenresCatalog() {
-    if (!genereSel) return;
+    const genGenereSel = document.getElementById('gen-genere');
+    if (!genereSel && !genGenereSel) return;
     try {
       const r = await fetch('/api/genres');
       const d = await r.json();
       const fams = d.families || [];
-      // Manté l'opció buida inicial; afegeix optgroups.
-      for (const fam of fams) {
-        const og = document.createElement('optgroup');
-        og.label = fam.macro_tipologia;
-        for (const g of (fam.generes || [])) {
-          const op = document.createElement('option');
-          op.value = g.genre_key; op.textContent = g.label_ca || g.genre_key;
-          og.appendChild(op);
-        }
-        genereSel.appendChild(og);
+
+      // Mode Adaptar: manté l'opció buida inicial.
+      _fillGenreSelect(genereSel, fams);
+      if (genereSel) {
+        const prev = localStorage.getItem('atne.genere_discursiu');
+        if (prev) genereSel.value = prev;
       }
-      // Si ja hi havia un gènere persistit (sessió en curs), preselecciona'l.
-      const prev = localStorage.getItem('atne.genere_discursiu');
-      if (prev) genereSel.value = prev;
+
+      // Mode Generar: sense opció buida; default a "manual" si existeix (comportament
+      // previ), o al primer gènere disponible si no.
+      if (genGenereSel) {
+        _fillGenreSelect(genGenereSel, fams);
+        const opts = Array.from(genGenereSel.options).map(o => o.value);
+        genGenereSel.value = opts.includes('manual') ? 'manual' : (opts[0] || '');
+      }
     } catch (e) {
-      // Catàleg no carregat: el selector queda amb l'opció buida (mai trencat).
+      // Catàleg no carregat: els selectors queden amb l'estat inicial (mai trencats).
     }
   }
 
@@ -2318,7 +2309,7 @@
     const topicTa = aiPanel.querySelector('textarea');
     const tema = topicTa?.value?.trim();
     if (!tema) { window.atneToast && window.atneToast('Cal escriure un tema o tòpic','error'); return; }
-    const genere = aiPanel.querySelector('select.sel')?.value || 'manual';
+    const genere = document.getElementById('gen-genere')?.value || 'manual';
     const to = document.getElementById('gen-to')?.value || 'neutre';
     const extensio = document.getElementById('gen-extensio')?.value || 'estandard';
     const genLang = document.getElementById('gen-lang')?.value || 'ca';
