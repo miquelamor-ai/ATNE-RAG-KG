@@ -602,20 +602,31 @@
   }
   .doc-materia-inp::placeholder { font-weight: 400; color: var(--ink-400); }
 
-  /* Selector de gènere (Peça C — detecció de gènere) */
+  /* Selector de gènere (Peça C — detecció de gènere) + badge enganxat (UX badge) */
+  .opt-genere { flex-direction: column; align-items: flex-start; gap: 4px; transition: background var(--trans-med), border-color var(--trans-med); }
+  .opt-genere-row { display: flex; align-items: center; gap: 6px; }
   .doc-genere-sel {
     border: none; outline: none; background: transparent;
     font-family: inherit; font-size: 12.5px; font-weight: 600;
     color: var(--ink-900); cursor: pointer; max-width: 180px;
   }
   .doc-genere-sel:invalid, .doc-genere-sel option[value=""] { color: var(--ink-400); font-weight: 400; }
+
+  /* Badge: penja del xip de Gènere, lligat al control. */
   .genere-badge {
-    margin: 6px 0 0; font-size: 11.5px; display: flex; align-items: center; gap: 5px;
-    color: var(--ink-600); transition: opacity .2s;
+    font-size: var(--fs-md); display: flex; align-items: center; gap: 5px;
+    color: var(--ink-600); transition: color var(--trans-med); line-height: 1.3;
   }
-  .genere-badge.is-detected { color: var(--accent-700, #1d6fb8); }
-  .genere-badge.is-fallback { color: var(--ink-500); }
-  .genere-badge.is-loading { color: var(--ink-400); font-style: italic; }
+  .genere-badge.is-loading { color: var(--ink-400); font-style: italic; font-size: var(--fs-sm); }
+  .genere-badge.is-detected { color: var(--primary); }
+  .genere-badge.is-fallback { color: var(--warn); font-weight: var(--fw-semi); }
+
+  /* Estat del XIP segons la detecció (la classe la propaga el JS al contenidor). */
+  .opt-genere.is-detected { background: var(--primary-50); border-color: var(--primary-100); }
+  /* Fallback "cal triar" — DESTACAT FORT (decisió Miquel): fons + vora ambre + icona
+     d'advertència al costat del control (segon canal de senyal, no només color → a11y). */
+  .opt-genere.is-fallback { background: var(--warn-50); border-color: var(--warn-100); box-shadow: inset 0 0 0 1px var(--warn-100); }
+  .opt-genere.is-fallback .opt-genere-row::before { content: "⚠️"; font-size: var(--fs-md); line-height: 1; }
 
   /* ─── Frail dret (floating rail) ─────────────────────── */
   .frail {
@@ -1110,11 +1121,14 @@
             </div>
             <div class="opts">
               <span class="opt opt-materia" data-help="p2-materia"><span class="opt-k">Matèria</span><input type="text" class="doc-materia-inp" placeholder="Ex. Història"></span>
-              <span class="opt opt-genere" data-help="p2-genere"><span class="opt-k">Gènere</span><select class="doc-genere-sel" id="genere-sel"><option value="">Selecciona un gènere…</option></select></span>
+              <!-- Gènere + badge de detecció enganxat (Peça C / UX badge). Contenidor
+                   vertical perquè el missatge pengi del control concret, no de la fila. -->
+              <span class="opt opt-genere" id="genere-chip" data-help="p2-genere">
+                <span class="opt-genere-row"><span class="opt-k">Gènere</span><select class="doc-genere-sel" id="genere-sel"><option value="">Selecciona un gènere…</option></select></span>
+                <span id="genere-badge" class="genere-badge" hidden></span>
+              </span>
               <span class="opt" data-help="p2-complements"><span class="opt-k">Complements</span><span class="opt-v">Cap</span></span>
             </div>
-            <!-- Badge de detecció de gènere (Peça C, Gap 1). Estat gestionat per JS. -->
-            <p id="genere-badge" class="genere-badge" hidden></p>
           </div>
 
           <!-- Mode: Pujar fitxer -->
@@ -1713,10 +1727,14 @@
   // atne.genere_discursiu (clau existent) + atne.genere_meta (procedència RIA).
   const genereSel = document.getElementById('genere-sel');
   const genereBadge = document.getElementById('genere-badge');
+  const genereChip = document.getElementById('genere-chip');
   let _genereDetectSeq = 0;      // token incremental anti-stale
   let _genereDetectTimer = null;
 
   function _setGenereBadge(html, cls) {
+    // Propaga l'estat al xip de Gènere perquè el control mateix comuniqui l'estat
+    // (detectat = accent / fallback = ambre destacat / loading = discret).
+    if (genereChip) genereChip.className = 'opt opt-genere' + (cls ? ' ' + cls : '');
     if (!genereBadge) return;
     if (!html) { genereBadge.hidden = true; genereBadge.textContent = ''; return; }
     genereBadge.hidden = false;
@@ -1785,7 +1803,7 @@
     const txt = (text || '').trim();
     if (txt.split(/\s+/).filter(Boolean).length < 40) {
       // Massa curt: no cridem; deixem que el docent triï.
-      _setGenereBadge('🔎 Tria el gènere del teu text.', 'is-fallback');
+      _setGenereBadge('⚠️ Tria el gènere per adaptar millor el text', 'is-fallback');
       return;
     }
     const seq = ++_genereDetectSeq;
@@ -1806,11 +1824,11 @@
         // Decisió C.7: quan la màquina no sap, NO proposa. Selector buit + missatge.
         genereSel.value = '';
         _persistGenere('', 'fallback', null);
-        _setGenereBadge('🔎 No hem pogut detectar-lo. Tria el gènere del teu text.', 'is-fallback');
+        _setGenereBadge('⚠️ No hem pogut detectar-lo. Tria el gènere per adaptar millor el text', 'is-fallback');
       }
     } catch (e) {
       if (seq !== _genereDetectSeq) return;
-      _setGenereBadge('🔎 Tria el gènere del teu text.', 'is-fallback');
+      _setGenereBadge('⚠️ Tria el gènere per adaptar millor el text', 'is-fallback');
     }
   }
 
