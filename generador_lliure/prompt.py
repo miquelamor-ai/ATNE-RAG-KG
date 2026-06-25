@@ -139,8 +139,7 @@ def build_user(params: dict) -> str:
         saber_curricular: str — saber curricular a vincular (Sprint C, opcional)
     """
     tema = (params.get("tema") or "").strip()
-    if not tema:
-        raise ValueError("Cal un 'tema' per generar el text.")
+    # Tema opcional: sense tema el model genera lliurement sense ancoratge temàtic.
 
     genere = (params.get("genere") or "article divulgatiu").strip()
     to = (params.get("to") or "neutre").strip().lower()

@@ -56,10 +56,9 @@ def generar(params: dict) -> dict:
     """
     # Validaci\u00f3 m\u00ednima
     tema = (params.get("tema") or "").strip()
-    if not tema:
-        raise ValueError("Cal especificar un 'tema' per generar text.")
+    # Tema opcional: sense tema el model genera lliurement sense ancoratge tem\u00e0tic.
 
-    # Construcci\u00f3 del prompt (pot aixecar ValueError per tema buit)
+    # Construcci\u00f3 del prompt
     system, user = build_prompt(params)
 
     # El model ha d'estar resolt pel caller (server.py via _model_for) i
@@ -128,9 +127,7 @@ def generar_stream(params: dict) -> Iterator[dict]:
     """
     try:
         tema = (params.get("tema") or "").strip()
-        if not tema:
-            yield {"type": "error", "message": "Cal especificar un 'tema' per generar text."}
-            return
+        # Tema opcional: sense tema el model genera lliurement.
 
         system, user = build_prompt(params)
 
