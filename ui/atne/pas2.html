@@ -2745,6 +2745,16 @@
     const tempTitle = tema.length < 80 ? tema : tema.slice(0, 60);
     loadTextIntoEditor('', tempTitle);
     const writeTa = document.getElementById('write-ta');
+    // Fix B: propagar matèria del Generar al mode Escriure per evitar matèria heretada.
+    // El gen-mat-sel és un .doc-materia-sel → _setMateria ja actualitza tots els selects,
+    // però si el docent no tria matèria al Generar el localStorage queda amb la sessió anterior.
+    // Aquí forcem la sincronització explícita des del valor actual del gen-mat-sel.
+    { const gms = document.getElementById('gen-mat-sel');
+      const gmi = document.querySelector('#sec-curr .doc-materia-inp');
+      const clau = gms?.value || '';
+      const nom = (clau === '__altra__' ? gmi?.value : gms?.options[gms?.selectedIndex]?.text) || '';
+      if (typeof _setMateria === 'function') _setMateria(nom && clau !== '__altra__' ? nom : (gmi?.value || ''), clau !== '__altra__' ? clau : '');
+    }
 
     try {
       // TODO: requires llm.js AbortController support (bug FIX-1 bug 5).

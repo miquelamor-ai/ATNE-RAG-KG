@@ -79,6 +79,26 @@ def _heuristica(text: str) -> dict | None:
         if re.search(r"\b(connecta|agafa|prem|premeu|munta|col·loca|talla|uneix|encén)\b", low):
             hits.append(("instructiu", 0.8, "passos imperatius numerats"))
 
+    # Pòster científic: secció "resultats" + dades numèriques + secció "conclusi"
+    has_resultats = re.search(r"\b(resultats|conclusions?|hipòtesi|objectiu)\b", low)
+    has_dades = re.search(r"\d+[,\.]\d+\s*(?:cm|mm|m|kg|g|mg|°C|ml|l|mol|pH|m/s|km/h|N|J|W|Pa|Hz|V|A|Ω)\b", t)
+    has_poster_struct = re.search(r"\b(pregunta d.investigaci|metodolog|discussi|bibliografia|referènci)\b", low)
+    if has_resultats and has_dades and not has_poster_struct:
+        hits.append(("poster_cientific", 0.82, "resultats + dades amb unitats"))
+
+    # Diari de camp: capçalera amb data/lloc + observació sistemàtica
+    has_capcalera = re.search(r"\b(data:|lloc:|hora:|observador:|condicions:)\b", low)
+    has_obs = re.search(r"\b(observ[oa]|he vist|he comptat|he mesurat|\[observo\]|\[interpretaci)\b", low)
+    if has_capcalera and has_obs:
+        hits.append(("diari_camp", 0.88, "capçalera data/lloc + observació"))
+
+    # Pràctica de laboratori: hipòtesi + material + procediment + resultats
+    has_hipotesi = re.search(r"\b(hipòtesi|hipótesi|crec que si|esperem que)\b", low)
+    has_material = re.search(r"\b(material(?:s)?|muntatge|aparell(?:s)?|vas de precipitats|proveta|bec bunsen)\b", low)
+    has_proc = re.search(r"\b(procediment|passos?|mètode)\b", low)
+    if has_hipotesi and (has_material or has_proc):
+        hits.append(("practica_laboratori", 0.88, "hipòtesi + material/procediment"))
+
     if not hits:
         return None
     # Si dues marques fortes diferents disparen → ambigu, deleguem a l'LLM.
