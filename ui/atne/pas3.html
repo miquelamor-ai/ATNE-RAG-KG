@@ -56,13 +56,25 @@
         'blockquote','pre','code',
         'table','thead','tbody','tfoot','tr','th','td',
         'a','img','figure','figcaption','hr',
-        'details','summary'
+        'details','summary',
+        // KaTeX — elements MathML que genera el renderitzador
+        'math','mrow','mi','mn','mo','mfrac','msup','msub','msubsup','msqrt',
+        'mroot','mtext','mspace','mover','munder','munderover','mtable','mtr','mtd',
+        'annotation','semantics'
       ],
-      ALLOWED_ATTR: ['href','title','alt','src','class','id','data-md','data-illus-idx','data-concept','colspan','rowspan','target','rel','style'],
+      ALLOWED_ATTR: ['href','title','alt','src','class','id','data-md','data-illus-idx','data-concept','colspan','rowspan','target','rel','style',
+        // KaTeX
+        'xmlns','display','mathvariant','stretchy','fence','separator','lspace','rspace'],
       ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel|ftp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i
     });
   };
 </script>
+<!-- KaTeX: renderitza fórmules LaTeX ($...$, $$...$$) al text adaptat i als complements.
+     Carrega ABANS de html2pdf perquè el PDF ha de capturar les fórmules ja renderitzades. -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="window.ATNE_renderMath = function(el){ if(typeof renderMathInElement==='function') renderMathInElement(el||document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false}); };"></script>
 <!-- html2pdf.js per exportar PDF client-side preservant tipografia + complements triats.
      CDN jsDelivr amb bundle (inclou html2canvas + jsPDF en un sol fitxer). -->
 <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.2/dist/html2pdf.bundle.min.js" defer></script>
@@ -6001,5 +6013,39 @@ ${compsHtml.join('\n')}
       }
     });
   }
+
+  // ── KaTeX: renderitza fórmules $...$ i $$...$$ al text adaptat i complements ──
+  // MutationObserver sobre #adapted-text i .comp-body perquè qualsevol canvi de
+  // contingut (SSE streaming, càrrega biblioteca, cache, refine) dispari el render.
+  (function() {
+    function _renderMath(el) {
+      if (typeof window.ATNE_renderMath === 'function') window.ATNE_renderMath(el);
+    }
+    function _observeEl(el) {
+      if (!el || el.dataset.mathObserved) return;
+      el.dataset.mathObserved = '1';
+      const obs = new MutationObserver(() => _renderMath(el));
+      obs.observe(el, { childList: true, subtree: true, characterData: true });
+      _renderMath(el); // render inicial
+    }
+    function _initMathObservers() {
+      _observeEl(document.getElementById('adapted-text'));
+      document.querySelectorAll('.comp-body, .comp-content').forEach(_observeEl);
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', _initMathObservers);
+    } else {
+      _initMathObservers();
+    }
+    // Observa nous complements afegits dinàmicament
+    const bodyObs = new MutationObserver(muts => {
+      muts.forEach(m => m.addedNodes.forEach(n => {
+        if (n.nodeType !== 1) return;
+        n.querySelectorAll?.('.comp-body, .comp-content').forEach(_observeEl);
+        if (n.matches?.('.comp-body, .comp-content')) _observeEl(n);
+      }));
+    });
+    bodyObs.observe(document.body, { childList: true, subtree: true });
+  })();
 </script>
 </body></html>

@@ -257,9 +257,44 @@ def clean_gemini_output(text: str) -> str:
 # i guions baixos normals, però els models les reprodueixen en sintaxi LaTeX.
 # Aquest post-processador es determinista, sense LLM, i normalitza la sortida
 # abans del Quality Report i abans de l'enviament al frontend.
+#
+# INVARIANT DISCIPLINARI (ADR-004): fórmules matemàtiques i químiques
+# delimitades amb $...$ (inline) o $$...$$ (display) són VÀLIDES i s'han
+# de preservar intactes perquè KaTeX les renderitzi al frontend. El cleanup
+# d'artefactes s'aplica NOMÉS fora d'aquests blocs.
 
-_LATEX_PATTERNS = [
-    # Fletxes (més específic primer)
+# Patró per detectar fórmules matemàtiques vàlides: $...$ amb contingut
+# matemàtic real (lletres+operadors, fraccions, sub/superíndex, etc.).
+# Exclou:
+# - $ aïllats (preus: "costa $15")
+# - $\text{\\\}$ (buits d'omplir)
+# - fletxes soles ($\rightarrow$, $\leftarrow$, etc.) — són artefactes discursius
+# - $\Rightarrow$, $\Leftarrow$, $\uparrow$, $\downarrow$ soles
+# Una fórmula vàlida conté almenys: un número, un sub/superíndex (_/^),
+# una fracció (\frac), una arrel (\sqrt), una variable amb operador
+# (lletres+operador aritmètic), o un element químic (H_2O, CO_2...).
+_MATH_FORMULA_RE = re.compile(
+    r'\$\$[^$]+?\$\$'           # display: $$...$$ (sempre vàlid si té contingut)
+    r'|\$(?!\$)'                # inline: $ (no seguida d'una altra $)
+    r'(?=[^$\n]*'               # contingut que conté almenys un indicador matemàtic:
+    r'(?:'
+    r'[0-9]'                    # número
+    r'|[_^]'                    # sub/superíndex
+    r'|\\frac'                  # fracció
+    r'|\\sqrt'                  # arrel
+    r'|\\sum|\\int|\\prod'      # operadors de suma/integral/producte
+    r'|\\alpha|\\beta|\\gamma|\\delta|\\pi|\\theta|\\lambda|\\mu|\\sigma|\\omega'
+    r'|\\rho|\\phi|\\psi|\\epsilon|\\eta|\\nu|\\xi|\\tau|\\chi'
+    r'|[a-zA-Z][+\-*/=][a-zA-Z0-9]'   # expressió algebraica: v=d/t, F=ma
+    r'|[0-9][+\-*/][0-9]'             # expressió numèrica: 6CO_2
+    r'|pH\s*='                  # pH = valor
+    r')'
+    r')[^$\n]+?\$',
+    re.DOTALL,
+)
+
+_LATEX_ARTIFACT_PATTERNS = [
+    # Fletxes soles (sense contingut matemàtic addicional) — artefactes típics
     (r'\$\s*\\xrightarrow\{[^}]*\}\s*\$', '→'),
     (r'\$\s*\\xleftarrow\{[^}]*\}\s*\$', '←'),
     (r'\$\s*\\rightarrow\s*\$', '→'),
@@ -269,8 +304,7 @@ _LATEX_PATTERNS = [
     (r'\$\s*\\leftrightarrow\s*\$', '↔'),
     (r'\$\s*\\Rightarrow\s*\$', '⇒'),
     (r'\$\s*\\Leftarrow\s*\$', '⇐'),
-    # \text{...} i altres comandos amb arguments — típicament són buits
-    # d'omplir ("$\text{\\\\\\\\}$"). Els convertim a ___ (placeholder).
+    # \text{...} i altres comandos d'omplir buit fora de context matemàtic
     (r'\$\\text\{[^}]*\}\$', '___'),
     (r'\\text\{[^}]*\}', '___'),
     (r'\$\\textbf\{[^}]*\}\$', '___'),
@@ -291,27 +325,43 @@ _LATEX_PATTERNS = [
 def _strip_latex_artifacts(text: str) -> str:
     """Neteja artefactes LaTeX que alguns LLMs injecten als complements.
 
-    Normalitza:
+    Preserva intactes les fórmules matemàtiques vàlides ($...$ i $$...$$)
+    perquè KaTeX les renderitzi al frontend (ADR-004). Només neteja artefactes
+    fora dels blocs de fórmula:
     - `$\\rightarrow$`, `$\\xrightarrow{...}$`, etc. → fletxes Unicode
-    - `$\\text{...}$`, `\\textbf{...}` → `___` (placeholder omplir buit)
+    - `$\\text{...}$`, `\\textbf{...}` fora de context → `___`
     - Seqüències de 2+ backslashes seguides de `_` → `___`
     - Seqüències de 4+ backslashes soles → `___`
-    - LaTeX malformat tipus `$(ightarrow$` (backslash → parèntesi)
+    - LaTeX malformat tipus `$(ightarrow$`
 
     No toca `$` aïllats (preus en euros) ni fletxes Unicode ja correctes.
     """
     if not text:
         return text
-    for pattern, replacement in _LATEX_PATTERNS:
+
+    # 1. Extreure i protegir fórmules matemàtiques vàlides amb placeholders
+    formulas: list[str] = []
+    placeholder_base = '\x00FORMULA{}\x00'
+
+    def _protect_formula(m: re.Match) -> str:
+        formulas.append(m.group(0))
+        return placeholder_base.format(len(formulas) - 1)
+
+    text = _MATH_FORMULA_RE.sub(_protect_formula, text)
+
+    # 2. Aplicar cleanup d'artefactes sobre el text sense fórmules
+    for pattern, replacement in _LATEX_ARTIFACT_PATTERNS:
         text = re.sub(pattern, replacement, text)
-    # Fill-in-the-blank: \\\\\\\\_ → ___
     text = re.sub(r'\\{2,}_', '___', text)
-    # Fill-in-the-blank sense underscore: \\\\\\\\ → ___
     text = re.sub(r'\\{4,}', '___', text)
-    # LaTeX malformat amb arrow: $(ightarrow$, $\ri(tarrow$, etc.
-    # Qualsevol $...rightarrow...$ o $...leftarrow...$ → fletxa Unicode
+    # LaTeX malformat amb arrow (no cobert pels patrons anteriors)
     text = re.sub(r'\$[^$\n]{0,15}(?:right|rightar|ight)arrow[^$\n]{0,5}\$', '→', text)
     text = re.sub(r'\$[^$\n]{0,15}(?:left|leftar|eft)arrow[^$\n]{0,5}\$', '←', text)
+
+    # 3. Restaurar fórmules preservades
+    for i, formula in enumerate(formulas):
+        text = text.replace(placeholder_base.format(i), formula)
+
     return text
 
 

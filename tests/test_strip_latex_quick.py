@@ -1,43 +1,9 @@
 """Quick sanity test for _strip_latex_artifacts — pre-deploy smoke."""
 import re
-
-_LATEX_PATTERNS = [
-    (r'\$\s*\\xrightarrow\{[^}]*\}\s*\$', '→'),
-    (r'\$\s*\\xleftarrow\{[^}]*\}\s*\$', '←'),
-    (r'\$\s*\\rightarrow\s*\$', '→'),
-    (r'\$\s*\\leftarrow\s*\$', '←'),
-    (r'\$\s*\\uparrow\s*\$', '↑'),
-    (r'\$\s*\\downarrow\s*\$', '↓'),
-    (r'\$\s*\\leftrightarrow\s*\$', '↔'),
-    (r'\$\s*\\Rightarrow\s*\$', '⇒'),
-    (r'\$\s*\\Leftarrow\s*\$', '⇐'),
-    (r'\$\\text\{[^}]*\}\$', '___'),
-    (r'\\text\{[^}]*\}', '___'),
-    (r'\$\\textbf\{[^}]*\}\$', '___'),
-    (r'\\textbf\{[^}]*\}', '___'),
-    (r'\$\\underline\{[^}]*\}\$', '___'),
-    (r'\\underline\{[^}]*\}', '___'),
-    (r'\\rightarrow\b', '→'),
-    (r'\\leftarrow\b', '←'),
-    (r'\\uparrow\b', '↑'),
-    (r'\\downarrow\b', '↓'),
-    (r'\\leftrightarrow\b', '↔'),
-    (r'\\Rightarrow\b', '⇒'),
-    (r'\\Leftarrow\b', '⇐'),
-]
-
-
-def strip(text):
-    if not text:
-        return text
-    for p, r in _LATEX_PATTERNS:
-        text = re.sub(p, r, text)
-    text = re.sub(r'\\{2,}_', '___', text)
-    text = re.sub(r'\\{4,}', '___', text)
-    # LaTeX malformat amb arrow ($(ightarrow$, $\ri(tarrow$, etc.)
-    text = re.sub(r'\$[^$\n]{0,15}(?:right|rightar|ight)arrow[^$\n]{0,5}\$', '→', text)
-    text = re.sub(r'\$[^$\n]{0,15}(?:left|leftar|eft)arrow[^$\n]{0,5}\$', '←', text)
-    return text
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from adaptation.post_process import _strip_latex_artifacts as strip
 
 
 # TEST 1: $\rightarrow$ + runaway backslashes with underscore
@@ -277,3 +243,62 @@ assert r'\text{' not in r17
 print('T17 OK\n')
 
 print('ALL TESTS PASSED')
+
+# ── TESTS ADR-004: Preservació de fórmules matemàtiques i químiques ──────────
+print('\n── TESTS ADR-004: fórmules STEAM ──\n')
+
+# T18: fórmula inline simple — ha de sobreviure intacta
+t18 = r'La força és $F = m \cdot a$ on $m$ és la massa.'
+r18 = strip(t18)
+print('T18:', r18)
+assert '$F = m \\cdot a$' in r18, f"Fórmula F=ma destruïda: {repr(r18)}"
+assert '$m$' in r18, f"Fórmula m destruïda: {repr(r18)}"
+print('T18 OK (fórmules inline preservades)\n')
+
+# T19: fórmula display ($$...$$) — ha de sobreviure intacta
+t19 = r'La densitat és:' + '\n' + r'$$\rho = \frac{m}{V}$$' + '\n' + 'on m és la massa i V el volum.'
+r19 = strip(t19)
+print('T19:', r19)
+assert r'$$\rho = \frac{m}{V}$$' in r19, f"Fórmula display destruïda: {repr(r19)}"
+print('T19 OK (fórmula display preservada)\n')
+
+# T20: fórmula química — ha de sobreviure intacta
+t20 = r'La fotosíntesi: $6CO_2 + 6H_2O \rightarrow C_6H_{12}O_6 + 6O_2$'
+r20 = strip(t20)
+print('T20:', r20)
+assert r'6CO_2 + 6H_2O \rightarrow C_6H_{12}O_6 + 6O_2' in r20, f"Fórmula química destruïda: {repr(r20)}"
+print('T20 OK (fórmula química amb \\rightarrow preservada)\n')
+
+# T21: fórmula STEAM + artefacte al mateix text — fórmula preservada, artefacte eliminat
+t21 = r'La velocitat és $v = \frac{d}{t}$. Causa $\rightarrow$ efecte.'
+r21 = strip(t21)
+print('T21:', r21)
+assert r'$v = \frac{d}{t}$' in r21, f"Fórmula v=d/t destruïda: {repr(r21)}"
+# L'artefacte $\rightarrow$ (fletxa sola) ha de convertir-se a Unicode
+assert '$\\rightarrow$' not in r21, f"Artefacte $\\rightarrow$ no eliminat: {repr(r21)}"
+assert '→' in r21, f"Fletxa Unicode no present: {repr(r21)}"
+print('T21 OK (fórmula preservada + artefacte eliminat)\n')
+
+# T22: equació amb subíndexs i superíndexs
+t22 = r'L\'energia cinètica és $E_k = \frac{1}{2}mv^2$.'
+r22 = strip(t22)
+print('T22:', r22)
+assert r'$E_k = \frac{1}{2}mv^2$' in r22, f"Fórmula energia cinètica destruïda: {repr(r22)}"
+print('T22 OK (equació amb sub/superíndex preservada)\n')
+
+# T23: preu en euros ($ aïllat) — no ha de tocar-se
+t23 = 'El material costa $15 euros per unitat.'
+r23 = strip(t23)
+print('T23:', r23)
+assert r23 == t23, f"Preu en euros modificat: {repr(r23)}"
+print('T23 OK (preu en euros no tocat)\n')
+
+# T24: fórmula química ATNE pòster científic
+t24 = r'El pH neutre és $pH = 7$ i l\'aigua és $H_2O$.'
+r24 = strip(t24)
+print('T24:', r24)
+assert '$pH = 7$' in r24, f"Fórmula pH destruïda: {repr(r24)}"
+assert '$H_2O$' in r24, f"Fórmula H2O destruïda: {repr(r24)}"
+print('T24 OK (fórmules química i física preservades)\n')
+
+print('ALL ADR-004 TESTS PASSED')

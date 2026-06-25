@@ -29,6 +29,11 @@
 <script src="/ui/atne/js/complements-matriu.data.js?v=20260601"></script>
 <script src="/ui/atne/js/complements-matriu.js?v=20260601"></script>
 <script src="/ui/atne/js/llm.js?v=20260419j" defer></script>
+<!-- KaTeX: preview de fórmules $...$ al camp de generació STEAM -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  onload="window.ATNE_renderMath = function(el){ if(typeof renderMathInElement==='function') renderMathInElement(el||document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false}); };"></script>
 
 <style>
   /* =========================================================
@@ -1212,7 +1217,9 @@
             <!-- 1. CONSIGNA (sempre visible) -->
             <div class="gen-consigna" data-help="p2-generar">
               <div class="mp-l">Tema o tòpic <span style="font-weight:400;color:var(--ink-400)">(opcional)</span></div>
-              <textarea class="ta" id="gen-tema" placeholder="Ex. Text sobre la Revolució Industrial per a 3r d'ESO…" style="min-height:60px"></textarea>
+              <textarea class="ta" id="gen-tema" placeholder="Ex. Text sobre la Revolució Industrial per a 3r d'ESO… Per a fórmules usa $F=ma$ o $$\frac{d}{dt}mv$$" style="min-height:60px"></textarea>
+              <!-- Preview KaTeX: apareix quan el tema conté $...$ o $$...$$ -->
+              <div id="gen-tema-math-preview" style="display:none;margin:6px 0 0;padding:8px 10px;background:var(--ink-50);border-radius:var(--r-sm);font-size:13px;color:var(--ink-700);border:1px solid var(--paper-line)"></div>
               <p style="margin:6px 0 0;font-size:11px;color:var(--ink-400);line-height:1.4">Cal indicar almenys un tema, un saber curricular o un gènere. Com més n'indiquis, més enfocat serà el text.</p>
             </div>
 
@@ -3868,6 +3875,22 @@
         if (det) det.open = false;
       });
     });
+  })();
+
+  // ── KaTeX: preview de fórmules al camp de tema del panell Generar ──
+  (function() {
+    const genTema = document.getElementById('gen-tema');
+    const mathPreview = document.getElementById('gen-tema-math-preview');
+    if (!genTema || !mathPreview) return;
+    function _updateMathPreview() {
+      const val = genTema.value;
+      const hasMath = /\$/.test(val);
+      if (!hasMath) { mathPreview.style.display = 'none'; return; }
+      mathPreview.style.display = 'block';
+      mathPreview.textContent = val;
+      if (typeof window.ATNE_renderMath === 'function') window.ATNE_renderMath(mathPreview);
+    }
+    genTema.addEventListener('input', _updateMathPreview);
   })();
 </script>
 </body>
