@@ -440,6 +440,27 @@
   }
 
   /* Formulari (mode Generar) */
+  /* ── Seccions col·lapsables del panell Generar (UX refactor) ── */
+  .gen-consigna { background:#fff; border:1px solid var(--paper-line); border-radius:var(--r-md); padding:12px 14px; margin-bottom:8px; }
+  .gen-section { border:1px solid var(--paper-line); border-radius:var(--r-md); background:#fff; margin-bottom:8px; overflow:hidden; }
+  .gen-section-hd { display:flex; align-items:center; gap:8px; padding:10px 14px; cursor:pointer; user-select:none; }
+  .gen-section-hd:hover { background:var(--ink-50); }
+  .gen-sec-arrow { font-size:10px; color:var(--ink-400); transition:transform var(--trans-med); display:inline-block; }
+  .gen-section.open .gen-sec-arrow { transform:rotate(90deg); }
+  .gen-sec-title { font-size:11.5px; font-weight:700; color:var(--ink-700); text-transform:uppercase; letter-spacing:.05em; flex:1; }
+  .gen-sec-summary { font-size:11.5px; color:var(--ink-500); }
+  .gen-section-body { padding:0 14px 14px; display:none; }
+  .gen-section.open .gen-section-body { display:block; }
+  .gen-curr-row { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .gen-curr-lbl { font-size:var(--fs-sm); color:var(--ink-500); min-width:58px; flex-shrink:0; }
+  .gen-curr-sel { border:none; outline:none; background:transparent; font-size:12.5px; font-weight:600; color:var(--ink-900); max-width:240px; cursor:pointer; }
+  .gen-curr-inp { border:none; outline:none; background:transparent; font-size:12.5px; font-weight:600; color:var(--ink-900); flex:1; }
+  /* ODA radio buttons (infantil) */
+  .oda-group-hd { font-size:10.5px; font-weight:700; color:var(--ink-600); text-transform:uppercase; letter-spacing:.04em; margin:8px 0 3px; }
+  .oda-group-hd:first-child { margin-top:0; }
+  .oda-radio-item { display:flex; align-items:flex-start; gap:7px; padding:4px 0; font-size:12.5px; line-height:1.35; cursor:pointer; }
+  .oda-radio-item input { margin-top:3px; flex-shrink:0; }
+
   .gen-card {
     background: #fff;
     border: 1px solid var(--paper-line);
@@ -1185,82 +1206,107 @@
           </div>
 
           <!-- Mode: Generar -->
+          <!-- Mode: Generar — 3 seccions col·lapsables (UX refactor) -->
           <div class="mode-panel" data-p="ai">
-            <div class="gen-card" data-help="p2-generar">
-              <div>
-                <div class="mp-l">Tema o tòpic</div>
-                <textarea class="ta" placeholder="Ex. Text sobre la Revolució Industrial per a 3r d'ESO…" style="min-height:60px"></textarea>
+
+            <!-- 1. CONSIGNA (sempre visible) -->
+            <div class="gen-consigna" data-help="p2-generar">
+              <div class="mp-l">Tema o tòpic</div>
+              <textarea class="ta" id="gen-tema" placeholder="Ex. Text sobre la Revolució Industrial per a 3r d'ESO…" style="min-height:60px"></textarea>
+            </div>
+
+            <!-- 2. CURRÍCULUM (col·lapsable, oberta per defecte si hi ha matèria) -->
+            <div class="gen-section" id="sec-curr">
+              <div class="gen-section-hd" id="sec-curr-hd">
+                <span class="gen-sec-arrow">▶</span>
+                <span class="gen-sec-title">Currículum</span>
+                <span class="gen-sec-summary" id="curr-summary"></span>
               </div>
-              <div class="gen-grid">
-                <div><div class="mp-l">Gènere</div><select class="sel" id="gen-genere">
-                  <!-- Poblat dinàmicament des de /api/genres (loadGenresCatalog),
-                       igual que el selector del mode Adaptar. Cap gènere hardcoded:
-                       els gèneres nous del corpus hi entren automàticament. -->
-                </select></div>
-                <div><div class="mp-l">To</div><select class="sel" id="gen-to">
-                  <option value="neutre" selected>Neutre</option>
-                  <option value="proper">Proper</option>
-                  <option value="motivador">Motivador</option>
-                  <option value="academic">Acadèmic</option>
-                </select></div>
-                <div><div class="mp-l">Extensió</div><select class="sel" id="gen-extensio">
-                  <option value="micro">Micro (~75 par.)</option>
-                  <option value="curt">Curt (~200 par.)</option>
-                  <option value="estandard" selected>Estàndard (~400 par.)</option>
-                  <option value="extens">Extens (~700 par.)</option>
-                </select></div>
-                <div><div class="mp-l">Llengua</div><select class="sel" id="gen-lang">
-                  <option value="ca" selected>Català</option>
-                  <option value="es">Castellà</option>
-                  <option value="en">Anglès</option>
-                  <option value="fr">Francès</option>
-                  <option value="de">Alemany</option>
-                </select></div>
-                <div><div class="mp-l">Habilitat cognitiva <span style="font-weight:400;color:var(--ink-400);font-size:10px">(MALL HCL)</span></div><select class="sel" id="gen-hcl">
-                  <option value="auto" selected>Auto (segons gènere)</option>
-                  <option value="descriure">Descriure</option>
-                  <option value="explicar">Explicar</option>
-                  <option value="justificar">Justificar</option>
-                  <option value="argumentar">Argumentar</option>
-                  <option value="demostrar">Demostrar</option>
-                  <option value="definir">Definir</option>
-                  <option value="interpretar">Interpretar</option>
-                </select></div>
-                <div><div class="mp-l">Modalitat lectora <span style="font-weight:400;color:var(--ink-400);font-size:10px">(MALL G-09)</span></div><select class="sel" id="gen-modalitat">
-                  <option value="auto" selected>Auto (derivada del perfil)</option>
-                  <option value="compartida">Compartida (adult llegeix)</option>
-                  <option value="transferencia">Transferència (L1→L2)</option>
-                  <option value="progressiva">Progressiva (emergent)</option>
-                  <option value="autonoma">Autònoma</option>
-                </select></div>
-              </div>
-              <!-- Sabers curriculars (Fil 3) — widget combinat: chips de resum + checkboxes
-                   agrupats per bloc, poblat de /api/curriculum segons matèria+curs. A infantil:
-                   1r selector = ODA (objectiu), aquí = continguts. Múltiple, límit suau a 3. -->
-              <div style="margin-top:8px" id="gen-saber-box" hidden>
-                <div class="mp-l" id="gen-saber-label" style="margin-bottom:6px">Sabers curriculars <span style="font-weight:400;color:var(--ink-400)">(opcional · recomanat fins a 3)</span></div>
-                <div class="saber-chips" id="gen-saber-chips"></div>
-                <div class="saber-cbgroup" id="gen-saber-list"></div>
-                <div class="saber-warn" id="gen-saber-warn" hidden>⚠️ Has triat molts sabers. Recomanem fins a 3 perquè el text no perdi focus.</div>
-              </div>
-              <div style="margin-top:8px">
-                <div class="mp-l" style="margin-bottom:4px">Indicació al docent <span style="font-weight:400;color:var(--ink-400)">(opcional)</span></div>
-                <textarea id="gen-notes" class="gen-card .ta" placeholder="Ex. Usa exemples de la vida quotidiana. Evita tecnicismes…" style="min-height:38px;max-height:80px;width:100%;box-sizing:border-box;padding:7px 10px;border:1px solid var(--paper-line);border-radius:var(--r-md);font-size:13px;resize:vertical;line-height:1.4"></textarea>
-              </div>
-              <!-- Bug 5: gen-cancel apareix mentre el streaming està actiu (display:none per defecte) -->
-              <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center">
-                <button class="gen-go" id="gen-cancel" type="button" style="display:none;background:#fff;color:var(--ink-700);border:1px solid var(--paper-line)">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
-                  Cancel·lar
-                </button>
-                <button class="gen-go" id="gen-go">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3 1.9 4.6L18.5 9l-4.6 1.9L12 15l-1.9-4.6L5.5 9l4.6-1.4z"/></svg>
-                  Generar text
-                </button>
+              <div class="gen-section-body" id="sec-curr-body">
+                <!-- ESO / Primària / Batx -->
+                <div id="curr-rest">
+                  <div class="gen-curr-row">
+                    <span class="gen-curr-lbl" id="gen-mat-lbl">Matèria</span>
+                    <select class="doc-materia-sel gen-curr-sel" id="gen-mat-sel"><option value="">Selecciona…</option></select>
+                    <input type="text" class="doc-materia-inp gen-curr-inp" placeholder="Escriu la matèria" style="display:none">
+                  </div>
+                  <div id="gen-saber-box" hidden>
+                    <div class="mp-l" id="gen-saber-label" style="margin-bottom:6px">Sabers curriculars <span style="font-weight:400;color:var(--ink-400)">(opcional · fins a 3)</span></div>
+                    <div class="saber-chips" id="gen-saber-chips"></div>
+                    <div class="saber-cbgroup" id="gen-saber-list"></div>
+                    <div class="saber-warn" id="gen-saber-warn" hidden>⚠️ Has triat molts sabers. Recomanem fins a 3 perquè el text no perdi focus.</div>
+                  </div>
+                </div>
+                <!-- Infantil: radio per ODA + continguts -->
+                <div id="curr-inf" style="display:none">
+                  <div class="mp-l" style="margin-bottom:5px">Objectiu <span style="color:var(--ink-400);font-weight:400">(tria'n un per al text)</span></div>
+                  <div class="saber-cbgroup" id="oda-list" style="max-height:190px"></div>
+                  <div id="cont-box" style="display:none;margin-top:10px">
+                    <div class="mp-l" style="margin-bottom:5px">Continguts <span style="color:var(--ink-400);font-weight:400">(opcional · fins a 3)</span></div>
+                    <div class="saber-chips" id="cont-chips"></div>
+                    <div class="saber-cbgroup" id="cont-list" style="max-height:140px"></div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="opts">
-              <span class="opt opt-materia" data-help="p2-materia"><span class="opt-k" data-materia-k>Matèria</span><select class="doc-materia-sel"><option value="">Selecciona…</option></select><input type="text" class="doc-materia-inp" placeholder="Escriu la matèria" style="display:none"></span>
+
+            <!-- 3. TEXT (col·lapsable, tancada per defecte) -->
+            <div class="gen-section" id="sec-text">
+              <div class="gen-section-hd" id="sec-text-hd">
+                <span class="gen-sec-arrow">▶</span>
+                <span class="gen-sec-title">Text</span>
+                <span class="gen-sec-summary" id="text-summary">Estàndard · Neutre</span>
+              </div>
+              <div class="gen-section-body" id="sec-text-body" style="display:none">
+                <div class="gen-grid">
+                  <div><div class="mp-l">Gènere</div><select class="sel" id="gen-genere"></select></div>
+                  <div><div class="mp-l">To</div><select class="sel" id="gen-to">
+                    <option value="neutre" selected>Neutre</option><option value="proper">Proper</option>
+                    <option value="motivador">Motivador</option><option value="academic">Acadèmic</option>
+                  </select></div>
+                  <div><div class="mp-l">Extensió</div><select class="sel" id="gen-extensio">
+                    <option value="micro">Micro (~75 par.)</option><option value="curt">Curt (~200 par.)</option>
+                    <option value="estandard" selected>Estàndard (~400 par.)</option><option value="extens">Extens (~700 par.)</option>
+                  </select></div>
+                  <div><div class="mp-l">Llengua</div><select class="sel" id="gen-lang">
+                    <option value="ca" selected>Català</option><option value="es">Castellà</option>
+                    <option value="en">Anglès</option><option value="fr">Francès</option><option value="de">Alemany</option>
+                  </select></div>
+                  <div><div class="mp-l">HCL <span style="font-weight:400;color:var(--ink-400);font-size:10px">(MALL)</span></div><select class="sel" id="gen-hcl">
+                    <option value="auto" selected>Auto</option><option value="descriure">Descriure</option>
+                    <option value="explicar">Explicar</option><option value="justificar">Justificar</option>
+                    <option value="argumentar">Argumentar</option><option value="demostrar">Demostrar</option>
+                    <option value="definir">Definir</option><option value="interpretar">Interpretar</option>
+                  </select></div>
+                  <div><div class="mp-l">Modalitat <span style="font-weight:400;color:var(--ink-400);font-size:10px">(MALL G-09)</span></div><select class="sel" id="gen-modalitat">
+                    <option value="auto" selected>Auto</option><option value="compartida">Compartida</option>
+                    <option value="transferencia">Transferència L1→L2</option>
+                    <option value="progressiva">Progressiva</option><option value="autonoma">Autònoma</option>
+                  </select></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Indicació + botons -->
+            <div style="margin-top:4px">
+              <div class="mp-l" style="margin-bottom:4px">Indicació addicional <span style="font-weight:400;color:var(--ink-400)">(opcional)</span></div>
+              <textarea id="gen-notes" class="gen-card .ta" placeholder="Ex. Usa exemples de la vida quotidiana. Evita tecnicismes…" style="min-height:38px;max-height:80px;width:100%;box-sizing:border-box;padding:7px 10px;border:1px solid var(--paper-line);border-radius:var(--r-md);font-size:13px;resize:vertical;line-height:1.4"></textarea>
+            </div>
+            <!-- Bug 5: gen-cancel apareix mentre el streaming està actiu -->
+            <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:8px">
+              <button class="gen-go" id="gen-cancel" type="button" style="display:none;background:#fff;color:var(--ink-700);border:1px solid var(--paper-line)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                Cancel·lar
+              </button>
+              <button class="gen-go" id="gen-go">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3 1.9 4.6L18.5 9l-4.6 1.9L12 15l-1.9-4.6L5.5 9l4.6-1.4z"/></svg>
+                Generar text
+              </button>
+            </div>
+
+            <!-- Matèria (xip informatiu, mode generar) — sincronitzada amb gen-mat-sel -->
+            <div class="opts" style="margin-top:8px">
+              <span class="opt opt-materia" data-help="p2-materia" style="display:none"><span class="opt-k" data-materia-k>Matèria</span><select class="doc-materia-sel"><option value="">Selecciona…</option></select><input type="text" class="doc-materia-inp" placeholder="Escriu la matèria" style="display:none"></span>
               <span class="opt" data-help="p2-complements"><span class="opt-k">Complements</span><span class="opt-v">Cap</span></span>
             </div>
           </div>
@@ -1950,6 +1996,129 @@
   // Inicialitza els inputs de Matèria: NO pre-omplim de sessions anteriors
   // per evitar que una matèria d'una prova anterior contamini noves adaptacions.
   // El docent la escriu si vol; si queda buit el LLM infereix del contingut.
+  // ─── Seccions col·lapsables del panell Generar (UX refactor) ───────────────
+  (function initGenSections() {
+    ['sec-curr','sec-text'].forEach(id => {
+      const sec = document.getElementById(id);
+      const hd  = document.getElementById(id + '-hd');
+      const body = document.getElementById(id + '-body');
+      if (!sec || !hd || !body) return;
+      hd.addEventListener('click', () => {
+        const open = sec.classList.toggle('open');
+        body.style.display = open ? 'block' : 'none';
+      });
+    });
+    // Currículum obert per defecte si hi ha matèria coneguda
+    const prevClau = localStorage.getItem('atne.doc_materia_clau') || '';
+    const secCurr = document.getElementById('sec-curr');
+    const secCurrBody = document.getElementById('sec-curr-body');
+    if (prevClau && secCurr && secCurrBody) {
+      secCurr.classList.add('open');
+      secCurrBody.style.display = 'block';
+    }
+  })();
+
+  function _updateCurrSummary() {
+    const lbl = document.getElementById('curr-summary');
+    if (!lbl) return;
+    const nom = localStorage.getItem('atne.doc_materia') || '';
+    const { curs } = _etapaCursActual();
+    lbl.textContent = nom ? nom + (curs ? ' · ' + curs : '') : '';
+  }
+
+  function _updateTextSummary() {
+    const lbl = document.getElementById('text-summary');
+    if (!lbl) return;
+    const gen = document.getElementById('gen-genere');
+    const ext = document.getElementById('gen-extensio');
+    const to  = document.getElementById('gen-to');
+    const genTxt = gen ? (gen.options[gen.selectedIndex]?.text || '') : '';
+    const extTxt = ext ? (ext.options[ext.selectedIndex]?.text?.split('(')[0].trim() || '') : '';
+    const toTxt  = to  ? (to.options[to.selectedIndex]?.text || '') : '';
+    lbl.textContent = [genTxt, extTxt, toTxt].filter(Boolean).join(' · ');
+  }
+
+  // Escolta canvis als selectors de Text per actualitzar el resum de la capçalera.
+  ['gen-genere','gen-to','gen-extensio','gen-lang','gen-hcl','gen-modalitat'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', _updateTextSummary);
+  });
+
+  // ─── Currículum Infantil (panell Generar): radio ODA + continguts ─────────
+  let _odaSelText = '';
+  const _contSel = new Map();
+
+  function _renderContChips() {
+    const chips = document.getElementById('cont-chips');
+    if (!chips) return;
+    chips.innerHTML = '';
+    _contSel.forEach((txt, id) => {
+      const c = document.createElement('span'); c.className = 'saber-chip';
+      const lab = txt.length > 35 ? txt.slice(0, 33) + '…' : txt;
+      c.innerHTML = lab + ' <b data-id="' + id.replace(/"/g, '') + '">✕</b>';
+      chips.appendChild(c);
+    });
+    chips.querySelectorAll('b').forEach(b => b.addEventListener('click', () => {
+      const cid = b.getAttribute('data-id');
+      _contSel.delete(cid);
+      const cx = document.querySelector('#cont-list input[data-id="' + CSS.escape(cid) + '"]');
+      if (cx) cx.checked = false;
+      _renderContChips();
+      _persistSabers();
+    }));
+  }
+
+  async function loadODAInfantil() {
+    const listEl = document.getElementById('oda-list');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    _odaSelText = ''; _contSel.clear();
+    document.getElementById('cont-box').style.display = 'none';
+    try {
+      const d = await (await fetch('/api/curriculum?etapa=infantil')).json();
+      let lastAmb = '';
+      for (const oda of (d.items || [])) {
+        if (oda.ambit !== lastAmb) {
+          const h = document.createElement('div'); h.className = 'oda-group-hd';
+          h.textContent = oda.ambit; listEl.appendChild(h); lastAmb = oda.ambit;
+        }
+        const w = document.createElement('label'); w.className = 'oda-radio-item';
+        const r = document.createElement('input');
+        r.type = 'radio'; r.name = 'gen-oda'; r.value = oda.clau;
+        r.addEventListener('change', async () => {
+          _odaSelText = oda.nom; _contSel.clear();
+          _persistSabers();
+          _updateCurrSummary();
+          // carrega continguts de l'ODA
+          const dc = await (await fetch('/api/curriculum?etapa=infantil&materia=' + encodeURIComponent(oda.clau))).json();
+          const contList = document.getElementById('cont-list');
+          contList.innerHTML = ''; let nc = 0;
+          for (const grp of (dc.agrupats || [])) {
+            const h2 = document.createElement('div'); h2.className = 'saber-cbblock';
+            h2.textContent = grp.bloc; contList.appendChild(h2);
+            for (const s of (grp.sabers || [])) {
+              const cid = 'c' + (nc++);
+              const wc = document.createElement('label'); wc.className = 'saber-cbitem';
+              const cb = document.createElement('input'); cb.type = 'checkbox';
+              cb.setAttribute('data-id', cid);
+              cb.addEventListener('change', () => {
+                if (cb.checked) _contSel.set(cid, s.text); else _contSel.delete(cid);
+                _renderContChips(); _persistSabers();
+              });
+              wc.appendChild(cb);
+              wc.appendChild(document.createTextNode(' ' + (s.text.length > 95 ? s.text.slice(0, 93) + '…' : s.text)));
+              wc.title = s.text; contList.appendChild(wc);
+            }
+          }
+          document.getElementById('cont-box').style.display = dc.sabers?.length ? 'block' : 'none';
+          document.getElementById('cont-chips').innerHTML = '';
+        });
+        w.appendChild(r);
+        w.appendChild(document.createTextNode(' ' + (oda.nom.length > 100 ? oda.nom.slice(0, 98) + '…' : oda.nom)));
+        w.title = oda.nom; listEl.appendChild(w);
+      }
+    } catch (e) { /* sense currículum → buit */ }
+  }
+
   // ─── Matèria (Fil 3): selector derivat del currículum + fallback text lliure ──
   // Deriva etapa+curs del perfil del Pas 1 (mateixa lògica que el generador).
   function _etapaCursActual() {
@@ -1977,6 +2146,7 @@
       s.value = has ? clau : (nom ? '__altra__' : '');
     });
     _toggleMateriaInputs();
+    _updateCurrSummary();
     if (typeof loadSabersForGenerar === 'function') loadSabersForGenerar();
   }
 
@@ -2083,22 +2253,36 @@
   }
 
   async function loadSabersForGenerar() {
-    const box = document.getElementById('gen-saber-box');
-    const list = document.getElementById('gen-saber-list');
-    const lbl = document.getElementById('gen-saber-label');
-    if (!box || !list) return;
     const { etapa, curs } = _etapaCursActual();
     const materiaClau = localStorage.getItem('atne.doc_materia_clau') || '';
     const esInfantil = etapa.toLowerCase().includes('infantil');
-    // reset
+    const currRest = document.getElementById('curr-rest');
+    const currInf  = document.getElementById('curr-inf');
+
+    // Commuta entre el model ESO/prim/batx i el model infantil (radio ODA).
+    if (currRest) currRest.style.display = esInfantil ? 'none' : 'block';
+    if (currInf)  currInf.style.display  = esInfantil ? 'block' : 'none';
+
+    // ── Infantil: carrega els ODA (radio) ──
+    if (esInfantil) {
+      if (!document.getElementById('oda-list').children.length) await loadODAInfantil();
+      _updateCurrSummary();
+      return;
+    }
+
+    // ── Resta (ESO/prim/batx): carrega els sabers del currículum ──
+    const box  = document.getElementById('gen-saber-box');
+    const list = document.getElementById('gen-saber-list');
+    const lbl  = document.getElementById('gen-saber-label');
+    if (!box || !list) return;
     _sabersSel = new Map(); _oda_text_actual = '';
-    list.innerHTML = ''; document.getElementById('gen-saber-chips').innerHTML = '';
+    list.innerHTML = '';
+    const chipsEl = document.getElementById('gen-saber-chips');
+    if (chipsEl) chipsEl.innerHTML = '';
     localStorage.removeItem('atne.saber_curricular');
-    // Sense matèria/ODA triada → amaga el widget (res a oferir).
     if (!etapa || !materiaClau) { box.hidden = true; return; }
     box.hidden = false;
-    if (lbl) lbl.firstChild.textContent = esInfantil ? 'Continguts ' : 'Sabers curriculars ';
-    if (esInfantil) _oda_text_actual = localStorage.getItem('atne.doc_materia') || '';
+    if (lbl) lbl.firstChild.textContent = 'Sabers curriculars ';
     try {
       const q = '/api/curriculum?etapa=' + encodeURIComponent(etapa) +
                 '&materia=' + encodeURIComponent(materiaClau) +
@@ -2107,28 +2291,25 @@
       let n = 0;
       for (const grp of (d.agrupats || [])) {
         const h = document.createElement('div');
-        h.className = 'saber-cbblock';
-        h.textContent = grp.bloc || '—';
+        h.className = 'saber-cbblock'; h.textContent = grp.bloc || '—';
         list.appendChild(h);
         for (const s of (grp.sabers || [])) {
           const txt = s.text || '';
-          const id = 's' + (n++) + '|' + txt;   // id únic estable
-          const w = document.createElement('label');
-          w.className = 'saber-cbitem';
-          const cb = document.createElement('input');
-          cb.type = 'checkbox'; cb.setAttribute('data-id', id);
+          const id = 's' + (n++) + '|' + txt;
+          const w = document.createElement('label'); w.className = 'saber-cbitem';
+          const cb = document.createElement('input'); cb.type = 'checkbox';
+          cb.setAttribute('data-id', id);
           cb.addEventListener('change', () => {
             if (cb.checked) _sabersSel.set(id, txt); else _sabersSel.delete(id);
             _renderSaberChips(); _persistSabers();
           });
           w.appendChild(cb);
           w.appendChild(document.createTextNode(' ' + (txt.length > 100 ? txt.slice(0, 98) + '…' : txt)));
-          w.title = txt;
-          list.appendChild(w);
+          w.title = txt; list.appendChild(w);
         }
       }
-      if (esInfantil) _persistSabers();   // a infantil l'ODA sol ja és vàlid sense continguts
     } catch (e) { box.hidden = true; }
+    _updateCurrSummary();
   }
   loadSabersForGenerar();
 
@@ -2527,7 +2708,7 @@
     if (!window.ATNE_LLM) return;
     const aiPanel = document.querySelector('.mode-panel[data-p="ai"]');
     if (!aiPanel) return;
-    const topicTa = aiPanel.querySelector('textarea');
+    const topicTa = document.getElementById('gen-tema') || aiPanel.querySelector('textarea');
     const tema = topicTa?.value?.trim();
     if (!tema) { window.atneToast && window.atneToast('Cal escriure un tema o tòpic','error'); return; }
     const genere = document.getElementById('gen-genere')?.value || 'manual';
