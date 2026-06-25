@@ -601,6 +601,29 @@
     color: var(--ink-900); width: 110px; min-width: 60px; max-width: 160px;
   }
   .doc-materia-inp::placeholder { font-weight: 400; color: var(--ink-400); }
+  /* Selector de matèria (Fil 3 — derivat del currículum) */
+  .doc-materia-sel {
+    border: none; outline: none; background: transparent;
+    font-family: inherit; font-size: 12.5px; font-weight: 600;
+    color: var(--ink-900); cursor: pointer; max-width: 200px;
+  }
+  .doc-materia-sel:invalid, .doc-materia-sel option[value=""] { color: var(--ink-400); font-weight: 400; }
+  /* Widget de sabers curriculars (Fil 3) — chips + checkboxes agrupats per bloc */
+  .saber-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; min-height: 2px; }
+  .saber-chip { display: inline-flex; align-items: center; gap: 5px; background: var(--primary-50);
+    border: 1px solid var(--primary-100); color: var(--primary); border-radius: var(--r-pill);
+    padding: 3px 9px; font-size: 11.5px; font-weight: 500; }
+  .saber-chip b { cursor: pointer; color: var(--ink-400); font-weight: 700; font-size: 13px; line-height: 1; }
+  .saber-cbgroup { max-height: 190px; overflow: auto; border: 1px solid var(--paper-line);
+    border-radius: var(--r-md); padding: 8px; background: var(--ink-50); }
+  .saber-cbblock { font-size: 10.5px; font-weight: 700; color: var(--ink-600); margin: 8px 0 3px;
+    text-transform: uppercase; letter-spacing: .04em; }
+  .saber-cbblock:first-child { margin-top: 0; }
+  .saber-cbitem { display: flex; align-items: flex-start; gap: 7px; padding: 3px 0;
+    font-size: 12.5px; line-height: 1.35; cursor: pointer; }
+  .saber-cbitem input { margin-top: 2px; flex-shrink: 0; }
+  .saber-warn { font-size: 11px; color: var(--warn); font-weight: var(--fw-semi); margin-top: 8px;
+    display: flex; align-items: center; gap: 4px; }
 
   /* Selector de gènere (Peça C — detecció de gènere) + badge enganxat (UX badge) */
   .opt-genere { flex-direction: column; align-items: flex-start; gap: 4px; transition: background var(--trans-med), border-color var(--trans-med); }
@@ -1120,7 +1143,7 @@
               </details>
             </div>
             <div class="opts">
-              <span class="opt opt-materia" data-help="p2-materia"><span class="opt-k">Matèria</span><input type="text" class="doc-materia-inp" placeholder="Ex. Història"></span>
+              <span class="opt opt-materia" data-help="p2-materia"><span class="opt-k" data-materia-k>Matèria</span><select class="doc-materia-sel"><option value="">Selecciona…</option></select><input type="text" class="doc-materia-inp" placeholder="Escriu la matèria" style="display:none"></span>
               <!-- Gènere + badge de detecció enganxat (Peça C / UX badge). Contenidor
                    vertical perquè el missatge pengi del control concret, no de la fila. -->
               <span class="opt opt-genere" id="genere-chip" data-help="p2-genere">
@@ -1156,7 +1179,7 @@
               <span id="doc-adapt-msg">Adaptant document…</span>
             </div>
             <div class="opts">
-              <span class="opt opt-materia" data-help="p2-materia"><span class="opt-k">Matèria</span><input type="text" class="doc-materia-inp" placeholder="Ex. Història"></span>
+              <span class="opt opt-materia" data-help="p2-materia"><span class="opt-k" data-materia-k>Matèria</span><select class="doc-materia-sel"><option value="">Selecciona…</option></select><input type="text" class="doc-materia-inp" placeholder="Escriu la matèria" style="display:none"></span>
               <span class="opt" data-help="p2-complements"><span class="opt-k">Complements</span><span class="opt-v">Cap</span></span>
             </div>
           </div>
@@ -1211,6 +1234,15 @@
                   <option value="autonoma">Autònoma</option>
                 </select></div>
               </div>
+              <!-- Sabers curriculars (Fil 3) — widget combinat: chips de resum + checkboxes
+                   agrupats per bloc, poblat de /api/curriculum segons matèria+curs. A infantil:
+                   1r selector = ODA (objectiu), aquí = continguts. Múltiple, límit suau a 3. -->
+              <div style="margin-top:8px" id="gen-saber-box" hidden>
+                <div class="mp-l" id="gen-saber-label" style="margin-bottom:6px">Sabers curriculars <span style="font-weight:400;color:var(--ink-400)">(opcional · recomanat fins a 3)</span></div>
+                <div class="saber-chips" id="gen-saber-chips"></div>
+                <div class="saber-cbgroup" id="gen-saber-list"></div>
+                <div class="saber-warn" id="gen-saber-warn" hidden>⚠️ Has triat molts sabers. Recomanem fins a 3 perquè el text no perdi focus.</div>
+              </div>
               <div style="margin-top:8px">
                 <div class="mp-l" style="margin-bottom:4px">Indicació al docent <span style="font-weight:400;color:var(--ink-400)">(opcional)</span></div>
                 <textarea id="gen-notes" class="gen-card .ta" placeholder="Ex. Usa exemples de la vida quotidiana. Evita tecnicismes…" style="min-height:38px;max-height:80px;width:100%;box-sizing:border-box;padding:7px 10px;border:1px solid var(--paper-line);border-radius:var(--r-md);font-size:13px;resize:vertical;line-height:1.4"></textarea>
@@ -1228,7 +1260,7 @@
               </div>
             </div>
             <div class="opts">
-              <span class="opt opt-materia" data-help="p2-materia"><span class="opt-k">Matèria</span><input type="text" class="doc-materia-inp" placeholder="Ex. Història"></span>
+              <span class="opt opt-materia" data-help="p2-materia"><span class="opt-k" data-materia-k>Matèria</span><select class="doc-materia-sel"><option value="">Selecciona…</option></select><input type="text" class="doc-materia-inp" placeholder="Escriu la matèria" style="display:none"></span>
               <span class="opt" data-help="p2-complements"><span class="opt-k">Complements</span><span class="opt-v">Cap</span></span>
             </div>
           </div>
@@ -1918,17 +1950,188 @@
   // Inicialitza els inputs de Matèria: NO pre-omplim de sessions anteriors
   // per evitar que una matèria d'una prova anterior contamini noves adaptacions.
   // El docent la escriu si vol; si queda buit el LLM infereix del contingut.
-  localStorage.removeItem('atne.doc_materia');
-  document.querySelectorAll('.doc-materia-inp').forEach(inp => {
-    inp.value = '';
-    inp.addEventListener('input', () => {
-      localStorage.setItem('atne.doc_materia', inp.value);
-      // Sincronitza els altres inputs de Matèria
-      document.querySelectorAll('.doc-materia-inp').forEach(other => {
-        if (other !== inp) other.value = inp.value;
-      });
+  // ─── Matèria (Fil 3): selector derivat del currículum + fallback text lliure ──
+  // Deriva etapa+curs del perfil del Pas 1 (mateixa lògica que el generador).
+  function _etapaCursActual() {
+    const pid = localStorage.getItem('atne.profile_id') || 'marc';
+    const prof = (window.ATNE_PROFILES && window.ATNE_PROFILES[pid]) || (window.ATNE_PROFILES && window.ATNE_PROFILES.marc) || {};
+    const curs = ((prof.course) || '').replace(/\s+[A-Z]$/, '').trim();
+    let etapa = '';
+    if (/infantil|^I[345]/i.test(curs)) etapa = 'Infantil';
+    else if (/prim/i.test(curs)) etapa = 'primària';
+    else if (/eso/i.test(curs)) etapa = 'ESO';
+    else if (/batx/i.test(curs)) etapa = 'Batxillerat';
+    else if (/fp/i.test(curs)) etapa = 'FP';
+    return { etapa, curs };
+  }
+
+  // Sincronitza tots els selects/inputs de matèria amb un valor (nom) + clau canònica.
+  function _setMateria(nom, clau) {
+    localStorage.setItem('atne.doc_materia', nom || '');
+    if (clau) localStorage.setItem('atne.doc_materia_clau', clau);
+    else localStorage.removeItem('atne.doc_materia_clau');
+    document.querySelectorAll('.doc-materia-inp').forEach(i => { i.value = nom || ''; });
+    document.querySelectorAll('.doc-materia-sel').forEach(s => {
+      // marca el select si el nom hi és com a opció; si no, deixa "Altra…"
+      const has = Array.from(s.options).some(o => o.value === clau);
+      s.value = has ? clau : (nom ? '__altra__' : '');
+    });
+    _toggleMateriaInputs();
+    if (typeof loadSabersForGenerar === 'function') loadSabersForGenerar();
+  }
+
+  // Mostra l'input de text lliure només quan el select està a "Altra…".
+  function _toggleMateriaInputs() {
+    document.querySelectorAll('.opt-materia').forEach(opt => {
+      const sel = opt.querySelector('.doc-materia-sel');
+      const inp = opt.querySelector('.doc-materia-inp');
+      if (sel && inp) inp.style.display = (sel.value === '__altra__') ? '' : 'none';
+    });
+  }
+
+  // Pobla els selectors de matèria des de /api/curriculum segons l'etapa del Pas 1.
+  async function loadMateriesCatalog() {
+    const { etapa } = _etapaCursActual();
+    const sels = document.querySelectorAll('.doc-materia-sel');
+    if (!sels.length) return;
+    let items = [];
+    try {
+      if (etapa) {
+        const r = await fetch('/api/curriculum?etapa=' + encodeURIComponent(etapa));
+        const d = await r.json();
+        items = d.items || [];
+      }
+    } catch (e) { items = []; }
+    const prevClau = localStorage.getItem('atne.doc_materia_clau') || '';
+    const prevNom = localStorage.getItem('atne.doc_materia') || '';
+    sels.forEach(sel => {
+      sel.innerHTML = '<option value="">Selecciona…</option>';
+      for (const it of items) {
+        const o = document.createElement('option');
+        o.value = it.clau; o.textContent = it.nom; sel.appendChild(o);
+      }
+      const o2 = document.createElement('option');
+      o2.value = '__altra__'; o2.textContent = 'Altra…'; sel.appendChild(o2);
+      // restaura selecció prèvia
+      if (prevClau && Array.from(sel.options).some(o => o.value === prevClau)) sel.value = prevClau;
+      else if (prevNom) sel.value = '__altra__';
+    });
+    _toggleMateriaInputs();
+  }
+
+  // Handlers dels selects i inputs de matèria (sincronitzats).
+  document.querySelectorAll('.doc-materia-sel').forEach(sel => {
+    sel.addEventListener('change', () => {
+      if (sel.value === '__altra__') {
+        _setMateria(localStorage.getItem('atne.doc_materia') || '', '');
+        // deixa l'input visible i buit per escriure
+        document.querySelectorAll('.doc-materia-sel').forEach(s => s.value = '__altra__');
+        _toggleMateriaInputs();
+      } else if (sel.value === '') {
+        _setMateria('', '');
+      } else {
+        const nom = sel.options[sel.selectedIndex].text;
+        _setMateria(nom, sel.value);
+      }
     });
   });
+  document.querySelectorAll('.doc-materia-inp').forEach(inp => {
+    inp.addEventListener('input', () => { _setMateria(inp.value, ''); });
+  });
+
+  loadMateriesCatalog();
+
+  // ─── Sabers curriculars (Fil 3, mode Generar): widget combinat chips + checkboxes ──
+  // Múltiple a totes les etapes (un text pot integrar diversos sabers), límit suau a 3.
+  // A infantil: el 1r selector (Matèria) és l'ODA; aquí es trien els CONTINGUTS de l'ODA.
+  const _SABER_LIMIT = 3;
+  let _sabersSel = new Map();   // text → text complet (els triats)
+  let _oda_text_actual = '';    // a infantil: text de l'ODA triat (per prefixar el saber_curricular)
+
+  function _renderSaberChips() {
+    const chips = document.getElementById('gen-saber-chips');
+    const warn = document.getElementById('gen-saber-warn');
+    if (!chips) return;
+    chips.innerHTML = '';
+    _sabersSel.forEach((txt, id) => {
+      const c = document.createElement('span');
+      c.className = 'saber-chip';
+      const lab = txt.length > 42 ? txt.slice(0, 40) + '…' : txt;
+      c.innerHTML = lab.replace(/</g, '&lt;') + ' <b data-id="' + id.replace(/"/g, '&quot;') + '">✕</b>';
+      chips.appendChild(c);
+    });
+    chips.querySelectorAll('b').forEach(b => b.addEventListener('click', () => {
+      const id = b.getAttribute('data-id');
+      _sabersSel.delete(id);
+      const cbx = document.querySelector('#gen-saber-list input[data-id="' + CSS.escape(id) + '"]');
+      if (cbx) cbx.checked = false;
+      _renderSaberChips();
+      _persistSabers();
+    }));
+    if (warn) warn.hidden = _sabersSel.size <= _SABER_LIMIT;
+  }
+
+  function _persistSabers() {
+    // Construeix el string saber_curricular: a infantil prefixa l'ODA.
+    const parts = Array.from(_sabersSel.values());
+    let val = '';
+    if (parts.length) val = parts.join('; ');
+    if (_oda_text_actual) {
+      val = _oda_text_actual + (parts.length ? ' — Continguts: ' + parts.join('; ') : '');
+    }
+    localStorage.setItem('atne.saber_curricular', val);
+  }
+
+  async function loadSabersForGenerar() {
+    const box = document.getElementById('gen-saber-box');
+    const list = document.getElementById('gen-saber-list');
+    const lbl = document.getElementById('gen-saber-label');
+    if (!box || !list) return;
+    const { etapa, curs } = _etapaCursActual();
+    const materiaClau = localStorage.getItem('atne.doc_materia_clau') || '';
+    const esInfantil = etapa.toLowerCase().includes('infantil');
+    // reset
+    _sabersSel = new Map(); _oda_text_actual = '';
+    list.innerHTML = ''; document.getElementById('gen-saber-chips').innerHTML = '';
+    localStorage.removeItem('atne.saber_curricular');
+    // Sense matèria/ODA triada → amaga el widget (res a oferir).
+    if (!etapa || !materiaClau) { box.hidden = true; return; }
+    box.hidden = false;
+    if (lbl) lbl.firstChild.textContent = esInfantil ? 'Continguts ' : 'Sabers curriculars ';
+    if (esInfantil) _oda_text_actual = localStorage.getItem('atne.doc_materia') || '';
+    try {
+      const q = '/api/curriculum?etapa=' + encodeURIComponent(etapa) +
+                '&materia=' + encodeURIComponent(materiaClau) +
+                '&curs=' + encodeURIComponent(curs);
+      const d = await (await fetch(q)).json();
+      let n = 0;
+      for (const grp of (d.agrupats || [])) {
+        const h = document.createElement('div');
+        h.className = 'saber-cbblock';
+        h.textContent = grp.bloc || '—';
+        list.appendChild(h);
+        for (const s of (grp.sabers || [])) {
+          const txt = s.text || '';
+          const id = 's' + (n++) + '|' + txt;   // id únic estable
+          const w = document.createElement('label');
+          w.className = 'saber-cbitem';
+          const cb = document.createElement('input');
+          cb.type = 'checkbox'; cb.setAttribute('data-id', id);
+          cb.addEventListener('change', () => {
+            if (cb.checked) _sabersSel.set(id, txt); else _sabersSel.delete(id);
+            _renderSaberChips(); _persistSabers();
+          });
+          w.appendChild(cb);
+          w.appendChild(document.createTextNode(' ' + (txt.length > 100 ? txt.slice(0, 98) + '…' : txt)));
+          w.title = txt;
+          list.appendChild(w);
+        }
+      }
+      if (esInfantil) _persistSabers();   // a infantil l'ODA sol ja és vàlid sense continguts
+    } catch (e) { box.hidden = true; }
+  }
+  loadSabersForGenerar();
+
   // Nivell: calculat del perfil, sense UI (usat silenciosament a onAdaptClick)
   const initialNivell = nivellFromCourse(profile?.course);
   localStorage.setItem('atne.doc_nivell', initialNivell);
@@ -2334,6 +2537,7 @@
     const genHcl = document.getElementById('gen-hcl')?.value || 'auto';
     const genNotes = document.getElementById('gen-notes')?.value?.trim() || '';
     const overrideCap = document.getElementById('gen-override-cap')?.checked || false;
+    const genSaber = localStorage.getItem('atne.saber_curricular') || '';   // Fil 3: sabers triats (widget combinat)
 
     const btn = document.getElementById('gen-go');
     const btnCancel = document.getElementById('gen-cancel');
@@ -2367,6 +2571,7 @@
         hcl: genHcl !== 'auto' ? genHcl : undefined,
         notes: genNotes || undefined,
         override_cap: overrideCap || undefined,
+        saber_curricular: genSaber || undefined,   // Fil 3: l'endoll del generador ja l'usa al prompt
         context: (() => {
           // Deriva modalitat_lectora pel generador (mirall de params_resolver._resolve_modalitat_lectora)
           const chars = profCur?.caracteristiques || {};
