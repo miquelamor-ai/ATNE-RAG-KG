@@ -1211,8 +1211,9 @@
 
             <!-- 1. CONSIGNA (sempre visible) -->
             <div class="gen-consigna" data-help="p2-generar">
-              <div class="mp-l">Tema o tòpic</div>
+              <div class="mp-l">Tema o tòpic <span style="font-weight:400;color:var(--ink-400)">(opcional)</span></div>
               <textarea class="ta" id="gen-tema" placeholder="Ex. Text sobre la Revolució Industrial per a 3r d'ESO…" style="min-height:60px"></textarea>
+              <p style="margin:6px 0 0;font-size:11px;color:var(--ink-400);line-height:1.4">Cap camp és obligatori. Com més informació donis (tema, currículum i gènere), més enfocat serà el text generat.</p>
             </div>
 
             <!-- 2. CURRÍCULUM (col·lapsable, oberta per defecte si hi ha matèria) -->
@@ -2710,7 +2711,7 @@
     if (!aiPanel) return;
     const topicTa = document.getElementById('gen-tema') || aiPanel.querySelector('textarea');
     const tema = topicTa?.value?.trim();
-    if (!tema) { window.atneToast && window.atneToast('Cal escriure un tema o tòpic','error'); return; }
+    // Tema opcional: si buida, el model genera lliurement sense ancoratge temàtic.
     const genere = document.getElementById('gen-genere')?.value || 'manual';
     const to = document.getElementById('gen-to')?.value || 'neutre';
     const extensio = document.getElementById('gen-extensio')?.value || 'estandard';
@@ -2791,9 +2792,11 @@
         if (docTitle) docTitle.value = title;
         localStorage.setItem('atne.doc_title', title);
         localStorage.setItem('atne.doc_draft', result.text);
-        // Persistim el gènere per al Pas 3 (adaptació genere-aware).
-        // El backend el fa servir via corpus_reader.get_genre_block(genere).
+        // Persistim el gènere i la matèria al mode Escriure (xip inferior).
         if (genere) localStorage.setItem('atne.genere_discursiu', genere);
+        // Bug 2: la matèria generada no es transferia al xip del mode Escriure.
+        const _genMatNom = localStorage.getItem('atne.doc_materia') || '';
+        if (_genMatNom) document.querySelectorAll('.doc-materia-inp').forEach(i => { i.value = _genMatNom; });
         // Sincronitza el selector del Pas 2 amb el gènere generat (el text ve del
         // generador via streaming, no passa per detectGenre): pre-emplena #genere-sel.
         if (genere && genereSel) {

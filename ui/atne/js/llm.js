@@ -641,7 +641,7 @@
    * @returns {Promise<{text: string, ...}>}
    */
   async function generateText({ tema, genere, tipologia, to, extensio, notes, context }) {
-    if (!tema || !tema.trim()) throw new Error('Cal un tema per generar el text');
+    // Tema opcional: si buit, el model genera lliurement (sense Error de bloqueig).
     const body = { tema, genere, tipologia, to, extensio };
     if (notes) body.notes = notes;
     if (context) body.context = context;
@@ -671,7 +671,7 @@
    * @returns {Promise<{text: string, paraules: number, model: string}>}  Resultat final.
    */
   async function generateTextStream({ tema, genere, to, extensio, lang, hcl, notes, override_cap, mecr, context, saber_curricular, onStart, onChunk, onDone, onError, signal }) {
-    if (!tema || !tema.trim()) throw new Error('Cal un tema per generar el text');
+    // Tema opcional: si buit, el model genera lliurement (sense Error de bloqueig).
     const body = { tema, genere, to, extensio };
     if (lang) body.lang = lang;
     if (hcl) body.hcl = hcl;
