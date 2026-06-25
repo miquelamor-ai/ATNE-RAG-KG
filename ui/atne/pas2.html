@@ -2133,13 +2133,16 @@
     const pid = localStorage.getItem('atne.profile_id') || 'marc';
     const prof = (window.ATNE_PROFILES && window.ATNE_PROFILES[pid]) || (window.ATNE_PROFILES && window.ATNE_PROFILES.marc) || {};
     const curs = ((prof.course) || '').replace(/\s+[A-Z]$/, '').trim();
+    // course_base és la clau canònica (ex: "5e_primaria", "1r_eso"); usada quan
+    // course és buit o no conté l'etapa (cas habitual en perfils de grup).
+    const cursBase = (prof.course_base || '').toLowerCase();
     let etapa = '';
-    if (/infantil|^I[345]/i.test(curs)) etapa = 'Infantil';
-    else if (/prim/i.test(curs)) etapa = 'primària';
-    else if (/eso/i.test(curs)) etapa = 'ESO';
-    else if (/batx/i.test(curs)) etapa = 'Batxillerat';
-    else if (/fp/i.test(curs)) etapa = 'FP';
-    return { etapa, curs };
+    if (/infantil|^I[345]/i.test(curs) || /infantil|^i[345]/.test(cursBase)) etapa = 'Infantil';
+    else if (/prim/i.test(curs) || /prim/.test(cursBase)) etapa = 'primària';
+    else if (/eso/i.test(curs) || /eso/.test(cursBase)) etapa = 'ESO';
+    else if (/batx/i.test(curs) || /batx/.test(cursBase)) etapa = 'Batxillerat';
+    else if (/fp/i.test(curs) || /fp/.test(cursBase)) etapa = 'FP';
+    return { etapa, curs: curs || cursBase };
   }
 
   // Sincronitza tots els selects/inputs de matèria amb un valor (nom) + clau canònica.
