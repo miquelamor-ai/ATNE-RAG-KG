@@ -139,14 +139,16 @@ def build_user(params: dict) -> str:
         saber_curricular: str — saber curricular a vincular (Sprint C, opcional)
     """
     tema = (params.get("tema") or "").strip()
-    if not tema:
-        raise ValueError("Cal un 'tema' per generar el text.")
-
     genere = (params.get("genere") or "article divulgatiu").strip()
     to = (params.get("to") or "neutre").strip().lower()
     hcl = (params.get("hcl") or "").strip().lower()
     notes = (params.get("notes") or "").strip()
     saber = (params.get("saber_curricular") or "").strip()
+
+    # Regla: almenys un dels tres camps substantius ha d'estar present.
+    genere_no_defecte = (params.get("genere") or "").strip()
+    if not tema and not saber and not genere_no_defecte:
+        raise ValueError("Cal indicar almenys un tema, un saber curricular o un gènere per generar el text.")
     override_cap = bool(params.get("override_cap", False))
 
     ctx = params.get("context") or {}

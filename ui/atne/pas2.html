@@ -1213,7 +1213,7 @@
             <div class="gen-consigna" data-help="p2-generar">
               <div class="mp-l">Tema o tòpic <span style="font-weight:400;color:var(--ink-400)">(opcional)</span></div>
               <textarea class="ta" id="gen-tema" placeholder="Ex. Text sobre la Revolució Industrial per a 3r d'ESO…" style="min-height:60px"></textarea>
-              <p style="margin:6px 0 0;font-size:11px;color:var(--ink-400);line-height:1.4">Cap camp és obligatori. Com més informació donis (tema, currículum i gènere), més enfocat serà el text generat.</p>
+              <p style="margin:6px 0 0;font-size:11px;color:var(--ink-400);line-height:1.4">Cal indicar almenys un tema, un saber curricular o un gènere. Com més n'indiquis, més enfocat serà el text.</p>
             </div>
 
             <!-- 2. CURRÍCULUM (col·lapsable, oberta per defecte si hi ha matèria) -->
@@ -2711,8 +2711,7 @@
     if (!aiPanel) return;
     const topicTa = document.getElementById('gen-tema') || aiPanel.querySelector('textarea');
     const tema = topicTa?.value?.trim();
-    // Tema opcional: si buida, el model genera lliurement sense ancoratge temàtic.
-    const genere = document.getElementById('gen-genere')?.value || 'manual';
+    const genere = document.getElementById('gen-genere')?.value || '';
     const to = document.getElementById('gen-to')?.value || 'neutre';
     const extensio = document.getElementById('gen-extensio')?.value || 'estandard';
     const genLang = document.getElementById('gen-lang')?.value || 'ca';
@@ -2720,6 +2719,12 @@
     const genNotes = document.getElementById('gen-notes')?.value?.trim() || '';
     const overrideCap = document.getElementById('gen-override-cap')?.checked || false;
     const genSaber = localStorage.getItem('atne.saber_curricular') || '';   // Fil 3: sabers triats (widget combinat)
+
+    // Regla: almenys un dels tres camps substantius ha d'estar present.
+    if (!tema && !genSaber && (!genere || genere === 'manual' || genere === '')) {
+      window.atneToast && window.atneToast('Per generar un text, indica almenys un tema, un saber curricular o un gènere.', 'error');
+      return;
+    }
 
     const btn = document.getElementById('gen-go');
     const btnCancel = document.getElementById('gen-cancel');
