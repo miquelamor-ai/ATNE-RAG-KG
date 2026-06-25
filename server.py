@@ -488,6 +488,7 @@ ATNE_PUBLIC_API_PATHS = {
     "/api/runtime-config",
     "/api/auth/exchange",   # intercanvi token LaNet → cookie httpOnly (sense auth prèvia)
     "/api/genres",          # catàleg de gèneres derivat (no sensible; consum públic Pas 2)
+    "/api/curriculum",      # currículum derivat (no sensible; consum públic Pas 2)
 }
 
 def _atne_is_public_path(path: str) -> bool:
@@ -709,6 +710,15 @@ async def _atne_startup():
               f"(degraded={_cat['degraded']}, version={_cat['version']})")
     except Exception as _e:
         print(f"[ATNE] ERROR construint catàleg de gèneres (no bloqueja): {_e}")
+
+    # Currículum LOMLOE derivat del corpusFJE (Fil 3). Precarrega el manifest al boot;
+    # els fitxers de matèria van sota demanda. Tolerant: mai bloqueja l'arrencada.
+    try:
+        from adaptation import curriculum_reader
+        curriculum_reader.build_cache()
+        print("[ATNE] currículum: manifest precarregat")
+    except Exception as _e:
+        print(f"[ATNE] ERROR precarregant currículum (no bloqueja): {_e}")
 
     # ── Asserts de seguretat de la service-role key ──────────────────────
     # La service-role bypassa RLS — un leak al frontend permetria modificar
@@ -5710,6 +5720,85 @@ async def api_genres(format: str = "", keys_only: int = 0, refresh: int = 0):
     # segons la capçalera (no com fetch().json(), que sempre assumeix UTF-8).
     return JSONResponse(
         genres_catalog.get_catalog(fmt=fmt, refresh=bool(refresh)),
+        media_type="application/json; charset=utf-8",
+    )
+
+
+# ── API Currículum LOMLOE (derivat del corpusFJE — Fil 3) ───────────────────
+
+@app.get("/api/curriculum")
+async def api_curriculum(etapa: str = "", materia: str = "", curs: str = "", refresh: int = 0):
+    """Currículum derivat del corpusFJE per al generador de textos (Pas 2, mode Generar).
+
+    Pública (com /api/genres): no sensible, consum directe del frontend.
+
+    Dues operacions segons els paràmetres:
+      - GET /api/curriculum?etapa=ESO
+          → matèries de l'etapa amb contingut (o àmbits, a infantil).
+      - GET /api/curriculum?etapa=ESO&materia=matematiques&curs=1r ESO
+          → sabers filtrats pel curs (175/2022), agrupats per bloc (o àmbits a infantil).
+      - ?refresh=1 → buida la cache (admin; el currículum només canvia amb bump del submòdul).
+    """
+    from adaptation import curriculum_reader
+    if refresh:
+        curriculum_reader._MANIFEST = None
+        curriculum_reader._FILE_CACHE.clear()
+
+    etapa = (etapa or "").strip()
+    if not etapa:
+        return JSONResponse(
+            {"ok": False, "error": "cal 'etapa'"},
+            status_code=400, media_type="application/json; charset=utf-8",
+        )
+
+    etapa_key = curriculum_reader._norm_etapa(etapa)
+    es_infantil = etapa_key == "infantil"
+
+    def _agrupa(items, key_grup, key_llista):
+        """Agrupa una llista per un camp, preservant l'ordre d'aparició."""
+        grups, idx = [], {}
+        for it in items:
+            g = it.get(key_grup, "")
+            if g not in idx:
+                idx[g] = len(grups)
+                grups.append({key_grup: g, key_llista: []})
+            grups[idx[g]][key_llista].append(it)
+        return grups
+
+    # Operació 1: primer selector (matèries; a infantil, OBJECTIUS/ODA per àmbit)
+    if not (materia or "").strip():
+        items = curriculum_reader.materies(etapa)   # a infantil retorna els ODA
+        if es_infantil:
+            return JSONResponse(
+                {"ok": True, "etapa": etapa_key, "tipus": "objectius",
+                 "items": items, "agrupats": _agrupa(items, "ambit", "objectius")},
+                media_type="application/json; charset=utf-8",
+            )
+        return JSONResponse(
+            {"ok": True, "etapa": etapa_key, "tipus": "materies", "items": items},
+            media_type="application/json; charset=utf-8",
+        )
+
+    # Operació 2: segon selector
+    #   - infantil: 'materia' és el codi d'ODA → CONTINGUTS (blocs) d'aquell objectiu.
+    #   - resta: 'materia' és la matèria → SABERS filtrats pel curs.
+    sabers = curriculum_reader.sabers(etapa, materia.strip(), curs.strip())
+    if es_infantil:
+        # agrupa els continguts sota l'objectiu (un sol grup, el text de l'ODA)
+        return JSONResponse(
+            {"ok": True, "etapa": etapa_key, "oda": materia.strip(),
+             "tipus": "continguts", "sabers": sabers,
+             "agrupats": _agrupa(sabers, "bloc", "sabers")},
+            media_type="application/json; charset=utf-8",
+        )
+
+    nivells = curriculum_reader._nivells_norm_per_curs(etapa, curs)
+    return JSONResponse(
+        {
+            "ok": True, "etapa": etapa_key, "materia": materia.strip(), "curs": curs.strip(),
+            "nivells_norm": nivells, "tipus": "sabers",
+            "sabers": sabers, "agrupats": _agrupa(sabers, "bloc", "sabers"),
+        },
         media_type="application/json; charset=utf-8",
     )
 

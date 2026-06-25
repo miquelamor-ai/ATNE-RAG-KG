@@ -670,7 +670,7 @@
    *   Internament es combina amb un timeout de 180s.
    * @returns {Promise<{text: string, paraules: number, model: string}>}  Resultat final.
    */
-  async function generateTextStream({ tema, genere, to, extensio, lang, hcl, notes, override_cap, mecr, context, onStart, onChunk, onDone, onError, signal }) {
+  async function generateTextStream({ tema, genere, to, extensio, lang, hcl, notes, override_cap, mecr, context, saber_curricular, onStart, onChunk, onDone, onError, signal }) {
     if (!tema || !tema.trim()) throw new Error('Cal un tema per generar el text');
     const body = { tema, genere, to, extensio };
     if (lang) body.lang = lang;
@@ -679,6 +679,7 @@
     if (notes) body.notes = notes;
     if (mecr) body.mecr = mecr;
     if (context) body.context = context;
+    if (saber_curricular) body.saber_curricular = saber_curricular;   // Fil 3: currículum → generador
     const combinedSignal = combineSignals(signal, SSE_TIMEOUT_MS);
     const resp = await fetch('/api/generate-text-stream', {
       method: 'POST',
