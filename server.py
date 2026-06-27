@@ -900,7 +900,7 @@ from adaptation.post_process import (  # noqa: E402,F401
     _fix_word_concatenations,
     _post_process_llm_output,
     # Constants internes re-exportades per compatibilitat (les usa algun test?)
-    _LATEX_PATTERNS,
+    _LATEX_ARTIFACT_PATTERNS,
     _ENGLISH_REPLACEMENTS,
     _TYPO_FIXES,
     _CONCAT_WORD_RE,
