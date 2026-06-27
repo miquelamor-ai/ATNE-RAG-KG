@@ -3415,6 +3415,7 @@
         localStorage.removeItem('atne.draft_id');
         localStorage.removeItem('atne.draft_saved_at');
         localStorage.removeItem('atne.current_adaptation_id');
+        _setMateria('', '');  // text nou → matèria anterior no és vàlida
       }
       // Dispara input perquè el comptador + desament automàtic s'actualitzin
       ta.dispatchEvent(new Event('input', { bubbles: true }));
@@ -3455,6 +3456,7 @@
     // Desvincula biblioteca perquè el proper "Desar" al pas3 creï una
     // entrada nova en lloc d'actualitzar l'anterior.
     localStorage.removeItem('atne.current_adaptation_id');
+    _setMateria('', '');  // document esborrat → matèria anterior no és vàlida
     ta.dispatchEvent(new Event('input', { bubbles: true }));
     if (titleEl) titleEl.dispatchEvent(new Event('input', { bubbles: true }));
     if (typeof updateSavedBadge === 'function') updateSavedBadge();

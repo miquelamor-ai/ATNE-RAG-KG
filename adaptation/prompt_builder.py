@@ -868,6 +868,35 @@ PROHIBIT generar una secció `## Pictogrames` separada: els marcadors viuen DINS
 PROHIBIT deixar la sortida sense cap marcador `[PICTO:]` quan pictogrames és ACTIVAT.
 """
 
+        # Il·lustracions IA — igual que pictogrames, ha d'anar a la Call 1 (adapter_only)
+        # perquè els marcadors [IMATGE: ...] han d'estar inline al ## Text adaptat.
+        # Bug 2026-06-27: estava a output_sections (Call 2) i el LLM mai el veia al generar.
+        _illu_block = ""
+        if comp.get("illustracions"):
+            _mecr_illu = (mecr or "B1").upper().replace("Ç", "C")
+            _illu_band_canon = _sl_canon("generate-illustracions", _mecr_illu)
+            _illu_densitat = _illu_band_canon.descriptor("pas_1_densitat") or "Màxim 3-4 marcadors per document. Menys és millor."
+            _illu_block = f"""
+## ⚠️ IL·LUSTRACIONS IA — OBLIGATORI
+ACTIVAT — Insereix marcadors `[IMATGE: <concepte curt en {lang_label}>]` al text adaptat
+allà on una il·lustració ajudaria la comprensió.
+
+REGLES ESTRICTES:
+- Format exacte: `[IMATGE: concepte]` amb claudàtors i la paraula IMATGE en majúscules.
+- **Idioma**: {lang_label}. 3-8 paraules. Concepte nuclear, no descripció d'escena.
+- **En línia pròpia**, abans del paràgraf/secció que introdueix el concepte.
+- **Densitat per a {_mecr_illu} (canon)**: {_illu_densitat}
+- **Un marcador per secció major com a màxim**.
+- Només conceptes **visualitzables i concrets** (llocs, objectes, escenes, processos observables).
+- **NO** conceptes abstractes purs ("la democràcia", "la justícia").
+- **NO** tecnicismes microscòpics ("cloroplasts", "àtoms") — reformula a nivell macroscòpic ("fulla sota el sol").
+- **NO** afegeixis descripcions d'estil dins el marcador (el backend s'encarrega de l'estil).
+- **NO** generis cap secció `## Il·lustracions`. Els marcadors viuen inline al ## Text adaptat.
+
+Exemples correctes: `[IMATGE: cicle de l'aigua]` · `[IMATGE: fàbrica tèxtil del segle XIX]` · `[IMATGE: fulla verda al sol]`
+PROHIBIT deixar la sortida sense cap `[IMATGE:]` quan il·lustracions és ACTIVAT.
+"""
+
         # «Per al docent» — taxonomia canònica de 9 categories A-I (font única:
         # _ARGUMENTACIO_9CAT_BLOCK). Sincronitzat 2026-06-09.
         # 2026-06-11: amb include_argumentacio=False, l'argumentació NO es genera aquí
@@ -893,6 +922,7 @@ SEMPRE GENERAR — Taula comparativa dels canvis principals:
 Màxim 5-6 files.
 {_genere_block}
 {_picto_block}
+{_illu_block}
 ## CHECKLIST DE GENERACIÓ — OBLIGATORI
 Genera únicament:
 {_checklist_items}
