@@ -852,7 +852,11 @@ expositiva genèrica si el gènere demanat és un altre.
             )
             _picto_block = f"""
 ## ⚠️ PICTOGRAMES ARASAAC — OBLIGATORI a {_mecr_pic}
-ACTIVAT — Insereix marcadors `[PICTO: terme]` reals (NO emojis Unicode 🌞🌊🌱).
+ACTIVAT — FORMAT ÚNIC OBLIGATORI: marcador `[PICTO: terme]` (PROHIBIT emojis Unicode directes).
+RESTRICCIÓ TÈCNICA: el backend ATNE NOMES processa marcadors `[PICTO:]`. Els emojis directes
+(🌞 🌊 🌱…) NO s'intercepten i no generen cap imatge. SEMPRE usa el marcador, independentment
+del perfil (general, nouvingut, TEA): el backend decideix si mostra ARASAAC o emoji de fallback.
+
 Gradació per a {_mecr_pic} (canon): {_picto_rule}
 
 Format OBLIGATORI del marcador: `[PICTO: terme_idioma_doc|terme_castellà]`
@@ -860,7 +864,6 @@ Format OBLIGATORI del marcador: `[PICTO: terme_idioma_doc|terme_castellà]`
 - Dreta del `|`: equivalent en castellà per a la cerca ARASAAC.
 - Terme curt (1-3 paraules), minúscules, concret i visualitzable (objecte, acció, ésser viu).
 - Exemples (text català): `[PICTO: sol|sol]` `[PICTO: aigua|agua]` `[PICTO: planta|planta]` `[PICTO: córrer|correr]` `[PICTO: clorofil·la|clorofila]`.
-- NO inventis emojis Unicode (🌞 🌊 🌱 ✨…): usa SEMPRE el marcador `[PICTO: …]`.
 - NO posis text ni puntuació dins del marcador, només els termes separats per `|`.
 - El backend els substitueix per imatges reals ARASAAC (CC BY-NC-SA 4.0).
 
