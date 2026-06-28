@@ -52,7 +52,7 @@ _DEGRADED_GENRES = [
     {"genre_key": "ressenya", "label_ca": "Ressenya / crítica", "macro_tipologia": "argumentativa"},
     {"genre_key": "assaig", "label_ca": "Assaig", "macro_tipologia": "argumentativa"},
     {"genre_key": "carta", "label_ca": "Carta / correu", "macro_tipologia": "argumentativa"},
-    {"genre_key": "instructiu", "label_ca": "Procediment / protocol", "macro_tipologia": "instructiva"},
+    {"genre_key": "instruccions", "label_ca": "Instruccions (recepta / manual / protocol)", "macro_tipologia": "instructiva"},
     {"genre_key": "receptari", "label_ca": "Receptari", "macro_tipologia": "instructiva"},
     {"genre_key": "reglament", "label_ca": "Reglament / normes", "macro_tipologia": "instructiva"},
     {"genre_key": "entrevista", "label_ca": "Entrevista", "macro_tipologia": "conversacional"},

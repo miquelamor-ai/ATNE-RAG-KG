@@ -65,7 +65,7 @@ CASES = [
         "params": {
             "mecr_sortida": "A1",
             "dua": "Core",
-            "genere_discursiu": "instructiu",
+            "genere_discursiu": "instruccions",
             "complements": {
                 # Defaults R3 esperat: NO glossari (treure per dislèxia low),
                 # pero la captura ens diu què demana avui ATNE realment.

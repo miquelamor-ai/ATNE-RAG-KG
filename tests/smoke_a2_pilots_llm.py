@@ -70,7 +70,7 @@ CASES = [
         "params": {
             "mecr_sortida": "A1",
             "dua": "Core",
-            "genere_discursiu": "instructiu",
+            "genere_discursiu": "instruccions",
             "lang": "ca",
             "complements": {"glossari": True, "bastides": True},
         },

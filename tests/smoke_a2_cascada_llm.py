@@ -117,7 +117,7 @@ CASES = [
         "params": {
             "mecr_sortida": "pre-A1",
             "dua": "Acces",
-            "genere_discursiu": "instructiu",
+            "genere_discursiu": "instruccions",
             "lang": "ca",
             "complements": {"activitats_aprofundiment": True},
         },
@@ -133,7 +133,7 @@ CASES = [
         "params": {
             "mecr_sortida": "A1",
             "dua": "Core",
-            "genere_discursiu": "instructiu",
+            "genere_discursiu": "instruccions",
             "lang": "ca",
             "complements": {"activitats_aprofundiment": True},
         },
