@@ -296,7 +296,7 @@ def test_curriculum_primaria(base: str, r: SmokeResult):
 
     # Test amb curs de cicle 2
     status2, body2, ms2 = _get(base, "/api/curriculum",
-                                {"etapa": "primaria", "materia": "catala", "curs": "4t"})
+                                {"etapa": "primaria", "materia": "llengua_catalana", "curs": "4t"})
     if status2 == 200 and body2.get("tipus") == "sabers":
         sabers2 = body2.get("sabers", [])
         r.ok(f"sabers 4t primària català: {len(sabers2)} sabers")
