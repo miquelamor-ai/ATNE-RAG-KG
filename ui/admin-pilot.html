@@ -164,6 +164,18 @@
   </div>
 </div>
 
+<!-- Entrades per docent -->
+<div class="card" style="margin-top:var(--sp-4)">
+  <h2>🚪 Entrades per docent</h2>
+  <p class="hint">Una entrada = una sessió de navegador. Es compten des del desplegament del registre (17/11/2026).</p>
+  <table class="lite" id="t-entrades">
+    <tr>
+      <th>Docent</th><th class="num">Entrades</th><th class="num">Últims 30 dies</th>
+      <th>Primera</th><th>Darrera</th>
+    </tr>
+  </table>
+</div>
+
 <div style="height: var(--sp-4);"></div>
 
 <!-- Funnel d'adopció + qualitat -->
@@ -502,6 +514,41 @@
     });
   }
 
+  function renderEntrades(rows) {
+    var t = $('t-entrades');
+    var header = t.querySelector('tr');
+    t.innerHTML = '';
+    if (header) t.appendChild(header);
+    if (!rows || rows.length === 0) {
+      var tr0 = document.createElement('tr');
+      var td0 = document.createElement('td');
+      td0.colSpan = 5;
+      td0.style.color = 'var(--ink-400)';
+      td0.style.fontStyle = 'italic';
+      td0.textContent = 'Encara no hi ha entrades registrades.';
+      tr0.appendChild(td0);
+      t.appendChild(tr0);
+      return;
+    }
+    rows.forEach(function (r) {
+      var tr = document.createElement('tr');
+      [
+        [r.docent || '–', 'font-weight:500'],
+        [fmt(r.entrades), '', 'num'],
+        [fmt(r.entrades_30d), '', 'num'],
+        [r.primera || '–', 'white-space:nowrap;font-family:var(--mono);font-size:11px'],
+        [r.darrera || '–', 'white-space:nowrap;font-family:var(--mono);font-size:11px']
+      ].forEach(function (c) {
+        var td = document.createElement('td');
+        td.textContent = c[0];
+        if (c[1]) td.style.cssText = c[1];
+        if (c[2]) td.className = c[2];
+        tr.appendChild(td);
+      });
+      t.appendChild(tr);
+    });
+  }
+
   function renderAltresTexts(arr) {
     var el = $('altres-texts');
     var empty = $('altres-empty');
@@ -625,6 +672,7 @@
 
     renderRecent(d.recent || []);
     renderDocentsList(d.docents_list || []);
+    renderEntrades(d.entrades_per_docent || []);
     renderAltresTexts(fb.altres_texts || []);
     renderSuggestions(d.suggestions || []);
     renderErrors(d.client_errors || []);

@@ -255,12 +255,24 @@
     // un docent_id cachejat d'una versió anterior (on no es creava la fila)
     // no apareixen mai a atne_docents i el dashboard els mostra com a "docXXXX".
     if (currentLogin) {
+      // Registre d'entrades: només la primera crida de cada sessió de
+      // navegador porta entry:true → el servidor desa un event session_start.
+      var ENTRY_KEY = 'atne.entry_logged';
+      var isEntry = false;
+      try { isEntry = !sessionStorage.getItem(ENTRY_KEY); } catch (e) { /* ignore */ }
       fetch('/api/docent/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ login: currentLogin })
+        body: JSON.stringify(isEntry
+          ? { login: currentLogin, entry: true, page: location.pathname }
+          : { login: currentLogin })
       })
-      .then(function (r) { return r.ok ? r.json() : {}; })
+      .then(function (r) {
+        if (isEntry && r.ok) {
+          try { sessionStorage.setItem(ENTRY_KEY, '1'); } catch (e) { /* ignore */ }
+        }
+        return r.ok ? r.json() : {};
+      })
       .then(function (d) {
         if (!d.ok || !d.docent_id) {
           if (did) checkAdmin(did);

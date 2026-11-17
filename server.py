@@ -1920,6 +1920,14 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
         f"&event_type=in.(refine_submitted,redo_rubric)"
         f"&order=ts.desc&limit=100"
     )
+    # Entrades (session_start): query dedicada, independent del window de
+    # 2000 events. docent_id = login en clar (p. ex. "nom.cognom").
+    entries_dedicated = _get(
+        f"{base}/atne_pilot_events"
+        f"?select=ts,docent_id,data"
+        f"&event_type=eq.session_start"
+        f"&order=ts.desc&limit=5000"
+    )
     feedback = _get(
         f"{base}/history"
         f"?select=created_at,rating,review_items,comment,refine_count,exported,copied,"
@@ -2142,6 +2150,31 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
                 "type": data.get("type") or "js",
             })
 
+    # Entrades per docent: 1 event session_start = 1 sessió de navegador.
+    _cut30 = (datetime.datetime.now(datetime.timezone.utc)
+              - datetime.timedelta(days=30)).isoformat()[:19]
+    _ent: dict[str, dict] = {}
+    for e in entries_dedicated:
+        if _is_probe(e):
+            continue
+        login = str(e.get("docent_id") or "").strip()
+        ts = str(e.get("ts") or "")[:19]
+        if not login or not ts:
+            continue
+        row = _ent.setdefault(login, {"docent": login[:60], "entrades": 0,
+                                      "entrades_30d": 0, "primera": ts, "darrera": ts})
+        row["entrades"] += 1
+        if ts >= _cut30:
+            row["entrades_30d"] += 1
+        if ts < row["primera"]:
+            row["primera"] = ts
+        if ts > row["darrera"]:
+            row["darrera"] = ts
+    entrades_per_docent = sorted(_ent.values(), key=lambda r: r["darrera"], reverse=True)
+    for r in entrades_per_docent:
+        r["primera"] = r["primera"].replace("T", " ")[:16]
+        r["darrera"] = r["darrera"].replace("T", " ")[:16]
+
     # Refines amb context (text/rúbrica): per a cada esdeveniment, exposem
     # QUÈ ha demanat el docent (problemes marcats + text lliure) perquè
     # el dashboard pugui mostrar-ho amb un format llegible.
@@ -2242,6 +2275,7 @@ async def admin_pilot_metrics(_: bool = Depends(_require_admin)):
         "suggestions": suggestions,
         "client_errors": client_errors,
         "refines_detall": refines_detall,
+        "entrades_per_docent": entrades_per_docent,
     }
     # Cap cache: les dades de pilot canvien constantment. Sense aquest header,
     # alguns navegadors/proxies cachejaven la resposta i el docent veia dades
@@ -6282,6 +6316,24 @@ async def docent_login(payload: dict = Body(...)):
 
     docent_id = _docent_id_from_login(login)
     alias = _alias_from_login(login)
+
+    # Registre d'entrades: auth.js envia entry=true un cop per sessió de
+    # navegador. Fire-and-forget i abans de tocar atne_docents, perquè quedi
+    # constància (o al fallback [TELEMETRY_FAILED]) encara que Supabase falli.
+    if payload.get("entry") is True:
+        page = re.sub(r"[^A-Za-z0-9/._-]", "", str(payload.get("page") or ""))[:100]
+        entry_event = {
+            "event_type": "session_start",
+            "step": None,
+            "docent_id": login,
+            "docent_hash": _docent_hash_from_id(login),
+            "session_id": None,
+            "history_id": None,
+            "data": {"page": page} if page else {},
+            "prompt_version": ATNE_PROMPT_VERSION,
+        }
+        import threading as _th
+        _th.Thread(target=_log_pilot_event, args=(entry_event,), daemon=True).start()
 
     # Comprova si ja existeix
     resp = requests.get(
