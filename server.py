@@ -6309,6 +6309,10 @@ async def docent_login(payload: dict = Body(...)):
     """
     # Accepta 'login' (lanet) o 'email' (compatibilitat)
     login = (payload.get("login") or payload.get("email") or "").strip().lower()
+    # La identitat de sessió (LaNET) és el login SENSE domini; si l'usuari escriu
+    # el correu complet, traiem el domini perquè el docent_id coincideixi amb el
+    # que valida el servidor (drafts/adaptations → 403 "No autoritzat" si no).
+    login = login.split("@")[0].strip()
     if not login:
         return JSONResponse({"ok": False, "error": "Login obligatori"}, status_code=400)
 

@@ -509,8 +509,8 @@
     <div class="id-overlay hidden" id="id-overlay">
       <div class="id-box">
         <h2>Benvingut/da a ATNE</h2>
-        <p>Introdueix el teu email corporatiu per desar els teus perfils i recuperar-los en qualsevol dispositiu.</p>
-        <input class="id-inp" id="id-email" type="email" placeholder="nom.cognom@fje.edu" autocomplete="email" autocapitalize="none">
+        <p>Introdueix el teu usuari de LaNET (nom.cognom, sense @fje.edu) per desar els teus perfils i recuperar-los en qualsevol dispositiu.</p>
+        <input class="id-inp" id="id-email" type="text" placeholder="nom.cognom" autocomplete="username" autocapitalize="none">
         <div class="id-err" id="id-err"></div>
         <button class="id-btn" id="id-btn">Entrar</button>
       </div>
@@ -2250,7 +2250,17 @@
           headers: {'Content-Type':'application/json'},
           body: JSON.stringify({login})
         });
-        const d = await r.json();
+        if (r.status >= 500) {
+          errEl.textContent = "El servei no està disponible ara mateix. Torna-ho a provar d'aquí una estona.";
+          btn.disabled = false; btn.textContent = 'Entrar';
+          return;
+        }
+        let d;
+        try { d = await r.json(); } catch (_) {
+          errEl.textContent = 'Resposta inesperada del servei. Torna-ho a provar d\'aquí una estona.';
+          btn.disabled = false; btn.textContent = 'Entrar';
+          return;
+        }
         if (!d.ok) { errEl.textContent = d.error || 'Error desconegut'; btn.disabled = false; btn.textContent = 'Entrar'; return; }
         localStorage.setItem('atne.docent_id', d.docent_id);
         localStorage.setItem('atne.docent_alias', d.alias);
@@ -2258,7 +2268,7 @@
         _updateDocentBtn();
         await _loadCustomProfiles();
       } catch(e) {
-        errEl.textContent = 'Error de connexió';
+        errEl.textContent = 'No hi ha connexió a Internet. Revisa la xarxa i torna-ho a provar.';
         btn.disabled = false;
         btn.textContent = 'Entrar';
       }
